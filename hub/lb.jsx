@@ -3,7 +3,7 @@ const { useState: useS_lb, useMemo: useM_lb, useRef: useR_lb, useLayoutEffect: u
 
 function OrgDot({ org, logo }) {
   const [failed, setFailed] = useS_lb(false);
-  const map = { OpenAI: "openai", Anthropic: "anthropic", Google: "google", DeepSeek: "deepseek", Meta: "meta", Alibaba: "alibaba", xAI: "xai", MiniMax: "minimax", Moonshot: "moonshot", Zhipu: "zhipu", Specula: "specula" };
+  const map = { OpenAI: "openai", Anthropic: "anthropic", Google: "google", DeepSeek: "deepseek", Meta: "meta", Alibaba: "alibaba", xAI: "xai", MiniMax: "minimax", Moonshot: "moonshot", Zhipu: "zhipu", GitHub: "github", Specula: "specula" };
   const cls = map[org] || "";
   const letter = (org || "?").slice(0, 1);
   if (logo && !failed) {

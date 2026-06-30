@@ -45,7 +45,7 @@ window.TLAPS_DATA = {
   // (model, mode/source) was not attempted — it renders as "—".
   models: [
     {
-      id: "gpt-5-codex", name: "GPT-5 (Codex)", subname: "Codex backend",
+      id: "gpt-5-codex", name: "GPT-5.5 (Codex)", subname: "Codex backend",
       org: "OpenAI", logo: "assets/logos/openai.svg",
       backend: "codex", kind: "agent",
       score: 0,
@@ -55,9 +55,9 @@ window.TLAPS_DATA = {
                    "open-addressing": 0, "anvil": null }
     },
     {
-      id: "claude-opus", name: "Claude Opus 4.8", subname: null,
+      id: "claude-opus", name: "Claude Opus 4.8", subname: "Claude Code backend",
       org: "Anthropic", logo: "assets/logos/claude-color.svg",
-      backend: "claude-code", kind: "base",
+      backend: "claude-code", kind: "agent",
       score: 0,
       perMode:   { completion: 0, scratch: 0 },
       perSource: { "tlaplus-examples": 0, "tlaps-dist": 0, "zookeeper-zab": null,

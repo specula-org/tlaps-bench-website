@@ -82,6 +82,10 @@ function PageHome({ go }) {
             <p style={{ fontFamily: "var(--serif)", fontSize: 18, lineHeight: 1.75, color: "var(--ink)", marginTop: 16, textWrap: "pretty" }}>
               {TLAPS_DATA.paper.overview}
             </p>
+            <p style={{ fontFamily: "var(--serif)", fontSize: 18, lineHeight: 1.75, color: "var(--ink-2)", marginTop: 14, textWrap: "pretty" }}>
+              Every accepted proof is also screened by a cheat-checker, so a "pass" means a
+              genuine proof — not a weakened theorem or an admitted step.
+            </p>
           </Reveal>
         </div>
       </section>
@@ -121,8 +125,10 @@ function PageLeaderboard() {
           <span className="eyebrow accent">Results</span>
           <h1 style={{ fontSize: 44, marginTop: 10 }}>Leaderboard</h1>
           <p className="lead" style={{ maxWidth: 720 }}>
-            Pass rate is the share of tasks whose generated proof tlapm accepts. Columns split
-            by task type; click any row to expand the per-source breakdown, filter by
+            Pass rate is the share of scored tasks that pass — the proof must be accepted by
+            tlapm and clear the cheat-checker (no admitted steps, smuggled axioms, or weakened
+            theorems). A proof that only "passes" by cheating is counted as a failure. Columns
+            split by task type; click any row to expand the per-source breakdown, filter by
             organization, or switch between LLM-only and agent runs.
           </p>
         </FadeIn>
@@ -160,7 +166,7 @@ function PageBenchmark() {
         <div className="wrap">
           <FadeIn>
             <span className="eyebrow accent">Benchmark</span>
-            <h1 style={{ fontSize: 44, marginTop: 10 }}>790 theorems, two ways to prove them</h1>
+            <h1 style={{ fontSize: 44, marginTop: 10 }}>Inside the benchmark</h1>
             <p className="lead" style={{ maxWidth: 760 }}>
               Every task is a TLA+ theorem whose proof has been replaced by PROOF OBVIOUS. The
               AI must produce a proof body that tlapm mechanically accepts — drawn from eight
@@ -219,10 +225,10 @@ function PageBenchmark() {
             <p className="lead" style={{ fontSize: 17 }}>How much of the proof is given to the AI before it starts.</p>
           </Reveal>
           <Reveal delay={80}>
-            <div className="highlight-grid" style={{ gridTemplateColumns: "1fr 1fr", marginTop: 24 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 16, marginTop: 24 }}>
               {TLAPS_DATA.modes.map((md) => (
                 <div key={md.id} className="card">
-                  <span className="eyebrow accent">{md.cli}</span>
+                  <span className="eyebrow accent" style={{ display: "block" }}>{md.cli}</span>
                   <h3 style={{ marginTop: 10 }}>{md.full}</h3>
                   <p style={{ margin: 0, fontSize: 16 }}>{md.blurb}</p>
                 </div>
@@ -236,10 +242,12 @@ function PageBenchmark() {
       <section className="section" style={{ background: "var(--paper-2)" }}>
         <div className="wrap">
           <Reveal>
-            <h2 style={{ fontSize: 32 }}>How tlapm grades a proof</h2>
+            <h2 style={{ fontSize: 32 }}>How a proof is graded</h2>
             <p className="lead" style={{ fontSize: 17 }}>
-              A candidate proof is checked mechanically inside a Docker sandbox — accepted or
-              rejected, no partial credit.
+              Each candidate proof is graded inside a Docker sandbox in two passes: tlapm checks
+              that the proof is correct, and a cheat-checker confirms it's legitimate — no
+              admitted steps, smuggled axioms, or weakened theorems. A proof that "passes" by
+              cheating is scored as a failure, not a pass.
             </p>
           </Reveal>
           <Reveal delay={120}><div style={{ marginTop: 24 }}><PipelineBanner /></div></Reveal>
