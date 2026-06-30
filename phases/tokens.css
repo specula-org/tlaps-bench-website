@@ -1,0 +1,38 @@
+/* Tokens for the pipeline banner. Scoped under .phase-host. */
+.phase-host {
+  --accent-deep: #2f6690;
+  --accent-soft: rgba(79, 140, 255, 0.18);
+  --accent-softer: rgba(79, 140, 255, 0.08);
+  --ink-4: #94a3b8;
+  --line-2: #cbd5e1;
+  --ok: #10b981;
+  --err: #ef4444;
+  --warn: #f59e0b;
+}
+[data-theme="dark"] .phase-host {
+  --accent-soft: rgba(79, 140, 255, 0.22);
+  --accent-softer: rgba(79, 140, 255, 0.10);
+  --ink-4: #6c7a88;
+  --line-2: rgba(236, 236, 236, 0.18);
+}
+.phase-host * { box-sizing: border-box; }
+.phase-host .banner {
+  width: 1078px;
+  height: 300px;
+  background: var(--paper);
+  font-family: var(--sans);
+  color: var(--ink);
+  position: relative;
+  overflow: hidden;
+}
+.phase-fit {
+  width: 100%;
+  overflow: hidden;
+  border-radius: 12px;
+  border: 1px solid var(--line-soft);
+  background: var(--paper);
+}
+.phase-fit .phase-fit-inner {
+  width: 1078px;
+  transform-origin: 0 0;
+}

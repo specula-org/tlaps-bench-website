@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>TLAPS-Bench</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="hub/hub.css?v=1" />
+<link rel="stylesheet" href="phases/tokens.css?v=1" />
+</head>
+<body>
+  <div id="root"></div>
+
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" crossorigin="anonymous"></script>
+
+  <script>
+    window.TWEAK_DEFAULTS = { "accent": "#4f8cff", "dark": false };
+  </script>
+
+  <script src="data.js?v=1"></script>
+  <script type="text/babel" src="hub/anim.jsx?v=1"></script>
+  <script type="text/babel" src="hub/lb.jsx?v=1"></script>
+  <script type="text/babel" src="phases/pipeline.jsx?v=1"></script>
+  <script type="text/babel" src="hub/pages.jsx?v=1"></script>
+
+  <script type="text/babel" data-presets="env,react">
+    const { useState, useEffect } = React;
+
+    function Nav({ route, go, tweaks, update }) {
+      const [navOpen, setNavOpen] = useState(false);
+      const links = [
+        { id: "home", label: "Home" },
+        { id: "leaderboard", label: "Leaderboard" },
+        { id: "benchmark", label: "Benchmark" },
+        { id: "cite", label: "Contribute" }
+      ];
+      const navigate = (id) => { go(id); setNavOpen(false); };
+      useEffect(() => { setNavOpen(false); }, [route]);
+      return (
+        <div className={"nav" + (navOpen ? " open" : "")}>
+          <div className="nav-inner">
+            <div className="nav-brand" onClick={() => navigate("home")}>
+              <Mark size={26} />
+              <span className="nav-brand-name">TLAPS-Bench</span>
+            </div>
+            <div className="nav-right">
+              <div className="nav-links">
+                {links.map(l => (
+                  <a key={l.id} className={"nav-link" + (route === l.id ? " active" : "")} onClick={() => navigate(l.id)}>{l.label}</a>
+                ))}
+                <a className="nav-cta" href="https://github.com/specula-org/tlaps-bench" target="_blank" onClick={() => setNavOpen(false)}>GitHub</a>
+              </div>
+              <div className="nav-actions">
+                <button className="theme-toggle" title={tweaks.dark ? "Switch to light" : "Switch to dark"} onClick={() => update({ dark: !tweaks.dark })}>
+                  {tweaks.dark ? "☀" : "☾"}
+                </button>
+                <button className="nav-toggle" aria-label="Toggle menu" aria-expanded={navOpen} onClick={() => setNavOpen(o => !o)}>
+                  <span /><span /><span />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function App() {
+      const [route, go] = useHashRoute("home");
+      const [tweaks, setTweaks] = useState(() => {
+        try { const saved = localStorage.getItem("tlaps_tweaks"); if (saved) return JSON.parse(saved); } catch (e) {}
+        const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+        return { ...window.TWEAK_DEFAULTS, dark: prefersDark };
+      });
+      const [open, setOpen] = useState(false);
+
+      useEffect(() => {
+        const r = document.documentElement;
+        r.style.setProperty("--accent", tweaks.accent);
+        r.setAttribute("data-theme", tweaks.dark ? "dark" : "light");
+      }, [tweaks]);
+
+      useEffect(() => {
+        const mq = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)");
+        if (!mq) return;
+        const onChange = (e) => { if (localStorage.getItem("tlaps_tweaks")) return; setTweaks(t => ({ ...t, dark: e.matches })); };
+        mq.addEventListener ? mq.addEventListener("change", onChange) : mq.addListener(onChange);
+        return () => { mq.removeEventListener ? mq.removeEventListener("change", onChange) : mq.removeListener(onChange); };
+      }, []);
+
+      const update = (patch) => {
+        setTweaks(t => {
+          const next = { ...t, ...patch };
+          try { localStorage.setItem("tlaps_tweaks", JSON.stringify(next)); } catch (e) {}
+          return next;
+        });
+      };
+
+      const ACCENTS = { "#4f8cff": "periwinkle", "#1e88e5": "bright blue", "#0ea5e9": "cyan", "#2f6690": "steel", "#d97757": "terracotta" };
+
+      let Page;
+      if (route === "leaderboard") Page = <PageLeaderboard />;
+      else if (route === "benchmark") Page = <PageBenchmark />;
+      else if (route === "cite") Page = <PageCite />;
+      else Page = <PageHome go={go} />;
+
+      return (
+        <div data-screen-label={route}>
+          <Nav route={route} go={go} tweaks={tweaks} update={update} />
+          <main>{Page}</main>
+          <footer className="site-foot">
+            <div className="wrap">
+              <div style={{display:"flex",alignItems:"center",gap:10}}>
+                <Mark size={22} />
+                <span>TLAPS-Bench · <a href="https://github.com/specula-org" target="_blank">specula-org</a></span>
+              </div>
+              <div style={{display:"flex",alignItems:"center",gap:18}}>
+                <a href="https://github.com/specula-org/tlaps-bench" target="_blank">GitHub</a>
+                <a onClick={() => go("cite")} style={{cursor:"pointer"}}>Cite</a>
+                <span className="foot-sep" aria-hidden="true" />
+                <span>Released under MIT</span>
+              </div>
+            </div>
+          </footer>
+
+          <div className={"tweaks" + (open ? " open" : "")}>
+            <h4>Tweaks</h4>
+            <div className="row">
+              <label>Accent</label>
+              <div className="swatches">
+                {Object.keys(ACCENTS).map(hex => (
+                  <button key={hex} title={ACCENTS[hex]} className={"sw" + (tweaks.accent === hex ? " active" : "")} style={{background:hex}} onClick={() => update({accent:hex})} />
+                ))}
+              </div>
+            </div>
+            <div className="row">
+              <label>Theme</label>
+              <div style={{display:"flex",gap:6}}>
+                <button className={"btn" + (!tweaks.dark ? " primary" : "")} style={{flex:1,justifyContent:"center",fontSize:12,padding:"6px 10px"}} onClick={() => update({dark:false})}>Light</button>
+                <button className={"btn" + (tweaks.dark ? " primary" : "")} style={{flex:1,justifyContent:"center",fontSize:12,padding:"6px 10px"}} onClick={() => update({dark:true})}>Dark</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>
