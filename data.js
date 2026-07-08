@@ -11,18 +11,20 @@ window.TLAPS_DATA = {
     {
       "id": "completion",
       "name": "--mode proof-completion",
-      "blurb": "Pass rate on the 483 proof-completion tasks."
+      "blurb": "Pass rate on the 483 proof-completion tasks.",
+      "tip": "The full proof scaffolding is provided — inductive invariants, lemma decomposition, and preceding lemmas — and the model fills in one target proof."
     },
     {
       "id": "scratch",
       "name": "--mode proof-from-scratch",
-      "blurb": "Pass rate on the 231 proof-from-scratch tasks."
+      "blurb": "Pass rate on the 231 proof-from-scratch tasks.",
+      "tip": "Only the model and the target theorem statement remain; the model must invent the entire proof structure, including any helper lemmas."
     }
   ],
   "tasks": [
     {
       "id": "tlaplus-examples",
-      "name": "tlaplus/Examples",
+      "name": "Official TLA+ Examples",
       "n": 505
     },
     {
@@ -52,7 +54,7 @@ window.TLAPS_DATA = {
     },
     {
       "id": "openaddressing-lemmy-examples",
-      "name": "OpenAddressing (lemmy/Examples)",
+      "name": "OpenAddressing",
       "n": 6
     },
     {
@@ -65,7 +67,7 @@ window.TLAPS_DATA = {
     {
       "id": "codex",
       "name": "OpenAI Codex",
-      "subname": "Codex agent (gpt-5.5)",
+      "subname": "gpt-5.5",
       "org": "OpenAI",
       "logo": null,
       "kind": "agent",
@@ -122,7 +124,664 @@ window.TLAPS_DATA = {
             "rate": 92.9,
             "pass": 117,
             "total": 126
-          }
+          },
+          "specs": [
+            {
+              "id": "ewd998",
+              "name": "ewd998",
+              "total": 59,
+              "completion": {
+                "rate": 59.6,
+                "pass": 31,
+                "total": 52
+              },
+              "scratch": {
+                "rate": 100,
+                "pass": 7,
+                "total": 7
+              }
+            },
+            {
+              "id": "byzpaxos",
+              "name": "byzpaxos",
+              "total": 52,
+              "completion": {
+                "rate": 95.1,
+                "pass": 39,
+                "total": 41
+              },
+              "scratch": {
+                "rate": 72.7,
+                "pass": 8,
+                "total": 11
+              }
+            },
+            {
+              "id": "lamport-mutex",
+              "name": "lamport_mutex",
+              "total": 22,
+              "completion": {
+                "rate": 100,
+                "pass": 20,
+                "total": 20
+              },
+              "scratch": {
+                "rate": 50,
+                "pass": 1,
+                "total": 2
+              }
+            },
+            {
+              "id": "tencentpaxos",
+              "name": "TencentPaxos",
+              "total": 21,
+              "completion": {
+                "rate": 94.7,
+                "pass": 18,
+                "total": 19
+              },
+              "scratch": {
+                "rate": 0,
+                "pass": 0,
+                "total": 2
+              }
+            },
+            {
+              "id": "loopinvariance",
+              "name": "LoopInvariance",
+              "total": 20,
+              "completion": {
+                "rate": 58.8,
+                "pass": 10,
+                "total": 17
+              },
+              "scratch": {
+                "rate": 100,
+                "pass": 3,
+                "total": 3
+              }
+            },
+            {
+              "id": "allocator",
+              "name": "allocator",
+              "total": 19,
+              "completion": {
+                "rate": 100,
+                "pass": 14,
+                "total": 14
+              },
+              "scratch": {
+                "rate": 80,
+                "pass": 4,
+                "total": 5
+              }
+            },
+            {
+              "id": "ewd687a",
+              "name": "ewd687a",
+              "total": 19,
+              "completion": {
+                "rate": 100,
+                "pass": 16,
+                "total": 16
+              },
+              "scratch": {
+                "rate": 100,
+                "pass": 3,
+                "total": 3
+              }
+            },
+            {
+              "id": "ewd840",
+              "name": "ewd840",
+              "total": 19,
+              "completion": {
+                "rate": 100,
+                "pass": 14,
+                "total": 14
+              },
+              "scratch": {
+                "rate": 100,
+                "pass": 5,
+                "total": 5
+              }
+            },
+            {
+              "id": "tcp",
+              "name": "tcp",
+              "total": 19,
+              "completion": {
+                "rate": 100,
+                "pass": 16,
+                "total": 16
+              },
+              "scratch": {
+                "rate": 66.7,
+                "pass": 2,
+                "total": 3
+              }
+            },
+            {
+              "id": "bcastbyz",
+              "name": "bcastByz",
+              "total": 18,
+              "completion": {
+                "rate": 100,
+                "pass": 13,
+                "total": 13
+              },
+              "scratch": {
+                "rate": 100,
+                "pass": 5,
+                "total": 5
+              }
+            },
+            {
+              "id": "finitemonotonic",
+              "name": "FiniteMonotonic",
+              "total": 17,
+              "completion": {
+                "rate": 92.9,
+                "pass": 13,
+                "total": 14
+              },
+              "scratch": {
+                "rate": 66.7,
+                "pass": 2,
+                "total": 3
+              }
+            },
+            {
+              "id": "barriers",
+              "name": "barriers",
+              "total": 16,
+              "completion": {
+                "rate": 100,
+                "pass": 11,
+                "total": 11
+              },
+              "scratch": {
+                "rate": 100,
+                "pass": 5,
+                "total": 5
+              }
+            },
+            {
+              "id": "teachingconcurrency",
+              "name": "TeachingConcurrency",
+              "total": 16,
+              "completion": {
+                "rate": 100,
+                "pass": 8,
+                "total": 8
+              },
+              "scratch": {
+                "rate": 100,
+                "pass": 8,
+                "total": 8
+              }
+            },
+            {
+              "id": "transaction-commit",
+              "name": "transaction_commit",
+              "total": 16,
+              "completion": {
+                "rate": 100,
+                "pass": 12,
+                "total": 12
+              },
+              "scratch": {
+                "rate": 100,
+                "pass": 4,
+                "total": 4
+              }
+            },
+            {
+              "id": "paxoshowtowinaturingaward",
+              "name": "PaxosHowToWinATuringAward",
+              "total": 15,
+              "completion": {
+                "rate": 77.8,
+                "pass": 7,
+                "total": 9
+              },
+              "scratch": {
+                "rate": 100,
+                "pass": 6,
+                "total": 6
+              }
+            },
+            {
+              "id": "locks-auxiliary-vars",
+              "name": "locks_auxiliary_vars",
+              "total": 14,
+              "completion": {
+                "rate": 100,
+                "pass": 9,
+                "total": 9
+              },
+              "scratch": {
+                "rate": 100,
+                "pass": 5,
+                "total": 5
+              }
+            },
+            {
+              "id": "blockingqueue",
+              "name": "BlockingQueue",
+              "total": 13,
+              "completion": {
+                "rate": 100,
+                "pass": 8,
+                "total": 8
+              },
+              "scratch": {
+                "rate": 100,
+                "pass": 5,
+                "total": 5
+              }
+            },
+            {
+              "id": "learnproofs",
+              "name": "LearnProofs",
+              "total": 11,
+              "completion": {
+                "rate": 100,
+                "pass": 5,
+                "total": 5
+              },
+              "scratch": {
+                "rate": 100,
+                "pass": 6,
+                "total": 6
+              }
+            },
+            {
+              "id": "multicarelevator",
+              "name": "MultiCarElevator",
+              "total": 11,
+              "completion": {
+                "rate": 100,
+                "pass": 9,
+                "total": 9
+              },
+              "scratch": {
+                "rate": 100,
+                "pass": 2,
+                "total": 2
+              }
+            },
+            {
+              "id": "cigarettesmokers",
+              "name": "CigaretteSmokers",
+              "total": 10,
+              "completion": {
+                "rate": 100,
+                "pass": 8,
+                "total": 8
+              },
+              "scratch": {
+                "rate": 100,
+                "pass": 2,
+                "total": 2
+              }
+            },
+            {
+              "id": "misrareachability",
+              "name": "MisraReachability",
+              "total": 10,
+              "completion": {
+                "rate": 100,
+                "pass": 8,
+                "total": 8
+              },
+              "scratch": {
+                "rate": 100,
+                "pass": 2,
+                "total": 2
+              }
+            },
+            {
+              "id": "glowingraccoon",
+              "name": "glowingRaccoon",
+              "total": 9,
+              "completion": {
+                "rate": 83.3,
+                "pass": 5,
+                "total": 6
+              },
+              "scratch": {
+                "rate": 100,
+                "pass": 3,
+                "total": 3
+              }
+            },
+            {
+              "id": "majority",
+              "name": "Majority",
+              "total": 9,
+              "completion": {
+                "rate": 100,
+                "pass": 9,
+                "total": 9
+              },
+              "scratch": null
+            },
+            {
+              "id": "paxos",
+              "name": "Paxos",
+              "total": 7,
+              "completion": {
+                "rate": 100,
+                "pass": 3,
+                "total": 3
+              },
+              "scratch": {
+                "rate": 100,
+                "pass": 4,
+                "total": 4
+              }
+            },
+            {
+              "id": "bakery-boulangerie",
+              "name": "Bakery-Boulangerie",
+              "total": 6,
+              "completion": {
+                "rate": 100,
+                "pass": 2,
+                "total": 2
+              },
+              "scratch": {
+                "rate": 100,
+                "pass": 4,
+                "total": 4
+              }
+            },
+            {
+              "id": "readerswriters",
+              "name": "ReadersWriters",
+              "total": 5,
+              "completion": {
+                "rate": 100,
+                "pass": 3,
+                "total": 3
+              },
+              "scratch": {
+                "rate": 100,
+                "pass": 2,
+                "total": 2
+              }
+            },
+            {
+              "id": "specifyingsystems-composing",
+              "name": "SpecifyingSystems_Composing",
+              "total": 5,
+              "completion": {
+                "rate": 100,
+                "pass": 4,
+                "total": 4
+              },
+              "scratch": {
+                "rate": 100,
+                "pass": 1,
+                "total": 1
+              }
+            },
+            {
+              "id": "termination",
+              "name": "Termination",
+              "total": 5,
+              "completion": {
+                "rate": 100,
+                "pass": 4,
+                "total": 4
+              },
+              "scratch": {
+                "rate": 100,
+                "pass": 1,
+                "total": 1
+              }
+            },
+            {
+              "id": "specifyingsystems-asynchronousinterface",
+              "name": "SpecifyingSystems_AsynchronousInterface",
+              "total": 4,
+              "completion": {
+                "rate": 100,
+                "pass": 2,
+                "total": 2
+              },
+              "scratch": {
+                "rate": 100,
+                "pass": 2,
+                "total": 2
+              }
+            },
+            {
+              "id": "diehard",
+              "name": "DieHard",
+              "total": 3,
+              "completion": {
+                "rate": 100,
+                "pass": 2,
+                "total": 2
+              },
+              "scratch": {
+                "rate": 100,
+                "pass": 1,
+                "total": 1
+              }
+            },
+            {
+              "id": "spanning",
+              "name": "spanning",
+              "total": 3,
+              "completion": {
+                "rate": 100,
+                "pass": 2,
+                "total": 2
+              },
+              "scratch": {
+                "rate": 100,
+                "pass": 1,
+                "total": 1
+              }
+            },
+            {
+              "id": "specifyingsystems-cachingmemory",
+              "name": "SpecifyingSystems_CachingMemory",
+              "total": 3,
+              "completion": {
+                "rate": 100,
+                "pass": 2,
+                "total": 2
+              },
+              "scratch": {
+                "rate": 100,
+                "pass": 1,
+                "total": 1
+              }
+            },
+            {
+              "id": "specifyingsystems-fifo",
+              "name": "SpecifyingSystems_FIFO",
+              "total": 3,
+              "completion": {
+                "rate": 100,
+                "pass": 2,
+                "total": 2
+              },
+              "scratch": {
+                "rate": 100,
+                "pass": 1,
+                "total": 1
+              }
+            },
+            {
+              "id": "specifyingsystems-liveness",
+              "name": "SpecifyingSystems_Liveness",
+              "total": 3,
+              "completion": {
+                "rate": 100,
+                "pass": 3,
+                "total": 3
+              },
+              "scratch": null
+            },
+            {
+              "id": "specifyingsystems-realtime",
+              "name": "SpecifyingSystems_RealTime",
+              "total": 3,
+              "completion": {
+                "rate": 100,
+                "pass": 3,
+                "total": 3
+              },
+              "scratch": null
+            },
+            {
+              "id": "sums-even",
+              "name": "sums_even",
+              "total": 3,
+              "completion": {
+                "rate": 100,
+                "pass": 1,
+                "total": 1
+              },
+              "scratch": {
+                "rate": 100,
+                "pass": 2,
+                "total": 2
+              }
+            },
+            {
+              "id": "twophase",
+              "name": "TwoPhase",
+              "total": 3,
+              "completion": {
+                "rate": 100,
+                "pass": 1,
+                "total": 1
+              },
+              "scratch": {
+                "rate": 100,
+                "pass": 2,
+                "total": 2
+              }
+            },
+            {
+              "id": "byihive",
+              "name": "byihive",
+              "total": 2,
+              "completion": {
+                "rate": 100,
+                "pass": 1,
+                "total": 1
+              },
+              "scratch": {
+                "rate": 100,
+                "pass": 1,
+                "total": 1
+              }
+            },
+            {
+              "id": "coffeecan",
+              "name": "CoffeeCan",
+              "total": 2,
+              "completion": {
+                "rate": 100,
+                "pass": 1,
+                "total": 1
+              },
+              "scratch": {
+                "rate": 100,
+                "pass": 1,
+                "total": 1
+              }
+            },
+            {
+              "id": "keyvaluestore",
+              "name": "KeyValueStore",
+              "total": 2,
+              "completion": {
+                "rate": 100,
+                "pass": 1,
+                "total": 1
+              },
+              "scratch": {
+                "rate": 100,
+                "pass": 1,
+                "total": 1
+              }
+            },
+            {
+              "id": "missionariesandcannibals",
+              "name": "MissionariesAndCannibals",
+              "total": 2,
+              "completion": {
+                "rate": 100,
+                "pass": 1,
+                "total": 1
+              },
+              "scratch": {
+                "rate": 100,
+                "pass": 1,
+                "total": 1
+              }
+            },
+            {
+              "id": "spanningtree",
+              "name": "SpanningTree",
+              "total": 2,
+              "completion": {
+                "rate": 100,
+                "pass": 1,
+                "total": 1
+              },
+              "scratch": {
+                "rate": 100,
+                "pass": 1,
+                "total": 1
+              }
+            },
+            {
+              "id": "specifyingsystems-tlc",
+              "name": "SpecifyingSystems_TLC",
+              "total": 2,
+              "completion": {
+                "rate": 100,
+                "pass": 1,
+                "total": 1
+              },
+              "scratch": {
+                "rate": 100,
+                "pass": 1,
+                "total": 1
+              }
+            },
+            {
+              "id": "germanprotocol",
+              "name": "GermanProtocol",
+              "total": 1,
+              "completion": null,
+              "scratch": {
+                "rate": 100,
+                "pass": 1,
+                "total": 1
+              }
+            },
+            {
+              "id": "specifyingsystems-hourclock",
+              "name": "SpecifyingSystems_HourClock",
+              "total": 1,
+              "completion": {
+                "rate": 100,
+                "pass": 1,
+                "total": 1
+              },
+              "scratch": null
+            }
+          ]
         },
         "abstractraft": {
           "rate": 75,
@@ -189,7 +848,7 @@ window.TLAPS_DATA = {
     {
       "id": "copilot",
       "name": "GitHub Copilot",
-      "subname": "Copilot agent",
+      "subname": "Opus-4.8",
       "org": "GitHub",
       "logo": null,
       "kind": "agent",
@@ -246,7 +905,664 @@ window.TLAPS_DATA = {
             "rate": 69.8,
             "pass": 88,
             "total": 126
-          }
+          },
+          "specs": [
+            {
+              "id": "ewd998",
+              "name": "ewd998",
+              "total": 59,
+              "completion": {
+                "rate": 50,
+                "pass": 26,
+                "total": 52
+              },
+              "scratch": {
+                "rate": 28.6,
+                "pass": 2,
+                "total": 7
+              }
+            },
+            {
+              "id": "byzpaxos",
+              "name": "byzpaxos",
+              "total": 52,
+              "completion": {
+                "rate": 73.2,
+                "pass": 30,
+                "total": 41
+              },
+              "scratch": {
+                "rate": 54.5,
+                "pass": 6,
+                "total": 11
+              }
+            },
+            {
+              "id": "lamport-mutex",
+              "name": "lamport_mutex",
+              "total": 22,
+              "completion": {
+                "rate": 90,
+                "pass": 18,
+                "total": 20
+              },
+              "scratch": {
+                "rate": 0,
+                "pass": 0,
+                "total": 2
+              }
+            },
+            {
+              "id": "tencentpaxos",
+              "name": "TencentPaxos",
+              "total": 21,
+              "completion": {
+                "rate": 73.7,
+                "pass": 14,
+                "total": 19
+              },
+              "scratch": {
+                "rate": 0,
+                "pass": 0,
+                "total": 2
+              }
+            },
+            {
+              "id": "loopinvariance",
+              "name": "LoopInvariance",
+              "total": 20,
+              "completion": {
+                "rate": 58.8,
+                "pass": 10,
+                "total": 17
+              },
+              "scratch": {
+                "rate": 33.3,
+                "pass": 1,
+                "total": 3
+              }
+            },
+            {
+              "id": "allocator",
+              "name": "allocator",
+              "total": 19,
+              "completion": {
+                "rate": 85.7,
+                "pass": 12,
+                "total": 14
+              },
+              "scratch": {
+                "rate": 60,
+                "pass": 3,
+                "total": 5
+              }
+            },
+            {
+              "id": "ewd687a",
+              "name": "ewd687a",
+              "total": 19,
+              "completion": {
+                "rate": 81.3,
+                "pass": 13,
+                "total": 16
+              },
+              "scratch": {
+                "rate": 66.7,
+                "pass": 2,
+                "total": 3
+              }
+            },
+            {
+              "id": "ewd840",
+              "name": "ewd840",
+              "total": 19,
+              "completion": {
+                "rate": 71.4,
+                "pass": 10,
+                "total": 14
+              },
+              "scratch": {
+                "rate": 80,
+                "pass": 4,
+                "total": 5
+              }
+            },
+            {
+              "id": "tcp",
+              "name": "tcp",
+              "total": 19,
+              "completion": {
+                "rate": 37.5,
+                "pass": 6,
+                "total": 16
+              },
+              "scratch": {
+                "rate": 33.3,
+                "pass": 1,
+                "total": 3
+              }
+            },
+            {
+              "id": "bcastbyz",
+              "name": "bcastByz",
+              "total": 18,
+              "completion": {
+                "rate": 92.3,
+                "pass": 12,
+                "total": 13
+              },
+              "scratch": {
+                "rate": 100,
+                "pass": 5,
+                "total": 5
+              }
+            },
+            {
+              "id": "finitemonotonic",
+              "name": "FiniteMonotonic",
+              "total": 17,
+              "completion": {
+                "rate": 0,
+                "pass": 0,
+                "total": 14
+              },
+              "scratch": {
+                "rate": 66.7,
+                "pass": 2,
+                "total": 3
+              }
+            },
+            {
+              "id": "barriers",
+              "name": "barriers",
+              "total": 16,
+              "completion": {
+                "rate": 72.7,
+                "pass": 8,
+                "total": 11
+              },
+              "scratch": {
+                "rate": 40,
+                "pass": 2,
+                "total": 5
+              }
+            },
+            {
+              "id": "teachingconcurrency",
+              "name": "TeachingConcurrency",
+              "total": 16,
+              "completion": {
+                "rate": 75,
+                "pass": 6,
+                "total": 8
+              },
+              "scratch": {
+                "rate": 87.5,
+                "pass": 7,
+                "total": 8
+              }
+            },
+            {
+              "id": "transaction-commit",
+              "name": "transaction_commit",
+              "total": 16,
+              "completion": {
+                "rate": 100,
+                "pass": 12,
+                "total": 12
+              },
+              "scratch": {
+                "rate": 100,
+                "pass": 4,
+                "total": 4
+              }
+            },
+            {
+              "id": "paxoshowtowinaturingaward",
+              "name": "PaxosHowToWinATuringAward",
+              "total": 15,
+              "completion": {
+                "rate": 66.7,
+                "pass": 6,
+                "total": 9
+              },
+              "scratch": {
+                "rate": 100,
+                "pass": 6,
+                "total": 6
+              }
+            },
+            {
+              "id": "locks-auxiliary-vars",
+              "name": "locks_auxiliary_vars",
+              "total": 14,
+              "completion": {
+                "rate": 66.7,
+                "pass": 6,
+                "total": 9
+              },
+              "scratch": {
+                "rate": 100,
+                "pass": 5,
+                "total": 5
+              }
+            },
+            {
+              "id": "blockingqueue",
+              "name": "BlockingQueue",
+              "total": 13,
+              "completion": {
+                "rate": 87.5,
+                "pass": 7,
+                "total": 8
+              },
+              "scratch": {
+                "rate": 20,
+                "pass": 1,
+                "total": 5
+              }
+            },
+            {
+              "id": "learnproofs",
+              "name": "LearnProofs",
+              "total": 11,
+              "completion": {
+                "rate": 60,
+                "pass": 3,
+                "total": 5
+              },
+              "scratch": {
+                "rate": 100,
+                "pass": 6,
+                "total": 6
+              }
+            },
+            {
+              "id": "multicarelevator",
+              "name": "MultiCarElevator",
+              "total": 11,
+              "completion": {
+                "rate": 88.9,
+                "pass": 8,
+                "total": 9
+              },
+              "scratch": {
+                "rate": 0,
+                "pass": 0,
+                "total": 2
+              }
+            },
+            {
+              "id": "cigarettesmokers",
+              "name": "CigaretteSmokers",
+              "total": 10,
+              "completion": {
+                "rate": 87.5,
+                "pass": 7,
+                "total": 8
+              },
+              "scratch": {
+                "rate": 100,
+                "pass": 2,
+                "total": 2
+              }
+            },
+            {
+              "id": "misrareachability",
+              "name": "MisraReachability",
+              "total": 10,
+              "completion": {
+                "rate": 75,
+                "pass": 6,
+                "total": 8
+              },
+              "scratch": {
+                "rate": 100,
+                "pass": 2,
+                "total": 2
+              }
+            },
+            {
+              "id": "glowingraccoon",
+              "name": "glowingRaccoon",
+              "total": 9,
+              "completion": {
+                "rate": 83.3,
+                "pass": 5,
+                "total": 6
+              },
+              "scratch": {
+                "rate": 100,
+                "pass": 3,
+                "total": 3
+              }
+            },
+            {
+              "id": "majority",
+              "name": "Majority",
+              "total": 9,
+              "completion": {
+                "rate": 44.4,
+                "pass": 4,
+                "total": 9
+              },
+              "scratch": null
+            },
+            {
+              "id": "paxos",
+              "name": "Paxos",
+              "total": 7,
+              "completion": {
+                "rate": 66.7,
+                "pass": 2,
+                "total": 3
+              },
+              "scratch": {
+                "rate": 100,
+                "pass": 4,
+                "total": 4
+              }
+            },
+            {
+              "id": "bakery-boulangerie",
+              "name": "Bakery-Boulangerie",
+              "total": 6,
+              "completion": {
+                "rate": 100,
+                "pass": 2,
+                "total": 2
+              },
+              "scratch": {
+                "rate": 25,
+                "pass": 1,
+                "total": 4
+              }
+            },
+            {
+              "id": "readerswriters",
+              "name": "ReadersWriters",
+              "total": 5,
+              "completion": {
+                "rate": 33.3,
+                "pass": 1,
+                "total": 3
+              },
+              "scratch": {
+                "rate": 100,
+                "pass": 2,
+                "total": 2
+              }
+            },
+            {
+              "id": "specifyingsystems-composing",
+              "name": "SpecifyingSystems_Composing",
+              "total": 5,
+              "completion": {
+                "rate": 50,
+                "pass": 2,
+                "total": 4
+              },
+              "scratch": {
+                "rate": 0,
+                "pass": 0,
+                "total": 1
+              }
+            },
+            {
+              "id": "termination",
+              "name": "Termination",
+              "total": 5,
+              "completion": {
+                "rate": 75,
+                "pass": 3,
+                "total": 4
+              },
+              "scratch": {
+                "rate": 100,
+                "pass": 1,
+                "total": 1
+              }
+            },
+            {
+              "id": "specifyingsystems-asynchronousinterface",
+              "name": "SpecifyingSystems_AsynchronousInterface",
+              "total": 4,
+              "completion": {
+                "rate": 100,
+                "pass": 2,
+                "total": 2
+              },
+              "scratch": {
+                "rate": 100,
+                "pass": 2,
+                "total": 2
+              }
+            },
+            {
+              "id": "diehard",
+              "name": "DieHard",
+              "total": 3,
+              "completion": {
+                "rate": 100,
+                "pass": 2,
+                "total": 2
+              },
+              "scratch": {
+                "rate": 100,
+                "pass": 1,
+                "total": 1
+              }
+            },
+            {
+              "id": "spanning",
+              "name": "spanning",
+              "total": 3,
+              "completion": {
+                "rate": 0,
+                "pass": 0,
+                "total": 2
+              },
+              "scratch": {
+                "rate": 100,
+                "pass": 1,
+                "total": 1
+              }
+            },
+            {
+              "id": "specifyingsystems-cachingmemory",
+              "name": "SpecifyingSystems_CachingMemory",
+              "total": 3,
+              "completion": {
+                "rate": 100,
+                "pass": 2,
+                "total": 2
+              },
+              "scratch": {
+                "rate": 100,
+                "pass": 1,
+                "total": 1
+              }
+            },
+            {
+              "id": "specifyingsystems-fifo",
+              "name": "SpecifyingSystems_FIFO",
+              "total": 3,
+              "completion": {
+                "rate": 50,
+                "pass": 1,
+                "total": 2
+              },
+              "scratch": {
+                "rate": 100,
+                "pass": 1,
+                "total": 1
+              }
+            },
+            {
+              "id": "specifyingsystems-liveness",
+              "name": "SpecifyingSystems_Liveness",
+              "total": 3,
+              "completion": {
+                "rate": 66.7,
+                "pass": 2,
+                "total": 3
+              },
+              "scratch": null
+            },
+            {
+              "id": "specifyingsystems-realtime",
+              "name": "SpecifyingSystems_RealTime",
+              "total": 3,
+              "completion": {
+                "rate": 100,
+                "pass": 3,
+                "total": 3
+              },
+              "scratch": null
+            },
+            {
+              "id": "sums-even",
+              "name": "sums_even",
+              "total": 3,
+              "completion": {
+                "rate": 100,
+                "pass": 1,
+                "total": 1
+              },
+              "scratch": {
+                "rate": 100,
+                "pass": 2,
+                "total": 2
+              }
+            },
+            {
+              "id": "twophase",
+              "name": "TwoPhase",
+              "total": 3,
+              "completion": {
+                "rate": 0,
+                "pass": 0,
+                "total": 1
+              },
+              "scratch": {
+                "rate": 100,
+                "pass": 2,
+                "total": 2
+              }
+            },
+            {
+              "id": "byihive",
+              "name": "byihive",
+              "total": 2,
+              "completion": {
+                "rate": 100,
+                "pass": 1,
+                "total": 1
+              },
+              "scratch": {
+                "rate": 100,
+                "pass": 1,
+                "total": 1
+              }
+            },
+            {
+              "id": "coffeecan",
+              "name": "CoffeeCan",
+              "total": 2,
+              "completion": {
+                "rate": 100,
+                "pass": 1,
+                "total": 1
+              },
+              "scratch": {
+                "rate": 100,
+                "pass": 1,
+                "total": 1
+              }
+            },
+            {
+              "id": "keyvaluestore",
+              "name": "KeyValueStore",
+              "total": 2,
+              "completion": {
+                "rate": 0,
+                "pass": 0,
+                "total": 1
+              },
+              "scratch": {
+                "rate": 100,
+                "pass": 1,
+                "total": 1
+              }
+            },
+            {
+              "id": "missionariesandcannibals",
+              "name": "MissionariesAndCannibals",
+              "total": 2,
+              "completion": {
+                "rate": 100,
+                "pass": 1,
+                "total": 1
+              },
+              "scratch": {
+                "rate": 100,
+                "pass": 1,
+                "total": 1
+              }
+            },
+            {
+              "id": "spanningtree",
+              "name": "SpanningTree",
+              "total": 2,
+              "completion": {
+                "rate": 100,
+                "pass": 1,
+                "total": 1
+              },
+              "scratch": {
+                "rate": 100,
+                "pass": 1,
+                "total": 1
+              }
+            },
+            {
+              "id": "specifyingsystems-tlc",
+              "name": "SpecifyingSystems_TLC",
+              "total": 2,
+              "completion": {
+                "rate": 100,
+                "pass": 1,
+                "total": 1
+              },
+              "scratch": {
+                "rate": 0,
+                "pass": 0,
+                "total": 1
+              }
+            },
+            {
+              "id": "germanprotocol",
+              "name": "GermanProtocol",
+              "total": 1,
+              "completion": null,
+              "scratch": {
+                "rate": 100,
+                "pass": 1,
+                "total": 1
+              }
+            },
+            {
+              "id": "specifyingsystems-hourclock",
+              "name": "SpecifyingSystems_HourClock",
+              "total": 1,
+              "completion": {
+                "rate": 100,
+                "pass": 1,
+                "total": 1
+              },
+              "scratch": null
+            }
+          ]
         },
         "abstractraft": {
           "rate": 25,
@@ -330,11 +1646,194 @@ window.TLAPS_DATA = {
   "sources": [
     {
       "id": "tlaplus-examples",
-      "name": "tlaplus/Examples",
+      "name": "Official TLA+ Examples",
       "completion": 379,
       "scratch": 126,
       "total": 505,
-      "github": "https://github.com/tlaplus/Examples"
+      "github": "https://github.com/tlaplus/Examples",
+      "desc": "The official community TLA+ examples repository — a broad collection of specifications, from teaching exercises to real distributed protocols. Its 505 proof tasks span dozens of individual specs.",
+      "examples": [
+        {
+          "name": "ewd998",
+          "n": 59
+        },
+        {
+          "name": "byzpaxos",
+          "n": 52
+        },
+        {
+          "name": "lamport_mutex",
+          "n": 22
+        },
+        {
+          "name": "TencentPaxos",
+          "n": 21
+        },
+        {
+          "name": "LoopInvariance",
+          "n": 20
+        },
+        {
+          "name": "allocator",
+          "n": 19
+        },
+        {
+          "name": "ewd687a",
+          "n": 19
+        },
+        {
+          "name": "ewd840",
+          "n": 19
+        },
+        {
+          "name": "tcp",
+          "n": 19
+        },
+        {
+          "name": "bcastByz",
+          "n": 18
+        },
+        {
+          "name": "FiniteMonotonic",
+          "n": 17
+        },
+        {
+          "name": "barriers",
+          "n": 16
+        },
+        {
+          "name": "TeachingConcurrency",
+          "n": 16
+        },
+        {
+          "name": "transaction_commit",
+          "n": 16
+        },
+        {
+          "name": "PaxosHowToWinATuringAward",
+          "n": 15
+        },
+        {
+          "name": "locks_auxiliary_vars",
+          "n": 14
+        },
+        {
+          "name": "BlockingQueue",
+          "n": 13
+        },
+        {
+          "name": "LearnProofs",
+          "n": 11
+        },
+        {
+          "name": "MultiCarElevator",
+          "n": 11
+        },
+        {
+          "name": "CigaretteSmokers",
+          "n": 10
+        },
+        {
+          "name": "MisraReachability",
+          "n": 10
+        },
+        {
+          "name": "glowingRaccoon",
+          "n": 9
+        },
+        {
+          "name": "Majority",
+          "n": 9
+        },
+        {
+          "name": "Paxos",
+          "n": 7
+        },
+        {
+          "name": "Bakery-Boulangerie",
+          "n": 6
+        },
+        {
+          "name": "ReadersWriters",
+          "n": 5
+        },
+        {
+          "name": "SpecifyingSystems_Composing",
+          "n": 5
+        },
+        {
+          "name": "Termination",
+          "n": 5
+        },
+        {
+          "name": "SpecifyingSystems_AsynchronousInterface",
+          "n": 4
+        },
+        {
+          "name": "DieHard",
+          "n": 3
+        },
+        {
+          "name": "spanning",
+          "n": 3
+        },
+        {
+          "name": "SpecifyingSystems_CachingMemory",
+          "n": 3
+        },
+        {
+          "name": "SpecifyingSystems_FIFO",
+          "n": 3
+        },
+        {
+          "name": "SpecifyingSystems_Liveness",
+          "n": 3
+        },
+        {
+          "name": "SpecifyingSystems_RealTime",
+          "n": 3
+        },
+        {
+          "name": "sums_even",
+          "n": 3
+        },
+        {
+          "name": "TwoPhase",
+          "n": 3
+        },
+        {
+          "name": "byihive",
+          "n": 2
+        },
+        {
+          "name": "CoffeeCan",
+          "n": 2
+        },
+        {
+          "name": "KeyValueStore",
+          "n": 2
+        },
+        {
+          "name": "MissionariesAndCannibals",
+          "n": 2
+        },
+        {
+          "name": "SpanningTree",
+          "n": 2
+        },
+        {
+          "name": "SpecifyingSystems_TLC",
+          "n": 2
+        },
+        {
+          "name": "GermanProtocol",
+          "n": 1
+        },
+        {
+          "name": "SpecifyingSystems_HourClock",
+          "n": 1
+        }
+      ]
     },
     {
       "id": "tlaps-dist",
@@ -378,7 +1877,7 @@ window.TLAPS_DATA = {
     },
     {
       "id": "open-addressing",
-      "name": "OpenAddressing (M. Kuppe)",
+      "name": "OpenAddressing",
       "completion": 1,
       "scratch": 5,
       "total": 6,

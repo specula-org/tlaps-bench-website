@@ -24,9 +24,17 @@ const CANONICAL = {
 const RECORDS = 714;
 
 // The one hand-maintained table: display info per backend id.
+// name = agent (primary label); subname = the underlying model, shown below it.
 const BACKEND_INFO = {
-  copilot: { name: "GitHub Copilot", subname: "Copilot agent", org: "GitHub", logo: null, kind: "agent" },
-  codex: { name: "OpenAI Codex", subname: "Codex agent (gpt-5.5)", org: "OpenAI", logo: null, kind: "agent" },
+  copilot: { name: "GitHub Copilot", subname: "Opus-4.8", org: "GitHub", logo: null, kind: "agent" },
+  codex: { name: "OpenAI Codex", subname: "gpt-5.5", org: "OpenAI", logo: null, kind: "agent" },
+};
+
+// Reader-facing dataset labels (the canonical keys above must match results[].source,
+// so renaming for display happens here). Keeps the leaderboard names clear and untruncated.
+const DISPLAY_NAME = {
+  "tlaplus/Examples": "Official TLA+ Examples",
+  "OpenAddressing (lemmy/Examples)": "OpenAddressing",
 };
 
 const slug = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
@@ -37,7 +45,7 @@ const models = readdirSync("results").filter((f) => f.endsWith(".json")).map((f)
 
   // ---- validate: recompute from results[], check against canon and meta ----
   if (results.length !== RECORDS) throw new Error(`${f}: ${results.length} records != ${RECORDS}`);
-  const byMode = {}, bySource = {};
+  const byMode = {}, bySource = {}, bySpec = {};
   for (const r of results) {
     if (!["PASS", "FAIL", "CHEATING"].includes(r.check_verdict))
       throw new Error(`${f}: ${r.benchmark} [${r.mode}] has infra verdict ${r.check_verdict} - re-run before publishing`);
@@ -52,6 +60,15 @@ const models = readdirSync("results").filter((f) => f.endsWith(".json")).map((f)
     const pm = (s.perMode[r.mode] ??= { pass: 0, total: 0 });
     pm.total++;
     if (r.check_verdict === "PASS") pm.pass++;
+    // Break the large tlaplus/Examples bucket down by individual spec, so the
+    // leaderboard can expand it into a per-spec breakdown of the same shape.
+    if (r.source === "tlaplus/Examples") {
+      const spec = r.benchmark.split("/")[0].replace(/^tlaplus_examples_/, "");
+      const sp = (bySpec[spec] ??= { perMode: {} });
+      const spm = (sp.perMode[r.mode] ??= { pass: 0, total: 0 });
+      spm.total++;
+      if (r.check_verdict === "PASS") spm.pass++;
+    }
   }
   for (const [src, [pc, pfs]] of Object.entries(CANONICAL)) {
     const got = bySource[src]?.perMode ?? {};
@@ -77,6 +94,19 @@ const models = readdirSync("results").filter((f) => f.endsWith(".json")).map((f)
       scratch: modeStat(s.perMode["proof-from-scratch"]),
     }]));
 
+  // Attach the per-spec breakdown to the tlaplus/Examples task, ordered by size.
+  const specSize = (sp) => (sp.perMode["proof-completion"]?.total ?? 0) + (sp.perMode["proof-from-scratch"]?.total ?? 0);
+  const specs = Object.entries(bySpec)
+    .map(([name, sp]) => ({
+      id: slug(name), name, total: specSize(sp),
+      completion: modeStat(sp.perMode["proof-completion"]),
+      scratch: modeStat(sp.perMode["proof-from-scratch"]),
+    }))
+    .sort((a, b) => b.total - a.total || a.name.localeCompare(b.name));
+  const specTotal = specs.reduce((n, sp) => n + sp.total, 0);
+  if (specTotal !== 505) throw new Error(`${f}: tlaplus/Examples specs sum to ${specTotal} != 505`);
+  if (perTask["tlaplus-examples"]) perTask["tlaplus-examples"].specs = specs;
+
   const info = BACKEND_INFO[meta.backend] ?? { name: meta.backend, org: "?", logo: null, kind: "base" };
   return {
     id: meta.backend, ...info, generated: meta.generated,
@@ -90,18 +120,39 @@ const models = readdirSync("results").filter((f) => f.endsWith(".json")).map((f)
   };
 });
 
+// Constituent specs behind the large tlaplus/Examples bucket, derived from the
+// task set so the list stays in sync with results (identical across backends).
+const anyFile = readdirSync("results").find((f) => f.endsWith(".json"));
+const exGroups = new Map();
+for (const r of JSON.parse(readFileSync(`results/${anyFile}`, "utf8")).results) {
+  if (r.source !== "tlaplus/Examples") continue;
+  const g = r.benchmark.split("/")[0].replace(/^tlaplus_examples_/, "");
+  exGroups.set(g, (exGroups.get(g) ?? 0) + 1);
+}
+const tlaplusExamples = [...exGroups.entries()]
+  .map(([name, n]) => ({ name, n }))
+  .sort((a, b) => b.n - a.n || a.name.localeCompare(b.name));
+const exTotal = tlaplusExamples.reduce((a, e) => a + e.n, 0);
+if (exTotal !== 505) throw new Error(`tlaplus/Examples specs sum to ${exTotal} != 505`);
+
+// Attach the derived spec list to the tlaplus/Examples source card.
+const sources = SITE.sources.map((s) =>
+  s.id === "tlaplus-examples" ? { ...s, examples: tlaplusExamples } : s);
+
 const data = {
   paper: SITE.paper,
   metrics: [
-    { id: "completion", name: "--mode proof-completion",  blurb: "Pass rate on the 483 proof-completion tasks." },
-    { id: "scratch",    name: "--mode proof-from-scratch", blurb: "Pass rate on the 231 proof-from-scratch tasks." },
+    { id: "completion", name: "--mode proof-completion",  blurb: "Pass rate on the 483 proof-completion tasks.",
+      tip: "The full proof scaffolding is provided — inductive invariants, lemma decomposition, and preceding lemmas — and the model fills in one target proof." },
+    { id: "scratch",    name: "--mode proof-from-scratch", blurb: "Pass rate on the 231 proof-from-scratch tasks.",
+      tip: "Only the model and the target theorem statement remain; the model must invent the entire proof structure, including any helper lemmas." },
   ],
   // Leaderboard per-source expand: slug ids match perTask keys; n = tasks across both modes.
-  tasks: Object.entries(CANONICAL).map(([name, [pc, pfs]]) => ({ id: slug(name), name, n: pc + pfs })),
+  tasks: Object.entries(CANONICAL).map(([name, [pc, pfs]]) => ({ id: slug(name), name: DISPLAY_NAME[name] ?? name, n: pc + pfs })),
   models: models.sort((a, b) => b.score - a.score),
   // Preserved page content (Benchmark task-type cards + source cards, Cite).
   modes: SITE.modes,
-  sources: SITE.sources,
+  sources,
   coverage: SITE.coverage,
   bibtex: SITE.bibtex,
 };

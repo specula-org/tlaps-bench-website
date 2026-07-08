@@ -120,6 +120,30 @@ table.lb thead th:hover { color: var(--ink); }
 table.lb thead th .sort { opacity: 0.4; font-size: 11px; margin-left: 4px; display: inline-block; transform-origin: 50% 50%; transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1), opacity 200ms, color 200ms; }
 table.lb thead th.sorted .sort { opacity: 1; color: var(--accent); }
 table.lb thead th.sorted-asc .sort { transform: rotate(180deg); }
+/* widen the gap between the two proof-mode columns so they read as separate sections */
+table.lb th.lb-gap, table.lb td.lb-gap { padding-left: 64px; }
+/* mode-column tooltip: hover the header label for a concise explanation of the mode */
+.th-mode { position: relative; display: inline-block; }
+.th-mode .col-tip {
+  position: absolute; top: calc(100% + 10px); right: 0; z-index: 30;
+  width: max-content; max-width: 260px; padding: 10px 12px;
+  font-family: var(--sans); font-size: 12px; font-weight: 400; line-height: 1.5;
+  text-transform: none; letter-spacing: 0; text-align: left; white-space: normal;
+  color: var(--ink-2); background: var(--paper); border: 1px solid var(--line);
+  border-radius: 8px; box-shadow: 0 10px 30px -12px rgba(20, 32, 43, 0.4);
+  opacity: 0; visibility: hidden; transform: translateY(-4px);
+  transition: opacity 160ms ease, transform 160ms ease, visibility 160ms;
+  pointer-events: none;
+}
+.th-mode .col-tip::before {
+  content: ""; position: absolute; bottom: 100%; right: 16px;
+  border: 6px solid transparent; border-bottom-color: var(--line);
+}
+.th-mode .col-tip::after {
+  content: ""; position: absolute; bottom: calc(100% - 1px); right: 16px;
+  border: 6px solid transparent; border-bottom-color: var(--paper);
+}
+.th-mode:hover .col-tip, .th-mode:focus-within .col-tip { opacity: 1; visibility: visible; transform: translateY(0); }
 table.lb tbody tr { cursor: pointer; transition: background 180ms; }
 table.lb tbody > tr { animation: lbRowEnter 360ms cubic-bezier(0.22, 1, 0.36, 1) both; }
 @keyframes lbRowEnter { from { opacity: 0; } to { opacity: 1; } }
@@ -154,7 +178,36 @@ table.lb tr.expand-row > td { padding: 0; border-bottom: 1px solid var(--line-so
 .taskbars { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px 28px; margin-top: 8px; }
 .taskbar { display: grid; grid-template-columns: 160px 1fr 40px; align-items: center; gap: 12px; }
 .taskbar .tname { font-family: var(--mono); font-size: 11px; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.06em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.taskbar .val { font-family: var(--mono); font-size: 12px; font-weight: 600; text-align: right; }
+.taskbar .val { font-family: var(--mono); font-size: 12px; font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
+.taskbar .val-rate { min-width: 56px; }
+.taskbar .val-count { min-width: 60px; color: var(--ink-3); font-weight: 400; font-size: 11px; }
+
+/* Expanded model details: the per-dataset breakdown table */
+.bd-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+table.breakdown { width: 100%; border-collapse: collapse; }
+table.breakdown th { text-align: left; font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-3); font-weight: 500; padding: 0 0 10px; border-bottom: 1px solid var(--line-soft); white-space: nowrap; }
+table.breakdown th.bd-mode { text-align: right; width: 200px; }
+/* clear separation between the two proof-mode columns */
+table.breakdown th.bd-mode, table.breakdown td.bd-cell { padding-left: 52px; }
+table.breakdown td { padding: 8px 0; border-bottom: 1px solid var(--line-soft); vertical-align: middle; }
+table.breakdown tbody tr:last-child td { border-bottom: none; }
+.bd-name { font-family: var(--mono); font-size: 11px; color: var(--ink-2); text-transform: uppercase; letter-spacing: 0.05em; padding-right: 24px !important; }
+.bd-group > .bd-name { color: var(--ink); font-weight: 600; }
+.bd-toggle { display: inline-flex; align-items: center; gap: 9px; background: none; border: 0; padding: 0; margin: 0; font: inherit; color: inherit; text-transform: inherit; letter-spacing: inherit; cursor: pointer; text-align: left; }
+.bd-toggle:hover .bd-caret { color: var(--ink); }
+.bd-caret { display: inline-block; font-size: 9px; color: var(--accent); transition: transform 200ms; flex: none; }
+.bd-note { font-family: var(--mono); font-size: 9.5px; color: var(--ink-3); background: var(--paper); border: 1px solid var(--line-soft); border-radius: 5px; padding: 1px 6px; letter-spacing: 0.03em; text-transform: none; white-space: nowrap; }
+.bd-spec > td { border-bottom: 1px solid var(--line-soft); }
+.bd-spec-name { padding-left: 26px; color: var(--ink-3); text-transform: none; letter-spacing: 0; }
+.bd-cell { text-align: right; }
+/* Value cells and the -- placeholder occupy the same fixed-width band (60+46+54 + 2*10
+   gaps = 180px), right-aligned in the column. The placeholder centers within that band
+   so it lines up with the bars/percentages instead of drifting to one side. */
+.bd-inner { display: inline-grid; grid-template-columns: 60px 46px 54px; gap: 10px; align-items: center; width: 180px; }
+.bd-bar { width: 60px; }
+.bd-rate { font-family: var(--mono); font-weight: 600; font-size: 12px; text-align: right; font-variant-numeric: tabular-nums; }
+.bd-num { font-family: var(--mono); font-weight: 400; font-size: 11px; color: var(--ink-3); text-align: right; font-variant-numeric: tabular-nums; }
+.bd-na { display: inline-flex; justify-content: center; width: 180px; font-family: var(--mono); font-size: 13px; color: var(--ink-3); }
 
 /* source/task card grid */
 .task-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
@@ -171,6 +224,18 @@ table.lb tr.expand-row > td { padding: 0; border-bottom: 1px solid var(--line-so
 .task-card .kv b { color: var(--ink); font-weight: 600; }
 .task-card .kv .gh { grid-column: 1 / -1; margin-top: 8px; display: inline-flex; align-items: center; gap: 6px; color: var(--accent); font-weight: 500; width: fit-content; }
 .task-card .kv .gh:hover { text-decoration: underline; }
+/* reveal desc + spec list in step with the .kv grid */
+.task-card .src-desc, .task-card .spec-block { opacity: 0; transform: translateY(-4px); transition: opacity 260ms ease 60ms, transform 260ms ease 60ms; }
+.task-card.open .src-desc, .task-card.row-open .src-desc, .task-card.open .spec-block, .task-card.row-open .spec-block { opacity: 1; transform: translateY(0); }
+.task-card .src-desc { margin: 12px 0 0; font-size: 13.5px; line-height: 1.55; color: var(--ink-2); }
+/* the examples card carries a long spec list — span the full row when open so the
+   chips flow horizontally instead of stretching its row-siblings into tall empties */
+.task-card.has-examples.open { grid-column: 1 / -1; }
+.task-card .spec-block { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line-soft); }
+.task-card .spec-head { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-3); margin-bottom: 10px; }
+.task-card .spec-list { display: flex; flex-wrap: wrap; gap: 6px; }
+.task-card .spec-chip { display: inline-flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 10.5px; padding: 3px 6px 3px 8px; border-radius: 6px; border: 1px solid var(--line-soft); background: var(--paper-2); color: var(--ink-2); }
+.task-card .spec-chip .spec-n { font-size: 10px; color: var(--ink-3); background: var(--paper); border-radius: 4px; padding: 1px 5px; }
 
 /* code block */
 pre.code { margin: 0; font-family: var(--mono); font-size: 12.5px; line-height: 1.65; background: var(--paper-2); color: var(--ink); padding: 18px 22px; border-radius: 10px; border: 1px solid var(--line-soft); overflow-x: auto; white-space: pre; tab-size: 2; }

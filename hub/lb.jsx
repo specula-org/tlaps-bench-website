@@ -12,12 +12,43 @@ function OrgDot({ org, logo }) {
   return <span className={"logo-dot " + cls}>{letter}</span>;
 }
 
+// One dataset-table cell for a given task type. A null stat means the dataset has
+// no tasks of that type — shown as a neutral dash, never as 0.
+function BreakdownCell({ v, isOpen }) {
+  // Show a neutral dash when the metric doesn't apply (no tasks of this type) or the
+  // pass rate is 0% — an empty 0% bar reads as noise. Data-driven: the underlying
+  // counts still surface on hover so a genuine 0-of-N stays discoverable.
+  if (v == null || v.rate === 0) {
+    const title = v == null
+      ? "Not applicable — this dataset has no tasks of this type"
+      : `0 of ${v.total} ${v.total === 1 ? "task" : "tasks"} passed`;
+    return (
+      <td className="bd-cell">
+        <span className="bd-na" title={title}>—</span>
+      </td>
+    );
+  }
+  return (
+    <td className="bd-cell">
+      <span className="bd-inner">
+        <span className="bd-bar">
+          {isOpen ? <AnimBar pct={v.rate} height={6} show />
+                  : <span style={{ display: "inline-block", width: "100%", height: 6 }} />}
+        </span>
+        <span className="bd-rate">{v.rate.toFixed(1)}%</span>
+        <span className="bd-num">{v.pass}/{v.total}</span>
+      </span>
+    </td>
+  );
+}
+
 function HubLeaderboard({ showFilters = true }) {
   const metricById = useM_lb(() => Object.fromEntries(TLAPS_DATA.metrics.map(m => [m.id, m])), []);
   const isInvert = (key) => key.startsWith("metric:") && metricById[key.slice(7)]?.invert;
 
   const [sort, setSort] = useS_lb({ key: "metric:completion", dir: "desc" });
   const [expanded, setExpanded] = useS_lb(null);
+  const [specsShown, setSpecsShown] = useS_lb(false);
   const [orgFilter, setOrgFilter] = useS_lb("All");
   const [kindFilter, setKindFilter] = useS_lb("All");
 
@@ -42,6 +73,7 @@ function HubLeaderboard({ showFilters = true }) {
 
   const onSort = (key) => {
     setExpanded(null);
+    setSpecsShown(false);
     setSort(s => {
       if (s.key === key) return { key, dir: s.dir === "desc" ? "asc" : "desc" };
       // any lower-is-better column starts ascending; everything else descending.
@@ -110,11 +142,14 @@ function HubLeaderboard({ showFilters = true }) {
             <tr>
               <th className="rank">#</th>
               <th className={sortCls("name")} onClick={() => onSort("name")}>Model <span className="sort">▾</span></th>
-              {TLAPS_DATA.metrics.map(mt => {
+              {TLAPS_DATA.metrics.map((mt, i) => {
                 const k = "metric:" + mt.id;
                 return (
-                  <th key={mt.id} className={sortCls(k)} onClick={() => onSort(k)} style={{ textAlign: "right" }} title={mt.blurb}>
-                    {mt.name} <span className="sort">▾</span>
+                  <th key={mt.id} className={sortCls(k) + (i > 0 ? " lb-gap" : "")} onClick={() => onSort(k)} style={{ textAlign: "right" }}>
+                    <span className="th-mode">
+                      {mt.name} <span className="sort">▾</span>
+                      {mt.tip && <span className="col-tip" role="tooltip">{mt.tip}</span>}
+                    </span>
                   </th>
                 );
               })}
@@ -128,7 +163,7 @@ function HubLeaderboard({ showFilters = true }) {
                 <React.Fragment key={m.id}>
                   <tr ref={el => { if (el) rowRefs.current[m.id] = el; else delete rowRefs.current[m.id]; }}
                       className={isOpen ? "expanded" : ""}
-                      onClick={() => setExpanded(isOpen ? null : m.id)}>
+                      onClick={() => { setSpecsShown(false); setExpanded(isOpen ? null : m.id); }}>
                     <td className="rank"><span className="rank-slot">{
                       m.score == null ? "—" : i < 3
                         ? <span className={"rank-medal " + ["gold","silver","bronze"][i]}>{i + 1}</span>
@@ -143,10 +178,10 @@ function HubLeaderboard({ showFilters = true }) {
                         </div>
                       </div>
                     </td>
-                    {TLAPS_DATA.metrics.map(mt => {
+                    {TLAPS_DATA.metrics.map((mt, i) => {
                       const v = m.perMetric?.[mt.id];
                       return (
-                        <td key={mt.id} style={{ textAlign: "right" }}>
+                        <td key={mt.id} className={i > 0 ? "lb-gap" : undefined} style={{ textAlign: "right" }}>
                           {v == null ? <span style={{ color: "var(--ink-3)", fontFamily: "var(--mono)", fontSize: 12 }}>—</span> : (
                             <span className="scorecell">
                               <span className="bar"><AnimBar pct={(v / metricMax[mt.id]) * 100} /></span>
@@ -163,33 +198,53 @@ function HubLeaderboard({ showFilters = true }) {
                       <div className={"expand-body" + (isOpen ? " on" : "")}>
                         <div className="inner">
                           <div className="pad">
-                            <div className="eyebrow" style={{ marginBottom: 14 }}>Per-source pass rate, {m.name}</div>
-                            {/* Split each source by task type so the two are never blended together. */}
-                            {TLAPS_DATA.metrics.map((mt, mi) => {
-                              const rowsForMode = TLAPS_DATA.tasks
-                                .map(t => ({ t, v: m.perTask?.[t.id]?.[mt.id] }))
-                                .filter(r => r.v != null);
-                              if (!rowsForMode.length) return null;
-                              return (
-                                <div key={mt.id} style={{ marginTop: mi === 0 ? 0 : 22 }}>
-                                  <div className="modehead">{mt.name}</div>
-                                  <div className="taskbars" style={{ gridTemplateColumns: "repeat(2, minmax(0, 1fr))" }}>
-                                    {rowsForMode.map(({ t, v }, si) => (
-                                      <div className="taskbar" key={t.id} style={{ gridTemplateColumns: "150px 1fr auto", alignItems: "center" }}>
-                                        <span className="tname">{t.name}</span>
-                                        {isOpen
-                                          ? <AnimBar pct={v.rate} delay={si * 40} height={8} show />
-                                          : <span style={{ display: "inline-block", width: "100%", height: 8 }} />}
-                                        <span className="val" style={{ minWidth: 92, textAlign: "right" }}>
-                                          <span style={{ fontWeight: 600 }}>{v.rate.toFixed(1)}%</span>{" "}
-                                          <span style={{ color: "var(--ink-3)", fontWeight: 400, fontSize: 11 }}>{v.pass}/{v.total}</span>
-                                        </span>
-                                      </div>
+                            <div className="eyebrow" style={{ marginBottom: 14 }}>Per-dataset pass rate, {m.name}</div>
+                            {/* One row per dataset, one column per task type. A dash marks a task
+                                type the dataset doesn't cover — not a failed attempt. */}
+                            <div className="bd-scroll">
+                              <table className="breakdown">
+                                <thead>
+                                  <tr>
+                                    <th>Dataset</th>
+                                    {TLAPS_DATA.metrics.map(mt => (
+                                      <th key={mt.id} className="bd-mode">{mt.name}</th>
                                     ))}
-                                  </div>
-                                </div>
-                              );
-                            })}
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {TLAPS_DATA.tasks.map(t => {
+                                    const pt = m.perTask?.[t.id];
+                                    if (!pt) return null;
+                                    const specs = pt.specs && pt.specs.length ? pt.specs : null;
+                                    return (
+                                      <React.Fragment key={t.id}>
+                                        <tr className={"bd-row" + (specs ? " bd-group" : "")}>
+                                          <td className="bd-name">
+                                            {specs ? (
+                                              <button className="bd-toggle" onClick={(e) => { e.stopPropagation(); setSpecsShown(v => !v); }}
+                                                      aria-expanded={specsShown}>
+                                                <span className="bd-caret" style={{ transform: specsShown ? "rotate(90deg)" : "none" }}>▸</span>
+                                                <span>{t.name}</span>
+                                                <span className="bd-note">{specs.length} specs</span>
+                                              </button>
+                                            ) : t.name}
+                                          </td>
+                                          <BreakdownCell v={pt.completion} isOpen={isOpen} />
+                                          <BreakdownCell v={pt.scratch} isOpen={isOpen} />
+                                        </tr>
+                                        {specs && specsShown && specs.map(sp => (
+                                          <tr className="bd-row bd-spec" key={sp.id}>
+                                            <td className="bd-name bd-spec-name">{sp.name.replace(/_/g, " / ")}</td>
+                                            <BreakdownCell v={sp.completion} isOpen={isOpen} />
+                                            <BreakdownCell v={sp.scratch} isOpen={isOpen} />
+                                          </tr>
+                                        ))}
+                                      </React.Fragment>
+                                    );
+                                  })}
+                                </tbody>
+                              </table>
+                            </div>
                           </div>
                         </div>
                       </div>

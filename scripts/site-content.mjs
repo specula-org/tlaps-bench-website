@@ -29,13 +29,14 @@ export const SITE = {
 
   // Benchmark page: the eight source cards (canonical benchmark counts; 483 + 231 = 714).
   sources: [
-    { id: "tlaplus-examples", name: "tlaplus/Examples",            completion: 379, scratch: 126, total: 505, github: "https://github.com/tlaplus/Examples" },
+    { id: "tlaplus-examples", name: "Official TLA+ Examples", completion: 379, scratch: 126, total: 505, github: "https://github.com/tlaplus/Examples",
+      desc: "The official community TLA+ examples repository — a broad collection of specifications, from teaching exercises to real distributed protocols. Its 505 proof tasks span dozens of individual specs." },
     { id: "tlaps-dist",       name: "TLAPS distribution examples", completion: 103, scratch:  57, total: 160, github: "https://github.com/tlaplus/tlapm" },
     { id: "zookeeper-zab",    name: "ZooKeeper / Zab (Remix)",     completion:   0, scratch:  18, total:  18, github: null },
     { id: "ivy-liveness",     name: "Ivy liveness",                completion:   0, scratch:  12, total:  12, github: null },
     { id: "etcd",             name: "etcd (Specula)",              completion:   0, scratch:   8, total:   8, github: null },
     { id: "abstract-raft",    name: "AbstractRaft (Stephan Merz)", completion:   0, scratch:   4, total:   4, github: null },
-    { id: "open-addressing",  name: "OpenAddressing (M. Kuppe)",   completion:   1, scratch:   5, total:   6, github: null },
+    { id: "open-addressing",  name: "OpenAddressing",              completion:   1, scratch:   5, total:   6, github: null },
     { id: "anvil",            name: "Anvil",                       completion:   0, scratch:   1, total:   1, github: null },
   ],
 
