@@ -60,8 +60,9 @@ function PageHome({ go }) {
         <div className="wrap-narrow">
           <FadeIn>
             <div className="news-banner"><span className="dot" />{totalTasks} proof tasks · checked by tlapm</div>
-            <h1>Can AI write proofs that <em>tlapm accepts</em>?</h1>
-            <p className="lead">A benchmark for evaluating AI's ability to write TLAPS (TLA+ Proof System) proofs, mechanically checked, accepted or rejected, with no partial credit.</p>
+            <h1>The TLAPS (TLA+ Proof System) Benchmark</h1>
+            <p className="lead">A benchmark for evaluating AI's ability to write TLAPS proofs, 
+                mechanically checked, accepted or rejected, with no partial credit.</p>
             <div style={{ display: "flex", gap: 10, justifyContent: "center", marginTop: 28, flexWrap: "wrap" }}>
               <button className="btn primary" onClick={() => go("leaderboard")}>View Leaderboard</button>
               <a className="btn ghost" href="https://github.com/specula-org/tlaps-bench" target="_blank">GitHub</a>
