@@ -143,7 +143,7 @@ const data = {
   paper: SITE.paper,
   metrics: [
     { id: "completion", name: "--mode proof-completion",  blurb: "Pass rate on the 483 proof-completion tasks.",
-      tip: "The full proof scaffolding is provided — inductive invariants, lemma decomposition, and preceding lemmas — and the model fills in one target proof." },
+      tip: "The full proof scaffolding is provided, including inductive invariants, lemma decomposition, and preceding lemmas, and the model fills in one target proof." },
     { id: "scratch",    name: "--mode proof-from-scratch", blurb: "Pass rate on the 231 proof-from-scratch tasks.",
       tip: "Only the model and the target theorem statement remain; the model must invent the entire proof structure, including any helper lemmas." },
   ],

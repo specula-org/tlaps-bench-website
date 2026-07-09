@@ -15,16 +15,13 @@ function OrgDot({ org, logo }) {
 // One dataset-table cell for a given task type. A null stat means the dataset has
 // no tasks of that type — shown as a neutral dash, never as 0.
 function BreakdownCell({ v, isOpen }) {
-  // Show a neutral dash when the metric doesn't apply (no tasks of this type) or the
-  // pass rate is 0% — an empty 0% bar reads as noise. Data-driven: the underlying
-  // counts still surface on hover so a genuine 0-of-N stays discoverable.
-  if (v == null || v.rate === 0) {
-    const title = v == null
-      ? "Not applicable — this dataset has no tasks of this type"
-      : `0 of ${v.total} ${v.total === 1 ? "task" : "tasks"} passed`;
+  // A null stat means the dataset has no tasks of this type (a conceptual 0/0) — shown
+  // as a neutral dash. A genuine 0% (0 of N tasks passed) is a real result, so it keeps
+  // its bar and value; only the not-applicable case collapses to a dash.
+  if (v == null) {
     return (
       <td className="bd-cell">
-        <span className="bd-na" title={title}>—</span>
+        <span className="bd-na" title="Not applicable — this dataset has no tasks of this type">—</span>
       </td>
     );
   }

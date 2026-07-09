@@ -18,13 +18,10 @@ export const SITE = {
   modes: [
     { id: "completion", name: "--mode proof-completion", full: "--mode proof-completion",
       cli: "--mode proof-completion",
-      blurb: "The full scaffolding is given, including inductive invariants, lemma " +
-             "decomposition, and preceding lemmas marked PROOF OMITTED, and the AI fills " +
-             "in one target proof." },
+      blurb: "The full scaffolding is given, including inductive invariants, lemma decomposition, and preceding lemmas marked PROOF OMITTED, and the AI fills in one target proof." },
     { id: "scratch", name: "--mode proof-from-scratch", full: "--mode proof-from-scratch",
       cli: "--mode proof-from-scratch",
-      blurb: "Only the model and the target theorem statement remain; the AI must invent " +
-             "the entire proof structure, including any helper lemmas." },
+      blurb: "Only the model and the target theorem statement remain; the AI must invent the entire proof structure, including any helper lemmas." },
   ],
 
   // Benchmark page: the eight source cards (canonical benchmark counts; 483 + 231 = 714).

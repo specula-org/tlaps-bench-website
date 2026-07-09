@@ -124,13 +124,13 @@ function PageLeaderboard() {
         <FadeIn>
           <span className="eyebrow accent">Results</span>
           <h1 style={{ fontSize: 44, marginTop: 10 }}>Leaderboard</h1>
-          <p className="lead" style={{ maxWidth: 720 }}>
+          <p className="lead" style={{ maxWidth: 820 }}>
             Pass rate is the share of scored tasks that pass, where the proof must be accepted
             by tlapm and clear the cheat-checker (no admitted steps, smuggled axioms, or
-            weakened theorems). The two task types — proof-completion and proof-from-scratch — are
+            weakened theorems). The two task types: proof-completion and proof-from-scratch, are
             scored separately rather than blended into a single number, in the columns and in each
-            row's per-dataset breakdown. Click any row to expand it — the largest dataset expands
-            further into its individual specifications — filter by organization, or switch between
+            row's per-dataset breakdown. Click any row to expand it, the largest dataset expands
+            further into its individual specifications. Filter by organization, or switch between
             LLM-only and agent runs.
           </p>
         </FadeIn>

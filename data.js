@@ -12,7 +12,7 @@ window.TLAPS_DATA = {
       "id": "completion",
       "name": "--mode proof-completion",
       "blurb": "Pass rate on the 483 proof-completion tasks.",
-      "tip": "The full proof scaffolding is provided — inductive invariants, lemma decomposition, and preceding lemmas — and the model fills in one target proof."
+      "tip": "The full proof scaffolding is provided, including inductive invariants, lemma decomposition, and preceding lemmas, and the model fills in one target proof."
     },
     {
       "id": "scratch",
