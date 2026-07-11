@@ -53,13 +53,14 @@ function CopyBibBtn() {
 
 // ============ HOME ============
 function PageHome({ go }) {
-  const totalTasks = TLAPS_DATA.sources.reduce((a, s) => a + s.total, 0);
+  const totalProperties = TLAPS_DATA.specs.reduce((sum, spec) => sum + spec.total, 0);
+  const totalSpecs = TLAPS_DATA.specs.length;
   return (
     <div>
       <section className="hero">
         <div className="wrap-narrow">
           <FadeIn>
-            <div className="news-banner"><span className="dot" />{totalTasks} proof tasks · checked by tlapm</div>
+            <div className="news-banner"><span className="dot" />{totalProperties} proof properties · {totalSpecs} specs · checked by tlapm</div>
             <h1>The TLAPS Benchmark</h1>
             <p className="lead">A benchmark for evaluating AI's ability to write TLAPS (TLA+ Proof System) proofs, 
                 mechanically checked, accepted or rejected, with no partial credit.</p>
@@ -68,8 +69,8 @@ function PageHome({ go }) {
               <a className="btn ghost" href="https://github.com/specula-org/tlaps-bench" target="_blank">GitHub</a>
             </div>
             <div className="stats">
-              <div><span className="big"><CountUp to={totalTasks} /></span>proof tasks</div>
-              <div><span className="big"><CountUp to={TLAPS_DATA.sources.length} /></span>sources</div>
+              <div><span className="big"><CountUp to={totalProperties} /></span>proof properties</div>
+              <div><span className="big"><CountUp to={totalSpecs} /></span>specs</div>
               <div><span className="big accent">tlapm</span><span className="sub-dim">accept / reject</span></div>
             </div>
           </FadeIn>
@@ -126,12 +127,12 @@ function PageLeaderboard() {
           <span className="eyebrow accent">Results</span>
           <h1 style={{ fontSize: 44, marginTop: 10 }}>Leaderboard</h1>
           <p className="lead" style={{ maxWidth: 820 }}>
-            Pass rate is the share of scored tasks that pass, where the proof must be accepted
+            Pass rate is the share of scored properties that pass, where the proof must be accepted
             by tlapm and clear the cheat-checker (no admitted steps, smuggled axioms, or
-            weakened theorems). The two task types: proof-completion and proof-from-scratch, are
-            scored separately rather than blended into a single number, in the columns and in each
-            row's per-dataset breakdown. Click any row to expand it, the largest dataset expands
-            further into its individual specifications. Filter by organization, or switch between one shot llm
+            weakened theorems). The two benchmark modes, proof-completion and proof-from-scratch, are
+            scored separately rather than blended into a single number. Expand a model to see the
+            same 71 specs used in the benchmark index in one continuous table, with per-spec
+            property pass counts for each mode. Filter by organization, or switch between one-shot
             and agent runs.
           </p>
         </FadeIn>
@@ -141,27 +142,10 @@ function PageLeaderboard() {
   );
 }
 
-// ============ BENCHMARK (sources + modes + grading) ============
+// ============ BENCHMARK (specs + modes + grading) ============
 function PageBenchmark() {
-  const [open, setOpen] = useS_p(null);
-  const gridRef = useR_p(null);
-  const [rowOpen, setRowOpen] = useS_p(() => new Set());
-
-  React.useLayoutEffect(() => {
-    const compute = () => {
-      if (!open || !gridRef.current) { setRowOpen(new Set()); return; }
-      const cards = gridRef.current.querySelectorAll(".task-card");
-      let openTop = null;
-      cards.forEach(c => { if (c.dataset.id === open) openTop = c.offsetTop; });
-      if (openTop == null) { setRowOpen(new Set()); return; }
-      const ids = new Set();
-      cards.forEach(c => { if (Math.abs(c.offsetTop - openTop) < 2) ids.add(c.dataset.id); });
-      setRowOpen(ids);
-    };
-    compute();
-    window.addEventListener("resize", compute);
-    return () => window.removeEventListener("resize", compute);
-  }, [open]);
+  const totalProperties = TLAPS_DATA.specs.reduce((sum, spec) => sum + spec.total, 0);
+  const totalSpecs = TLAPS_DATA.specs.length;
 
   return (
     <>
@@ -170,72 +154,114 @@ function PageBenchmark() {
           <FadeIn>
             <span className="eyebrow accent">Benchmark</span>
             <h1 style={{ fontSize: 44, marginTop: 10 }}>Inside the benchmark</h1>
-            <p className="lead" style={{ maxWidth: 760 }}>
-              Every task is a TLA+ theorem whose proof has been replaced by PROOF OBVIOUS. The
-              AI must produce a proof body that tlapm mechanically accepts, drawn from eight
-              real-world sources.
+            <p className="lead dataset-intro" style={{ maxWidth: 800 }}>
+              The benchmark spans classic TLA+ example libraries and real systems
+              specifications. For every property, an AI must replace PROOF OBVIOUS with a proof
+              that tlapm mechanically accepts.
             </p>
+            <div className="dataset-facts" aria-label="Benchmark size">
+              <div className="dataset-fact"><strong>{totalSpecs}</strong><span>specs</span></div>
+              <div className="dataset-fact"><strong>{totalProperties}</strong><span>proof properties</span></div>
+            </div>
           </FadeIn>
         </div>
       </section>
 
-      {/* sources grid */}
+      {/* source categories and per-spec dataset */}
       <section className="section" style={{ background: "var(--paper-2)" }}>
         <div className="wrap">
           <Reveal>
             <h2 style={{ fontSize: 32 }}>Benchmark sources</h2>
-            <p className="lead" style={{ fontSize: 17 }}>Click a card to see its task counts and source repository.</p>
+            <p className="lead" style={{ fontSize: 17, maxWidth: 780 }}>
+              Two complementary kinds of source balance established proof corpora with protocols
+              drawn from real systems. Both sets can grow as new specifications are added.
+            </p>
           </Reveal>
           <Reveal delay={80}>
-            <div className="task-grid" ref={gridRef} style={{ marginTop: 24 }}>
-              {TLAPS_DATA.sources.map((s) => {
-                const isOpen = open === s.id;
-                const inRow = rowOpen.has(s.id);
-                // A source with no proof-completion tasks: show a dash, not 0.
-                const naC = s.completion === 0;
-                const naTitle = "Not applicable — this source has no proof-completion tasks.";
-                return (
-                  <div key={s.id} data-id={s.id}
-                       className={"task-card" + (isOpen ? " open" : "") + (inRow ? " row-open" : "")}
-                       onClick={() => setOpen(isOpen ? null : s.id)}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 10 }}>
-                      <h3 style={{ fontSize: 16, margin: 0 }}>{s.name}</h3>
-                      <span className="pill">{s.total}</span>
-                    </div>
-                    <div style={{ fontFamily: "var(--mono)", fontSize: 11.5, color: "var(--ink-3)", marginTop: 6, textTransform: "uppercase", letterSpacing: "0.06em" }}>
-                      {/* Only name the task types this dataset actually has, so scratch-only
-                          datasets don't all foreground a hollow "— completion". */}
-                      {[
-                        s.completion > 0 ? `${s.completion} completion` : null,
-                        s.scratch > 0 ? `${s.scratch} from scratch` : null,
-                      ].filter(Boolean).join(" · ")}
-                    </div>
-                    <div className="kv-wrap"><div className="kv-inner">
-                      <div className="kv">
-                        <span>Completion</span><b title={naC ? naTitle : undefined}>{naC ? "—" : s.completion}</b>
-                        <span>From scratch</span><b>{s.scratch}</b>
-                        <span>Total</span><b style={{ color: "var(--accent)" }}>{s.total}</b>
-                        {s.source && (
-                          <a className="gh" href={s.source} target="_blank" rel="noopener" onClick={(e) => e.stopPropagation()}>
-                            <span style={{fontSize:13}}>↗</span> View source repository
-                          </a>
-                        )}
-                      </div>
-                      {s.desc && <p className="src-desc">{s.desc}</p>}
-                    </div></div>
-                  </div>
-                );
-              })}
+            <div className="dataset-category-grid">
+              {TLAPS_DATA.categories.map((category, index) => (
+                <article key={category.id} className="dataset-category-card">
+                  <span className="eyebrow accent">Source category {String(index + 1).padStart(2, "0")}</span>
+                  <h3>{category.name}</h3>
+                  <p>{category.blurb}</p>
+                  <dl className="dataset-category-stats">
+                    <div><dt>Specs</dt><dd>{category.specCount}</dd></div>
+                    <div><dt>Completion properties</dt><dd>{category.completion || "—"}</dd></div>
+                    <div><dt>From-scratch properties</dt><dd>{category.scratch || "—"}</dd></div>
+                    <div><dt>Total properties</dt><dd>{category.total}</dd></div>
+                  </dl>
+                </article>
+              ))}
             </div>
           </Reveal>
+
+          <Reveal delay={120}>
+            <div className="dataset-table-header">
+              <div>
+                <span className="eyebrow">Dataset index</span>
+                <h2>All benchmark specs</h2>
+              </div>
+              <p>
+                Each row is one spec, and the numbers are its proof properties. A dash (—)
+                means that the spec has no properties for that mode.
+              </p>
+            </div>
+          </Reveal>
+          <div className="dataset-table-shell">
+            <table className="dataset-table">
+                <thead>
+                  <tr>
+                    <th scope="col">Spec</th>
+                    <th scope="col">Source</th>
+                    <th scope="col" className="dataset-number">Completion properties</th>
+                    <th scope="col" className="dataset-number">From-scratch properties</th>
+                    <th scope="col" className="dataset-number">Total properties</th>
+                  </tr>
+                </thead>
+                {TLAPS_DATA.categories.map((category) => {
+                  const specs = TLAPS_DATA.specs.filter((spec) => spec.category === category.id);
+                  return (
+                    <tbody key={category.id} className="dataset-table-section">
+                      <tr className="dataset-table-group-row">
+                        <th colSpan="5" scope="rowgroup">
+                          <span>{category.name}</span>
+                          <small>{category.specCount} specs · {category.total} properties</small>
+                        </th>
+                      </tr>
+                      {specs.map((spec) => (
+                        <tr key={`${category.id}:${spec.id}`}>
+                          <th scope="row" className="dataset-spec">
+                            {spec.url ? (
+                              <a href={spec.url} target="_blank" rel="noopener">{spec.name}<span aria-hidden="true">↗</span></a>
+                            ) : spec.name}
+                          </th>
+                          <td className="dataset-source">
+                            {spec.sourceUrl ? (
+                              <a href={spec.sourceUrl} target="_blank" rel="noopener">{spec.sourceName}<span aria-hidden="true">↗</span></a>
+                            ) : spec.sourceName}
+                          </td>
+                          <td className="dataset-number">
+                            {spec.completion || <span className="dataset-na" title="No proof-completion properties">—</span>}
+                          </td>
+                          <td className="dataset-number">
+                            {spec.scratch || <span className="dataset-na" title="No proof-from-scratch properties">—</span>}
+                          </td>
+                          <td className="dataset-number dataset-total">{spec.total}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  );
+                })}
+            </table>
+          </div>
         </div>
       </section>
 
-      {/* two task types */}
+      {/* two benchmark modes */}
       <section className="section">
         <div className="wrap">
           <Reveal>
-            <h2 style={{ fontSize: 32 }}>Two task types</h2>
+            <h2 style={{ fontSize: 32 }}>Two benchmark modes</h2>
             <p className="lead" style={{ fontSize: 17 }}>How much of the proof is given to the AI before it starts.</p>
           </Reveal>
           <Reveal delay={80}>

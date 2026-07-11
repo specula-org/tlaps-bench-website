@@ -13,4 +13,15 @@ Then open http://localhost:8000
 
 # Edit
 
-All leaderboard content lives in `data.js`. Change it and refresh the browser.
+- Model runs live in `results/*.json`.
+- Hand-written page copy lives in `scripts/site-content.mjs`.
+- The category, spec, and score tables are generated from the result records.
+
+After changing either input, rebuild the browser data:
+
+```bash
+node scripts/build-data.mjs
+```
+
+Use `node scripts/build-data.mjs --check` to validate all 714 records without
+rewriting `data.js`.

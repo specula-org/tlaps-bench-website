@@ -12,16 +12,16 @@ function OrgDot({ org, logo }) {
   return <span className={"logo-dot " + cls}>{letter}</span>;
 }
 
-// One dataset-table cell for a given task type. A null stat means the dataset has
-// no tasks of that type — shown as a neutral dash, never as 0.
+// One spec-table cell for a given benchmark mode. A null stat means the spec has
+// no properties in that mode — shown as a neutral dash, never as 0.
 function BreakdownCell({ v, isOpen }) {
-  // A null stat means the dataset has no tasks of this type (a conceptual 0/0) — shown
-  // as a neutral dash. A genuine 0% (0 of N tasks passed) is a real result, so it keeps
+  // A null stat means the spec has no properties in this mode (a conceptual 0/0) — shown
+  // as a neutral dash. A genuine 0% (0 of N properties passed) is a real result, so it keeps
   // its bar and value; only the not-applicable case collapses to a dash.
   if (v == null) {
     return (
       <td className="bd-cell">
-        <span className="bd-na" title="Not applicable — this dataset has no tasks of this type">—</span>
+        <span className="bd-na" title="Not applicable — this spec has no properties in this mode">—</span>
       </td>
     );
   }
@@ -45,16 +45,12 @@ function HubLeaderboard({ showFilters = true }) {
 
   const [sort, setSort] = useS_lb({ key: "metric:completion", dir: "desc" });
   const [expanded, setExpanded] = useS_lb(null);
-  // Which datasets have their per-spec breakdown open (by task id). A Set so that
-  // multiple expandable datasets can be toggled independently.
-  const [openSpecs, setOpenSpecs] = useS_lb(() => new Set());
-  const toggleSpecs = (id) => setOpenSpecs(s => { const n = new Set(s); n.has(id) ? n.delete(id) : n.add(id); return n; });
   const [orgFilter, setOrgFilter] = useS_lb("All");
   const [kindFilter, setKindFilter] = useS_lb("All");
 
   const orgs = ["All", ...new Set(TLAPS_DATA.models.map(m => m.org))];
 
-  // sort key forms: "name", "score", or "metric:<id>"
+  // Sort key forms: "name" or "metric:<id>".
   const getVal = (m, key) => key.startsWith("metric:") ? (m.perMetric?.[key.slice(7)] ?? null) : m[key];
 
   const rows = useM_lb(() => {
@@ -73,7 +69,6 @@ function HubLeaderboard({ showFilters = true }) {
 
   const onSort = (key) => {
     setExpanded(null);
-    setOpenSpecs(new Set());
     setSort(s => {
       if (s.key === key) return { key, dir: s.dir === "desc" ? "asc" : "desc" };
       // any lower-is-better column starts ascending; everything else descending.
@@ -159,13 +154,14 @@ function HubLeaderboard({ showFilters = true }) {
           <tbody>
             {rows.map((m, i) => {
               const isOpen = expanded === m.id;
+              const hasRankValue = getVal(m, sort.key) != null;
               return (
                 <React.Fragment key={m.id}>
                   <tr ref={el => { if (el) rowRefs.current[m.id] = el; else delete rowRefs.current[m.id]; }}
                       className={isOpen ? "expanded" : ""}
-                      onClick={() => { setOpenSpecs(new Set()); setExpanded(isOpen ? null : m.id); }}>
+                      onClick={() => setExpanded(isOpen ? null : m.id)}>
                     <td className="rank"><span className="rank-slot">{
-                      m.score == null ? "—" : i < 3
+                      !hasRankValue ? "—" : i < 3
                         ? <span className={"rank-medal " + ["gold","silver","bronze"][i]}>{i + 1}</span>
                         : i + 1
                     }</span></td>
@@ -198,49 +194,43 @@ function HubLeaderboard({ showFilters = true }) {
                       <div className={"expand-body" + (isOpen ? " on" : "")}>
                         <div className="inner">
                           <div className="pad">
-                            <div className="eyebrow" style={{ marginBottom: 14 }}>Per-dataset pass rate, {m.name}</div>
-                            {/* One row per dataset, one column per task type. A dash marks a task
-                                type the dataset doesn't cover — not a failed attempt. */}
+                            <div className="eyebrow" style={{ marginBottom: 6 }}>Per-spec property pass rate, {m.name}</div>
+                            <div style={{ marginBottom: 14, color: "var(--ink-3)", fontSize: 12 }}>
+                              Counts show passed / total properties.
+                            </div>
+                            {/* The benchmark and leaderboard share the same spec-level unit.
+                                A dash marks a mode with no properties, not a failed attempt. */}
                             <div className="bd-scroll">
-                              <table className="breakdown">
+                              <table className="breakdown dataset-score-table">
                                 <thead>
                                   <tr>
-                                    <th>Dataset</th>
+                                    <th>Spec</th>
+                                    <th>Source</th>
                                     {TLAPS_DATA.metrics.map(mt => (
                                       <th key={mt.id} className="bd-mode">{mt.name}</th>
                                     ))}
                                   </tr>
                                 </thead>
                                 <tbody>
-                                  {TLAPS_DATA.tasks.map(t => {
-                                    const pt = m.perTask?.[t.id];
-                                    if (!pt) return null;
-                                    const specs = pt.specs && pt.specs.length ? pt.specs : null;
-                                    const specsOpen = specs && openSpecs.has(t.id);
+                                  {TLAPS_DATA.specs.map(spec => {
+                                    const score = m.perSpec?.[spec.id];
                                     return (
-                                      <React.Fragment key={t.id}>
-                                        <tr className={"bd-row" + (specs ? " bd-group" : "")}>
-                                          <td className="bd-name">
-                                            {specs ? (
-                                              <button className="bd-toggle" onClick={(e) => { e.stopPropagation(); toggleSpecs(t.id); }}
-                                                      aria-expanded={specsOpen}>
-                                                <span className="bd-caret" style={{ transform: specsOpen ? "rotate(90deg)" : "none" }}>▸</span>
-                                                <span>{t.name}</span>
-                                                <span className="bd-note">{specs.length} specs</span>
-                                              </button>
-                                            ) : t.name}
-                                          </td>
-                                          <BreakdownCell v={pt.completion} isOpen={isOpen} />
-                                          <BreakdownCell v={pt.scratch} isOpen={isOpen} />
-                                        </tr>
-                                        {specsOpen && specs.map(sp => (
-                                          <tr className="bd-row bd-spec" key={sp.id}>
-                                            <td className="bd-name bd-spec-name">{sp.name.replace(/_/g, " / ")}</td>
-                                            <BreakdownCell v={sp.completion} isOpen={isOpen} />
-                                            <BreakdownCell v={sp.scratch} isOpen={isOpen} />
-                                          </tr>
-                                        ))}
-                                      </React.Fragment>
+                                      <tr className="bd-row dataset-score-spec-row" key={spec.id}>
+                                        <td className="bd-name spec-name">
+                                          {spec.url ? (
+                                            <a href={spec.url} target="_blank" rel="noopener"
+                                               onClick={(e) => e.stopPropagation()}>{spec.name}</a>
+                                          ) : spec.name}
+                                        </td>
+                                        <td className="dataset-score-source">
+                                          {spec.sourceUrl ? (
+                                            <a href={spec.sourceUrl} target="_blank" rel="noopener"
+                                               onClick={(e) => e.stopPropagation()}>{spec.sourceName}</a>
+                                          ) : spec.sourceName}
+                                        </td>
+                                        <BreakdownCell v={score?.completion ?? null} isOpen={isOpen} />
+                                        <BreakdownCell v={score?.scratch ?? null} isOpen={isOpen} />
+                                      </tr>
                                     );
                                   })}
                                 </tbody>

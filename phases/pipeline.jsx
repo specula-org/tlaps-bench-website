@@ -103,7 +103,7 @@ PROOF OBVIOUS`}
             </div>
           ))}
           <div style={{ fontFamily: 'var(--mono)', fontSize: 10.5, color: P.ink3, marginTop: 2 }}>
-            pass rate = PASS / scored tasks
+            pass rate = PASS / scored properties
           </div>
         </div>
       </div>

@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="hub/hub.css?v=5" />
+<link rel="stylesheet" href="hub/hub.css?v=10" />
 <link rel="stylesheet" href="phases/tokens.css?v=1" />
 </head>
 <body>
@@ -21,11 +21,11 @@
     window.TWEAK_DEFAULTS = { "accent": "#4f8cff", "dark": false };
   </script>
 
-  <script src="data.js?v=13"></script>
+  <script src="data.js?v=17"></script>
   <script type="text/babel" src="hub/anim.jsx?v=2"></script>
-  <script type="text/babel" src="hub/lb.jsx?v=13"></script>
-  <script type="text/babel" src="phases/pipeline.jsx?v=1"></script>
-  <script type="text/babel" src="hub/pages.jsx?v=10"></script>
+  <script type="text/babel" src="hub/lb.jsx?v=16"></script>
+  <script type="text/babel" src="phases/pipeline.jsx?v=2"></script>
+  <script type="text/babel" src="hub/pages.jsx?v=14"></script>
 
   <script type="text/babel" data-presets="env,react">
     const { useState, useEffect } = React;
@@ -44,7 +44,12 @@
         <div className={"nav" + (navOpen ? " open" : "")}>
           <div className="nav-inner">
             <div className="nav-brand" onClick={() => navigate("home")}>
-              <Mark size={26} />
+              <img
+                className="nav-brand-logo"
+                src="https://github.com/specula-org.png?size=80"
+                alt=""
+                aria-hidden="true"
+              />
               <span className="nav-brand-name">TLAPS-Bench</span>
             </div>
             <div className="nav-right">
