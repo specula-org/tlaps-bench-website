@@ -131,8 +131,8 @@ function PageLeaderboard() {
             weakened theorems). The two task types: proof-completion and proof-from-scratch, are
             scored separately rather than blended into a single number, in the columns and in each
             row's per-dataset breakdown. Click any row to expand it, the largest dataset expands
-            further into its individual specifications. Filter by organization, or switch between
-            LLM-only and agent runs.
+            further into its individual specifications. Filter by organization, or switch between one shot llm
+            and agent runs.
           </p>
         </FadeIn>
         <div style={{ marginTop: 32 }}><HubLeaderboard /></div>

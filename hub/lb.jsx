@@ -130,7 +130,7 @@ function HubLeaderboard({ showFilters = true }) {
           <div className="method-select-wrap">
             <select className="method-select" value={kindFilter} onChange={e => setKindFilter(e.target.value)}>
               <option value="All">All</option>
-              <option value="base">LLM-Only</option>
+              <option value="base">One-Shot</option>
               <option value="agent">Agent</option>
             </select>
           </div>
