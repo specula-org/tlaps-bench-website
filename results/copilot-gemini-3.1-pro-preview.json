@@ -165,7 +165,14 @@
         }
       }
     },
-    "record_count": 710
+    "record_count": 710,
+    "usage_audit": {
+      "date": "2026-07-18",
+      "task_count": 710,
+      "active_time_complete": true,
+      "output_tokens_audited": true,
+      "provenance": "Consolidated time and output tokens cross-checked against all 710 per-task result.json files with zero mismatches."
+    }
   },
   "results": [
     {

@@ -19,6 +19,25 @@ window.TLAPS_DATA = {
       "name": "--mode proof-from-scratch",
       "blurb": "Pass rate on the 227 proof-from-scratch properties.",
       "tip": "Only the model and the target theorem statement remain; the model must invent the entire proof structure, including any helper lemmas."
+    },
+    {
+      "id": "activeTimePerTask",
+      "name": "Active time / task",
+      "invert": true,
+      "format": "duration",
+      "breakdown": false,
+      "groupStart": true,
+      "bar": false,
+      "tip": "Mean active agent time per task in the selected mode. The secondary value is that mode's sum of task time; parallel tasks overlap, so it is not experiment wall-clock time. Lower is better."
+    },
+    {
+      "id": "outputCostPerTask",
+      "name": "Output-only cost / task",
+      "invert": true,
+      "format": "usd",
+      "breakdown": false,
+      "bar": false,
+      "tip": "Mean estimated output-only cost per task in the selected mode, using reported output tokens and a fixed public standard-tier output rate as of July 18, 2026. Long-context tiers are not inferred. The secondary value is that mode's total. Lower is better."
     }
   ],
   "categories": [
@@ -962,9 +981,51 @@ window.TLAPS_DATA = {
       "logo": null,
       "kind": "agent",
       "generated": "2026-07-07",
+      "resultsFile": "results/codex.json",
+      "resultsVersion": "d097d0079a0e",
       "perMetric": {
         "completion": 91.3,
-        "scratch": 80.2
+        "scratch": 80.2,
+        "activeTimePerTask": 723.3195387664983,
+        "outputCostPerTask": 0.6303626197183099
+      },
+      "perMode": {
+        "completion": {
+          "rate": 91.3,
+          "pass": 441,
+          "total": 483,
+          "taskCount": 483,
+          "activeTimeSecs": 196577.244546175,
+          "activeTimePerTask": 406.9922247332816,
+          "outputTokens": 6542843,
+          "outputTokensPerTask": 13546.258799171843,
+          "outputCostUsd": 196.28529,
+          "outputCostPerTask": 0.4063877639751553
+        },
+        "scratch": {
+          "rate": 80.2,
+          "pass": 182,
+          "total": 227,
+          "taskCount": 227,
+          "activeTimeSecs": 316979.6279780388,
+          "activeTimePerTask": 1396.3860263349727,
+          "outputTokens": 8375739,
+          "outputTokensPerTask": 36897.52863436123,
+          "outputCostUsd": 251.27217,
+          "outputCostPerTask": 1.1069258590308368
+        }
+      },
+      "usage": {
+        "taskCount": 710,
+        "activeTimeSecs": 513556.8725242138,
+        "outputTokens": 14918582,
+        "outputCostUsd": 447.55746
+      },
+      "pricing": {
+        "usdPerMillionTokens": 30,
+        "tier": "standard",
+        "asOf": "2026-07-18",
+        "source": "https://developers.openai.com/api/docs/models/gpt-5.5"
       },
       "perSpec": {
         "anvil--anvillock": {
@@ -972,7 +1033,14 @@ window.TLAPS_DATA = {
           "scratch": {
             "rate": 100,
             "pass": 1,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 684.0895478725433,
+            "activeTimePerTask": 684.0895478725433,
+            "outputTokens": 26168,
+            "outputTokensPerTask": 26168,
+            "outputCostUsd": 0.78504,
+            "outputCostPerTask": 0.78504
           }
         },
         "etcd-specula--etcd-raft": {
@@ -980,7 +1048,14 @@ window.TLAPS_DATA = {
           "scratch": {
             "rate": 0,
             "pass": 0,
-            "total": 8
+            "total": 8,
+            "taskCount": 8,
+            "activeTimeSecs": 36181.08174753189,
+            "activeTimePerTask": 4522.635218441486,
+            "outputTokens": 685812,
+            "outputTokensPerTask": 85726.5,
+            "outputCostUsd": 20.57436,
+            "outputCostPerTask": 2.571795
           }
         },
         "ivy-liveness--ivy-examples-alternating-bit-protocol": {
@@ -988,7 +1063,14 @@ window.TLAPS_DATA = {
           "scratch": {
             "rate": 50,
             "pass": 1,
-            "total": 2
+            "total": 2,
+            "taskCount": 2,
+            "activeTimeSecs": 3479.466732978821,
+            "activeTimePerTask": 1739.7333664894104,
+            "outputTokens": 101401,
+            "outputTokensPerTask": 50700.5,
+            "outputCostUsd": 3.04203,
+            "outputCostPerTask": 1.521015
           }
         },
         "ivy-liveness--ivy-examples-hybrid-reliable-broadcast-cisa": {
@@ -996,7 +1078,14 @@ window.TLAPS_DATA = {
           "scratch": {
             "rate": 66.7,
             "pass": 2,
-            "total": 3
+            "total": 3,
+            "taskCount": 3,
+            "activeTimeSecs": 6718.5661277771,
+            "activeTimePerTask": 2239.5220425923667,
+            "outputTokens": 219463,
+            "outputTokensPerTask": 73154.33333333333,
+            "outputCostUsd": 6.58389,
+            "outputCostPerTask": 2.19463
           }
         },
         "ivy-liveness--ivy-examples-split-queue-2-new": {
@@ -1004,7 +1093,14 @@ window.TLAPS_DATA = {
           "scratch": {
             "rate": 0,
             "pass": 0,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 5598.645144462585,
+            "activeTimePerTask": 5598.645144462585,
+            "outputTokens": 166650,
+            "outputTokensPerTask": 166650,
+            "outputCostUsd": 4.9995,
+            "outputCostPerTask": 4.9995
           }
         },
         "ivy-liveness--ivy-examples-ticket": {
@@ -1012,7 +1108,14 @@ window.TLAPS_DATA = {
           "scratch": {
             "rate": 50,
             "pass": 1,
-            "total": 2
+            "total": 2,
+            "taskCount": 2,
+            "activeTimeSecs": 2858.6604430675507,
+            "activeTimePerTask": 1429.3302215337753,
+            "outputTokens": 74745,
+            "outputTokensPerTask": 37372.5,
+            "outputCostUsd": 2.24235,
+            "outputCostPerTask": 1.121175
           }
         },
         "ivy-liveness--ivy-examples-ticket-nested": {
@@ -1020,7 +1123,14 @@ window.TLAPS_DATA = {
           "scratch": {
             "rate": 50,
             "pass": 1,
-            "total": 2
+            "total": 2,
+            "taskCount": 2,
+            "activeTimeSecs": 2548.141010761261,
+            "activeTimePerTask": 1274.0705053806305,
+            "outputTokens": 78826,
+            "outputTokensPerTask": 39413,
+            "outputCostUsd": 2.36478,
+            "outputCostPerTask": 1.18239
           }
         },
         "ivy-liveness--ivy-examples-tlb": {
@@ -1028,187 +1138,404 @@ window.TLAPS_DATA = {
           "scratch": {
             "rate": 0,
             "pass": 0,
-            "total": 2
+            "total": 2,
+            "taskCount": 2,
+            "activeTimeSecs": 8493.559080123901,
+            "activeTimePerTask": 4246.779540061951,
+            "outputTokens": 196877,
+            "outputTokensPerTask": 98438.5,
+            "outputCostUsd": 5.90631,
+            "outputCostPerTask": 2.953155
           }
         },
         "openaddressing-lemmy-examples--openaddressing": {
           "completion": {
             "rate": 0,
             "pass": 0,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 397.3961730003357,
+            "activeTimePerTask": 397.3961730003357,
+            "outputTokens": 17298,
+            "outputTokensPerTask": 17298,
+            "outputCostUsd": 0.51894,
+            "outputCostPerTask": 0.51894
           },
           "scratch": {
             "rate": 40,
             "pass": 2,
-            "total": 5
+            "total": 5,
+            "taskCount": 5,
+            "activeTimeSecs": 16447.91350221634,
+            "activeTimePerTask": 3289.5827004432676,
+            "outputTokens": 436043,
+            "outputTokensPerTask": 87208.6,
+            "outputCostUsd": 13.08129,
+            "outputCostPerTask": 2.6162579999999998
           }
         },
         "tlaplus-examples--tlaplus-examples-allocator": {
           "completion": {
             "rate": 100,
             "pass": 14,
-            "total": 14
+            "total": 14,
+            "taskCount": 14,
+            "activeTimeSecs": 3521.5672783851624,
+            "activeTimePerTask": 251.54051988465446,
+            "outputTokens": 123495,
+            "outputTokensPerTask": 8821.07142857143,
+            "outputCostUsd": 3.70485,
+            "outputCostPerTask": 0.26463214285714287
           },
           "scratch": {
             "rate": 80,
             "pass": 4,
-            "total": 5
+            "total": 5,
+            "taskCount": 5,
+            "activeTimeSecs": 4931.252676963806,
+            "activeTimePerTask": 986.2505353927612,
+            "outputTokens": 149971,
+            "outputTokensPerTask": 29994.2,
+            "outputCostUsd": 4.49913,
+            "outputCostPerTask": 0.899826
           }
         },
         "tlaplus-examples--tlaplus-examples-bakery-boulangerie": {
           "completion": {
             "rate": 100,
             "pass": 2,
-            "total": 2
+            "total": 2,
+            "taskCount": 2,
+            "activeTimeSecs": 1449.5739045143127,
+            "activeTimePerTask": 724.7869522571564,
+            "outputTokens": 48066,
+            "outputTokensPerTask": 24033,
+            "outputCostUsd": 1.44198,
+            "outputCostPerTask": 0.72099
           },
           "scratch": {
             "rate": 100,
             "pass": 4,
-            "total": 4
+            "total": 4,
+            "taskCount": 4,
+            "activeTimeSecs": 6453.0571031570435,
+            "activeTimePerTask": 1613.2642757892609,
+            "outputTokens": 207424,
+            "outputTokensPerTask": 51856,
+            "outputCostUsd": 6.22272,
+            "outputCostPerTask": 1.55568
           }
         },
         "tlaplus-examples--tlaplus-examples-barriers": {
           "completion": {
             "rate": 100,
             "pass": 11,
-            "total": 11
+            "total": 11,
+            "taskCount": 11,
+            "activeTimeSecs": 3608.76899266243,
+            "activeTimePerTask": 328.06990842385727,
+            "outputTokens": 122404,
+            "outputTokensPerTask": 11127.636363636364,
+            "outputCostUsd": 3.67212,
+            "outputCostPerTask": 0.3338290909090909
           },
           "scratch": {
             "rate": 100,
             "pass": 5,
-            "total": 5
+            "total": 5,
+            "taskCount": 5,
+            "activeTimeSecs": 13827.166159152985,
+            "activeTimePerTask": 2765.433231830597,
+            "outputTokens": 367612,
+            "outputTokensPerTask": 73522.4,
+            "outputCostUsd": 11.02836,
+            "outputCostPerTask": 2.205672
           }
         },
         "tlaplus-examples--tlaplus-examples-bcastbyz": {
           "completion": {
             "rate": 100,
             "pass": 13,
-            "total": 13
+            "total": 13,
+            "taskCount": 13,
+            "activeTimeSecs": 2579.1474442481995,
+            "activeTimePerTask": 198.3959572498615,
+            "outputTokens": 92382,
+            "outputTokensPerTask": 7106.307692307692,
+            "outputCostUsd": 2.77146,
+            "outputCostPerTask": 0.21318923076923074
           },
           "scratch": {
             "rate": 100,
             "pass": 5,
-            "total": 5
+            "total": 5,
+            "taskCount": 5,
+            "activeTimeSecs": 1817.2081425189972,
+            "activeTimePerTask": 363.44162850379945,
+            "outputTokens": 61820,
+            "outputTokensPerTask": 12364,
+            "outputCostUsd": 1.8546,
+            "outputCostPerTask": 0.37092
           }
         },
         "tlaplus-examples--tlaplus-examples-blockingqueue": {
           "completion": {
             "rate": 100,
             "pass": 8,
-            "total": 8
+            "total": 8,
+            "taskCount": 8,
+            "activeTimeSecs": 2623.357634782791,
+            "activeTimePerTask": 327.9197043478489,
+            "outputTokens": 95519,
+            "outputTokensPerTask": 11939.875,
+            "outputCostUsd": 2.86557,
+            "outputCostPerTask": 0.35819625
           },
           "scratch": {
             "rate": 100,
             "pass": 5,
-            "total": 5
+            "total": 5,
+            "taskCount": 5,
+            "activeTimeSecs": 2266.730881214142,
+            "activeTimePerTask": 453.3461762428284,
+            "outputTokens": 81214,
+            "outputTokensPerTask": 16242.8,
+            "outputCostUsd": 2.43642,
+            "outputCostPerTask": 0.487284
           }
         },
         "tlaplus-examples--tlaplus-examples-byihive": {
           "completion": {
             "rate": 100,
             "pass": 1,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 166.94570994377136,
+            "activeTimePerTask": 166.94570994377136,
+            "outputTokens": 6696,
+            "outputTokensPerTask": 6696,
+            "outputCostUsd": 0.20088,
+            "outputCostPerTask": 0.20088
           },
           "scratch": {
             "rate": 100,
             "pass": 1,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 123.04432129859924,
+            "activeTimePerTask": 123.04432129859924,
+            "outputTokens": 4902,
+            "outputTokensPerTask": 4902,
+            "outputCostUsd": 0.14706,
+            "outputCostPerTask": 0.14706
           }
         },
         "tlaplus-examples--tlaplus-examples-byzpaxos": {
           "completion": {
             "rate": 95.1,
             "pass": 39,
-            "total": 41
+            "total": 41,
+            "taskCount": 41,
+            "activeTimeSecs": 24047.2400662899,
+            "activeTimePerTask": 586.5180503973147,
+            "outputTokens": 580038,
+            "outputTokensPerTask": 14147.268292682927,
+            "outputCostUsd": 17.40114,
+            "outputCostPerTask": 0.42441804878048783
           },
           "scratch": {
             "rate": 72.7,
             "pass": 8,
-            "total": 11
+            "total": 11,
+            "taskCount": 11,
+            "activeTimeSecs": 19380.303027629852,
+            "activeTimePerTask": 1761.845729784532,
+            "outputTokens": 390111,
+            "outputTokensPerTask": 35464.63636363636,
+            "outputCostUsd": 11.70333,
+            "outputCostPerTask": 1.063939090909091
           }
         },
         "tlaplus-examples--tlaplus-examples-cigarettesmokers": {
           "completion": {
             "rate": 100,
             "pass": 8,
-            "total": 8
+            "total": 8,
+            "taskCount": 8,
+            "activeTimeSecs": 1546.2927935123444,
+            "activeTimePerTask": 193.28659918904305,
+            "outputTokens": 57335,
+            "outputTokensPerTask": 7166.875,
+            "outputCostUsd": 1.72005,
+            "outputCostPerTask": 0.21500625
           },
           "scratch": {
             "rate": 100,
             "pass": 2,
-            "total": 2
+            "total": 2,
+            "taskCount": 2,
+            "activeTimeSecs": 707.2207009792328,
+            "activeTimePerTask": 353.6103504896164,
+            "outputTokens": 29467,
+            "outputTokensPerTask": 14733.5,
+            "outputCostUsd": 0.88401,
+            "outputCostPerTask": 0.442005
           }
         },
         "tlaplus-examples--tlaplus-examples-coffeecan": {
           "completion": {
             "rate": 100,
             "pass": 1,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 1121.5553884506226,
+            "activeTimePerTask": 1121.5553884506226,
+            "outputTokens": 38057,
+            "outputTokensPerTask": 38057,
+            "outputCostUsd": 1.14171,
+            "outputCostPerTask": 1.14171
           },
           "scratch": {
             "rate": 100,
             "pass": 1,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 893.3278615474701,
+            "activeTimePerTask": 893.3278615474701,
+            "outputTokens": 20586,
+            "outputTokensPerTask": 20586,
+            "outputCostUsd": 0.61758,
+            "outputCostPerTask": 0.61758
           }
         },
         "tlaplus-examples--tlaplus-examples-diehard": {
           "completion": {
             "rate": 100,
             "pass": 2,
-            "total": 2
+            "total": 2,
+            "taskCount": 2,
+            "activeTimeSecs": 148.74491333961487,
+            "activeTimePerTask": 74.37245666980743,
+            "outputTokens": 5468,
+            "outputTokensPerTask": 2734,
+            "outputCostUsd": 0.16404,
+            "outputCostPerTask": 0.08202
           },
           "scratch": {
             "rate": 100,
             "pass": 1,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 93.84472417831421,
+            "activeTimePerTask": 93.84472417831421,
+            "outputTokens": 4101,
+            "outputTokensPerTask": 4101,
+            "outputCostUsd": 0.12303,
+            "outputCostPerTask": 0.12303
           }
         },
         "tlaplus-examples--tlaplus-examples-ewd687a": {
           "completion": {
             "rate": 100,
             "pass": 16,
-            "total": 16
+            "total": 16,
+            "taskCount": 16,
+            "activeTimeSecs": 6192.356538295746,
+            "activeTimePerTask": 387.0222836434841,
+            "outputTokens": 249192,
+            "outputTokensPerTask": 15574.5,
+            "outputCostUsd": 7.47576,
+            "outputCostPerTask": 0.467235
           },
           "scratch": {
             "rate": 100,
             "pass": 3,
-            "total": 3
+            "total": 3,
+            "taskCount": 3,
+            "activeTimeSecs": 4034.8596868515015,
+            "activeTimePerTask": 1344.9532289505005,
+            "outputTokens": 140878,
+            "outputTokensPerTask": 46959.333333333336,
+            "outputCostUsd": 4.22634,
+            "outputCostPerTask": 1.4087800000000001
           }
         },
         "tlaplus-examples--tlaplus-examples-ewd840": {
           "completion": {
             "rate": 100,
             "pass": 14,
-            "total": 14
+            "total": 14,
+            "taskCount": 14,
+            "activeTimeSecs": 7965.986286401749,
+            "activeTimePerTask": 568.9990204572678,
+            "outputTokens": 301298,
+            "outputTokensPerTask": 21521.285714285714,
+            "outputCostUsd": 9.03894,
+            "outputCostPerTask": 0.6456385714285714
           },
           "scratch": {
             "rate": 100,
             "pass": 5,
-            "total": 5
+            "total": 5,
+            "taskCount": 5,
+            "activeTimeSecs": 2791.899968147278,
+            "activeTimePerTask": 558.3799936294556,
+            "outputTokens": 95983,
+            "outputTokensPerTask": 19196.6,
+            "outputCostUsd": 2.87949,
+            "outputCostPerTask": 0.575898
           }
         },
         "tlaplus-examples--tlaplus-examples-ewd998": {
           "completion": {
             "rate": 59.6,
             "pass": 31,
-            "total": 52
+            "total": 52,
+            "taskCount": 52,
+            "activeTimeSecs": 31928.571034431458,
+            "activeTimePerTask": 614.0109814313741,
+            "outputTokens": 1130136,
+            "outputTokensPerTask": 21733.384615384617,
+            "outputCostUsd": 33.90408,
+            "outputCostPerTask": 0.6520015384615385
           },
           "scratch": {
             "rate": 100,
             "pass": 7,
-            "total": 7
+            "total": 7,
+            "taskCount": 7,
+            "activeTimeSecs": 7214.19576883316,
+            "activeTimePerTask": 1030.5993955475944,
+            "outputTokens": 181449,
+            "outputTokensPerTask": 25921.285714285714,
+            "outputCostUsd": 5.44347,
+            "outputCostPerTask": 0.7776385714285714
           }
         },
         "tlaplus-examples--tlaplus-examples-finitemonotonic": {
           "completion": {
             "rate": 92.9,
             "pass": 13,
-            "total": 14
+            "total": 14,
+            "taskCount": 14,
+            "activeTimeSecs": 7799.710049152374,
+            "activeTimePerTask": 557.1221463680267,
+            "outputTokens": 267162,
+            "outputTokensPerTask": 19083,
+            "outputCostUsd": 8.01486,
+            "outputCostPerTask": 0.57249
           },
           "scratch": {
             "rate": 66.7,
             "pass": 2,
-            "total": 3
+            "total": 3,
+            "taskCount": 3,
+            "activeTimeSecs": 5453.555239915848,
+            "activeTimePerTask": 1817.8517466386159,
+            "outputTokens": 197798,
+            "outputTokensPerTask": 65932.66666666667,
+            "outputCostUsd": 5.93394,
+            "outputCostPerTask": 1.9779799999999998
           }
         },
         "tlaplus-examples--tlaplus-examples-germanprotocol": {
@@ -1216,86 +1543,184 @@ window.TLAPS_DATA = {
           "scratch": {
             "rate": 100,
             "pass": 1,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 746.7667655944824,
+            "activeTimePerTask": 746.7667655944824,
+            "outputTokens": 26534,
+            "outputTokensPerTask": 26534,
+            "outputCostUsd": 0.79602,
+            "outputCostPerTask": 0.79602
           }
         },
         "tlaplus-examples--tlaplus-examples-glowingraccoon": {
           "completion": {
             "rate": 83.3,
             "pass": 5,
-            "total": 6
+            "total": 6,
+            "taskCount": 6,
+            "activeTimeSecs": 2535.3224396705627,
+            "activeTimePerTask": 422.5537399450938,
+            "outputTokens": 94766,
+            "outputTokensPerTask": 15794.333333333334,
+            "outputCostUsd": 2.84298,
+            "outputCostPerTask": 0.47383
           },
           "scratch": {
             "rate": 100,
             "pass": 3,
-            "total": 3
+            "total": 3,
+            "taskCount": 3,
+            "activeTimeSecs": 478.1501486301422,
+            "activeTimePerTask": 159.38338287671408,
+            "outputTokens": 19553,
+            "outputTokensPerTask": 6517.666666666667,
+            "outputCostUsd": 0.58659,
+            "outputCostPerTask": 0.19552999999999998
           }
         },
         "tlaplus-examples--tlaplus-examples-keyvaluestore": {
           "completion": {
             "rate": 100,
             "pass": 1,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 227.18616008758545,
+            "activeTimePerTask": 227.18616008758545,
+            "outputTokens": 7565,
+            "outputTokensPerTask": 7565,
+            "outputCostUsd": 0.22695,
+            "outputCostPerTask": 0.22695
           },
           "scratch": {
             "rate": 100,
             "pass": 1,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 226.39969420433044,
+            "activeTimePerTask": 226.39969420433044,
+            "outputTokens": 7272,
+            "outputTokensPerTask": 7272,
+            "outputCostUsd": 0.21816,
+            "outputCostPerTask": 0.21816
           }
         },
         "tlaplus-examples--tlaplus-examples-lamport-mutex": {
           "completion": {
             "rate": 100,
             "pass": 20,
-            "total": 20
+            "total": 20,
+            "taskCount": 20,
+            "activeTimeSecs": 9404.927111625671,
+            "activeTimePerTask": 470.2463555812836,
+            "outputTokens": 301630,
+            "outputTokensPerTask": 15081.5,
+            "outputCostUsd": 9.0489,
+            "outputCostPerTask": 0.452445
           },
           "scratch": {
             "rate": 50,
             "pass": 1,
-            "total": 2
+            "total": 2,
+            "taskCount": 2,
+            "activeTimeSecs": 8031.321589336395,
+            "activeTimePerTask": 4015.6607946681975,
+            "outputTokens": 195992,
+            "outputTokensPerTask": 97996,
+            "outputCostUsd": 5.87976,
+            "outputCostPerTask": 2.93988
           }
         },
         "tlaplus-examples--tlaplus-examples-learnproofs": {
           "completion": {
             "rate": 100,
             "pass": 5,
-            "total": 5
+            "total": 5,
+            "taskCount": 5,
+            "activeTimeSecs": 729.7316732406616,
+            "activeTimePerTask": 145.94633464813234,
+            "outputTokens": 28814,
+            "outputTokensPerTask": 5762.8,
+            "outputCostUsd": 0.86442,
+            "outputCostPerTask": 0.17288399999999998
           },
           "scratch": {
             "rate": 100,
             "pass": 6,
-            "total": 6
+            "total": 6,
+            "taskCount": 6,
+            "activeTimeSecs": 1338.877207517624,
+            "activeTimePerTask": 223.14620125293732,
+            "outputTokens": 55910,
+            "outputTokensPerTask": 9318.333333333334,
+            "outputCostUsd": 1.6773,
+            "outputCostPerTask": 0.27955
           }
         },
         "tlaplus-examples--tlaplus-examples-locks-auxiliary-vars": {
           "completion": {
             "rate": 100,
             "pass": 9,
-            "total": 9
+            "total": 9,
+            "taskCount": 9,
+            "activeTimeSecs": 2495.6009709835052,
+            "activeTimePerTask": 277.288996775945,
+            "outputTokens": 87414,
+            "outputTokensPerTask": 9712.666666666666,
+            "outputCostUsd": 2.62242,
+            "outputCostPerTask": 0.29138
           },
           "scratch": {
             "rate": 100,
             "pass": 5,
-            "total": 5
+            "total": 5,
+            "taskCount": 5,
+            "activeTimeSecs": 1989.0686881542206,
+            "activeTimePerTask": 397.8137376308441,
+            "outputTokens": 75300,
+            "outputTokensPerTask": 15060,
+            "outputCostUsd": 2.259,
+            "outputCostPerTask": 0.4518
           }
         },
         "tlaplus-examples--tlaplus-examples-loopinvariance": {
           "completion": {
             "rate": 58.8,
             "pass": 10,
-            "total": 17
+            "total": 17,
+            "taskCount": 17,
+            "activeTimeSecs": 9169.212450027466,
+            "activeTimePerTask": 539.3654382369098,
+            "outputTokens": 313158,
+            "outputTokensPerTask": 18421.058823529413,
+            "outputCostUsd": 9.39474,
+            "outputCostPerTask": 0.5526317647058824
           },
           "scratch": {
             "rate": 100,
             "pass": 3,
-            "total": 3
+            "total": 3,
+            "taskCount": 3,
+            "activeTimeSecs": 3459.2406566143036,
+            "activeTimePerTask": 1153.0802188714345,
+            "outputTokens": 110596,
+            "outputTokensPerTask": 36865.333333333336,
+            "outputCostUsd": 3.31788,
+            "outputCostPerTask": 1.10596
           }
         },
         "tlaplus-examples--tlaplus-examples-majority": {
           "completion": {
             "rate": 100,
             "pass": 9,
-            "total": 9
+            "total": 9,
+            "taskCount": 9,
+            "activeTimeSecs": 1638.4897029399872,
+            "activeTimePerTask": 182.05441143777637,
+            "outputTokens": 51740,
+            "outputTokensPerTask": 5748.888888888889,
+            "outputCostUsd": 1.5522,
+            "outputCostPerTask": 0.17246666666666666
           },
           "scratch": null
         },
@@ -1303,151 +1728,326 @@ window.TLAPS_DATA = {
           "completion": {
             "rate": 100,
             "pass": 8,
-            "total": 8
+            "total": 8,
+            "taskCount": 8,
+            "activeTimeSecs": 2357.0693125724792,
+            "activeTimePerTask": 294.6336640715599,
+            "outputTokens": 84249,
+            "outputTokensPerTask": 10531.125,
+            "outputCostUsd": 2.52747,
+            "outputCostPerTask": 0.31593375
           },
           "scratch": {
             "rate": 100,
             "pass": 2,
-            "total": 2
+            "total": 2,
+            "taskCount": 2,
+            "activeTimeSecs": 568.5282707214355,
+            "activeTimePerTask": 284.2641353607178,
+            "outputTokens": 21222,
+            "outputTokensPerTask": 10611,
+            "outputCostUsd": 0.63666,
+            "outputCostPerTask": 0.31833
           }
         },
         "tlaplus-examples--tlaplus-examples-missionariesandcannibals": {
           "completion": {
             "rate": 100,
             "pass": 1,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 91.80142617225647,
+            "activeTimePerTask": 91.80142617225647,
+            "outputTokens": 3698,
+            "outputTokensPerTask": 3698,
+            "outputCostUsd": 0.11094,
+            "outputCostPerTask": 0.11094
           },
           "scratch": {
             "rate": 100,
             "pass": 1,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 71.87631177902222,
+            "activeTimePerTask": 71.87631177902222,
+            "outputTokens": 3116,
+            "outputTokensPerTask": 3116,
+            "outputCostUsd": 0.09348,
+            "outputCostPerTask": 0.09348
           }
         },
         "tlaplus-examples--tlaplus-examples-multicarelevator": {
           "completion": {
             "rate": 100,
             "pass": 9,
-            "total": 9
+            "total": 9,
+            "taskCount": 9,
+            "activeTimeSecs": 1956.1778419017792,
+            "activeTimePerTask": 217.35309354464212,
+            "outputTokens": 58199,
+            "outputTokensPerTask": 6466.555555555556,
+            "outputCostUsd": 1.74597,
+            "outputCostPerTask": 0.19399666666666668
           },
           "scratch": {
             "rate": 100,
             "pass": 2,
-            "total": 2
+            "total": 2,
+            "taskCount": 2,
+            "activeTimeSecs": 7192.503611564636,
+            "activeTimePerTask": 3596.251805782318,
+            "outputTokens": 179907,
+            "outputTokensPerTask": 89953.5,
+            "outputCostUsd": 5.39721,
+            "outputCostPerTask": 2.698605
           }
         },
         "tlaplus-examples--tlaplus-examples-paxos": {
           "completion": {
             "rate": 100,
             "pass": 3,
-            "total": 3
+            "total": 3,
+            "taskCount": 3,
+            "activeTimeSecs": 819.1030225753784,
+            "activeTimePerTask": 273.0343408584595,
+            "outputTokens": 34170,
+            "outputTokensPerTask": 11390,
+            "outputCostUsd": 1.0251,
+            "outputCostPerTask": 0.34169999999999995
           },
           "scratch": {
             "rate": 100,
             "pass": 4,
-            "total": 4
+            "total": 4,
+            "taskCount": 4,
+            "activeTimeSecs": 3206.466870069504,
+            "activeTimePerTask": 801.616717517376,
+            "outputTokens": 96264,
+            "outputTokensPerTask": 24066,
+            "outputCostUsd": 2.88792,
+            "outputCostPerTask": 0.72198
           }
         },
         "tlaplus-examples--tlaplus-examples-paxoshowtowinaturingaward": {
           "completion": {
             "rate": 77.8,
             "pass": 7,
-            "total": 9
+            "total": 9,
+            "taskCount": 9,
+            "activeTimeSecs": 3297.071503162384,
+            "activeTimePerTask": 366.3412781291538,
+            "outputTokens": 126031,
+            "outputTokensPerTask": 14003.444444444445,
+            "outputCostUsd": 3.78093,
+            "outputCostPerTask": 0.42010333333333333
           },
           "scratch": {
             "rate": 100,
             "pass": 6,
-            "total": 6
+            "total": 6,
+            "taskCount": 6,
+            "activeTimeSecs": 5055.447593450546,
+            "activeTimePerTask": 842.5745989084244,
+            "outputTokens": 114915,
+            "outputTokensPerTask": 19152.5,
+            "outputCostUsd": 3.44745,
+            "outputCostPerTask": 0.574575
           }
         },
         "tlaplus-examples--tlaplus-examples-readerswriters": {
           "completion": {
             "rate": 100,
             "pass": 3,
-            "total": 3
+            "total": 3,
+            "taskCount": 3,
+            "activeTimeSecs": 729.6714186668396,
+            "activeTimePerTask": 243.22380622227988,
+            "outputTokens": 26814,
+            "outputTokensPerTask": 8938,
+            "outputCostUsd": 0.80442,
+            "outputCostPerTask": 0.26814
           },
           "scratch": {
             "rate": 100,
             "pass": 2,
-            "total": 2
+            "total": 2,
+            "taskCount": 2,
+            "activeTimeSecs": 693.5096309185028,
+            "activeTimePerTask": 346.7548154592514,
+            "outputTokens": 26869,
+            "outputTokensPerTask": 13434.5,
+            "outputCostUsd": 0.80607,
+            "outputCostPerTask": 0.403035
           }
         },
         "tlaplus-examples--tlaplus-examples-spanning": {
           "completion": {
             "rate": 100,
             "pass": 2,
-            "total": 2
+            "total": 2,
+            "taskCount": 2,
+            "activeTimeSecs": 152.6775906085968,
+            "activeTimePerTask": 76.3387953042984,
+            "outputTokens": 6067,
+            "outputTokensPerTask": 3033.5,
+            "outputCostUsd": 0.18201,
+            "outputCostPerTask": 0.091005
           },
           "scratch": {
             "rate": 100,
             "pass": 1,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 357.5560381412506,
+            "activeTimePerTask": 357.5560381412506,
+            "outputTokens": 11374,
+            "outputTokensPerTask": 11374,
+            "outputCostUsd": 0.34122,
+            "outputCostPerTask": 0.34122
           }
         },
         "tlaplus-examples--tlaplus-examples-spanningtree": {
           "completion": {
             "rate": 100,
             "pass": 1,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 95.2645013332367,
+            "activeTimePerTask": 95.2645013332367,
+            "outputTokens": 3655,
+            "outputTokensPerTask": 3655,
+            "outputCostUsd": 0.10965,
+            "outputCostPerTask": 0.10965
           },
           "scratch": {
             "rate": 100,
             "pass": 1,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 58.847235441207886,
+            "activeTimePerTask": 58.847235441207886,
+            "outputTokens": 2475,
+            "outputTokensPerTask": 2475,
+            "outputCostUsd": 0.07425,
+            "outputCostPerTask": 0.07425
           }
         },
         "tlaplus-examples--tlaplus-examples-specifyingsystems-asynchronousinterface": {
           "completion": {
             "rate": 100,
             "pass": 2,
-            "total": 2
+            "total": 2,
+            "taskCount": 2,
+            "activeTimeSecs": 193.26926851272583,
+            "activeTimePerTask": 96.63463425636292,
+            "outputTokens": 7828,
+            "outputTokensPerTask": 3914,
+            "outputCostUsd": 0.23484,
+            "outputCostPerTask": 0.11742
           },
           "scratch": {
             "rate": 100,
             "pass": 2,
-            "total": 2
+            "total": 2,
+            "taskCount": 2,
+            "activeTimeSecs": 157.21412324905396,
+            "activeTimePerTask": 78.60706162452698,
+            "outputTokens": 6523,
+            "outputTokensPerTask": 3261.5,
+            "outputCostUsd": 0.19569,
+            "outputCostPerTask": 0.097845
           }
         },
         "tlaplus-examples--tlaplus-examples-specifyingsystems-cachingmemory": {
           "completion": {
             "rate": 100,
             "pass": 2,
-            "total": 2
+            "total": 2,
+            "taskCount": 2,
+            "activeTimeSecs": 229.42608451843262,
+            "activeTimePerTask": 114.71304225921631,
+            "outputTokens": 9603,
+            "outputTokensPerTask": 4801.5,
+            "outputCostUsd": 0.28809,
+            "outputCostPerTask": 0.144045
           },
           "scratch": {
             "rate": 100,
             "pass": 1,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 126.19581985473633,
+            "activeTimePerTask": 126.19581985473633,
+            "outputTokens": 5608,
+            "outputTokensPerTask": 5608,
+            "outputCostUsd": 0.16824,
+            "outputCostPerTask": 0.16824
           }
         },
         "tlaplus-examples--tlaplus-examples-specifyingsystems-composing": {
           "completion": {
             "rate": 100,
             "pass": 4,
-            "total": 4
+            "total": 4,
+            "taskCount": 4,
+            "activeTimeSecs": 347.1445963382721,
+            "activeTimePerTask": 86.78614908456802,
+            "outputTokens": 13478,
+            "outputTokensPerTask": 3369.5,
+            "outputCostUsd": 0.40434,
+            "outputCostPerTask": 0.101085
           },
           "scratch": {
             "rate": 100,
             "pass": 1,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 54.04389405250549,
+            "activeTimePerTask": 54.04389405250549,
+            "outputTokens": 2313,
+            "outputTokensPerTask": 2313,
+            "outputCostUsd": 0.06939,
+            "outputCostPerTask": 0.06939
           }
         },
         "tlaplus-examples--tlaplus-examples-specifyingsystems-fifo": {
           "completion": {
             "rate": 100,
             "pass": 2,
-            "total": 2
+            "total": 2,
+            "taskCount": 2,
+            "activeTimeSecs": 683.8938219547272,
+            "activeTimePerTask": 341.9469109773636,
+            "outputTokens": 23248,
+            "outputTokensPerTask": 11624,
+            "outputCostUsd": 0.69744,
+            "outputCostPerTask": 0.34872
           },
           "scratch": {
             "rate": 100,
             "pass": 1,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 172.14268445968628,
+            "activeTimePerTask": 172.14268445968628,
+            "outputTokens": 7717,
+            "outputTokensPerTask": 7717,
+            "outputCostUsd": 0.23151,
+            "outputCostPerTask": 0.23151
           }
         },
         "tlaplus-examples--tlaplus-examples-specifyingsystems-hourclock": {
           "completion": {
             "rate": 100,
             "pass": 1,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 123.07209777832031,
+            "activeTimePerTask": 123.07209777832031,
+            "outputTokens": 5167,
+            "outputTokensPerTask": 5167,
+            "outputCostUsd": 0.15501,
+            "outputCostPerTask": 0.15501
           },
           "scratch": null
         },
@@ -1455,7 +2055,14 @@ window.TLAPS_DATA = {
           "completion": {
             "rate": 100,
             "pass": 3,
-            "total": 3
+            "total": 3,
+            "taskCount": 3,
+            "activeTimeSecs": 249.088232755661,
+            "activeTimePerTask": 83.02941091855367,
+            "outputTokens": 8891,
+            "outputTokensPerTask": 2963.6666666666665,
+            "outputCostUsd": 0.26673,
+            "outputCostPerTask": 0.08891
           },
           "scratch": null
         },
@@ -1463,7 +2070,14 @@ window.TLAPS_DATA = {
           "completion": {
             "rate": 100,
             "pass": 3,
-            "total": 3
+            "total": 3,
+            "taskCount": 3,
+            "activeTimeSecs": 255.56035542488098,
+            "activeTimePerTask": 85.186785141627,
+            "outputTokens": 8658,
+            "outputTokensPerTask": 2886,
+            "outputCostUsd": 0.25974,
+            "outputCostPerTask": 0.08658
           },
           "scratch": null
         },
@@ -1471,120 +2085,260 @@ window.TLAPS_DATA = {
           "completion": {
             "rate": 100,
             "pass": 1,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 415.7318136692047,
+            "activeTimePerTask": 415.7318136692047,
+            "outputTokens": 15571,
+            "outputTokensPerTask": 15571,
+            "outputCostUsd": 0.46713,
+            "outputCostPerTask": 0.46713
           },
           "scratch": {
             "rate": 100,
             "pass": 1,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 182.94913935661316,
+            "activeTimePerTask": 182.94913935661316,
+            "outputTokens": 8629,
+            "outputTokensPerTask": 8629,
+            "outputCostUsd": 0.25887,
+            "outputCostPerTask": 0.25887
           }
         },
         "tlaplus-examples--tlaplus-examples-sums-even": {
           "completion": {
             "rate": 100,
             "pass": 1,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 70.25865054130554,
+            "activeTimePerTask": 70.25865054130554,
+            "outputTokens": 2042,
+            "outputTokensPerTask": 2042,
+            "outputCostUsd": 0.06126,
+            "outputCostPerTask": 0.06126
           },
           "scratch": {
             "rate": 100,
             "pass": 2,
-            "total": 2
+            "total": 2,
+            "taskCount": 2,
+            "activeTimeSecs": 155.90801358222961,
+            "activeTimePerTask": 77.95400679111481,
+            "outputTokens": 6083,
+            "outputTokensPerTask": 3041.5,
+            "outputCostUsd": 0.18249,
+            "outputCostPerTask": 0.091245
           }
         },
         "tlaplus-examples--tlaplus-examples-tcp": {
           "completion": {
             "rate": 100,
             "pass": 16,
-            "total": 16
+            "total": 16,
+            "taskCount": 16,
+            "activeTimeSecs": 11391.840135335922,
+            "activeTimePerTask": 711.9900084584951,
+            "outputTokens": 307531,
+            "outputTokensPerTask": 19220.6875,
+            "outputCostUsd": 9.22593,
+            "outputCostPerTask": 0.576620625
           },
           "scratch": {
             "rate": 66.7,
             "pass": 2,
-            "total": 3
+            "total": 3,
+            "taskCount": 3,
+            "activeTimeSecs": 1415.3644534015657,
+            "activeTimePerTask": 471.78815113385525,
+            "outputTokens": 75296,
+            "outputTokensPerTask": 25098.666666666668,
+            "outputCostUsd": 2.25888,
+            "outputCostPerTask": 0.75296
           }
         },
         "tlaplus-examples--tlaplus-examples-teachingconcurrency": {
           "completion": {
             "rate": 100,
             "pass": 8,
-            "total": 8
+            "total": 8,
+            "taskCount": 8,
+            "activeTimeSecs": 1967.5081827640533,
+            "activeTimePerTask": 245.93852284550667,
+            "outputTokens": 66787,
+            "outputTokensPerTask": 8348.375,
+            "outputCostUsd": 2.00361,
+            "outputCostPerTask": 0.25045125
           },
           "scratch": {
             "rate": 100,
             "pass": 8,
-            "total": 8
+            "total": 8,
+            "taskCount": 8,
+            "activeTimeSecs": 1839.231724023819,
+            "activeTimePerTask": 229.90396550297737,
+            "outputTokens": 70408,
+            "outputTokensPerTask": 8801,
+            "outputCostUsd": 2.11224,
+            "outputCostPerTask": 0.26403
           }
         },
         "tlaplus-examples--tlaplus-examples-tencentpaxos": {
           "completion": {
             "rate": 94.7,
             "pass": 18,
-            "total": 19
+            "total": 19,
+            "taskCount": 19,
+            "activeTimeSecs": 18631.121816635132,
+            "activeTimePerTask": 980.5853587702701,
+            "outputTokens": 576143,
+            "outputTokensPerTask": 30323.315789473683,
+            "outputCostUsd": 17.28429,
+            "outputCostPerTask": 0.9096994736842104
           },
           "scratch": {
             "rate": 0,
             "pass": 0,
-            "total": 2
+            "total": 2,
+            "taskCount": 2,
+            "activeTimeSecs": 14400.103095531464,
+            "activeTimePerTask": 7200.051547765732,
+            "outputTokens": 313515,
+            "outputTokensPerTask": 156757.5,
+            "outputCostUsd": 9.40545,
+            "outputCostPerTask": 4.702725
           }
         },
         "tlaplus-examples--tlaplus-examples-termination": {
           "completion": {
             "rate": 100,
             "pass": 4,
-            "total": 4
+            "total": 4,
+            "taskCount": 4,
+            "activeTimeSecs": 1192.1854441165924,
+            "activeTimePerTask": 298.0463610291481,
+            "outputTokens": 43921,
+            "outputTokensPerTask": 10980.25,
+            "outputCostUsd": 1.31763,
+            "outputCostPerTask": 0.3294075
           },
           "scratch": {
             "rate": 100,
             "pass": 1,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 615.5239813327789,
+            "activeTimePerTask": 615.5239813327789,
+            "outputTokens": 23622,
+            "outputTokensPerTask": 23622,
+            "outputCostUsd": 0.70866,
+            "outputCostPerTask": 0.70866
           }
         },
         "tlaplus-examples--tlaplus-examples-transaction-commit": {
           "completion": {
             "rate": 100,
             "pass": 12,
-            "total": 12
+            "total": 12,
+            "taskCount": 12,
+            "activeTimeSecs": 2825.2231295108795,
+            "activeTimePerTask": 235.4352607925733,
+            "outputTokens": 89420,
+            "outputTokensPerTask": 7451.666666666667,
+            "outputCostUsd": 2.6826,
+            "outputCostPerTask": 0.22355
           },
           "scratch": {
             "rate": 100,
             "pass": 4,
-            "total": 4
+            "total": 4,
+            "taskCount": 4,
+            "activeTimeSecs": 743.8688673973083,
+            "activeTimePerTask": 185.9672168493271,
+            "outputTokens": 26445,
+            "outputTokensPerTask": 6611.25,
+            "outputCostUsd": 0.79335,
+            "outputCostPerTask": 0.1983375
           }
         },
         "tlaplus-examples--tlaplus-examples-twophase": {
           "completion": {
             "rate": 100,
             "pass": 1,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 177.02747535705566,
+            "activeTimePerTask": 177.02747535705566,
+            "outputTokens": 7579,
+            "outputTokensPerTask": 7579,
+            "outputCostUsd": 0.22737,
+            "outputCostPerTask": 0.22737
           },
           "scratch": {
             "rate": 100,
             "pass": 2,
-            "total": 2
+            "total": 2,
+            "taskCount": 2,
+            "activeTimeSecs": 218.25616216659546,
+            "activeTimePerTask": 109.12808108329773,
+            "outputTokens": 9668,
+            "outputTokensPerTask": 4834,
+            "outputCostUsd": 0.29004,
+            "outputCostPerTask": 0.14502
           }
         },
         "tlaps-distribution-examples--allocator": {
           "completion": {
             "rate": 100,
             "pass": 10,
-            "total": 10
+            "total": 10,
+            "taskCount": 10,
+            "activeTimeSecs": 1381.5083343982697,
+            "activeTimePerTask": 138.15083343982695,
+            "outputTokens": 49317,
+            "outputTokensPerTask": 4931.7,
+            "outputCostUsd": 1.47951,
+            "outputCostPerTask": 0.147951
           },
           "scratch": {
             "rate": 100,
             "pass": 4,
-            "total": 4
+            "total": 4,
+            "taskCount": 4,
+            "activeTimeSecs": 988.0688126087189,
+            "activeTimePerTask": 247.01720315217972,
+            "outputTokens": 37425,
+            "outputTokensPerTask": 9356.25,
+            "outputCostUsd": 1.12275,
+            "outputCostPerTask": 0.2806875
           }
         },
         "tlaps-distribution-examples--atomicbakery": {
           "completion": {
             "rate": 100,
             "pass": 8,
-            "total": 8
+            "total": 8,
+            "taskCount": 8,
+            "activeTimeSecs": 4771.355647087097,
+            "activeTimePerTask": 596.4194558858871,
+            "outputTokens": 140161,
+            "outputTokensPerTask": 17520.125,
+            "outputCostUsd": 4.20483,
+            "outputCostPerTask": 0.52560375
           },
           "scratch": {
             "rate": 100,
             "pass": 2,
-            "total": 2
+            "total": 2,
+            "taskCount": 2,
+            "activeTimeSecs": 5768.661964178085,
+            "activeTimePerTask": 2884.3309820890427,
+            "outputTokens": 112126,
+            "outputTokensPerTask": 56063,
+            "outputCostUsd": 3.36378,
+            "outputCostPerTask": 1.68189
           }
         },
         "tlaps-distribution-examples--bakery": {
@@ -1592,91 +2346,196 @@ window.TLAPS_DATA = {
           "scratch": {
             "rate": 100,
             "pass": 1,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 1115.5750269889832,
+            "activeTimePerTask": 1115.5750269889832,
+            "outputTokens": 37393,
+            "outputTokensPerTask": 37393,
+            "outputCostUsd": 1.12179,
+            "outputCostPerTask": 1.12179
           }
         },
         "tlaps-distribution-examples--bubblesort": {
           "completion": {
             "rate": 100,
             "pass": 8,
-            "total": 8
+            "total": 8,
+            "taskCount": 8,
+            "activeTimeSecs": 822.3481914997101,
+            "activeTimePerTask": 102.79352393746376,
+            "outputTokens": 31554,
+            "outputTokensPerTask": 3944.25,
+            "outputCostUsd": 0.94662,
+            "outputCostPerTask": 0.1183275
           },
           "scratch": {
             "rate": 100,
             "pass": 3,
-            "total": 3
+            "total": 3,
+            "taskCount": 3,
+            "activeTimeSecs": 902.93332862854,
+            "activeTimePerTask": 300.97777620951337,
+            "outputTokens": 32233,
+            "outputTokensPerTask": 10744.333333333334,
+            "outputCostUsd": 0.96699,
+            "outputCostPerTask": 0.32233
           }
         },
         "tlaps-distribution-examples--cantor": {
           "completion": {
             "rate": 100,
             "pass": 11,
-            "total": 11
+            "total": 11,
+            "taskCount": 11,
+            "activeTimeSecs": 1954.783370256424,
+            "activeTimePerTask": 177.70757911422035,
+            "outputTokens": 73133,
+            "outputTokensPerTask": 6648.454545454545,
+            "outputCostUsd": 2.19399,
+            "outputCostPerTask": 0.19945363636363636
           },
           "scratch": {
             "rate": 100,
             "pass": 10,
-            "total": 10
+            "total": 10,
+            "taskCount": 10,
+            "activeTimeSecs": 1335.7705428600311,
+            "activeTimePerTask": 133.57705428600312,
+            "outputTokens": 42785,
+            "outputTokensPerTask": 4278.5,
+            "outputCostUsd": 1.28355,
+            "outputCostPerTask": 0.128355
           }
         },
         "tlaps-distribution-examples--consensus": {
           "completion": {
             "rate": 88,
             "pass": 22,
-            "total": 25
+            "total": 25,
+            "taskCount": 25,
+            "activeTimeSecs": 7313.568912267685,
+            "activeTimePerTask": 292.5427564907074,
+            "outputTokens": 288238,
+            "outputTokensPerTask": 11529.52,
+            "outputCostUsd": 8.64714,
+            "outputCostPerTask": 0.3458856
           },
           "scratch": {
             "rate": 100,
             "pass": 10,
-            "total": 10
+            "total": 10,
+            "taskCount": 10,
+            "activeTimeSecs": 5617.471732854843,
+            "activeTimePerTask": 561.7471732854843,
+            "outputTokens": 211612,
+            "outputTokensPerTask": 21161.2,
+            "outputCostUsd": 6.34836,
+            "outputCostPerTask": 0.634836
           }
         },
         "tlaps-distribution-examples--data": {
           "completion": {
             "rate": 80,
             "pass": 12,
-            "total": 15
+            "total": 15,
+            "taskCount": 15,
+            "activeTimeSecs": 3917.8332962989807,
+            "activeTimePerTask": 261.18888641993203,
+            "outputTokens": 150225,
+            "outputTokensPerTask": 10015,
+            "outputCostUsd": 4.50675,
+            "outputCostPerTask": 0.30045
           },
           "scratch": {
             "rate": 100,
             "pass": 9,
-            "total": 9
+            "total": 9,
+            "taskCount": 9,
+            "activeTimeSecs": 2015.2267806529999,
+            "activeTimePerTask": 223.9140867392222,
+            "outputTokens": 76557,
+            "outputTokensPerTask": 8506.333333333334,
+            "outputCostUsd": 2.29671,
+            "outputCostPerTask": 0.25519000000000003
           }
         },
         "tlaps-distribution-examples--euclid": {
           "completion": {
             "rate": 100,
             "pass": 6,
-            "total": 6
+            "total": 6,
+            "taskCount": 6,
+            "activeTimeSecs": 1027.3595623970032,
+            "activeTimePerTask": 171.22659373283386,
+            "outputTokens": 41029,
+            "outputTokensPerTask": 6838.166666666667,
+            "outputCostUsd": 1.23087,
+            "outputCostPerTask": 0.205145
           },
           "scratch": {
             "rate": 100,
             "pass": 5,
-            "total": 5
+            "total": 5,
+            "taskCount": 5,
+            "activeTimeSecs": 1007.5552878379822,
+            "activeTimePerTask": 201.51105756759642,
+            "outputTokens": 36902,
+            "outputTokensPerTask": 7380.4,
+            "outputCostUsd": 1.10706,
+            "outputCostPerTask": 0.221412
           }
         },
         "tlaps-distribution-examples--ewd840": {
           "completion": {
             "rate": 100,
             "pass": 2,
-            "total": 2
+            "total": 2,
+            "taskCount": 2,
+            "activeTimeSecs": 309.8236746788025,
+            "activeTimePerTask": 154.91183733940125,
+            "outputTokens": 10572,
+            "outputTokensPerTask": 5286,
+            "outputCostUsd": 0.31716,
+            "outputCostPerTask": 0.15858
           },
           "scratch": {
             "rate": 100,
             "pass": 1,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 162.2940673828125,
+            "activeTimePerTask": 162.2940673828125,
+            "outputTokens": 7238,
+            "outputTokensPerTask": 7238,
+            "outputCostUsd": 0.21714,
+            "outputCostPerTask": 0.21714
           }
         },
         "tlaps-distribution-examples--paxos": {
           "completion": {
             "rate": 100,
             "pass": 13,
-            "total": 13
+            "total": 13,
+            "taskCount": 13,
+            "activeTimeSecs": 5050.970152854919,
+            "activeTimePerTask": 388.53616560422455,
+            "outputTokens": 191247,
+            "outputTokensPerTask": 14711.307692307691,
+            "outputCostUsd": 5.73741,
+            "outputCostPerTask": 0.44133923076923076
           },
           "scratch": {
             "rate": 100,
             "pass": 6,
-            "total": 6
+            "total": 6,
+            "taskCount": 6,
+            "activeTimeSecs": 15955.169480085373,
+            "activeTimePerTask": 2659.1949133475623,
+            "outputTokens": 429507,
+            "outputTokensPerTask": 71584.5,
+            "outputCostUsd": 12.88521,
+            "outputCostPerTask": 2.147535
           }
         },
         "tlaps-distribution-examples--peterson": {
@@ -1684,7 +2543,14 @@ window.TLAPS_DATA = {
           "scratch": {
             "rate": 100,
             "pass": 2,
-            "total": 2
+            "total": 2,
+            "taskCount": 2,
+            "activeTimeSecs": 1998.4909522533417,
+            "activeTimePerTask": 999.2454761266708,
+            "outputTokens": 80662,
+            "outputTokensPerTask": 40331,
+            "outputCostUsd": 2.41986,
+            "outputCostPerTask": 1.20993
           }
         },
         "tlaps-distribution-examples--record": {
@@ -1692,19 +2558,40 @@ window.TLAPS_DATA = {
           "scratch": {
             "rate": 100,
             "pass": 1,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 392.12482142448425,
+            "activeTimePerTask": 392.12482142448425,
+            "outputTokens": 14120,
+            "outputTokensPerTask": 14120,
+            "outputCostUsd": 0.4236,
+            "outputCostPerTask": 0.4236
           }
         },
         "tlaps-distribution-examples--simplemutex": {
           "completion": {
             "rate": 100,
             "pass": 5,
-            "total": 5
+            "total": 5,
+            "taskCount": 5,
+            "activeTimeSecs": 478.8209662437439,
+            "activeTimePerTask": 95.76419324874878,
+            "outputTokens": 18984,
+            "outputTokensPerTask": 3796.8,
+            "outputCostUsd": 0.56952,
+            "outputCostPerTask": 0.113904
           },
           "scratch": {
             "rate": 100,
             "pass": 2,
-            "total": 2
+            "total": 2,
+            "taskCount": 2,
+            "activeTimeSecs": 282.82798886299133,
+            "activeTimePerTask": 141.41399443149567,
+            "outputTokens": 10427,
+            "outputTokensPerTask": 5213.5,
+            "outputCostUsd": 0.31281,
+            "outputCostPerTask": 0.156405
           }
         },
         "tlaps-distribution-examples--sumandmax": {
@@ -1712,7 +2599,14 @@ window.TLAPS_DATA = {
           "scratch": {
             "rate": 100,
             "pass": 1,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 250.63792657852173,
+            "activeTimePerTask": 250.63792657852173,
+            "outputTokens": 8353,
+            "outputTokensPerTask": 8353,
+            "outputCostUsd": 0.25059,
+            "outputCostPerTask": 0.25059
           }
         },
         "zookeeper-remix--zookeeper": {
@@ -1720,7 +2614,14 @@ window.TLAPS_DATA = {
           "scratch": {
             "rate": 0,
             "pass": 0,
-            "total": 9
+            "total": 9,
+            "taskCount": 9,
+            "activeTimeSecs": 34626.85418796539,
+            "activeTimePerTask": 3847.428243107266,
+            "outputTokens": 872213,
+            "outputTokensPerTask": 96912.55555555556,
+            "outputCostUsd": 26.16639,
+            "outputCostPerTask": 2.9073766666666665
           }
         },
         "zookeeper-remix--zookeeper-lowlevel": {
@@ -1728,7 +2629,14 @@ window.TLAPS_DATA = {
           "scratch": {
             "rate": 0,
             "pass": 0,
-            "total": 9
+            "total": 9,
+            "taskCount": 9,
+            "activeTimeSecs": 38006.813207149506,
+            "activeTimePerTask": 4222.979245238834,
+            "outputTokens": 943759,
+            "outputTokensPerTask": 104862.11111111111,
+            "outputCostUsd": 28.31277,
+            "outputCostPerTask": 3.1458633333333332
           }
         }
       }
@@ -1741,9 +2649,51 @@ window.TLAPS_DATA = {
       "logo": null,
       "kind": "agent",
       "generated": "2026-07-15",
+      "resultsFile": "results/copilot-gemini-3.1-pro-preview.json",
+      "resultsVersion": "fab62f907abb",
       "perMetric": {
         "completion": 78.7,
-        "scratch": 57.3
+        "scratch": 57.3,
+        "activeTimePerTask": 647.2131605420315,
+        "outputCostPerTask": 0.22062354929577466
+      },
+      "perMode": {
+        "completion": {
+          "rate": 78.7,
+          "pass": 380,
+          "total": 483,
+          "taskCount": 483,
+          "activeTimeSecs": 231949.7833325863,
+          "activeTimePerTask": 480.2272946844437,
+          "outputTokens": 5422290,
+          "outputTokensPerTask": 11226.273291925465,
+          "outputCostUsd": 65.06748,
+          "outputCostPerTask": 0.1347152795031056
+        },
+        "scratch": {
+          "rate": 57.3,
+          "pass": 130,
+          "total": 227,
+          "taskCount": 227,
+          "activeTimeSecs": 227571.560652256,
+          "activeTimePerTask": 1002.5178883359296,
+          "outputTokens": 7631270,
+          "outputTokensPerTask": 33617.9295154185,
+          "outputCostUsd": 91.57524,
+          "outputCostPerTask": 0.403415154185022
+        }
+      },
+      "usage": {
+        "taskCount": 710,
+        "activeTimeSecs": 459521.3439848423,
+        "outputTokens": 13053560,
+        "outputCostUsd": 156.64272
+      },
+      "pricing": {
+        "usdPerMillionTokens": 12,
+        "tier": "standard (up to 200K input tokens)",
+        "asOf": "2026-07-18",
+        "source": "https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing"
       },
       "perSpec": {
         "anvil--anvillock": {
@@ -1751,7 +2701,14 @@ window.TLAPS_DATA = {
           "scratch": {
             "rate": 100,
             "pass": 1,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 388.8719005584717,
+            "activeTimePerTask": 388.8719005584717,
+            "outputTokens": 13678,
+            "outputTokensPerTask": 13678,
+            "outputCostUsd": 0.164136,
+            "outputCostPerTask": 0.164136
           }
         },
         "etcd-specula--etcd-raft": {
@@ -1759,7 +2716,14 @@ window.TLAPS_DATA = {
           "scratch": {
             "rate": 0,
             "pass": 0,
-            "total": 8
+            "total": 8,
+            "taskCount": 8,
+            "activeTimeSecs": 16496.576391220093,
+            "activeTimePerTask": 2062.0720489025116,
+            "outputTokens": 212833,
+            "outputTokensPerTask": 26604.125,
+            "outputCostUsd": 2.553996,
+            "outputCostPerTask": 0.3192495
           }
         },
         "ivy-liveness--ivy-examples-alternating-bit-protocol": {
@@ -1767,7 +2731,14 @@ window.TLAPS_DATA = {
           "scratch": {
             "rate": 0,
             "pass": 0,
-            "total": 2
+            "total": 2,
+            "taskCount": 2,
+            "activeTimeSecs": 7236.762725830078,
+            "activeTimePerTask": 3618.381362915039,
+            "outputTokens": 206267,
+            "outputTokensPerTask": 103133.5,
+            "outputCostUsd": 2.475204,
+            "outputCostPerTask": 1.237602
           }
         },
         "ivy-liveness--ivy-examples-hybrid-reliable-broadcast-cisa": {
@@ -1775,7 +2746,14 @@ window.TLAPS_DATA = {
           "scratch": {
             "rate": 0,
             "pass": 0,
-            "total": 3
+            "total": 3,
+            "taskCount": 3,
+            "activeTimeSecs": 5075.654026031494,
+            "activeTimePerTask": 1691.8846753438313,
+            "outputTokens": 85682,
+            "outputTokensPerTask": 28560.666666666668,
+            "outputCostUsd": 1.028184,
+            "outputCostPerTask": 0.342728
           }
         },
         "ivy-liveness--ivy-examples-split-queue-2-new": {
@@ -1783,7 +2761,14 @@ window.TLAPS_DATA = {
           "scratch": {
             "rate": 0,
             "pass": 0,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 4978.8421177864075,
+            "activeTimePerTask": 4978.8421177864075,
+            "outputTokens": 192654,
+            "outputTokensPerTask": 192654,
+            "outputCostUsd": 2.311848,
+            "outputCostPerTask": 2.311848
           }
         },
         "ivy-liveness--ivy-examples-ticket": {
@@ -1791,7 +2776,14 @@ window.TLAPS_DATA = {
           "scratch": {
             "rate": 50,
             "pass": 1,
-            "total": 2
+            "total": 2,
+            "taskCount": 2,
+            "activeTimeSecs": 7390.256208181381,
+            "activeTimePerTask": 3695.1281040906906,
+            "outputTokens": 491080,
+            "outputTokensPerTask": 245540,
+            "outputCostUsd": 5.89296,
+            "outputCostPerTask": 2.94648
           }
         },
         "ivy-liveness--ivy-examples-ticket-nested": {
@@ -1799,7 +2791,14 @@ window.TLAPS_DATA = {
           "scratch": {
             "rate": 50,
             "pass": 1,
-            "total": 2
+            "total": 2,
+            "taskCount": 2,
+            "activeTimeSecs": 1162.295164823532,
+            "activeTimePerTask": 581.147582411766,
+            "outputTokens": 35710,
+            "outputTokensPerTask": 17855,
+            "outputCostUsd": 0.42852,
+            "outputCostPerTask": 0.21426
           }
         },
         "ivy-liveness--ivy-examples-tlb": {
@@ -1807,187 +2806,404 @@ window.TLAPS_DATA = {
           "scratch": {
             "rate": 0,
             "pass": 0,
-            "total": 2
+            "total": 2,
+            "taskCount": 2,
+            "activeTimeSecs": 2079.873946428299,
+            "activeTimePerTask": 1039.9369732141495,
+            "outputTokens": 29372,
+            "outputTokensPerTask": 14686,
+            "outputCostUsd": 0.352464,
+            "outputCostPerTask": 0.176232
           }
         },
         "openaddressing-lemmy-examples--openaddressing": {
           "completion": {
             "rate": 0,
             "pass": 0,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 1298.4554460048676,
+            "activeTimePerTask": 1298.4554460048676,
+            "outputTokens": 6588,
+            "outputTokensPerTask": 6588,
+            "outputCostUsd": 0.079056,
+            "outputCostPerTask": 0.079056
           },
           "scratch": {
             "rate": 0,
             "pass": 0,
-            "total": 5
+            "total": 5,
+            "taskCount": 5,
+            "activeTimeSecs": 12192.637870073318,
+            "activeTimePerTask": 2438.5275740146635,
+            "outputTokens": 652071,
+            "outputTokensPerTask": 130414.2,
+            "outputCostUsd": 7.824852,
+            "outputCostPerTask": 1.5649704
           }
         },
         "tlaplus-examples--tlaplus-examples-allocator": {
           "completion": {
             "rate": 85.7,
             "pass": 12,
-            "total": 14
+            "total": 14,
+            "taskCount": 14,
+            "activeTimeSecs": 2535.267802476883,
+            "activeTimePerTask": 181.09055731977736,
+            "outputTokens": 42619,
+            "outputTokensPerTask": 3044.214285714286,
+            "outputCostUsd": 0.511428,
+            "outputCostPerTask": 0.036530571428571426
           },
           "scratch": {
             "rate": 80,
             "pass": 4,
-            "total": 5
+            "total": 5,
+            "taskCount": 5,
+            "activeTimeSecs": 2297.580876350403,
+            "activeTimePerTask": 459.51617527008057,
+            "outputTokens": 49587,
+            "outputTokensPerTask": 9917.4,
+            "outputCostUsd": 0.595044,
+            "outputCostPerTask": 0.1190088
           }
         },
         "tlaplus-examples--tlaplus-examples-bakery-boulangerie": {
           "completion": {
             "rate": 100,
             "pass": 2,
-            "total": 2
+            "total": 2,
+            "taskCount": 2,
+            "activeTimeSecs": 1192.7841351032257,
+            "activeTimePerTask": 596.3920675516129,
+            "outputTokens": 27162,
+            "outputTokensPerTask": 13581,
+            "outputCostUsd": 0.325944,
+            "outputCostPerTask": 0.162972
           },
           "scratch": {
             "rate": 50,
             "pass": 2,
-            "total": 4
+            "total": 4,
+            "taskCount": 4,
+            "activeTimeSecs": 3613.7271797657013,
+            "activeTimePerTask": 903.4317949414253,
+            "outputTokens": 107212,
+            "outputTokensPerTask": 26803,
+            "outputCostUsd": 1.286544,
+            "outputCostPerTask": 0.321636
           }
         },
         "tlaplus-examples--tlaplus-examples-barriers": {
           "completion": {
             "rate": 81.8,
             "pass": 9,
-            "total": 11
+            "total": 11,
+            "taskCount": 11,
+            "activeTimeSecs": 7661.387050151825,
+            "activeTimePerTask": 696.489731831984,
+            "outputTokens": 256326,
+            "outputTokensPerTask": 23302.363636363636,
+            "outputCostUsd": 3.075912,
+            "outputCostPerTask": 0.2796283636363637
           },
           "scratch": {
             "rate": 40,
             "pass": 2,
-            "total": 5
+            "total": 5,
+            "taskCount": 5,
+            "activeTimeSecs": 12247.158108472824,
+            "activeTimePerTask": 2449.431621694565,
+            "outputTokens": 616209,
+            "outputTokensPerTask": 123241.8,
+            "outputCostUsd": 7.394508,
+            "outputCostPerTask": 1.4789016
           }
         },
         "tlaplus-examples--tlaplus-examples-bcastbyz": {
           "completion": {
             "rate": 92.3,
             "pass": 12,
-            "total": 13
+            "total": 13,
+            "taskCount": 13,
+            "activeTimeSecs": 12016.423139810562,
+            "activeTimePerTask": 924.3402415238894,
+            "outputTokens": 247026,
+            "outputTokensPerTask": 19002,
+            "outputCostUsd": 2.964312,
+            "outputCostPerTask": 0.228024
           },
           "scratch": {
             "rate": 60,
             "pass": 3,
-            "total": 5
+            "total": 5,
+            "taskCount": 5,
+            "activeTimeSecs": 5568.282418966293,
+            "activeTimePerTask": 1113.6564837932588,
+            "outputTokens": 163166,
+            "outputTokensPerTask": 32633.2,
+            "outputCostUsd": 1.957992,
+            "outputCostPerTask": 0.3915984
           }
         },
         "tlaplus-examples--tlaplus-examples-blockingqueue": {
           "completion": {
             "rate": 87.5,
             "pass": 7,
-            "total": 8
+            "total": 8,
+            "taskCount": 8,
+            "activeTimeSecs": 3562.3835220336914,
+            "activeTimePerTask": 445.2979402542114,
+            "outputTokens": 63999,
+            "outputTokensPerTask": 7999.875,
+            "outputCostUsd": 0.767988,
+            "outputCostPerTask": 0.0959985
           },
           "scratch": {
             "rate": 80,
             "pass": 4,
-            "total": 5
+            "total": 5,
+            "taskCount": 5,
+            "activeTimeSecs": 3520.289706468582,
+            "activeTimePerTask": 704.0579412937165,
+            "outputTokens": 114223,
+            "outputTokensPerTask": 22844.6,
+            "outputCostUsd": 1.370676,
+            "outputCostPerTask": 0.2741352
           }
         },
         "tlaplus-examples--tlaplus-examples-byihive": {
           "completion": {
             "rate": 100,
             "pass": 1,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 139.04321384429932,
+            "activeTimePerTask": 139.04321384429932,
+            "outputTokens": 3481,
+            "outputTokensPerTask": 3481,
+            "outputCostUsd": 0.041772,
+            "outputCostPerTask": 0.041772
           },
           "scratch": {
             "rate": 100,
             "pass": 1,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 99.03402423858643,
+            "activeTimePerTask": 99.03402423858643,
+            "outputTokens": 2186,
+            "outputTokensPerTask": 2186,
+            "outputCostUsd": 0.026232,
+            "outputCostPerTask": 0.026232
           }
         },
         "tlaplus-examples--tlaplus-examples-byzpaxos": {
           "completion": {
             "rate": 85.4,
             "pass": 35,
-            "total": 41
+            "total": 41,
+            "taskCount": 41,
+            "activeTimeSecs": 27084.81362438202,
+            "activeTimePerTask": 660.6052103507809,
+            "outputTokens": 606963,
+            "outputTokensPerTask": 14803.975609756097,
+            "outputCostUsd": 7.283556,
+            "outputCostPerTask": 0.17764770731707316
           },
           "scratch": {
             "rate": 36.4,
             "pass": 4,
-            "total": 11
+            "total": 11,
+            "taskCount": 11,
+            "activeTimeSecs": 10431.688084125519,
+            "activeTimePerTask": 948.3352803750472,
+            "outputTokens": 312045,
+            "outputTokensPerTask": 28367.727272727272,
+            "outputCostUsd": 3.74454,
+            "outputCostPerTask": 0.3404127272727273
           }
         },
         "tlaplus-examples--tlaplus-examples-cigarettesmokers": {
           "completion": {
             "rate": 87.5,
             "pass": 7,
-            "total": 8
+            "total": 8,
+            "taskCount": 8,
+            "activeTimeSecs": 1717.8225231170654,
+            "activeTimePerTask": 214.72781538963318,
+            "outputTokens": 33239,
+            "outputTokensPerTask": 4154.875,
+            "outputCostUsd": 0.398868,
+            "outputCostPerTask": 0.0498585
           },
           "scratch": {
             "rate": 100,
             "pass": 2,
-            "total": 2
+            "total": 2,
+            "taskCount": 2,
+            "activeTimeSecs": 531.5512630939484,
+            "activeTimePerTask": 265.7756315469742,
+            "outputTokens": 14086,
+            "outputTokensPerTask": 7043,
+            "outputCostUsd": 0.169032,
+            "outputCostPerTask": 0.084516
           }
         },
         "tlaplus-examples--tlaplus-examples-coffeecan": {
           "completion": {
             "rate": 100,
             "pass": 1,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 88.34387183189392,
+            "activeTimePerTask": 88.34387183189392,
+            "outputTokens": 1060,
+            "outputTokensPerTask": 1060,
+            "outputCostUsd": 0.01272,
+            "outputCostPerTask": 0.01272
           },
           "scratch": {
             "rate": 100,
             "pass": 1,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 128.4061405658722,
+            "activeTimePerTask": 128.4061405658722,
+            "outputTokens": 1394,
+            "outputTokensPerTask": 1394,
+            "outputCostUsd": 0.016728,
+            "outputCostPerTask": 0.016728
           }
         },
         "tlaplus-examples--tlaplus-examples-diehard": {
           "completion": {
             "rate": 100,
             "pass": 2,
-            "total": 2
+            "total": 2,
+            "taskCount": 2,
+            "activeTimeSecs": 510.80211448669434,
+            "activeTimePerTask": 255.40105724334717,
+            "outputTokens": 18851,
+            "outputTokensPerTask": 9425.5,
+            "outputCostUsd": 0.226212,
+            "outputCostPerTask": 0.113106
           },
           "scratch": {
             "rate": 100,
             "pass": 1,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 73.30867028236389,
+            "activeTimePerTask": 73.30867028236389,
+            "outputTokens": 883,
+            "outputTokensPerTask": 883,
+            "outputCostUsd": 0.010596,
+            "outputCostPerTask": 0.010596
           }
         },
         "tlaplus-examples--tlaplus-examples-ewd687a": {
           "completion": {
             "rate": 68.8,
             "pass": 11,
-            "total": 16
+            "total": 16,
+            "taskCount": 16,
+            "activeTimeSecs": 7869.0942442417145,
+            "activeTimePerTask": 491.81839026510715,
+            "outputTokens": 133768,
+            "outputTokensPerTask": 8360.5,
+            "outputCostUsd": 1.605216,
+            "outputCostPerTask": 0.100326
           },
           "scratch": {
             "rate": 33.3,
             "pass": 1,
-            "total": 3
+            "total": 3,
+            "taskCount": 3,
+            "activeTimeSecs": 5976.177186727524,
+            "activeTimePerTask": 1992.059062242508,
+            "outputTokens": 226164,
+            "outputTokensPerTask": 75388,
+            "outputCostUsd": 2.713968,
+            "outputCostPerTask": 0.904656
           }
         },
         "tlaplus-examples--tlaplus-examples-ewd840": {
           "completion": {
             "rate": 78.6,
             "pass": 11,
-            "total": 14
+            "total": 14,
+            "taskCount": 14,
+            "activeTimeSecs": 8906.171208143234,
+            "activeTimePerTask": 636.1550862959454,
+            "outputTokens": 319202,
+            "outputTokensPerTask": 22800.14285714286,
+            "outputCostUsd": 3.830424,
+            "outputCostPerTask": 0.2736017142857143
           },
           "scratch": {
             "rate": 80,
             "pass": 4,
-            "total": 5
+            "total": 5,
+            "taskCount": 5,
+            "activeTimeSecs": 1305.5153183937073,
+            "activeTimePerTask": 261.1030636787415,
+            "outputTokens": 38893,
+            "outputTokensPerTask": 7778.6,
+            "outputCostUsd": 0.466716,
+            "outputCostPerTask": 0.0933432
           }
         },
         "tlaplus-examples--tlaplus-examples-ewd998": {
           "completion": {
             "rate": 42.3,
             "pass": 22,
-            "total": 52
+            "total": 52,
+            "taskCount": 52,
+            "activeTimeSecs": 32250.74214529991,
+            "activeTimePerTask": 620.206579717306,
+            "outputTokens": 595977,
+            "outputTokensPerTask": 11461.096153846154,
+            "outputCostUsd": 7.151724,
+            "outputCostPerTask": 0.13753315384615383
           },
           "scratch": {
             "rate": 28.6,
             "pass": 2,
-            "total": 7
+            "total": 7,
+            "taskCount": 7,
+            "activeTimeSecs": 9428.22800207138,
+            "activeTimePerTask": 1346.8897145816259,
+            "outputTokens": 248695,
+            "outputTokensPerTask": 35527.857142857145,
+            "outputCostUsd": 2.98434,
+            "outputCostPerTask": 0.4263342857142857
           }
         },
         "tlaplus-examples--tlaplus-examples-finitemonotonic": {
           "completion": {
             "rate": 92.9,
             "pass": 13,
-            "total": 14
+            "total": 14,
+            "taskCount": 14,
+            "activeTimeSecs": 7487.471699953079,
+            "activeTimePerTask": 534.8194071395056,
+            "outputTokens": 238280,
+            "outputTokensPerTask": 17020,
+            "outputCostUsd": 2.85936,
+            "outputCostPerTask": 0.20424
           },
           "scratch": {
             "rate": 0,
             "pass": 0,
-            "total": 3
+            "total": 3,
+            "taskCount": 3,
+            "activeTimeSecs": 753.1763498783112,
+            "activeTimePerTask": 251.05878329277039,
+            "outputTokens": 6432,
+            "outputTokensPerTask": 2144,
+            "outputCostUsd": 0.077184,
+            "outputCostPerTask": 0.025728
           }
         },
         "tlaplus-examples--tlaplus-examples-germanprotocol": {
@@ -1995,86 +3211,184 @@ window.TLAPS_DATA = {
           "scratch": {
             "rate": 0,
             "pass": 0,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 2057.904940366745,
+            "activeTimePerTask": 2057.904940366745,
+            "outputTokens": 59420,
+            "outputTokensPerTask": 59420,
+            "outputCostUsd": 0.71304,
+            "outputCostPerTask": 0.71304
           }
         },
         "tlaplus-examples--tlaplus-examples-glowingraccoon": {
           "completion": {
             "rate": 83.3,
             "pass": 5,
-            "total": 6
+            "total": 6,
+            "taskCount": 6,
+            "activeTimeSecs": 632.545568227768,
+            "activeTimePerTask": 105.42426137129466,
+            "outputTokens": 8390,
+            "outputTokensPerTask": 1398.3333333333333,
+            "outputCostUsd": 0.10068,
+            "outputCostPerTask": 0.01678
           },
           "scratch": {
             "rate": 100,
             "pass": 3,
-            "total": 3
+            "total": 3,
+            "taskCount": 3,
+            "activeTimeSecs": 334.4483549594879,
+            "activeTimePerTask": 111.48278498649597,
+            "outputTokens": 3030,
+            "outputTokensPerTask": 1010,
+            "outputCostUsd": 0.03636,
+            "outputCostPerTask": 0.01212
           }
         },
         "tlaplus-examples--tlaplus-examples-keyvaluestore": {
           "completion": {
             "rate": 100,
             "pass": 1,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 126.2153971195221,
+            "activeTimePerTask": 126.2153971195221,
+            "outputTokens": 1780,
+            "outputTokensPerTask": 1780,
+            "outputCostUsd": 0.02136,
+            "outputCostPerTask": 0.02136
           },
           "scratch": {
             "rate": 100,
             "pass": 1,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 178.88370561599731,
+            "activeTimePerTask": 178.88370561599731,
+            "outputTokens": 7822,
+            "outputTokensPerTask": 7822,
+            "outputCostUsd": 0.093864,
+            "outputCostPerTask": 0.093864
           }
         },
         "tlaplus-examples--tlaplus-examples-lamport-mutex": {
           "completion": {
             "rate": 90,
             "pass": 18,
-            "total": 20
+            "total": 20,
+            "taskCount": 20,
+            "activeTimeSecs": 8271.630055904388,
+            "activeTimePerTask": 413.5815027952194,
+            "outputTokens": 153281,
+            "outputTokensPerTask": 7664.05,
+            "outputCostUsd": 1.839372,
+            "outputCostPerTask": 0.0919686
           },
           "scratch": {
             "rate": 0,
             "pass": 0,
-            "total": 2
+            "total": 2,
+            "taskCount": 2,
+            "activeTimeSecs": 2325.2218351364136,
+            "activeTimePerTask": 1162.6109175682068,
+            "outputTokens": 88522,
+            "outputTokensPerTask": 44261,
+            "outputCostUsd": 1.062264,
+            "outputCostPerTask": 0.531132
           }
         },
         "tlaplus-examples--tlaplus-examples-learnproofs": {
           "completion": {
             "rate": 100,
             "pass": 5,
-            "total": 5
+            "total": 5,
+            "taskCount": 5,
+            "activeTimeSecs": 461.1317620277405,
+            "activeTimePerTask": 92.2263524055481,
+            "outputTokens": 5530,
+            "outputTokensPerTask": 1106,
+            "outputCostUsd": 0.06636,
+            "outputCostPerTask": 0.013272
           },
           "scratch": {
             "rate": 100,
             "pass": 6,
-            "total": 6
+            "total": 6,
+            "taskCount": 6,
+            "activeTimeSecs": 836.195494890213,
+            "activeTimePerTask": 139.3659158150355,
+            "outputTokens": 12338,
+            "outputTokensPerTask": 2056.3333333333335,
+            "outputCostUsd": 0.148056,
+            "outputCostPerTask": 0.024676
           }
         },
         "tlaplus-examples--tlaplus-examples-locks-auxiliary-vars": {
           "completion": {
             "rate": 77.8,
             "pass": 7,
-            "total": 9
+            "total": 9,
+            "taskCount": 9,
+            "activeTimeSecs": 4234.56734418869,
+            "activeTimePerTask": 470.50748268763226,
+            "outputTokens": 108858,
+            "outputTokensPerTask": 12095.333333333334,
+            "outputCostUsd": 1.306296,
+            "outputCostPerTask": 0.145144
           },
           "scratch": {
             "rate": 80,
             "pass": 4,
-            "total": 5
+            "total": 5,
+            "taskCount": 5,
+            "activeTimeSecs": 3448.4403607845306,
+            "activeTimePerTask": 689.6880721569062,
+            "outputTokens": 136456,
+            "outputTokensPerTask": 27291.2,
+            "outputCostUsd": 1.637472,
+            "outputCostPerTask": 0.3274944
           }
         },
         "tlaplus-examples--tlaplus-examples-loopinvariance": {
           "completion": {
             "rate": 58.8,
             "pass": 10,
-            "total": 17
+            "total": 17,
+            "taskCount": 17,
+            "activeTimeSecs": 18959.656435251236,
+            "activeTimePerTask": 1115.273907955955,
+            "outputTokens": 282412,
+            "outputTokensPerTask": 16612.470588235294,
+            "outputCostUsd": 3.388944,
+            "outputCostPerTask": 0.19934964705882352
           },
           "scratch": {
             "rate": 0,
             "pass": 0,
-            "total": 3
+            "total": 3,
+            "taskCount": 3,
+            "activeTimeSecs": 3963.048469543457,
+            "activeTimePerTask": 1321.0161565144856,
+            "outputTokens": 80781,
+            "outputTokensPerTask": 26927,
+            "outputCostUsd": 0.969372,
+            "outputCostPerTask": 0.323124
           }
         },
         "tlaplus-examples--tlaplus-examples-majority": {
           "completion": {
             "rate": 88.9,
             "pass": 8,
-            "total": 9
+            "total": 9,
+            "taskCount": 9,
+            "activeTimeSecs": 1313.7955446243286,
+            "activeTimePerTask": 145.9772827360365,
+            "outputTokens": 27486,
+            "outputTokensPerTask": 3054,
+            "outputCostUsd": 0.329832,
+            "outputCostPerTask": 0.036648
           },
           "scratch": null
         },
@@ -2082,151 +3396,326 @@ window.TLAPS_DATA = {
           "completion": {
             "rate": 87.5,
             "pass": 7,
-            "total": 8
+            "total": 8,
+            "taskCount": 8,
+            "activeTimeSecs": 1899.7703816890717,
+            "activeTimePerTask": 237.47129771113396,
+            "outputTokens": 48239,
+            "outputTokensPerTask": 6029.875,
+            "outputCostUsd": 0.578868,
+            "outputCostPerTask": 0.0723585
           },
           "scratch": {
             "rate": 50,
             "pass": 1,
-            "total": 2
+            "total": 2,
+            "taskCount": 2,
+            "activeTimeSecs": 768.7251904010773,
+            "activeTimePerTask": 384.36259520053864,
+            "outputTokens": 31604,
+            "outputTokensPerTask": 15802,
+            "outputCostUsd": 0.379248,
+            "outputCostPerTask": 0.189624
           }
         },
         "tlaplus-examples--tlaplus-examples-missionariesandcannibals": {
           "completion": {
             "rate": 100,
             "pass": 1,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 116.74718165397644,
+            "activeTimePerTask": 116.74718165397644,
+            "outputTokens": 1249,
+            "outputTokensPerTask": 1249,
+            "outputCostUsd": 0.014988,
+            "outputCostPerTask": 0.014988
           },
           "scratch": {
             "rate": 100,
             "pass": 1,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 89.52772092819214,
+            "activeTimePerTask": 89.52772092819214,
+            "outputTokens": 1531,
+            "outputTokensPerTask": 1531,
+            "outputCostUsd": 0.018372,
+            "outputCostPerTask": 0.018372
           }
         },
         "tlaplus-examples--tlaplus-examples-multicarelevator": {
           "completion": {
             "rate": 100,
             "pass": 9,
-            "total": 9
+            "total": 9,
+            "taskCount": 9,
+            "activeTimeSecs": 1616.54549741745,
+            "activeTimePerTask": 179.61616637971667,
+            "outputTokens": 37706,
+            "outputTokensPerTask": 4189.555555555556,
+            "outputCostUsd": 0.452472,
+            "outputCostPerTask": 0.05027466666666666
           },
           "scratch": {
             "rate": 0,
             "pass": 0,
-            "total": 2
+            "total": 2,
+            "taskCount": 2,
+            "activeTimeSecs": 9750.153724431992,
+            "activeTimePerTask": 4875.076862215996,
+            "outputTokens": 323151,
+            "outputTokensPerTask": 161575.5,
+            "outputCostUsd": 3.877812,
+            "outputCostPerTask": 1.938906
           }
         },
         "tlaplus-examples--tlaplus-examples-paxos": {
           "completion": {
             "rate": 100,
             "pass": 3,
-            "total": 3
+            "total": 3,
+            "taskCount": 3,
+            "activeTimeSecs": 871.829596042633,
+            "activeTimePerTask": 290.60986534754437,
+            "outputTokens": 15406,
+            "outputTokensPerTask": 5135.333333333333,
+            "outputCostUsd": 0.184872,
+            "outputCostPerTask": 0.061624000000000005
           },
           "scratch": {
             "rate": 75,
             "pass": 3,
-            "total": 4
+            "total": 4,
+            "taskCount": 4,
+            "activeTimeSecs": 1744.3977200984955,
+            "activeTimePerTask": 436.09943002462387,
+            "outputTokens": 52935,
+            "outputTokensPerTask": 13233.75,
+            "outputCostUsd": 0.63522,
+            "outputCostPerTask": 0.158805
           }
         },
         "tlaplus-examples--tlaplus-examples-paxoshowtowinaturingaward": {
           "completion": {
             "rate": 77.8,
             "pass": 7,
-            "total": 9
+            "total": 9,
+            "taskCount": 9,
+            "activeTimeSecs": 5921.163444280624,
+            "activeTimePerTask": 657.9070493645138,
+            "outputTokens": 151468,
+            "outputTokensPerTask": 16829.777777777777,
+            "outputCostUsd": 1.817616,
+            "outputCostPerTask": 0.20195733333333332
           },
           "scratch": {
             "rate": 83.3,
             "pass": 5,
-            "total": 6
+            "total": 6,
+            "taskCount": 6,
+            "activeTimeSecs": 11599.23678445816,
+            "activeTimePerTask": 1933.2061307430267,
+            "outputTokens": 614269,
+            "outputTokensPerTask": 102378.16666666667,
+            "outputCostUsd": 7.371228,
+            "outputCostPerTask": 1.2285380000000001
           }
         },
         "tlaplus-examples--tlaplus-examples-readerswriters": {
           "completion": {
             "rate": 100,
             "pass": 3,
-            "total": 3
+            "total": 3,
+            "taskCount": 3,
+            "activeTimeSecs": 2522.7627494335175,
+            "activeTimePerTask": 840.9209164778391,
+            "outputTokens": 42379,
+            "outputTokensPerTask": 14126.333333333334,
+            "outputCostUsd": 0.508548,
+            "outputCostPerTask": 0.169516
           },
           "scratch": {
             "rate": 100,
             "pass": 2,
-            "total": 2
+            "total": 2,
+            "taskCount": 2,
+            "activeTimeSecs": 1923.253930091858,
+            "activeTimePerTask": 961.626965045929,
+            "outputTokens": 43235,
+            "outputTokensPerTask": 21617.5,
+            "outputCostUsd": 0.51882,
+            "outputCostPerTask": 0.25941
           }
         },
         "tlaplus-examples--tlaplus-examples-spanning": {
           "completion": {
             "rate": 100,
             "pass": 2,
-            "total": 2
+            "total": 2,
+            "taskCount": 2,
+            "activeTimeSecs": 287.9545109272003,
+            "activeTimePerTask": 143.97725546360016,
+            "outputTokens": 5494,
+            "outputTokensPerTask": 2747,
+            "outputCostUsd": 0.065928,
+            "outputCostPerTask": 0.032964
           },
           "scratch": {
             "rate": 0,
             "pass": 0,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 1339.0360720157623,
+            "activeTimePerTask": 1339.0360720157623,
+            "outputTokens": 73119,
+            "outputTokensPerTask": 73119,
+            "outputCostUsd": 0.877428,
+            "outputCostPerTask": 0.877428
           }
         },
         "tlaplus-examples--tlaplus-examples-spanningtree": {
           "completion": {
             "rate": 100,
             "pass": 1,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 64.34075498580933,
+            "activeTimePerTask": 64.34075498580933,
+            "outputTokens": 1038,
+            "outputTokensPerTask": 1038,
+            "outputCostUsd": 0.012456,
+            "outputCostPerTask": 0.012456
           },
           "scratch": {
             "rate": 100,
             "pass": 1,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 79.13617968559265,
+            "activeTimePerTask": 79.13617968559265,
+            "outputTokens": 1383,
+            "outputTokensPerTask": 1383,
+            "outputCostUsd": 0.016596,
+            "outputCostPerTask": 0.016596
           }
         },
         "tlaplus-examples--tlaplus-examples-specifyingsystems-asynchronousinterface": {
           "completion": {
             "rate": 100,
             "pass": 2,
-            "total": 2
+            "total": 2,
+            "taskCount": 2,
+            "activeTimeSecs": 116.84181141853333,
+            "activeTimePerTask": 58.42090570926666,
+            "outputTokens": 1378,
+            "outputTokensPerTask": 689,
+            "outputCostUsd": 0.016536,
+            "outputCostPerTask": 0.008268
           },
           "scratch": {
             "rate": 100,
             "pass": 2,
-            "total": 2
+            "total": 2,
+            "taskCount": 2,
+            "activeTimeSecs": 154.90181970596313,
+            "activeTimePerTask": 77.45090985298157,
+            "outputTokens": 2715,
+            "outputTokensPerTask": 1357.5,
+            "outputCostUsd": 0.03258,
+            "outputCostPerTask": 0.01629
           }
         },
         "tlaplus-examples--tlaplus-examples-specifyingsystems-cachingmemory": {
           "completion": {
             "rate": 100,
             "pass": 2,
-            "total": 2
+            "total": 2,
+            "taskCount": 2,
+            "activeTimeSecs": 177.8592550754547,
+            "activeTimePerTask": 88.92962753772736,
+            "outputTokens": 4007,
+            "outputTokensPerTask": 2003.5,
+            "outputCostUsd": 0.048084,
+            "outputCostPerTask": 0.024042
           },
           "scratch": {
             "rate": 100,
             "pass": 1,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 234.46676015853882,
+            "activeTimePerTask": 234.46676015853882,
+            "outputTokens": 3833,
+            "outputTokensPerTask": 3833,
+            "outputCostUsd": 0.045996,
+            "outputCostPerTask": 0.045996
           }
         },
         "tlaplus-examples--tlaplus-examples-specifyingsystems-composing": {
           "completion": {
             "rate": 100,
             "pass": 4,
-            "total": 4
+            "total": 4,
+            "taskCount": 4,
+            "activeTimeSecs": 382.3992886543274,
+            "activeTimePerTask": 95.59982216358185,
+            "outputTokens": 10706,
+            "outputTokensPerTask": 2676.5,
+            "outputCostUsd": 0.128472,
+            "outputCostPerTask": 0.032118
           },
           "scratch": {
             "rate": 100,
             "pass": 1,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 144.4243187904358,
+            "activeTimePerTask": 144.4243187904358,
+            "outputTokens": 476,
+            "outputTokensPerTask": 476,
+            "outputCostUsd": 0.005712,
+            "outputCostPerTask": 0.005712
           }
         },
         "tlaplus-examples--tlaplus-examples-specifyingsystems-fifo": {
           "completion": {
             "rate": 100,
             "pass": 2,
-            "total": 2
+            "total": 2,
+            "taskCount": 2,
+            "activeTimeSecs": 149.15152525901794,
+            "activeTimePerTask": 74.57576262950897,
+            "outputTokens": 1828,
+            "outputTokensPerTask": 914,
+            "outputCostUsd": 0.021936,
+            "outputCostPerTask": 0.010968
           },
           "scratch": {
             "rate": 100,
             "pass": 1,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 71.69258666038513,
+            "activeTimePerTask": 71.69258666038513,
+            "outputTokens": 1370,
+            "outputTokensPerTask": 1370,
+            "outputCostUsd": 0.01644,
+            "outputCostPerTask": 0.01644
           }
         },
         "tlaplus-examples--tlaplus-examples-specifyingsystems-hourclock": {
           "completion": {
             "rate": 100,
             "pass": 1,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 61.582809925079346,
+            "activeTimePerTask": 61.582809925079346,
+            "outputTokens": 576,
+            "outputTokensPerTask": 576,
+            "outputCostUsd": 0.006912,
+            "outputCostPerTask": 0.006912
           },
           "scratch": null
         },
@@ -2234,7 +3723,14 @@ window.TLAPS_DATA = {
           "completion": {
             "rate": 100,
             "pass": 3,
-            "total": 3
+            "total": 3,
+            "taskCount": 3,
+            "activeTimeSecs": 237.0189392566681,
+            "activeTimePerTask": 79.00631308555603,
+            "outputTokens": 2809,
+            "outputTokensPerTask": 936.3333333333334,
+            "outputCostUsd": 0.033708,
+            "outputCostPerTask": 0.011236000000000001
           },
           "scratch": null
         },
@@ -2242,7 +3738,14 @@ window.TLAPS_DATA = {
           "completion": {
             "rate": 100,
             "pass": 3,
-            "total": 3
+            "total": 3,
+            "taskCount": 3,
+            "activeTimeSecs": 184.0865924358368,
+            "activeTimePerTask": 61.362197478612266,
+            "outputTokens": 1596,
+            "outputTokensPerTask": 532,
+            "outputCostUsd": 0.019152,
+            "outputCostPerTask": 0.006384
           },
           "scratch": null
         },
@@ -2250,120 +3753,260 @@ window.TLAPS_DATA = {
           "completion": {
             "rate": 100,
             "pass": 1,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 88.71837997436523,
+            "activeTimePerTask": 88.71837997436523,
+            "outputTokens": 1193,
+            "outputTokensPerTask": 1193,
+            "outputCostUsd": 0.014316,
+            "outputCostPerTask": 0.014316
           },
           "scratch": {
             "rate": 100,
             "pass": 1,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 71.28620100021362,
+            "activeTimePerTask": 71.28620100021362,
+            "outputTokens": 629,
+            "outputTokensPerTask": 629,
+            "outputCostUsd": 0.007548,
+            "outputCostPerTask": 0.007548
           }
         },
         "tlaplus-examples--tlaplus-examples-sums-even": {
           "completion": {
             "rate": 100,
             "pass": 1,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 101.20575332641602,
+            "activeTimePerTask": 101.20575332641602,
+            "outputTokens": 954,
+            "outputTokensPerTask": 954,
+            "outputCostUsd": 0.011448,
+            "outputCostPerTask": 0.011448
           },
           "scratch": {
             "rate": 100,
             "pass": 2,
-            "total": 2
+            "total": 2,
+            "taskCount": 2,
+            "activeTimeSecs": 315.4661464691162,
+            "activeTimePerTask": 157.7330732345581,
+            "outputTokens": 1113,
+            "outputTokensPerTask": 556.5,
+            "outputCostUsd": 0.013356,
+            "outputCostPerTask": 0.006678
           }
         },
         "tlaplus-examples--tlaplus-examples-tcp": {
           "completion": {
             "rate": 68.8,
             "pass": 11,
-            "total": 16
+            "total": 16,
+            "taskCount": 16,
+            "activeTimeSecs": 16555.68684387207,
+            "activeTimePerTask": 1034.7304277420044,
+            "outputTokens": 326518,
+            "outputTokensPerTask": 20407.375,
+            "outputCostUsd": 3.918216,
+            "outputCostPerTask": 0.2448885
           },
           "scratch": {
             "rate": 66.7,
             "pass": 2,
-            "total": 3
+            "total": 3,
+            "taskCount": 3,
+            "activeTimeSecs": 4394.653159856796,
+            "activeTimePerTask": 1464.884386618932,
+            "outputTokens": 109330,
+            "outputTokensPerTask": 36443.333333333336,
+            "outputCostUsd": 1.31196,
+            "outputCostPerTask": 0.43732
           }
         },
         "tlaplus-examples--tlaplus-examples-teachingconcurrency": {
           "completion": {
             "rate": 100,
             "pass": 8,
-            "total": 8
+            "total": 8,
+            "taskCount": 8,
+            "activeTimeSecs": 1261.2518994808197,
+            "activeTimePerTask": 157.65648743510246,
+            "outputTokens": 25504,
+            "outputTokensPerTask": 3188,
+            "outputCostUsd": 0.306048,
+            "outputCostPerTask": 0.038256
           },
           "scratch": {
             "rate": 100,
             "pass": 8,
-            "total": 8
+            "total": 8,
+            "taskCount": 8,
+            "activeTimeSecs": 3917.354043006897,
+            "activeTimePerTask": 489.6692553758621,
+            "outputTokens": 159054,
+            "outputTokensPerTask": 19881.75,
+            "outputCostUsd": 1.908648,
+            "outputCostPerTask": 0.238581
           }
         },
         "tlaplus-examples--tlaplus-examples-tencentpaxos": {
           "completion": {
             "rate": 52.6,
             "pass": 10,
-            "total": 19
+            "total": 19,
+            "taskCount": 19,
+            "activeTimeSecs": 15734.496785640717,
+            "activeTimePerTask": 828.131409770564,
+            "outputTokens": 661300,
+            "outputTokensPerTask": 34805.26315789474,
+            "outputCostUsd": 7.9356,
+            "outputCostPerTask": 0.41766315789473685
           },
           "scratch": {
             "rate": 0,
             "pass": 0,
-            "total": 2
+            "total": 2,
+            "taskCount": 2,
+            "activeTimeSecs": 6492.498642206192,
+            "activeTimePerTask": 3246.249321103096,
+            "outputTokens": 257847,
+            "outputTokensPerTask": 128923.5,
+            "outputCostUsd": 3.094164,
+            "outputCostPerTask": 1.547082
           }
         },
         "tlaplus-examples--tlaplus-examples-termination": {
           "completion": {
             "rate": 100,
             "pass": 4,
-            "total": 4
+            "total": 4,
+            "taskCount": 4,
+            "activeTimeSecs": 971.9462954998016,
+            "activeTimePerTask": 242.9865738749504,
+            "outputTokens": 18863,
+            "outputTokensPerTask": 4715.75,
+            "outputCostUsd": 0.226356,
+            "outputCostPerTask": 0.056589
           },
           "scratch": {
             "rate": 100,
             "pass": 1,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 3394.072772026062,
+            "activeTimePerTask": 3394.072772026062,
+            "outputTokens": 49087,
+            "outputTokensPerTask": 49087,
+            "outputCostUsd": 0.589044,
+            "outputCostPerTask": 0.589044
           }
         },
         "tlaplus-examples--tlaplus-examples-transaction-commit": {
           "completion": {
             "rate": 91.7,
             "pass": 11,
-            "total": 12
+            "total": 12,
+            "taskCount": 12,
+            "activeTimeSecs": 4475.3655841350555,
+            "activeTimePerTask": 372.9471320112546,
+            "outputTokens": 156212,
+            "outputTokensPerTask": 13017.666666666666,
+            "outputCostUsd": 1.874544,
+            "outputCostPerTask": 0.156212
           },
           "scratch": {
             "rate": 100,
             "pass": 4,
-            "total": 4
+            "total": 4,
+            "taskCount": 4,
+            "activeTimeSecs": 1121.5506613254547,
+            "activeTimePerTask": 280.3876653313637,
+            "outputTokens": 23102,
+            "outputTokensPerTask": 5775.5,
+            "outputCostUsd": 0.277224,
+            "outputCostPerTask": 0.069306
           }
         },
         "tlaplus-examples--tlaplus-examples-twophase": {
           "completion": {
             "rate": 100,
             "pass": 1,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 209.07837557792664,
+            "activeTimePerTask": 209.07837557792664,
+            "outputTokens": 4033,
+            "outputTokensPerTask": 4033,
+            "outputCostUsd": 0.048396,
+            "outputCostPerTask": 0.048396
           },
           "scratch": {
             "rate": 100,
             "pass": 2,
-            "total": 2
+            "total": 2,
+            "taskCount": 2,
+            "activeTimeSecs": 178.1040666103363,
+            "activeTimePerTask": 89.05203330516815,
+            "outputTokens": 3116,
+            "outputTokensPerTask": 1558,
+            "outputCostUsd": 0.037392,
+            "outputCostPerTask": 0.018696
           }
         },
         "tlaps-distribution-examples--allocator": {
           "completion": {
             "rate": 100,
             "pass": 10,
-            "total": 10
+            "total": 10,
+            "taskCount": 10,
+            "activeTimeSecs": 1445.4164888858795,
+            "activeTimePerTask": 144.54164888858796,
+            "outputTokens": 17988,
+            "outputTokensPerTask": 1798.8,
+            "outputCostUsd": 0.215856,
+            "outputCostPerTask": 0.0215856
           },
           "scratch": {
             "rate": 100,
             "pass": 4,
-            "total": 4
+            "total": 4,
+            "taskCount": 4,
+            "activeTimeSecs": 754.6695337295532,
+            "activeTimePerTask": 188.6673834323883,
+            "outputTokens": 5409,
+            "outputTokensPerTask": 1352.25,
+            "outputCostUsd": 0.064908,
+            "outputCostPerTask": 0.016227
           }
         },
         "tlaps-distribution-examples--atomicbakery": {
           "completion": {
             "rate": 0,
             "pass": 0,
-            "total": 8
+            "total": 8,
+            "taskCount": 8,
+            "activeTimeSecs": 7495.906969070435,
+            "activeTimePerTask": 936.9883711338043,
+            "outputTokens": 166637,
+            "outputTokensPerTask": 20829.625,
+            "outputCostUsd": 1.999644,
+            "outputCostPerTask": 0.2499555
           },
           "scratch": {
             "rate": 50,
             "pass": 1,
-            "total": 2
+            "total": 2,
+            "taskCount": 2,
+            "activeTimeSecs": 2457.3979802131653,
+            "activeTimePerTask": 1228.6989901065826,
+            "outputTokens": 79574,
+            "outputTokensPerTask": 39787,
+            "outputCostUsd": 0.954888,
+            "outputCostPerTask": 0.477444
           }
         },
         "tlaps-distribution-examples--bakery": {
@@ -2371,91 +4014,196 @@ window.TLAPS_DATA = {
           "scratch": {
             "rate": 100,
             "pass": 1,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 5471.800439119339,
+            "activeTimePerTask": 5471.800439119339,
+            "outputTokens": 156489,
+            "outputTokensPerTask": 156489,
+            "outputCostUsd": 1.877868,
+            "outputCostPerTask": 1.877868
           }
         },
         "tlaps-distribution-examples--bubblesort": {
           "completion": {
             "rate": 100,
             "pass": 8,
-            "total": 8
+            "total": 8,
+            "taskCount": 8,
+            "activeTimeSecs": 752.3614671230316,
+            "activeTimePerTask": 94.04518339037895,
+            "outputTokens": 10352,
+            "outputTokensPerTask": 1294,
+            "outputCostUsd": 0.124224,
+            "outputCostPerTask": 0.015528
           },
           "scratch": {
             "rate": 100,
             "pass": 3,
-            "total": 3
+            "total": 3,
+            "taskCount": 3,
+            "activeTimeSecs": 1545.3675310611725,
+            "activeTimePerTask": 515.1225103537241,
+            "outputTokens": 57610,
+            "outputTokensPerTask": 19203.333333333332,
+            "outputCostUsd": 0.69132,
+            "outputCostPerTask": 0.23044
           }
         },
         "tlaps-distribution-examples--cantor": {
           "completion": {
             "rate": 100,
             "pass": 11,
-            "total": 11
+            "total": 11,
+            "taskCount": 11,
+            "activeTimeSecs": 1111.8481483459473,
+            "activeTimePerTask": 101.07710439508611,
+            "outputTokens": 19790,
+            "outputTokensPerTask": 1799.090909090909,
+            "outputCostUsd": 0.23748,
+            "outputCostPerTask": 0.02158909090909091
           },
           "scratch": {
             "rate": 100,
             "pass": 10,
-            "total": 10
+            "total": 10,
+            "taskCount": 10,
+            "activeTimeSecs": 1103.2687606811523,
+            "activeTimePerTask": 110.32687606811524,
+            "outputTokens": 21657,
+            "outputTokensPerTask": 2165.7,
+            "outputCostUsd": 0.259884,
+            "outputCostPerTask": 0.025988400000000002
           }
         },
         "tlaps-distribution-examples--consensus": {
           "completion": {
             "rate": 84,
             "pass": 21,
-            "total": 25
+            "total": 25,
+            "taskCount": 25,
+            "activeTimeSecs": 6774.599507808685,
+            "activeTimePerTask": 270.9839803123474,
+            "outputTokens": 176961,
+            "outputTokensPerTask": 7078.44,
+            "outputCostUsd": 2.123532,
+            "outputCostPerTask": 0.08494128
           },
           "scratch": {
             "rate": 70,
             "pass": 7,
-            "total": 10
+            "total": 10,
+            "taskCount": 10,
+            "activeTimeSecs": 14267.564596414566,
+            "activeTimePerTask": 1426.7564596414566,
+            "outputTokens": 450968,
+            "outputTokensPerTask": 45096.8,
+            "outputCostUsd": 5.411616,
+            "outputCostPerTask": 0.5411616
           }
         },
         "tlaps-distribution-examples--data": {
           "completion": {
             "rate": 73.3,
             "pass": 11,
-            "total": 15
+            "total": 15,
+            "taskCount": 15,
+            "activeTimeSecs": 3988.6448645591736,
+            "activeTimePerTask": 265.90965763727826,
+            "outputTokens": 93943,
+            "outputTokensPerTask": 6262.866666666667,
+            "outputCostUsd": 1.127316,
+            "outputCostPerTask": 0.0751544
           },
           "scratch": {
             "rate": 66.7,
             "pass": 6,
-            "total": 9
+            "total": 9,
+            "taskCount": 9,
+            "activeTimeSecs": 3806.5870537757874,
+            "activeTimePerTask": 422.9541170861986,
+            "outputTokens": 124208,
+            "outputTokensPerTask": 13800.888888888889,
+            "outputCostUsd": 1.490496,
+            "outputCostPerTask": 0.16561066666666668
           }
         },
         "tlaps-distribution-examples--euclid": {
           "completion": {
             "rate": 100,
             "pass": 6,
-            "total": 6
+            "total": 6,
+            "taskCount": 6,
+            "activeTimeSecs": 696.7346901893616,
+            "activeTimePerTask": 116.1224483648936,
+            "outputTokens": 12102,
+            "outputTokensPerTask": 2017,
+            "outputCostUsd": 0.145224,
+            "outputCostPerTask": 0.024204
           },
           "scratch": {
             "rate": 100,
             "pass": 5,
-            "total": 5
+            "total": 5,
+            "taskCount": 5,
+            "activeTimeSecs": 1043.9709055423737,
+            "activeTimePerTask": 208.79418110847473,
+            "outputTokens": 21341,
+            "outputTokensPerTask": 4268.2,
+            "outputCostUsd": 0.256092,
+            "outputCostPerTask": 0.0512184
           }
         },
         "tlaps-distribution-examples--ewd840": {
           "completion": {
             "rate": 100,
             "pass": 2,
-            "total": 2
+            "total": 2,
+            "taskCount": 2,
+            "activeTimeSecs": 424.25855588912964,
+            "activeTimePerTask": 212.12927794456482,
+            "outputTokens": 8218,
+            "outputTokensPerTask": 4109,
+            "outputCostUsd": 0.098616,
+            "outputCostPerTask": 0.049308
           },
           "scratch": {
             "rate": 100,
             "pass": 1,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 628.6618428230286,
+            "activeTimePerTask": 628.6618428230286,
+            "outputTokens": 25469,
+            "outputTokensPerTask": 25469,
+            "outputCostUsd": 0.305628,
+            "outputCostPerTask": 0.305628
           }
         },
         "tlaps-distribution-examples--paxos": {
           "completion": {
             "rate": 84.6,
             "pass": 11,
-            "total": 13
+            "total": 13,
+            "taskCount": 13,
+            "activeTimeSecs": 5623.090968370438,
+            "activeTimePerTask": 432.5454591054183,
+            "outputTokens": 167427,
+            "outputTokensPerTask": 12879,
+            "outputCostUsd": 2.009124,
+            "outputCostPerTask": 0.154548
           },
           "scratch": {
             "rate": 16.7,
             "pass": 1,
-            "total": 6
+            "total": 6,
+            "taskCount": 6,
+            "activeTimeSecs": 6952.580048084259,
+            "activeTimePerTask": 1158.7633413473766,
+            "outputTokens": 308509,
+            "outputTokensPerTask": 51418.166666666664,
+            "outputCostUsd": 3.702108,
+            "outputCostPerTask": 0.617018
           }
         },
         "tlaps-distribution-examples--peterson": {
@@ -2463,7 +4211,14 @@ window.TLAPS_DATA = {
           "scratch": {
             "rate": 50,
             "pass": 1,
-            "total": 2
+            "total": 2,
+            "taskCount": 2,
+            "activeTimeSecs": 1067.0578262805939,
+            "activeTimePerTask": 533.5289131402969,
+            "outputTokens": 55291,
+            "outputTokensPerTask": 27645.5,
+            "outputCostUsd": 0.663492,
+            "outputCostPerTask": 0.331746
           }
         },
         "tlaps-distribution-examples--record": {
@@ -2471,19 +4226,40 @@ window.TLAPS_DATA = {
           "scratch": {
             "rate": 100,
             "pass": 1,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 232.5543189048767,
+            "activeTimePerTask": 232.5543189048767,
+            "outputTokens": 9005,
+            "outputTokensPerTask": 9005,
+            "outputCostUsd": 0.10806,
+            "outputCostPerTask": 0.10806
           }
         },
         "tlaps-distribution-examples--simplemutex": {
           "completion": {
             "rate": 80,
             "pass": 4,
-            "total": 5
+            "total": 5,
+            "taskCount": 5,
+            "activeTimeSecs": 1308.569568157196,
+            "activeTimePerTask": 261.7139136314392,
+            "outputTokens": 46138,
+            "outputTokensPerTask": 9227.6,
+            "outputCostUsd": 0.553656,
+            "outputCostPerTask": 0.1107312
           },
           "scratch": {
             "rate": 100,
             "pass": 2,
-            "total": 2
+            "total": 2,
+            "taskCount": 2,
+            "activeTimeSecs": 278.0215802192688,
+            "activeTimePerTask": 139.0107901096344,
+            "outputTokens": 2937,
+            "outputTokensPerTask": 1468.5,
+            "outputCostUsd": 0.035244,
+            "outputCostPerTask": 0.017622
           }
         },
         "tlaps-distribution-examples--sumandmax": {
@@ -2491,7 +4267,14 @@ window.TLAPS_DATA = {
           "scratch": {
             "rate": 100,
             "pass": 1,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 180.2242031097412,
+            "activeTimePerTask": 180.2242031097412,
+            "outputTokens": 3980,
+            "outputTokensPerTask": 3980,
+            "outputCostUsd": 0.04776,
+            "outputCostPerTask": 0.04776
           }
         },
         "zookeeper-remix--zookeeper": {
@@ -2499,7 +4282,14 @@ window.TLAPS_DATA = {
           "scratch": {
             "rate": 0,
             "pass": 0,
-            "total": 9
+            "total": 9,
+            "taskCount": 9,
+            "activeTimeSecs": 5863.608232021332,
+            "activeTimePerTask": 651.512025780148,
+            "outputTokens": 162941,
+            "outputTokensPerTask": 18104.555555555555,
+            "outputCostUsd": 1.955292,
+            "outputCostPerTask": 0.21725466666666668
           }
         },
         "zookeeper-remix--zookeeper-lowlevel": {
@@ -2507,7 +4297,14 @@ window.TLAPS_DATA = {
           "scratch": {
             "rate": 0,
             "pass": 0,
-            "total": 9
+            "total": 9,
+            "taskCount": 9,
+            "activeTimeSecs": 8014.250458717346,
+            "activeTimePerTask": 890.4722731908163,
+            "outputTokens": 184092,
+            "outputTokensPerTask": 20454.666666666668,
+            "outputCostUsd": 2.209104,
+            "outputCostPerTask": 0.245456
           }
         }
       }
@@ -2520,9 +4317,51 @@ window.TLAPS_DATA = {
       "logo": null,
       "kind": "agent",
       "generated": "2026-07-07",
+      "resultsFile": "results/copilot.json",
+      "resultsVersion": "6ca339f01a79",
       "perMetric": {
         "completion": 69.2,
-        "scratch": 61.2
+        "scratch": 61.2,
+        "activeTimePerTask": 867.6088385081626,
+        "outputCostPerTask": 1.3552488028169014
+      },
+      "perMode": {
+        "completion": {
+          "rate": 69.2,
+          "pass": 334,
+          "total": 483,
+          "taskCount": 483,
+          "activeTimeSecs": 341113.97290468216,
+          "activeTimePerTask": 706.2401095335034,
+          "outputTokens": 21037935,
+          "outputTokensPerTask": 43556.801242236026,
+          "outputCostUsd": 525.948375,
+          "outputCostPerTask": 1.0889200310559006
+        },
+        "scratch": {
+          "rate": 61.2,
+          "pass": 139,
+          "total": 227,
+          "taskCount": 227,
+          "activeTimeSecs": 274888.30243611336,
+          "activeTimePerTask": 1210.9616847405875,
+          "outputTokens": 17451131,
+          "outputTokensPerTask": 76877.22907488987,
+          "outputCostUsd": 436.278275,
+          "outputCostPerTask": 1.9219307268722468
+        }
+      },
+      "usage": {
+        "taskCount": 710,
+        "activeTimeSecs": 616002.2753407955,
+        "outputTokens": 38489066,
+        "outputCostUsd": 962.22665
+      },
+      "pricing": {
+        "usdPerMillionTokens": 25,
+        "tier": "standard",
+        "asOf": "2026-07-18",
+        "source": "https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing"
       },
       "perSpec": {
         "anvil--anvillock": {
@@ -2530,7 +4369,14 @@ window.TLAPS_DATA = {
           "scratch": {
             "rate": 100,
             "pass": 1,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 2404.7526001930237,
+            "activeTimePerTask": 2404.7526001930237,
+            "outputTokens": 165611,
+            "outputTokensPerTask": 165611,
+            "outputCostUsd": 4.140275,
+            "outputCostPerTask": 4.140275
           }
         },
         "etcd-specula--etcd-raft": {
@@ -2538,7 +4384,14 @@ window.TLAPS_DATA = {
           "scratch": {
             "rate": 0,
             "pass": 0,
-            "total": 8
+            "total": 8,
+            "taskCount": 8,
+            "activeTimeSecs": 18097.868116378784,
+            "activeTimePerTask": 2262.233514547348,
+            "outputTokens": 938439,
+            "outputTokensPerTask": 117304.875,
+            "outputCostUsd": 23.460975,
+            "outputCostPerTask": 2.932621875
           }
         },
         "ivy-liveness--ivy-examples-alternating-bit-protocol": {
@@ -2546,7 +4399,14 @@ window.TLAPS_DATA = {
           "scratch": {
             "rate": 50,
             "pass": 1,
-            "total": 2
+            "total": 2,
+            "taskCount": 2,
+            "activeTimeSecs": 4956.917547464371,
+            "activeTimePerTask": 2478.4587737321854,
+            "outputTokens": 315156,
+            "outputTokensPerTask": 157578,
+            "outputCostUsd": 7.8789,
+            "outputCostPerTask": 3.93945
           }
         },
         "ivy-liveness--ivy-examples-hybrid-reliable-broadcast-cisa": {
@@ -2554,7 +4414,14 @@ window.TLAPS_DATA = {
           "scratch": {
             "rate": 33.3,
             "pass": 1,
-            "total": 3
+            "total": 3,
+            "taskCount": 3,
+            "activeTimeSecs": 8916.003256559372,
+            "activeTimePerTask": 2972.0010855197906,
+            "outputTokens": 586207,
+            "outputTokensPerTask": 195402.33333333334,
+            "outputCostUsd": 14.655175,
+            "outputCostPerTask": 4.885058333333333
           }
         },
         "ivy-liveness--ivy-examples-split-queue-2-new": {
@@ -2562,7 +4429,14 @@ window.TLAPS_DATA = {
           "scratch": {
             "rate": 0,
             "pass": 0,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 2067.091794729233,
+            "activeTimePerTask": 2067.091794729233,
+            "outputTokens": 132153,
+            "outputTokensPerTask": 132153,
+            "outputCostUsd": 3.303825,
+            "outputCostPerTask": 3.303825
           }
         },
         "ivy-liveness--ivy-examples-ticket": {
@@ -2570,7 +4444,14 @@ window.TLAPS_DATA = {
           "scratch": {
             "rate": 100,
             "pass": 2,
-            "total": 2
+            "total": 2,
+            "taskCount": 2,
+            "activeTimeSecs": 6521.704998731613,
+            "activeTimePerTask": 3260.8524993658066,
+            "outputTokens": 430379,
+            "outputTokensPerTask": 215189.5,
+            "outputCostUsd": 10.759475,
+            "outputCostPerTask": 5.3797375
           }
         },
         "ivy-liveness--ivy-examples-ticket-nested": {
@@ -2578,7 +4459,14 @@ window.TLAPS_DATA = {
           "scratch": {
             "rate": 0,
             "pass": 0,
-            "total": 2
+            "total": 2,
+            "taskCount": 2,
+            "activeTimeSecs": 2475.523413181305,
+            "activeTimePerTask": 1237.7617065906525,
+            "outputTokens": 159032,
+            "outputTokensPerTask": 79516,
+            "outputCostUsd": 3.9758,
+            "outputCostPerTask": 1.9879
           }
         },
         "ivy-liveness--ivy-examples-tlb": {
@@ -2586,187 +4474,404 @@ window.TLAPS_DATA = {
           "scratch": {
             "rate": 0,
             "pass": 0,
-            "total": 2
+            "total": 2,
+            "taskCount": 2,
+            "activeTimeSecs": 4528.0017149448395,
+            "activeTimePerTask": 2264.0008574724197,
+            "outputTokens": 261426,
+            "outputTokensPerTask": 130713,
+            "outputCostUsd": 6.53565,
+            "outputCostPerTask": 3.267825
           }
         },
         "openaddressing-lemmy-examples--openaddressing": {
           "completion": {
             "rate": 0,
             "pass": 0,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 1764.4345598220825,
+            "activeTimePerTask": 1764.4345598220825,
+            "outputTokens": 89689,
+            "outputTokensPerTask": 89689,
+            "outputCostUsd": 2.242225,
+            "outputCostPerTask": 2.242225
           },
           "scratch": {
             "rate": 20,
             "pass": 1,
-            "total": 5
+            "total": 5,
+            "taskCount": 5,
+            "activeTimeSecs": 13403.234927654266,
+            "activeTimePerTask": 2680.6469855308533,
+            "outputTokens": 812826,
+            "outputTokensPerTask": 162565.2,
+            "outputCostUsd": 20.32065,
+            "outputCostPerTask": 4.0641300000000005
           }
         },
         "tlaplus-examples--tlaplus-examples-allocator": {
           "completion": {
             "rate": 85.7,
             "pass": 12,
-            "total": 14
+            "total": 14,
+            "taskCount": 14,
+            "activeTimeSecs": 7241.768203735352,
+            "activeTimePerTask": 517.269157409668,
+            "outputTokens": 512055,
+            "outputTokensPerTask": 36575.357142857145,
+            "outputCostUsd": 12.801375,
+            "outputCostPerTask": 0.9143839285714286
           },
           "scratch": {
             "rate": 60,
             "pass": 3,
-            "total": 5
+            "total": 5,
+            "taskCount": 5,
+            "activeTimeSecs": 5512.276570081711,
+            "activeTimePerTask": 1102.455314016342,
+            "outputTokens": 326056,
+            "outputTokensPerTask": 65211.2,
+            "outputCostUsd": 8.1514,
+            "outputCostPerTask": 1.6302800000000002
           }
         },
         "tlaplus-examples--tlaplus-examples-bakery-boulangerie": {
           "completion": {
             "rate": 100,
             "pass": 2,
-            "total": 2
+            "total": 2,
+            "taskCount": 2,
+            "activeTimeSecs": 3835.217011451721,
+            "activeTimePerTask": 1917.6085057258606,
+            "outputTokens": 166601,
+            "outputTokensPerTask": 83300.5,
+            "outputCostUsd": 4.165025,
+            "outputCostPerTask": 2.0825125
           },
           "scratch": {
             "rate": 25,
             "pass": 1,
-            "total": 4
+            "total": 4,
+            "taskCount": 4,
+            "activeTimeSecs": 12390.465960979462,
+            "activeTimePerTask": 3097.6164902448654,
+            "outputTokens": 773078,
+            "outputTokensPerTask": 193269.5,
+            "outputCostUsd": 19.32695,
+            "outputCostPerTask": 4.8317375
           }
         },
         "tlaplus-examples--tlaplus-examples-barriers": {
           "completion": {
             "rate": 72.7,
             "pass": 8,
-            "total": 11
+            "total": 11,
+            "taskCount": 11,
+            "activeTimeSecs": 4988.604056119919,
+            "activeTimePerTask": 453.5094596472654,
+            "outputTokens": 327548,
+            "outputTokensPerTask": 29777.090909090908,
+            "outputCostUsd": 8.1887,
+            "outputCostPerTask": 0.7444272727272728
           },
           "scratch": {
             "rate": 40,
             "pass": 2,
-            "total": 5
+            "total": 5,
+            "taskCount": 5,
+            "activeTimeSecs": 8510.210095882416,
+            "activeTimePerTask": 1702.042019176483,
+            "outputTokens": 561443,
+            "outputTokensPerTask": 112288.6,
+            "outputCostUsd": 14.036075,
+            "outputCostPerTask": 2.8072150000000002
           }
         },
         "tlaplus-examples--tlaplus-examples-bcastbyz": {
           "completion": {
             "rate": 92.3,
             "pass": 12,
-            "total": 13
+            "total": 13,
+            "taskCount": 13,
+            "activeTimeSecs": 4864.627450704575,
+            "activeTimePerTask": 374.2021115926596,
+            "outputTokens": 315027,
+            "outputTokensPerTask": 24232.846153846152,
+            "outputCostUsd": 7.875675,
+            "outputCostPerTask": 0.6058211538461539
           },
           "scratch": {
             "rate": 100,
             "pass": 5,
-            "total": 5
+            "total": 5,
+            "taskCount": 5,
+            "activeTimeSecs": 2840.440297603607,
+            "activeTimePerTask": 568.0880595207215,
+            "outputTokens": 194762,
+            "outputTokensPerTask": 38952.4,
+            "outputCostUsd": 4.86905,
+            "outputCostPerTask": 0.97381
           }
         },
         "tlaplus-examples--tlaplus-examples-blockingqueue": {
           "completion": {
             "rate": 87.5,
             "pass": 7,
-            "total": 8
+            "total": 8,
+            "taskCount": 8,
+            "activeTimeSecs": 3479.7543411254883,
+            "activeTimePerTask": 434.96929264068604,
+            "outputTokens": 206987,
+            "outputTokensPerTask": 25873.375,
+            "outputCostUsd": 5.174675,
+            "outputCostPerTask": 0.646834375
           },
           "scratch": {
             "rate": 20,
             "pass": 1,
-            "total": 5
+            "total": 5,
+            "taskCount": 5,
+            "activeTimeSecs": 3443.201746702194,
+            "activeTimePerTask": 688.6403493404389,
+            "outputTokens": 232249,
+            "outputTokensPerTask": 46449.8,
+            "outputCostUsd": 5.806225,
+            "outputCostPerTask": 1.161245
           }
         },
         "tlaplus-examples--tlaplus-examples-byihive": {
           "completion": {
             "rate": 100,
             "pass": 1,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 160.05508422851562,
+            "activeTimePerTask": 160.05508422851562,
+            "outputTokens": 10396,
+            "outputTokensPerTask": 10396,
+            "outputCostUsd": 0.2599,
+            "outputCostPerTask": 0.2599
           },
           "scratch": {
             "rate": 100,
             "pass": 1,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 127.05935311317444,
+            "activeTimePerTask": 127.05935311317444,
+            "outputTokens": 7352,
+            "outputTokensPerTask": 7352,
+            "outputCostUsd": 0.1838,
+            "outputCostPerTask": 0.1838
           }
         },
         "tlaplus-examples--tlaplus-examples-byzpaxos": {
           "completion": {
             "rate": 73.2,
             "pass": 30,
-            "total": 41
+            "total": 41,
+            "taskCount": 41,
+            "activeTimeSecs": 24358.342757225037,
+            "activeTimePerTask": 594.1059209079277,
+            "outputTokens": 1544992,
+            "outputTokensPerTask": 37682.73170731707,
+            "outputCostUsd": 38.6248,
+            "outputCostPerTask": 0.9420682926829268
           },
           "scratch": {
             "rate": 54.5,
             "pass": 6,
-            "total": 11
+            "total": 11,
+            "taskCount": 11,
+            "activeTimeSecs": 15872.968359947205,
+            "activeTimePerTask": 1442.9971236315641,
+            "outputTokens": 943034,
+            "outputTokensPerTask": 85730.36363636363,
+            "outputCostUsd": 23.57585,
+            "outputCostPerTask": 2.143259090909091
           }
         },
         "tlaplus-examples--tlaplus-examples-cigarettesmokers": {
           "completion": {
             "rate": 87.5,
             "pass": 7,
-            "total": 8
+            "total": 8,
+            "taskCount": 8,
+            "activeTimeSecs": 1917.8258748054504,
+            "activeTimePerTask": 239.7282343506813,
+            "outputTokens": 88499,
+            "outputTokensPerTask": 11062.375,
+            "outputCostUsd": 2.212475,
+            "outputCostPerTask": 0.276559375
           },
           "scratch": {
             "rate": 100,
             "pass": 2,
-            "total": 2
+            "total": 2,
+            "taskCount": 2,
+            "activeTimeSecs": 891.0332546234131,
+            "activeTimePerTask": 445.51662731170654,
+            "outputTokens": 66471,
+            "outputTokensPerTask": 33235.5,
+            "outputCostUsd": 1.661775,
+            "outputCostPerTask": 0.8308875
           }
         },
         "tlaplus-examples--tlaplus-examples-coffeecan": {
           "completion": {
             "rate": 100,
             "pass": 1,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 119.13160610198975,
+            "activeTimePerTask": 119.13160610198975,
+            "outputTokens": 5161,
+            "outputTokensPerTask": 5161,
+            "outputCostUsd": 0.129025,
+            "outputCostPerTask": 0.129025
           },
           "scratch": {
             "rate": 100,
             "pass": 1,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 212.89654541015625,
+            "activeTimePerTask": 212.89654541015625,
+            "outputTokens": 13270,
+            "outputTokensPerTask": 13270,
+            "outputCostUsd": 0.33175,
+            "outputCostPerTask": 0.33175
           }
         },
         "tlaplus-examples--tlaplus-examples-diehard": {
           "completion": {
             "rate": 100,
             "pass": 2,
-            "total": 2
+            "total": 2,
+            "taskCount": 2,
+            "activeTimeSecs": 152.32396030426025,
+            "activeTimePerTask": 76.16198015213013,
+            "outputTokens": 5169,
+            "outputTokensPerTask": 2584.5,
+            "outputCostUsd": 0.129225,
+            "outputCostPerTask": 0.0646125
           },
           "scratch": {
             "rate": 100,
             "pass": 1,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 88.46204400062561,
+            "activeTimePerTask": 88.46204400062561,
+            "outputTokens": 4208,
+            "outputTokensPerTask": 4208,
+            "outputCostUsd": 0.1052,
+            "outputCostPerTask": 0.1052
           }
         },
         "tlaplus-examples--tlaplus-examples-ewd687a": {
           "completion": {
             "rate": 81.3,
             "pass": 13,
-            "total": 16
+            "total": 16,
+            "taskCount": 16,
+            "activeTimeSecs": 14898.820247650146,
+            "activeTimePerTask": 931.1762654781342,
+            "outputTokens": 857451,
+            "outputTokensPerTask": 53590.6875,
+            "outputCostUsd": 21.436275,
+            "outputCostPerTask": 1.3397671875
           },
           "scratch": {
             "rate": 66.7,
             "pass": 2,
-            "total": 3
+            "total": 3,
+            "taskCount": 3,
+            "activeTimeSecs": 5266.087092876434,
+            "activeTimePerTask": 1755.3623642921448,
+            "outputTokens": 371334,
+            "outputTokensPerTask": 123778,
+            "outputCostUsd": 9.28335,
+            "outputCostPerTask": 3.09445
           }
         },
         "tlaplus-examples--tlaplus-examples-ewd840": {
           "completion": {
             "rate": 71.4,
             "pass": 10,
-            "total": 14
+            "total": 14,
+            "taskCount": 14,
+            "activeTimeSecs": 9056.477480888367,
+            "activeTimePerTask": 646.8912486348834,
+            "outputTokens": 603937,
+            "outputTokensPerTask": 43138.357142857145,
+            "outputCostUsd": 15.098425,
+            "outputCostPerTask": 1.0784589285714286
           },
           "scratch": {
             "rate": 80,
             "pass": 4,
-            "total": 5
+            "total": 5,
+            "taskCount": 5,
+            "activeTimeSecs": 6839.696919679642,
+            "activeTimePerTask": 1367.9393839359284,
+            "outputTokens": 464253,
+            "outputTokensPerTask": 92850.6,
+            "outputCostUsd": 11.606325,
+            "outputCostPerTask": 2.321265
           }
         },
         "tlaplus-examples--tlaplus-examples-ewd998": {
           "completion": {
             "rate": 50,
             "pass": 26,
-            "total": 52
+            "total": 52,
+            "taskCount": 52,
+            "activeTimeSecs": 74410.25396680832,
+            "activeTimePerTask": 1430.9664224386215,
+            "outputTokens": 4880447,
+            "outputTokensPerTask": 93854.75,
+            "outputCostUsd": 122.011175,
+            "outputCostPerTask": 2.34636875
           },
           "scratch": {
             "rate": 28.6,
             "pass": 2,
-            "total": 7
+            "total": 7,
+            "taskCount": 7,
+            "activeTimeSecs": 10554.20234823227,
+            "activeTimePerTask": 1507.74319260461,
+            "outputTokens": 648806,
+            "outputTokensPerTask": 92686.57142857143,
+            "outputCostUsd": 16.22015,
+            "outputCostPerTask": 2.3171642857142856
           }
         },
         "tlaplus-examples--tlaplus-examples-finitemonotonic": {
           "completion": {
             "rate": 0,
             "pass": 0,
-            "total": 14
+            "total": 14,
+            "taskCount": 14,
+            "activeTimeSecs": 3111.758679151535,
+            "activeTimePerTask": 222.2684770822525,
+            "outputTokens": 162379,
+            "outputTokensPerTask": 11598.5,
+            "outputCostUsd": 4.059475,
+            "outputCostPerTask": 0.2899625
           },
           "scratch": {
             "rate": 66.7,
             "pass": 2,
-            "total": 3
+            "total": 3,
+            "taskCount": 3,
+            "activeTimeSecs": 3832.0124032497406,
+            "activeTimePerTask": 1277.3374677499135,
+            "outputTokens": 230610,
+            "outputTokensPerTask": 76870,
+            "outputCostUsd": 5.76525,
+            "outputCostPerTask": 1.92175
           }
         },
         "tlaplus-examples--tlaplus-examples-germanprotocol": {
@@ -2774,86 +4879,184 @@ window.TLAPS_DATA = {
           "scratch": {
             "rate": 100,
             "pass": 1,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 1236.2848014831543,
+            "activeTimePerTask": 1236.2848014831543,
+            "outputTokens": 89102,
+            "outputTokensPerTask": 89102,
+            "outputCostUsd": 2.22755,
+            "outputCostPerTask": 2.22755
           }
         },
         "tlaplus-examples--tlaplus-examples-glowingraccoon": {
           "completion": {
             "rate": 83.3,
             "pass": 5,
-            "total": 6
+            "total": 6,
+            "taskCount": 6,
+            "activeTimeSecs": 1185.3161311149597,
+            "activeTimePerTask": 197.55268851915994,
+            "outputTokens": 72351,
+            "outputTokensPerTask": 12058.5,
+            "outputCostUsd": 1.808775,
+            "outputCostPerTask": 0.3014625
           },
           "scratch": {
             "rate": 100,
             "pass": 3,
-            "total": 3
+            "total": 3,
+            "taskCount": 3,
+            "activeTimeSecs": 651.0188710689545,
+            "activeTimePerTask": 217.00629035631815,
+            "outputTokens": 44045,
+            "outputTokensPerTask": 14681.666666666666,
+            "outputCostUsd": 1.101125,
+            "outputCostPerTask": 0.36704166666666665
           }
         },
         "tlaplus-examples--tlaplus-examples-keyvaluestore": {
           "completion": {
             "rate": 0,
             "pass": 0,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 235.31385111808777,
+            "activeTimePerTask": 235.31385111808777,
+            "outputTokens": 14815,
+            "outputTokensPerTask": 14815,
+            "outputCostUsd": 0.370375,
+            "outputCostPerTask": 0.370375
           },
           "scratch": {
             "rate": 100,
             "pass": 1,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 615.1043214797974,
+            "activeTimePerTask": 615.1043214797974,
+            "outputTokens": 44610,
+            "outputTokensPerTask": 44610,
+            "outputCostUsd": 1.11525,
+            "outputCostPerTask": 1.11525
           }
         },
         "tlaplus-examples--tlaplus-examples-lamport-mutex": {
           "completion": {
             "rate": 90,
             "pass": 18,
-            "total": 20
+            "total": 20,
+            "taskCount": 20,
+            "activeTimeSecs": 9465.785971403122,
+            "activeTimePerTask": 473.2892985701561,
+            "outputTokens": 642200,
+            "outputTokensPerTask": 32110,
+            "outputCostUsd": 16.055,
+            "outputCostPerTask": 0.80275
           },
           "scratch": {
             "rate": 0,
             "pass": 0,
-            "total": 2
+            "total": 2,
+            "taskCount": 2,
+            "activeTimeSecs": 5816.581158876419,
+            "activeTimePerTask": 2908.2905794382095,
+            "outputTokens": 364304,
+            "outputTokensPerTask": 182152,
+            "outputCostUsd": 9.1076,
+            "outputCostPerTask": 4.5538
           }
         },
         "tlaplus-examples--tlaplus-examples-learnproofs": {
           "completion": {
             "rate": 60,
             "pass": 3,
-            "total": 5
+            "total": 5,
+            "taskCount": 5,
+            "activeTimeSecs": 764.9705505371094,
+            "activeTimePerTask": 152.99411010742188,
+            "outputTokens": 44771,
+            "outputTokensPerTask": 8954.2,
+            "outputCostUsd": 1.119275,
+            "outputCostPerTask": 0.223855
           },
           "scratch": {
             "rate": 100,
             "pass": 6,
-            "total": 6
+            "total": 6,
+            "taskCount": 6,
+            "activeTimeSecs": 1723.7605378627777,
+            "activeTimePerTask": 287.29342297712964,
+            "outputTokens": 118842,
+            "outputTokensPerTask": 19807,
+            "outputCostUsd": 2.97105,
+            "outputCostPerTask": 0.495175
           }
         },
         "tlaplus-examples--tlaplus-examples-locks-auxiliary-vars": {
           "completion": {
             "rate": 66.7,
             "pass": 6,
-            "total": 9
+            "total": 9,
+            "taskCount": 9,
+            "activeTimeSecs": 5145.7451338768005,
+            "activeTimePerTask": 571.7494593196445,
+            "outputTokens": 357693,
+            "outputTokensPerTask": 39743.666666666664,
+            "outputCostUsd": 8.942325,
+            "outputCostPerTask": 0.9935916666666667
           },
           "scratch": {
             "rate": 100,
             "pass": 5,
-            "total": 5
+            "total": 5,
+            "taskCount": 5,
+            "activeTimeSecs": 3853.5751764774323,
+            "activeTimePerTask": 770.7150352954865,
+            "outputTokens": 232281,
+            "outputTokensPerTask": 46456.2,
+            "outputCostUsd": 5.807025,
+            "outputCostPerTask": 1.161405
           }
         },
         "tlaplus-examples--tlaplus-examples-loopinvariance": {
           "completion": {
             "rate": 58.8,
             "pass": 10,
-            "total": 17
+            "total": 17,
+            "taskCount": 17,
+            "activeTimeSecs": 22126.675973892212,
+            "activeTimePerTask": 1301.569174934836,
+            "outputTokens": 830172,
+            "outputTokensPerTask": 48833.64705882353,
+            "outputCostUsd": 20.7543,
+            "outputCostPerTask": 1.2208411764705882
           },
           "scratch": {
             "rate": 33.3,
             "pass": 1,
-            "total": 3
+            "total": 3,
+            "taskCount": 3,
+            "activeTimeSecs": 2855.677391767502,
+            "activeTimePerTask": 951.8924639225006,
+            "outputTokens": 187923,
+            "outputTokensPerTask": 62641,
+            "outputCostUsd": 4.698075,
+            "outputCostPerTask": 1.566025
           }
         },
         "tlaplus-examples--tlaplus-examples-majority": {
           "completion": {
             "rate": 44.4,
             "pass": 4,
-            "total": 9
+            "total": 9,
+            "taskCount": 9,
+            "activeTimeSecs": 6190.410965919495,
+            "activeTimePerTask": 687.8234406577217,
+            "outputTokens": 253852,
+            "outputTokensPerTask": 28205.777777777777,
+            "outputCostUsd": 6.3463,
+            "outputCostPerTask": 0.7051444444444445
           },
           "scratch": null
         },
@@ -2861,151 +5064,326 @@ window.TLAPS_DATA = {
           "completion": {
             "rate": 75,
             "pass": 6,
-            "total": 8
+            "total": 8,
+            "taskCount": 8,
+            "activeTimeSecs": 4418.327096223831,
+            "activeTimePerTask": 552.2908870279789,
+            "outputTokens": 304559,
+            "outputTokensPerTask": 38069.875,
+            "outputCostUsd": 7.613975,
+            "outputCostPerTask": 0.951746875
           },
           "scratch": {
             "rate": 100,
             "pass": 2,
-            "total": 2
+            "total": 2,
+            "taskCount": 2,
+            "activeTimeSecs": 1969.383475780487,
+            "activeTimePerTask": 984.6917378902435,
+            "outputTokens": 150117,
+            "outputTokensPerTask": 75058.5,
+            "outputCostUsd": 3.752925,
+            "outputCostPerTask": 1.8764625
           }
         },
         "tlaplus-examples--tlaplus-examples-missionariesandcannibals": {
           "completion": {
             "rate": 100,
             "pass": 1,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 203.45279932022095,
+            "activeTimePerTask": 203.45279932022095,
+            "outputTokens": 13450,
+            "outputTokensPerTask": 13450,
+            "outputCostUsd": 0.33625,
+            "outputCostPerTask": 0.33625
           },
           "scratch": {
             "rate": 100,
             "pass": 1,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 265.05404138565063,
+            "activeTimePerTask": 265.05404138565063,
+            "outputTokens": 19613,
+            "outputTokensPerTask": 19613,
+            "outputCostUsd": 0.490325,
+            "outputCostPerTask": 0.490325
           }
         },
         "tlaplus-examples--tlaplus-examples-multicarelevator": {
           "completion": {
             "rate": 88.9,
             "pass": 8,
-            "total": 9
+            "total": 9,
+            "taskCount": 9,
+            "activeTimeSecs": 2830.281511068344,
+            "activeTimePerTask": 314.4757234520382,
+            "outputTokens": 184757,
+            "outputTokensPerTask": 20528.555555555555,
+            "outputCostUsd": 4.618925,
+            "outputCostPerTask": 0.5132138888888889
           },
           "scratch": {
             "rate": 0,
             "pass": 0,
-            "total": 2
+            "total": 2,
+            "taskCount": 2,
+            "activeTimeSecs": 6058.734858989716,
+            "activeTimePerTask": 3029.367429494858,
+            "outputTokens": 370339,
+            "outputTokensPerTask": 185169.5,
+            "outputCostUsd": 9.258475,
+            "outputCostPerTask": 4.6292375
           }
         },
         "tlaplus-examples--tlaplus-examples-paxos": {
           "completion": {
             "rate": 66.7,
             "pass": 2,
-            "total": 3
+            "total": 3,
+            "taskCount": 3,
+            "activeTimeSecs": 563.576913356781,
+            "activeTimePerTask": 187.858971118927,
+            "outputTokens": 21602,
+            "outputTokensPerTask": 7200.666666666667,
+            "outputCostUsd": 0.54005,
+            "outputCostPerTask": 0.18001666666666669
           },
           "scratch": {
             "rate": 100,
             "pass": 4,
-            "total": 4
+            "total": 4,
+            "taskCount": 4,
+            "activeTimeSecs": 3036.899687767029,
+            "activeTimePerTask": 759.2249219417572,
+            "outputTokens": 192048,
+            "outputTokensPerTask": 48012,
+            "outputCostUsd": 4.8012,
+            "outputCostPerTask": 1.2003
           }
         },
         "tlaplus-examples--tlaplus-examples-paxoshowtowinaturingaward": {
           "completion": {
             "rate": 66.7,
             "pass": 6,
-            "total": 9
+            "total": 9,
+            "taskCount": 9,
+            "activeTimeSecs": 7461.032997608185,
+            "activeTimePerTask": 829.0036664009094,
+            "outputTokens": 526053,
+            "outputTokensPerTask": 58450.333333333336,
+            "outputCostUsd": 13.151325,
+            "outputCostPerTask": 1.4612583333333333
           },
           "scratch": {
             "rate": 100,
             "pass": 6,
-            "total": 6
+            "total": 6,
+            "taskCount": 6,
+            "activeTimeSecs": 3538.713196992874,
+            "activeTimePerTask": 589.7855328321457,
+            "outputTokens": 254508,
+            "outputTokensPerTask": 42418,
+            "outputCostUsd": 6.3627,
+            "outputCostPerTask": 1.0604500000000001
           }
         },
         "tlaplus-examples--tlaplus-examples-readerswriters": {
           "completion": {
             "rate": 33.3,
             "pass": 1,
-            "total": 3
+            "total": 3,
+            "taskCount": 3,
+            "activeTimeSecs": 2327.593504667282,
+            "activeTimePerTask": 775.8645015557607,
+            "outputTokens": 138549,
+            "outputTokensPerTask": 46183,
+            "outputCostUsd": 3.463725,
+            "outputCostPerTask": 1.1545750000000001
           },
           "scratch": {
             "rate": 100,
             "pass": 2,
-            "total": 2
+            "total": 2,
+            "taskCount": 2,
+            "activeTimeSecs": 2215.5618829727173,
+            "activeTimePerTask": 1107.7809414863586,
+            "outputTokens": 151880,
+            "outputTokensPerTask": 75940,
+            "outputCostUsd": 3.797,
+            "outputCostPerTask": 1.8985
           }
         },
         "tlaplus-examples--tlaplus-examples-spanning": {
           "completion": {
             "rate": 0,
             "pass": 0,
-            "total": 2
+            "total": 2,
+            "taskCount": 2,
+            "activeTimeSecs": 591.5518839359283,
+            "activeTimePerTask": 295.7759419679642,
+            "outputTokens": 45071,
+            "outputTokensPerTask": 22535.5,
+            "outputCostUsd": 1.126775,
+            "outputCostPerTask": 0.5633875
           },
           "scratch": {
             "rate": 100,
             "pass": 1,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 375.92039585113525,
+            "activeTimePerTask": 375.92039585113525,
+            "outputTokens": 29260,
+            "outputTokensPerTask": 29260,
+            "outputCostUsd": 0.7315,
+            "outputCostPerTask": 0.7315
           }
         },
         "tlaplus-examples--tlaplus-examples-spanningtree": {
           "completion": {
             "rate": 100,
             "pass": 1,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 262.2020881175995,
+            "activeTimePerTask": 262.2020881175995,
+            "outputTokens": 18263,
+            "outputTokensPerTask": 18263,
+            "outputCostUsd": 0.456575,
+            "outputCostPerTask": 0.456575
           },
           "scratch": {
             "rate": 100,
             "pass": 1,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 190.2702760696411,
+            "activeTimePerTask": 190.2702760696411,
+            "outputTokens": 12539,
+            "outputTokensPerTask": 12539,
+            "outputCostUsd": 0.313475,
+            "outputCostPerTask": 0.313475
           }
         },
         "tlaplus-examples--tlaplus-examples-specifyingsystems-asynchronousinterface": {
           "completion": {
             "rate": 100,
             "pass": 2,
-            "total": 2
+            "total": 2,
+            "taskCount": 2,
+            "activeTimeSecs": 277.2885801792145,
+            "activeTimePerTask": 138.64429008960724,
+            "outputTokens": 14674,
+            "outputTokensPerTask": 7337,
+            "outputCostUsd": 0.36685,
+            "outputCostPerTask": 0.183425
           },
           "scratch": {
             "rate": 100,
             "pass": 2,
-            "total": 2
+            "total": 2,
+            "taskCount": 2,
+            "activeTimeSecs": 186.1734516620636,
+            "activeTimePerTask": 93.0867258310318,
+            "outputTokens": 8772,
+            "outputTokensPerTask": 4386,
+            "outputCostUsd": 0.2193,
+            "outputCostPerTask": 0.10965
           }
         },
         "tlaplus-examples--tlaplus-examples-specifyingsystems-cachingmemory": {
           "completion": {
             "rate": 100,
             "pass": 2,
-            "total": 2
+            "total": 2,
+            "taskCount": 2,
+            "activeTimeSecs": 364.43300199508667,
+            "activeTimePerTask": 182.21650099754333,
+            "outputTokens": 22182,
+            "outputTokensPerTask": 11091,
+            "outputCostUsd": 0.55455,
+            "outputCostPerTask": 0.277275
           },
           "scratch": {
             "rate": 100,
             "pass": 1,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 431.6182177066803,
+            "activeTimePerTask": 431.6182177066803,
+            "outputTokens": 33585,
+            "outputTokensPerTask": 33585,
+            "outputCostUsd": 0.839625,
+            "outputCostPerTask": 0.839625
           }
         },
         "tlaplus-examples--tlaplus-examples-specifyingsystems-composing": {
           "completion": {
             "rate": 50,
             "pass": 2,
-            "total": 4
+            "total": 4,
+            "taskCount": 4,
+            "activeTimeSecs": 745.3398110866547,
+            "activeTimePerTask": 186.33495277166367,
+            "outputTokens": 51401,
+            "outputTokensPerTask": 12850.25,
+            "outputCostUsd": 1.285025,
+            "outputCostPerTask": 0.32125625
           },
           "scratch": {
             "rate": 0,
             "pass": 0,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 95.33816409111023,
+            "activeTimePerTask": 95.33816409111023,
+            "outputTokens": 4051,
+            "outputTokensPerTask": 4051,
+            "outputCostUsd": 0.101275,
+            "outputCostPerTask": 0.101275
           }
         },
         "tlaplus-examples--tlaplus-examples-specifyingsystems-fifo": {
           "completion": {
             "rate": 50,
             "pass": 1,
-            "total": 2
+            "total": 2,
+            "taskCount": 2,
+            "activeTimeSecs": 474.5484707355499,
+            "activeTimePerTask": 237.27423536777496,
+            "outputTokens": 28881,
+            "outputTokensPerTask": 14440.5,
+            "outputCostUsd": 0.722025,
+            "outputCostPerTask": 0.3610125
           },
           "scratch": {
             "rate": 100,
             "pass": 1,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 235.82275938987732,
+            "activeTimePerTask": 235.82275938987732,
+            "outputTokens": 14402,
+            "outputTokensPerTask": 14402,
+            "outputCostUsd": 0.36005,
+            "outputCostPerTask": 0.36005
           }
         },
         "tlaplus-examples--tlaplus-examples-specifyingsystems-hourclock": {
           "completion": {
             "rate": 100,
             "pass": 1,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 117.4321768283844,
+            "activeTimePerTask": 117.4321768283844,
+            "outputTokens": 5731,
+            "outputTokensPerTask": 5731,
+            "outputCostUsd": 0.143275,
+            "outputCostPerTask": 0.143275
           },
           "scratch": null
         },
@@ -3013,7 +5391,14 @@ window.TLAPS_DATA = {
           "completion": {
             "rate": 66.7,
             "pass": 2,
-            "total": 3
+            "total": 3,
+            "taskCount": 3,
+            "activeTimeSecs": 651.613523721695,
+            "activeTimePerTask": 217.20450790723166,
+            "outputTokens": 46975,
+            "outputTokensPerTask": 15658.333333333334,
+            "outputCostUsd": 1.174375,
+            "outputCostPerTask": 0.3914583333333333
           },
           "scratch": null
         },
@@ -3021,7 +5406,14 @@ window.TLAPS_DATA = {
           "completion": {
             "rate": 100,
             "pass": 3,
-            "total": 3
+            "total": 3,
+            "taskCount": 3,
+            "activeTimeSecs": 435.5580713748932,
+            "activeTimePerTask": 145.18602379163107,
+            "outputTokens": 23926,
+            "outputTokensPerTask": 7975.333333333333,
+            "outputCostUsd": 0.59815,
+            "outputCostPerTask": 0.19938333333333333
           },
           "scratch": null
         },
@@ -3029,120 +5421,260 @@ window.TLAPS_DATA = {
           "completion": {
             "rate": 100,
             "pass": 1,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 391.19234228134155,
+            "activeTimePerTask": 391.19234228134155,
+            "outputTokens": 30325,
+            "outputTokensPerTask": 30325,
+            "outputCostUsd": 0.758125,
+            "outputCostPerTask": 0.758125
           },
           "scratch": {
             "rate": 0,
             "pass": 0,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 1361.582248210907,
+            "activeTimePerTask": 1361.582248210907,
+            "outputTokens": 82574,
+            "outputTokensPerTask": 82574,
+            "outputCostUsd": 2.06435,
+            "outputCostPerTask": 2.06435
           }
         },
         "tlaplus-examples--tlaplus-examples-sums-even": {
           "completion": {
             "rate": 100,
             "pass": 1,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 133.23524832725525,
+            "activeTimePerTask": 133.23524832725525,
+            "outputTokens": 5652,
+            "outputTokensPerTask": 5652,
+            "outputCostUsd": 0.1413,
+            "outputCostPerTask": 0.1413
           },
           "scratch": {
             "rate": 100,
             "pass": 2,
-            "total": 2
+            "total": 2,
+            "taskCount": 2,
+            "activeTimeSecs": 202.14180827140808,
+            "activeTimePerTask": 101.07090413570404,
+            "outputTokens": 7692,
+            "outputTokensPerTask": 3846,
+            "outputCostUsd": 0.1923,
+            "outputCostPerTask": 0.09615
           }
         },
         "tlaplus-examples--tlaplus-examples-tcp": {
           "completion": {
             "rate": 37.5,
             "pass": 6,
-            "total": 16
+            "total": 16,
+            "taskCount": 16,
+            "activeTimeSecs": 18910.938984632492,
+            "activeTimePerTask": 1181.9336865395308,
+            "outputTokens": 1109243,
+            "outputTokensPerTask": 69327.6875,
+            "outputCostUsd": 27.731075,
+            "outputCostPerTask": 1.7331921875
           },
           "scratch": {
             "rate": 33.3,
             "pass": 1,
-            "total": 3
+            "total": 3,
+            "taskCount": 3,
+            "activeTimeSecs": 4127.019480705261,
+            "activeTimePerTask": 1375.6731602350872,
+            "outputTokens": 239573,
+            "outputTokensPerTask": 79857.66666666667,
+            "outputCostUsd": 5.989325,
+            "outputCostPerTask": 1.9964416666666667
           }
         },
         "tlaplus-examples--tlaplus-examples-teachingconcurrency": {
           "completion": {
             "rate": 75,
             "pass": 6,
-            "total": 8
+            "total": 8,
+            "taskCount": 8,
+            "activeTimeSecs": 4795.833405971527,
+            "activeTimePerTask": 599.4791757464409,
+            "outputTokens": 336057,
+            "outputTokensPerTask": 42007.125,
+            "outputCostUsd": 8.401425,
+            "outputCostPerTask": 1.050178125
           },
           "scratch": {
             "rate": 87.5,
             "pass": 7,
-            "total": 8
+            "total": 8,
+            "taskCount": 8,
+            "activeTimeSecs": 5182.989622116089,
+            "activeTimePerTask": 647.8737027645111,
+            "outputTokens": 341962,
+            "outputTokensPerTask": 42745.25,
+            "outputCostUsd": 8.54905,
+            "outputCostPerTask": 1.06863125
           }
         },
         "tlaplus-examples--tlaplus-examples-tencentpaxos": {
           "completion": {
             "rate": 73.7,
             "pass": 14,
-            "total": 19
+            "total": 19,
+            "taskCount": 19,
+            "activeTimeSecs": 24510.939890384674,
+            "activeTimePerTask": 1290.0494679149829,
+            "outputTokens": 1745764,
+            "outputTokensPerTask": 91882.31578947368,
+            "outputCostUsd": 43.6441,
+            "outputCostPerTask": 2.297057894736842
           },
           "scratch": {
             "rate": 0,
             "pass": 0,
-            "total": 2
+            "total": 2,
+            "taskCount": 2,
+            "activeTimeSecs": 5393.592252969742,
+            "activeTimePerTask": 2696.796126484871,
+            "outputTokens": 378193,
+            "outputTokensPerTask": 189096.5,
+            "outputCostUsd": 9.454825,
+            "outputCostPerTask": 4.7274125
           }
         },
         "tlaplus-examples--tlaplus-examples-termination": {
           "completion": {
             "rate": 75,
             "pass": 3,
-            "total": 4
+            "total": 4,
+            "taskCount": 4,
+            "activeTimeSecs": 3033.4384932518005,
+            "activeTimePerTask": 758.3596233129501,
+            "outputTokens": 234691,
+            "outputTokensPerTask": 58672.75,
+            "outputCostUsd": 5.867275,
+            "outputCostPerTask": 1.46681875
           },
           "scratch": {
             "rate": 100,
             "pass": 1,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 1707.3685357570648,
+            "activeTimePerTask": 1707.3685357570648,
+            "outputTokens": 124310,
+            "outputTokensPerTask": 124310,
+            "outputCostUsd": 3.10775,
+            "outputCostPerTask": 3.10775
           }
         },
         "tlaplus-examples--tlaplus-examples-transaction-commit": {
           "completion": {
             "rate": 100,
             "pass": 12,
-            "total": 12
+            "total": 12,
+            "taskCount": 12,
+            "activeTimeSecs": 5589.66085767746,
+            "activeTimePerTask": 465.80507147312164,
+            "outputTokens": 378244,
+            "outputTokensPerTask": 31520.333333333332,
+            "outputCostUsd": 9.4561,
+            "outputCostPerTask": 0.7880083333333333
           },
           "scratch": {
             "rate": 100,
             "pass": 4,
-            "total": 4
+            "total": 4,
+            "taskCount": 4,
+            "activeTimeSecs": 1168.2808117866516,
+            "activeTimePerTask": 292.0702029466629,
+            "outputTokens": 82057,
+            "outputTokensPerTask": 20514.25,
+            "outputCostUsd": 2.051425,
+            "outputCostPerTask": 0.51285625
           }
         },
         "tlaplus-examples--tlaplus-examples-twophase": {
           "completion": {
             "rate": 0,
             "pass": 0,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 236.195720911026,
+            "activeTimePerTask": 236.195720911026,
+            "outputTokens": 15803,
+            "outputTokensPerTask": 15803,
+            "outputCostUsd": 0.395075,
+            "outputCostPerTask": 0.395075
           },
           "scratch": {
             "rate": 100,
             "pass": 2,
-            "total": 2
+            "total": 2,
+            "taskCount": 2,
+            "activeTimeSecs": 1045.6118693351746,
+            "activeTimePerTask": 522.8059346675873,
+            "outputTokens": 73740,
+            "outputTokensPerTask": 36870,
+            "outputCostUsd": 1.8435,
+            "outputCostPerTask": 0.92175
           }
         },
         "tlaps-distribution-examples--allocator": {
           "completion": {
             "rate": 100,
             "pass": 10,
-            "total": 10
+            "total": 10,
+            "taskCount": 10,
+            "activeTimeSecs": 1230.1668584346771,
+            "activeTimePerTask": 123.01668584346771,
+            "outputTokens": 68279,
+            "outputTokensPerTask": 6827.9,
+            "outputCostUsd": 1.706975,
+            "outputCostPerTask": 0.1706975
           },
           "scratch": {
             "rate": 100,
             "pass": 4,
-            "total": 4
+            "total": 4,
+            "taskCount": 4,
+            "activeTimeSecs": 1724.4809985160828,
+            "activeTimePerTask": 431.1202496290207,
+            "outputTokens": 121071,
+            "outputTokensPerTask": 30267.75,
+            "outputCostUsd": 3.026775,
+            "outputCostPerTask": 0.75669375
           }
         },
         "tlaps-distribution-examples--atomicbakery": {
           "completion": {
             "rate": 0,
             "pass": 0,
-            "total": 8
+            "total": 8,
+            "taskCount": 8,
+            "activeTimeSecs": 20606.184304714203,
+            "activeTimePerTask": 2575.7730380892754,
+            "outputTokens": 1081289,
+            "outputTokensPerTask": 135161.125,
+            "outputCostUsd": 27.032225,
+            "outputCostPerTask": 3.379028125
           },
           "scratch": {
             "rate": 50,
             "pass": 1,
-            "total": 2
+            "total": 2,
+            "taskCount": 2,
+            "activeTimeSecs": 3203.6483228206635,
+            "activeTimePerTask": 1601.8241614103317,
+            "outputTokens": 241016,
+            "outputTokensPerTask": 120508,
+            "outputCostUsd": 6.0254,
+            "outputCostPerTask": 3.0127
           }
         },
         "tlaps-distribution-examples--bakery": {
@@ -3150,91 +5682,196 @@ window.TLAPS_DATA = {
           "scratch": {
             "rate": 100,
             "pass": 1,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 3598.6416301727295,
+            "activeTimePerTask": 3598.6416301727295,
+            "outputTokens": 260789,
+            "outputTokensPerTask": 260789,
+            "outputCostUsd": 6.519725,
+            "outputCostPerTask": 6.519725
           }
         },
         "tlaps-distribution-examples--bubblesort": {
           "completion": {
             "rate": 100,
             "pass": 8,
-            "total": 8
+            "total": 8,
+            "taskCount": 8,
+            "activeTimeSecs": 1252.83362698555,
+            "activeTimePerTask": 156.60420337319374,
+            "outputTokens": 72504,
+            "outputTokensPerTask": 9063,
+            "outputCostUsd": 1.8126,
+            "outputCostPerTask": 0.226575
           },
           "scratch": {
             "rate": 100,
             "pass": 3,
-            "total": 3
+            "total": 3,
+            "taskCount": 3,
+            "activeTimeSecs": 1684.4391634464264,
+            "activeTimePerTask": 561.4797211488088,
+            "outputTokens": 130474,
+            "outputTokensPerTask": 43491.333333333336,
+            "outputCostUsd": 3.26185,
+            "outputCostPerTask": 1.0872833333333334
           }
         },
         "tlaps-distribution-examples--cantor": {
           "completion": {
             "rate": 100,
             "pass": 11,
-            "total": 11
+            "total": 11,
+            "taskCount": 11,
+            "activeTimeSecs": 1300.313782453537,
+            "activeTimePerTask": 118.21034385941245,
+            "outputTokens": 64863,
+            "outputTokensPerTask": 5896.636363636364,
+            "outputCostUsd": 1.621575,
+            "outputCostPerTask": 0.1474159090909091
           },
           "scratch": {
             "rate": 100,
             "pass": 10,
-            "total": 10
+            "total": 10,
+            "taskCount": 10,
+            "activeTimeSecs": 1072.9971873760223,
+            "activeTimePerTask": 107.29971873760223,
+            "outputTokens": 53764,
+            "outputTokensPerTask": 5376.4,
+            "outputCostUsd": 1.3441,
+            "outputCostPerTask": 0.13441
           }
         },
         "tlaps-distribution-examples--consensus": {
           "completion": {
             "rate": 72,
             "pass": 18,
-            "total": 25
+            "total": 25,
+            "taskCount": 25,
+            "activeTimeSecs": 17448.069352388382,
+            "activeTimePerTask": 697.9227740955353,
+            "outputTokens": 1228558,
+            "outputTokensPerTask": 49142.32,
+            "outputCostUsd": 30.71395,
+            "outputCostPerTask": 1.228558
           },
           "scratch": {
             "rate": 60,
             "pass": 6,
-            "total": 10
+            "total": 10,
+            "taskCount": 10,
+            "activeTimeSecs": 8583.459255695343,
+            "activeTimePerTask": 858.3459255695343,
+            "outputTokens": 618873,
+            "outputTokensPerTask": 61887.3,
+            "outputCostUsd": 15.471825,
+            "outputCostPerTask": 1.5471825000000001
           }
         },
         "tlaps-distribution-examples--data": {
           "completion": {
             "rate": 80,
             "pass": 12,
-            "total": 15
+            "total": 15,
+            "taskCount": 15,
+            "activeTimeSecs": 12408.390171527863,
+            "activeTimePerTask": 827.2260114351908,
+            "outputTokens": 804717,
+            "outputTokensPerTask": 53647.8,
+            "outputCostUsd": 20.117925,
+            "outputCostPerTask": 1.341195
           },
           "scratch": {
             "rate": 88.9,
             "pass": 8,
-            "total": 9
+            "total": 9,
+            "taskCount": 9,
+            "activeTimeSecs": 3898.4889113903046,
+            "activeTimePerTask": 433.16543459892273,
+            "outputTokens": 286578,
+            "outputTokensPerTask": 31842,
+            "outputCostUsd": 7.16445,
+            "outputCostPerTask": 0.79605
           }
         },
         "tlaps-distribution-examples--euclid": {
           "completion": {
             "rate": 83.3,
             "pass": 5,
-            "total": 6
+            "total": 6,
+            "taskCount": 6,
+            "activeTimeSecs": 770.9092745780945,
+            "activeTimePerTask": 128.4848790963491,
+            "outputTokens": 36923,
+            "outputTokensPerTask": 6153.833333333333,
+            "outputCostUsd": 0.923075,
+            "outputCostPerTask": 0.15384583333333332
           },
           "scratch": {
             "rate": 100,
             "pass": 5,
-            "total": 5
+            "total": 5,
+            "taskCount": 5,
+            "activeTimeSecs": 1660.7646596431732,
+            "activeTimePerTask": 332.15293192863464,
+            "outputTokens": 120752,
+            "outputTokensPerTask": 24150.4,
+            "outputCostUsd": 3.0188,
+            "outputCostPerTask": 0.6037600000000001
           }
         },
         "tlaps-distribution-examples--ewd840": {
           "completion": {
             "rate": 100,
             "pass": 2,
-            "total": 2
+            "total": 2,
+            "taskCount": 2,
+            "activeTimeSecs": 163.03167700767517,
+            "activeTimePerTask": 81.51583850383759,
+            "outputTokens": 6905,
+            "outputTokensPerTask": 3452.5,
+            "outputCostUsd": 0.172625,
+            "outputCostPerTask": 0.0863125
           },
           "scratch": {
             "rate": 0,
             "pass": 0,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 878.2868132591248,
+            "activeTimePerTask": 878.2868132591248,
+            "outputTokens": 64251,
+            "outputTokensPerTask": 64251,
+            "outputCostUsd": 1.606275,
+            "outputCostPerTask": 1.606275
           }
         },
         "tlaps-distribution-examples--paxos": {
           "completion": {
             "rate": 53.8,
             "pass": 7,
-            "total": 13
+            "total": 13,
+            "taskCount": 13,
+            "activeTimeSecs": 6608.0890119075775,
+            "activeTimePerTask": 508.314539377506,
+            "outputTokens": 356624,
+            "outputTokensPerTask": 27432.615384615383,
+            "outputCostUsd": 8.9156,
+            "outputCostPerTask": 0.6858153846153846
           },
           "scratch": {
             "rate": 33.3,
             "pass": 2,
-            "total": 6
+            "total": 6,
+            "taskCount": 6,
+            "activeTimeSecs": 12116.098083019257,
+            "activeTimePerTask": 2019.3496805032094,
+            "outputTokens": 888582,
+            "outputTokensPerTask": 148097,
+            "outputCostUsd": 22.21455,
+            "outputCostPerTask": 3.702425
           }
         },
         "tlaps-distribution-examples--peterson": {
@@ -3242,7 +5879,14 @@ window.TLAPS_DATA = {
           "scratch": {
             "rate": 50,
             "pass": 1,
-            "total": 2
+            "total": 2,
+            "taskCount": 2,
+            "activeTimeSecs": 4399.743876695633,
+            "activeTimePerTask": 2199.8719383478165,
+            "outputTokens": 295222,
+            "outputTokensPerTask": 147611,
+            "outputCostUsd": 7.38055,
+            "outputCostPerTask": 3.690275
           }
         },
         "tlaps-distribution-examples--record": {
@@ -3250,19 +5894,40 @@ window.TLAPS_DATA = {
           "scratch": {
             "rate": 100,
             "pass": 1,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 504.8676507472992,
+            "activeTimePerTask": 504.8676507472992,
+            "outputTokens": 39775,
+            "outputTokensPerTask": 39775,
+            "outputCostUsd": 0.994375,
+            "outputCostPerTask": 0.994375
           }
         },
         "tlaps-distribution-examples--simplemutex": {
           "completion": {
             "rate": 60,
             "pass": 3,
-            "total": 5
+            "total": 5,
+            "taskCount": 5,
+            "activeTimeSecs": 526.7036130428314,
+            "activeTimePerTask": 105.34072260856628,
+            "outputTokens": 23228,
+            "outputTokensPerTask": 4645.6,
+            "outputCostUsd": 0.5807,
+            "outputCostPerTask": 0.11614
           },
           "scratch": {
             "rate": 100,
             "pass": 2,
-            "total": 2
+            "total": 2,
+            "taskCount": 2,
+            "activeTimeSecs": 1101.1353631019592,
+            "activeTimePerTask": 550.5676815509796,
+            "outputTokens": 67126,
+            "outputTokensPerTask": 33563,
+            "outputCostUsd": 1.67815,
+            "outputCostPerTask": 0.839075
           }
         },
         "tlaps-distribution-examples--sumandmax": {
@@ -3270,7 +5935,14 @@ window.TLAPS_DATA = {
           "scratch": {
             "rate": 100,
             "pass": 1,
-            "total": 1
+            "total": 1,
+            "taskCount": 1,
+            "activeTimeSecs": 733.1837131977081,
+            "activeTimePerTask": 733.1837131977081,
+            "outputTokens": 49911,
+            "outputTokensPerTask": 49911,
+            "outputCostUsd": 1.247775,
+            "outputCostPerTask": 1.247775
           }
         },
         "zookeeper-remix--zookeeper": {
@@ -3278,7 +5950,14 @@ window.TLAPS_DATA = {
           "scratch": {
             "rate": 0,
             "pass": 0,
-            "total": 9
+            "total": 9,
+            "taskCount": 9,
+            "activeTimeSecs": 16839.516551733017,
+            "activeTimePerTask": 1871.0573946370018,
+            "outputTokens": 972702,
+            "outputTokensPerTask": 108078,
+            "outputCostUsd": 24.31755,
+            "outputCostPerTask": 2.70195
           }
         },
         "zookeeper-remix--zookeeper-lowlevel": {
@@ -3286,7 +5965,14 @@ window.TLAPS_DATA = {
           "scratch": {
             "rate": 0,
             "pass": 0,
-            "total": 9
+            "total": 9,
+            "taskCount": 9,
+            "activeTimeSecs": 17596.35959625244,
+            "activeTimePerTask": 1955.1510662502712,
+            "outputTokens": 949768,
+            "outputTokensPerTask": 105529.77777777778,
+            "outputCostUsd": 23.7442,
+            "outputCostPerTask": 2.638244444444444
           }
         }
       }

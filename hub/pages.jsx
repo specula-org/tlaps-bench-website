@@ -130,10 +130,9 @@ function PageLeaderboard() {
             Pass rate is the share of scored properties that pass, where the proof must first clear
             the cheat-checker (no admitted steps, smuggled axioms, or weakened theorems) and then be
             accepted by tlapm. The two benchmark modes, proof-completion and proof-from-scratch, are
-            scored separately rather than blended into a single number. Expand a model to see the
-            same 70 specs used in the benchmark index in one continuous table, with per-spec
-            property pass counts for each mode. Filter by organization, or switch between one-shot
-            and agent runs.
+            separate leaderboards; use the task selector to switch between them. Each row reports
+            pass rate and mean usage for the selected mode, with that mode's total underneath.
+            Expand a model to compare per-spec pass rate, time, and cost or inspect its individual tasks.
           </p>
         </FadeIn>
         <div style={{ marginTop: 32 }}><HubLeaderboard /></div>
