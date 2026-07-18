@@ -134,18 +134,6 @@ function PageLeaderboard() {
             pass rate and mean usage for the selected mode, with that mode's total underneath.
             Expand a model to compare per-spec pass rate, time, and cost or inspect its individual tasks.
           </p>
-          <div className="leaderboard-method-note">
-            <p><strong>Output-only cost</strong> is reported output tokens multiplied by a fixed
-              public standard-tier output rate as of July 18, 2026
-              ({" "}<a href="https://developers.openai.com/api/docs/models/gpt-5.5" target="_blank" rel="noopener">OpenAI</a>,
-              {" "}<a href="https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing" target="_blank" rel="noopener">GitHub</a>).
-              This standard tier is applied uniformly for comparison; long-context tiers are not
-              inferred because the archived Copilot CLI records do not contain per-request input
-              usage. Input, cached-input, and other charges are excluded, so this is an estimate,
-              not the actual bill.</p>
-            <p><strong>Active time</strong> adds the time each task's agent was running. Parallel
-              tasks overlap, so the total is task-time rather than experiment wall-clock time.</p>
-          </div>
         </FadeIn>
         <div style={{ marginTop: 32 }}><HubLeaderboard /></div>
       </div>
