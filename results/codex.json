@@ -137,7 +137,15 @@
         }
       }
     },
-    "record_count": 710
+    "record_count": 710,
+    "usage_audit": {
+      "date": "2026-07-18",
+      "task_count": 710,
+      "active_time_complete": true,
+      "output_tokens_audited": true,
+      "recovered_timeout_tasks": 13,
+      "provenance": "Last cumulative token_count from Codex rollouts matched by thread_id; 697 terminal tasks cross-checked with zero mismatches."
+    }
   },
   "results": [
     {
@@ -4902,8 +4910,8 @@
       "check_verdict": "FAIL",
       "time_secs": 7200.045640230179,
       "error": "codex timeout after 7200s",
-      "input_tokens": 0,
-      "output_tokens": 0,
+      "input_tokens": 27433835,
+      "output_tokens": 92423,
       "sany_valid": true,
       "obligations": null,
       "source": "tlaplus/Examples"
@@ -8662,8 +8670,8 @@
       "check_verdict": "FAIL",
       "time_secs": 7200.053244590759,
       "error": "codex timeout after 7200s",
-      "input_tokens": 0,
-      "output_tokens": 0,
+      "input_tokens": 54280711,
+      "output_tokens": 179122,
       "sany_valid": true,
       "obligations": 751,
       "source": "OpenAddressing (lemmy/Examples)"
@@ -8950,8 +8958,8 @@
       "check_verdict": "FAIL",
       "time_secs": 7200.052299261093,
       "error": "codex timeout after 7200s",
-      "input_tokens": 0,
-      "output_tokens": 0,
+      "input_tokens": 51041183,
+      "output_tokens": 139144,
       "sany_valid": true,
       "obligations": 768,
       "source": "ZooKeeper (Remix)"
@@ -8966,8 +8974,8 @@
       "check_verdict": "FAIL",
       "time_secs": 7200.052649736404,
       "error": "codex timeout after 7200s",
-      "input_tokens": 0,
-      "output_tokens": 0,
+      "input_tokens": 33688842,
+      "output_tokens": 189873,
       "sany_valid": true,
       "obligations": 658,
       "source": "ZooKeeper (Remix)"
@@ -9062,8 +9070,8 @@
       "check_verdict": "FAIL",
       "time_secs": 7200.0511820316315,
       "error": "codex timeout after 7200s",
-      "input_tokens": 0,
-      "output_tokens": 0,
+      "input_tokens": 49083401,
+      "output_tokens": 175288,
       "sany_valid": true,
       "obligations": 924,
       "source": "ZooKeeper (Remix)"
@@ -9110,8 +9118,8 @@
       "check_verdict": "FAIL",
       "time_secs": 7200.049932003021,
       "error": "codex timeout after 7200s",
-      "input_tokens": 0,
-      "output_tokens": 0,
+      "input_tokens": 43941252,
+      "output_tokens": 160304,
       "sany_valid": true,
       "obligations": 817,
       "source": "ZooKeeper (Remix)"
@@ -9142,8 +9150,8 @@
       "check_verdict": "FAIL",
       "time_secs": 7200.047882556915,
       "error": "codex timeout after 7200s",
-      "input_tokens": 0,
-      "output_tokens": 0,
+      "input_tokens": 52704370,
+      "output_tokens": 185928,
       "sany_valid": true,
       "obligations": 619,
       "source": "ZooKeeper (Remix)"
@@ -9174,8 +9182,8 @@
       "check_verdict": "FAIL",
       "time_secs": 7200.051661968231,
       "error": "codex timeout after 7200s",
-      "input_tokens": 0,
-      "output_tokens": 0,
+      "input_tokens": 33235640,
+      "output_tokens": 135840,
       "sany_valid": true,
       "obligations": 521,
       "source": "etcd (Specula)"
@@ -9190,8 +9198,8 @@
       "check_verdict": "FAIL",
       "time_secs": 7200.050947666168,
       "error": "codex timeout after 7200s",
-      "input_tokens": 0,
-      "output_tokens": 0,
+      "input_tokens": 30828726,
+      "output_tokens": 114686,
       "sany_valid": true,
       "obligations": 291,
       "source": "etcd (Specula)"
@@ -9254,8 +9262,8 @@
       "check_verdict": "FAIL",
       "time_secs": 7200.0471160411835,
       "error": "codex timeout after 7200s",
-      "input_tokens": 0,
-      "output_tokens": 0,
+      "input_tokens": 34708588,
+      "output_tokens": 106620,
       "sany_valid": true,
       "obligations": 228,
       "source": "etcd (Specula)"
@@ -10438,8 +10446,8 @@
       "check_verdict": "FAIL",
       "time_secs": 7200.0515875816345,
       "error": "codex timeout after 7200s",
-      "input_tokens": 0,
-      "output_tokens": 0,
+      "input_tokens": 31532844,
+      "output_tokens": 162613,
       "sany_valid": true,
       "obligations": 1281,
       "source": "tlaplus/Examples"
@@ -10454,8 +10462,8 @@
       "check_verdict": "FAIL",
       "time_secs": 7200.051507949829,
       "error": "codex timeout after 7200s",
-      "input_tokens": 0,
-      "output_tokens": 0,
+      "input_tokens": 40417198,
+      "output_tokens": 150902,
       "sany_valid": true,
       "obligations": 1534,
       "source": "tlaplus/Examples"
@@ -10790,8 +10798,8 @@
       "check_verdict": "FAIL",
       "time_secs": 7200.049651622772,
       "error": "codex timeout after 7200s",
-      "input_tokens": 0,
-      "output_tokens": 0,
+      "input_tokens": 20165718,
+      "output_tokens": 68218,
       "sany_valid": true,
       "obligations": 589,
       "source": "tlaplus/Examples"

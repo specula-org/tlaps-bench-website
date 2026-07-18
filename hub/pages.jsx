@@ -130,11 +130,22 @@ function PageLeaderboard() {
             Pass rate is the share of scored properties that pass, where the proof must first clear
             the cheat-checker (no admitted steps, smuggled axioms, or weakened theorems) and then be
             accepted by tlapm. The two benchmark modes, proof-completion and proof-from-scratch, are
-            scored separately rather than blended into a single number. Expand a model to see the
-            same 70 specs used in the benchmark index in one continuous table, with per-spec
-            property pass counts for each mode. Filter by organization, or switch between one-shot
-            and agent runs.
+            scored separately rather than blended into a single number. Each row also reports mean
+            usage per task, with the 710-task total underneath. Expand a model to keep the per-spec
+            pass-rate view or inspect all 710 individual tasks.
           </p>
+          <div className="leaderboard-method-note">
+            <p><strong>Output-only cost</strong> is reported output tokens multiplied by a fixed
+              public standard-tier output rate as of July 18, 2026
+              ({" "}<a href="https://developers.openai.com/api/docs/models/gpt-5.5" target="_blank" rel="noopener">OpenAI</a>,
+              {" "}<a href="https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing" target="_blank" rel="noopener">GitHub</a>).
+              This standard tier is applied uniformly for comparison; long-context tiers are not
+              inferred because the archived Copilot CLI records do not contain per-request input
+              usage. Input, cached-input, and other charges are excluded, so this is an estimate,
+              not the actual bill.</p>
+            <p><strong>Active time</strong> adds the time each task's agent was running. Parallel
+              tasks overlap, so the total is task-time rather than experiment wall-clock time.</p>
+          </div>
         </FadeIn>
         <div style={{ marginTop: 32 }}><HubLeaderboard /></div>
       </div>

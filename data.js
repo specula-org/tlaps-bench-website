@@ -19,6 +19,25 @@ window.TLAPS_DATA = {
       "name": "--mode proof-from-scratch",
       "blurb": "Pass rate on the 227 proof-from-scratch properties.",
       "tip": "Only the model and the target theorem statement remain; the model must invent the entire proof structure, including any helper lemmas."
+    },
+    {
+      "id": "activeTimePerTask",
+      "name": "Active time / task",
+      "invert": true,
+      "format": "duration",
+      "breakdown": false,
+      "groupStart": true,
+      "bar": false,
+      "tip": "Mean active agent time per canonical task. The secondary value is the sum of task time; parallel tasks overlap, so it is not experiment wall-clock time. Lower is better."
+    },
+    {
+      "id": "outputCostPerTask",
+      "name": "Output-only cost / task",
+      "invert": true,
+      "format": "usd",
+      "breakdown": false,
+      "bar": false,
+      "tip": "Mean estimated output-only cost per task, using reported output tokens and a fixed public standard-tier output rate as of July 18, 2026. Long-context tiers are not inferred. The secondary value is the 710-task total. Lower is better."
     }
   ],
   "categories": [
@@ -962,9 +981,25 @@ window.TLAPS_DATA = {
       "logo": null,
       "kind": "agent",
       "generated": "2026-07-07",
+      "resultsFile": "results/codex.json",
+      "resultsVersion": "d097d0079a0e",
       "perMetric": {
         "completion": 91.3,
-        "scratch": 80.2
+        "scratch": 80.2,
+        "activeTimePerTask": 723.3195387664983,
+        "outputCostPerTask": 0.6303626197183099
+      },
+      "usage": {
+        "taskCount": 710,
+        "activeTimeSecs": 513556.8725242138,
+        "outputTokens": 14918582,
+        "outputCostUsd": 447.55746
+      },
+      "pricing": {
+        "usdPerMillionTokens": 30,
+        "tier": "standard",
+        "asOf": "2026-07-18",
+        "source": "https://developers.openai.com/api/docs/models/gpt-5.5"
       },
       "perSpec": {
         "anvil--anvillock": {
@@ -1741,9 +1776,25 @@ window.TLAPS_DATA = {
       "logo": null,
       "kind": "agent",
       "generated": "2026-07-15",
+      "resultsFile": "results/copilot-gemini-3.1-pro-preview.json",
+      "resultsVersion": "fab62f907abb",
       "perMetric": {
         "completion": 78.7,
-        "scratch": 57.3
+        "scratch": 57.3,
+        "activeTimePerTask": 647.2131605420315,
+        "outputCostPerTask": 0.22062354929577466
+      },
+      "usage": {
+        "taskCount": 710,
+        "activeTimeSecs": 459521.3439848423,
+        "outputTokens": 13053560,
+        "outputCostUsd": 156.64272
+      },
+      "pricing": {
+        "usdPerMillionTokens": 12,
+        "tier": "standard (up to 200K input tokens)",
+        "asOf": "2026-07-18",
+        "source": "https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing"
       },
       "perSpec": {
         "anvil--anvillock": {
@@ -2520,9 +2571,25 @@ window.TLAPS_DATA = {
       "logo": null,
       "kind": "agent",
       "generated": "2026-07-07",
+      "resultsFile": "results/copilot.json",
+      "resultsVersion": "6ca339f01a79",
       "perMetric": {
         "completion": 69.2,
-        "scratch": 61.2
+        "scratch": 61.2,
+        "activeTimePerTask": 867.6088385081626,
+        "outputCostPerTask": 1.3552488028169014
+      },
+      "usage": {
+        "taskCount": 710,
+        "activeTimeSecs": 616002.2753407955,
+        "outputTokens": 38489066,
+        "outputCostUsd": 962.22665
+      },
+      "pricing": {
+        "usdPerMillionTokens": 25,
+        "tier": "standard",
+        "asOf": "2026-07-18",
+        "source": "https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing"
       },
       "perSpec": {
         "anvil--anvillock": {
