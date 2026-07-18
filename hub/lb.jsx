@@ -39,6 +39,27 @@ function BreakdownCell({ v, isOpen }) {
   );
 }
 
+function BreakdownUsageCell({ v, format }) {
+  if (v == null) {
+    return <td className="bd-usage-cell"><span className="bd-usage-na">—</span></td>;
+  }
+  const isDuration = format === "duration";
+  const primary = isDuration
+    ? formatDuration(v.activeTimePerTask)
+    : formatUsd(v.outputCostPerTask, 4);
+  const total = isDuration
+    ? formatDuration(v.activeTimeSecs, false)
+    : formatUsd(v.outputCostUsd);
+  return (
+    <td className="bd-usage-cell">
+      <span className="bd-usage-value">
+        <span>{primary}</span>
+        <small>total {total}</small>
+      </span>
+    </td>
+  );
+}
+
 function formatDuration(totalSecs, includeSeconds = true) {
   const secs = Math.round(totalSecs);
   const hours = Math.floor(secs / 3600);
@@ -56,7 +77,7 @@ function formatDuration(totalSecs, includeSeconds = true) {
 const formatUsd = (value, digits = 2) => `$${value.toFixed(digits)}`;
 const formatTokens = (value) => Math.round(value).toLocaleString("en-US");
 
-function MetricCell({ v, metric, model, max }) {
+function MetricCell({ v, metric, usage, max }) {
   if (v == null) {
     return <span className="metric-na">—</span>;
   }
@@ -64,7 +85,7 @@ function MetricCell({ v, metric, model, max }) {
     return (
       <span className="metric-value">
         <span className="metric-primary">{formatDuration(v)}</span>
-        <span className="metric-secondary">total {formatDuration(model.usage.activeTimeSecs, false)}</span>
+        <span className="metric-secondary">total {formatDuration(usage.activeTimeSecs, false)}</span>
       </span>
     );
   }
@@ -72,7 +93,7 @@ function MetricCell({ v, metric, model, max }) {
     return (
       <span className="metric-value">
         <span className="metric-primary">{formatUsd(v, 3)}</span>
-        <span className="metric-secondary">total {formatUsd(model.usage.outputCostUsd)}</span>
+        <span className="metric-secondary">total {formatUsd(usage.outputCostUsd)}</span>
       </span>
     );
   }
@@ -84,13 +105,14 @@ function MetricCell({ v, metric, model, max }) {
   );
 }
 
-function TaskBreakdown({ model }) {
+function TaskBreakdown({ model, selectedMode }) {
   const [taskRows, setTaskRows] = useS_lb(null);
   const [loadError, setLoadError] = useS_lb(null);
   const [query, setQuery] = useS_lb("");
-  const [mode, setMode] = useS_lb("All");
   const [verdict, setVerdict] = useS_lb("All");
   const [sort, setSort] = useS_lb({ key: "benchmark", dir: "asc" });
+  const rawMode = selectedMode === "completion" ? "proof-completion" : "proof-from-scratch";
+  const modeTaskCount = model.perMode[selectedMode].total;
 
   useE_lb(() => {
     const controller = new AbortController();
@@ -128,7 +150,7 @@ function TaskBreakdown({ model }) {
   const rows = useM_lb(() => {
     const needle = query.trim().toLowerCase();
     const filtered = (taskRows ?? []).filter((row) =>
-      (mode === "All" || row.mode === mode) &&
+      row.mode === rawMode &&
       (verdict === "All" || row.verdict === verdict) &&
       (!needle || `${row.theorem} ${row.benchmark} ${row.source}`.toLowerCase().includes(needle))
     );
@@ -139,7 +161,7 @@ function TaskBreakdown({ model }) {
       }
       return sort.dir === "asc" ? av - bv : bv - av;
     });
-  }, [taskRows, query, mode, verdict, sort]);
+  }, [taskRows, query, rawMode, verdict, sort]);
 
   const onSort = (key) => setSort((current) => ({
     key,
@@ -149,10 +171,8 @@ function TaskBreakdown({ model }) {
     ? ` task-sorted${sort.dir === "asc" ? " task-sorted-asc" : ""}`
     : "";
   const sortAria = (key) => sort.key === key ? (sort.dir === "asc" ? "ascending" : "descending") : "none";
-  const modeLabel = (value) => value === "proof-completion" ? "Completion" : "From scratch";
   const taskColumns = [
     ["benchmark", "Task"],
-    ["mode", "Mode"],
     ["verdict", "Verdict"],
     ["timeSecs", "Active time"],
     ["outputTokens", "Output tokens"],
@@ -160,7 +180,7 @@ function TaskBreakdown({ model }) {
   ];
   const taskStatus = loadError
     ? "Task data unavailable"
-    : taskRows ? `${rows.length} / ${model.usage.taskCount} tasks` : "Loading tasks…";
+    : taskRows ? `${rows.length} / ${modeTaskCount} tasks` : "Loading tasks…";
 
   return (
     <div className="task-detail">
@@ -169,11 +189,6 @@ function TaskBreakdown({ model }) {
           <span className="sr-only">Search tasks</span>
           <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search task, theorem, or source" />
         </label>
-        <select value={mode} onChange={(e) => setMode(e.target.value)} aria-label="Filter by benchmark mode">
-          <option value="All">All modes</option>
-          <option value="proof-completion">Proof completion</option>
-          <option value="proof-from-scratch">Proof from scratch</option>
-        </select>
         <select value={verdict} onChange={(e) => setVerdict(e.target.value)} aria-label="Filter by verdict">
           <option value="All">All verdicts</option>
           <option value="PASS">PASS</option>
@@ -206,7 +221,6 @@ function TaskBreakdown({ model }) {
                   <span>{row.theorem}</span>
                   <small>{row.benchmark}</small>
                 </td>
-                <td><span className="task-mode">{modeLabel(row.mode)}</span></td>
                 <td><span className={`task-verdict ${row.verdict.toLowerCase()}`}>{row.verdict}</span></td>
                 <td className="task-number">{formatDuration(row.timeSecs)}</td>
                 <td className="task-number">{formatTokens(row.outputTokens)}</td>
@@ -214,13 +228,13 @@ function TaskBreakdown({ model }) {
               </tr>
             ))}
             {!taskRows && !loadError && (
-              <tr><td className="task-no-results" colSpan="6">Loading task usage…</td></tr>
+              <tr><td className="task-no-results" colSpan="5">Loading task usage…</td></tr>
             )}
             {loadError && (
-              <tr><td className="task-no-results" colSpan="6">Could not load task usage: {loadError}</td></tr>
+              <tr><td className="task-no-results" colSpan="5">Could not load task usage: {loadError}</td></tr>
             )}
             {taskRows && rows.length === 0 && (
-              <tr><td className="task-no-results" colSpan="6">No tasks match these filters.</td></tr>
+              <tr><td className="task-no-results" colSpan="5">No tasks match these filters.</td></tr>
             )}
           </tbody>
         </table>
@@ -233,20 +247,28 @@ function HubLeaderboard({ showFilters = true }) {
   const metricById = useM_lb(() => Object.fromEntries(TLAPS_DATA.metrics.map(m => [m.id, m])), []);
   const isInvert = (key) => key.startsWith("metric:") && metricById[key.slice(7)]?.invert;
 
+  const [selectedMode, setSelectedMode] = useS_lb("completion");
   const [sort, setSort] = useS_lb({ key: "metric:completion", dir: "desc" });
   const [expanded, setExpanded] = useS_lb(null);
   const [detailView, setDetailView] = useS_lb("spec");
-  const [orgFilter, setOrgFilter] = useS_lb("All");
   const [kindFilter, setKindFilter] = useS_lb("All");
-
-  const orgs = ["All", ...new Set(TLAPS_DATA.models.map(m => m.org))];
+  const modeLabels = { completion: "Proof completion", scratch: "Proof from scratch" };
+  const hasMultipleKinds = new Set(TLAPS_DATA.models.map(m => m.kind)).size > 1;
+  const visibleMetrics = useM_lb(() => [
+    { ...metricById[selectedMode], name: "Pass rate" },
+    metricById.activeTimePerTask,
+    metricById.outputCostPerTask,
+  ], [metricById, selectedMode]);
 
   // Sort key forms: "name" or "metric:<id>".
-  const getVal = (m, key) => key.startsWith("metric:") ? (m.perMetric?.[key.slice(7)] ?? null) : m[key];
+  const getMetricVal = (m, metricId) => {
+    if (metricId === "completion" || metricId === "scratch") return m.perMetric?.[metricId] ?? null;
+    return m.perMode?.[selectedMode]?.[metricId] ?? null;
+  };
+  const getVal = (m, key) => key.startsWith("metric:") ? getMetricVal(m, key.slice(7)) : m[key];
 
   const rows = useM_lb(() => {
-    let arr = TLAPS_DATA.models.filter(m => orgFilter === "All" || m.org === orgFilter);
-    arr = arr.filter(m => kindFilter === "All" || m.kind === kindFilter);
+    let arr = TLAPS_DATA.models.filter(m => kindFilter === "All" || m.kind === kindFilter);
     arr = [...arr];
     arr.sort((a, b) => {
       const va = getVal(a, sort.key), vb = getVal(b, sort.key);
@@ -256,7 +278,14 @@ function HubLeaderboard({ showFilters = true }) {
       return sort.dir === "asc" ? va - vb : vb - va;
     });
     return arr;
-  }, [sort, orgFilter, kindFilter]);
+  }, [sort, kindFilter, selectedMode]);
+
+  const selectMode = (mode) => {
+    if (mode === selectedMode) return;
+    setSelectedMode(mode);
+    setExpanded(null);
+    setSort({ key: `metric:${mode}`, dir: "desc" });
+  };
 
   const onSort = (key) => {
     setExpanded(null);
@@ -270,22 +299,25 @@ function HubLeaderboard({ showFilters = true }) {
   const sortAria = (key) => sort.key === key ? (sort.dir === "asc" ? "ascending" : "descending") : "none";
   const toggleExpanded = (modelId) => setExpanded((current) => current === modelId ? null : modelId);
   // Each displayed bar scales to that column's own top value.
-  const metricMax = useM_lb(() => Object.fromEntries(TLAPS_DATA.metrics.map(mt => {
-    const vals = TLAPS_DATA.models.map(m => m.perMetric?.[mt.id]).filter(v => v != null);
+  const metricMax = useM_lb(() => Object.fromEntries(visibleMetrics.map(mt => {
+    const vals = TLAPS_DATA.models.map(m => {
+      if (mt.id === "completion" || mt.id === "scratch") return m.perMetric?.[mt.id];
+      return m.perMode?.[selectedMode]?.[mt.id];
+    }).filter(v => v != null);
     return [mt.id, vals.length ? Math.max(...vals) : 100];
-  })), []);
+  })), [visibleMetrics, selectedMode]);
 
   // FLIP: slide rows to new positions on sort/filter change.
   const rowRefs = useR_lb({});
   const positionsRef = useR_lb({});
-  const lastKeyRef = useR_lb({ k: sort.key, d: sort.dir, f: orgFilter, kd: kindFilter });
+  const lastKeyRef = useR_lb({ k: sort.key, d: sort.dir, mode: selectedMode, kd: kindFilter });
   useLE_lb(() => {
     const oldPositions = positionsRef.current;
     const newPositions = {};
     const refs = rowRefs.current;
     Object.keys(refs).forEach(id => { const el = refs[id]; if (el) newPositions[id] = el.offsetTop; });
     const lk = lastKeyRef.current;
-    const changed = lk.k !== sort.key || lk.d !== sort.dir || lk.f !== orgFilter || lk.kd !== kindFilter;
+    const changed = lk.k !== sort.key || lk.d !== sort.dir || lk.mode !== selectedMode || lk.kd !== kindFilter;
     if (changed && Object.keys(oldPositions).length > 0) {
       Object.keys(refs).forEach(id => {
         const el = refs[id]; if (!el) return;
@@ -301,27 +333,33 @@ function HubLeaderboard({ showFilters = true }) {
       });
     }
     positionsRef.current = newPositions;
-    lastKeyRef.current = { k: sort.key, d: sort.dir, f: orgFilter, kd: kindFilter };
+    lastKeyRef.current = { k: sort.key, d: sort.dir, mode: selectedMode, kd: kindFilter };
   });
 
-  const colCount = 3 + TLAPS_DATA.metrics.length; // #, Model, [metric columns], caret
+  const colCount = 3 + visibleMetrics.length; // #, Model, [metric columns], caret
 
   return (
     <div>
       {showFilters && (
-        <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 20, flexWrap: "wrap" }}>
-          <span className="eyebrow">Filter</span>
-          {orgs.map(o => (
-            <button key={o} className={"pill" + (orgFilter === o ? " solid" : "")} onClick={() => setOrgFilter(o)}
-              style={{ cursor: "pointer", border: orgFilter === o ? undefined : "1px solid var(--line)" }}>{o}</button>
-          ))}
-          <div className="method-select-wrap">
-            <select className="method-select" value={kindFilter} onChange={e => setKindFilter(e.target.value)}>
-              <option value="All">All</option>
-              <option value="base">One-Shot</option>
-              <option value="agent">Agent</option>
-            </select>
+        <div className="leaderboard-controls">
+          <span className="eyebrow">Task</span>
+          <div className="mode-switch" role="group" aria-label="Benchmark task">
+            {TLAPS_DATA.modes.map((mode) => (
+              <button key={mode.id} type="button" className={selectedMode === mode.id ? "active" : ""}
+                aria-pressed={selectedMode === mode.id} onClick={() => selectMode(mode.id)}>
+                {modeLabels[mode.id]} <span>{TLAPS_DATA.models[0]?.perMode?.[mode.id]?.total ?? 0}</span>
+              </button>
+            ))}
           </div>
+          {hasMultipleKinds && (
+            <div className="method-select-wrap">
+              <select className="method-select" value={kindFilter} onChange={e => setKindFilter(e.target.value)}>
+                <option value="All">All</option>
+                <option value="base">One-Shot</option>
+                <option value="agent">Agent</option>
+              </select>
+            </div>
+          )}
         </div>
       )}
       <div className="lb-wrap">
@@ -334,7 +372,7 @@ function HubLeaderboard({ showFilters = true }) {
                   Model <span className="sort" aria-hidden="true">▾</span>
                 </button>
               </th>
-              {TLAPS_DATA.metrics.map((mt, i) => {
+              {visibleMetrics.map((mt, i) => {
                 const k = "metric:" + mt.id;
                 return (
                   <th key={mt.id} className={sortCls(k) + ((i === 1 || mt.groupStart) ? " lb-gap" : "") + " lb-metric"}
@@ -381,12 +419,12 @@ function HubLeaderboard({ showFilters = true }) {
                         </div>
                       </div>
                     </td>
-                    {TLAPS_DATA.metrics.map((mt, i) => {
-                      const v = m.perMetric?.[mt.id];
+                    {visibleMetrics.map((mt, i) => {
+                      const v = getMetricVal(m, mt.id);
                       return (
                         <td key={mt.id} className={(i === 1 || mt.groupStart) ? "lb-gap" : undefined} style={{ textAlign: "right" }}>
                           {v == null ? <span style={{ color: "var(--ink-3)", fontFamily: "var(--mono)", fontSize: 12 }}>—</span> : (
-                            <MetricCell v={v} metric={mt} model={m} max={metricMax[mt.id]} />
+                            <MetricCell v={v} metric={mt} usage={m.perMode[selectedMode]} max={metricMax[mt.id]} />
                           )}
                         </td>
                       );
@@ -409,7 +447,9 @@ function HubLeaderboard({ showFilters = true }) {
                               <div>
                                 <div className="eyebrow" style={{ marginBottom: 6 }}>{m.name} · {m.subname}</div>
                                 <div className="detail-caption">
-                                  {detailView === "spec" ? "Counts show passed / total properties." : "Recorded usage for every canonical task."}
+                                  {detailView === "spec"
+                                    ? `${modeLabels[selectedMode]}: usage shows the mean per task with the spec total underneath.`
+                                    : `${modeLabels[selectedMode]}: recorded usage for each task in this leaderboard.`}
                                 </div>
                               </div>
                               <div className="detail-tabs" role="group" aria-label="Leaderboard detail view">
@@ -428,14 +468,14 @@ function HubLeaderboard({ showFilters = true }) {
                                     <tr>
                                       <th>Spec</th>
                                       <th>Source</th>
-                                      {TLAPS_DATA.metrics.filter(mt => mt.breakdown !== false).map(mt => (
-                                        <th key={mt.id} className="bd-mode">{mt.name}</th>
-                                      ))}
+                                      <th className="bd-mode">Pass rate</th>
+                                      <th className="bd-usage-head">Active time / task</th>
+                                      <th className="bd-usage-head">Output-only cost / task</th>
                                     </tr>
                                   </thead>
                                   <tbody>
-                                    {TLAPS_DATA.specs.map(spec => {
-                                      const score = m.perSpec?.[spec.id];
+                                    {TLAPS_DATA.specs.filter(spec => m.perSpec?.[spec.id]?.[selectedMode]).map(spec => {
+                                      const score = m.perSpec[spec.id][selectedMode];
                                       return (
                                         <tr className="bd-row dataset-score-spec-row" key={spec.id}>
                                           <td className="bd-name spec-name">
@@ -450,15 +490,16 @@ function HubLeaderboard({ showFilters = true }) {
                                                  onClick={(e) => e.stopPropagation()}>{spec.sourceName}</a>
                                             ) : spec.sourceName}
                                           </td>
-                                          <BreakdownCell v={score?.completion ?? null} isOpen={isOpen} />
-                                          <BreakdownCell v={score?.scratch ?? null} isOpen={isOpen} />
+                                          <BreakdownCell v={score} isOpen={isOpen} />
+                                          <BreakdownUsageCell v={score} format="duration" />
+                                          <BreakdownUsageCell v={score} format="usd" />
                                         </tr>
                                       );
                                     })}
                                   </tbody>
                                 </table>
                               </div>
-                            ) : (isOpen ? <TaskBreakdown model={m} /> : null)}
+                            ) : (isOpen ? <TaskBreakdown model={m} selectedMode={selectedMode} /> : null)}
                           </div>
                         </div>
                       </div>

@@ -157,9 +157,22 @@ const slug = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g
 const specId = (source, group) => `${slug(source)}--${slug(group)}`;
 const specKey = (source, group) => JSON.stringify([source, group]);
 const r1 = (x) => Math.round(x * 10) / 10;
-const modeStat = (pm) => (pm && pm.total > 0)
-  ? { rate: r1((pm.pass / pm.total) * 100), pass: pm.pass, total: pm.total }
-  : null;
+const modeStat = (pm, usdPerMillionTokens) => {
+  if (!pm || pm.total <= 0) return null;
+  const outputCostUsd = pm.outputTokens * usdPerMillionTokens / 1_000_000;
+  return {
+    rate: r1((pm.pass / pm.total) * 100),
+    pass: pm.pass,
+    total: pm.total,
+    taskCount: pm.total,
+    activeTimeSecs: pm.activeTimeSecs,
+    activeTimePerTask: pm.activeTimeSecs / pm.total,
+    outputTokens: pm.outputTokens,
+    outputTokensPerTask: pm.outputTokens / pm.total,
+    outputCostUsd,
+    outputCostPerTask: outputCostUsd / pm.total,
+  };
+};
 
 let canonicalSpecs = null;
 let canonicalSpecManifest = null;
@@ -201,9 +214,17 @@ const models = resultFiles.map((f) => {
       throw new Error(`${f}: benchmark "${r.benchmark}" does not identify a spec group`);
     }
 
-    const m = (byMode[r.mode] ??= { total: 0, PASS: 0, CHEATING: 0 });
+    const m = (byMode[r.mode] ??= {
+      total: 0,
+      PASS: 0,
+      CHEATING: 0,
+      activeTimeSecs: 0,
+      outputTokens: 0,
+    });
     m.total++;
     m[r.check_verdict] = (m[r.check_verdict] ?? 0) + 1;
+    m.activeTimeSecs += r.time_secs;
+    m.outputTokens += r.output_tokens;
 
     const s = (bySource[r.source] ??= { perMode: {} });
     const spm = (s.perMode[r.mode] ??= { total: 0 });
@@ -211,15 +232,29 @@ const models = resultFiles.map((f) => {
 
     const key = specKey(r.source, group);
     const spec = (bySpec[key] ??= { source: r.source, group, perMode: {} });
-    const specMode = (spec.perMode[r.mode] ??= { pass: 0, total: 0 });
+    const specMode = (spec.perMode[r.mode] ??= {
+      pass: 0,
+      total: 0,
+      activeTimeSecs: 0,
+      outputTokens: 0,
+    });
     specMode.total++;
     if (r.check_verdict === "PASS") specMode.pass++;
+    specMode.activeTimeSecs += r.time_secs;
+    specMode.outputTokens += r.output_tokens;
   }
 
   const usageAudit = meta.usage_audit;
   if (!usageAudit || usageAudit.task_count !== RECORDS ||
       usageAudit.active_time_complete !== true || usageAudit.output_tokens_audited !== true) {
     throw new Error(`${f}: missing audited ${RECORDS}-task usage data`);
+  }
+  const pricing = OUTPUT_PRICING[meta.backend];
+  if (!pricing || !Number.isFinite(pricing.usdPerMillionTokens) || pricing.usdPerMillionTokens <= 0) {
+    throw new Error(`${f}: missing valid output pricing for ${meta.backend}`);
+  }
+  if (pricing.asOf !== usageAudit.date) {
+    throw new Error(`${f}: pricing date ${pricing.asOf} does not match usage audit ${usageAudit.date}`);
   }
 
   for (const [source, [completion, scratch]] of Object.entries(CANONICAL)) {
@@ -308,20 +343,23 @@ const models = resultFiles.map((f) => {
     return [
       specId(source, group),
       {
-        completion: modeStat(spec.perMode["proof-completion"]),
-        scratch: modeStat(spec.perMode["proof-from-scratch"]),
+        completion: modeStat(spec.perMode["proof-completion"], pricing.usdPerMillionTokens),
+        scratch: modeStat(spec.perMode["proof-from-scratch"], pricing.usdPerMillionTokens),
       },
     ];
   }));
 
   const info = BACKEND_INFO[meta.backend] ?? { name: meta.backend, org: "?", logo: null, kind: "base" };
-  const pricing = OUTPUT_PRICING[meta.backend];
-  if (!pricing || !Number.isFinite(pricing.usdPerMillionTokens) || pricing.usdPerMillionTokens <= 0) {
-    throw new Error(`${f}: missing valid output pricing for ${meta.backend}`);
-  }
-  if (pricing.asOf !== usageAudit.date) {
-    throw new Error(`${f}: pricing date ${pricing.asOf} does not match usage audit ${usageAudit.date}`);
-  }
+  const perMode = {
+    completion: modeStat({
+      ...byMode["proof-completion"],
+      pass: byMode["proof-completion"].PASS,
+    }, pricing.usdPerMillionTokens),
+    scratch: modeStat({
+      ...byMode["proof-from-scratch"],
+      pass: byMode["proof-from-scratch"].PASS,
+    }, pricing.usdPerMillionTokens),
+  };
   const outputCostUsd = outputTokens * pricing.usdPerMillionTokens / 1_000_000;
   return {
     id: meta.backend,
@@ -330,11 +368,12 @@ const models = resultFiles.map((f) => {
     resultsFile: `results/${f}`,
     resultsVersion,
     perMetric: {
-      completion: r1((byMode["proof-completion"].PASS / byMode["proof-completion"].total) * 100),
-      scratch: r1((byMode["proof-from-scratch"].PASS / byMode["proof-from-scratch"].total) * 100),
+      completion: perMode.completion.rate,
+      scratch: perMode.scratch.rate,
       activeTimePerTask: activeTimeSecs / RECORDS,
       outputCostPerTask: outputCostUsd / RECORDS,
     },
+    perMode,
     usage: {
       taskCount: RECORDS,
       activeTimeSecs,
@@ -374,9 +413,9 @@ const data = {
     { id: "scratch", name: "--mode proof-from-scratch", blurb: "Pass rate on the 227 proof-from-scratch properties.",
       tip: "Only the model and the target theorem statement remain; the model must invent the entire proof structure, including any helper lemmas." },
     { id: "activeTimePerTask", name: "Active time / task", invert: true, format: "duration", breakdown: false, groupStart: true, bar: false,
-      tip: "Mean active agent time per canonical task. The secondary value is the sum of task time; parallel tasks overlap, so it is not experiment wall-clock time. Lower is better." },
+      tip: "Mean active agent time per task in the selected mode. The secondary value is that mode's sum of task time; parallel tasks overlap, so it is not experiment wall-clock time. Lower is better." },
     { id: "outputCostPerTask", name: "Output-only cost / task", invert: true, format: "usd", breakdown: false, bar: false,
-      tip: "Mean estimated output-only cost per task, using reported output tokens and a fixed public standard-tier output rate as of July 18, 2026. Long-context tiers are not inferred. The secondary value is the 710-task total. Lower is better." },
+      tip: "Mean estimated output-only cost per task in the selected mode, using reported output tokens and a fixed public standard-tier output rate as of July 18, 2026. Long-context tiers are not inferred. The secondary value is that mode's total. Lower is better." },
   ],
   categories,
   specs: canonicalSpecs,

@@ -117,6 +117,13 @@ p.lead { font-family: var(--serif); font-size: 20px; line-height: 1.6; color: va
 .highlight-card:hover .arrow .ar { transform: translateX(4px); }
 
 /* leaderboard */
+.leaderboard-controls { display: flex; gap: 8px; align-items: center; margin-bottom: 20px; flex-wrap: wrap; }
+.mode-switch { display: inline-flex; gap: 3px; padding: 3px; border: 1px solid var(--line); border-radius: 9px; background: var(--paper-2); }
+.mode-switch button { display: inline-flex; align-items: center; gap: 7px; padding: 7px 11px; border: 0; border-radius: 6px; background: transparent; color: var(--ink-3); font-family: var(--mono); font-size: 10.5px; cursor: pointer; }
+.mode-switch button:hover { color: var(--ink); }
+.mode-switch button.active { background: var(--paper); color: var(--ink); box-shadow: 0 1px 3px rgba(20, 32, 43, 0.12); }
+.mode-switch button span { color: var(--ink-3); font-size: 9px; font-variant-numeric: tabular-nums; }
+.mode-switch button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 /* overflow is visible on desktop so column tooltips can extend past a short table
    (few/one filtered row) without being clipped; horizontal scroll is only needed
    on narrow viewports, where it's re-enabled in the max-width:900px block below. */
@@ -133,7 +140,7 @@ table.lb thead th:hover { color: var(--ink); }
 table.lb thead th .sort { opacity: 0.4; font-size: 11px; margin-left: 4px; display: inline-block; transform-origin: 50% 50%; transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1), opacity 200ms, color 200ms; }
 table.lb thead th.sorted .sort { opacity: 1; color: var(--accent); }
 table.lb thead th.sorted-asc .sort { transform: rotate(180deg); }
-/* widen the gap between the two proof-mode columns so they read as separate sections */
+/* Separate the selected mode's pass rate from its usage columns. */
 table.lb th.lb-gap, table.lb td.lb-gap { padding-left: 44px; }
 /* mode-column tooltip: hover the header label for a concise explanation of the mode */
 .th-mode { position: relative; display: inline-flex; }
@@ -207,9 +214,10 @@ table.lb tr.expand-row > td { padding: 0; border-bottom: 1px solid var(--line-so
 .detail-tabs button.active { background: var(--paper); color: var(--ink); box-shadow: 0 1px 3px rgba(20, 32, 43, 0.12); }
 /* Expanded model details: the full per-spec score table. */
 .bd-scroll { max-height: min(68vh, 680px); overflow: auto; border: 1px solid var(--line-soft); border-radius: 9px; background: var(--paper); -webkit-overflow-scrolling: touch; }
-table.breakdown { width: 100%; min-width: 820px; border-collapse: separate; border-spacing: 0; }
+table.breakdown { width: 100%; min-width: 980px; border-collapse: separate; border-spacing: 0; }
 table.breakdown thead th { position: sticky; top: 0; z-index: 3; text-align: left; font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-3); font-weight: 500; padding: 11px 14px; border-bottom: 1px solid var(--line); background: var(--paper); white-space: nowrap; }
 table.breakdown th.bd-mode { text-align: right; width: 210px; }
+table.breakdown th.bd-usage-head { min-width: 170px; text-align: right; }
 table.breakdown td { padding: 9px 14px; border-bottom: 1px solid var(--line-soft); vertical-align: middle; background: var(--paper); }
 table.breakdown tbody tr:last-child td { border-bottom: none; }
 .bd-name { font-family: var(--mono); font-size: 11px; color: var(--ink-2); padding-right: 24px !important; }
@@ -229,6 +237,10 @@ table.breakdown tbody tr:last-child td { border-bottom: none; }
 .bd-rate { font-family: var(--mono); font-weight: 600; font-size: 12px; text-align: right; font-variant-numeric: tabular-nums; }
 .bd-num { font-family: var(--mono); font-weight: 400; font-size: 11px; color: var(--ink-3); text-align: right; font-variant-numeric: tabular-nums; }
 .bd-na { display: inline-flex; justify-content: center; width: 180px; font-family: var(--mono); font-size: 13px; color: var(--ink-3); }
+.bd-usage-cell { min-width: 170px; text-align: right; }
+.bd-usage-value { display: inline-flex; flex-direction: column; align-items: flex-end; gap: 3px; font-family: var(--mono); font-size: 11px; font-weight: 600; color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.bd-usage-value small { color: var(--ink-3); font-size: 9px; font-weight: 400; }
+.bd-usage-na { color: var(--ink-3); font-family: var(--mono); font-size: 12px; }
 
 /* Per-task usage and output-only cost table. */
 .task-toolbar { display: flex; align-items: center; gap: 8px; margin-bottom: 9px; }
@@ -241,17 +253,16 @@ table.breakdown tbody tr:last-child td { border-bottom: none; }
 .task-pricing-note { margin: 0 0 12px; color: var(--ink-3); font-family: var(--mono); font-size: 9.5px; line-height: 1.5; }
 .task-pricing-note a { color: var(--accent); }
 .task-scroll { max-height: min(68vh, 680px); overflow: auto; border: 1px solid var(--line-soft); border-radius: 9px; background: var(--paper); -webkit-overflow-scrolling: touch; }
-table.task-table { width: 100%; min-width: 980px; table-layout: fixed; border-collapse: separate; border-spacing: 0; }
-table.task-table th:nth-child(1) { width: 38%; }
-table.task-table th:nth-child(2) { width: 13%; }
-table.task-table th:nth-child(3) { width: 10%; }
-table.task-table th:nth-child(4) { width: 13%; }
-table.task-table th:nth-child(5) { width: 13%; }
-table.task-table th:nth-child(6) { width: 13%; }
+table.task-table { width: 100%; min-width: 850px; table-layout: fixed; border-collapse: separate; border-spacing: 0; }
+table.task-table th:nth-child(1) { width: 40%; }
+table.task-table th:nth-child(2) { width: 12%; }
+table.task-table th:nth-child(3) { width: 16%; }
+table.task-table th:nth-child(4) { width: 16%; }
+table.task-table th:nth-child(5) { width: 16%; }
 table.task-table th { position: sticky; top: 0; z-index: 3; padding: 11px 13px; border-bottom: 1px solid var(--line); background: var(--paper); color: var(--ink-3); font-family: var(--mono); font-size: 9.5px; font-weight: 500; text-align: left; text-transform: uppercase; letter-spacing: 0.07em; white-space: nowrap; }
-table.task-table th:nth-child(n+4) { text-align: right; }
+table.task-table th:nth-child(n+3) { text-align: right; }
 .task-sort-button { display: inline-flex; width: 100%; align-items: center; gap: 2px; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; text-align: inherit; text-transform: inherit; letter-spacing: inherit; cursor: pointer; }
-table.task-table th:nth-child(n+4) .task-sort-button { justify-content: flex-end; }
+table.task-table th:nth-child(n+3) .task-sort-button { justify-content: flex-end; }
 table.task-table th .sort { display: inline-block; margin-left: 3px; opacity: 0.25; transition: transform 160ms, opacity 160ms, color 160ms; }
 table.task-table th.task-sorted .sort { opacity: 1; color: var(--accent); }
 table.task-table th.task-sorted-asc .sort { transform: rotate(180deg); }
@@ -261,7 +272,6 @@ table.task-table tbody tr:hover td { background: var(--paper-2); }
 .task-name { min-width: 330px; font-family: var(--mono); }
 .task-name > span { display: block; overflow: hidden; color: var(--ink); font-size: 10.5px; font-weight: 500; text-overflow: ellipsis; white-space: nowrap; }
 .task-name > small { display: block; max-width: 430px; margin-top: 3px; overflow: hidden; color: var(--ink-3); font-size: 9px; font-weight: 400; text-overflow: ellipsis; white-space: nowrap; }
-.task-mode { color: var(--ink-3); font-family: var(--mono); font-size: 9.5px; white-space: nowrap; }
 .task-verdict { display: inline-flex; min-width: 62px; justify-content: center; padding: 3px 6px; border-radius: 999px; font-family: var(--mono); font-size: 8.5px; font-weight: 600; letter-spacing: 0.04em; }
 .task-verdict.pass { background: rgba(35, 139, 91, 0.12); color: #18764d; }
 .task-verdict.fail { background: rgba(190, 67, 58, 0.12); color: #a33b35; }
@@ -375,7 +385,7 @@ hr.sep { border: none; border-top: 1px solid var(--line-soft); margin: 40px 0; }
 /* responsive */
 @media (max-width: 1100px) {
   .lb-wrap { overflow-x: auto; overflow-y: hidden; }
-  table.lb { min-width: 1050px; }
+  table.lb { min-width: 850px; }
 }
 @media (max-width: 900px) {
   .coverage-grid { grid-template-columns: 1fr; }
@@ -399,6 +409,10 @@ hr.sep { border: none; border-top: 1px solid var(--line-soft); margin: 40px 0; }
   .wrap-narrow { padding: 0 20px; }
 }
 @media (max-width: 600px) {
+  .leaderboard-controls { align-items: stretch; }
+  .leaderboard-controls > .eyebrow { width: 100%; }
+  .mode-switch { width: 100%; }
+  .mode-switch button { flex: 1; justify-content: center; }
   .highlight-grid { grid-template-columns: 1fr; }
   .leaderboard-method-note { grid-template-columns: 1fr; gap: 12px; padding: 14px 15px; }
   .dataset-facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
