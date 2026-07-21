@@ -628,7 +628,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": null,
+      "url": "https://github.com/tlaplus/Examples/blob/aba0cef20ce694f97612ad36a873734a1314534a/specifications/GermanProtocol/GermanCoherence.tla",
       "completion": 0,
       "scratch": 1,
       "total": 1

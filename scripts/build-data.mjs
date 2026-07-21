@@ -119,11 +119,11 @@ const SPEC_URL = {
   ZooKeeper: "https://github.com/Disalg-ICS-NJU/zookeeper-tla-spec/blob/main/high-level-spec/Zab.tla",
   ZooKeeper_LowLevel: "https://github.com/Disalg-ICS-NJU/zookeeper-tla-spec/tree/main/low-level-spec/zk-3.7",
   tlaplus_examples_BlockingQueue: "https://github.com/lemmy/BlockingQueue",
+  tlaplus_examples_GermanProtocol: "https://github.com/tlaplus/Examples/blob/aba0cef20ce694f97612ad36a873734a1314534a/specifications/GermanProtocol/GermanCoherence.tla",
   two_thread_mutex: "https://github.com/anvil-verifier/anvil/blob/main/src/tla_demo.rs",
   // Compatibility with result bundles created before the benchmark rename.
   AnvilLock: "https://github.com/anvil-verifier/anvil/blob/main/src/tla_demo.rs",
 };
-const UNLINKED_SPECS = new Set(["tlaplus_examples_GermanProtocol"]);
 
 const displayName = (group) => {
   if (group === "AnvilLock") return "two_thread_mutex";
@@ -141,7 +141,6 @@ const specUrl = (group) => {
   }
   if (group.startsWith("tlaplus_examples_")) {
     const name = group.slice("tlaplus_examples_".length);
-    if (name === "GermanProtocol") return null;
     if (name.startsWith("SpecifyingSystems_")) {
       const chapter = name.slice("SpecifyingSystems_".length);
       return `${TLAPLUS_REPO}/SpecifyingSystems/${chapter}`;
@@ -326,7 +325,7 @@ const models = resultFiles.map((f) => {
   const ids = new Set(rows.map((row) => row.id));
   if (ids.size !== rows.length) throw new Error(`${f}: spec ids are not unique`);
   for (const row of rows) {
-    if (!row.url && !UNLINKED_SPECS.has(row.group)) {
+    if (!row.url) {
       throw new Error(`${f}: spec "${row.group}" is missing an upstream URL`);
     }
   }
