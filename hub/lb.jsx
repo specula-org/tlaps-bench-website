@@ -243,12 +243,14 @@ function TaskBreakdown({ model, selectedMode }) {
   );
 }
 
-function HubLeaderboard({ showFilters = true }) {
+function HubLeaderboard({ showFilters = true, fixedMode = null }) {
   const metricById = useM_lb(() => Object.fromEntries(TLAPS_DATA.metrics.map(m => [m.id, m])), []);
+  const modeBlurb = useM_lb(() => Object.fromEntries(TLAPS_DATA.modes.map(m => [m.id, m.blurb])), []);
   const isInvert = (key) => key.startsWith("metric:") && metricById[key.slice(7)]?.invert;
 
-  const [selectedMode, setSelectedMode] = useS_lb("completion");
-  const [sort, setSort] = useS_lb({ key: "metric:completion", dir: "desc" });
+  const initialMode = fixedMode || "completion";
+  const [selectedMode, setSelectedMode] = useS_lb(initialMode);
+  const [sort, setSort] = useS_lb({ key: `metric:${initialMode}`, dir: "desc" });
   const [expanded, setExpanded] = useS_lb(null);
   const [detailView, setDetailView] = useS_lb("spec");
   const [kindFilter, setKindFilter] = useS_lb("All");
@@ -340,7 +342,28 @@ function HubLeaderboard({ showFilters = true }) {
 
   return (
     <div>
-      {showFilters && (
+      {fixedMode ? (
+        <div className="lb-section-head">
+          <div className="lb-section-titlebar">
+            <h2 className="lb-section-title">
+              <span className="lb-section-badge">{modeLabels[fixedMode]}</span>
+              <span className="lb-section-count">
+                {TLAPS_DATA.models[0]?.perMode?.[fixedMode]?.total ?? 0} properties
+              </span>
+            </h2>
+            {hasMultipleKinds && (
+              <div className="method-select-wrap">
+                <select className="method-select" value={kindFilter} onChange={e => setKindFilter(e.target.value)}>
+                  <option value="All">All</option>
+                  <option value="base">One-Shot</option>
+                  <option value="agent">Agent</option>
+                </select>
+              </div>
+            )}
+          </div>
+          {modeBlurb[fixedMode] && <p className="lb-section-sub">{modeBlurb[fixedMode]}</p>}
+        </div>
+      ) : showFilters && (
         <div className="leaderboard-controls">
           <span className="eyebrow">Task</span>
           <div className="mode-switch" role="group" aria-label="Benchmark task">

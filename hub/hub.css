@@ -113,6 +113,12 @@ p.lead { font-family: var(--serif); font-size: 20px; line-height: 1.6; color: va
 .highlight-card:hover .arrow .ar { transform: translateX(4px); }
 
 /* leaderboard */
+.lb-section-head { margin-bottom: 16px; }
+.lb-section-titlebar { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.lb-section-title { display: inline-flex; align-items: center; gap: 12px; margin: 0; font-size: 22px; font-weight: 600; letter-spacing: -0.01em; }
+.lb-section-badge { display: inline-flex; align-items: center; padding: 8px 14px; border: 1px solid var(--line); border-radius: 8px; background: var(--paper-2); box-shadow: 0 1px 2px rgba(20, 32, 43, 0.06); }
+.lb-section-count { font-family: var(--mono); font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.lb-section-sub { margin: 10px 0 0; font-size: 13.5px; line-height: 1.55; color: var(--ink-2); }
 .leaderboard-controls { display: flex; gap: 8px; align-items: center; margin-bottom: 20px; flex-wrap: wrap; }
 .mode-switch { display: inline-flex; gap: 3px; padding: 3px; border: 1px solid var(--line); border-radius: 9px; background: var(--paper-2); }
 .mode-switch button { display: inline-flex; align-items: center; gap: 7px; padding: 7px 11px; border: 0; border-radius: 6px; background: transparent; color: var(--ink-3); font-family: var(--mono); font-size: 10.5px; cursor: pointer; }
