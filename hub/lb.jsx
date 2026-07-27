@@ -40,10 +40,12 @@ function BreakdownCell({ v, isOpen }) {
 }
 
 function BreakdownUsageCell({ v, format }) {
-  if (v == null) {
+  const isDuration = format === "duration";
+  // Two separate reasons for a dash: no properties in this mode (v is null), or
+  // a cost column for a model with no published output rate (the fields are null).
+  if (v == null || (!isDuration && v.outputCostPerTask == null)) {
     return <td className="bd-usage-cell"><span className="bd-usage-na">—</span></td>;
   }
-  const isDuration = format === "duration";
   const primary = isDuration
     ? formatDuration(v.activeTimePerTask)
     : formatUsd(v.outputCostPerTask, 4);
@@ -112,7 +114,10 @@ function TaskBreakdown({ model, selectedMode }) {
   const [verdict, setVerdict] = useS_lb("All");
   const [sort, setSort] = useS_lb({ key: "benchmark", dir: "asc" });
   const rawMode = selectedMode === "completion" ? "proof-completion" : "proof-from-scratch";
-  const modeTaskCount = model.perMode[selectedMode].total;
+  // A model that did not run this mode has no per-task rows to show at all.
+  const ranMode = model.perMode[selectedMode] != null;
+  const modeTaskCount = model.perMode[selectedMode]?.total ?? 0;
+  const pricing = model.pricing;
 
   useE_lb(() => {
     const controller = new AbortController();
@@ -137,7 +142,7 @@ function TaskBreakdown({ model, selectedMode }) {
           verdict: row.check_verdict,
           timeSecs: row.time_secs,
           outputTokens: row.output_tokens,
-          outputCostUsd: row.output_tokens * model.pricing.usdPerMillionTokens / 1_000_000,
+          outputCostUsd: pricing ? row.output_tokens * pricing.usdPerMillionTokens / 1_000_000 : null,
         })));
       })
       .catch((error) => {
@@ -198,8 +203,12 @@ function TaskBreakdown({ model, selectedMode }) {
         <span className="task-count" role="status" aria-live="polite">{taskStatus}</span>
       </div>
       <div className="task-pricing-note">
-        Output-only estimate at {formatUsd(model.pricing.usdPerMillionTokens, 0)} / 1M output tokens
-        ({model.pricing.tier}, as of {model.pricing.asOf}). <a href={model.pricing.source} target="_blank" rel="noopener">Pricing source</a>
+        {pricing ? (
+          <React.Fragment>
+            Output-only estimate at {formatUsd(pricing.usdPerMillionTokens, 0)} / 1M output tokens
+            ({pricing.tier}, as of {pricing.asOf}). <a href={pricing.source} target="_blank" rel="noopener">Pricing source</a>
+          </React.Fragment>
+        ) : "No published output rate is on file for this model, so cost is not estimated."}
       </div>
       <div className="task-scroll">
         <table className="task-table">
@@ -224,7 +233,7 @@ function TaskBreakdown({ model, selectedMode }) {
                 <td><span className={`task-verdict ${row.verdict.toLowerCase()}`}>{row.verdict}</span></td>
                 <td className="task-number">{formatDuration(row.timeSecs)}</td>
                 <td className="task-number">{formatTokens(row.outputTokens)}</td>
-                <td className="task-number">{formatUsd(row.outputCostUsd, 4)}</td>
+                <td className="task-number">{row.outputCostUsd == null ? "—" : formatUsd(row.outputCostUsd, 4)}</td>
               </tr>
             ))}
             {!taskRows && !loadError && (
@@ -234,7 +243,9 @@ function TaskBreakdown({ model, selectedMode }) {
               <tr><td className="task-no-results" colSpan="5">Could not load task usage: {loadError}</td></tr>
             )}
             {taskRows && rows.length === 0 && (
-              <tr><td className="task-no-results" colSpan="5">No tasks match these filters.</td></tr>
+              <tr><td className="task-no-results" colSpan="5">
+                {ranMode ? "No tasks match these filters." : "This model did not run this mode."}
+              </td></tr>
             )}
           </tbody>
         </table>
@@ -256,6 +267,10 @@ function HubLeaderboard({ showFilters = true, fixedMode = null }) {
   const [kindFilter, setKindFilter] = useS_lb("All");
   const modeLabels = { completion: "Proof completion", scratch: "Proof from scratch" };
   const hasMultipleKinds = new Set(TLAPS_DATA.models.map(m => m.kind)).size > 1;
+  // The property count for a mode is a property of the benchmark, not of whoever
+  // happens to sort first — read it off any model that actually ran the mode.
+  const modeTotal = (mode) =>
+    TLAPS_DATA.models.find(m => m.perMode?.[mode])?.perMode[mode].total ?? 0;
   const visibleMetrics = useM_lb(() => [
     { ...metricById[selectedMode], name: "Pass rate" },
     metricById.activeTimePerTask,
@@ -348,7 +363,7 @@ function HubLeaderboard({ showFilters = true, fixedMode = null }) {
             <h2 className="lb-section-title">
               <span className="lb-section-badge">{modeLabels[fixedMode]}</span>
               <span className="lb-section-count">
-                {TLAPS_DATA.models[0]?.perMode?.[fixedMode]?.total ?? 0} properties
+                {modeTotal(fixedMode)} properties
               </span>
             </h2>
             {hasMultipleKinds && (
@@ -370,7 +385,7 @@ function HubLeaderboard({ showFilters = true, fixedMode = null }) {
             {TLAPS_DATA.modes.map((mode) => (
               <button key={mode.id} type="button" className={selectedMode === mode.id ? "active" : ""}
                 aria-pressed={selectedMode === mode.id} onClick={() => selectMode(mode.id)}>
-                {modeLabels[mode.id]} <span>{TLAPS_DATA.models[0]?.perMode?.[mode.id]?.total ?? 0}</span>
+                {modeLabels[mode.id]} <span>{modeTotal(mode.id)}</span>
               </button>
             ))}
           </div>

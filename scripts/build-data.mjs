@@ -25,18 +25,32 @@ const CANONICAL = {
 const RECORDS = 710;
 const SPECS = 70;
 
+// Per-mode task totals implied by the manifest above. A result bundle may cover
+// both modes or just one; each mode it covers must be complete.
+const MODE_RECORDS = {
+  "proof-completion": Object.values(CANONICAL).reduce((n, [completion]) => n + completion, 0),
+  "proof-from-scratch": Object.values(CANONICAL).reduce((n, [, scratch]) => n + scratch, 0),
+};
+if (MODES.reduce((n, mode) => n + MODE_RECORDS[mode], 0) !== RECORDS) {
+  throw new Error("canonical manifest does not sum to the expected record total");
+}
+const MODE_KEY = { "proof-completion": "completion", "proof-from-scratch": "scratch" };
+
 // The one hand-maintained table: display info per backend id.
 // name = the underlying model (primary label); subname = the agent/endpoint, shown below it.
 const BACKEND_INFO = {
   copilot: { name: "Opus-4.8", subname: "GitHub Copilot", org: "GitHub", logo: null, kind: "agent" },
   "copilot-gemini-3.1-pro-preview": { name: "Gemini 3.1 Pro Preview", subname: "GitHub Copilot", org: "GitHub", logo: null, kind: "agent" },
+  "copilot-gpt-5.6-sol": { name: "GPT-5.6-Sol", subname: "GitHub Copilot", org: "GitHub", logo: null, kind: "agent" },
   codex: { name: "GPT-5.5", subname: "OpenAI Codex", org: "OpenAI", logo: null, kind: "agent" },
 };
 
 // A reproducible output-only estimate, not the experiments' actual bill. The
 // archived Copilot CLI events expose output tokens but not input/cache usage, so
-// every backend uses a fixed public standard-tier output rate from the same
-// audit date. Long-context tiers cannot be inferred without per-request input.
+// every backend uses a fixed public standard-tier output rate from its own audit
+// date. Long-context tiers cannot be inferred without per-request input.
+// A backend with no entry here publishes no cost at all: its cost cells render as
+// a dash rather than an invented rate. Add the entry to turn the numbers on.
 const OUTPUT_PRICING = {
   codex: {
     usdPerMillionTokens: 30,
@@ -156,9 +170,11 @@ const slug = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g
 const specId = (source, group) => `${slug(source)}--${slug(group)}`;
 const specKey = (source, group) => JSON.stringify([source, group]);
 const r1 = (x) => Math.round(x * 10) / 10;
-const modeStat = (pm, usdPerMillionTokens) => {
+// pricing may be null for a backend with no published output rate; the cost
+// fields then stay null so the UI shows a dash instead of a fabricated number.
+const modeStat = (pm, pricing) => {
   if (!pm || pm.total <= 0) return null;
-  const outputCostUsd = pm.outputTokens * usdPerMillionTokens / 1_000_000;
+  const outputCostUsd = pricing ? pm.outputTokens * pricing.usdPerMillionTokens / 1_000_000 : null;
   return {
     rate: r1((pm.pass / pm.total) * 100),
     pass: pm.pass,
@@ -169,7 +185,7 @@ const modeStat = (pm, usdPerMillionTokens) => {
     outputTokens: pm.outputTokens,
     outputTokensPerTask: pm.outputTokens / pm.total,
     outputCostUsd,
-    outputCostPerTask: outputCostUsd / pm.total,
+    outputCostPerTask: outputCostUsd === null ? null : outputCostUsd / pm.total,
   };
 };
 
@@ -180,13 +196,38 @@ let canonicalTaskManifest = null;
 const resultFiles = readdirSync("results").filter((f) => f.endsWith(".json")).sort();
 if (resultFiles.length === 0) throw new Error("results/: no backend JSON files found");
 
-const models = resultFiles.map((f) => {
+// A bundle covers the modes it has records for. Full-scope bundles (both modes)
+// define the canonical spec and task manifests; mode-partial bundles are then
+// checked against those manifests restricted to the modes they claim.
+const bundles = resultFiles.map((f) => {
   const resultText = readFileSync(`results/${f}`, "utf8");
   const { meta, results } = JSON.parse(resultText);
-  const resultsVersion = createHash("sha256").update(resultText).digest("hex").slice(0, 12);
+  if (!Array.isArray(results) || results.length === 0) throw new Error(`${f}: no results[]`);
+  const covered = MODES.filter((mode) => results.some((r) => r.mode === mode));
+  if (covered.length === 0) throw new Error(`${f}: no records in any known mode`);
+  return {
+    f, meta, results, covered,
+    resultsVersion: createHash("sha256").update(resultText).digest("hex").slice(0, 12),
+  };
+});
+if (!bundles.some((b) => b.covered.length === MODES.length)) {
+  throw new Error("results/: no full-scope bundle to anchor the canonical manifests");
+}
+// Deterministic anchor: the alphabetically first bundle that covers both modes.
+// It is validated first so the canonical manifests exist before any partial
+// bundle is compared against them.
+const anchorBundle = bundles.find((b) => b.covered.length === MODES.length);
+const anchor = anchorBundle.f;
+const ordered = [anchorBundle, ...bundles.filter((b) => b !== anchorBundle)];
+
+const models = ordered.map(({ f, meta, results, covered, resultsVersion }) => {
+  const isFullScope = covered.length === MODES.length;
+  const expectedRecords = covered.reduce((n, mode) => n + MODE_RECORDS[mode], 0);
 
   // ---- validate: recompute from results[], check against canon and meta ----
-  if (results.length !== RECORDS) throw new Error(`${f}: ${results.length} records != ${RECORDS}`);
+  if (results.length !== expectedRecords) {
+    throw new Error(`${f}: ${results.length} records != ${expectedRecords} for modes [${covered.join(", ")}]`);
+  }
   const byMode = {};
   const bySource = {};
   const bySpec = {};
@@ -243,31 +284,46 @@ const models = resultFiles.map((f) => {
     specMode.outputTokens += r.output_tokens;
   }
 
+  // Output tokens must be vouched for, but bundles state that two ways: a full
+  // reconciliation against the per-task files, or a per-task positivity check.
   const usageAudit = meta.usage_audit;
-  if (!usageAudit || usageAudit.task_count !== RECORDS ||
-      usageAudit.active_time_complete !== true || usageAudit.output_tokens_audited !== true) {
-    throw new Error(`${f}: missing audited ${RECORDS}-task usage data`);
+  const outputTokensVouched = usageAudit?.output_tokens_audited === true ||
+    usageAudit?.output_tokens_positive_for_all_tasks === true;
+  if (!usageAudit || usageAudit.task_count !== results.length ||
+      usageAudit.active_time_complete !== true || !outputTokensVouched) {
+    throw new Error(`${f}: missing audited ${results.length}-task usage data`);
   }
-  const pricing = OUTPUT_PRICING[meta.backend];
-  if (!pricing || !Number.isFinite(pricing.usdPerMillionTokens) || pricing.usdPerMillionTokens <= 0) {
-    throw new Error(`${f}: missing valid output pricing for ${meta.backend}`);
-  }
-  if (pricing.asOf !== usageAudit.date) {
-    throw new Error(`${f}: pricing date ${pricing.asOf} does not match usage audit ${usageAudit.date}`);
-  }
-
-  for (const [source, [completion, scratch]] of Object.entries(CANONICAL)) {
-    const got = bySource[source]?.perMode ?? {};
-    if ((got["proof-completion"]?.total ?? 0) !== completion ||
-        (got["proof-from-scratch"]?.total ?? 0) !== scratch) {
-      throw new Error(`${f}: ${source} counts don't match the canonical manifest`);
+  // No entry means this backend has no published rate on file: cost is withheld
+  // rather than guessed. An entry that is present must still be well formed.
+  const pricing = OUTPUT_PRICING[meta.backend] ?? null;
+  if (pricing) {
+    if (!Number.isFinite(pricing.usdPerMillionTokens) || pricing.usdPerMillionTokens <= 0) {
+      throw new Error(`${f}: invalid output pricing for ${meta.backend}`);
+    }
+    if (pricing.asOf !== usageAudit.date) {
+      throw new Error(`${f}: pricing date ${pricing.asOf} does not match usage audit ${usageAudit.date}`);
     }
   }
-  for (const mode of MODES) {
-    if (!byMode[mode]) throw new Error(`${f}: no records for ${mode}`);
+
+  for (const [source, counts] of Object.entries(CANONICAL)) {
+    const got = bySource[source]?.perMode ?? {};
+    for (const mode of MODES) {
+      // Modes this bundle does not cover must contribute nothing at all.
+      const expected = covered.includes(mode) ? counts[MODES.indexOf(mode)] : 0;
+      if ((got[mode]?.total ?? 0) !== expected) {
+        throw new Error(`${f}: ${source} [${mode}] counts don't match the canonical manifest`);
+      }
+    }
+  }
+  for (const mode of covered) {
     const rate = r1((byMode[mode].PASS / byMode[mode].total) * 100);
     if (Math.abs(rate - meta.summary_by_mode[mode].pass_rate) > 0.05) {
       throw new Error(`${f}: recomputed ${mode} pass_rate ${rate} != meta ${meta.summary_by_mode[mode].pass_rate}`);
+    }
+  }
+  for (const mode of MODES.filter((m) => !covered.includes(m))) {
+    if (meta.summary_by_mode?.[mode]) {
+      throw new Error(`${f}: meta claims ${mode} results but no records are present`);
     }
   }
 
@@ -282,24 +338,41 @@ const models = resultFiles.map((f) => {
       scratch: spec.perMode["proof-from-scratch"]?.total ?? 0,
     }))
     .sort((a, b) => a.source.localeCompare(b.source) || a.group.localeCompare(b.group));
-  if (manifest.length !== SPECS) throw new Error(`${f}: ${manifest.length} specs != ${SPECS}`);
   const serializedManifest = JSON.stringify(manifest);
-  if (canonicalSpecManifest === null) {
+  if (isFullScope && canonicalSpecManifest === null) {
+    if (manifest.length !== SPECS) throw new Error(`${f}: ${manifest.length} specs != ${SPECS}`);
     canonicalSpecManifest = serializedManifest;
-  } else if (serializedManifest !== canonicalSpecManifest) {
-    throw new Error(`${f}: per-spec manifest differs from ${resultFiles[0]}`);
+  } else {
+    // Restrict the canon to this bundle's modes: zero out the modes it does not
+    // cover, then drop specs left with no tasks at all.
+    const expected = JSON.parse(canonicalSpecManifest)
+      .map((row) => ({
+        ...row,
+        completion: covered.includes("proof-completion") ? row.completion : 0,
+        scratch: covered.includes("proof-from-scratch") ? row.scratch : 0,
+      }))
+      .filter((row) => row.completion + row.scratch > 0);
+    if (manifest.length !== expected.length) {
+      throw new Error(`${f}: ${manifest.length} specs != ${expected.length} for modes [${covered.join(", ")}]`);
+    }
+    if (serializedManifest !== JSON.stringify(expected)) {
+      throw new Error(`${f}: per-spec manifest differs from ${anchor}`);
+    }
   }
 
   const taskManifest = results
     .map((r) => ({ mode: r.mode, benchmark: r.benchmark, theorem: r.theorem, source: r.source }))
     .sort((a, b) => a.mode.localeCompare(b.mode) || a.benchmark.localeCompare(b.benchmark));
   const taskIds = new Set(taskManifest.map((r) => `${r.mode}\n${r.benchmark}`));
-  if (taskIds.size !== RECORDS) throw new Error(`${f}: task identities are not unique`);
+  if (taskIds.size !== results.length) throw new Error(`${f}: task identities are not unique`);
   const serializedTaskManifest = JSON.stringify(taskManifest);
-  if (canonicalTaskManifest === null) {
+  if (isFullScope && canonicalTaskManifest === null) {
     canonicalTaskManifest = serializedTaskManifest;
-  } else if (serializedTaskManifest !== canonicalTaskManifest) {
-    throw new Error(`${f}: task manifest differs from ${resultFiles[0]}`);
+  } else {
+    const expected = JSON.parse(canonicalTaskManifest).filter((row) => covered.includes(row.mode));
+    if (serializedTaskManifest !== JSON.stringify(expected)) {
+      throw new Error(`${f}: task manifest differs from ${anchor}`);
+    }
   }
 
   const rows = manifest.map(({ source, group, completion, scratch }) => {
@@ -342,39 +415,38 @@ const models = resultFiles.map((f) => {
     return [
       specId(source, group),
       {
-        completion: modeStat(spec.perMode["proof-completion"], pricing.usdPerMillionTokens),
-        scratch: modeStat(spec.perMode["proof-from-scratch"], pricing.usdPerMillionTokens),
+        completion: modeStat(spec.perMode["proof-completion"], pricing),
+        scratch: modeStat(spec.perMode["proof-from-scratch"], pricing),
       },
     ];
   }));
 
   const info = BACKEND_INFO[meta.backend] ?? { name: meta.backend, org: "?", logo: null, kind: "base" };
-  const perMode = {
-    completion: modeStat({
-      ...byMode["proof-completion"],
-      pass: byMode["proof-completion"].PASS,
-    }, pricing.usdPerMillionTokens),
-    scratch: modeStat({
-      ...byMode["proof-from-scratch"],
-      pass: byMode["proof-from-scratch"].PASS,
-    }, pricing.usdPerMillionTokens),
-  };
-  const outputCostUsd = outputTokens * pricing.usdPerMillionTokens / 1_000_000;
+  // A mode this bundle does not cover stays null all the way through, so the
+  // leaderboard shows a dash and ranks the model last in that mode.
+  const perMode = Object.fromEntries(MODES.map((mode) => [
+    MODE_KEY[mode],
+    covered.includes(mode)
+      ? modeStat({ ...byMode[mode], pass: byMode[mode].PASS }, pricing)
+      : null,
+  ]));
+  const outputCostUsd = pricing ? outputTokens * pricing.usdPerMillionTokens / 1_000_000 : null;
   return {
     id: meta.backend,
     ...info,
     generated: meta.generated,
     resultsFile: `results/${f}`,
     resultsVersion,
+    modes: covered.map((mode) => MODE_KEY[mode]),
     perMetric: {
-      completion: perMode.completion.rate,
-      scratch: perMode.scratch.rate,
-      activeTimePerTask: activeTimeSecs / RECORDS,
-      outputCostPerTask: outputCostUsd / RECORDS,
+      completion: perMode.completion?.rate ?? null,
+      scratch: perMode.scratch?.rate ?? null,
+      activeTimePerTask: activeTimeSecs / results.length,
+      outputCostPerTask: outputCostUsd === null ? null : outputCostUsd / results.length,
     },
     perMode,
     usage: {
-      taskCount: RECORDS,
+      taskCount: results.length,
       activeTimeSecs,
       outputTokens,
       outputCostUsd,
@@ -412,15 +484,16 @@ const data = {
     { id: "scratch", name: "--mode proof-from-scratch", blurb: "Pass rate on the 227 proof-from-scratch properties.",
       tip: "Only the model and the target theorem statement remain; the model must invent the entire proof structure, including any helper lemmas." },
     { id: "activeTimePerTask", name: "Active time / task", invert: true, format: "duration", breakdown: false, groupStart: true, bar: false,
-      tip: "Mean active agent time per task in the selected mode. The secondary value is that mode's sum of task time; parallel tasks overlap, so it is not experiment wall-clock time. Lower is better." },
+      tip: "Mean active agent time per task in the selected mode. The secondary value is that mode's sum of task time; parallel tasks overlap, so it is not experiment wall-clock time. Lower is better. A dash means the model did not run this mode." },
     { id: "outputCostPerTask", name: "Output-only cost / task", invert: true, format: "usd", breakdown: false, bar: false,
-      tip: "Mean estimated output-only cost per task in the selected mode, using reported output tokens and a fixed public standard-tier output rate as of July 18, 2026. Long-context tiers are not inferred. The secondary value is that mode's total. Lower is better." },
+      tip: "Mean estimated output-only cost per task in the selected mode, using reported output tokens and a fixed public standard-tier output rate recorded per model on its own audit date. Long-context tiers are not inferred. The secondary value is that mode's total. Lower is better. A dash means no published output rate is on file for that model, or it did not run this mode." },
   ],
   categories,
   specs: canonicalSpecs,
   // Initial order matches the leaderboard's default sort. The two modes remain
-  // separate; there is deliberately no hidden blended headline score.
-  models: models.sort((a, b) => b.perMetric.completion - a.perMetric.completion),
+  // separate; there is deliberately no hidden blended headline score. A model
+  // that did not run a mode has no rate there and sorts last.
+  models: models.sort((a, b) => (b.perMetric.completion ?? -1) - (a.perMetric.completion ?? -1)),
   modes: SITE.modes,
   coverage: SITE.coverage,
   bibtex: SITE.bibtex,
