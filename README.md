@@ -34,7 +34,9 @@ rewriting `data.js`.
    subname, org, kind).
 3. Add an `OUTPUT_PRICING` entry if a public standard-tier output rate is known.
    Without one the model still publishes, but its cost columns show a dash
-   instead of a guessed number.
+   instead of a guessed number. Mixed-model runs must also audit
+   `usage_audit.output_usage_by_model` and each affected row's
+   `secondary_model_usage` so every recorded output token uses the right rate.
 4. Rebuild, then bump the `?v=` cache-buster on `data.js` in `index.html`.
 
 A bundle may cover both modes or only one. Each mode it does cover must be

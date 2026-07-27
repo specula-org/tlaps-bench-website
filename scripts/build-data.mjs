@@ -41,14 +41,14 @@ const MODE_KEY = { "proof-completion": "completion", "proof-from-scratch": "scra
 const BACKEND_INFO = {
   copilot: { name: "Opus-4.8", subname: "GitHub Copilot", org: "GitHub", logo: null, kind: "agent" },
   "copilot-gemini-3.1-pro-preview": { name: "Gemini 3.1 Pro Preview", subname: "GitHub Copilot", org: "GitHub", logo: null, kind: "agent" },
-  "copilot-gpt-5.6-sol": { name: "GPT-5.6-Sol", subname: "GitHub Copilot", org: "GitHub", logo: null, kind: "agent" },
+  "copilot-gpt-5.6-sol": { name: "GPT-5.6-Sol", subname: "GitHub Copilot · Agentic", org: "GitHub", logo: null, kind: "agent" },
   codex: { name: "GPT-5.5", subname: "OpenAI Codex", org: "OpenAI", logo: null, kind: "agent" },
 };
 
-// A reproducible output-only estimate, not the experiments' actual bill. The
-// archived Copilot CLI events expose output tokens but not input/cache usage, so
-// every backend uses a fixed public standard-tier output rate from its own audit
-// date. Long-context tiers cannot be inferred without per-request input.
+// A reproducible output-only estimate, not the experiments' actual bill. Every
+// backend uses public standard-tier output rates from its own audit date, with
+// model-specific rates when a run records secondary-model output. Long-context
+// tiers cannot be inferred without complete per-request input.
 // A backend with no entry here publishes no cost at all: its cost cells render as
 // a dash rather than an invented rate. Add the entry to turn the numbers on.
 const OUTPUT_PRICING = {
@@ -75,6 +75,18 @@ const OUTPUT_PRICING = {
     tier: "standard (up to 272K input tokens)",
     asOf: "2026-07-26",
     source: "https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing",
+    additionalModels: {
+      "claude-opus-4.8": {
+        name: "Claude Opus 4.8",
+        usdPerMillionTokens: 25,
+        tier: "standard",
+      },
+      "gpt-5.6-terra": {
+        name: "GPT-5.6-Terra",
+        usdPerMillionTokens: 15,
+        tier: "standard (up to 272K input tokens)",
+      },
+    },
   },
 };
 
@@ -180,7 +192,7 @@ const r1 = (x) => Math.round(x * 10) / 10;
 // fields then stay null so the UI shows a dash instead of a fabricated number.
 const modeStat = (pm, pricing) => {
   if (!pm || pm.total <= 0) return null;
-  const outputCostUsd = pricing ? pm.outputTokens * pricing.usdPerMillionTokens / 1_000_000 : null;
+  const outputCostUsd = pricing ? pm.outputCostUnits / 1_000_000 : null;
   return {
     rate: r1((pm.pass / pm.total) * 100),
     pass: pm.pass,
@@ -229,6 +241,31 @@ const ordered = [anchorBundle, ...bundles.filter((b) => b !== anchorBundle)];
 const models = ordered.map(({ f, meta, results, covered, resultsVersion }) => {
   const isFullScope = covered.length === MODES.length;
   const expectedRecords = covered.reduce((n, mode) => n + MODE_RECORDS[mode], 0);
+  const usageAudit = meta.usage_audit;
+  const outputTokensVouched = usageAudit?.output_tokens_audited === true ||
+    usageAudit?.output_tokens_positive_for_all_tasks === true;
+  if (!usageAudit || usageAudit.task_count !== results.length ||
+      usageAudit.active_time_complete !== true || !outputTokensVouched) {
+    throw new Error(`${f}: missing audited ${results.length}-task usage data`);
+  }
+
+  // No entry means this backend has no published rate on file: cost is withheld
+  // rather than guessed. An entry that is present must still be well formed.
+  const pricing = OUTPUT_PRICING[meta.backend] ?? null;
+  if (pricing) {
+    if (!Number.isFinite(pricing.usdPerMillionTokens) || pricing.usdPerMillionTokens <= 0) {
+      throw new Error(`${f}: invalid output pricing for ${meta.backend}`);
+    }
+    if (pricing.asOf !== usageAudit.date) {
+      throw new Error(`${f}: pricing date ${pricing.asOf} does not match usage audit ${usageAudit.date}`);
+    }
+    for (const [model, modelPricing] of Object.entries(pricing.additionalModels ?? {})) {
+      if (!Number.isFinite(modelPricing.usdPerMillionTokens) ||
+          modelPricing.usdPerMillionTokens <= 0) {
+        throw new Error(`${f}: invalid output pricing for secondary model ${model}`);
+      }
+    }
+  }
 
   // ---- validate: recompute from results[], check against canon and meta ----
   if (results.length !== expectedRecords) {
@@ -239,6 +276,8 @@ const models = ordered.map(({ f, meta, results, covered, resultsVersion }) => {
   const bySpec = {};
   let activeTimeSecs = 0;
   let outputTokens = 0;
+  let outputCostUnits = pricing ? 0 : null;
+  const secondaryUsageTotals = {};
   for (const r of results) {
     if (!["PASS", "FAIL", "CHEATING"].includes(r.check_verdict)) {
       throw new Error(`${f}: ${r.benchmark} [${r.mode}] has infra verdict ${r.check_verdict} - re-run before publishing`);
@@ -254,6 +293,45 @@ const models = ordered.map(({ f, meta, results, covered, resultsVersion }) => {
 
     activeTimeSecs += r.time_secs;
     outputTokens += r.output_tokens;
+    let rowOutputCostUnits = pricing
+      ? r.output_tokens * pricing.usdPerMillionTokens
+      : null;
+    let secondaryOutputTokens = 0;
+    for (const [model, usage] of Object.entries(r.secondary_model_usage ?? {})) {
+      if (!Number.isInteger(usage.observed_requests) || usage.observed_requests <= 0 ||
+          !Number.isInteger(usage.requests_with_output_tokens) ||
+          usage.requests_with_output_tokens < 0 ||
+          usage.requests_with_output_tokens > usage.observed_requests ||
+          !Number.isInteger(usage.output_tokens_lower_bound) ||
+          usage.output_tokens_lower_bound < 0) {
+        throw new Error(`${f}: ${r.benchmark} has invalid secondary usage for ${model}`);
+      }
+      if (model === meta.model) {
+        throw new Error(`${f}: ${r.benchmark} lists primary model ${model} as secondary`);
+      }
+      secondaryOutputTokens += usage.output_tokens_lower_bound;
+      const total = (secondaryUsageTotals[model] ??= {
+        observed_requests: 0,
+        requests_with_output_tokens: 0,
+        output_tokens_lower_bound: 0,
+      });
+      total.observed_requests += usage.observed_requests;
+      total.requests_with_output_tokens += usage.requests_with_output_tokens;
+      total.output_tokens_lower_bound += usage.output_tokens_lower_bound;
+
+      if (rowOutputCostUnits !== null && usage.output_tokens_lower_bound > 0) {
+        const modelPricing = pricing.additionalModels?.[model];
+        if (!modelPricing) {
+          throw new Error(`${f}: missing output pricing for secondary model ${model}`);
+        }
+        rowOutputCostUnits += usage.output_tokens_lower_bound *
+          (modelPricing.usdPerMillionTokens - pricing.usdPerMillionTokens);
+      }
+    }
+    if (secondaryOutputTokens > r.output_tokens) {
+      throw new Error(`${f}: ${r.benchmark} secondary output exceeds task output`);
+    }
+    if (outputCostUnits !== null) outputCostUnits += rowOutputCostUnits;
 
     const group = r.benchmark.split("/")[0];
     if (!group || group === r.benchmark) {
@@ -266,11 +344,13 @@ const models = ordered.map(({ f, meta, results, covered, resultsVersion }) => {
       CHEATING: 0,
       activeTimeSecs: 0,
       outputTokens: 0,
+      outputCostUnits: 0,
     });
     m.total++;
     m[r.check_verdict] = (m[r.check_verdict] ?? 0) + 1;
     m.activeTimeSecs += r.time_secs;
     m.outputTokens += r.output_tokens;
+    m.outputCostUnits += rowOutputCostUnits ?? 0;
 
     const s = (bySource[r.source] ??= { perMode: {} });
     const spm = (s.perMode[r.mode] ??= { total: 0 });
@@ -283,32 +363,63 @@ const models = ordered.map(({ f, meta, results, covered, resultsVersion }) => {
       total: 0,
       activeTimeSecs: 0,
       outputTokens: 0,
+      outputCostUnits: 0,
     });
     specMode.total++;
     if (r.check_verdict === "PASS") specMode.pass++;
     specMode.activeTimeSecs += r.time_secs;
     specMode.outputTokens += r.output_tokens;
+    specMode.outputCostUnits += rowOutputCostUnits ?? 0;
   }
 
-  // Output tokens must be vouched for, but bundles state that two ways: a full
-  // reconciliation against the per-task files, or a per-task positivity check.
-  const usageAudit = meta.usage_audit;
-  const outputTokensVouched = usageAudit?.output_tokens_audited === true ||
-    usageAudit?.output_tokens_positive_for_all_tasks === true;
-  if (!usageAudit || usageAudit.task_count !== results.length ||
-      usageAudit.active_time_complete !== true || !outputTokensVouched) {
-    throw new Error(`${f}: missing audited ${results.length}-task usage data`);
+  const outputCostLowerBound = Number.isInteger(usageAudit.output_tokens_lower_bound);
+  if (outputCostLowerBound && usageAudit.output_tokens_lower_bound !== outputTokens) {
+    throw new Error(`${f}: output token lower bound does not match result rows`);
   }
-  // No entry means this backend has no published rate on file: cost is withheld
-  // rather than guessed. An entry that is present must still be well formed.
-  const pricing = OUTPUT_PRICING[meta.backend] ?? null;
-  if (pricing) {
-    if (!Number.isFinite(pricing.usdPerMillionTokens) || pricing.usdPerMillionTokens <= 0) {
-      throw new Error(`${f}: invalid output pricing for ${meta.backend}`);
+  const outputUsageByModel = usageAudit.output_usage_by_model;
+  if (outputUsageByModel) {
+    if (outputUsageByModel.status !== "lower_bound" ||
+        outputUsageByModel.attribution !== "resolved_model_else_requested_model" ||
+        !outputUsageByModel.models || typeof outputUsageByModel.models !== "object") {
+      throw new Error(`${f}: invalid output_usage_by_model audit`);
     }
-    if (pricing.asOf !== usageAudit.date) {
-      throw new Error(`${f}: pricing date ${pricing.asOf} does not match usage audit ${usageAudit.date}`);
+    let auditedOutputTokens = 0;
+    for (const [model, usage] of Object.entries(outputUsageByModel.models)) {
+      if (!Number.isInteger(usage.observed_requests) || usage.observed_requests <= 0 ||
+          !Number.isInteger(usage.requests_with_output_tokens) ||
+          usage.requests_with_output_tokens < 0 ||
+          usage.requests_with_output_tokens > usage.observed_requests ||
+          !Number.isInteger(usage.output_tokens_lower_bound) ||
+          usage.output_tokens_lower_bound < 0) {
+        throw new Error(`${f}: invalid audited output usage for ${model}`);
+      }
+      auditedOutputTokens += usage.output_tokens_lower_bound;
     }
+    if (auditedOutputTokens !== outputTokens) {
+      throw new Error(`${f}: model-attributed output does not match result rows`);
+    }
+    if (!meta.model || !outputUsageByModel.models[meta.model]) {
+      throw new Error(`${f}: model-attributed output omits primary model`);
+    }
+    const auditedSecondaryModels = Object.keys(outputUsageByModel.models)
+      .filter((model) => model !== meta.model).sort();
+    const taskSecondaryModels = Object.keys(secondaryUsageTotals).sort();
+    if (JSON.stringify(auditedSecondaryModels) !== JSON.stringify(taskSecondaryModels)) {
+      throw new Error(`${f}: task and model audits disagree on secondary models`);
+    }
+    const secondaryOutputTokens = Object.values(secondaryUsageTotals)
+      .reduce((sum, usage) => sum + usage.output_tokens_lower_bound, 0);
+    if (outputUsageByModel.models[meta.model].output_tokens_lower_bound !==
+        outputTokens - secondaryOutputTokens) {
+      throw new Error(`${f}: primary-model output does not match task attribution`);
+    }
+    for (const [model, usage] of Object.entries(secondaryUsageTotals)) {
+      if (JSON.stringify(outputUsageByModel.models[model]) !== JSON.stringify(usage)) {
+        throw new Error(`${f}: task attribution does not match ${model} usage audit`);
+      }
+    }
+  } else if (Object.keys(secondaryUsageTotals).length > 0) {
+    throw new Error(`${f}: secondary model usage lacks a model-level audit`);
   }
 
   for (const [source, counts] of Object.entries(CANONICAL)) {
@@ -436,7 +547,7 @@ const models = ordered.map(({ f, meta, results, covered, resultsVersion }) => {
       ? modeStat({ ...byMode[mode], pass: byMode[mode].PASS }, pricing)
       : null,
   ]));
-  const outputCostUsd = pricing ? outputTokens * pricing.usdPerMillionTokens / 1_000_000 : null;
+  const outputCostUsd = outputCostUnits === null ? null : outputCostUnits / 1_000_000;
   return {
     id: meta.backend,
     ...info,
@@ -456,6 +567,7 @@ const models = ordered.map(({ f, meta, results, covered, resultsVersion }) => {
       activeTimeSecs,
       outputTokens,
       outputCostUsd,
+      ...(outputCostUsd !== null && outputCostLowerBound ? { outputCostLowerBound: true } : {}),
     },
     pricing,
     perSpec,
@@ -492,7 +604,7 @@ const data = {
     { id: "activeTimePerTask", name: "Active time / task", invert: true, format: "duration", breakdown: false, groupStart: true, bar: false,
       tip: "Mean active agent time per task in the selected mode. The secondary value is that mode's sum of task time; parallel tasks overlap, so it is not experiment wall-clock time. Lower is better." },
     { id: "outputCostPerTask", name: "Output-only cost / task", invert: true, format: "usd", breakdown: false, bar: false,
-      tip: "Mean estimated output-only cost per task in the selected mode, using reported output tokens and a fixed public standard-tier output rate recorded per model on its own audit date. Long-context tiers are not inferred. The secondary value is that mode's total. Lower is better. A dash means no published output rate is on file for that model." },
+      tip: "Mean estimated output-only cost per task in the selected mode, using recorded output tokens and public standard-tier rates from each model's audit date. Model-specific rates are applied when a run invokes more than one model. A ≥ prefix marks incomplete telemetry, so the amount is a lower bound. Long-context tiers are not inferred. The secondary value is that mode's total. Lower is better." },
   ],
   categories,
   specs: canonicalSpecs,

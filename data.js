@@ -37,7 +37,7 @@ window.TLAPS_DATA = {
       "format": "usd",
       "breakdown": false,
       "bar": false,
-      "tip": "Mean estimated output-only cost per task in the selected mode, using reported output tokens and a fixed public standard-tier output rate recorded per model on its own audit date. Long-context tiers are not inferred. The secondary value is that mode's total. Lower is better. A dash means no published output rate is on file for that model."
+      "tip": "Mean estimated output-only cost per task in the selected mode, using recorded output tokens and public standard-tier rates from each model's audit date. Model-specific rates are applied when a run invokes more than one model. A ≥ prefix marks incomplete telemetry, so the amount is a lower bound. Long-context tiers are not inferred. The secondary value is that mode's total. Lower is better."
     }
   ],
   "categories": [
@@ -976,13 +976,13 @@ window.TLAPS_DATA = {
     {
       "id": "copilot-gpt-5.6-sol",
       "name": "GPT-5.6-Sol",
-      "subname": "GitHub Copilot",
+      "subname": "GitHub Copilot · Agentic",
       "org": "GitHub",
       "logo": null,
       "kind": "agent",
       "generated": "2026-07-26",
       "resultsFile": "results/copilot-gpt-5.6-sol.json",
-      "resultsVersion": "95eb7d504308",
+      "resultsVersion": "9e45c37aec99",
       "modes": [
         "completion"
       ],
@@ -990,7 +990,7 @@ window.TLAPS_DATA = {
         "completion": 93.6,
         "scratch": null,
         "activeTimePerTask": 338.6487843995262,
-        "outputCostPerTask": 0.27530844720496894
+        "outputCostPerTask": 0.27499822981366456
       },
       "perMode": {
         "completion": {
@@ -1002,8 +1002,8 @@ window.TLAPS_DATA = {
           "activeTimePerTask": 338.6487843995262,
           "outputTokens": 4432466,
           "outputTokensPerTask": 9176.948240165631,
-          "outputCostUsd": 132.97398,
-          "outputCostPerTask": 0.27530844720496894
+          "outputCostUsd": 132.824145,
+          "outputCostPerTask": 0.27499822981366456
         },
         "scratch": null
       },
@@ -1011,13 +1011,26 @@ window.TLAPS_DATA = {
         "taskCount": 483,
         "activeTimeSecs": 163567.36286497116,
         "outputTokens": 4432466,
-        "outputCostUsd": 132.97398
+        "outputCostUsd": 132.824145,
+        "outputCostLowerBound": true
       },
       "pricing": {
         "usdPerMillionTokens": 30,
         "tier": "standard (up to 272K input tokens)",
         "asOf": "2026-07-26",
-        "source": "https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing"
+        "source": "https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing",
+        "additionalModels": {
+          "claude-opus-4.8": {
+            "name": "Claude Opus 4.8",
+            "usdPerMillionTokens": 25,
+            "tier": "standard"
+          },
+          "gpt-5.6-terra": {
+            "name": "GPT-5.6-Terra",
+            "usdPerMillionTokens": 15,
+            "tier": "standard (up to 272K input tokens)"
+          }
+        }
       },
       "perSpec": {
         "openaddressing-lemmy-examples--openaddressing": {
@@ -1225,8 +1238,8 @@ window.TLAPS_DATA = {
             "activeTimePerTask": 536.2471243739128,
             "outputTokens": 844524,
             "outputTokensPerTask": 16240.846153846154,
-            "outputCostUsd": 25.33572,
-            "outputCostPerTask": 0.48722538461538456
+            "outputCostUsd": 25.185885,
+            "outputCostPerTask": 0.4843439423076923
           },
           "scratch": null
         },

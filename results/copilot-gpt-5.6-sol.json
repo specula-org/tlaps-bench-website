@@ -96,7 +96,28 @@
       "active_time_complete": true,
       "input_tokens_lower_bound": 380580135,
       "output_tokens_lower_bound": 4432466,
-      "output_tokens_positive_for_all_tasks": true
+      "output_tokens_positive_for_all_tasks": true,
+      "output_usage_by_model": {
+        "status": "lower_bound",
+        "attribution": "resolved_model_else_requested_model",
+        "models": {
+          "gpt-5.6-sol": {
+            "observed_requests": 9071,
+            "requests_with_output_tokens": 9017,
+            "output_tokens_lower_bound": 4402499
+          },
+          "claude-opus-4.8": {
+            "observed_requests": 8,
+            "requests_with_output_tokens": 2,
+            "output_tokens_lower_bound": 29967
+          },
+          "gpt-5.6-terra": {
+            "observed_requests": 1,
+            "requests_with_output_tokens": 0,
+            "output_tokens_lower_bound": 0
+          }
+        }
+      }
     }
   },
   "results": [
@@ -2240,6 +2261,13 @@
       "termination_reason": "OK",
       "input_tokens": 2108926,
       "output_tokens": 29216,
+      "secondary_model_usage": {
+        "claude-opus-4.8": {
+          "observed_requests": 1,
+          "requests_with_output_tokens": 0,
+          "output_tokens_lower_bound": 0
+        }
+      },
       "sany_valid": true,
       "obligations": 51,
       "source": "TLAPS distribution examples",
@@ -4183,6 +4211,13 @@
       "termination_reason": "OK",
       "input_tokens": 3407623,
       "output_tokens": 30306,
+      "secondary_model_usage": {
+        "claude-opus-4.8": {
+          "observed_requests": 1,
+          "requests_with_output_tokens": 0,
+          "output_tokens_lower_bound": 0
+        }
+      },
       "sany_valid": true,
       "obligations": 14,
       "source": "tlaplus/Examples",
@@ -9695,6 +9730,13 @@
       "termination_reason": "OK",
       "input_tokens": 1342043,
       "output_tokens": 23680,
+      "secondary_model_usage": {
+        "claude-opus-4.8": {
+          "observed_requests": 1,
+          "requests_with_output_tokens": 0,
+          "output_tokens_lower_bound": 0
+        }
+      },
       "infra_retries": 1,
       "infra_retry_reasons": [
         "Error: Failed to load models"
@@ -9799,6 +9841,13 @@
       "termination_reason": "OK",
       "input_tokens": 1569352,
       "output_tokens": 24480,
+      "secondary_model_usage": {
+        "claude-opus-4.8": {
+          "observed_requests": 1,
+          "requests_with_output_tokens": 1,
+          "output_tokens_lower_bound": 7596
+        }
+      },
       "sany_valid": true,
       "obligations": 3,
       "source": "tlaplus/Examples",
@@ -9941,6 +9990,13 @@
       "termination_reason": "OK",
       "input_tokens": 2193731,
       "output_tokens": 42099,
+      "secondary_model_usage": {
+        "claude-opus-4.8": {
+          "observed_requests": 1,
+          "requests_with_output_tokens": 1,
+          "output_tokens_lower_bound": 22371
+        }
+      },
       "sany_valid": true,
       "obligations": 9,
       "source": "tlaplus/Examples",
@@ -10005,6 +10061,13 @@
       "termination_reason": "OK",
       "input_tokens": 2223756,
       "output_tokens": 31791,
+      "secondary_model_usage": {
+        "claude-opus-4.8": {
+          "observed_requests": 1,
+          "requests_with_output_tokens": 0,
+          "output_tokens_lower_bound": 0
+        }
+      },
       "sany_valid": true,
       "obligations": 216,
       "source": "tlaplus/Examples",
@@ -10150,6 +10213,18 @@
       "termination_reason": "OK",
       "input_tokens": 6528841,
       "output_tokens": 48999,
+      "secondary_model_usage": {
+        "claude-opus-4.8": {
+          "observed_requests": 1,
+          "requests_with_output_tokens": 0,
+          "output_tokens_lower_bound": 0
+        },
+        "gpt-5.6-terra": {
+          "observed_requests": 1,
+          "requests_with_output_tokens": 0,
+          "output_tokens_lower_bound": 0
+        }
+      },
       "infra_retries": 2,
       "infra_retry_reasons": [
         "Error: Failed to load models",
@@ -10655,6 +10730,13 @@
       "termination_reason": "OK",
       "input_tokens": 2292738,
       "output_tokens": 24098,
+      "secondary_model_usage": {
+        "claude-opus-4.8": {
+          "observed_requests": 1,
+          "requests_with_output_tokens": 0,
+          "output_tokens_lower_bound": 0
+        }
+      },
       "infra_retries": 1,
       "infra_retry_reasons": [
         "Error: Failed to load models"
