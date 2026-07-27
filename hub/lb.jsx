@@ -443,10 +443,12 @@ function HubLeaderboard({ showFilters = true, fixedMode = null }) {
                   <tr ref={el => { if (el) rowRefs.current[m.id] = el; else delete rowRefs.current[m.id]; }}
                       className={isOpen ? "expanded" : ""}
                       onClick={() => toggleExpanded(m.id)}>
+                    {/* Every ranked row gets a chip so the column reads as one set;
+                        only the top three carry a podium colour. */}
                     <td className="rank"><span className="rank-slot">{
-                      !hasRankValue ? "—" : i < 3
-                        ? <span className={"rank-medal " + ["gold","silver","bronze"][i]}>{i + 1}</span>
-                        : i + 1
+                      !hasRankValue ? "—" : (
+                        <span className={"rank-medal " + (["gold","silver","bronze"][i] || "plain")}>{i + 1}</span>
+                      )
                     }</span></td>
                     <td>
                       <div className="modelname">

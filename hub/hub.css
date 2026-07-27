@@ -189,6 +189,9 @@ table.lb tr.expand-row > td { padding: 0; border-bottom: 1px solid var(--line-so
 .rank-medal.gold { background: #b38b2d; }
 .rank-medal.silver { background: #8e9aa6; }
 .rank-medal.bronze { background: #a66a39; }
+/* Off the podium: same chip, no medal colour. Reads as part of the table
+   rather than a fourth place worth celebrating. */
+.rank-medal.plain { background: var(--paper-2); color: var(--ink-2); font-weight: 600; box-shadow: inset 0 0 0 1px var(--line-soft); }
 .modelname { font-weight: 600; font-size: 15px; display: flex; align-items: center; gap: 10px; }
 .modelname-text { display: flex; flex-direction: column; line-height: 1.25; min-width: 0; }
 .modelname-main { font-weight: 600; }
