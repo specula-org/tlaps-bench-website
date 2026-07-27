@@ -28,7 +28,7 @@ window.TLAPS_DATA = {
       "breakdown": false,
       "groupStart": true,
       "bar": false,
-      "tip": "Mean active agent time per task in the selected mode. The secondary value is that mode's sum of task time; parallel tasks overlap, so it is not experiment wall-clock time. Lower is better. A dash means the model did not run this mode."
+      "tip": "Mean active agent time per task in the selected mode. The secondary value is that mode's sum of task time; parallel tasks overlap, so it is not experiment wall-clock time. Lower is better."
     },
     {
       "id": "outputCostPerTask",
@@ -37,7 +37,7 @@ window.TLAPS_DATA = {
       "format": "usd",
       "breakdown": false,
       "bar": false,
-      "tip": "Mean estimated output-only cost per task in the selected mode, using reported output tokens and a fixed public standard-tier output rate recorded per model on its own audit date. Long-context tiers are not inferred. The secondary value is that mode's total. Lower is better. A dash means no published output rate is on file for that model, or it did not run this mode."
+      "tip": "Mean estimated output-only cost per task in the selected mode, using reported output tokens and a fixed public standard-tier output rate recorded per model on its own audit date. Long-context tiers are not inferred. The secondary value is that mode's total. Lower is better. A dash means no published output rate is on file for that model."
     }
   ],
   "categories": [

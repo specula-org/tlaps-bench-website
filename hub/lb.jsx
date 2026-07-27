@@ -114,8 +114,6 @@ function TaskBreakdown({ model, selectedMode }) {
   const [verdict, setVerdict] = useS_lb("All");
   const [sort, setSort] = useS_lb({ key: "benchmark", dir: "asc" });
   const rawMode = selectedMode === "completion" ? "proof-completion" : "proof-from-scratch";
-  // A model that did not run this mode has no per-task rows to show at all.
-  const ranMode = model.perMode[selectedMode] != null;
   const modeTaskCount = model.perMode[selectedMode]?.total ?? 0;
   const pricing = model.pricing;
 
@@ -243,9 +241,7 @@ function TaskBreakdown({ model, selectedMode }) {
               <tr><td className="task-no-results" colSpan="5">Could not load task usage: {loadError}</td></tr>
             )}
             {taskRows && rows.length === 0 && (
-              <tr><td className="task-no-results" colSpan="5">
-                {ranMode ? "No tasks match these filters." : "This model did not run this mode."}
-              </td></tr>
+              <tr><td className="task-no-results" colSpan="5">No tasks match these filters.</td></tr>
             )}
           </tbody>
         </table>
@@ -285,7 +281,10 @@ function HubLeaderboard({ showFilters = true, fixedMode = null }) {
   const getVal = (m, key) => key.startsWith("metric:") ? getMetricVal(m, key.slice(7)) : m[key];
 
   const rows = useM_lb(() => {
-    let arr = TLAPS_DATA.models.filter(m => kindFilter === "All" || m.kind === kindFilter);
+    // A model only appears in a mode it actually ran. Listing it with dashes
+    // would read as a result; it reappears on its own once the run lands.
+    let arr = TLAPS_DATA.models.filter(m =>
+      m.modes.includes(selectedMode) && (kindFilter === "All" || m.kind === kindFilter));
     arr = [...arr];
     arr.sort((a, b) => {
       const va = getVal(a, sort.key), vb = getVal(b, sort.key);
