@@ -990,7 +990,7 @@ window.TLAPS_DATA = {
         "completion": 93.6,
         "scratch": null,
         "activeTimePerTask": 338.6487843995262,
-        "outputCostPerTask": null
+        "outputCostPerTask": 0.27530844720496894
       },
       "perMode": {
         "completion": {
@@ -1002,8 +1002,8 @@ window.TLAPS_DATA = {
           "activeTimePerTask": 338.6487843995262,
           "outputTokens": 4432466,
           "outputTokensPerTask": 9176.948240165631,
-          "outputCostUsd": null,
-          "outputCostPerTask": null
+          "outputCostUsd": 132.97398,
+          "outputCostPerTask": 0.27530844720496894
         },
         "scratch": null
       },
@@ -1011,9 +1011,14 @@ window.TLAPS_DATA = {
         "taskCount": 483,
         "activeTimeSecs": 163567.36286497116,
         "outputTokens": 4432466,
-        "outputCostUsd": null
+        "outputCostUsd": 132.97398
       },
-      "pricing": null,
+      "pricing": {
+        "usdPerMillionTokens": 30,
+        "tier": "standard (up to 272K input tokens)",
+        "asOf": "2026-07-26",
+        "source": "https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing"
+      },
       "perSpec": {
         "openaddressing-lemmy-examples--openaddressing": {
           "completion": {
@@ -1025,8 +1030,8 @@ window.TLAPS_DATA = {
             "activeTimePerTask": 87.78224349021912,
             "outputTokens": 1638,
             "outputTokensPerTask": 1638,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "outputCostUsd": 0.04914,
+            "outputCostPerTask": 0.04914
           },
           "scratch": null
         },
@@ -1040,8 +1045,8 @@ window.TLAPS_DATA = {
             "activeTimePerTask": 305.67488178185056,
             "outputTokens": 107454,
             "outputTokensPerTask": 7675.285714285715,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "outputCostUsd": 3.22362,
+            "outputCostPerTask": 0.23025857142857142
           },
           "scratch": null
         },
@@ -1055,8 +1060,8 @@ window.TLAPS_DATA = {
             "activeTimePerTask": 530.0758792161942,
             "outputTokens": 36517,
             "outputTokensPerTask": 18258.5,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "outputCostUsd": 1.09551,
+            "outputCostPerTask": 0.547755
           },
           "scratch": null
         },
@@ -1070,8 +1075,8 @@ window.TLAPS_DATA = {
             "activeTimePerTask": 359.5900251865387,
             "outputTokens": 117186,
             "outputTokensPerTask": 10653.272727272728,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "outputCostUsd": 3.51558,
+            "outputCostPerTask": 0.31959818181818184
           },
           "scratch": null
         },
@@ -1085,8 +1090,8 @@ window.TLAPS_DATA = {
             "activeTimePerTask": 211.7449087363023,
             "outputTokens": 55864,
             "outputTokensPerTask": 4297.2307692307695,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "outputCostUsd": 1.67592,
+            "outputCostPerTask": 0.1289169230769231
           },
           "scratch": null
         },
@@ -1100,8 +1105,8 @@ window.TLAPS_DATA = {
             "activeTimePerTask": 315.57040560245514,
             "outputTokens": 71793,
             "outputTokensPerTask": 8974.125,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "outputCostUsd": 2.15379,
+            "outputCostPerTask": 0.26922375
           },
           "scratch": null
         },
@@ -1115,8 +1120,8 @@ window.TLAPS_DATA = {
             "activeTimePerTask": 131.5272421836853,
             "outputTokens": 3638,
             "outputTokensPerTask": 3638,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "outputCostUsd": 0.10914,
+            "outputCostPerTask": 0.10914
           },
           "scratch": null
         },
@@ -1130,8 +1135,8 @@ window.TLAPS_DATA = {
             "activeTimePerTask": 340.27293597198116,
             "outputTokens": 354362,
             "outputTokensPerTask": 8642.975609756097,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "outputCostUsd": 10.63086,
+            "outputCostPerTask": 0.25928926829268295
           },
           "scratch": null
         },
@@ -1145,8 +1150,8 @@ window.TLAPS_DATA = {
             "activeTimePerTask": 182.19737458229065,
             "outputTokens": 33556,
             "outputTokensPerTask": 4194.5,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "outputCostUsd": 1.00668,
+            "outputCostPerTask": 0.125835
           },
           "scratch": null
         },
@@ -1160,8 +1165,8 @@ window.TLAPS_DATA = {
             "activeTimePerTask": 333.84954929351807,
             "outputTokens": 8965,
             "outputTokensPerTask": 8965,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "outputCostUsd": 0.26895,
+            "outputCostPerTask": 0.26895
           },
           "scratch": null
         },
@@ -1175,8 +1180,8 @@ window.TLAPS_DATA = {
             "activeTimePerTask": 103.96135604381561,
             "outputTokens": 6551,
             "outputTokensPerTask": 3275.5,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "outputCostUsd": 0.19653,
+            "outputCostPerTask": 0.098265
           },
           "scratch": null
         },
@@ -1190,8 +1195,8 @@ window.TLAPS_DATA = {
             "activeTimePerTask": 379.1209769845009,
             "outputTokens": 197429,
             "outputTokensPerTask": 12339.3125,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "outputCostUsd": 5.92287,
+            "outputCostPerTask": 0.370179375
           },
           "scratch": null
         },
@@ -1205,8 +1210,8 @@ window.TLAPS_DATA = {
             "activeTimePerTask": 328.05336918149675,
             "outputTokens": 150168,
             "outputTokensPerTask": 10726.285714285714,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "outputCostUsd": 4.50504,
+            "outputCostPerTask": 0.3217885714285714
           },
           "scratch": null
         },
@@ -1220,8 +1225,8 @@ window.TLAPS_DATA = {
             "activeTimePerTask": 536.2471243739128,
             "outputTokens": 844524,
             "outputTokensPerTask": 16240.846153846154,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "outputCostUsd": 25.33572,
+            "outputCostPerTask": 0.48722538461538456
           },
           "scratch": null
         },
@@ -1235,8 +1240,8 @@ window.TLAPS_DATA = {
             "activeTimePerTask": 238.00746784891402,
             "outputTokens": 100949,
             "outputTokensPerTask": 7210.642857142857,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "outputCostUsd": 3.02847,
+            "outputCostPerTask": 0.21631928571428571
           },
           "scratch": null
         },
@@ -1250,8 +1255,8 @@ window.TLAPS_DATA = {
             "activeTimePerTask": 152.23878594239554,
             "outputTokens": 19646,
             "outputTokensPerTask": 3274.3333333333335,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "outputCostUsd": 0.58938,
+            "outputCostPerTask": 0.09823
           },
           "scratch": null
         },
@@ -1265,8 +1270,8 @@ window.TLAPS_DATA = {
             "activeTimePerTask": 475.4135901927948,
             "outputTokens": 8637,
             "outputTokensPerTask": 8637,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "outputCostUsd": 0.25911,
+            "outputCostPerTask": 0.25911
           },
           "scratch": null
         },
@@ -1280,8 +1285,8 @@ window.TLAPS_DATA = {
             "activeTimePerTask": 285.2463980436325,
             "outputTokens": 179036,
             "outputTokensPerTask": 8951.8,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "outputCostUsd": 5.37108,
+            "outputCostPerTask": 0.268554
           },
           "scratch": null
         },
@@ -1295,8 +1300,8 @@ window.TLAPS_DATA = {
             "activeTimePerTask": 214.8075448989868,
             "outputTokens": 23038,
             "outputTokensPerTask": 4607.6,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "outputCostUsd": 0.69114,
+            "outputCostPerTask": 0.138228
           },
           "scratch": null
         },
@@ -1310,8 +1315,8 @@ window.TLAPS_DATA = {
             "activeTimePerTask": 273.400953690211,
             "outputTokens": 71444,
             "outputTokensPerTask": 7938.222222222223,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "outputCostUsd": 2.14332,
+            "outputCostPerTask": 0.23814666666666667
           },
           "scratch": null
         },
@@ -1325,8 +1330,8 @@ window.TLAPS_DATA = {
             "activeTimePerTask": 534.9543756877674,
             "outputTokens": 227145,
             "outputTokensPerTask": 13361.470588235294,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "outputCostUsd": 6.81435,
+            "outputCostPerTask": 0.40084411764705885
           },
           "scratch": null
         },
@@ -1340,8 +1345,8 @@ window.TLAPS_DATA = {
             "activeTimePerTask": 180.52518775728015,
             "outputTokens": 47271,
             "outputTokensPerTask": 5252.333333333333,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "outputCostUsd": 1.41813,
+            "outputCostPerTask": 0.15757
           },
           "scratch": null
         },
@@ -1355,8 +1360,8 @@ window.TLAPS_DATA = {
             "activeTimePerTask": 219.32447960972786,
             "outputTokens": 47688,
             "outputTokensPerTask": 5961,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "outputCostUsd": 1.43064,
+            "outputCostPerTask": 0.17883
           },
           "scratch": null
         },
@@ -1370,8 +1375,8 @@ window.TLAPS_DATA = {
             "activeTimePerTask": 296.4882798194885,
             "outputTokens": 7240,
             "outputTokensPerTask": 7240,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "outputCostUsd": 0.2172,
+            "outputCostPerTask": 0.2172
           },
           "scratch": null
         },
@@ -1385,8 +1390,8 @@ window.TLAPS_DATA = {
             "activeTimePerTask": 210.20540610949197,
             "outputTokens": 35435,
             "outputTokensPerTask": 3937.222222222222,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "outputCostUsd": 1.06305,
+            "outputCostPerTask": 0.11811666666666668
           },
           "scratch": null
         },
@@ -1400,8 +1405,8 @@ window.TLAPS_DATA = {
             "activeTimePerTask": 215.75082143147787,
             "outputTokens": 18224,
             "outputTokensPerTask": 6074.666666666667,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "outputCostUsd": 0.54672,
+            "outputCostPerTask": 0.18223999999999999
           },
           "scratch": null
         },
@@ -1415,8 +1420,8 @@ window.TLAPS_DATA = {
             "activeTimePerTask": 325.88451523251,
             "outputTokens": 84128,
             "outputTokensPerTask": 9347.555555555555,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "outputCostUsd": 2.52384,
+            "outputCostPerTask": 0.28042666666666666
           },
           "scratch": null
         },
@@ -1430,8 +1435,8 @@ window.TLAPS_DATA = {
             "activeTimePerTask": 195.66702246665955,
             "outputTokens": 16499,
             "outputTokensPerTask": 5499.666666666667,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "outputCostUsd": 0.49497,
+            "outputCostPerTask": 0.16499
           },
           "scratch": null
         },
@@ -1445,8 +1450,8 @@ window.TLAPS_DATA = {
             "activeTimePerTask": 70.60511493682861,
             "outputTokens": 2669,
             "outputTokensPerTask": 1334.5,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "outputCostUsd": 0.08007,
+            "outputCostPerTask": 0.040035
           },
           "scratch": null
         },
@@ -1460,8 +1465,8 @@ window.TLAPS_DATA = {
             "activeTimePerTask": 100.94453144073486,
             "outputTokens": 2447,
             "outputTokensPerTask": 2447,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "outputCostUsd": 0.07341,
+            "outputCostPerTask": 0.07341
           },
           "scratch": null
         },
@@ -1475,8 +1480,8 @@ window.TLAPS_DATA = {
             "activeTimePerTask": 112.61273336410522,
             "outputTokens": 5933,
             "outputTokensPerTask": 2966.5,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "outputCostUsd": 0.17799,
+            "outputCostPerTask": 0.088995
           },
           "scratch": null
         },
@@ -1490,8 +1495,8 @@ window.TLAPS_DATA = {
             "activeTimePerTask": 135.32210898399353,
             "outputTokens": 5646,
             "outputTokensPerTask": 2823,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "outputCostUsd": 0.16938,
+            "outputCostPerTask": 0.08469
           },
           "scratch": null
         },
@@ -1505,8 +1510,8 @@ window.TLAPS_DATA = {
             "activeTimePerTask": 183.11853295564651,
             "outputTokens": 12064,
             "outputTokensPerTask": 3016,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "outputCostUsd": 0.36192,
+            "outputCostPerTask": 0.09048
           },
           "scratch": null
         },
@@ -1520,8 +1525,8 @@ window.TLAPS_DATA = {
             "activeTimePerTask": 202.40903317928314,
             "outputTokens": 9717,
             "outputTokensPerTask": 4858.5,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "outputCostUsd": 0.29151,
+            "outputCostPerTask": 0.145755
           },
           "scratch": null
         },
@@ -1535,8 +1540,8 @@ window.TLAPS_DATA = {
             "activeTimePerTask": 113.98892140388489,
             "outputTokens": 1915,
             "outputTokensPerTask": 1915,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "outputCostUsd": 0.05745,
+            "outputCostPerTask": 0.05745
           },
           "scratch": null
         },
@@ -1550,8 +1555,8 @@ window.TLAPS_DATA = {
             "activeTimePerTask": 177.61521490414938,
             "outputTokens": 8715,
             "outputTokensPerTask": 2905,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "outputCostUsd": 0.26145,
+            "outputCostPerTask": 0.08715
           },
           "scratch": null
         },
@@ -1565,8 +1570,8 @@ window.TLAPS_DATA = {
             "activeTimePerTask": 110.29362869262695,
             "outputTokens": 7383,
             "outputTokensPerTask": 2461,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "outputCostUsd": 0.22149,
+            "outputCostPerTask": 0.07382999999999999
           },
           "scratch": null
         },
@@ -1580,8 +1585,8 @@ window.TLAPS_DATA = {
             "activeTimePerTask": 253.16791415214539,
             "outputTokens": 8193,
             "outputTokensPerTask": 8193,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "outputCostUsd": 0.24579,
+            "outputCostPerTask": 0.24579
           },
           "scratch": null
         },
@@ -1595,8 +1600,8 @@ window.TLAPS_DATA = {
             "activeTimePerTask": 93.29188823699951,
             "outputTokens": 1205,
             "outputTokensPerTask": 1205,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "outputCostUsd": 0.03615,
+            "outputCostPerTask": 0.03615
           },
           "scratch": null
         },
@@ -1610,8 +1615,8 @@ window.TLAPS_DATA = {
             "activeTimePerTask": 653.5802877694368,
             "outputTokens": 217619,
             "outputTokensPerTask": 13601.1875,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "outputCostUsd": 6.52857,
+            "outputCostPerTask": 0.408035625
           },
           "scratch": null
         },
@@ -1625,8 +1630,8 @@ window.TLAPS_DATA = {
             "activeTimePerTask": 244.51962450146675,
             "outputTokens": 60608,
             "outputTokensPerTask": 7576,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "outputCostUsd": 1.81824,
+            "outputCostPerTask": 0.22728
           },
           "scratch": null
         },
@@ -1640,8 +1645,8 @@ window.TLAPS_DATA = {
             "activeTimePerTask": 413.0161396076805,
             "outputTokens": 223831,
             "outputTokensPerTask": 11780.578947368422,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "outputCostUsd": 6.71493,
+            "outputCostPerTask": 0.35341736842105265
           },
           "scratch": null
         },
@@ -1655,8 +1660,8 @@ window.TLAPS_DATA = {
             "activeTimePerTask": 308.9952386021614,
             "outputTokens": 36045,
             "outputTokensPerTask": 9011.25,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "outputCostUsd": 1.08135,
+            "outputCostPerTask": 0.2703375
           },
           "scratch": null
         },
@@ -1670,8 +1675,8 @@ window.TLAPS_DATA = {
             "activeTimePerTask": 285.7430128653844,
             "outputTokens": 72387,
             "outputTokensPerTask": 6032.25,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "outputCostUsd": 2.17161,
+            "outputCostPerTask": 0.18096749999999998
           },
           "scratch": null
         },
@@ -1685,8 +1690,8 @@ window.TLAPS_DATA = {
             "activeTimePerTask": 320.7098982334137,
             "outputTokens": 6807,
             "outputTokensPerTask": 6807,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "outputCostUsd": 0.20421,
+            "outputCostPerTask": 0.20421
           },
           "scratch": null
         },
@@ -1700,8 +1705,8 @@ window.TLAPS_DATA = {
             "activeTimePerTask": 315.38127567768095,
             "outputTokens": 29528,
             "outputTokensPerTask": 2952.8,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "outputCostUsd": 0.88584,
+            "outputCostPerTask": 0.088584
           },
           "scratch": null
         },
@@ -1715,8 +1720,8 @@ window.TLAPS_DATA = {
             "activeTimePerTask": 952.8935042917728,
             "outputTokens": 175404,
             "outputTokensPerTask": 21925.5,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "outputCostUsd": 5.26212,
+            "outputCostPerTask": 0.657765
           },
           "scratch": null
         },
@@ -1730,8 +1735,8 @@ window.TLAPS_DATA = {
             "activeTimePerTask": 145.74908116459846,
             "outputTokens": 20171,
             "outputTokensPerTask": 2521.375,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "outputCostUsd": 0.60513,
+            "outputCostPerTask": 0.07564125
           },
           "scratch": null
         },
@@ -1745,8 +1750,8 @@ window.TLAPS_DATA = {
             "activeTimePerTask": 159.33258065310392,
             "outputTokens": 43414,
             "outputTokensPerTask": 3946.7272727272725,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "outputCostUsd": 1.30242,
+            "outputCostPerTask": 0.11840181818181818
           },
           "scratch": null
         },
@@ -1760,8 +1765,8 @@ window.TLAPS_DATA = {
             "activeTimePerTask": 304.2013009357452,
             "outputTokens": 214640,
             "outputTokensPerTask": 8585.6,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "outputCostUsd": 6.4392,
+            "outputCostPerTask": 0.25756799999999996
           },
           "scratch": null
         },
@@ -1775,8 +1780,8 @@ window.TLAPS_DATA = {
             "activeTimePerTask": 270.803786055247,
             "outputTokens": 135629,
             "outputTokensPerTask": 9041.933333333332,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "outputCostUsd": 4.06887,
+            "outputCostPerTask": 0.27125800000000005
           },
           "scratch": null
         },
@@ -1790,8 +1795,8 @@ window.TLAPS_DATA = {
             "activeTimePerTask": 321.8035598198573,
             "outputTokens": 53706,
             "outputTokensPerTask": 8951,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "outputCostUsd": 1.61118,
+            "outputCostPerTask": 0.26853
           },
           "scratch": null
         },
@@ -1805,8 +1810,8 @@ window.TLAPS_DATA = {
             "activeTimePerTask": 115.50246870517731,
             "outputTokens": 6477,
             "outputTokensPerTask": 3238.5,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "outputCostUsd": 0.19431,
+            "outputCostPerTask": 0.097155
           },
           "scratch": null
         },
@@ -1820,8 +1825,8 @@ window.TLAPS_DATA = {
             "activeTimePerTask": 388.17288396908685,
             "outputTokens": 187990,
             "outputTokensPerTask": 14460.76923076923,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "outputCostUsd": 5.6397,
+            "outputCostPerTask": 0.433823076923077
           },
           "scratch": null
         },
@@ -1835,8 +1840,8 @@ window.TLAPS_DATA = {
             "activeTimePerTask": 95.07916202545167,
             "outputTokens": 6298,
             "outputTokensPerTask": 1259.6,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "outputCostUsd": 0.18894,
+            "outputCostPerTask": 0.037788
           },
           "scratch": null
         }

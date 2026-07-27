@@ -70,6 +70,12 @@ const OUTPUT_PRICING = {
     asOf: "2026-07-18",
     source: "https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing",
   },
+  "copilot-gpt-5.6-sol": {
+    usdPerMillionTokens: 30,
+    tier: "standard (up to 272K input tokens)",
+    asOf: "2026-07-26",
+    source: "https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing",
+  },
 };
 
 // Upstream provenance per source. The canonical result keys are kept separate
