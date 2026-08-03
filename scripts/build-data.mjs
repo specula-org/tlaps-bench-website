@@ -298,6 +298,33 @@ const anchorBundle = bundles.find((b) => b.covered.length === MODES.length);
 const anchor = anchorBundle.f;
 const ordered = [anchorBundle, ...bundles.filter((b) => b !== anchorBundle)];
 
+// Difficulty belongs to the task, not the run: any bundle carrying gt_proof_steps
+// feeds one shared manifest that buckets every model. Recorders must agree.
+const difficultyByTask = new Map();
+for (const { f, results } of ordered) {
+  for (const r of results) {
+    if (!Number.isInteger(r.gt_proof_steps)) continue;
+    if (r.gt_proof_steps < 0) throw new Error(`${f}: ${r.benchmark} has negative gt_proof_steps`);
+    const key = taskKey(r.mode, r.benchmark);
+    const seen = difficultyByTask.get(key);
+    if (seen !== undefined && seen !== r.gt_proof_steps) {
+      throw new Error(`${f}: ${r.benchmark} reference-proof steps ${r.gt_proof_steps} != ${seen} recorded elsewhere`);
+    }
+    difficultyByTask.set(key, r.gt_proof_steps);
+  }
+}
+
+// Fixed bands, so every model is bucketed identically and the columns line up.
+const DIFFICULTY_BANDS = [
+  { id: "d0", label: "0", min: 0, max: 0, note: "reference proof is a single step" },
+  { id: "d1", label: "1–4", min: 1, max: 4 },
+  { id: "d2", label: "5–12", min: 5, max: 12 },
+  { id: "d3", label: "13–30", min: 13, max: 30 },
+  { id: "d4", label: "31+", min: 31, max: Infinity },
+];
+const EMPTY_BAND = { rate: null, pass: 0, total: 0 };
+const bandFor = (steps) => DIFFICULTY_BANDS.find((b) => steps >= b.min && steps <= b.max);
+
 const models = ordered.map(({ f, meta, results, covered, resultsVersion }) => {
   const exception = parseManifestException(f, meta, covered);
   const isFullScope = covered.length === MODES.length && !exception;
@@ -342,6 +369,7 @@ const models = ordered.map(({ f, meta, results, covered, resultsVersion }) => {
   const byMode = {};
   const bySource = {};
   const bySpec = {};
+  const byBand = {};
   let activeTimeSecs = 0;
   let outputTokens = 0;
   let tasksWithOutputTokens = 0;
@@ -448,6 +476,19 @@ const models = ordered.map(({ f, meta, results, covered, resultsVersion }) => {
     specMode.activeTimeSecs += r.time_secs;
     specMode.outputTokens += r.output_tokens ?? 0;
     specMode.outputCostUnits += rowOutputCostUnits ?? 0;
+
+    // Tasks with no recorded reference proof stay out of the bands entirely.
+    const steps = difficultyByTask.get(taskKey(r.mode, r.benchmark));
+    if (steps !== undefined) {
+      const band = (byBand[r.mode] ??= {})[bandFor(steps).id] ??= {
+        pass: 0, total: 0, activeTimeSecs: 0, outputTokens: 0, outputCostUnits: 0,
+      };
+      band.total++;
+      if (r.check_verdict === "PASS") band.pass++;
+      band.activeTimeSecs += r.time_secs;
+      band.outputTokens += r.output_tokens ?? 0;
+      band.outputCostUnits += rowOutputCostUnits ?? 0;
+    }
   }
 
   const outputCostLowerBound = Number.isInteger(usageAudit.output_tokens_lower_bound);
@@ -665,6 +706,15 @@ const models = ordered.map(({ f, meta, results, covered, resultsVersion }) => {
       outputCostPerTask: outputCostUsd === null ? null : outputCostUsd / results.length,
     },
     perMode,
+    perDifficulty: Object.fromEntries(MODES.map((mode) => [
+      MODE_KEY[mode],
+      byBand[mode]
+        ? DIFFICULTY_BANDS.map((band) => {
+            const b = byBand[mode][band.id];
+            return b ? { id: band.id, ...modeStat({ ...b }, pricing) } : { id: band.id, ...EMPTY_BAND };
+          })
+        : null,
+    ])),
     // Present only for a bundle that declared a scope exception.
     scope: exception ? {
       partial: true,
@@ -711,6 +761,11 @@ if (categories.reduce((n, category) => n + category.specCount, 0) !== SPECS ||
 
 const data = {
   paper: SITE.paper,
+  difficulty: {
+    label: "Reference proof steps",
+    tip: "Steps in the benchmark's own reference proof for each theorem - a measure of how hard the task is, independent of any model. Bands are identical for every model, so the columns are directly comparable. Tasks with no recorded reference proof are left out.",
+    bands: DIFFICULTY_BANDS.map(({ max, ...band }) => ({ ...band, max: Number.isFinite(max) ? max : null })),
+  },
   metrics: [
     { id: "completion", name: "--mode proof-completion", blurb: "Pass rate on the 483 proof-completion properties.",
       tip: "The full proof scaffolding is provided, including inductive invariants, lemma decomposition, and preceding lemmas, and the model fills in one target proof." },

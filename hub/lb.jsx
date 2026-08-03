@@ -146,6 +146,42 @@ function PricingNote({ model }) {
   );
 }
 
+function DifficultyBreakdown({ model, selectedMode, isOpen }) {
+  const bands = model.perDifficulty[selectedMode];
+  const meta = TLAPS_DATA.difficulty;
+  const byId = Object.fromEntries(meta.bands.map((band) => [band.id, band]));
+  return (
+    <div className="bd-scroll">
+      <table className="breakdown dataset-score-table">
+        <thead>
+          <tr>
+            <th>{meta.label}</th>
+            <th>Properties</th>
+            <th className="bd-mode">Pass rate</th>
+            <th className="bd-usage-head">Active time / task</th>
+            <th className="bd-usage-head">Output-only cost / task</th>
+          </tr>
+        </thead>
+        <tbody>
+          {bands.map((band) => (
+            <tr className="bd-row dataset-score-spec-row" key={band.id}>
+              <td className="bd-name spec-name">
+                {byId[band.id].label}
+                {byId[band.id].note && <small className="band-note">{byId[band.id].note}</small>}
+              </td>
+              <td className="dataset-score-source">{band.total}</td>
+              <BreakdownCell v={band.rate == null ? null : band} isOpen={isOpen} />
+              <BreakdownUsageCell v={band.rate == null ? null : band} format="duration" />
+              <BreakdownUsageCell v={band.rate == null ? null : band} format="usd"
+                lowerBound={model.usage.outputCostLowerBound === true} />
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 function MetricCell({ v, metric, usage, max, outputCostLowerBound = false }) {
   if (v == null) {
     return <span className="metric-na">—</span>;
@@ -561,26 +597,37 @@ function HubLeaderboard({ showFilters = true, fixedMode = null }) {
                               <div>
                                 <div className="eyebrow" style={{ marginBottom: 6 }}>{m.name} · {m.subname}</div>
                                 <div className="detail-caption">
-                                  {detailView === "spec"
+                                  {detailView === "difficulty" && !m.perDifficulty?.[selectedMode]
                                     ? `${modeLabels[selectedMode]}: usage shows the mean per task with the spec total underneath.`
+                                    : detailView === "spec"
+                                    ? `${modeLabels[selectedMode]}: usage shows the mean per task with the spec total underneath.`
+                                    : detailView === "difficulty"
+                                    ? `${modeLabels[selectedMode]}: pass rate and usage by how many steps the benchmark's own reference proof takes.`
                                     : `${modeLabels[selectedMode]}: recorded usage for each task in this leaderboard.`}
                                 </div>
-                                {m.perMode[selectedMode]?.partialScope && m.scope && (
-                                  <div className="scope-caption">
-                                    Partial scope: {m.scope.taskCount} of {m.scope.canonicalTaskCount} canonical
-                                    properties. {m.scope.reason} The pass rate is over the properties
-                                    actually run, so it is not directly comparable to a full-scope run.
-                                  </div>
-                                )}
                               </div>
                               <div className="detail-tabs" role="group" aria-label="Leaderboard detail view">
                                 <button className={detailView === "spec" ? "active" : ""} aria-pressed={detailView === "spec"}
                                   onClick={() => setDetailView("spec")}>By spec</button>
+                                {m.perDifficulty?.[selectedMode] && (
+                                  <button className={detailView === "difficulty" ? "active" : ""}
+                                    aria-pressed={detailView === "difficulty"}
+                                    onClick={() => setDetailView("difficulty")}>By difficulty</button>
+                                )}
                                 <button className={detailView === "task" ? "active" : ""} aria-pressed={detailView === "task"}
                                   onClick={() => setDetailView("task")}>By task</button>
                               </div>
                             </div>
-                            {detailView === "spec" ? (
+                            {m.perMode[selectedMode]?.partialScope && m.scope && (
+                              <div className="scope-caption">
+                                Partial scope: {m.scope.taskCount} of {m.scope.canonicalTaskCount} canonical
+                                properties. {m.scope.reason} The pass rate is over the properties
+                                actually run, so it is not directly comparable to a full-scope run.
+                              </div>
+                            )}
+                            {detailView === "difficulty" && m.perDifficulty?.[selectedMode] ? (
+                              <DifficultyBreakdown model={m} selectedMode={selectedMode} isOpen={isOpen} />
+                            ) : detailView === "spec" ? (
                               /* The benchmark and leaderboard share the same spec-level unit.
                                  A dash marks a mode with no properties, not a failed attempt. */
                               <div className="bd-scroll">

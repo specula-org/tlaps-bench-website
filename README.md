@@ -44,6 +44,19 @@ complete: the full per-source task counts, and task identities byte-identical to
 the anchor bundle (the alphabetically first bundle covering both modes). A model
 that skipped a mode shows a dash and ranks last in that mode's table.
 
+## Difficulty bands
+
+Records may carry `gt_proof_steps`: how many steps the benchmark's own reference
+proof of that theorem takes. It measures the task, not the model, so any bundle
+recording it feeds one shared manifest that buckets *every* model — including
+bundles that never recorded the field. Bundles that do record it must agree on a
+task's value or the build throws. Tasks with no recorded reference proof are left
+out of the bands rather than assigned a difficulty.
+
+The bands (`0`, `1–4`, `5–12`, `13–30`, `31+`) are fixed in `build-data.mjs`, so
+every model's columns line up. They surface as a "By difficulty" tab when a model
+is expanded.
+
 ## Incomplete runs
 
 Two gaps can be published rather than papered over. Both must be declared in
