@@ -33,9 +33,6 @@ function BreakdownCell({ v, isOpen }) {
                   : <span style={{ display: "inline-block", width: "100%", height: 6 }} />}
         </span>
         <span className="bd-rate">{v.rate.toFixed(1)}%</span>
-        {/* Where a scope exception trimmed this spec, the rate is over the tasks
-            actually run; the canonical denominator is shown so it cannot read as
-            a full result. */}
         <span className="bd-num">
           {v.pass}/{v.total}
           {v.partialScope && (
@@ -92,7 +89,6 @@ const formatCostUsd = (value, digits = 2, lowerBound = false) =>
   `${lowerBound ? "≥" : ""}${formatUsd(value, digits)}`;
 const formatTokens = (value) => Math.round(value).toLocaleString("en-US");
 const outputCostForTask = (row, pricing) => {
-  // No rate on file, or no recorded output for this task: no cost, not a zero.
   if (!pricing || row.output_tokens == null) return null;
   let cost = row.output_tokens * pricing.usdPerMillionTokens / 1_000_000;
   for (const [model, usage] of Object.entries(row.secondary_model_usage ?? {})) {
@@ -105,7 +101,6 @@ const outputCostForTask = (row, pricing) => {
   return cost;
 };
 
-// Why some tasks in the table below have no token or cost figure at all.
 function TelemetryNote({ model }) {
   if (model.usage.outputTokensPartial !== true) return null;
   const missing = model.usage.taskCount - model.usage.tasksWithOutputTokens;
@@ -234,8 +229,7 @@ function TaskBreakdown({ model, selectedMode }) {
       if (typeof av === "string") {
         return sort.dir === "asc" ? av.localeCompare(bv) : bv.localeCompare(av);
       }
-      // Tasks with no recorded value sort last either way rather than mixing
-      // into the numbers as if they were zero.
+      // Unrecorded values sort last either way, never as zero.
       if (av == null || bv == null) return av == null ? (bv == null ? 0 : 1) : -1;
       return sort.dir === "asc" ? av - bv : bv - av;
     });
@@ -300,8 +294,6 @@ function TaskBreakdown({ model, selectedMode }) {
                 </td>
                 <td><span className={`task-verdict ${row.verdict.toLowerCase()}`}>{row.verdict}</span></td>
                 <td className="task-number">{formatDuration(row.timeSecs)}</td>
-                {/* No count means the session ended before its telemetry flushed.
-                    Unknown is a dash; it is never rendered as zero. */}
                 <td className="task-number">{row.outputTokens == null ? "—" : formatTokens(row.outputTokens)}</td>
                 <td className="task-number">{row.outputCostUsd == null
                   ? "—"
@@ -529,9 +521,6 @@ function HubLeaderboard({ showFilters = true, fixedMode = null }) {
                         <div className="modelname-text">
                           <div className="modelname-main">
                             {m.name}
-                            {/* A rate over fewer tasks than the benchmark defines is
-                                not comparable to a full run, so say so on the row
-                                itself rather than only in the expanded detail. */}
                             {m.perMode[selectedMode]?.partialScope && (
                               <span className="scope-chip"
                                     title={`${m.perMode[selectedMode].total} of ${m.perMode[selectedMode].canonicalTotal} properties. ${m.scope?.reason ?? ""}`}>

@@ -126,16 +126,13 @@ function PageLeaderboard() {
         <FadeIn>
           <span className="eyebrow accent">Results</span>
           <h1 style={{ fontSize: 44, marginTop: 10 }}>Leaderboard</h1>
-          <p className="lead" style={{ maxWidth: 820 }}>
-            Pass rate is the share of scored properties that pass, where the proof must first clear
-            the cheat-checker (no admitted steps, smuggled axioms, or weakened theorems) and then be
-            accepted by tlapm. The two benchmark modes, proof-completion and proof-from-scratch, are
-            separate leaderboards, shown one after the other below. Each row reports pass rate and
-            mean usage for that mode, with the mode's total underneath. Expand a model to compare
-            per-spec pass rate, time, and cost or inspect its individual tasks.
+          <p className="lead">
+            Models are ranked by the percentage of properties that pass the cheat-checker and TLAPM.
+            Separate leaderboards are shown for each benchmark mode. Expand a model for per-spec
+            results, time, cost, and tasks.
           </p>
         </FadeIn>
-        <div style={{ marginTop: 32 }}><HubLeaderboard fixedMode="completion" /></div>
+        <div style={{ marginTop: 72 }}><HubLeaderboard fixedMode="completion" /></div>
         <div style={{ marginTop: 48 }}><HubLeaderboard fixedMode="scratch" /></div>
       </div>
     </section>

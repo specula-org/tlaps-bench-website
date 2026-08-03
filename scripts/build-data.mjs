@@ -36,17 +36,12 @@ if (MODES.reduce((n, mode) => n + MODE_RECORDS[mode], 0) !== RECORDS) {
 }
 const MODE_KEY = { "proof-completion": "completion", "proof-from-scratch": "scratch" };
 
-// ---- scope exceptions -------------------------------------------------------
-// A bundle normally has to match the anchor task-for-task. A run graded against
-// a different upstream revision of one spec cannot, and re-running it is not
-// always possible. The alternatives are all worse than the truth: dropping the
-// run hides a real result, and scoring unrun tasks as FAIL invents 14 failures
-// that were never observed. So a bundle may instead declare exactly which
-// canonical tasks it is missing and which non-canonical ones it carries. The
-// declaration is checked against the records and must account for every
-// difference, no more and no less - an undeclared drift still throws. Such a
-// bundle is scored over the tasks it actually ran and is flagged partial-scope,
-// which the leaderboard renders next to its numbers.
+// A bundle normally has to match the anchor task-for-task; a run graded against a
+// different upstream revision of one spec cannot. Rather than hide the run or
+// score its unrun tasks as FAIL, the bundle declares exactly which canonical
+// tasks it lacks and which non-canonical ones it carries. The declaration must
+// account for every difference, no more and no less - undeclared drift throws.
+// Such a bundle is scored over what it ran and flagged partial-scope.
 const taskKey = (mode, benchmark) => `${mode}\n${benchmark}`;
 
 const parseManifestException = (f, meta, covered) => {
@@ -81,8 +76,7 @@ const parseManifestException = (f, meta, covered) => {
   for (const key of extra.keys()) {
     if (missing.has(key)) throw new Error(`${f}: a task is both missing and extra`);
   }
-  // Net change per source/mode and per spec/mode, used to bend the canonical
-  // expectations by exactly what was declared.
+  // Net change per source/mode and per spec/mode.
   const delta = new Map();
   const bump = (row, n) => {
     const group = row.benchmark.split("/")[0];
@@ -251,10 +245,9 @@ const specKey = (source, group) => JSON.stringify([source, group]);
 const r1 = (x) => Math.round(x * 10) / 10;
 // pricing may be null for a backend with no published output rate; the cost
 // fields then stay null so the UI shows a dash instead of a fabricated number.
-// canonicalTotal is how many tasks this mode holds in the canonical manifest. It
-// equals total for every complete bundle; where a declared scope exception makes
-// it larger, the stat carries both so the UI can show "473 of 483" rather than
-// letting a rate over a smaller denominator pass for a full run.
+// canonicalTotal equals total for every complete bundle; where a scope exception
+// makes it larger, the stat carries both so a rate over the smaller denominator
+// cannot pass for a full run.
 const modeStat = (pm, pricing, canonicalTotal = null) => {
   if (!pm || pm.total <= 0) return null;
   const outputCostUsd = pricing ? pm.outputCostUnits / 1_000_000 : null;
@@ -311,10 +304,8 @@ const models = ordered.map(({ f, meta, results, covered, resultsVersion }) => {
   const expectedRecords = covered.reduce((n, mode) => n + MODE_RECORDS[mode], 0) -
     (exception ? exception.missing.size - exception.extra.size : 0);
   const usageAudit = meta.usage_audit;
-  // Three ways to vouch for output tokens. The first two assert a count on every
-  // task. The third admits that some tasks ended before their usage telemetry
-  // flushed: those rows carry no count, the totals are sums over the rest, and
-  // everything derived from them is published as a lower bound.
+  // The first two vouch for a count on every task; the third admits that some
+  // sessions ended before their telemetry flushed, making the totals lower bounds.
   const outputTokensPartial = usageAudit?.output_tokens_partial === true;
   const outputTokensVouched = usageAudit?.output_tokens_audited === true ||
     usageAudit?.output_tokens_positive_for_all_tasks === true || outputTokensPartial;
@@ -365,8 +356,7 @@ const models = ordered.map(({ f, meta, results, covered, resultsVersion }) => {
     if (!Number.isFinite(r.time_secs) || r.time_secs <= 0) {
       throw new Error(`${f}: ${r.benchmark} has invalid time_secs ${r.time_secs}`);
     }
-    // Under partial telemetry an absent count means unknown, never zero: the row
-    // contributes nothing to the totals and shows a dash rather than a 0.
+    // An absent count means unknown, never zero: the row contributes nothing.
     const hasOutputTokens = r.output_tokens !== undefined;
     if (!hasOutputTokens && !outputTokensPartial) {
       throw new Error(`${f}: ${r.benchmark} has no output_tokens and the bundle claims complete telemetry`);
@@ -517,8 +507,8 @@ const models = ordered.map(({ f, meta, results, covered, resultsVersion }) => {
   for (const [source, counts] of Object.entries(CANONICAL)) {
     const got = bySource[source]?.perMode ?? {};
     for (const mode of MODES) {
-      // Modes this bundle does not cover must contribute nothing at all; a
-      // declared scope exception shifts the expectation by exactly its delta.
+      // Modes this bundle does not cover contribute nothing; a declared scope
+      // exception shifts the expectation by exactly its delta.
       const expected = covered.includes(mode)
         ? counts[MODES.indexOf(mode)] + (exception?.delta.get(`source\n${source}\n${mode}`) ?? 0)
         : 0;
@@ -585,9 +575,7 @@ const models = ordered.map(({ f, meta, results, covered, resultsVersion }) => {
   if (isFullScope && canonicalTaskManifest === null) {
     canonicalTaskManifest = serializedTaskManifest;
   } else {
-    // Every declared exception must be real: each missing task genuinely absent,
-    // each extra task genuinely present. Then the rest has to match the anchor
-    // exactly, so only the declared drift is tolerated.
+    // Each declared exception must be real; the rest must match the anchor exactly.
     for (const key of exception?.missing.keys() ?? []) {
       if (taskIds.has(key)) throw new Error(`${f}: task declared missing is present: ${key.split("\n")[1]}`);
     }
@@ -637,8 +625,7 @@ const models = ordered.map(({ f, meta, results, covered, resultsVersion }) => {
       a.sourceName.localeCompare(b.sourceName) || b.total - a.total || a.name.localeCompare(b.name));
   }
 
-  // Canonical per-spec counts, so a spec trimmed by a scope exception reports
-  // the denominator it was meant to have alongside the one it actually ran.
+  // A spec trimmed by a scope exception reports both denominators.
   const canonicalSpecCounts = new Map(JSON.parse(canonicalSpecManifest)
     .map((row) => [specKey(row.source, row.group), row]));
   const perSpec = Object.fromEntries(manifest.map(({ source, group }) => {
@@ -678,8 +665,7 @@ const models = ordered.map(({ f, meta, results, covered, resultsVersion }) => {
       outputCostPerTask: outputCostUsd === null ? null : outputCostUsd / results.length,
     },
     perMode,
-    // Present only for a bundle that declared a scope exception. The UI reads it
-    // to label the model partial-scope and to explain why in its own words.
+    // Present only for a bundle that declared a scope exception.
     scope: exception ? {
       partial: true,
       reason: exception.reason,
