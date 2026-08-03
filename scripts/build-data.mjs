@@ -36,6 +36,66 @@ if (MODES.reduce((n, mode) => n + MODE_RECORDS[mode], 0) !== RECORDS) {
 }
 const MODE_KEY = { "proof-completion": "completion", "proof-from-scratch": "scratch" };
 
+// ---- scope exceptions -------------------------------------------------------
+// A bundle normally has to match the anchor task-for-task. A run graded against
+// a different upstream revision of one spec cannot, and re-running it is not
+// always possible. The alternatives are all worse than the truth: dropping the
+// run hides a real result, and scoring unrun tasks as FAIL invents 14 failures
+// that were never observed. So a bundle may instead declare exactly which
+// canonical tasks it is missing and which non-canonical ones it carries. The
+// declaration is checked against the records and must account for every
+// difference, no more and no less - an undeclared drift still throws. Such a
+// bundle is scored over the tasks it actually ran and is flagged partial-scope,
+// which the leaderboard renders next to its numbers.
+const taskKey = (mode, benchmark) => `${mode}\n${benchmark}`;
+
+const parseManifestException = (f, meta, covered) => {
+  const declared = meta.manifest_exception;
+  if (!declared) return null;
+  if (typeof declared.reason !== "string" || declared.reason.trim() === "") {
+    throw new Error(`${f}: manifest_exception needs a reason`);
+  }
+  const read = (field) => {
+    const rows = declared[field];
+    if (!Array.isArray(rows) || rows.length === 0) {
+      throw new Error(`${f}: manifest_exception.${field} must be a non-empty array`);
+    }
+    const byKey = new Map();
+    for (const row of rows) {
+      if (!MODES.includes(row.mode)) throw new Error(`${f}: ${field} has unknown mode "${row.mode}"`);
+      if (!covered.includes(row.mode)) {
+        throw new Error(`${f}: ${field} names mode ${row.mode}, which this bundle does not cover`);
+      }
+      if (typeof row.benchmark !== "string" || !row.benchmark.includes("/")) {
+        throw new Error(`${f}: ${field} entry "${row.benchmark}" does not identify a spec group`);
+      }
+      if (!CANONICAL[row.source]) throw new Error(`${f}: ${field} has unknown source "${row.source}"`);
+      const key = taskKey(row.mode, row.benchmark);
+      if (byKey.has(key)) throw new Error(`${f}: ${field} lists ${row.benchmark} twice`);
+      byKey.set(key, row);
+    }
+    return byKey;
+  };
+  const missing = read("missing_tasks");
+  const extra = read("extra_tasks");
+  for (const key of extra.keys()) {
+    if (missing.has(key)) throw new Error(`${f}: a task is both missing and extra`);
+  }
+  // Net change per source/mode and per spec/mode, used to bend the canonical
+  // expectations by exactly what was declared.
+  const delta = new Map();
+  const bump = (row, n) => {
+    const group = row.benchmark.split("/")[0];
+    for (const key of [`source\n${row.source}\n${row.mode}`,
+                       `spec\n${specKey(row.source, group)}\n${row.mode}`]) {
+      delta.set(key, (delta.get(key) ?? 0) + n);
+    }
+  };
+  for (const row of missing.values()) bump(row, -1);
+  for (const row of extra.values()) bump(row, 1);
+  return { reason: declared.reason, missing, extra, delta };
+};
+
 // The one hand-maintained table: display info per backend id.
 // name = the underlying model (primary label); subname = the agent/endpoint, shown below it.
 const BACKEND_INFO = {
@@ -43,6 +103,7 @@ const BACKEND_INFO = {
   "copilot-gemini-3.1-pro-preview": { name: "Gemini 3.1 Pro Preview", subname: "GitHub Copilot", org: "GitHub", logo: null, kind: "agent" },
   "copilot-gpt-5.6-sol": { name: "GPT-5.6-Sol", subname: "GitHub Copilot · Agentic", org: "GitHub", logo: null, kind: "agent" },
   codex: { name: "GPT-5.5", subname: "OpenAI Codex", org: "OpenAI", logo: null, kind: "agent" },
+  "composer-2.5": { name: "Composer 2.5", subname: "Cursor CLI · Agentic", org: "Cursor", logo: null, kind: "agent" },
 };
 
 // A reproducible output-only estimate, not the experiments' actual bill. Every
@@ -190,13 +251,19 @@ const specKey = (source, group) => JSON.stringify([source, group]);
 const r1 = (x) => Math.round(x * 10) / 10;
 // pricing may be null for a backend with no published output rate; the cost
 // fields then stay null so the UI shows a dash instead of a fabricated number.
-const modeStat = (pm, pricing) => {
+// canonicalTotal is how many tasks this mode holds in the canonical manifest. It
+// equals total for every complete bundle; where a declared scope exception makes
+// it larger, the stat carries both so the UI can show "473 of 483" rather than
+// letting a rate over a smaller denominator pass for a full run.
+const modeStat = (pm, pricing, canonicalTotal = null) => {
   if (!pm || pm.total <= 0) return null;
   const outputCostUsd = pricing ? pm.outputCostUnits / 1_000_000 : null;
   return {
     rate: r1((pm.pass / pm.total) * 100),
     pass: pm.pass,
     total: pm.total,
+    canonicalTotal: canonicalTotal ?? pm.total,
+    partialScope: canonicalTotal != null && canonicalTotal !== pm.total,
     taskCount: pm.total,
     activeTimeSecs: pm.activeTimeSecs,
     activeTimePerTask: pm.activeTimeSecs / pm.total,
@@ -239,14 +306,24 @@ const anchor = anchorBundle.f;
 const ordered = [anchorBundle, ...bundles.filter((b) => b !== anchorBundle)];
 
 const models = ordered.map(({ f, meta, results, covered, resultsVersion }) => {
-  const isFullScope = covered.length === MODES.length;
-  const expectedRecords = covered.reduce((n, mode) => n + MODE_RECORDS[mode], 0);
+  const exception = parseManifestException(f, meta, covered);
+  const isFullScope = covered.length === MODES.length && !exception;
+  const expectedRecords = covered.reduce((n, mode) => n + MODE_RECORDS[mode], 0) -
+    (exception ? exception.missing.size - exception.extra.size : 0);
   const usageAudit = meta.usage_audit;
+  // Three ways to vouch for output tokens. The first two assert a count on every
+  // task. The third admits that some tasks ended before their usage telemetry
+  // flushed: those rows carry no count, the totals are sums over the rest, and
+  // everything derived from them is published as a lower bound.
+  const outputTokensPartial = usageAudit?.output_tokens_partial === true;
   const outputTokensVouched = usageAudit?.output_tokens_audited === true ||
-    usageAudit?.output_tokens_positive_for_all_tasks === true;
+    usageAudit?.output_tokens_positive_for_all_tasks === true || outputTokensPartial;
   if (!usageAudit || usageAudit.task_count !== results.length ||
       usageAudit.active_time_complete !== true || !outputTokensVouched) {
     throw new Error(`${f}: missing audited ${results.length}-task usage data`);
+  }
+  if (outputTokensPartial && !Number.isInteger(usageAudit.tasks_with_output_tokens)) {
+    throw new Error(`${f}: partial output telemetry must declare tasks_with_output_tokens`);
   }
 
   // No entry means this backend has no published rate on file: cost is withheld
@@ -276,6 +353,7 @@ const models = ordered.map(({ f, meta, results, covered, resultsVersion }) => {
   const bySpec = {};
   let activeTimeSecs = 0;
   let outputTokens = 0;
+  let tasksWithOutputTokens = 0;
   let outputCostUnits = pricing ? 0 : null;
   const secondaryUsageTotals = {};
   for (const r of results) {
@@ -287,13 +365,20 @@ const models = ordered.map(({ f, meta, results, covered, resultsVersion }) => {
     if (!Number.isFinite(r.time_secs) || r.time_secs <= 0) {
       throw new Error(`${f}: ${r.benchmark} has invalid time_secs ${r.time_secs}`);
     }
-    if (!Number.isInteger(r.output_tokens) || r.output_tokens <= 0) {
+    // Under partial telemetry an absent count means unknown, never zero: the row
+    // contributes nothing to the totals and shows a dash rather than a 0.
+    const hasOutputTokens = r.output_tokens !== undefined;
+    if (!hasOutputTokens && !outputTokensPartial) {
+      throw new Error(`${f}: ${r.benchmark} has no output_tokens and the bundle claims complete telemetry`);
+    }
+    if (hasOutputTokens && (!Number.isInteger(r.output_tokens) || r.output_tokens <= 0)) {
       throw new Error(`${f}: ${r.benchmark} has invalid output_tokens ${r.output_tokens}`);
     }
+    if (hasOutputTokens) tasksWithOutputTokens++;
 
     activeTimeSecs += r.time_secs;
-    outputTokens += r.output_tokens;
-    let rowOutputCostUnits = pricing
+    outputTokens += r.output_tokens ?? 0;
+    let rowOutputCostUnits = pricing && hasOutputTokens
       ? r.output_tokens * pricing.usdPerMillionTokens
       : null;
     let secondaryOutputTokens = 0;
@@ -328,10 +413,13 @@ const models = ordered.map(({ f, meta, results, covered, resultsVersion }) => {
           (modelPricing.usdPerMillionTokens - pricing.usdPerMillionTokens);
       }
     }
-    if (secondaryOutputTokens > r.output_tokens) {
+    if (secondaryOutputTokens > 0 && !hasOutputTokens) {
+      throw new Error(`${f}: ${r.benchmark} reports secondary output but no task output total`);
+    }
+    if (hasOutputTokens && secondaryOutputTokens > r.output_tokens) {
       throw new Error(`${f}: ${r.benchmark} secondary output exceeds task output`);
     }
-    if (outputCostUnits !== null) outputCostUnits += rowOutputCostUnits;
+    if (outputCostUnits !== null) outputCostUnits += rowOutputCostUnits ?? 0;
 
     const group = r.benchmark.split("/")[0];
     if (!group || group === r.benchmark) {
@@ -349,7 +437,7 @@ const models = ordered.map(({ f, meta, results, covered, resultsVersion }) => {
     m.total++;
     m[r.check_verdict] = (m[r.check_verdict] ?? 0) + 1;
     m.activeTimeSecs += r.time_secs;
-    m.outputTokens += r.output_tokens;
+    m.outputTokens += r.output_tokens ?? 0;
     m.outputCostUnits += rowOutputCostUnits ?? 0;
 
     const s = (bySource[r.source] ??= { perMode: {} });
@@ -368,7 +456,7 @@ const models = ordered.map(({ f, meta, results, covered, resultsVersion }) => {
     specMode.total++;
     if (r.check_verdict === "PASS") specMode.pass++;
     specMode.activeTimeSecs += r.time_secs;
-    specMode.outputTokens += r.output_tokens;
+    specMode.outputTokens += r.output_tokens ?? 0;
     specMode.outputCostUnits += rowOutputCostUnits ?? 0;
   }
 
@@ -422,11 +510,18 @@ const models = ordered.map(({ f, meta, results, covered, resultsVersion }) => {
     throw new Error(`${f}: secondary model usage lacks a model-level audit`);
   }
 
+  if (outputTokensPartial && usageAudit.tasks_with_output_tokens !== tasksWithOutputTokens) {
+    throw new Error(`${f}: ${tasksWithOutputTokens} rows carry output tokens, audit claims ${usageAudit.tasks_with_output_tokens}`);
+  }
+
   for (const [source, counts] of Object.entries(CANONICAL)) {
     const got = bySource[source]?.perMode ?? {};
     for (const mode of MODES) {
-      // Modes this bundle does not cover must contribute nothing at all.
-      const expected = covered.includes(mode) ? counts[MODES.indexOf(mode)] : 0;
+      // Modes this bundle does not cover must contribute nothing at all; a
+      // declared scope exception shifts the expectation by exactly its delta.
+      const expected = covered.includes(mode)
+        ? counts[MODES.indexOf(mode)] + (exception?.delta.get(`source\n${source}\n${mode}`) ?? 0)
+        : 0;
       if ((got[mode]?.total ?? 0) !== expected) {
         throw new Error(`${f}: ${source} [${mode}] counts don't match the canonical manifest`);
       }
@@ -462,11 +557,15 @@ const models = ordered.map(({ f, meta, results, covered, resultsVersion }) => {
   } else {
     // Restrict the canon to this bundle's modes: zero out the modes it does not
     // cover, then drop specs left with no tasks at all.
+    const specDelta = (row, mode) =>
+      exception?.delta.get(`spec\n${specKey(row.source, row.group)}\n${mode}`) ?? 0;
     const expected = JSON.parse(canonicalSpecManifest)
       .map((row) => ({
         ...row,
-        completion: covered.includes("proof-completion") ? row.completion : 0,
-        scratch: covered.includes("proof-from-scratch") ? row.scratch : 0,
+        completion: covered.includes("proof-completion")
+          ? row.completion + specDelta(row, "proof-completion") : 0,
+        scratch: covered.includes("proof-from-scratch")
+          ? row.scratch + specDelta(row, "proof-from-scratch") : 0,
       }))
       .filter((row) => row.completion + row.scratch > 0);
     if (manifest.length !== expected.length) {
@@ -486,8 +585,19 @@ const models = ordered.map(({ f, meta, results, covered, resultsVersion }) => {
   if (isFullScope && canonicalTaskManifest === null) {
     canonicalTaskManifest = serializedTaskManifest;
   } else {
-    const expected = JSON.parse(canonicalTaskManifest).filter((row) => covered.includes(row.mode));
-    if (serializedTaskManifest !== JSON.stringify(expected)) {
+    // Every declared exception must be real: each missing task genuinely absent,
+    // each extra task genuinely present. Then the rest has to match the anchor
+    // exactly, so only the declared drift is tolerated.
+    for (const key of exception?.missing.keys() ?? []) {
+      if (taskIds.has(key)) throw new Error(`${f}: task declared missing is present: ${key.split("\n")[1]}`);
+    }
+    for (const key of exception?.extra.keys() ?? []) {
+      if (!taskIds.has(key)) throw new Error(`${f}: task declared extra is absent: ${key.split("\n")[1]}`);
+    }
+    const comparable = taskManifest.filter((row) => !exception?.extra.has(taskKey(row.mode, row.benchmark)));
+    const expected = JSON.parse(canonicalTaskManifest).filter((row) =>
+      covered.includes(row.mode) && !exception?.missing.has(taskKey(row.mode, row.benchmark)));
+    if (JSON.stringify(comparable) !== JSON.stringify(expected)) {
       throw new Error(`${f}: task manifest differs from ${anchor}`);
     }
   }
@@ -527,13 +637,19 @@ const models = ordered.map(({ f, meta, results, covered, resultsVersion }) => {
       a.sourceName.localeCompare(b.sourceName) || b.total - a.total || a.name.localeCompare(b.name));
   }
 
+  // Canonical per-spec counts, so a spec trimmed by a scope exception reports
+  // the denominator it was meant to have alongside the one it actually ran.
+  const canonicalSpecCounts = new Map(JSON.parse(canonicalSpecManifest)
+    .map((row) => [specKey(row.source, row.group), row]));
   const perSpec = Object.fromEntries(manifest.map(({ source, group }) => {
-    const spec = bySpec[specKey(source, group)];
+    const key = specKey(source, group);
+    const spec = bySpec[key];
+    const canonicalRow = canonicalSpecCounts.get(key);
     return [
       specId(source, group),
       {
-        completion: modeStat(spec.perMode["proof-completion"], pricing),
-        scratch: modeStat(spec.perMode["proof-from-scratch"], pricing),
+        completion: modeStat(spec.perMode["proof-completion"], pricing, canonicalRow?.completion ?? null),
+        scratch: modeStat(spec.perMode["proof-from-scratch"], pricing, canonicalRow?.scratch ?? null),
       },
     ];
   }));
@@ -544,7 +660,7 @@ const models = ordered.map(({ f, meta, results, covered, resultsVersion }) => {
   const perMode = Object.fromEntries(MODES.map((mode) => [
     MODE_KEY[mode],
     covered.includes(mode)
-      ? modeStat({ ...byMode[mode], pass: byMode[mode].PASS }, pricing)
+      ? modeStat({ ...byMode[mode], pass: byMode[mode].PASS }, pricing, MODE_RECORDS[mode])
       : null,
   ]));
   const outputCostUsd = outputCostUnits === null ? null : outputCostUnits / 1_000_000;
@@ -562,11 +678,24 @@ const models = ordered.map(({ f, meta, results, covered, resultsVersion }) => {
       outputCostPerTask: outputCostUsd === null ? null : outputCostUsd / results.length,
     },
     perMode,
+    // Present only for a bundle that declared a scope exception. The UI reads it
+    // to label the model partial-scope and to explain why in its own words.
+    scope: exception ? {
+      partial: true,
+      reason: exception.reason,
+      taskCount: results.length,
+      canonicalTaskCount: covered.reduce((n, mode) => n + MODE_RECORDS[mode], 0),
+      missingTasks: [...exception.missing.values()].map((row) => row.benchmark).sort(),
+      extraTasks: [...exception.extra.values()].map((row) => row.benchmark).sort(),
+    } : null,
     usage: {
       taskCount: results.length,
       activeTimeSecs,
       outputTokens,
       outputCostUsd,
+      ...(outputTokensPartial
+        ? { outputTokensPartial: true, tasksWithOutputTokens: tasksWithOutputTokens }
+        : {}),
       ...(outputCostUsd !== null && outputCostLowerBound ? { outputCostLowerBound: true } : {}),
     },
     pricing,

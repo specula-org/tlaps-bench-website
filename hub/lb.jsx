@@ -33,7 +33,18 @@ function BreakdownCell({ v, isOpen }) {
                   : <span style={{ display: "inline-block", width: "100%", height: 6 }} />}
         </span>
         <span className="bd-rate">{v.rate.toFixed(1)}%</span>
-        <span className="bd-num">{v.pass}/{v.total}</span>
+        {/* Where a scope exception trimmed this spec, the rate is over the tasks
+            actually run; the canonical denominator is shown so it cannot read as
+            a full result. */}
+        <span className="bd-num">
+          {v.pass}/{v.total}
+          {v.partialScope && (
+            <em className="scope-partial"
+                title={`This run covers ${v.total} of the ${v.canonicalTotal} canonical properties in this spec.`}>
+              {" "}of {v.canonicalTotal}
+            </em>
+          )}
+        </span>
       </span>
     </td>
   );
@@ -81,7 +92,8 @@ const formatCostUsd = (value, digits = 2, lowerBound = false) =>
   `${lowerBound ? "≥" : ""}${formatUsd(value, digits)}`;
 const formatTokens = (value) => Math.round(value).toLocaleString("en-US");
 const outputCostForTask = (row, pricing) => {
-  if (!pricing) return null;
+  // No rate on file, or no recorded output for this task: no cost, not a zero.
+  if (!pricing || row.output_tokens == null) return null;
   let cost = row.output_tokens * pricing.usdPerMillionTokens / 1_000_000;
   for (const [model, usage] of Object.entries(row.secondary_model_usage ?? {})) {
     if (usage.output_tokens_lower_bound <= 0) continue;
@@ -93,10 +105,28 @@ const outputCostForTask = (row, pricing) => {
   return cost;
 };
 
+// Why some tasks in the table below have no token or cost figure at all.
+function TelemetryNote({ model }) {
+  if (model.usage.outputTokensPartial !== true) return null;
+  const missing = model.usage.taskCount - model.usage.tasksWithOutputTokens;
+  return (
+    <React.Fragment>
+      {" "}{missing} of {model.usage.taskCount} tasks ended before their usage telemetry
+      flushed and carry no token count; those rows show a dash, and every token
+      total here is a sum over the remaining {model.usage.tasksWithOutputTokens}.
+    </React.Fragment>
+  );
+}
+
 function PricingNote({ model }) {
   const pricing = model.pricing;
   if (!pricing) {
-    return "No published output rate is on file for this model, so cost is not estimated.";
+    return (
+      <React.Fragment>
+        No published output rate is on file for this model, so cost is not estimated.
+        <TelemetryNote model={model} />
+      </React.Fragment>
+    );
   }
   const components = [
     { name: model.name, ...pricing },
@@ -116,6 +146,7 @@ function PricingNote({ model }) {
         </React.Fragment>
       ))}{", as of "}{pricing.asOf}. {lowerBound && "Missing output telemetry is not included. "}
       <a href={pricing.source} target="_blank" rel="noopener">Pricing source</a>
+      <TelemetryNote model={model} />
     </React.Fragment>
   );
 }
@@ -180,7 +211,7 @@ function TaskBreakdown({ model, selectedMode }) {
           mode: row.mode,
           verdict: row.check_verdict,
           timeSecs: row.time_secs,
-          outputTokens: row.output_tokens,
+          outputTokens: row.output_tokens ?? null,
           outputCostUsd: outputCostForTask(row, pricing),
         })));
       })
@@ -203,6 +234,9 @@ function TaskBreakdown({ model, selectedMode }) {
       if (typeof av === "string") {
         return sort.dir === "asc" ? av.localeCompare(bv) : bv.localeCompare(av);
       }
+      // Tasks with no recorded value sort last either way rather than mixing
+      // into the numbers as if they were zero.
+      if (av == null || bv == null) return av == null ? (bv == null ? 0 : 1) : -1;
       return sort.dir === "asc" ? av - bv : bv - av;
     });
   }, [taskRows, query, rawMode, verdict, sort]);
@@ -266,7 +300,9 @@ function TaskBreakdown({ model, selectedMode }) {
                 </td>
                 <td><span className={`task-verdict ${row.verdict.toLowerCase()}`}>{row.verdict}</span></td>
                 <td className="task-number">{formatDuration(row.timeSecs)}</td>
-                <td className="task-number">{formatTokens(row.outputTokens)}</td>
+                {/* No count means the session ended before its telemetry flushed.
+                    Unknown is a dash; it is never rendered as zero. */}
+                <td className="task-number">{row.outputTokens == null ? "—" : formatTokens(row.outputTokens)}</td>
                 <td className="task-number">{row.outputCostUsd == null
                   ? "—"
                   : formatCostUsd(row.outputCostUsd, 4, model.usage.outputCostLowerBound)}</td>
@@ -491,7 +527,18 @@ function HubLeaderboard({ showFilters = true, fixedMode = null }) {
                       <div className="modelname">
                         {m.logo && <OrgDot org={m.org} logo={m.logo} />}
                         <div className="modelname-text">
-                          <div className="modelname-main">{m.name}</div>
+                          <div className="modelname-main">
+                            {m.name}
+                            {/* A rate over fewer tasks than the benchmark defines is
+                                not comparable to a full run, so say so on the row
+                                itself rather than only in the expanded detail. */}
+                            {m.perMode[selectedMode]?.partialScope && (
+                              <span className="scope-chip"
+                                    title={`${m.perMode[selectedMode].total} of ${m.perMode[selectedMode].canonicalTotal} properties. ${m.scope?.reason ?? ""}`}>
+                                {m.perMode[selectedMode].total}/{m.perMode[selectedMode].canonicalTotal}
+                              </span>
+                            )}
+                          </div>
                           {m.subname && <div className="modelname-sub">{m.subname}</div>}
                         </div>
                       </div>
@@ -529,6 +576,13 @@ function HubLeaderboard({ showFilters = true, fixedMode = null }) {
                                     ? `${modeLabels[selectedMode]}: usage shows the mean per task with the spec total underneath.`
                                     : `${modeLabels[selectedMode]}: recorded usage for each task in this leaderboard.`}
                                 </div>
+                                {m.perMode[selectedMode]?.partialScope && m.scope && (
+                                  <div className="scope-caption">
+                                    Partial scope: {m.scope.taskCount} of {m.scope.canonicalTaskCount} canonical
+                                    properties. {m.scope.reason} The pass rate is over the properties
+                                    actually run, so it is not directly comparable to a full-scope run.
+                                  </div>
+                                )}
                               </div>
                               <div className="detail-tabs" role="group" aria-label="Leaderboard detail view">
                                 <button className={detailView === "spec" ? "active" : ""} aria-pressed={detailView === "spec"}
