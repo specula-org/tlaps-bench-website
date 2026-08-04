@@ -146,9 +146,9 @@ function PricingNote({ model }) {
   );
 }
 
-function DifficultyBreakdown({ model, selectedMode, isOpen }) {
-  const bands = model.perDifficulty[selectedMode];
-  const meta = TLAPS_DATA.difficulty;
+function ComplexityBreakdown({ model, selectedMode, isOpen }) {
+  const bands = model.perComplexity[selectedMode];
+  const meta = TLAPS_DATA.complexity;
   const byId = Object.fromEntries(meta.bands.map((band) => [band.id, band]));
   return (
     <div className="bd-scroll">
@@ -597,11 +597,11 @@ function HubLeaderboard({ showFilters = true, fixedMode = null }) {
                               <div>
                                 <div className="eyebrow" style={{ marginBottom: 6 }}>{m.name} · {m.subname}</div>
                                 <div className="detail-caption">
-                                  {detailView === "difficulty" && !m.perDifficulty?.[selectedMode]
+                                  {detailView === "complexity" && !m.perComplexity?.[selectedMode]
                                     ? `${modeLabels[selectedMode]}: usage shows the mean per task with the spec total underneath.`
                                     : detailView === "spec"
                                     ? `${modeLabels[selectedMode]}: usage shows the mean per task with the spec total underneath.`
-                                    : detailView === "difficulty"
+                                    : detailView === "complexity"
                                     ? `${modeLabels[selectedMode]}: pass rate and usage by how many steps the benchmark's own reference proof takes.`
                                     : `${modeLabels[selectedMode]}: recorded usage for each task in this leaderboard.`}
                                 </div>
@@ -609,10 +609,10 @@ function HubLeaderboard({ showFilters = true, fixedMode = null }) {
                               <div className="detail-tabs" role="group" aria-label="Leaderboard detail view">
                                 <button className={detailView === "spec" ? "active" : ""} aria-pressed={detailView === "spec"}
                                   onClick={() => setDetailView("spec")}>By spec</button>
-                                {m.perDifficulty?.[selectedMode] && (
-                                  <button className={detailView === "difficulty" ? "active" : ""}
-                                    aria-pressed={detailView === "difficulty"}
-                                    onClick={() => setDetailView("difficulty")}>By difficulty</button>
+                                {m.perComplexity?.[selectedMode] && (
+                                  <button className={detailView === "complexity" ? "active" : ""}
+                                    aria-pressed={detailView === "complexity"}
+                                    onClick={() => setDetailView("complexity")}>By complexity</button>
                                 )}
                                 <button className={detailView === "task" ? "active" : ""} aria-pressed={detailView === "task"}
                                   onClick={() => setDetailView("task")}>By task</button>
@@ -625,8 +625,8 @@ function HubLeaderboard({ showFilters = true, fixedMode = null }) {
                                 actually run, so it is not directly comparable to a full-scope run.
                               </div>
                             )}
-                            {detailView === "difficulty" && m.perDifficulty?.[selectedMode] ? (
-                              <DifficultyBreakdown model={m} selectedMode={selectedMode} isOpen={isOpen} />
+                            {detailView === "complexity" && m.perComplexity?.[selectedMode] ? (
+                              <ComplexityBreakdown model={m} selectedMode={selectedMode} isOpen={isOpen} />
                             ) : detailView === "spec" ? (
                               /* The benchmark and leaderboard share the same spec-level unit.
                                  A dash marks a mode with no properties, not a failed attempt. */

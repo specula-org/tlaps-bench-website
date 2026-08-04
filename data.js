@@ -7,9 +7,9 @@ window.TLAPS_DATA = {
     "repo": "https://github.com/specula-org/tlaps-bench",
     "overview": "TLAPS proofs are checked mechanically by tlapm: a proof is either accepted or rejected, with no partial credit and no room for a plausible-but-wrong argument. Each property presents a TLA+ theorem whose proof body is replaced by PROOF OBVIOUS; the AI must replace it with a real proof that tlapm accepts. That makes proof construction a sharp test of an AI's formal reasoning."
   },
-  "difficulty": {
+  "complexity": {
     "label": "Reference proof steps",
-    "tip": "Steps in the benchmark's own reference proof for each theorem - a measure of how hard the task is, independent of any model. Bands are identical for every model, so the columns are directly comparable. Tasks with no recorded reference proof are left out.",
+    "tip": "Steps in the benchmark's own reference proof for each theorem - a measure of the task's structural complexity, independent of any model. Bands are identical for every model, so the columns are directly comparable. Tasks with no recorded reference proof are left out.",
     "bands": [
       {
         "id": "d0",
@@ -38,8 +38,20 @@ window.TLAPS_DATA = {
       },
       {
         "id": "d4",
-        "label": "31+",
+        "label": "31–50",
         "min": 31,
+        "max": 50
+      },
+      {
+        "id": "d5",
+        "label": "51–100",
+        "min": 51,
+        "max": 100
+      },
+      {
+        "id": "d6",
+        "label": "101+",
+        "min": 101,
         "max": null
       }
     ]
@@ -1046,7 +1058,7 @@ window.TLAPS_DATA = {
         },
         "scratch": null
       },
-      "perDifficulty": {
+      "perComplexity": {
         "completion": [
           {
             "id": "d0",
@@ -1110,18 +1122,48 @@ window.TLAPS_DATA = {
           },
           {
             "id": "d4",
-            "rate": 65.5,
-            "pass": 36,
-            "total": 55,
-            "canonicalTotal": 55,
+            "rate": 68.8,
+            "pass": 11,
+            "total": 16,
+            "canonicalTotal": 16,
             "partialScope": false,
-            "taskCount": 55,
-            "activeTimeSecs": 45675.263345718384,
-            "activeTimePerTask": 830.459333558516,
-            "outputTokens": 1204933,
-            "outputTokensPerTask": 21907.872727272726,
-            "outputCostUsd": 36.14799,
-            "outputCostPerTask": 0.6572361818181818
+            "taskCount": 16,
+            "activeTimeSecs": 7838.459901571274,
+            "activeTimePerTask": 489.9037438482046,
+            "outputTokens": 244001,
+            "outputTokensPerTask": 15250.0625,
+            "outputCostUsd": 7.32003,
+            "outputCostPerTask": 0.457501875
+          },
+          {
+            "id": "d5",
+            "rate": 78.9,
+            "pass": 15,
+            "total": 19,
+            "canonicalTotal": 19,
+            "partialScope": false,
+            "taskCount": 19,
+            "activeTimeSecs": 13419.756691217422,
+            "activeTimePerTask": 706.3029837482854,
+            "outputTokens": 375979,
+            "outputTokensPerTask": 19788.36842105263,
+            "outputCostUsd": 11.27937,
+            "outputCostPerTask": 0.5936510526315789
+          },
+          {
+            "id": "d6",
+            "rate": 50,
+            "pass": 10,
+            "total": 20,
+            "canonicalTotal": 20,
+            "partialScope": false,
+            "taskCount": 20,
+            "activeTimeSecs": 24417.046752929688,
+            "activeTimePerTask": 1220.8523376464843,
+            "outputTokens": 584953,
+            "outputTokensPerTask": 29247.65,
+            "outputCostUsd": 17.54859,
+            "outputCostPerTask": 0.8774295000000001
           }
         ],
         "scratch": null
@@ -2140,7 +2182,7 @@ window.TLAPS_DATA = {
           "outputCostPerTask": 1.1069258590308368
         }
       },
-      "perDifficulty": {
+      "perComplexity": {
         "completion": [
           {
             "id": "d0",
@@ -2204,18 +2246,48 @@ window.TLAPS_DATA = {
           },
           {
             "id": "d4",
-            "rate": 85.5,
-            "pass": 47,
-            "total": 55,
-            "canonicalTotal": 55,
+            "rate": 81.3,
+            "pass": 13,
+            "total": 16,
+            "canonicalTotal": 16,
             "partialScope": false,
-            "taskCount": 55,
-            "activeTimeSecs": 79784.2400970459,
-            "activeTimePerTask": 1450.6225472190163,
-            "outputTokens": 2204565,
-            "outputTokensPerTask": 40083,
-            "outputCostUsd": 66.13695,
-            "outputCostPerTask": 1.20249
+            "taskCount": 16,
+            "activeTimeSecs": 10077.170550584793,
+            "activeTimePerTask": 629.8231594115496,
+            "outputTokens": 335654,
+            "outputTokensPerTask": 20978.375,
+            "outputCostUsd": 10.06962,
+            "outputCostPerTask": 0.62935125
+          },
+          {
+            "id": "d5",
+            "rate": 89.5,
+            "pass": 17,
+            "total": 19,
+            "canonicalTotal": 19,
+            "partialScope": false,
+            "taskCount": 19,
+            "activeTimeSecs": 26192.797456502914,
+            "activeTimePerTask": 1378.568287184364,
+            "outputTokens": 760418,
+            "outputTokensPerTask": 40022,
+            "outputCostUsd": 22.81254,
+            "outputCostPerTask": 1.2006599999999998
+          },
+          {
+            "id": "d6",
+            "rate": 85,
+            "pass": 17,
+            "total": 20,
+            "canonicalTotal": 20,
+            "partialScope": false,
+            "taskCount": 20,
+            "activeTimeSecs": 43514.27208995819,
+            "activeTimePerTask": 2175.7136044979097,
+            "outputTokens": 1108493,
+            "outputTokensPerTask": 55424.65,
+            "outputCostUsd": 33.25479,
+            "outputCostPerTask": 1.6627395
           }
         ],
         "scratch": null
@@ -4139,7 +4211,7 @@ window.TLAPS_DATA = {
           "outputCostPerTask": 0.403415154185022
         }
       },
-      "perDifficulty": {
+      "perComplexity": {
         "completion": [
           {
             "id": "d0",
@@ -4203,18 +4275,48 @@ window.TLAPS_DATA = {
           },
           {
             "id": "d4",
-            "rate": 38.2,
-            "pass": 21,
-            "total": 55,
-            "canonicalTotal": 55,
+            "rate": 56.3,
+            "pass": 9,
+            "total": 16,
+            "canonicalTotal": 16,
             "partialScope": false,
-            "taskCount": 55,
-            "activeTimeSecs": 97572.64862561226,
-            "activeTimePerTask": 1774.0481568293137,
-            "outputTokens": 2759323,
-            "outputTokensPerTask": 50169.509090909094,
-            "outputCostUsd": 33.111876,
-            "outputCostPerTask": 0.6020341090909092
+            "taskCount": 16,
+            "activeTimeSecs": 14808.934359073639,
+            "activeTimePerTask": 925.5583974421024,
+            "outputTokens": 354356,
+            "outputTokensPerTask": 22147.25,
+            "outputCostUsd": 4.252272,
+            "outputCostPerTask": 0.265767
+          },
+          {
+            "id": "d5",
+            "rate": 47.4,
+            "pass": 9,
+            "total": 19,
+            "canonicalTotal": 19,
+            "partialScope": false,
+            "taskCount": 19,
+            "activeTimeSecs": 41433.19077062607,
+            "activeTimePerTask": 2180.6942510855824,
+            "outputTokens": 1297511,
+            "outputTokensPerTask": 68290.05263157895,
+            "outputCostUsd": 15.570132,
+            "outputCostPerTask": 0.8194806315789473
+          },
+          {
+            "id": "d6",
+            "rate": 15,
+            "pass": 3,
+            "total": 20,
+            "canonicalTotal": 20,
+            "partialScope": false,
+            "taskCount": 20,
+            "activeTimeSecs": 41330.52349591255,
+            "activeTimePerTask": 2066.5261747956274,
+            "outputTokens": 1107456,
+            "outputTokensPerTask": 55372.8,
+            "outputCostUsd": 13.289472,
+            "outputCostPerTask": 0.6644736
           }
         ],
         "scratch": null
@@ -6124,7 +6226,7 @@ window.TLAPS_DATA = {
         },
         "scratch": null
       },
-      "perDifficulty": {
+      "perComplexity": {
         "completion": [
           {
             "id": "d0",
@@ -6188,16 +6290,46 @@ window.TLAPS_DATA = {
           },
           {
             "id": "d4",
-            "rate": 33.9,
-            "pass": 19,
-            "total": 56,
-            "canonicalTotal": 56,
+            "rate": 62.5,
+            "pass": 10,
+            "total": 16,
+            "canonicalTotal": 16,
             "partialScope": false,
-            "taskCount": 56,
-            "activeTimeSecs": 476151,
-            "activeTimePerTask": 8502.69642857143,
-            "outputTokens": 3495111,
-            "outputTokensPerTask": 62412.69642857143,
+            "taskCount": 16,
+            "activeTimeSecs": 115457,
+            "activeTimePerTask": 7216.0625,
+            "outputTokens": 1112900,
+            "outputTokensPerTask": 69556.25,
+            "outputCostUsd": null,
+            "outputCostPerTask": null
+          },
+          {
+            "id": "d5",
+            "rate": 31.6,
+            "pass": 6,
+            "total": 19,
+            "canonicalTotal": 19,
+            "partialScope": false,
+            "taskCount": 19,
+            "activeTimeSecs": 152142,
+            "activeTimePerTask": 8007.473684210527,
+            "outputTokens": 1271517,
+            "outputTokensPerTask": 66921.94736842105,
+            "outputCostUsd": null,
+            "outputCostPerTask": null
+          },
+          {
+            "id": "d6",
+            "rate": 14.3,
+            "pass": 3,
+            "total": 21,
+            "canonicalTotal": 21,
+            "partialScope": false,
+            "taskCount": 21,
+            "activeTimeSecs": 208552,
+            "activeTimePerTask": 9931.047619047618,
+            "outputTokens": 1110694,
+            "outputTokensPerTask": 52890.19047619047,
             "outputCostUsd": null,
             "outputCostPerTask": null
           }
@@ -7229,7 +7361,7 @@ window.TLAPS_DATA = {
           "outputCostPerTask": 1.9219307268722468
         }
       },
-      "perDifficulty": {
+      "perComplexity": {
         "completion": [
           {
             "id": "d0",
@@ -7293,18 +7425,48 @@ window.TLAPS_DATA = {
           },
           {
             "id": "d4",
-            "rate": 47.3,
-            "pass": 26,
-            "total": 55,
-            "canonicalTotal": 55,
+            "rate": 68.8,
+            "pass": 11,
+            "total": 16,
+            "canonicalTotal": 16,
             "partialScope": false,
-            "taskCount": 55,
-            "activeTimeSecs": 83016.55886077881,
-            "activeTimePerTask": 1509.3919792868874,
-            "outputTokens": 5401610,
-            "outputTokensPerTask": 98211.09090909091,
-            "outputCostUsd": 135.04025,
-            "outputCostPerTask": 2.4552772727272725
+            "taskCount": 16,
+            "activeTimeSecs": 15981.806596040726,
+            "activeTimePerTask": 998.8629122525454,
+            "outputTokens": 1124078,
+            "outputTokensPerTask": 70254.875,
+            "outputCostUsd": 28.10195,
+            "outputCostPerTask": 1.756371875
+          },
+          {
+            "id": "d5",
+            "rate": 52.6,
+            "pass": 10,
+            "total": 19,
+            "canonicalTotal": 19,
+            "partialScope": false,
+            "taskCount": 19,
+            "activeTimeSecs": 29294.65926504135,
+            "activeTimePerTask": 1541.8241718442816,
+            "outputTokens": 1750317,
+            "outputTokensPerTask": 92121.94736842105,
+            "outputCostUsd": 43.757925,
+            "outputCostPerTask": 2.3030486842105264
+          },
+          {
+            "id": "d6",
+            "rate": 25,
+            "pass": 5,
+            "total": 20,
+            "canonicalTotal": 20,
+            "partialScope": false,
+            "taskCount": 20,
+            "activeTimeSecs": 37740.09299969673,
+            "activeTimePerTask": 1887.0046499848365,
+            "outputTokens": 2527215,
+            "outputTokensPerTask": 126360.75,
+            "outputCostUsd": 63.180375,
+            "outputCostPerTask": 3.15901875
           }
         ],
         "scratch": null
