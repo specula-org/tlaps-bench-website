@@ -1,17 +1,17 @@
 {
   "meta": {
     "backend": "copilot-gemini-3.1-pro-preview",
-    "generated": "2026-07-15",
-    "note": "Consolidated GitHub Copilot (Gemini 3.1 Pro Preview) results for both benchmark modes: 483 proof-completion and 227 proof-from-scratch canonical tasks. The one proof-from-scratch grader TIMEOUT was regraded from the unchanged archived final solution with the experiment checker and TLAPM; it completed as a genuine FAIL (167/1675 obligations failed). Non-canonical duplicates excluded; 0 tasks missing and 0 residual infra/ERROR/TIMEOUT.",
+    "generated": "2026-08-04",
+    "note": "Consolidated results for 483 proof-completion and 227 proof-from-scratch canonical tasks. On 2026-08-04, exact archived-solution cold regrading reviewed 15 results whose prior checker output lacked required dependency context and corrected 9 grader false negatives. Final scores: proof-completion 389/483 (80.5%); proof-from-scratch 130/227 (57.3%). Runtime and token telemetry are unchanged.",
     "summary_by_mode": {
       "proof-completion": {
         "total": 483,
-        "PASS": 380,
-        "FAIL": 96,
+        "PASS": 389,
+        "FAIL": 87,
         "CHEATING": 7,
         "ERROR": 0,
         "TIMEOUT": 0,
-        "pass_rate": 78.7
+        "pass_rate": 80.5
       },
       "proof-from-scratch": {
         "total": 227,
@@ -27,12 +27,12 @@
       "tlaplus/Examples": {
         "proof-completion": {
           "total": 379,
-          "PASS": 296,
-          "FAIL": 77,
+          "PASS": 305,
+          "FAIL": 68,
           "CHEATING": 6,
           "ERROR": 0,
           "TIMEOUT": 0,
-          "pass_rate": 78.1
+          "pass_rate": 80.5
         },
         "proof-from-scratch": {
           "total": 126,
@@ -81,7 +81,7 @@
           "CHEATING": 3,
           "ERROR": 0,
           "TIMEOUT": 0,
-          "pass_rate": 0
+          "pass_rate": 0.0
         }
       },
       "Ivy liveness": {
@@ -121,7 +121,7 @@
           "CHEATING": 5,
           "ERROR": 0,
           "TIMEOUT": 0,
-          "pass_rate": 0
+          "pass_rate": 0.0
         }
       },
       "OpenAddressing (lemmy/Examples)": {
@@ -132,7 +132,7 @@
           "CHEATING": 1,
           "ERROR": 0,
           "TIMEOUT": 0,
-          "pass_rate": 0
+          "pass_rate": 0.0
         },
         "proof-from-scratch": {
           "total": 5,
@@ -141,7 +141,7 @@
           "CHEATING": 4,
           "ERROR": 0,
           "TIMEOUT": 0,
-          "pass_rate": 0
+          "pass_rate": 0.0
         }
       },
       "Anvil": {
@@ -161,7 +161,7 @@
           "CHEATING": 0,
           "ERROR": 0,
           "TIMEOUT": 0,
-          "pass_rate": 100
+          "pass_rate": 100.0
         }
       }
     },
@@ -172,6 +172,32 @@
       "active_time_complete": true,
       "output_tokens_audited": true,
       "provenance": "Consolidated time and output tokens cross-checked against all 710 per-task result.json files with zero mismatches."
+    },
+    "regrading": {
+      "date": "2026-08-04",
+      "scope": "dependency-context false negatives",
+      "candidates_reviewed": 15,
+      "false_fail_to_pass": 9,
+      "candidates_by_mode": {
+        "proof-completion": 12,
+        "proof-from-scratch": 3
+      },
+      "false_fail_to_pass_by_mode": {
+        "proof-completion": 9
+      },
+      "candidates_by_context": {
+        "trusted-community-library": 15
+      },
+      "false_fail_to_pass_by_context": {
+        "trusted-community-library": 9
+      },
+      "checker": "v1.0.0-9-g6c70aa4",
+      "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+      "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+      "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+      "tlapm_version": "80172c6",
+      "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+      "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117"
     }
   },
   "results": [
@@ -6171,17 +6197,47 @@
       "backend": "copilot-gemini-3.1-pro-preview",
       "mode": "proof-completion",
       "agent_exit": 0,
-      "check_verdict": "FAIL",
       "time_secs": 259.4298777580261,
       "error": "",
       "termination_reason": "OK",
       "input_tokens": 0,
       "output_tokens": 1364,
+      "source": "tlaplus/Examples",
+      "check_verdict": "PASS",
       "sany_valid": true,
-      "failed_gates": [
-        "B:discharge"
-      ],
-      "source": "tlaplus/Examples"
+      "obligations": 1,
+      "regraded": true,
+      "original_check_verdict": "FAIL",
+      "original_grading": {
+        "sany_valid": true,
+        "check_verdict": "FAIL",
+        "failed_gates": [
+          "B:discharge"
+        ]
+      },
+      "regrade": {
+        "category": "trusted-community-library",
+        "method": "exact-archived-solution-cold-replay",
+        "trigger": "Error: Unknown module \"Graphs\"",
+        "checker": "v1.0.0-9-g6c70aa4",
+        "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+        "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+        "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+        "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+        "tlapm_version": "80172c6",
+        "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+        "obligations": "1/1 proved",
+        "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+        "solution_sha256": "04eb3b12e98bd339d3fe62f58cf07cb9de879190b2a70c512d60f666b7e82dbc",
+        "baseline_sha256": "9a16193f00a9918e54162d6eeae84f68b832644e16a01f52d5807eb6bf5098d7",
+        "dependency_sha256": {
+          "EWD687a.tla": "554033b7d1a544b75e047ec90abddda298c4c084be0338c683002de52f611186"
+        },
+        "recovered_dependencies": {},
+        "evidence_sha256": "d54b81b145e39cf2ba5f37d7a822dfbd36b6aec966f224866e172dac2a028584",
+        "original_regraded": false,
+        "date": "2026-08-04"
+      }
     },
     {
       "benchmark": "tlaplus_examples_byzpaxos/VoteProof_SafeLemma.tla",
@@ -6410,17 +6466,47 @@
       "backend": "copilot-gemini-3.1-pro-preview",
       "mode": "proof-completion",
       "agent_exit": 0,
-      "check_verdict": "FAIL",
       "time_secs": 237.3817789554596,
       "error": "",
       "termination_reason": "OK",
       "input_tokens": 0,
       "output_tokens": 1829,
+      "source": "tlaplus/Examples",
+      "check_verdict": "PASS",
       "sany_valid": true,
-      "failed_gates": [
-        "B:discharge"
-      ],
-      "source": "tlaplus/Examples"
+      "obligations": 7,
+      "regraded": true,
+      "original_check_verdict": "FAIL",
+      "original_grading": {
+        "sany_valid": true,
+        "check_verdict": "FAIL",
+        "failed_gates": [
+          "B:discharge"
+        ]
+      },
+      "regrade": {
+        "category": "trusted-community-library",
+        "method": "exact-archived-solution-cold-replay",
+        "trigger": "Error: Unknown module \"Graphs\"",
+        "checker": "v1.0.0-9-g6c70aa4",
+        "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+        "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+        "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+        "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+        "tlapm_version": "80172c6",
+        "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+        "obligations": "7/7 proved",
+        "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+        "solution_sha256": "2d91d60c19cedf1728575c099417f744763559d9b8956071d31abb2fdf72c118",
+        "baseline_sha256": "9c86a3ba7b34304b13f269a356bfe69474870832cedba0586c3cb7e6f70b7f01",
+        "dependency_sha256": {
+          "EWD687a.tla": "554033b7d1a544b75e047ec90abddda298c4c084be0338c683002de52f611186"
+        },
+        "recovered_dependencies": {},
+        "evidence_sha256": "43956aa8fc2bcfc58df71f5cd5005d66e2245cf6a11c2d17538aae138d416fa4",
+        "original_regraded": false,
+        "date": "2026-08-04"
+      }
     },
     {
       "benchmark": "tlaplus_examples_ewd687a/EWD687a_proof_TreeIsTree.tla",
@@ -6429,7 +6515,6 @@
       "backend": "copilot-gemini-3.1-pro-preview",
       "mode": "proof-completion",
       "agent_exit": 0,
-      "check_verdict": "FAIL",
       "time_secs": 401.31241726875305,
       "error": "",
       "termination_reason": "OK",
@@ -6440,11 +6525,42 @@
         "Error: Authentication token found but could not be validated.",
         "Error: Failed to load models"
       ],
+      "source": "tlaplus/Examples",
+      "check_verdict": "PASS",
       "sany_valid": true,
-      "failed_gates": [
-        "B:discharge"
-      ],
-      "source": "tlaplus/Examples"
+      "obligations": 14,
+      "regraded": true,
+      "original_check_verdict": "FAIL",
+      "original_grading": {
+        "sany_valid": true,
+        "check_verdict": "FAIL",
+        "failed_gates": [
+          "B:discharge"
+        ]
+      },
+      "regrade": {
+        "category": "trusted-community-library",
+        "method": "exact-archived-solution-cold-replay",
+        "trigger": "Error: Unknown module \"Relation\"",
+        "checker": "v1.0.0-9-g6c70aa4",
+        "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+        "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+        "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+        "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+        "tlapm_version": "80172c6",
+        "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+        "obligations": "14/14 proved",
+        "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+        "solution_sha256": "49d2349c7fe692c9ea5c6c65b2debdf50bd07f68c86367c4d71b374374fcc0cf",
+        "baseline_sha256": "a294af55ed8637dab6c6be63a90324f77e1adfdab784df91bd7a1495025a4b68",
+        "dependency_sha256": {
+          "EWD687a.tla": "554033b7d1a544b75e047ec90abddda298c4c084be0338c683002de52f611186"
+        },
+        "recovered_dependencies": {},
+        "evidence_sha256": "67eb0ab930a6387bf25c8fbee8c38d8e4d4f300f46ebae6239e509cb5c329c76",
+        "original_regraded": false,
+        "date": "2026-08-04"
+      }
     },
     {
       "benchmark": "tlaplus_examples_byzpaxos/VoteProof_InductiveInvariance.tla",
@@ -6986,17 +7102,50 @@
       "backend": "copilot-gemini-3.1-pro-preview",
       "mode": "proof-completion",
       "agent_exit": 0,
-      "check_verdict": "FAIL",
       "time_secs": 339.84420943260193,
       "error": "",
       "termination_reason": "OK",
       "input_tokens": 0,
       "output_tokens": 1986,
+      "source": "tlaplus/Examples",
+      "check_verdict": "PASS",
       "sany_valid": true,
-      "failed_gates": [
-        "B:discharge"
-      ],
-      "source": "tlaplus/Examples"
+      "obligations": 36,
+      "regraded": true,
+      "original_check_verdict": "FAIL",
+      "original_grading": {
+        "sany_valid": true,
+        "check_verdict": "FAIL",
+        "failed_gates": [
+          "B:discharge"
+        ]
+      },
+      "regrade": {
+        "category": "trusted-community-library",
+        "method": "exact-archived-solution-cold-replay",
+        "trigger": "Error: Unknown module \"BagsExt\"",
+        "checker": "v1.0.0-9-g6c70aa4",
+        "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+        "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+        "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+        "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+        "tlapm_version": "80172c6",
+        "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+        "obligations": "36/36 proved",
+        "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+        "solution_sha256": "b1e960722528fe4f702267ca3c3fe49130f66953e045ee6c318793440f616956",
+        "baseline_sha256": "1eee20af83c234876007b95af68beb2ee393cb323c55a4d7f260ba6e95a8f154",
+        "dependency_sha256": {
+          "AsyncTerminationDetection.tla": "fb99591c97ae77753e9eb60f83fa9db3ec5beeaa528b8e0694f30735fb22fb2d",
+          "EWD998.tla": "9640c4e87778859cfe1b427455bd27cd6ae112489c86c71a5745a14105bb5964",
+          "EWD998PCal.tla": "1538a2661e76e5bab7e5dde4a6de869a631ad919524d04cf0b863367badcbcb2",
+          "EWD998_proof.tla": "55c06814c2284f96f5792414164856599298af80bb7fb0f2386b10dbacae0811"
+        },
+        "recovered_dependencies": {},
+        "evidence_sha256": "1dc092ba6b160d69cdaab6f24d56157cc406f8add00a66e1f8f4c033fd55059f",
+        "original_regraded": false,
+        "date": "2026-08-04"
+      }
     },
     {
       "benchmark": "tlaplus_examples_ewd998/EWD998PCal_proof_EmptyBagDom.tla",
@@ -7005,17 +7154,50 @@
       "backend": "copilot-gemini-3.1-pro-preview",
       "mode": "proof-completion",
       "agent_exit": 0,
-      "check_verdict": "FAIL",
       "time_secs": 162.89616990089417,
       "error": "",
       "termination_reason": "OK",
       "input_tokens": 0,
       "output_tokens": 1141,
+      "source": "tlaplus/Examples",
+      "check_verdict": "PASS",
       "sany_valid": true,
-      "failed_gates": [
-        "B:discharge"
-      ],
-      "source": "tlaplus/Examples"
+      "obligations": 2,
+      "regraded": true,
+      "original_check_verdict": "FAIL",
+      "original_grading": {
+        "sany_valid": true,
+        "check_verdict": "FAIL",
+        "failed_gates": [
+          "B:discharge"
+        ]
+      },
+      "regrade": {
+        "category": "trusted-community-library",
+        "method": "exact-archived-solution-cold-replay",
+        "trigger": "Error: Unknown module \"BagsExt\"",
+        "checker": "v1.0.0-9-g6c70aa4",
+        "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+        "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+        "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+        "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+        "tlapm_version": "80172c6",
+        "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+        "obligations": "2/2 proved",
+        "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+        "solution_sha256": "bd1e00c4ebe688009b2f07b92ec8efb87c8588625649f8fc152ce9f7f42c3c31",
+        "baseline_sha256": "6467cf4ea9e5c64bcbf9dcbd29ec120319ec619a2ac1f1a42dbdda5a7b5cd71c",
+        "dependency_sha256": {
+          "AsyncTerminationDetection.tla": "fb99591c97ae77753e9eb60f83fa9db3ec5beeaa528b8e0694f30735fb22fb2d",
+          "EWD998.tla": "9640c4e87778859cfe1b427455bd27cd6ae112489c86c71a5745a14105bb5964",
+          "EWD998PCal.tla": "1538a2661e76e5bab7e5dde4a6de869a631ad919524d04cf0b863367badcbcb2",
+          "EWD998_proof.tla": "55c06814c2284f96f5792414164856599298af80bb7fb0f2386b10dbacae0811"
+        },
+        "recovered_dependencies": {},
+        "evidence_sha256": "f33af074147966671eb8e02f9649929945c79675d64f656e0899892be26dc0b7",
+        "original_regraded": false,
+        "date": "2026-08-04"
+      }
     },
     {
       "benchmark": "tlaplus_examples_ewd998/EWD998PCal_proof_BagAdd_tok_preserves_pl.tla",
@@ -7048,17 +7230,50 @@
       "backend": "copilot-gemini-3.1-pro-preview",
       "mode": "proof-completion",
       "agent_exit": 0,
-      "check_verdict": "FAIL",
       "time_secs": 204.00607228279114,
       "error": "",
       "termination_reason": "OK",
       "input_tokens": 0,
       "output_tokens": 1652,
+      "source": "tlaplus/Examples",
+      "check_verdict": "PASS",
       "sany_valid": true,
-      "failed_gates": [
-        "B:discharge"
-      ],
-      "source": "tlaplus/Examples"
+      "obligations": 14,
+      "regraded": true,
+      "original_check_verdict": "FAIL",
+      "original_grading": {
+        "sany_valid": true,
+        "check_verdict": "FAIL",
+        "failed_gates": [
+          "B:discharge"
+        ]
+      },
+      "regrade": {
+        "category": "trusted-community-library",
+        "method": "exact-archived-solution-cold-replay",
+        "trigger": "Error: Unknown module \"BagsExt\"",
+        "checker": "v1.0.0-9-g6c70aa4",
+        "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+        "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+        "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+        "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+        "tlapm_version": "80172c6",
+        "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+        "obligations": "14/14 proved",
+        "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+        "solution_sha256": "a39ba7ef29c17104ca4007ccceae0f133b02c9777e739bf297c75b62ab2850f1",
+        "baseline_sha256": "76b87edca9cf11acbb788568bfa29825a5afd2eb80632b74f00141e4e0eafe27",
+        "dependency_sha256": {
+          "AsyncTerminationDetection.tla": "fb99591c97ae77753e9eb60f83fa9db3ec5beeaa528b8e0694f30735fb22fb2d",
+          "EWD998.tla": "9640c4e87778859cfe1b427455bd27cd6ae112489c86c71a5745a14105bb5964",
+          "EWD998PCal.tla": "1538a2661e76e5bab7e5dde4a6de869a631ad919524d04cf0b863367badcbcb2",
+          "EWD998_proof.tla": "55c06814c2284f96f5792414164856599298af80bb7fb0f2386b10dbacae0811"
+        },
+        "recovered_dependencies": {},
+        "evidence_sha256": "c7c4433f0c39ee3465c38f7d88539cddee76d980cf7c95496e704c450949d0d1",
+        "original_regraded": false,
+        "date": "2026-08-04"
+      }
     },
     {
       "benchmark": "tlaplus_examples_ewd998/EWD998PCal_proof_InitiatorIsZero.tla",
@@ -7086,17 +7301,50 @@
       "backend": "copilot-gemini-3.1-pro-preview",
       "mode": "proof-completion",
       "agent_exit": 0,
-      "check_verdict": "FAIL",
       "time_secs": 244.60432028770447,
       "error": "",
       "termination_reason": "OK",
       "input_tokens": 0,
       "output_tokens": 2086,
+      "source": "tlaplus/Examples",
+      "check_verdict": "PASS",
       "sany_valid": true,
-      "failed_gates": [
-        "B:discharge"
-      ],
-      "source": "tlaplus/Examples"
+      "obligations": 13,
+      "regraded": true,
+      "original_check_verdict": "FAIL",
+      "original_grading": {
+        "sany_valid": true,
+        "check_verdict": "FAIL",
+        "failed_gates": [
+          "B:discharge"
+        ]
+      },
+      "regrade": {
+        "category": "trusted-community-library",
+        "method": "exact-archived-solution-cold-replay",
+        "trigger": "Error: Unknown module \"BagsExt\"",
+        "checker": "v1.0.0-9-g6c70aa4",
+        "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+        "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+        "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+        "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+        "tlapm_version": "80172c6",
+        "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+        "obligations": "13/13 proved",
+        "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+        "solution_sha256": "c13eced1f5657291a9adeef52abfa22c97365c2d762947f2e7c8297fba7b7205",
+        "baseline_sha256": "f07d94568805d4f0824b5fd0c31602fc242d010c725c0ca845b26601979cacce",
+        "dependency_sha256": {
+          "AsyncTerminationDetection.tla": "fb99591c97ae77753e9eb60f83fa9db3ec5beeaa528b8e0694f30735fb22fb2d",
+          "EWD998.tla": "9640c4e87778859cfe1b427455bd27cd6ae112489c86c71a5745a14105bb5964",
+          "EWD998PCal.tla": "1538a2661e76e5bab7e5dde4a6de869a631ad919524d04cf0b863367badcbcb2",
+          "EWD998_proof.tla": "55c06814c2284f96f5792414164856599298af80bb7fb0f2386b10dbacae0811"
+        },
+        "recovered_dependencies": {},
+        "evidence_sha256": "840d02bfaa470a775683397d6899d87e9ef36c2e9e8513ec2d6b351eaf7073c2",
+        "original_regraded": false,
+        "date": "2026-08-04"
+      }
     },
     {
       "benchmark": "tlaplus_examples_ewd998/EWD998PCal_proof_InitTypeOK.tla",
@@ -7190,17 +7438,50 @@
       "backend": "copilot-gemini-3.1-pro-preview",
       "mode": "proof-completion",
       "agent_exit": 0,
-      "check_verdict": "FAIL",
       "time_secs": 127.44229817390442,
       "error": "",
       "termination_reason": "OK",
       "input_tokens": 0,
       "output_tokens": 955,
+      "source": "tlaplus/Examples",
+      "check_verdict": "PASS",
       "sany_valid": true,
-      "failed_gates": [
-        "B:discharge"
-      ],
-      "source": "tlaplus/Examples"
+      "obligations": 2,
+      "regraded": true,
+      "original_check_verdict": "FAIL",
+      "original_grading": {
+        "sany_valid": true,
+        "check_verdict": "FAIL",
+        "failed_gates": [
+          "B:discharge"
+        ]
+      },
+      "regrade": {
+        "category": "trusted-community-library",
+        "method": "exact-archived-solution-cold-replay",
+        "trigger": "Error: Unknown module \"BagsExt\"",
+        "checker": "v1.0.0-9-g6c70aa4",
+        "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+        "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+        "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+        "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+        "tlapm_version": "80172c6",
+        "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+        "obligations": "2/2 proved",
+        "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+        "solution_sha256": "f71a9537215428ac55de3306ebed55eee62ceb6dea1ad64cde9e03b4d26cc209",
+        "baseline_sha256": "4704ee0f2902666d226c81834e0b25785439b1a35292a7a9367a6d9260ac672f",
+        "dependency_sha256": {
+          "AsyncTerminationDetection.tla": "fb99591c97ae77753e9eb60f83fa9db3ec5beeaa528b8e0694f30735fb22fb2d",
+          "EWD998.tla": "9640c4e87778859cfe1b427455bd27cd6ae112489c86c71a5745a14105bb5964",
+          "EWD998PCal.tla": "1538a2661e76e5bab7e5dde4a6de869a631ad919524d04cf0b863367badcbcb2",
+          "EWD998_proof.tla": "55c06814c2284f96f5792414164856599298af80bb7fb0f2386b10dbacae0811"
+        },
+        "recovered_dependencies": {},
+        "evidence_sha256": "34ac5a805f5b09dcf0396a6d2d662aa507e54057a89527b6c6e8d46a80429277",
+        "original_regraded": false,
+        "date": "2026-08-04"
+      }
     },
     {
       "benchmark": "tlaplus_examples_ewd998/EWD998PCal_proof_PendingIsPlCount.tla",
@@ -8632,17 +8913,47 @@
       "backend": "copilot-gemini-3.1-pro-preview",
       "mode": "proof-completion",
       "agent_exit": 0,
-      "check_verdict": "FAIL",
       "time_secs": 263.364652633667,
       "error": "",
       "termination_reason": "OK",
       "input_tokens": 0,
       "output_tokens": 2116,
+      "source": "tlaplus/Examples",
+      "check_verdict": "PASS",
       "sany_valid": true,
-      "failed_gates": [
-        "B:discharge"
-      ],
-      "source": "tlaplus/Examples"
+      "obligations": 10,
+      "regraded": true,
+      "original_check_verdict": "FAIL",
+      "original_grading": {
+        "sany_valid": true,
+        "check_verdict": "FAIL",
+        "failed_gates": [
+          "B:discharge"
+        ]
+      },
+      "regrade": {
+        "category": "trusted-community-library",
+        "method": "exact-archived-solution-cold-replay",
+        "trigger": "Error: Unknown module \"SequencesExt\"",
+        "checker": "v1.0.0-9-g6c70aa4",
+        "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+        "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+        "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+        "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+        "tlapm_version": "80172c6",
+        "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+        "obligations": "10/10 proved",
+        "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+        "solution_sha256": "ffb0430a7d8aca4e93180540f85ee70db48e15f0b67aa9cd4a4fd19a05170fad",
+        "baseline_sha256": "c67fff445a124ff5edb0078fa4a18bc399307e0a488f75bfed6abe63b4518e39",
+        "dependency_sha256": {
+          "tcp.tla": "b16d88c512400b3adc3637b6060f79cc0818e9253540c2631f54a890882a3fe7"
+        },
+        "recovered_dependencies": {},
+        "evidence_sha256": "6626a8c43ac11e41526dd807880057b5d9a3809028fbb20cfd9d0fe18b5ada80",
+        "original_regraded": false,
+        "date": "2026-08-04"
+      }
     },
     {
       "benchmark": "tlaplus_examples_tcp/tcp_proof_SpecImpliesInv.tla",

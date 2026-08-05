@@ -1,59 +1,59 @@
 {
  "meta": {
   "backend": "copilot",
-  "generated": "2026-07-07",
-  "note": "Consolidated copilot results for both benchmark modes, organized to match the README 'Benchmark problems' table (7 sources, 483 proof-completion + 227 proof-from-scratch = 710 canonical tasks). The 98 transient-infra (0-token) failures were re-run (agent produced real proofs) and re-graded locally with a rebuilt check_proof_bin; real PASS/FAIL/CHEATING verdicts merged in (regraded=true). Non-canonical duplicates excluded; 0 tasks missing, 0 residual infra/ERROR/TIMEOUT.",
+  "generated": "2026-08-04",
+  "note": "Consolidated results for 483 proof-completion and 227 proof-from-scratch canonical tasks. On 2026-08-04, exact archived-solution cold regrading reviewed 92 results whose prior checker output lacked required dependency context and corrected 73 grader false negatives. Final scores: proof-completion 389/483 (80.5%); proof-from-scratch 157/227 (69.2%). Runtime and token telemetry are unchanged.",
   "summary_by_mode": {
    "proof-completion": {
     "total": 483,
-    "PASS": 334,
-    "FAIL": 117,
+    "PASS": 389,
+    "FAIL": 62,
     "CHEATING": 32,
     "ERROR": 0,
     "TIMEOUT": 0,
-    "pass_rate": 69.2
+    "pass_rate": 80.5
    },
    "proof-from-scratch": {
     "total": 227,
-    "PASS": 139,
-    "FAIL": 86,
+    "PASS": 157,
+    "FAIL": 68,
     "CHEATING": 2,
     "ERROR": 0,
     "TIMEOUT": 0,
-    "pass_rate": 61.2
+    "pass_rate": 69.2
    }
   },
   "summary_by_source": {
    "tlaplus/Examples": {
     "proof-completion": {
      "total": 379,
-     "PASS": 258,
-     "FAIL": 95,
+     "PASS": 304,
+     "FAIL": 49,
      "CHEATING": 26,
-     "pass_rate": 68.1
+     "pass_rate": 80.2
     },
     "proof-from-scratch": {
      "total": 126,
-     "PASS": 88,
-     "FAIL": 36,
+     "PASS": 99,
+     "FAIL": 25,
      "CHEATING": 2,
-     "pass_rate": 69.8
+     "pass_rate": 78.6
     }
    },
    "TLAPS distribution examples": {
     "proof-completion": {
      "total": 103,
-     "PASS": 76,
-     "FAIL": 22,
+     "PASS": 85,
+     "FAIL": 13,
      "CHEATING": 5,
-     "pass_rate": 73.8
+     "pass_rate": 82.5
     },
     "proof-from-scratch": {
      "total": 57,
-     "PASS": 45,
-     "FAIL": 12,
+     "PASS": 51,
+     "FAIL": 6,
      "CHEATING": 0,
-     "pass_rate": 78.9
+     "pass_rate": 89.5
     }
    },
    "ZooKeeper (Remix)": {
@@ -82,10 +82,10 @@
     },
     "proof-from-scratch": {
      "total": 12,
-     "PASS": 4,
-     "FAIL": 8,
+     "PASS": 5,
+     "FAIL": 7,
      "CHEATING": 0,
-     "pass_rate": 33.3
+     "pass_rate": 41.7
     }
    },
    "etcd (Specula)": {
@@ -145,6 +145,37 @@
    "output_tokens_audited": true,
    "corrected_rerun_tasks": 98,
    "provenance": "Per-task rerun result.json telemetry matched by mode and benchmark; all 710 verdicts cross-checked with zero mismatches."
+  },
+  "regrading": {
+   "date": "2026-08-04",
+   "scope": "dependency-context false negatives",
+   "candidates_reviewed": 92,
+   "false_fail_to_pass": 73,
+   "candidates_by_mode": {
+    "proof-completion": 63,
+    "proof-from-scratch": 29
+   },
+   "false_fail_to_pass_by_mode": {
+    "proof-completion": 55,
+    "proof-from-scratch": 18
+   },
+   "candidates_by_context": {
+    "archived-input-context": 72,
+    "same-run-sibling-context": 1,
+    "trusted-community-library": 19
+   },
+   "false_fail_to_pass_by_context": {
+    "archived-input-context": 62,
+    "same-run-sibling-context": 1,
+    "trusted-community-library": 10
+   },
+   "checker": "v1.0.0-9-g6c70aa4",
+   "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+   "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+   "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+   "tlapm_version": "80172c6",
+   "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+   "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117"
   }
  },
  "results": [
@@ -1110,19 +1141,51 @@
    "backend": "copilot",
    "mode": "proof-completion",
    "agent_exit": 0,
-   "check_verdict": "FAIL",
    "time_secs": 150.8172163963318,
    "error": "",
    "input_tokens": 0,
    "output_tokens": 7758,
-   "sany_valid": true,
-   "failed_gates": [
-    "B:discharge"
-   ],
-   "obligations_failed": 1,
-   "obligations_total": 1,
    "source": "TLAPS distribution examples",
-   "regraded": true
+   "regraded": true,
+   "check_verdict": "PASS",
+   "sany_valid": true,
+   "obligations": 14,
+   "original_check_verdict": "FAIL",
+   "original_grading": {
+    "sany_valid": true,
+    "check_verdict": "FAIL",
+    "obligations_total": 1,
+    "obligations_failed": 1,
+    "failed_gates": [
+     "B:discharge"
+    ]
+   },
+   "regrade": {
+    "category": "archived-input-context",
+    "method": "exact-archived-solution-cold-replay",
+    "trigger": "Error: Unknown module \"Consensus\"",
+    "checker": "v1.0.0-9-g6c70aa4",
+    "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+    "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+    "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+    "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+    "tlapm_version": "80172c6",
+    "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+    "obligations": "14/14 proved",
+    "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+    "solution_sha256": "032927f27c3d0c053fa2d56901c742161e5edd3731380963aff09dd2df6f84ce",
+    "baseline_sha256": "ba81dc6a37eb35da9bf1fd42eb5051d718c9c94ecf49cb8cbfd768a8f9099784",
+    "dependency_sha256": {
+     "Consensus.tla": "b5b78974f8c9376c8e1f325834b3cf8b032193b55aba5c2b6f46a983a7285900",
+     "PaxosTuple.tla": "91c147e533858586ac96ed0ead3b2feeb76073fac998a26c995ebf15a190cb2f",
+     "Sets.tla": "183f1d902f2e1861d1996e0a100cc0b9ed9ae83495194dadaf5a0bc1450604b2",
+     "Voting.tla": "91b428c66d419b55c3e297243a42b7cf78f054379a82bd7310516a32e5cf6783"
+    },
+    "recovered_dependencies": {},
+    "evidence_sha256": "8ad2ce09b510599f8f21453a35214037c5524e13b478bc8f868c5553929a98fc",
+    "original_regraded": true,
+    "date": "2026-08-04"
+   }
   },
   {
    "benchmark": "Consensus/Voting_Invariant.tla",
@@ -1131,19 +1194,51 @@
    "backend": "copilot",
    "mode": "proof-completion",
    "agent_exit": 0,
-   "check_verdict": "FAIL",
    "time_secs": 1856.9997594356537,
    "error": "",
    "input_tokens": 0,
    "output_tokens": 134338,
-   "sany_valid": true,
-   "failed_gates": [
-    "B:discharge"
-   ],
-   "obligations_failed": 1,
-   "obligations_total": 1,
    "source": "TLAPS distribution examples",
-   "regraded": true
+   "regraded": true,
+   "check_verdict": "PASS",
+   "sany_valid": true,
+   "obligations": 130,
+   "original_check_verdict": "FAIL",
+   "original_grading": {
+    "sany_valid": true,
+    "check_verdict": "FAIL",
+    "obligations_total": 1,
+    "obligations_failed": 1,
+    "failed_gates": [
+     "B:discharge"
+    ]
+   },
+   "regrade": {
+    "category": "archived-input-context",
+    "method": "exact-archived-solution-cold-replay",
+    "trigger": "Error: Unknown module \"Consensus\"",
+    "checker": "v1.0.0-9-g6c70aa4",
+    "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+    "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+    "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+    "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+    "tlapm_version": "80172c6",
+    "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+    "obligations": "130/130 proved",
+    "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+    "solution_sha256": "ed585df1da521aa3017c4219ce82f5ab73ef5e987e2f90c85935a6c878cc4a57",
+    "baseline_sha256": "1d97e6ddbdbe4fea63b8d2cddb7a61df129f7557cd27cbe8d4664d76f697928e",
+    "dependency_sha256": {
+     "Consensus.tla": "b5b78974f8c9376c8e1f325834b3cf8b032193b55aba5c2b6f46a983a7285900",
+     "PaxosTuple.tla": "91c147e533858586ac96ed0ead3b2feeb76073fac998a26c995ebf15a190cb2f",
+     "Sets.tla": "183f1d902f2e1861d1996e0a100cc0b9ed9ae83495194dadaf5a0bc1450604b2",
+     "Voting.tla": "91b428c66d419b55c3e297243a42b7cf78f054379a82bd7310516a32e5cf6783"
+    },
+    "recovered_dependencies": {},
+    "evidence_sha256": "535137468433558b2c10f7ec8128a69fb27171610ba313b74e85086ee98d72aa",
+    "original_regraded": true,
+    "date": "2026-08-04"
+   }
   },
   {
    "benchmark": "Consensus/Voting_OneVoteThm.tla",
@@ -1152,19 +1247,51 @@
    "backend": "copilot",
    "mode": "proof-completion",
    "agent_exit": 0,
-   "check_verdict": "FAIL",
    "time_secs": 112.8467173576355,
    "error": "",
    "input_tokens": 0,
    "output_tokens": 4780,
-   "sany_valid": true,
-   "failed_gates": [
-    "B:discharge"
-   ],
-   "obligations_failed": 1,
-   "obligations_total": 1,
    "source": "TLAPS distribution examples",
-   "regraded": true
+   "regraded": true,
+   "check_verdict": "PASS",
+   "sany_valid": true,
+   "obligations": 1,
+   "original_check_verdict": "FAIL",
+   "original_grading": {
+    "sany_valid": true,
+    "check_verdict": "FAIL",
+    "obligations_total": 1,
+    "obligations_failed": 1,
+    "failed_gates": [
+     "B:discharge"
+    ]
+   },
+   "regrade": {
+    "category": "archived-input-context",
+    "method": "exact-archived-solution-cold-replay",
+    "trigger": "Error: Unknown module \"Consensus\"",
+    "checker": "v1.0.0-9-g6c70aa4",
+    "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+    "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+    "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+    "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+    "tlapm_version": "80172c6",
+    "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+    "obligations": "1/1 proved",
+    "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+    "solution_sha256": "cfdb8d08cd61861620104d6a8662b4c4ecb63f3594898826c560bb4a0df8be53",
+    "baseline_sha256": "b3e2153f0390a5f0545e10203ad35f5c05ae3e6ab832b47e6d97ead7f203ef38",
+    "dependency_sha256": {
+     "Consensus.tla": "b5b78974f8c9376c8e1f325834b3cf8b032193b55aba5c2b6f46a983a7285900",
+     "PaxosTuple.tla": "91c147e533858586ac96ed0ead3b2feeb76073fac998a26c995ebf15a190cb2f",
+     "Sets.tla": "183f1d902f2e1861d1996e0a100cc0b9ed9ae83495194dadaf5a0bc1450604b2",
+     "Voting.tla": "91b428c66d419b55c3e297243a42b7cf78f054379a82bd7310516a32e5cf6783"
+    },
+    "recovered_dependencies": {},
+    "evidence_sha256": "855bdaf1300b039f6e53bafa757ad8402b2ab155f05f95bc246d4ab413049b6b",
+    "original_regraded": true,
+    "date": "2026-08-04"
+   }
   },
   {
    "benchmark": "Consensus/Voting_QuorumNonEmpty.tla",
@@ -1205,19 +1332,51 @@
    "backend": "copilot",
    "mode": "proof-completion",
    "agent_exit": 0,
-   "check_verdict": "FAIL",
    "time_secs": 529.5608742237091,
    "error": "",
    "input_tokens": 0,
    "output_tokens": 37306,
-   "sany_valid": true,
-   "failed_gates": [
-    "B:discharge"
-   ],
-   "obligations_failed": 1,
-   "obligations_total": 1,
    "source": "TLAPS distribution examples",
-   "regraded": true
+   "regraded": true,
+   "check_verdict": "PASS",
+   "sany_valid": true,
+   "obligations": 104,
+   "original_check_verdict": "FAIL",
+   "original_grading": {
+    "sany_valid": true,
+    "check_verdict": "FAIL",
+    "obligations_total": 1,
+    "obligations_failed": 1,
+    "failed_gates": [
+     "B:discharge"
+    ]
+   },
+   "regrade": {
+    "category": "archived-input-context",
+    "method": "exact-archived-solution-cold-replay",
+    "trigger": "Error: Unknown module \"Consensus\"",
+    "checker": "v1.0.0-9-g6c70aa4",
+    "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+    "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+    "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+    "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+    "tlapm_version": "80172c6",
+    "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+    "obligations": "104/104 proved",
+    "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+    "solution_sha256": "7afb3548af42df7964de8bb923dd3adfd8366d80603c4856c6581726307a82ca",
+    "baseline_sha256": "ccbfd9263de5ddabc2a3d815e63ad3ff6c55cc7985d68ed823dd723553483586",
+    "dependency_sha256": {
+     "Consensus.tla": "b5b78974f8c9376c8e1f325834b3cf8b032193b55aba5c2b6f46a983a7285900",
+     "PaxosTuple.tla": "91c147e533858586ac96ed0ead3b2feeb76073fac998a26c995ebf15a190cb2f",
+     "Sets.tla": "183f1d902f2e1861d1996e0a100cc0b9ed9ae83495194dadaf5a0bc1450604b2",
+     "Voting.tla": "91b428c66d419b55c3e297243a42b7cf78f054379a82bd7310516a32e5cf6783"
+    },
+    "recovered_dependencies": {},
+    "evidence_sha256": "1c362f8a9e3ef3a50140639634ac72d7943d0e6fb054b90efaea3ab9eeebfc30",
+    "original_regraded": true,
+    "date": "2026-08-04"
+   }
   },
   {
    "benchmark": "Consensus/Voting_VotesSafeImpliesConsistency.tla",
@@ -1796,19 +1955,50 @@
    "backend": "copilot",
    "mode": "proof-completion",
    "agent_exit": 0,
-   "check_verdict": "FAIL",
    "time_secs": 97.16759538650513,
    "error": "",
    "input_tokens": 0,
    "output_tokens": 4178,
-   "sany_valid": true,
-   "failed_gates": [
-    "B:discharge"
-   ],
-   "obligations_failed": 1,
-   "obligations_total": 1,
    "source": "TLAPS distribution examples",
-   "regraded": true
+   "regraded": true,
+   "check_verdict": "PASS",
+   "sany_valid": true,
+   "obligations": 2,
+   "original_check_verdict": "FAIL",
+   "original_grading": {
+    "sany_valid": true,
+    "check_verdict": "FAIL",
+    "obligations_total": 1,
+    "obligations_failed": 1,
+    "failed_gates": [
+     "B:discharge"
+    ]
+   },
+   "regrade": {
+    "category": "archived-input-context",
+    "method": "exact-archived-solution-cold-replay",
+    "trigger": "Error: Unknown module \"Consensus\"",
+    "checker": "v1.0.0-9-g6c70aa4",
+    "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+    "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+    "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+    "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+    "tlapm_version": "80172c6",
+    "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+    "obligations": "2/2 proved",
+    "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+    "solution_sha256": "773f3e8960dae8353885917b59a77aa1b2e16668acedbdf0b5adc6496bdfcdb9",
+    "baseline_sha256": "48d307677452f6a5d80adb86d84ef213d08d68288df2bd650e53c4e3a5df0579",
+    "dependency_sha256": {
+     "Consensus.tla": "b56657a8c1c5c462de2be84ea2113cba3eedb9dc25ecc1915303fc67ce720a19",
+     "Paxos.tla": "6ebfdc9aa3b631562e003de19104191153d6b67bb8147d3d3e802fbbc3307b72",
+     "PaxosHistVar.tla": "a16b7d24dba5b52ac2a4b178cf8e8058012ee477d5fc23a0681f08f014787396"
+    },
+    "recovered_dependencies": {},
+    "evidence_sha256": "a12e66cd814a569081befc52c280254f1a61c44639869f3e756c0bb1d9aff96c",
+    "original_regraded": true,
+    "date": "2026-08-04"
+   }
   },
   {
    "benchmark": "Paxos/Paxos_Refinement.tla",
@@ -1817,19 +2007,50 @@
    "backend": "copilot",
    "mode": "proof-completion",
    "agent_exit": 0,
-   "check_verdict": "FAIL",
    "time_secs": 689.0953688621521,
    "error": "",
    "input_tokens": 0,
    "output_tokens": 50731,
-   "sany_valid": true,
-   "failed_gates": [
-    "B:discharge"
-   ],
-   "obligations_failed": 1,
-   "obligations_total": 1,
    "source": "TLAPS distribution examples",
-   "regraded": true
+   "regraded": true,
+   "check_verdict": "PASS",
+   "sany_valid": true,
+   "obligations": 50,
+   "original_check_verdict": "FAIL",
+   "original_grading": {
+    "sany_valid": true,
+    "check_verdict": "FAIL",
+    "obligations_total": 1,
+    "obligations_failed": 1,
+    "failed_gates": [
+     "B:discharge"
+    ]
+   },
+   "regrade": {
+    "category": "archived-input-context",
+    "method": "exact-archived-solution-cold-replay",
+    "trigger": "Error: Unknown module \"Consensus\"",
+    "checker": "v1.0.0-9-g6c70aa4",
+    "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+    "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+    "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+    "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+    "tlapm_version": "80172c6",
+    "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+    "obligations": "50/50 proved",
+    "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+    "solution_sha256": "03d392a6bcfc2bdfe075f74e352df76146f84df70ac0ecbc682fc8d91dbc59c2",
+    "baseline_sha256": "43c211832855579cc1067ab260ca191acb45c91995e231d05181a2701da7d38b",
+    "dependency_sha256": {
+     "Consensus.tla": "b56657a8c1c5c462de2be84ea2113cba3eedb9dc25ecc1915303fc67ce720a19",
+     "Paxos.tla": "6ebfdc9aa3b631562e003de19104191153d6b67bb8147d3d3e802fbbc3307b72",
+     "PaxosHistVar.tla": "a16b7d24dba5b52ac2a4b178cf8e8058012ee477d5fc23a0681f08f014787396"
+    },
+    "recovered_dependencies": {},
+    "evidence_sha256": "f717758b4711eb33ecff92e6a8abcb4ede88d9d1874634a750e570271c18cf4d",
+    "original_regraded": true,
+    "date": "2026-08-04"
+   }
   },
   {
    "benchmark": "Paxos/Paxos_SafeAtStable.tla",
@@ -1838,19 +2059,50 @@
    "backend": "copilot",
    "mode": "proof-completion",
    "agent_exit": 0,
-   "check_verdict": "FAIL",
    "time_secs": 863.6657018661499,
    "error": "",
    "input_tokens": 0,
    "output_tokens": 58715,
-   "sany_valid": true,
-   "failed_gates": [
-    "B:discharge"
-   ],
-   "obligations_failed": 1,
-   "obligations_total": 1,
    "source": "TLAPS distribution examples",
-   "regraded": true
+   "regraded": true,
+   "check_verdict": "PASS",
+   "sany_valid": true,
+   "obligations": 36,
+   "original_check_verdict": "FAIL",
+   "original_grading": {
+    "sany_valid": true,
+    "check_verdict": "FAIL",
+    "obligations_total": 1,
+    "obligations_failed": 1,
+    "failed_gates": [
+     "B:discharge"
+    ]
+   },
+   "regrade": {
+    "category": "archived-input-context",
+    "method": "exact-archived-solution-cold-replay",
+    "trigger": "Error: Unknown module \"Consensus\"",
+    "checker": "v1.0.0-9-g6c70aa4",
+    "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+    "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+    "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+    "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+    "tlapm_version": "80172c6",
+    "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+    "obligations": "36/36 proved",
+    "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+    "solution_sha256": "bf83043d5a82074c9843625cd84816e77b3c16de16f4e7634a396d9974955ea8",
+    "baseline_sha256": "efe304d1d421dcaa4ce9156e8e0f5282a9d41e572e9828e907fd4c5e347bd972",
+    "dependency_sha256": {
+     "Consensus.tla": "b56657a8c1c5c462de2be84ea2113cba3eedb9dc25ecc1915303fc67ce720a19",
+     "Paxos.tla": "6ebfdc9aa3b631562e003de19104191153d6b67bb8147d3d3e802fbbc3307b72",
+     "PaxosHistVar.tla": "a16b7d24dba5b52ac2a4b178cf8e8058012ee477d5fc23a0681f08f014787396"
+    },
+    "recovered_dependencies": {},
+    "evidence_sha256": "4e1d844ed0882de7e823b355c1a2e7cd970a6ba49e810d1c686a67297286099e",
+    "original_regraded": true,
+    "date": "2026-08-04"
+   }
   },
   {
    "benchmark": "Paxos/Paxos_VotedInv.tla",
@@ -1875,19 +2127,50 @@
    "backend": "copilot",
    "mode": "proof-completion",
    "agent_exit": 0,
-   "check_verdict": "FAIL",
    "time_secs": 125.96472144126892,
    "error": "",
    "input_tokens": 0,
    "output_tokens": 7188,
-   "sany_valid": true,
-   "failed_gates": [
-    "B:discharge"
-   ],
-   "obligations_failed": 1,
-   "obligations_total": 1,
    "source": "TLAPS distribution examples",
-   "regraded": true
+   "regraded": true,
+   "check_verdict": "PASS",
+   "sany_valid": true,
+   "obligations": 20,
+   "original_check_verdict": "FAIL",
+   "original_grading": {
+    "sany_valid": true,
+    "check_verdict": "FAIL",
+    "obligations_total": 1,
+    "obligations_failed": 1,
+    "failed_gates": [
+     "B:discharge"
+    ]
+   },
+   "regrade": {
+    "category": "archived-input-context",
+    "method": "exact-archived-solution-cold-replay",
+    "trigger": "Error: Unknown module \"Consensus\"",
+    "checker": "v1.0.0-9-g6c70aa4",
+    "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+    "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+    "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+    "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+    "tlapm_version": "80172c6",
+    "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+    "obligations": "20/20 proved",
+    "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+    "solution_sha256": "ab1f87f14fc37f5c7611388e14050cb7cd33d85fc663ddb6ca44577148400e0c",
+    "baseline_sha256": "307e0dc6ba6d183a8a90a6be728ed8d67b05b39015bf97adf27a4adbd5c0b0e0",
+    "dependency_sha256": {
+     "Consensus.tla": "b56657a8c1c5c462de2be84ea2113cba3eedb9dc25ecc1915303fc67ce720a19",
+     "Paxos.tla": "6ebfdc9aa3b631562e003de19104191153d6b67bb8147d3d3e802fbbc3307b72",
+     "PaxosHistVar.tla": "a16b7d24dba5b52ac2a4b178cf8e8058012ee477d5fc23a0681f08f014787396"
+    },
+    "recovered_dependencies": {},
+    "evidence_sha256": "118d4043932091c890585ad73704b79b6cd71fa7fd6b1dbbc5c34622bd6737cb",
+    "original_regraded": true,
+    "date": "2026-08-04"
+   }
   },
   {
    "benchmark": "SimpleMutex/SimpleMutex_Initialization.tla",
@@ -1896,19 +2179,48 @@
    "backend": "copilot",
    "mode": "proof-completion",
    "agent_exit": 0,
-   "check_verdict": "FAIL",
    "time_secs": 179.75825095176697,
    "error": "",
    "input_tokens": 0,
    "output_tokens": 9394,
-   "sany_valid": true,
-   "failed_gates": [
-    "B:discharge"
-   ],
-   "obligations_failed": 1,
-   "obligations_total": 1,
    "source": "TLAPS distribution examples",
-   "regraded": true
+   "regraded": true,
+   "check_verdict": "PASS",
+   "sany_valid": true,
+   "obligations": 1,
+   "original_check_verdict": "FAIL",
+   "original_grading": {
+    "sany_valid": true,
+    "check_verdict": "FAIL",
+    "obligations_total": 1,
+    "obligations_failed": 1,
+    "failed_gates": [
+     "B:discharge"
+    ]
+   },
+   "regrade": {
+    "category": "archived-input-context",
+    "method": "exact-archived-solution-cold-replay",
+    "trigger": "Error: Unknown module \"SimpleMutex\"",
+    "checker": "v1.0.0-9-g6c70aa4",
+    "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+    "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+    "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+    "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+    "tlapm_version": "80172c6",
+    "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+    "obligations": "1/1 proved",
+    "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+    "solution_sha256": "559414a613fe20a1c416f46c6b6ddcbb4f749093004487d2a2213af7f0e83d84",
+    "baseline_sha256": "8f68e2bf2293b8f5d9a7f50f9e9f7b9eebb7276d3678521aa1383b6d29ae0f7d",
+    "dependency_sha256": {
+     "SimpleMutex.tla": "e6ae65e5ae04f40ee29c43f3b6001aedcb01677447a82693f4e52fbd89b263f5"
+    },
+    "recovered_dependencies": {},
+    "evidence_sha256": "05d0ab42e3725dbd173de75a5c82ea6e0ca857dfee39c6393eff5da78cef390a",
+    "original_regraded": true,
+    "date": "2026-08-04"
+   }
   },
   {
    "benchmark": "SimpleMutex/SimpleMutex_Invariance.tla",
@@ -2109,19 +2421,50 @@
    "backend": "copilot",
    "mode": "proof-completion",
    "agent_exit": 0,
-   "check_verdict": "FAIL",
    "time_secs": 1782.843159198761,
    "error": "",
    "input_tokens": 0,
    "output_tokens": 132591,
-   "sany_valid": true,
-   "failed_gates": [
-    "B:discharge"
-   ],
-   "obligations_failed": 1,
-   "obligations_total": 1,
    "source": "tlaplus/Examples",
-   "regraded": true
+   "regraded": true,
+   "check_verdict": "PASS",
+   "sany_valid": true,
+   "obligations": 105,
+   "original_check_verdict": "FAIL",
+   "original_grading": {
+    "sany_valid": true,
+    "check_verdict": "FAIL",
+    "obligations_total": 1,
+    "obligations_failed": 1,
+    "failed_gates": [
+     "B:discharge"
+    ]
+   },
+   "regrade": {
+    "category": "archived-input-context",
+    "method": "exact-archived-solution-cold-replay",
+    "trigger": "Error: Unknown module \"BlockingQueue\"",
+    "checker": "v1.0.0-9-g6c70aa4",
+    "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+    "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+    "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+    "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+    "tlapm_version": "80172c6",
+    "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+    "obligations": "105/105 proved",
+    "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+    "solution_sha256": "0af5dc53472695c4f7d5ed6993ba113fc98f563b1ad86cd91a6b81ec13837122",
+    "baseline_sha256": "9ad1b3f328ce1d56282fd2e4e16e3d6fceb50e07885f63c9eee8cf1469130762",
+    "dependency_sha256": {
+     "BlockingQueue.tla": "80683a56c2bcd10d41b094d62c86b335cb6f84ad0d061deaadfb3beef5291131",
+     "BlockingQueueFair.tla": "3d4665019d516cf8c1a7a293e34840faabc9ca07ff2456b78e10ce75729f1963",
+     "BlockingQueueSplit.tla": "04b64d0dd7b592a92de6e98bfa9b7579c29ab1b0c0f83e9e93069a38915a2d27"
+    },
+    "recovered_dependencies": {},
+    "evidence_sha256": "c157549dbc24e56f32c596f1eaa95e57d7da92d2fc548ef0da7d6f90f9386756",
+    "original_regraded": true,
+    "date": "2026-08-04"
+   }
   },
   {
    "benchmark": "tlaplus_examples_BlockingQueue/BlockingQueue_proofs_TypeCorrect.tla",
@@ -2178,19 +2521,48 @@
    "backend": "copilot",
    "mode": "proof-completion",
    "agent_exit": 0,
-   "check_verdict": "FAIL",
    "time_secs": 90.8860125541687,
    "error": "",
    "input_tokens": 0,
    "output_tokens": 3701,
-   "sany_valid": true,
-   "failed_gates": [
-    "B:discharge"
-   ],
-   "obligations_failed": 1,
-   "obligations_total": 1,
    "source": "tlaplus/Examples",
-   "regraded": true
+   "regraded": true,
+   "check_verdict": "PASS",
+   "sany_valid": true,
+   "obligations": 2,
+   "original_check_verdict": "FAIL",
+   "original_grading": {
+    "sany_valid": true,
+    "check_verdict": "FAIL",
+    "obligations_total": 1,
+    "obligations_failed": 1,
+    "failed_gates": [
+     "B:discharge"
+    ]
+   },
+   "regrade": {
+    "category": "archived-input-context",
+    "method": "exact-archived-solution-cold-replay",
+    "trigger": "Error: Unknown module \"CigaretteSmokers\"",
+    "checker": "v1.0.0-9-g6c70aa4",
+    "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+    "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+    "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+    "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+    "tlapm_version": "80172c6",
+    "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+    "obligations": "2/2 proved",
+    "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+    "solution_sha256": "9544b2b4189b46979d029f2ab8a0bf4b89652826e28737a4202f93a770e6566a",
+    "baseline_sha256": "d850e8102b02f802339c31a9d5db88cc61765064c214f478b9fe18d4c8273db8",
+    "dependency_sha256": {
+     "CigaretteSmokers.tla": "0281e467d6831dfa680252e7c0da411efe949409c1f930ab33f5623196011f76"
+    },
+    "recovered_dependencies": {},
+    "evidence_sha256": "d3fca9a20a967b18fb731768e5a37b1086a4cacfac199e59fd8ca9db45d3ddf4",
+    "original_regraded": true,
+    "date": "2026-08-04"
+   }
   },
   {
    "benchmark": "tlaplus_examples_CigaretteSmokers/CigaretteSmokers_proof_SmokingSetFinite.tla",
@@ -2437,17 +2809,52 @@
    "backend": "copilot",
    "mode": "proof-completion",
    "agent_exit": 0,
-   "check_verdict": "FAIL",
    "time_secs": 218.32195019721985,
    "error": "",
    "input_tokens": 0,
    "output_tokens": 11167,
-   "sany_valid": false,
-   "failed_gates": [
-    "A:identity",
-    "B:discharge"
-   ],
-   "source": "tlaplus/Examples"
+   "source": "tlaplus/Examples",
+   "check_verdict": "PASS",
+   "sany_valid": true,
+   "obligations": 4,
+   "regraded": true,
+   "original_check_verdict": "FAIL",
+   "original_grading": {
+    "sany_valid": false,
+    "check_verdict": "FAIL",
+    "failed_gates": [
+     "A:identity",
+     "B:discharge"
+    ]
+   },
+   "regrade": {
+    "category": "same-run-sibling-context",
+    "method": "exact-archived-solution-cold-replay",
+    "trigger": "Error: Unknown module \"CRDT_proof\"",
+    "checker": "v1.0.0-9-g6c70aa4",
+    "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+    "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+    "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+    "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+    "tlapm_version": "80172c6",
+    "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+    "obligations": "4/4 proved",
+    "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+    "solution_sha256": "d933b6d54ddf68817f67e08cfe36270931a2d50a9c0527d1bdf7f78aff2ccf42",
+    "baseline_sha256": "5b75972c34bfc39064f07603001f544f16e4db46d54908a06e2f8d05f5c7be19",
+    "dependency_sha256": {
+     "CRDT.tla": "e476ca897f9abe9433319475fc37e44bbd03df3f712ae14619785f10f6c5f02f"
+    },
+    "recovered_dependencies": {
+     "CRDT_proof.tla": {
+      "sha256": "264f8ad442f8a64ac32665c486911d4ba080de799a54e9cc1cc4ad33b023e8b9",
+      "source": "results/level1/copilot_claude-opus-4.8/complete_all/tlaplus_examples_FiniteMonotonic/CRDT_proof_SumIsZero/input/CRDT_proof.tla"
+     }
+    },
+    "evidence_sha256": "ffe6f7d9943be9839dcd33ddc82092bfb13d9eb6b39d546bba2163d09b2ca604",
+    "original_regraded": false,
+    "date": "2026-08-04"
+   }
   },
   {
    "benchmark": "tlaplus_examples_FiniteMonotonic/CRDT_proof_OGLiveness.tla",
@@ -2522,18 +2929,48 @@
    "backend": "copilot",
    "mode": "proof-completion",
    "agent_exit": 0,
-   "check_verdict": "FAIL",
    "time_secs": 142.83859157562256,
    "error": "",
    "input_tokens": 0,
    "output_tokens": 8269,
-   "sany_valid": false,
-   "failed_gates": [
-    "A:identity",
-    "B:discharge"
-   ],
    "source": "tlaplus/Examples",
-   "regraded": true
+   "regraded": true,
+   "check_verdict": "PASS",
+   "sany_valid": true,
+   "obligations": 16,
+   "original_check_verdict": "FAIL",
+   "original_grading": {
+    "sany_valid": false,
+    "check_verdict": "FAIL",
+    "failed_gates": [
+     "A:identity",
+     "B:discharge"
+    ]
+   },
+   "regrade": {
+    "category": "archived-input-context",
+    "method": "exact-archived-solution-cold-replay",
+    "trigger": "Error: Unknown module \"CRDT_proof\"",
+    "checker": "v1.0.0-9-g6c70aa4",
+    "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+    "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+    "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+    "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+    "tlapm_version": "80172c6",
+    "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+    "obligations": "16/16 proved",
+    "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+    "solution_sha256": "28310379fbabe28fd4565e64968e089b28b6dba9d8907b0730fd83081c689db2",
+    "baseline_sha256": "6330bc986f5579e7618c5dde2a519d0d934b522b8f18903236396a92da1e0e5d",
+    "dependency_sha256": {
+     "CRDT.tla": "2b8fdee2dd60d05289bcb1504d6217f01413060e15aaf5d5a7ac8a9e1a182497",
+     "CRDT_proof.tla": "264f8ad442f8a64ac32665c486911d4ba080de799a54e9cc1cc4ad33b023e8b9"
+    },
+    "recovered_dependencies": {},
+    "evidence_sha256": "1be34e43b699618060a67b4985616dbc6be97b20af7a8c3248805696d198263f",
+    "original_regraded": true,
+    "date": "2026-08-04"
+   }
   },
   {
    "benchmark": "tlaplus_examples_FiniteMonotonic/CRDT_proof_SumStronglyMonotonic.tla",
@@ -2608,18 +3045,48 @@
    "backend": "copilot",
    "mode": "proof-completion",
    "agent_exit": 0,
-   "check_verdict": "FAIL",
    "time_secs": 165.21131658554077,
    "error": "",
    "input_tokens": 0,
    "output_tokens": 10137,
-   "sany_valid": false,
-   "failed_gates": [
-    "A:identity",
-    "B:discharge"
-   ],
    "source": "tlaplus/Examples",
-   "regraded": true
+   "regraded": true,
+   "check_verdict": "PASS",
+   "sany_valid": true,
+   "obligations": 21,
+   "original_check_verdict": "FAIL",
+   "original_grading": {
+    "sany_valid": false,
+    "check_verdict": "FAIL",
+    "failed_gates": [
+     "A:identity",
+     "B:discharge"
+    ]
+   },
+   "regrade": {
+    "category": "archived-input-context",
+    "method": "exact-archived-solution-cold-replay",
+    "trigger": "Error: Unknown module \"CRDT_proof\"",
+    "checker": "v1.0.0-9-g6c70aa4",
+    "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+    "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+    "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+    "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+    "tlapm_version": "80172c6",
+    "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+    "obligations": "21/21 proved",
+    "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+    "solution_sha256": "837983756923f37c3311cc1f7603e7423e29610e92e31aea0b780ce3eb9f0da0",
+    "baseline_sha256": "b25e085dbbc860220bd4f4f923243c7e41493167e9090e2025c148b76ea1d4e7",
+    "dependency_sha256": {
+     "CRDT.tla": "2b8fdee2dd60d05289bcb1504d6217f01413060e15aaf5d5a7ac8a9e1a182497",
+     "CRDT_proof.tla": "264f8ad442f8a64ac32665c486911d4ba080de799a54e9cc1cc4ad33b023e8b9"
+    },
+    "recovered_dependencies": {},
+    "evidence_sha256": "10392ad2dfa1588dc9c18dde39c9f843908a90658f1c667309a911fe437e8ed3",
+    "original_regraded": true,
+    "date": "2026-08-04"
+   }
   },
   {
    "benchmark": "tlaplus_examples_KeyValueStore/KeyValueStore_proof_TypeAndLifecycle.tla",
@@ -2698,19 +3165,49 @@
    "backend": "copilot",
    "mode": "proof-completion",
    "agent_exit": 0,
-   "check_verdict": "FAIL",
    "time_secs": 197.83033895492554,
    "error": "",
    "input_tokens": 0,
    "output_tokens": 12401,
-   "sany_valid": true,
-   "failed_gates": [
-    "B:discharge"
-   ],
-   "obligations_failed": 1,
-   "obligations_total": 1,
    "source": "tlaplus/Examples",
-   "regraded": true
+   "regraded": true,
+   "check_verdict": "PASS",
+   "sany_valid": true,
+   "obligations": 22,
+   "original_check_verdict": "FAIL",
+   "original_grading": {
+    "sany_valid": true,
+    "check_verdict": "FAIL",
+    "obligations_total": 1,
+    "obligations_failed": 1,
+    "failed_gates": [
+     "B:discharge"
+    ]
+   },
+   "regrade": {
+    "category": "archived-input-context",
+    "method": "exact-archived-solution-cold-replay",
+    "trigger": "Error: Unknown module \"FindHighest\"",
+    "checker": "v1.0.0-9-g6c70aa4",
+    "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+    "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+    "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+    "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+    "tlapm_version": "80172c6",
+    "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+    "obligations": "22/22 proved",
+    "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+    "solution_sha256": "06436490a5446cb85499b43b0149ddef9d13f7a6acb94855fbf61c3886052ac8",
+    "baseline_sha256": "ea0861d96cfcad59c7730166acbe186f205ecb01b2105484cf2e64a8d6a2984f",
+    "dependency_sha256": {
+     "AddTwo.tla": "9b2f9a1dc304c9008070c52a99bbb368fcb6c38c438ba5650b3e366ff30f3381",
+     "FindHighest.tla": "87b4f0ee791a645af017bf8861ac735e721d7ccd5fbd26d2b0c9ade30d05c54f"
+    },
+    "recovered_dependencies": {},
+    "evidence_sha256": "f2f1f0d6884c27ed03735d5d822ba006e50e31e39aadff097ddd275548728a35",
+    "original_regraded": true,
+    "date": "2026-08-04"
+   }
   },
   {
    "benchmark": "tlaplus_examples_LearnProofs/FindHighest_TypeInvariantHolds.tla",
@@ -2719,19 +3216,49 @@
    "backend": "copilot",
    "mode": "proof-completion",
    "agent_exit": 0,
-   "check_verdict": "FAIL",
    "time_secs": 250.5377233028412,
    "error": "",
    "input_tokens": 0,
    "output_tokens": 16815,
-   "sany_valid": true,
-   "failed_gates": [
-    "B:discharge"
-   ],
-   "obligations_failed": 1,
-   "obligations_total": 1,
    "source": "tlaplus/Examples",
-   "regraded": true
+   "regraded": true,
+   "check_verdict": "PASS",
+   "sany_valid": true,
+   "obligations": 16,
+   "original_check_verdict": "FAIL",
+   "original_grading": {
+    "sany_valid": true,
+    "check_verdict": "FAIL",
+    "obligations_total": 1,
+    "obligations_failed": 1,
+    "failed_gates": [
+     "B:discharge"
+    ]
+   },
+   "regrade": {
+    "category": "archived-input-context",
+    "method": "exact-archived-solution-cold-replay",
+    "trigger": "Error: Unknown module \"FindHighest\"",
+    "checker": "v1.0.0-9-g6c70aa4",
+    "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+    "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+    "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+    "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+    "tlapm_version": "80172c6",
+    "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+    "obligations": "16/16 proved",
+    "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+    "solution_sha256": "abe6a2c829440e96a32b0922671637b90e8469b9559c583e4afa34852963c1d5",
+    "baseline_sha256": "ab6cf9c030b8712639b11bfb7d2e490870eab77a3ce9cac55886f7387e68175d",
+    "dependency_sha256": {
+     "AddTwo.tla": "9b2f9a1dc304c9008070c52a99bbb368fcb6c38c438ba5650b3e366ff30f3381",
+     "FindHighest.tla": "87b4f0ee791a645af017bf8861ac735e721d7ccd5fbd26d2b0c9ade30d05c54f"
+    },
+    "recovered_dependencies": {},
+    "evidence_sha256": "8a7e29972cd08f879c3a2197ecdcdd651221e461398ae51a91b7cf86d56a5b9b",
+    "original_regraded": true,
+    "date": "2026-08-04"
+   }
   },
   {
    "benchmark": "tlaplus_examples_LoopInvariance/BinarySearch_SortedLess.tla",
@@ -3120,19 +3647,48 @@
    "backend": "copilot",
    "mode": "proof-completion",
    "agent_exit": 0,
-   "check_verdict": "FAIL",
    "time_secs": 116.6558735370636,
    "error": "",
    "input_tokens": 0,
    "output_tokens": 6485,
-   "sany_valid": true,
-   "failed_gates": [
-    "B:discharge"
-   ],
-   "obligations_failed": 1,
-   "obligations_total": 1,
    "source": "tlaplus/Examples",
-   "regraded": true
+   "regraded": true,
+   "check_verdict": "PASS",
+   "sany_valid": true,
+   "obligations": 9,
+   "original_check_verdict": "FAIL",
+   "original_grading": {
+    "sany_valid": true,
+    "check_verdict": "FAIL",
+    "obligations_total": 1,
+    "obligations_failed": 1,
+    "failed_gates": [
+     "B:discharge"
+    ]
+   },
+   "regrade": {
+    "category": "archived-input-context",
+    "method": "exact-archived-solution-cold-replay",
+    "trigger": "Error: Unknown module \"Majority\"",
+    "checker": "v1.0.0-9-g6c70aa4",
+    "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+    "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+    "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+    "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+    "tlapm_version": "80172c6",
+    "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+    "obligations": "9/9 proved",
+    "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+    "solution_sha256": "4279159da96aafaef2293036a6192c5611ff0fb1a71a0c09fa4a6ff2e6e2997a",
+    "baseline_sha256": "c6ccacc868443efcbdb6f2ce17c0fcd6299e9c251458f6f6549dd4a2429f0e65",
+    "dependency_sha256": {
+     "Majority.tla": "2a5f0e28bdc81fedf5466b94fb336c9dff5633a98cc6fd1f4c02e40b3439e4d6"
+    },
+    "recovered_dependencies": {},
+    "evidence_sha256": "1d134887e78c07d88333bda34dd6fa31a45a6cbcdac12e5d11cd3108261dda58",
+    "original_regraded": true,
+    "date": "2026-08-04"
+   }
   },
   {
    "benchmark": "tlaplus_examples_Majority/MajorityProof_PositionsFinite.tla",
@@ -3157,19 +3713,48 @@
    "backend": "copilot",
    "mode": "proof-completion",
    "agent_exit": 0,
-   "check_verdict": "FAIL",
    "time_secs": 160.62354373931885,
    "error": "",
    "input_tokens": 0,
    "output_tokens": 4423,
-   "sany_valid": true,
-   "failed_gates": [
-    "B:discharge"
-   ],
-   "obligations_failed": 1,
-   "obligations_total": 1,
    "source": "tlaplus/Examples",
-   "regraded": true
+   "regraded": true,
+   "check_verdict": "PASS",
+   "sany_valid": true,
+   "obligations": 1,
+   "original_check_verdict": "FAIL",
+   "original_grading": {
+    "sany_valid": true,
+    "check_verdict": "FAIL",
+    "obligations_total": 1,
+    "obligations_failed": 1,
+    "failed_gates": [
+     "B:discharge"
+    ]
+   },
+   "regrade": {
+    "category": "archived-input-context",
+    "method": "exact-archived-solution-cold-replay",
+    "trigger": "Error: Unknown module \"Majority\"",
+    "checker": "v1.0.0-9-g6c70aa4",
+    "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+    "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+    "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+    "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+    "tlapm_version": "80172c6",
+    "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+    "obligations": "1/1 proved",
+    "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+    "solution_sha256": "c5a1937200de6b1356b1e0f2872a85dbbd1109c1e9e67d2700625d88951a2250",
+    "baseline_sha256": "2d9b0b1251f266d515f5e6ca8f6644edf7aac68336fad9630908ad962cb2753d",
+    "dependency_sha256": {
+     "Majority.tla": "2a5f0e28bdc81fedf5466b94fb336c9dff5633a98cc6fd1f4c02e40b3439e4d6"
+    },
+    "recovered_dependencies": {},
+    "evidence_sha256": "2ff2732e6673dfab8b3697bcc6f4458cb4da94f279a7d310c436bb95f45554a5",
+    "original_regraded": true,
+    "date": "2026-08-04"
+   }
   },
   {
    "benchmark": "tlaplus_examples_Majority/MajorityProof_PositionsPlusOne.tla",
@@ -3226,19 +3811,51 @@
    "backend": "copilot",
    "mode": "proof-completion",
    "agent_exit": 0,
-   "check_verdict": "FAIL",
    "time_secs": 242.08961582183838,
    "error": "",
    "input_tokens": 0,
    "output_tokens": 17474,
-   "sany_valid": true,
-   "failed_gates": [
-    "B:discharge"
-   ],
-   "obligations_failed": 1,
-   "obligations_total": 1,
    "source": "tlaplus/Examples",
-   "regraded": true
+   "regraded": true,
+   "check_verdict": "PASS",
+   "sany_valid": true,
+   "obligations": 28,
+   "original_check_verdict": "FAIL",
+   "original_grading": {
+    "sany_valid": true,
+    "check_verdict": "FAIL",
+    "obligations_total": 1,
+    "obligations_failed": 1,
+    "failed_gates": [
+     "B:discharge"
+    ]
+   },
+   "regrade": {
+    "category": "archived-input-context",
+    "method": "exact-archived-solution-cold-replay",
+    "trigger": "Error: Unknown module \"ParReach\"",
+    "checker": "v1.0.0-9-g6c70aa4",
+    "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+    "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+    "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+    "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+    "tlapm_version": "80172c6",
+    "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+    "obligations": "28/28 proved",
+    "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+    "solution_sha256": "43e879680892e7b490ac9b17c66716d480fd549a3675fe7f81ccc9037f71459f",
+    "baseline_sha256": "08757fe909bb307a5086dd323e4a05d35decca1f0546ead875c0edb6c68eb248",
+    "dependency_sha256": {
+     "ParReach.tla": "bee531a82aa773875530f1f331a96cfc74d1f702fd863f8d078e61359222bbd5",
+     "Reachability.tla": "a3719f75797cff35a46134009d343f2d5212628af1b10f84c95868d5ec25ad14",
+     "ReachabilityProofs.tla": "7ebcc50cb998728d5e316e574bb53f0cc25c033f9985724507f9075948b7c9b1",
+     "Reachable.tla": "10eb0f54c09e062d4bdce6d60965c94b9f16d550bf6b01825ceae264a4df172e"
+    },
+    "recovered_dependencies": {},
+    "evidence_sha256": "6d560e85ffe50abe1c58922c8e5d6a51d6a924709d1d42a2ba3288c230b4600c",
+    "original_regraded": true,
+    "date": "2026-08-04"
+   }
   },
   {
    "benchmark": "tlaplus_examples_MisraReachability/ReachabilityProofs_Reachable0.tla",
@@ -3279,19 +3896,51 @@
    "backend": "copilot",
    "mode": "proof-completion",
    "agent_exit": 0,
-   "check_verdict": "FAIL",
    "time_secs": 1284.853170633316,
    "error": "",
    "input_tokens": 0,
    "output_tokens": 85140,
-   "sany_valid": true,
-   "failed_gates": [
-    "B:discharge"
-   ],
-   "obligations_failed": 1,
-   "obligations_total": 1,
    "source": "tlaplus/Examples",
-   "regraded": true
+   "regraded": true,
+   "check_verdict": "PASS",
+   "sany_valid": true,
+   "obligations": 53,
+   "original_check_verdict": "FAIL",
+   "original_grading": {
+    "sany_valid": true,
+    "check_verdict": "FAIL",
+    "obligations_total": 1,
+    "obligations_failed": 1,
+    "failed_gates": [
+     "B:discharge"
+    ]
+   },
+   "regrade": {
+    "category": "archived-input-context",
+    "method": "exact-archived-solution-cold-replay",
+    "trigger": "Error: Unknown module \"Reachability\"",
+    "checker": "v1.0.0-9-g6c70aa4",
+    "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+    "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+    "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+    "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+    "tlapm_version": "80172c6",
+    "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+    "obligations": "53/53 proved",
+    "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+    "solution_sha256": "1989bcc55cc08ad13f55ac1fc7a1fb206774a71c3402949aeb6d42fa364fce38",
+    "baseline_sha256": "1649fc2a7d2af51b19ab7b6a1be858135b51c9e49bcb89b682188d3aa1b95740",
+    "dependency_sha256": {
+     "ParReach.tla": "bee531a82aa773875530f1f331a96cfc74d1f702fd863f8d078e61359222bbd5",
+     "Reachability.tla": "a3719f75797cff35a46134009d343f2d5212628af1b10f84c95868d5ec25ad14",
+     "ReachabilityProofs.tla": "7ebcc50cb998728d5e316e574bb53f0cc25c033f9985724507f9075948b7c9b1",
+     "Reachable.tla": "10eb0f54c09e062d4bdce6d60965c94b9f16d550bf6b01825ceae264a4df172e"
+    },
+    "recovered_dependencies": {},
+    "evidence_sha256": "a39054ca5cac17c2b7c5e59d43f09b6f32a22eef4aea1ea8ed0ef8de20ab3683",
+    "original_regraded": true,
+    "date": "2026-08-04"
+   }
   },
   {
    "benchmark": "tlaplus_examples_MisraReachability/ReachabilityProofs_Reachable3.tla",
@@ -3460,19 +4109,48 @@
    "backend": "copilot",
    "mode": "proof-completion",
    "agent_exit": 0,
-   "check_verdict": "FAIL",
    "time_secs": 1814.867666721344,
    "error": "",
    "input_tokens": 0,
    "output_tokens": 130477,
-   "sany_valid": true,
-   "failed_gates": [
-    "B:discharge"
-   ],
-   "obligations_failed": 1,
-   "obligations_total": 1,
    "source": "tlaplus/Examples",
-   "regraded": true
+   "regraded": true,
+   "check_verdict": "PASS",
+   "sany_valid": true,
+   "obligations": 349,
+   "original_check_verdict": "FAIL",
+   "original_grading": {
+    "sany_valid": true,
+    "check_verdict": "FAIL",
+    "obligations_total": 1,
+    "obligations_failed": 1,
+    "failed_gates": [
+     "B:discharge"
+    ]
+   },
+   "regrade": {
+    "category": "archived-input-context",
+    "method": "exact-archived-solution-cold-replay",
+    "trigger": "Error: Unknown module \"Elevator\"",
+    "checker": "v1.0.0-9-g6c70aa4",
+    "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+    "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+    "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+    "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+    "tlapm_version": "80172c6",
+    "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+    "obligations": "349/349 proved",
+    "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+    "solution_sha256": "5fd5e553e0c333998a7250a30937062c5aaa1d5924599f658f598b61f94d703a",
+    "baseline_sha256": "19502b7219fc2c05a9bd1b2a29373d699357c0fdccd8e39ffe1d8eee66080bf0",
+    "dependency_sha256": {
+     "Elevator.tla": "8b8db6b8634444fd701ac9c4375de75bf1e1c6658ae5f34c73f3b075f4373ae0"
+    },
+    "recovered_dependencies": {},
+    "evidence_sha256": "b2cb792629af562e95b0f1cc43e04a1d9975a6620a17e4783d0a39948b84a3ff",
+    "original_regraded": true,
+    "date": "2026-08-04"
+   }
   },
   {
    "benchmark": "tlaplus_examples_MultiCarElevator/Elevator_proof_SafetyCorrect.tla",
@@ -3671,19 +4349,49 @@
    "backend": "copilot",
    "mode": "proof-completion",
    "agent_exit": 0,
-   "check_verdict": "FAIL",
    "time_secs": 92.51636862754822,
    "error": "",
    "input_tokens": 0,
    "output_tokens": 3422,
-   "sany_valid": true,
-   "failed_gates": [
-    "B:discharge"
-   ],
-   "obligations_failed": 1,
-   "obligations_total": 1,
    "source": "tlaplus/Examples",
-   "regraded": true
+   "regraded": true,
+   "check_verdict": "PASS",
+   "sany_valid": true,
+   "obligations": 1,
+   "original_check_verdict": "FAIL",
+   "original_grading": {
+    "sany_valid": true,
+    "check_verdict": "FAIL",
+    "obligations_total": 1,
+    "obligations_failed": 1,
+    "failed_gates": [
+     "B:discharge"
+    ]
+   },
+   "regrade": {
+    "category": "archived-input-context",
+    "method": "exact-archived-solution-cold-replay",
+    "trigger": "Error: Unknown module \"Voting\"",
+    "checker": "v1.0.0-9-g6c70aa4",
+    "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+    "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+    "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+    "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+    "tlapm_version": "80172c6",
+    "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+    "obligations": "1/1 proved",
+    "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+    "solution_sha256": "72769e52d3085ef0c3119a576c0178afb62e16f802e421330d00387e42a363ff",
+    "baseline_sha256": "6f00d4f5ddd1d4556bb809fe2bbb1b60d3662827774faef30d914101d506d1c7",
+    "dependency_sha256": {
+     "Consensus.tla": "0861b232fdae91f1e2dcc20b50f731c5d711f73d63a3fc642cd41a1177482f6e",
+     "Voting.tla": "f4e407327f7c2b73ce5ba46e7b0945edd89bf24db79f5496231c47ec256ba8a2"
+    },
+    "recovered_dependencies": {},
+    "evidence_sha256": "122f26b6b21649a9d93975d966bee0593ee7eaed738576f8b543317f58246c0f",
+    "original_regraded": true,
+    "date": "2026-08-04"
+   }
   },
   {
    "benchmark": "tlaplus_examples_PaxosHowToWinATuringAward/Voting_proof_QuorumIntersect.tla",
@@ -3740,19 +4448,48 @@
    "backend": "copilot",
    "mode": "proof-completion",
    "agent_exit": 0,
-   "check_verdict": "FAIL",
    "time_secs": 249.55515813827515,
    "error": "",
    "input_tokens": 0,
    "output_tokens": 10690,
-   "sany_valid": true,
-   "failed_gates": [
-    "B:discharge"
-   ],
-   "obligations_failed": 1,
-   "obligations_total": 3,
    "source": "tlaplus/Examples",
-   "regraded": true
+   "regraded": true,
+   "check_verdict": "PASS",
+   "sany_valid": true,
+   "obligations": 15,
+   "original_check_verdict": "FAIL",
+   "original_grading": {
+    "sany_valid": true,
+    "check_verdict": "FAIL",
+    "obligations_total": 3,
+    "obligations_failed": 1,
+    "failed_gates": [
+     "B:discharge"
+    ]
+   },
+   "regrade": {
+    "category": "archived-input-context",
+    "method": "exact-archived-solution-cold-replay",
+    "trigger": "Error: Unknown module \"ReadersWriters\"",
+    "checker": "v1.0.0-9-g6c70aa4",
+    "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+    "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+    "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+    "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+    "tlapm_version": "80172c6",
+    "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+    "obligations": "15/15 proved",
+    "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+    "solution_sha256": "3acf5173f73c385a79a8efbd89cbc5f007bfbafb15f874ef0864326192ae46c3",
+    "baseline_sha256": "71da41feeb350830a78a117445033c0883a85804e44229d521d5f81c2b9793f8",
+    "dependency_sha256": {
+     "ReadersWriters.tla": "bfc9d4cb5946e5a918494247faddc9dbda40eed8ae36b40191203315ed04fb2f"
+    },
+    "recovered_dependencies": {},
+    "evidence_sha256": "0eb4da36c6591ad5fe1677d525fe89afa1a90e59664763b9fc612a394709279e",
+    "original_regraded": true,
+    "date": "2026-08-04"
+   }
   },
   {
    "benchmark": "tlaplus_examples_ReadersWriters/ReadersWriters_proof_SafetyStep.tla",
@@ -3761,19 +4498,48 @@
    "backend": "copilot",
    "mode": "proof-completion",
    "agent_exit": 0,
-   "check_verdict": "FAIL",
    "time_secs": 1720.4530079364777,
    "error": "",
    "input_tokens": 0,
    "output_tokens": 105240,
-   "sany_valid": true,
-   "failed_gates": [
-    "B:discharge"
-   ],
-   "obligations_failed": 1,
-   "obligations_total": 3,
    "source": "tlaplus/Examples",
-   "regraded": true
+   "regraded": true,
+   "check_verdict": "PASS",
+   "sany_valid": true,
+   "obligations": 129,
+   "original_check_verdict": "FAIL",
+   "original_grading": {
+    "sany_valid": true,
+    "check_verdict": "FAIL",
+    "obligations_total": 3,
+    "obligations_failed": 1,
+    "failed_gates": [
+     "B:discharge"
+    ]
+   },
+   "regrade": {
+    "category": "archived-input-context",
+    "method": "exact-archived-solution-cold-replay",
+    "trigger": "Error: Unknown module \"ReadersWriters\"",
+    "checker": "v1.0.0-9-g6c70aa4",
+    "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+    "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+    "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+    "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+    "tlapm_version": "80172c6",
+    "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+    "obligations": "129/129 proved",
+    "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+    "solution_sha256": "c8becdbdbca6e9b390fc798a1a10c892ea2f3a047ef887e2b7efd4bbab5b5d04",
+    "baseline_sha256": "35122e13a4f9586f42586c45352cbb57261d5a56ef0651d5872ce2df47b78edc",
+    "dependency_sha256": {
+     "ReadersWriters.tla": "bfc9d4cb5946e5a918494247faddc9dbda40eed8ae36b40191203315ed04fb2f"
+    },
+    "recovered_dependencies": {},
+    "evidence_sha256": "d4bb19de524e0a30ac5dfc0f2c0abcf44d35042f88e0b23cdf10287ef9e952b2",
+    "original_regraded": true,
+    "date": "2026-08-04"
+   }
   },
   {
    "benchmark": "tlaplus_examples_ReadersWriters/ReadersWriters_proof_TypeCorrect.tla",
@@ -3894,19 +4660,51 @@
    "backend": "copilot",
    "mode": "proof-completion",
    "agent_exit": 0,
-   "check_verdict": "FAIL",
    "time_secs": 103.09851384162903,
    "error": "",
    "input_tokens": 0,
    "output_tokens": 4750,
-   "sany_valid": true,
-   "failed_gates": [
-    "B:discharge"
-   ],
-   "obligations_failed": 1,
-   "obligations_total": 1,
    "source": "tlaplus/Examples",
-   "regraded": true
+   "regraded": true,
+   "check_verdict": "PASS",
+   "sany_valid": true,
+   "obligations": 6,
+   "original_check_verdict": "FAIL",
+   "original_grading": {
+    "sany_valid": true,
+    "check_verdict": "FAIL",
+    "obligations_total": 1,
+    "obligations_failed": 1,
+    "failed_gates": [
+     "B:discharge"
+    ]
+   },
+   "regrade": {
+    "category": "archived-input-context",
+    "method": "exact-archived-solution-cold-replay",
+    "trigger": "Error: Unknown module \"HourClock\"",
+    "checker": "v1.0.0-9-g6c70aa4",
+    "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+    "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+    "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+    "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+    "tlapm_version": "80172c6",
+    "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+    "obligations": "6/6 proved",
+    "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+    "solution_sha256": "d1103aae84491e7edd9e271f13b266edb51948b91d5006f2926f1fabc11f3e44",
+    "baseline_sha256": "b93c50003276362c07c5a7893e05c3e5bf154ede7d196365c9f8f939748ee8f1",
+    "dependency_sha256": {
+     "Channel.tla": "88eff74235f0c82286dd4128571bec8c7863662a4cd65b8ec8cea5132126b11c",
+     "HourClock.tla": "1009a70d2b4520377b18c4cabd7254fb8976db87a5bfbdbe6a788af72a67e8d9",
+     "InternalMemory.tla": "a76ff925ecbc27185016321ff57cfc6151a83e5746d090dd959bcd2be4d43d90",
+     "MemoryInterface.tla": "564dd0e49957829e5493e643c28e5aed392533eb312327e2a688df1c6e4c64dd"
+    },
+    "recovered_dependencies": {},
+    "evidence_sha256": "17c9dbc2bebc9f13c087b5f93f86d9bac4b23f55f357e18d2485633238d292f2",
+    "original_regraded": true,
+    "date": "2026-08-04"
+   }
   },
   {
    "benchmark": "tlaplus_examples_SpecifyingSystems_Composing/InternalMemory_proof_InvInductive.tla",
@@ -3931,19 +4729,51 @@
    "backend": "copilot",
    "mode": "proof-completion",
    "agent_exit": 0,
-   "check_verdict": "FAIL",
    "time_secs": 119.78921866416931,
    "error": "",
    "input_tokens": 0,
    "output_tokens": 5665,
-   "sany_valid": true,
-   "failed_gates": [
-    "B:discharge"
-   ],
-   "obligations_failed": 1,
-   "obligations_total": 1,
    "source": "tlaplus/Examples",
-   "regraded": true
+   "regraded": true,
+   "check_verdict": "PASS",
+   "sany_valid": true,
+   "obligations": 7,
+   "original_check_verdict": "FAIL",
+   "original_grading": {
+    "sany_valid": true,
+    "check_verdict": "FAIL",
+    "obligations_total": 1,
+    "obligations_failed": 1,
+    "failed_gates": [
+     "B:discharge"
+    ]
+   },
+   "regrade": {
+    "category": "archived-input-context",
+    "method": "exact-archived-solution-cold-replay",
+    "trigger": "Error: Unknown module \"InternalMemory\"",
+    "checker": "v1.0.0-9-g6c70aa4",
+    "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+    "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+    "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+    "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+    "tlapm_version": "80172c6",
+    "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+    "obligations": "7/7 proved",
+    "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+    "solution_sha256": "4723c88aace87666b9a92d5af663456ea54c074238e41c3226ceaff60275173b",
+    "baseline_sha256": "2bb37a540b3cdc7079e5fbccde06d0e08906d33c41c852e6ec7a56be2ac482d7",
+    "dependency_sha256": {
+     "Channel.tla": "88eff74235f0c82286dd4128571bec8c7863662a4cd65b8ec8cea5132126b11c",
+     "HourClock.tla": "1009a70d2b4520377b18c4cabd7254fb8976db87a5bfbdbe6a788af72a67e8d9",
+     "InternalMemory.tla": "a76ff925ecbc27185016321ff57cfc6151a83e5746d090dd959bcd2be4d43d90",
+     "MemoryInterface.tla": "564dd0e49957829e5493e643c28e5aed392533eb312327e2a688df1c6e4c64dd"
+    },
+    "recovered_dependencies": {},
+    "evidence_sha256": "7ee24f2c72169bb1120fd3709509e320bcf526368200026e133ca7e3d6d57a4b",
+    "original_regraded": true,
+    "date": "2026-08-04"
+   }
   },
   {
    "benchmark": "tlaplus_examples_SpecifyingSystems_FIFO/Channel_proof_TypeCorrect.tla",
@@ -3968,19 +4798,49 @@
    "backend": "copilot",
    "mode": "proof-completion",
    "agent_exit": 0,
-   "check_verdict": "FAIL",
    "time_secs": 360.7419648170471,
    "error": "",
    "input_tokens": 0,
    "output_tokens": 23701,
-   "sany_valid": true,
-   "failed_gates": [
-    "B:discharge"
-   ],
-   "obligations_failed": 1,
-   "obligations_total": 1,
    "source": "tlaplus/Examples",
-   "regraded": true
+   "regraded": true,
+   "check_verdict": "PASS",
+   "sany_valid": true,
+   "obligations": 22,
+   "original_check_verdict": "FAIL",
+   "original_grading": {
+    "sany_valid": true,
+    "check_verdict": "FAIL",
+    "obligations_total": 1,
+    "obligations_failed": 1,
+    "failed_gates": [
+     "B:discharge"
+    ]
+   },
+   "regrade": {
+    "category": "archived-input-context",
+    "method": "exact-archived-solution-cold-replay",
+    "trigger": "Error: Unknown module \"InnerFIFO\"",
+    "checker": "v1.0.0-9-g6c70aa4",
+    "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+    "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+    "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+    "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+    "tlapm_version": "80172c6",
+    "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+    "obligations": "22/22 proved",
+    "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+    "solution_sha256": "73530831002745b728b8e9e5736192a1c36ef66e0f14836f14b110ef154c688f",
+    "baseline_sha256": "215834e2c21141178eeb791409c391dc73f5adaae02addab28f73ec5501b1ef1",
+    "dependency_sha256": {
+     "Channel.tla": "88eff74235f0c82286dd4128571bec8c7863662a4cd65b8ec8cea5132126b11c",
+     "InnerFIFO.tla": "57260bf02e31cbd71ee0f338fffab11e6162fc3c67832e68fe1a26604ef8e313"
+    },
+    "recovered_dependencies": {},
+    "evidence_sha256": "47d795d3473749d74155fd8a1c83c7112dfbf8c1b05b3ac655be147f23d52f9d",
+    "original_regraded": true,
+    "date": "2026-08-04"
+   }
   },
   {
    "benchmark": "tlaplus_examples_SpecifyingSystems_HourClock/HourClock_proof_HCini_Invariant.tla",
@@ -4005,19 +4865,50 @@
    "backend": "copilot",
    "mode": "proof-completion",
    "agent_exit": 0,
-   "check_verdict": "FAIL",
    "time_secs": 94.14915537834167,
    "error": "",
    "input_tokens": 0,
    "output_tokens": 4478,
-   "sany_valid": true,
-   "failed_gates": [
-    "B:discharge"
-   ],
-   "obligations_failed": 1,
-   "obligations_total": 1,
    "source": "tlaplus/Examples",
-   "regraded": true
+   "regraded": true,
+   "check_verdict": "PASS",
+   "sany_valid": true,
+   "obligations": 6,
+   "original_check_verdict": "FAIL",
+   "original_grading": {
+    "sany_valid": true,
+    "check_verdict": "FAIL",
+    "obligations_total": 1,
+    "obligations_failed": 1,
+    "failed_gates": [
+     "B:discharge"
+    ]
+   },
+   "regrade": {
+    "category": "archived-input-context",
+    "method": "exact-archived-solution-cold-replay",
+    "trigger": "Error: Unknown module \"HourClock\"",
+    "checker": "v1.0.0-9-g6c70aa4",
+    "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+    "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+    "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+    "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+    "tlapm_version": "80172c6",
+    "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+    "obligations": "6/6 proved",
+    "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+    "solution_sha256": "d1103aae84491e7edd9e271f13b266edb51948b91d5006f2926f1fabc11f3e44",
+    "baseline_sha256": "b93c50003276362c07c5a7893e05c3e5bf154ede7d196365c9f8f939748ee8f1",
+    "dependency_sha256": {
+     "HourClock.tla": "1009a70d2b4520377b18c4cabd7254fb8976db87a5bfbdbe6a788af72a67e8d9",
+     "InternalMemory.tla": "a76ff925ecbc27185016321ff57cfc6151a83e5746d090dd959bcd2be4d43d90",
+     "MemoryInterface.tla": "564dd0e49957829e5493e643c28e5aed392533eb312327e2a688df1c6e4c64dd"
+    },
+    "recovered_dependencies": {},
+    "evidence_sha256": "b2365a4941b9b72830fb5ed11acb8d7544433c0ca29ed6142ef2c9f38c479f57",
+    "original_regraded": true,
+    "date": "2026-08-04"
+   }
   },
   {
    "benchmark": "tlaplus_examples_SpecifyingSystems_Liveness/InternalMemory_proof_InvInductive.tla",
@@ -4629,19 +5520,48 @@
    "backend": "copilot",
    "mode": "proof-completion",
    "agent_exit": 0,
-   "check_verdict": "FAIL",
    "time_secs": 367.655241727829,
    "error": "",
    "input_tokens": 0,
    "output_tokens": 20197,
-   "sany_valid": true,
-   "failed_gates": [
-    "B:discharge"
-   ],
-   "obligations_failed": 1,
-   "obligations_total": 1,
    "source": "tlaplus/Examples",
-   "regraded": true
+   "regraded": true,
+   "check_verdict": "PASS",
+   "sany_valid": true,
+   "obligations": 39,
+   "original_check_verdict": "FAIL",
+   "original_grading": {
+    "sany_valid": true,
+    "check_verdict": "FAIL",
+    "obligations_total": 1,
+    "obligations_failed": 1,
+    "failed_gates": [
+     "B:discharge"
+    ]
+   },
+   "regrade": {
+    "category": "archived-input-context",
+    "method": "exact-archived-solution-cold-replay",
+    "trigger": "Error: Unknown module \"Termination\"",
+    "checker": "v1.0.0-9-g6c70aa4",
+    "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+    "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+    "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+    "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+    "tlapm_version": "80172c6",
+    "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+    "obligations": "39/39 proved",
+    "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+    "solution_sha256": "fa2802c64996c257b05ba493278dcc2f86670441188c2632bb76783128d0be03",
+    "baseline_sha256": "94f0cdb51cb70da3f64ce6a252efab8832c87c8d570669b261a4c734273a1146",
+    "dependency_sha256": {
+     "Termination.tla": "3e78dc3fbf01fbe40aa310bcea84be323c593844c9ecea50f604671f84ef5a94"
+    },
+    "recovered_dependencies": {},
+    "evidence_sha256": "16f7703ed40a19c34ce56031bdab4036dc765910e86f94f72ebf2a6132667867",
+    "original_regraded": true,
+    "date": "2026-08-04"
+   }
   },
   {
    "benchmark": "tlaplus_examples_TwoPhase/TwoPhase_Implementation.tla",
@@ -4650,19 +5570,48 @@
    "backend": "copilot",
    "mode": "proof-completion",
    "agent_exit": 0,
-   "check_verdict": "FAIL",
    "time_secs": 236.195720911026,
    "error": "",
    "input_tokens": 0,
    "output_tokens": 15803,
-   "sany_valid": true,
-   "failed_gates": [
-    "B:discharge"
-   ],
-   "obligations_failed": 1,
-   "obligations_total": 1,
    "source": "tlaplus/Examples",
-   "regraded": true
+   "regraded": true,
+   "check_verdict": "PASS",
+   "sany_valid": true,
+   "obligations": 13,
+   "original_check_verdict": "FAIL",
+   "original_grading": {
+    "sany_valid": true,
+    "check_verdict": "FAIL",
+    "obligations_total": 1,
+    "obligations_failed": 1,
+    "failed_gates": [
+     "B:discharge"
+    ]
+   },
+   "regrade": {
+    "category": "archived-input-context",
+    "method": "exact-archived-solution-cold-replay",
+    "trigger": "Error: Unknown module \"Alternate\"",
+    "checker": "v1.0.0-9-g6c70aa4",
+    "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+    "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+    "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+    "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+    "tlapm_version": "80172c6",
+    "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+    "obligations": "13/13 proved",
+    "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+    "solution_sha256": "9ad0ce7018286039208e82a1ff97b4a21de9ea3c1307a08a8b70561380bd31c0",
+    "baseline_sha256": "2d728c1b3699560bd121c6242fce4505c3e029b82638dcadcd32e101a034f910",
+    "dependency_sha256": {
+     "Alternate.tla": "302ba28352c3ac500c42f648f604933a0cc0b870d88affe5f3a07f0cd2eb1fba"
+    },
+    "recovered_dependencies": {},
+    "evidence_sha256": "68d763f4225681324f647ee895456f7a7ceb69cf63233193d81a349c3780549d",
+    "original_regraded": true,
+    "date": "2026-08-04"
+   }
   },
   {
    "benchmark": "tlaplus_examples_allocator/AllocatorImplementation_proof_DropType.tla",
@@ -4863,19 +5812,50 @@
    "backend": "copilot",
    "mode": "proof-completion",
    "agent_exit": 0,
-   "check_verdict": "FAIL",
    "time_secs": 1127.4282722473145,
    "error": "",
    "input_tokens": 0,
    "output_tokens": 85807,
-   "sany_valid": true,
-   "failed_gates": [
-    "B:discharge"
-   ],
-   "obligations_failed": 1,
-   "obligations_total": 1,
    "source": "tlaplus/Examples",
-   "regraded": true
+   "regraded": true,
+   "check_verdict": "PASS",
+   "sany_valid": true,
+   "obligations": 88,
+   "original_check_verdict": "FAIL",
+   "original_grading": {
+    "sany_valid": true,
+    "check_verdict": "FAIL",
+    "obligations_total": 1,
+    "obligations_failed": 1,
+    "failed_gates": [
+     "B:discharge"
+    ]
+   },
+   "regrade": {
+    "category": "archived-input-context",
+    "method": "exact-archived-solution-cold-replay",
+    "trigger": "Error: Unknown module \"SimpleAllocator\"",
+    "checker": "v1.0.0-9-g6c70aa4",
+    "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+    "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+    "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+    "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+    "tlapm_version": "80172c6",
+    "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+    "obligations": "88/88 proved",
+    "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+    "solution_sha256": "b56b13b5c4d0fc48135e45efc1a4741e84dc66ce55e5d9b2f9b78662bb16cbaa",
+    "baseline_sha256": "92b2202469813410ce6e49329065e16ceed87564c7a4f6ca8ee05e6926514958",
+    "dependency_sha256": {
+     "AllocatorImplementation.tla": "1b4431845c547660345102fe6d04fb863c5a64baa37daced6a5c78797796c8a3",
+     "SchedulingAllocator.tla": "b8bef576626ece585e3d98ae2022d124c31c6a5f40fa3c6e9e4cc16d7a65ef13",
+     "SimpleAllocator.tla": "6c259e4ddb9e202995e2789db173bce644a9659d830dfcb6f958bf08e91d5fe6"
+    },
+    "recovered_dependencies": {},
+    "evidence_sha256": "49616b149c5ad909fa446d7efd8e2d8203905c7e206cc965fa8c4dc74fc3223d",
+    "original_regraded": true,
+    "date": "2026-08-04"
+   }
   },
   {
    "benchmark": "tlaplus_examples_allocator/SimpleAllocator_proof_TypeCorrect.tla",
@@ -5033,19 +6013,49 @@
    "backend": "copilot",
    "mode": "proof-completion",
    "agent_exit": 0,
-   "check_verdict": "FAIL",
    "time_secs": 373.7821846008301,
    "error": "",
    "input_tokens": 0,
    "output_tokens": 21692,
-   "sany_valid": true,
-   "failed_gates": [
-    "B:discharge"
-   ],
-   "obligations_failed": 1,
-   "obligations_total": 1,
    "source": "tlaplus/Examples",
-   "regraded": true
+   "regraded": true,
+   "check_verdict": "PASS",
+   "sany_valid": true,
+   "obligations": 55,
+   "original_check_verdict": "FAIL",
+   "original_grading": {
+    "sany_valid": true,
+    "check_verdict": "FAIL",
+    "obligations_total": 1,
+    "obligations_failed": 1,
+    "failed_gates": [
+     "B:discharge"
+    ]
+   },
+   "regrade": {
+    "category": "archived-input-context",
+    "method": "exact-archived-solution-cold-replay",
+    "trigger": "Error: Unknown module \"Barrier\"",
+    "checker": "v1.0.0-9-g6c70aa4",
+    "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+    "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+    "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+    "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+    "tlapm_version": "80172c6",
+    "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+    "obligations": "55/55 proved",
+    "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+    "solution_sha256": "5016babd86369d915ec7caca08cab06d2acae5a5032bb4337e42739c10bad903",
+    "baseline_sha256": "fb3be264a33c79b9c6d9264affc2c623cf2d62ae8cc443bb12633e1b1a59d1d6",
+    "dependency_sha256": {
+     "Barrier.tla": "68c5ba44fc9ce71146c06f0405de79babfa071591da3e6dd655f025a43a544f3",
+     "Barriers.tla": "4ec6728b85ae376c84b101d7976589bbe493e300debb16e9f249de781eb0e22f"
+    },
+    "recovered_dependencies": {},
+    "evidence_sha256": "bffc9802dab29c45d36347430f5159f207e3a34ca25eb7f987fa174fd5fcc5ff",
+    "original_regraded": true,
+    "date": "2026-08-04"
+   }
   },
   {
    "benchmark": "tlaplus_examples_barriers/Barriers_ProcSetSubSetsBound.tla",
@@ -5332,15 +6342,47 @@
    "backend": "copilot",
    "mode": "proof-completion",
    "agent_exit": 0,
-   "check_verdict": "FAIL",
    "time_secs": 289.0152151584625,
    "error": "",
    "input_tokens": 0,
    "output_tokens": 9965,
+   "source": "tlaplus/Examples",
+   "regraded": true,
+   "check_verdict": "PASS",
    "sany_valid": true,
    "obligations": 11,
-   "source": "tlaplus/Examples",
-   "regraded": true
+   "original_check_verdict": "FAIL",
+   "original_grading": {
+    "sany_valid": true,
+    "check_verdict": "FAIL",
+    "obligations": 11
+   },
+   "regrade": {
+    "category": "archived-input-context",
+    "method": "exact-archived-solution-cold-replay",
+    "trigger": "Error: Unknown module \"BPConProof\"",
+    "checker": "v1.0.0-9-g6c70aa4",
+    "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+    "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+    "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+    "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+    "tlapm_version": "80172c6",
+    "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+    "obligations": "11/11 proved",
+    "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+    "solution_sha256": "d22926332a2d7631cd6373ae6f1864eeb1cff22882594227c119a61f33e8948c",
+    "baseline_sha256": "b632258c871daa70ed805df7a01b1cf8bb0fbb36dedf024f8698ed9c0b616475",
+    "dependency_sha256": {
+     "BPConProof.tla": "f099cec51e91ed9dd38bf76e23445eb731e58a1f3546df3d868517e5d2254bbb",
+     "Consensus.tla": "dc2cab3e329a79da5ac39235cd234956686b2576b7a7f7470af4e02c0aa387a9",
+     "PConProof.tla": "beb15dc05b114d770f97da54af0a70e2fd2ad8740ae476a26713408ff5b1da81",
+     "VoteProof.tla": "0a2adc4cd5a4473db822c58ee410e8900272b335af4598ed15d130efd5b50042"
+    },
+    "recovered_dependencies": {},
+    "evidence_sha256": "f552bfaad95f2dc06c91824832a337c59901ccfe7442e11de774053ac5cb5035",
+    "original_regraded": true,
+    "date": "2026-08-04"
+   }
   },
   {
    "benchmark": "tlaplus_examples_byzpaxos/BPConProof_FiniteSetHasMax.tla",
@@ -5549,19 +6591,51 @@
    "backend": "copilot",
    "mode": "proof-completion",
    "agent_exit": 0,
-   "check_verdict": "FAIL",
    "time_secs": 203.70676493644714,
    "error": "",
    "input_tokens": 0,
    "output_tokens": 9933,
-   "sany_valid": true,
-   "failed_gates": [
-    "B:discharge"
-   ],
-   "obligations_failed": 1,
-   "obligations_total": 1,
    "source": "tlaplus/Examples",
-   "regraded": true
+   "regraded": true,
+   "check_verdict": "PASS",
+   "sany_valid": true,
+   "obligations": 3,
+   "original_check_verdict": "FAIL",
+   "original_grading": {
+    "sany_valid": true,
+    "check_verdict": "FAIL",
+    "obligations_total": 1,
+    "obligations_failed": 1,
+    "failed_gates": [
+     "B:discharge"
+    ]
+   },
+   "regrade": {
+    "category": "archived-input-context",
+    "method": "exact-archived-solution-cold-replay",
+    "trigger": "Error: Unknown module \"BPConProof\"",
+    "checker": "v1.0.0-9-g6c70aa4",
+    "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+    "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+    "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+    "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+    "tlapm_version": "80172c6",
+    "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+    "obligations": "3/3 proved",
+    "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+    "solution_sha256": "8e586b742e9505e29a2515b9be2715f66ba43fe257551f0f6c882ecb710119e1",
+    "baseline_sha256": "d63be43f131ed803c262a859b15a653781c7a4f26d4b07fd02845889a8870a5b",
+    "dependency_sha256": {
+     "BPConProof.tla": "f099cec51e91ed9dd38bf76e23445eb731e58a1f3546df3d868517e5d2254bbb",
+     "Consensus.tla": "dc2cab3e329a79da5ac39235cd234956686b2576b7a7f7470af4e02c0aa387a9",
+     "PConProof.tla": "beb15dc05b114d770f97da54af0a70e2fd2ad8740ae476a26713408ff5b1da81",
+     "VoteProof.tla": "0a2adc4cd5a4473db822c58ee410e8900272b335af4598ed15d130efd5b50042"
+    },
+    "recovered_dependencies": {},
+    "evidence_sha256": "ac32de3da2547f8ab01a89e18afa66106e41015a3d4972bb675c40f21a868d70",
+    "original_regraded": true,
+    "date": "2026-08-04"
+   }
   },
   {
    "benchmark": "tlaplus_examples_byzpaxos/BPConProof_PmaxBalLemma2.tla",
@@ -5618,15 +6692,47 @@
    "backend": "copilot",
    "mode": "proof-completion",
    "agent_exit": 0,
-   "check_verdict": "FAIL",
    "time_secs": 186.2126021385193,
    "error": "",
    "input_tokens": 0,
    "output_tokens": 8832,
-   "sany_valid": true,
-   "obligations": 16,
    "source": "tlaplus/Examples",
-   "regraded": true
+   "regraded": true,
+   "check_verdict": "PASS",
+   "sany_valid": true,
+   "obligations": 18,
+   "original_check_verdict": "FAIL",
+   "original_grading": {
+    "sany_valid": true,
+    "check_verdict": "FAIL",
+    "obligations": 16
+   },
+   "regrade": {
+    "category": "archived-input-context",
+    "method": "exact-archived-solution-cold-replay",
+    "trigger": "Error: Unknown module \"BPConProof\"",
+    "checker": "v1.0.0-9-g6c70aa4",
+    "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+    "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+    "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+    "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+    "tlapm_version": "80172c6",
+    "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+    "obligations": "18/18 proved",
+    "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+    "solution_sha256": "f476f9db8cc199b378fbf644e14f9b742b1d92ab0fa2f4b9ce1a4e1612c957e9",
+    "baseline_sha256": "8996eb514cde39cfb11987a4850a69852fc01c02fac247c1e75c2aa2d156e35f",
+    "dependency_sha256": {
+     "BPConProof.tla": "f099cec51e91ed9dd38bf76e23445eb731e58a1f3546df3d868517e5d2254bbb",
+     "Consensus.tla": "dc2cab3e329a79da5ac39235cd234956686b2576b7a7f7470af4e02c0aa387a9",
+     "PConProof.tla": "beb15dc05b114d770f97da54af0a70e2fd2ad8740ae476a26713408ff5b1da81",
+     "VoteProof.tla": "0a2adc4cd5a4473db822c58ee410e8900272b335af4598ed15d130efd5b50042"
+    },
+    "recovered_dependencies": {},
+    "evidence_sha256": "645787fd9a615fe1080053f667b7d08c8f2c74d8191ac16ccb185ef818aa35f4",
+    "original_regraded": true,
+    "date": "2026-08-04"
+   }
   },
   {
    "benchmark": "tlaplus_examples_byzpaxos/Consensus_EnabledDef.tla",
@@ -5731,19 +6837,51 @@
    "backend": "copilot",
    "mode": "proof-completion",
    "agent_exit": 0,
-   "check_verdict": "FAIL",
    "time_secs": 604.7557334899902,
    "error": "",
    "input_tokens": 0,
    "output_tokens": 40085,
-   "sany_valid": true,
-   "failed_gates": [
-    "B:discharge"
-   ],
-   "obligations_failed": 1,
-   "obligations_total": 1,
    "source": "tlaplus/Examples",
-   "regraded": true
+   "regraded": true,
+   "check_verdict": "PASS",
+   "sany_valid": true,
+   "obligations": 62,
+   "original_check_verdict": "FAIL",
+   "original_grading": {
+    "sany_valid": true,
+    "check_verdict": "FAIL",
+    "obligations_total": 1,
+    "obligations_failed": 1,
+    "failed_gates": [
+     "B:discharge"
+    ]
+   },
+   "regrade": {
+    "category": "archived-input-context",
+    "method": "exact-archived-solution-cold-replay",
+    "trigger": "Error: Unknown module \"Consensus\"",
+    "checker": "v1.0.0-9-g6c70aa4",
+    "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+    "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+    "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+    "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+    "tlapm_version": "80172c6",
+    "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+    "obligations": "62/62 proved",
+    "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+    "solution_sha256": "11d136e59998bac4710b7301f88be19d7b1dfda75f791550fd3697dab06976e2",
+    "baseline_sha256": "136d97faddebeb9e9f79fe419b8639d9de3702e959512f67f85addee3303e0a3",
+    "dependency_sha256": {
+     "BPConProof.tla": "f099cec51e91ed9dd38bf76e23445eb731e58a1f3546df3d868517e5d2254bbb",
+     "Consensus.tla": "dc2cab3e329a79da5ac39235cd234956686b2576b7a7f7470af4e02c0aa387a9",
+     "PConProof.tla": "beb15dc05b114d770f97da54af0a70e2fd2ad8740ae476a26713408ff5b1da81",
+     "VoteProof.tla": "0a2adc4cd5a4473db822c58ee410e8900272b335af4598ed15d130efd5b50042"
+    },
+    "recovered_dependencies": {},
+    "evidence_sha256": "55a908f81b5f2f9b6c22f49d02a5d6209883a48624f48edf6b9ebebd5274d0fc",
+    "original_regraded": true,
+    "date": "2026-08-04"
+   }
   },
   {
    "benchmark": "tlaplus_examples_byzpaxos/VoteProof_InductiveInvariance.tla",
@@ -5804,15 +6942,47 @@
    "backend": "copilot",
    "mode": "proof-completion",
    "agent_exit": 0,
-   "check_verdict": "FAIL",
    "time_secs": 315.7489459514618,
    "error": "",
    "input_tokens": 0,
    "output_tokens": 14967,
-   "sany_valid": true,
-   "obligations": 1,
    "source": "tlaplus/Examples",
-   "regraded": true
+   "regraded": true,
+   "check_verdict": "PASS",
+   "sany_valid": true,
+   "obligations": 4,
+   "original_check_verdict": "FAIL",
+   "original_grading": {
+    "sany_valid": true,
+    "check_verdict": "FAIL",
+    "obligations": 1
+   },
+   "regrade": {
+    "category": "archived-input-context",
+    "method": "exact-archived-solution-cold-replay",
+    "trigger": "Error: Unknown module \"Consensus\"",
+    "checker": "v1.0.0-9-g6c70aa4",
+    "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+    "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+    "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+    "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+    "tlapm_version": "80172c6",
+    "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+    "obligations": "4/4 proved",
+    "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+    "solution_sha256": "2c90e8eb492d8f3146a4cd0a48db20dfd30504593d2b6664fad89c99c1d98370",
+    "baseline_sha256": "27d6a9d8b10e734e0bf6d66d87ce2635b4916c664015cb592cac2ee11a1e09ca",
+    "dependency_sha256": {
+     "BPConProof.tla": "f099cec51e91ed9dd38bf76e23445eb731e58a1f3546df3d868517e5d2254bbb",
+     "Consensus.tla": "dc2cab3e329a79da5ac39235cd234956686b2576b7a7f7470af4e02c0aa387a9",
+     "PConProof.tla": "beb15dc05b114d770f97da54af0a70e2fd2ad8740ae476a26713408ff5b1da81",
+     "VoteProof.tla": "0a2adc4cd5a4473db822c58ee410e8900272b335af4598ed15d130efd5b50042"
+    },
+    "recovered_dependencies": {},
+    "evidence_sha256": "73304bd345c9ea435f7fae4a0dc76fa0418ca409c94afb49f438b6b74c614a39",
+    "original_regraded": true,
+    "date": "2026-08-04"
+   }
   },
   {
    "benchmark": "tlaplus_examples_byzpaxos/VoteProof_QuorumNonEmpty.tla",
@@ -5869,15 +7039,47 @@
    "backend": "copilot",
    "mode": "proof-completion",
    "agent_exit": 1,
-   "check_verdict": "FAIL",
    "time_secs": 1989.7591211795807,
    "error": "",
    "input_tokens": 0,
    "output_tokens": 141856,
-   "sany_valid": true,
-   "obligations": 118,
    "source": "tlaplus/Examples",
-   "regraded": true
+   "regraded": true,
+   "check_verdict": "PASS",
+   "sany_valid": true,
+   "obligations": 77,
+   "original_check_verdict": "FAIL",
+   "original_grading": {
+    "sany_valid": true,
+    "check_verdict": "FAIL",
+    "obligations": 118
+   },
+   "regrade": {
+    "category": "archived-input-context",
+    "method": "exact-archived-solution-cold-replay",
+    "trigger": "Error: Unknown module \"Consensus\"",
+    "checker": "v1.0.0-9-g6c70aa4",
+    "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+    "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+    "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+    "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+    "tlapm_version": "80172c6",
+    "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+    "obligations": "77/77 proved",
+    "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+    "solution_sha256": "5a7adf054b0582f06854617d6fdf1e36c66fca157be1e4ba639c6daae4d12cda",
+    "baseline_sha256": "712ecf9b782a6fbee2046ade16152c4c3abfc3fa139d853c0d24a33d840647a1",
+    "dependency_sha256": {
+     "BPConProof.tla": "f099cec51e91ed9dd38bf76e23445eb731e58a1f3546df3d868517e5d2254bbb",
+     "Consensus.tla": "dc2cab3e329a79da5ac39235cd234956686b2576b7a7f7470af4e02c0aa387a9",
+     "PConProof.tla": "beb15dc05b114d770f97da54af0a70e2fd2ad8740ae476a26713408ff5b1da81",
+     "VoteProof.tla": "0a2adc4cd5a4473db822c58ee410e8900272b335af4598ed15d130efd5b50042"
+    },
+    "recovered_dependencies": {},
+    "evidence_sha256": "ba3937088d85ec5e7fca588d7e26db93bb4a04880e8c42c0f0a78080aee98f80",
+    "original_regraded": true,
+    "date": "2026-08-04"
+   }
   },
   {
    "benchmark": "tlaplus_examples_byzpaxos/VoteProof_VT0.tla",
@@ -5902,15 +7104,47 @@
    "backend": "copilot",
    "mode": "proof-completion",
    "agent_exit": 0,
-   "check_verdict": "FAIL",
    "time_secs": 545.9478256702423,
    "error": "",
    "input_tokens": 0,
    "output_tokens": 32641,
-   "sany_valid": true,
-   "obligations": 8,
    "source": "tlaplus/Examples",
-   "regraded": true
+   "regraded": true,
+   "check_verdict": "PASS",
+   "sany_valid": true,
+   "obligations": 5,
+   "original_check_verdict": "FAIL",
+   "original_grading": {
+    "sany_valid": true,
+    "check_verdict": "FAIL",
+    "obligations": 8
+   },
+   "regrade": {
+    "category": "archived-input-context",
+    "method": "exact-archived-solution-cold-replay",
+    "trigger": "Error: Unknown module \"Consensus\"",
+    "checker": "v1.0.0-9-g6c70aa4",
+    "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+    "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+    "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+    "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+    "tlapm_version": "80172c6",
+    "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+    "obligations": "5/5 proved",
+    "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+    "solution_sha256": "260632c04ec6d9f7746826480673d24ff683eb1007bca2f9f4ee52dcff0b894a",
+    "baseline_sha256": "058fb77ee2cf1e2a49bea604b3e4bca6b4faa9909ba888da0d6573895016d2a1",
+    "dependency_sha256": {
+     "BPConProof.tla": "f099cec51e91ed9dd38bf76e23445eb731e58a1f3546df3d868517e5d2254bbb",
+     "Consensus.tla": "dc2cab3e329a79da5ac39235cd234956686b2576b7a7f7470af4e02c0aa387a9",
+     "PConProof.tla": "beb15dc05b114d770f97da54af0a70e2fd2ad8740ae476a26713408ff5b1da81",
+     "VoteProof.tla": "0a2adc4cd5a4473db822c58ee410e8900272b335af4598ed15d130efd5b50042"
+    },
+    "recovered_dependencies": {},
+    "evidence_sha256": "59f73a31a51ab2bc670c3b7796d96878d7b19050b61e87d62a883da85bf01699",
+    "original_regraded": true,
+    "date": "2026-08-04"
+   }
   },
   {
    "benchmark": "tlaplus_examples_byzpaxos/VoteProof_VT1.tla",
@@ -6047,16 +7281,46 @@
    "backend": "copilot",
    "mode": "proof-completion",
    "agent_exit": 1,
-   "check_verdict": "FAIL",
    "time_secs": 788.561030626297,
    "error": "",
    "input_tokens": 0,
    "output_tokens": 24066,
+   "source": "tlaplus/Examples",
+   "check_verdict": "PASS",
    "sany_valid": true,
-   "failed_gates": [
-    "B:discharge"
-   ],
-   "source": "tlaplus/Examples"
+   "obligations": 24,
+   "regraded": true,
+   "original_check_verdict": "FAIL",
+   "original_grading": {
+    "sany_valid": true,
+    "check_verdict": "FAIL",
+    "failed_gates": [
+     "B:discharge"
+    ]
+   },
+   "regrade": {
+    "category": "trusted-community-library",
+    "method": "exact-archived-solution-cold-replay",
+    "trigger": "Error: Unknown module \"Graphs\"",
+    "checker": "v1.0.0-9-g6c70aa4",
+    "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+    "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+    "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+    "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+    "tlapm_version": "80172c6",
+    "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+    "obligations": "24/24 proved",
+    "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+    "solution_sha256": "6a96dab5c03fbeff716e3edafb69abd08e534282fb32636caa538ec4123a3622",
+    "baseline_sha256": "d1aa3969794e0375ef03a353d4242f2d01358fa23a09b7771e0452f85ef8159c",
+    "dependency_sha256": {
+     "EWD687a.tla": "554033b7d1a544b75e047ec90abddda298c4c084be0338c683002de52f611186"
+    },
+    "recovered_dependencies": {},
+    "evidence_sha256": "9be18cbbb6b61ac2ae3aa3f32c516acff53afba7cab84fd09b459fe664cfb991",
+    "original_regraded": false,
+    "date": "2026-08-04"
+   }
   },
   {
    "benchmark": "tlaplus_examples_ewd687a/EWD687a_proof_Inv2GivesTreeBody.tla",
@@ -6149,16 +7413,46 @@
    "backend": "copilot",
    "mode": "proof-completion",
    "agent_exit": 1,
-   "check_verdict": "FAIL",
    "time_secs": 491.35767579078674,
    "error": "",
    "input_tokens": 0,
    "output_tokens": 25378,
+   "source": "tlaplus/Examples",
+   "check_verdict": "PASS",
    "sany_valid": true,
-   "failed_gates": [
-    "B:discharge"
-   ],
-   "source": "tlaplus/Examples"
+   "obligations": 14,
+   "regraded": true,
+   "original_check_verdict": "FAIL",
+   "original_grading": {
+    "sany_valid": true,
+    "check_verdict": "FAIL",
+    "failed_gates": [
+     "B:discharge"
+    ]
+   },
+   "regrade": {
+    "category": "trusted-community-library",
+    "method": "exact-archived-solution-cold-replay",
+    "trigger": "Error: Unknown module \"Graphs\"",
+    "checker": "v1.0.0-9-g6c70aa4",
+    "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+    "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+    "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+    "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+    "tlapm_version": "80172c6",
+    "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+    "obligations": "14/14 proved",
+    "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+    "solution_sha256": "3001df7407a08743cd034019124387b38a5e0b0c8d67d237808074a48aede5b6",
+    "baseline_sha256": "21f35485ba2ff87f5aa2c6db23b73fe32eecc4bae354d23474bee57a1b51d99f",
+    "dependency_sha256": {
+     "EWD687a.tla": "554033b7d1a544b75e047ec90abddda298c4c084be0338c683002de52f611186"
+    },
+    "recovered_dependencies": {},
+    "evidence_sha256": "72669a79a0124e7867665a344f739f9f96123ad1b2b318d8814f935e60a03244",
+    "original_regraded": false,
+    "date": "2026-08-04"
+   }
   },
   {
    "benchmark": "tlaplus_examples_ewd687a/EWD687a_proof_Thm_CountersConsistent.tla",
@@ -6498,19 +7792,51 @@
    "backend": "copilot",
    "mode": "proof-completion",
    "agent_exit": 0,
-   "check_verdict": "FAIL",
    "time_secs": 685.0809640884399,
    "error": "",
    "input_tokens": 0,
    "output_tokens": 35894,
-   "sany_valid": true,
-   "failed_gates": [
-    "B:discharge"
-   ],
-   "obligations_failed": 1,
-   "obligations_total": 1,
    "source": "tlaplus/Examples",
-   "regraded": true
+   "regraded": true,
+   "check_verdict": "PASS",
+   "sany_valid": true,
+   "obligations": 2,
+   "original_check_verdict": "FAIL",
+   "original_grading": {
+    "sany_valid": true,
+    "check_verdict": "FAIL",
+    "obligations_total": 1,
+    "obligations_failed": 1,
+    "failed_gates": [
+     "B:discharge"
+    ]
+   },
+   "regrade": {
+    "category": "archived-input-context",
+    "method": "exact-archived-solution-cold-replay",
+    "trigger": "Error: Unknown module \"AsyncTerminationDetection\"",
+    "checker": "v1.0.0-9-g6c70aa4",
+    "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+    "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+    "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+    "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+    "tlapm_version": "80172c6",
+    "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+    "obligations": "2/2 proved",
+    "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+    "solution_sha256": "6a466c38fda057827ed774f79662ce62f9508f066482fc091f8936f0720858a4",
+    "baseline_sha256": "324835471e8146c983055c665e34b1aa6890e67b70afcee5b74152a8bfbb5ade",
+    "dependency_sha256": {
+     "AsyncTerminationDetection.tla": "fb99591c97ae77753e9eb60f83fa9db3ec5beeaa528b8e0694f30735fb22fb2d",
+     "EWD998.tla": "9640c4e87778859cfe1b427455bd27cd6ae112489c86c71a5745a14105bb5964",
+     "EWD998PCal.tla": "1538a2661e76e5bab7e5dde4a6de869a631ad919524d04cf0b863367badcbcb2",
+     "EWD998_proof.tla": "55c06814c2284f96f5792414164856599298af80bb7fb0f2386b10dbacae0811"
+    },
+    "recovered_dependencies": {},
+    "evidence_sha256": "fb4c805ca5b7115623460c431d2ed8254f31e8ca8e6f687a03cb4010897ec1f0",
+    "original_regraded": true,
+    "date": "2026-08-04"
+   }
   },
   {
    "benchmark": "tlaplus_examples_ewd998/AsyncTerminationDetection_proof_Liveness.tla",
@@ -6519,19 +7845,51 @@
    "backend": "copilot",
    "mode": "proof-completion",
    "agent_exit": 0,
-   "check_verdict": "FAIL",
    "time_secs": 587.4064846038818,
    "error": "",
    "input_tokens": 0,
    "output_tokens": 39700,
-   "sany_valid": true,
-   "failed_gates": [
-    "B:discharge"
-   ],
-   "obligations_failed": 1,
-   "obligations_total": 1,
    "source": "tlaplus/Examples",
-   "regraded": true
+   "regraded": true,
+   "check_verdict": "PASS",
+   "sany_valid": true,
+   "obligations": 18,
+   "original_check_verdict": "FAIL",
+   "original_grading": {
+    "sany_valid": true,
+    "check_verdict": "FAIL",
+    "obligations_total": 1,
+    "obligations_failed": 1,
+    "failed_gates": [
+     "B:discharge"
+    ]
+   },
+   "regrade": {
+    "category": "archived-input-context",
+    "method": "exact-archived-solution-cold-replay",
+    "trigger": "Error: Unknown module \"AsyncTerminationDetection\"",
+    "checker": "v1.0.0-9-g6c70aa4",
+    "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+    "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+    "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+    "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+    "tlapm_version": "80172c6",
+    "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+    "obligations": "18/18 proved",
+    "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+    "solution_sha256": "9fe8735efad3b25e4b24996bbcf45a1b5b7c8e44a88e8a28f3ba76707fb013bc",
+    "baseline_sha256": "78dc709c4df080d3b034e947654a26fef0fc5dba9b47e8216bb497689cd10b32",
+    "dependency_sha256": {
+     "AsyncTerminationDetection.tla": "fb99591c97ae77753e9eb60f83fa9db3ec5beeaa528b8e0694f30735fb22fb2d",
+     "EWD998.tla": "9640c4e87778859cfe1b427455bd27cd6ae112489c86c71a5745a14105bb5964",
+     "EWD998PCal.tla": "1538a2661e76e5bab7e5dde4a6de869a631ad919524d04cf0b863367badcbcb2",
+     "EWD998_proof.tla": "55c06814c2284f96f5792414164856599298af80bb7fb0f2386b10dbacae0811"
+    },
+    "recovered_dependencies": {},
+    "evidence_sha256": "3b613a215749c255d90b619c5046f95719a7a962ba3e00f8550c12baa7abf1b9",
+    "original_regraded": true,
+    "date": "2026-08-04"
+   }
   },
   {
    "benchmark": "tlaplus_examples_ewd998/AsyncTerminationDetection_proof_Safety.tla",
@@ -6540,19 +7898,51 @@
    "backend": "copilot",
    "mode": "proof-completion",
    "agent_exit": 0,
-   "check_verdict": "FAIL",
    "time_secs": 463.5515341758728,
    "error": "",
    "input_tokens": 0,
    "output_tokens": 32580,
-   "sany_valid": true,
-   "failed_gates": [
-    "B:discharge"
-   ],
-   "obligations_failed": 1,
-   "obligations_total": 1,
    "source": "tlaplus/Examples",
-   "regraded": true
+   "regraded": true,
+   "check_verdict": "PASS",
+   "sany_valid": true,
+   "obligations": 19,
+   "original_check_verdict": "FAIL",
+   "original_grading": {
+    "sany_valid": true,
+    "check_verdict": "FAIL",
+    "obligations_total": 1,
+    "obligations_failed": 1,
+    "failed_gates": [
+     "B:discharge"
+    ]
+   },
+   "regrade": {
+    "category": "archived-input-context",
+    "method": "exact-archived-solution-cold-replay",
+    "trigger": "Error: Unknown module \"AsyncTerminationDetection\"",
+    "checker": "v1.0.0-9-g6c70aa4",
+    "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+    "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+    "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+    "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+    "tlapm_version": "80172c6",
+    "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+    "obligations": "19/19 proved",
+    "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+    "solution_sha256": "9a6bc3771192c9eee9055db68ccb85e5c3e69e5dd77e9834424e9af3f8f4c7a1",
+    "baseline_sha256": "5fc02abac01f825f1ddfb3c7b4ac51d629a9d67cb9f2f666ebb1c666127eecd7",
+    "dependency_sha256": {
+     "AsyncTerminationDetection.tla": "fb99591c97ae77753e9eb60f83fa9db3ec5beeaa528b8e0694f30735fb22fb2d",
+     "EWD998.tla": "9640c4e87778859cfe1b427455bd27cd6ae112489c86c71a5745a14105bb5964",
+     "EWD998PCal.tla": "1538a2661e76e5bab7e5dde4a6de869a631ad919524d04cf0b863367badcbcb2",
+     "EWD998_proof.tla": "55c06814c2284f96f5792414164856599298af80bb7fb0f2386b10dbacae0811"
+    },
+    "recovered_dependencies": {},
+    "evidence_sha256": "579701b9eefd28fab06cef6959e7d5cba591adde88388bf08cd5530090afe826",
+    "original_regraded": true,
+    "date": "2026-08-04"
+   }
   },
   {
    "benchmark": "tlaplus_examples_ewd998/AsyncTerminationDetection_proof_Stability.tla",
@@ -7529,19 +8919,49 @@
    "backend": "copilot",
    "mode": "proof-completion",
    "agent_exit": 0,
-   "check_verdict": "FAIL",
    "time_secs": 354.1482036113739,
    "error": "",
    "input_tokens": 0,
    "output_tokens": 23465,
-   "sany_valid": true,
-   "failed_gates": [
-    "B:discharge"
-   ],
-   "obligations_failed": 1,
-   "obligations_total": 1,
    "source": "tlaplus/Examples",
-   "regraded": true
+   "regraded": true,
+   "check_verdict": "PASS",
+   "sany_valid": true,
+   "obligations": 45,
+   "original_check_verdict": "FAIL",
+   "original_grading": {
+    "sany_valid": true,
+    "check_verdict": "FAIL",
+    "obligations_total": 1,
+    "obligations_failed": 1,
+    "failed_gates": [
+     "B:discharge"
+    ]
+   },
+   "regrade": {
+    "category": "archived-input-context",
+    "method": "exact-archived-solution-cold-replay",
+    "trigger": "Error: Unknown module \"stages\"",
+    "checker": "v1.0.0-9-g6c70aa4",
+    "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+    "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+    "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+    "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+    "tlapm_version": "80172c6",
+    "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+    "obligations": "45/45 proved",
+    "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+    "solution_sha256": "3468632a4e0d12449966f676cdd9cab0bf8eb4a38efda260db0c5141163a1bf9",
+    "baseline_sha256": "81f807bd799ce178c21d62d7d1cf74bfdca5f13e33bcb17b61e8691493e42e34",
+    "dependency_sha256": {
+     "clean.tla": "58789a4f01bdb8f5013d09e6859ca10f8a20e667ee352a472cc4cab49bca988f",
+     "stages.tla": "c0bb110ea862e7e826ba3a7122d1635fea90579ff91f5a8bab08cc6b78ea10a8"
+    },
+    "recovered_dependencies": {},
+    "evidence_sha256": "51ea276ee9418d079b37880e723371f158e3919c593b21b3c361f543d982274d",
+    "original_regraded": true,
+    "date": "2026-08-04"
+   }
   },
   {
    "benchmark": "tlaplus_examples_lamport_mutex/LamportMutex_proofs_AtMostOneHead.tla",
@@ -7998,19 +9418,51 @@
    "backend": "copilot",
    "mode": "proof-completion",
    "agent_exit": 0,
-   "check_verdict": "FAIL",
    "time_secs": 1717.6530330181122,
    "error": "",
    "input_tokens": 0,
    "output_tokens": 118587,
-   "sany_valid": true,
-   "failed_gates": [
-    "B:discharge"
-   ],
-   "obligations_failed": 1,
-   "obligations_total": 1,
    "source": "tlaplus/Examples",
-   "regraded": true
+   "regraded": true,
+   "check_verdict": "PASS",
+   "sany_valid": true,
+   "obligations": 215,
+   "original_check_verdict": "FAIL",
+   "original_grading": {
+    "sany_valid": true,
+    "check_verdict": "FAIL",
+    "obligations_total": 1,
+    "obligations_failed": 1,
+    "failed_gates": [
+     "B:discharge"
+    ]
+   },
+   "regrade": {
+    "category": "archived-input-context",
+    "method": "exact-archived-solution-cold-replay",
+    "trigger": "Error: Unknown module \"Lock\"",
+    "checker": "v1.0.0-9-g6c70aa4",
+    "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+    "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+    "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+    "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+    "tlapm_version": "80172c6",
+    "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+    "obligations": "215/215 proved",
+    "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+    "solution_sha256": "f22b9ae2c099660780e8615e1c3821e1eb4f312122b205d92b50c49146d79e2d",
+    "baseline_sha256": "103ecaca858479787d2e6c05b3379d6493668d14a0f0f6ffd15b2490ad76eb5a",
+    "dependency_sha256": {
+     "Lock.tla": "ec449f24d9de1e1372657f4a47b83a4448de0935600395b7a48d99cdf6250665",
+     "LockHS.tla": "4d9a5e9d8895f3de4055b23dbfa443941c7066d389cf53f61524ae90bcab6412",
+     "Peterson.tla": "91518d8541a63dd6b8ae03111f0c8a37d03404848424e406ce9d8cf746b2b4ae",
+     "Stuttering.tla": "312d35a4ba300840cc758b7e970a5c7c460a40e5e820851adbf2bd5ad49cddf9"
+    },
+    "recovered_dependencies": {},
+    "evidence_sha256": "b9e216003d53dd8739d6716787cac6ef73fc7cd26ce9f09e27885cf4bbf38c4c",
+    "original_regraded": true,
+    "date": "2026-08-04"
+   }
   },
   {
    "benchmark": "tlaplus_examples_locks_auxiliary_vars/Peterson_Typing.tla",
@@ -8035,19 +9487,48 @@
    "backend": "copilot",
    "mode": "proof-completion",
    "agent_exit": 0,
-   "check_verdict": "FAIL",
    "time_secs": 132.281720161438,
    "error": "",
    "input_tokens": 0,
    "output_tokens": 7869,
-   "sany_valid": true,
-   "failed_gates": [
-    "B:discharge"
-   ],
-   "obligations_failed": 1,
-   "obligations_total": 1,
    "source": "tlaplus/Examples",
-   "regraded": true
+   "regraded": true,
+   "check_verdict": "PASS",
+   "sany_valid": true,
+   "obligations": 12,
+   "original_check_verdict": "FAIL",
+   "original_grading": {
+    "sany_valid": true,
+    "check_verdict": "FAIL",
+    "obligations_total": 1,
+    "obligations_failed": 1,
+    "failed_gates": [
+     "B:discharge"
+    ]
+   },
+   "regrade": {
+    "category": "archived-input-context",
+    "method": "exact-archived-solution-cold-replay",
+    "trigger": "Error: Unknown module \"spanning\"",
+    "checker": "v1.0.0-9-g6c70aa4",
+    "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+    "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+    "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+    "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+    "tlapm_version": "80172c6",
+    "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+    "obligations": "12/12 proved",
+    "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+    "solution_sha256": "1b2b44c2178d5f955eef51d34c66c06db47fecdde668cce8d265bdabdf13fb04",
+    "baseline_sha256": "5bb87adabcec40b9c6a30ecff7d24d3c2defaba3f7e391149f8f512fece016bb",
+    "dependency_sha256": {
+     "spanning.tla": "1bd36ba2a7c62b533cbd2aab8b99783e3473e78988f733498609596a43082fea"
+    },
+    "recovered_dependencies": {},
+    "evidence_sha256": "4f371fcb1d9763663957f398a1f64b65abcec9cae4e7919fc3681fd50755696b",
+    "original_regraded": true,
+    "date": "2026-08-04"
+   }
   },
   {
    "benchmark": "tlaplus_examples_spanning/spanning_proof_SntMsgStep.tla",
@@ -8056,19 +9537,48 @@
    "backend": "copilot",
    "mode": "proof-completion",
    "agent_exit": 0,
-   "check_verdict": "FAIL",
    "time_secs": 459.27016377449036,
    "error": "",
    "input_tokens": 0,
    "output_tokens": 37202,
-   "sany_valid": true,
-   "failed_gates": [
-    "B:discharge"
-   ],
-   "obligations_failed": 1,
-   "obligations_total": 1,
    "source": "tlaplus/Examples",
-   "regraded": true
+   "regraded": true,
+   "check_verdict": "PASS",
+   "sany_valid": true,
+   "obligations": 102,
+   "original_check_verdict": "FAIL",
+   "original_grading": {
+    "sany_valid": true,
+    "check_verdict": "FAIL",
+    "obligations_total": 1,
+    "obligations_failed": 1,
+    "failed_gates": [
+     "B:discharge"
+    ]
+   },
+   "regrade": {
+    "category": "archived-input-context",
+    "method": "exact-archived-solution-cold-replay",
+    "trigger": "Error: Unknown module \"spanning\"",
+    "checker": "v1.0.0-9-g6c70aa4",
+    "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+    "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+    "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+    "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+    "tlapm_version": "80172c6",
+    "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+    "obligations": "102/102 proved",
+    "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+    "solution_sha256": "75fd247a90f9ee7fe8b85009a91b856646bd895034215c49af5a6ff5fbb26284",
+    "baseline_sha256": "2272a7a8824dd9004aa64b743af3c7ee91bce5e204f7826f2dd515e949084344",
+    "dependency_sha256": {
+     "spanning.tla": "1bd36ba2a7c62b533cbd2aab8b99783e3473e78988f733498609596a43082fea"
+    },
+    "recovered_dependencies": {},
+    "evidence_sha256": "601f0cd3a85f54ea2e0057ae4f98f50593ad3b7073e94eef3e3a8298006dec66",
+    "original_regraded": true,
+    "date": "2026-08-04"
+   }
   },
   {
    "benchmark": "tlaplus_examples_sums_even/sums_even_T1.tla",
@@ -8130,16 +9640,46 @@
    "backend": "copilot",
    "mode": "proof-completion",
    "agent_exit": 1,
-   "check_verdict": "FAIL",
    "time_secs": 2449.398570537567,
    "error": "",
    "input_tokens": 0,
    "output_tokens": 141057,
+   "source": "tlaplus/Examples",
+   "check_verdict": "PASS",
    "sany_valid": true,
-   "failed_gates": [
-    "B:discharge"
-   ],
-   "source": "tlaplus/Examples"
+   "obligations": 370,
+   "regraded": true,
+   "original_check_verdict": "FAIL",
+   "original_grading": {
+    "sany_valid": true,
+    "check_verdict": "FAIL",
+    "failed_gates": [
+     "B:discharge"
+    ]
+   },
+   "regrade": {
+    "category": "trusted-community-library",
+    "method": "exact-archived-solution-cold-replay",
+    "trigger": "Error: Unknown module \"SequencesExt\"",
+    "checker": "v1.0.0-9-g6c70aa4",
+    "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+    "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+    "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+    "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+    "tlapm_version": "80172c6",
+    "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+    "obligations": "370/370 proved",
+    "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+    "solution_sha256": "26c2d8a3b1bf1dcc1dcea993a5251737dcabe6193a0443b6dd1738043fc779be",
+    "baseline_sha256": "1ec2f34a3496008722744f02ea72a3c3b8f6dd3e0fa211156f092ee66dd180f0",
+    "dependency_sha256": {
+     "tcp.tla": "b16d88c512400b3adc3637b6060f79cc0818e9253540c2631f54a890882a3fe7"
+    },
+    "recovered_dependencies": {},
+    "evidence_sha256": "362bbf2032d040e159f04b242037759f114e449836bb9aa8cc6095d15731e7b6",
+    "original_regraded": false,
+    "date": "2026-08-04"
+   }
   },
   {
    "benchmark": "tlaplus_examples_tcp/tcp_proof_IndInvStutter.tla",
@@ -8148,16 +9688,46 @@
    "backend": "copilot",
    "mode": "proof-completion",
    "agent_exit": 1,
-   "check_verdict": "FAIL",
    "time_secs": 1247.3323276042938,
    "error": "",
    "input_tokens": 0,
    "output_tokens": 70236,
+   "source": "tlaplus/Examples",
+   "check_verdict": "PASS",
    "sany_valid": true,
-   "failed_gates": [
-    "B:discharge"
-   ],
-   "source": "tlaplus/Examples"
+   "obligations": 6,
+   "regraded": true,
+   "original_check_verdict": "FAIL",
+   "original_grading": {
+    "sany_valid": true,
+    "check_verdict": "FAIL",
+    "failed_gates": [
+     "B:discharge"
+    ]
+   },
+   "regrade": {
+    "category": "trusted-community-library",
+    "method": "exact-archived-solution-cold-replay",
+    "trigger": "Error: Unknown module \"SequencesExt\"",
+    "checker": "v1.0.0-9-g6c70aa4",
+    "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+    "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+    "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+    "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+    "tlapm_version": "80172c6",
+    "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+    "obligations": "6/6 proved",
+    "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+    "solution_sha256": "f0b31f55144d22b77e157bfe1830bcd19f2d156cc83c526ac03ecac1aee9378c",
+    "baseline_sha256": "c26242644e92fbe709a579495bdc23c369b203400f007df72cc1c182a3e6de52",
+    "dependency_sha256": {
+     "tcp.tla": "b16d88c512400b3adc3637b6060f79cc0818e9253540c2631f54a890882a3fe7"
+    },
+    "recovered_dependencies": {},
+    "evidence_sha256": "5b6c0a264c001f295c7621fbec378ab2e1ce8de27e9c9b00d71029dd9ba30ad6",
+    "original_regraded": false,
+    "date": "2026-08-04"
+   }
   },
   {
    "benchmark": "tlaplus_examples_tcp/tcp_proof_IndInvSystem.tla",
@@ -8204,17 +9774,46 @@
    "backend": "copilot",
    "mode": "proof-completion",
    "agent_exit": 0,
-   "check_verdict": "FAIL",
    "time_secs": 711.6162261962891,
    "error": "",
    "input_tokens": 0,
    "output_tokens": 43065,
-   "sany_valid": true,
-   "failed_gates": [
-    "B:discharge"
-   ],
    "source": "tlaplus/Examples",
-   "regraded": true
+   "regraded": true,
+   "check_verdict": "PASS",
+   "sany_valid": true,
+   "obligations": 13,
+   "original_check_verdict": "FAIL",
+   "original_grading": {
+    "sany_valid": true,
+    "check_verdict": "FAIL",
+    "failed_gates": [
+     "B:discharge"
+    ]
+   },
+   "regrade": {
+    "category": "trusted-community-library",
+    "method": "exact-archived-solution-cold-replay",
+    "trigger": "Error: Unknown module \"SequencesExtTheorems\"",
+    "checker": "v1.0.0-9-g6c70aa4",
+    "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+    "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+    "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+    "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+    "tlapm_version": "80172c6",
+    "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+    "obligations": "13/13 proved",
+    "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+    "solution_sha256": "31eec1d3ee0e2f2f7a15f51c641a6be859dd0cfd71d7147d7525d934c8b2dd26",
+    "baseline_sha256": "b4fea3c80cf825691005d54129c694f9edb9d82573a6db30356d0115a63ec50a",
+    "dependency_sha256": {
+     "tcp.tla": "b16d88c512400b3adc3637b6060f79cc0818e9253540c2631f54a890882a3fe7"
+    },
+    "recovered_dependencies": {},
+    "evidence_sha256": "e0451a6b4d0b078aeb5b7177f01d71adf3501d521c6b628740a3bd831068b633",
+    "original_regraded": true,
+    "date": "2026-08-04"
+   }
   },
   {
    "benchmark": "tlaplus_examples_tcp/tcp_proof_InvIsAB.tla",
@@ -8255,17 +9854,46 @@
    "backend": "copilot",
    "mode": "proof-completion",
    "agent_exit": 0,
-   "check_verdict": "FAIL",
    "time_secs": 780.3047208786011,
    "error": "",
    "input_tokens": 0,
    "output_tokens": 40048,
-   "sany_valid": true,
-   "failed_gates": [
-    "B:discharge"
-   ],
    "source": "tlaplus/Examples",
-   "regraded": true
+   "regraded": true,
+   "check_verdict": "PASS",
+   "sany_valid": true,
+   "obligations": 53,
+   "original_check_verdict": "FAIL",
+   "original_grading": {
+    "sany_valid": true,
+    "check_verdict": "FAIL",
+    "failed_gates": [
+     "B:discharge"
+    ]
+   },
+   "regrade": {
+    "category": "trusted-community-library",
+    "method": "exact-archived-solution-cold-replay",
+    "trigger": "Error: Unknown module \"SequencesExtTheorems\"",
+    "checker": "v1.0.0-9-g6c70aa4",
+    "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+    "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+    "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+    "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+    "tlapm_version": "80172c6",
+    "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+    "obligations": "53/53 proved",
+    "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+    "solution_sha256": "8636b913fb9a9c32fe06d2b7379956907a027da9c0f9d4ad05ec1de048afec4c",
+    "baseline_sha256": "047266edf1a0cfca01f1aa0af0ae907a65b0fa289edfc5f14c81dbf10e7d19c8",
+    "dependency_sha256": {
+     "tcp.tla": "b16d88c512400b3adc3637b6060f79cc0818e9253540c2631f54a890882a3fe7"
+    },
+    "recovered_dependencies": {},
+    "evidence_sha256": "70c86beef8a4ebe36176daaa253e0c579bfff6e840936e60d1a9d762e8de0ee4",
+    "original_regraded": true,
+    "date": "2026-08-04"
+   }
   },
   {
    "benchmark": "tlaplus_examples_tcp/tcp_proof_PrefixOneNonEmpty.tla",
@@ -8274,17 +9902,46 @@
    "backend": "copilot",
    "mode": "proof-completion",
    "agent_exit": 0,
-   "check_verdict": "FAIL",
    "time_secs": 816.0367653369904,
    "error": "",
    "input_tokens": 0,
    "output_tokens": 46450,
-   "sany_valid": true,
-   "failed_gates": [
-    "B:discharge"
-   ],
    "source": "tlaplus/Examples",
-   "regraded": true
+   "regraded": true,
+   "check_verdict": "PASS",
+   "sany_valid": true,
+   "obligations": 21,
+   "original_check_verdict": "FAIL",
+   "original_grading": {
+    "sany_valid": true,
+    "check_verdict": "FAIL",
+    "failed_gates": [
+     "B:discharge"
+    ]
+   },
+   "regrade": {
+    "category": "trusted-community-library",
+    "method": "exact-archived-solution-cold-replay",
+    "trigger": "Error: Unknown module \"SequencesExtTheorems\"",
+    "checker": "v1.0.0-9-g6c70aa4",
+    "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+    "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+    "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+    "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+    "tlapm_version": "80172c6",
+    "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+    "obligations": "21/21 proved",
+    "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+    "solution_sha256": "3412d7b235c632cdbbf728792102b033f50ebd8e91936997f39fa6d74b45f7fa",
+    "baseline_sha256": "fb778b101939743d0ee25f0d1ae63cec11a632fa143bdde062b1abbe77204edd",
+    "dependency_sha256": {
+     "tcp.tla": "b16d88c512400b3adc3637b6060f79cc0818e9253540c2631f54a890882a3fe7"
+    },
+    "recovered_dependencies": {},
+    "evidence_sha256": "f78976a4661fdf24d182ada9dac1bb36c5e623791ba644460ebc2375313c5dcb",
+    "original_regraded": true,
+    "date": "2026-08-04"
+   }
   },
   {
    "benchmark": "tlaplus_examples_tcp/tcp_proof_PrefixTwoNonEmpty.tla",
@@ -8311,17 +9968,46 @@
    "backend": "copilot",
    "mode": "proof-completion",
    "agent_exit": 0,
-   "check_verdict": "FAIL",
    "time_secs": 820.9048502445221,
    "error": "",
    "input_tokens": 0,
    "output_tokens": 46943,
-   "sany_valid": true,
-   "failed_gates": [
-    "B:discharge"
-   ],
    "source": "tlaplus/Examples",
-   "regraded": true
+   "regraded": true,
+   "check_verdict": "PASS",
+   "sany_valid": true,
+   "obligations": 10,
+   "original_check_verdict": "FAIL",
+   "original_grading": {
+    "sany_valid": true,
+    "check_verdict": "FAIL",
+    "failed_gates": [
+     "B:discharge"
+    ]
+   },
+   "regrade": {
+    "category": "trusted-community-library",
+    "method": "exact-archived-solution-cold-replay",
+    "trigger": "Error: Unknown module \"SequencesExtTheorems\"",
+    "checker": "v1.0.0-9-g6c70aa4",
+    "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+    "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+    "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+    "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+    "tlapm_version": "80172c6",
+    "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+    "obligations": "10/10 proved",
+    "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+    "solution_sha256": "f932f4546c1d7582fb43565438d20a79814edd098e7a64074fd1b9f247811cdb",
+    "baseline_sha256": "c67fff445a124ff5edb0078fa4a18bc399307e0a488f75bfed6abe63b4518e39",
+    "dependency_sha256": {
+     "tcp.tla": "b16d88c512400b3adc3637b6060f79cc0818e9253540c2631f54a890882a3fe7"
+    },
+    "recovered_dependencies": {},
+    "evidence_sha256": "0d052a3937dc278b9b3a0d27ce7be2d304adb5332571659904cba3de1a0470d7",
+    "original_regraded": true,
+    "date": "2026-08-04"
+   }
   },
   {
    "benchmark": "tlaplus_examples_tcp/tcp_proof_SpecImpliesInv.tla",
@@ -8362,16 +10048,46 @@
    "backend": "copilot",
    "mode": "proof-completion",
    "agent_exit": 1,
-   "check_verdict": "FAIL",
    "time_secs": 1468.3760232925415,
    "error": "",
    "input_tokens": 0,
    "output_tokens": 70713,
+   "source": "tlaplus/Examples",
+   "check_verdict": "PASS",
    "sany_valid": true,
-   "failed_gates": [
-    "B:discharge"
-   ],
-   "source": "tlaplus/Examples"
+   "obligations": 180,
+   "regraded": true,
+   "original_check_verdict": "FAIL",
+   "original_grading": {
+    "sany_valid": true,
+    "check_verdict": "FAIL",
+    "failed_gates": [
+     "B:discharge"
+    ]
+   },
+   "regrade": {
+    "category": "trusted-community-library",
+    "method": "exact-archived-solution-cold-replay",
+    "trigger": "Error: Unknown module \"SequencesExt\"",
+    "checker": "v1.0.0-9-g6c70aa4",
+    "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+    "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+    "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+    "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+    "tlapm_version": "80172c6",
+    "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+    "obligations": "180/180 proved",
+    "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+    "solution_sha256": "c9276f7360d490444d1dcc966172b31fa115177bd84626701fbfb3abdcdc488f",
+    "baseline_sha256": "859d5d7b114ae6f2664b19bb396a86d5e4d819cc29a442d1b466fe55714fab72",
+    "dependency_sha256": {
+     "tcp.tla": "b16d88c512400b3adc3637b6060f79cc0818e9253540c2631f54a890882a3fe7"
+    },
+    "recovered_dependencies": {},
+    "evidence_sha256": "8b62c82273b9471fd532f14600e19c9da1d267373f0f0e21debb4f5acfbb2201",
+    "original_regraded": false,
+    "date": "2026-08-04"
+   }
   },
   {
    "benchmark": "tlaplus_examples_transaction_commit/PaxosCommit_proof_InitInv.tla",
@@ -8944,19 +10660,51 @@
    "backend": "copilot",
    "mode": "proof-from-scratch",
    "agent_exit": 0,
-   "check_verdict": "FAIL",
    "time_secs": 1307.0415811538696,
    "error": "",
    "input_tokens": 0,
    "output_tokens": 86838,
-   "sany_valid": true,
-   "failed_gates": [
-    "B:discharge"
-   ],
-   "obligations_failed": 1,
-   "obligations_total": 1,
    "source": "TLAPS distribution examples",
-   "regraded": true
+   "regraded": true,
+   "check_verdict": "PASS",
+   "sany_valid": true,
+   "obligations": 155,
+   "original_check_verdict": "FAIL",
+   "original_grading": {
+    "sany_valid": true,
+    "check_verdict": "FAIL",
+    "obligations_total": 1,
+    "obligations_failed": 1,
+    "failed_gates": [
+     "B:discharge"
+    ]
+   },
+   "regrade": {
+    "category": "archived-input-context",
+    "method": "exact-archived-solution-cold-replay",
+    "trigger": "Error: Unknown module \"PaxosTuple\"",
+    "checker": "v1.0.0-9-g6c70aa4",
+    "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+    "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+    "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+    "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+    "tlapm_version": "80172c6",
+    "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+    "obligations": "155/155 proved",
+    "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+    "solution_sha256": "808bb77ecf92f03c2a47cf4df06f9be27169281a9ccd33e2b4665e15c6466348",
+    "baseline_sha256": "d56a00c52560b0247f29b933a02e3dc33e424628eb9d304e39faf1dbd1047164",
+    "dependency_sha256": {
+     "Consensus.tla": "b5b78974f8c9376c8e1f325834b3cf8b032193b55aba5c2b6f46a983a7285900",
+     "PaxosTuple.tla": "91c147e533858586ac96ed0ead3b2feeb76073fac998a26c995ebf15a190cb2f",
+     "Sets.tla": "183f1d902f2e1861d1996e0a100cc0b9ed9ae83495194dadaf5a0bc1450604b2",
+     "Voting.tla": "91b428c66d419b55c3e297243a42b7cf78f054379a82bd7310516a32e5cf6783"
+    },
+    "recovered_dependencies": {},
+    "evidence_sha256": "a1e28fe58ca22f8209348e7dfbbb3d8ca32d1b6a8a5d0f6fd014186454eff580",
+    "original_regraded": true,
+    "date": "2026-08-04"
+   }
   },
   {
    "benchmark": "Consensus/PaxosProof_line130.tla",
@@ -8965,19 +10713,51 @@
    "backend": "copilot",
    "mode": "proof-from-scratch",
    "agent_exit": 0,
-   "check_verdict": "FAIL",
    "time_secs": 914.7510504722595,
    "error": "",
    "input_tokens": 0,
    "output_tokens": 61439,
-   "sany_valid": true,
-   "failed_gates": [
-    "B:discharge"
-   ],
-   "obligations_failed": 1,
-   "obligations_total": 1,
    "source": "TLAPS distribution examples",
-   "regraded": true
+   "regraded": true,
+   "check_verdict": "PASS",
+   "sany_valid": true,
+   "obligations": 167,
+   "original_check_verdict": "FAIL",
+   "original_grading": {
+    "sany_valid": true,
+    "check_verdict": "FAIL",
+    "obligations_total": 1,
+    "obligations_failed": 1,
+    "failed_gates": [
+     "B:discharge"
+    ]
+   },
+   "regrade": {
+    "category": "archived-input-context",
+    "method": "exact-archived-solution-cold-replay",
+    "trigger": "Error: Unknown module \"PaxosTuple\"",
+    "checker": "v1.0.0-9-g6c70aa4",
+    "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+    "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+    "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+    "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+    "tlapm_version": "80172c6",
+    "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+    "obligations": "167/167 proved",
+    "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+    "solution_sha256": "19f13a6ba683a972b83c248fe3d12c07e64e0af128c5073806f29d07a59d8f19",
+    "baseline_sha256": "91b59001beed3667aa3be4ee6b9adce78e66fa2db452b74953fea2d345aadc4c",
+    "dependency_sha256": {
+     "Consensus.tla": "b5b78974f8c9376c8e1f325834b3cf8b032193b55aba5c2b6f46a983a7285900",
+     "PaxosTuple.tla": "91c147e533858586ac96ed0ead3b2feeb76073fac998a26c995ebf15a190cb2f",
+     "Sets.tla": "183f1d902f2e1861d1996e0a100cc0b9ed9ae83495194dadaf5a0bc1450604b2",
+     "Voting.tla": "91b428c66d419b55c3e297243a42b7cf78f054379a82bd7310516a32e5cf6783"
+    },
+    "recovered_dependencies": {},
+    "evidence_sha256": "f637a570c31b4d89d83b3387fe21a2ee964e469f47dea1cb6c3ec5f38c4559a8",
+    "original_regraded": true,
+    "date": "2026-08-04"
+   }
   },
   {
    "benchmark": "Consensus/PaxosProof_line91.tla",
@@ -9111,19 +10891,48 @@
    "backend": "copilot",
    "mode": "proof-from-scratch",
    "agent_exit": 0,
-   "check_verdict": "FAIL",
    "time_secs": 799.1267409324646,
    "error": "",
    "input_tokens": 0,
    "output_tokens": 58934,
-   "sany_valid": true,
-   "failed_gates": [
-    "B:discharge"
-   ],
-   "obligations_failed": 1,
-   "obligations_total": 1,
    "source": "TLAPS distribution examples",
-   "regraded": true
+   "regraded": true,
+   "check_verdict": "PASS",
+   "sany_valid": true,
+   "obligations": 307,
+   "original_check_verdict": "FAIL",
+   "original_grading": {
+    "sany_valid": true,
+    "check_verdict": "FAIL",
+    "obligations_total": 1,
+    "obligations_failed": 1,
+    "failed_gates": [
+     "B:discharge"
+    ]
+   },
+   "regrade": {
+    "category": "archived-input-context",
+    "method": "exact-archived-solution-cold-replay",
+    "trigger": "Error: Unknown module \"Sets\"",
+    "checker": "v1.0.0-9-g6c70aa4",
+    "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+    "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+    "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+    "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+    "tlapm_version": "80172c6",
+    "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+    "obligations": "307/307 proved",
+    "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+    "solution_sha256": "d03d1177a11cf8dc237bc08616511f2aec2119a003667a51bfc29cd8999cc306",
+    "baseline_sha256": "51001d515d205bec6ec75705e3dd9cb8084d1ef10e5fa9d4d0b40f158a9fa191",
+    "dependency_sha256": {
+     "Sets.tla": "183f1d902f2e1861d1996e0a100cc0b9ed9ae83495194dadaf5a0bc1450604b2"
+    },
+    "recovered_dependencies": {},
+    "evidence_sha256": "85b3b48d5193b998e1cba6f511a2714c7a5f37d0fc2daf761b5041e0cb16df18",
+    "original_regraded": true,
+    "date": "2026-08-04"
+   }
   },
   {
    "benchmark": "Data/SequencesTheorems_RemoveSeq.tla",
@@ -9265,19 +11074,48 @@
    "backend": "copilot",
    "mode": "proof-from-scratch",
    "agent_exit": 0,
-   "check_verdict": "FAIL",
    "time_secs": 878.2868132591248,
    "error": "",
    "input_tokens": 0,
    "output_tokens": 64251,
-   "sany_valid": true,
-   "failed_gates": [
-    "B:discharge"
-   ],
-   "obligations_failed": 1,
-   "obligations_total": 1,
    "source": "TLAPS distribution examples",
-   "regraded": true
+   "regraded": true,
+   "check_verdict": "PASS",
+   "sany_valid": true,
+   "obligations": 163,
+   "original_check_verdict": "FAIL",
+   "original_grading": {
+    "sany_valid": true,
+    "check_verdict": "FAIL",
+    "obligations_total": 1,
+    "obligations_failed": 1,
+    "failed_gates": [
+     "B:discharge"
+    ]
+   },
+   "regrade": {
+    "category": "archived-input-context",
+    "method": "exact-archived-solution-cold-replay",
+    "trigger": "Error: Unknown module \"EWD840\"",
+    "checker": "v1.0.0-9-g6c70aa4",
+    "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+    "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+    "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+    "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+    "tlapm_version": "80172c6",
+    "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+    "obligations": "163/163 proved",
+    "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+    "solution_sha256": "a50cd93a1441e746c4f8a499548456231283749d5aa1d03fb988b4c3abe17ee2",
+    "baseline_sha256": "56d711fe0882dae0b31fa021b8b764ef0438f604e408cb32e9ef3de4578de218",
+    "dependency_sha256": {
+     "EWD840.tla": "de0c827e38daf89fc30fa808901269a7af335875b1251275fb786212a5953d70"
+    },
+    "recovered_dependencies": {},
+    "evidence_sha256": "91cb749db5cd37056bcc52a0cafd241b666e7b8def2f999002aa98be57f7a4e7",
+    "original_regraded": true,
+    "date": "2026-08-04"
+   }
   },
   {
    "benchmark": "Euclid/EuclidEx_PartialCorrectness.tla",
@@ -9484,19 +11322,50 @@
    "backend": "copilot",
    "mode": "proof-from-scratch",
    "agent_exit": 0,
-   "check_verdict": "FAIL",
    "time_secs": 2160.7293980121613,
    "error": "",
    "input_tokens": 0,
    "output_tokens": 163657,
-   "sany_valid": true,
-   "failed_gates": [
-    "B:discharge"
-   ],
-   "obligations_failed": 1,
-   "obligations_total": 1,
    "source": "TLAPS distribution examples",
-   "regraded": true
+   "regraded": true,
+   "check_verdict": "PASS",
+   "sany_valid": true,
+   "obligations": 663,
+   "original_check_verdict": "FAIL",
+   "original_grading": {
+    "sany_valid": true,
+    "check_verdict": "FAIL",
+    "obligations_total": 1,
+    "obligations_failed": 1,
+    "failed_gates": [
+     "B:discharge"
+    ]
+   },
+   "regrade": {
+    "category": "archived-input-context",
+    "method": "exact-archived-solution-cold-replay",
+    "trigger": "Error: Unknown module \"PaxosHistVar\"",
+    "checker": "v1.0.0-9-g6c70aa4",
+    "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+    "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+    "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+    "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+    "tlapm_version": "80172c6",
+    "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+    "obligations": "663/663 proved",
+    "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+    "solution_sha256": "dbc4ba858738608d03d2cd2e6ef439438639e52dc2e8baa41504ee18b67c6cbd",
+    "baseline_sha256": "319313c2b02a63413e880ce6cce01abac7a3925392db7bde45f33b3e941072ca",
+    "dependency_sha256": {
+     "Consensus.tla": "b56657a8c1c5c462de2be84ea2113cba3eedb9dc25ecc1915303fc67ce720a19",
+     "Paxos.tla": "6ebfdc9aa3b631562e003de19104191153d6b67bb8147d3d3e802fbbc3307b72",
+     "PaxosHistVar.tla": "a16b7d24dba5b52ac2a4b178cf8e8058012ee477d5fc23a0681f08f014787396"
+    },
+    "recovered_dependencies": {},
+    "evidence_sha256": "5c9d7a207a4589425ae3aa384bb96c7b3313439003dc8304906caa92b4ed7166",
+    "original_regraded": true,
+    "date": "2026-08-04"
+   }
   },
   {
    "benchmark": "Paxos/PaxosHistVar_Invariant.tla",
@@ -9505,19 +11374,50 @@
    "backend": "copilot",
    "mode": "proof-from-scratch",
    "agent_exit": 0,
-   "check_verdict": "FAIL",
    "time_secs": 2186.515873670578,
    "error": "",
    "input_tokens": 0,
    "output_tokens": 158797,
-   "sany_valid": true,
-   "failed_gates": [
-    "B:discharge"
-   ],
-   "obligations_failed": 1,
-   "obligations_total": 1,
    "source": "TLAPS distribution examples",
-   "regraded": true
+   "regraded": true,
+   "check_verdict": "PASS",
+   "sany_valid": true,
+   "obligations": 787,
+   "original_check_verdict": "FAIL",
+   "original_grading": {
+    "sany_valid": true,
+    "check_verdict": "FAIL",
+    "obligations_total": 1,
+    "obligations_failed": 1,
+    "failed_gates": [
+     "B:discharge"
+    ]
+   },
+   "regrade": {
+    "category": "archived-input-context",
+    "method": "exact-archived-solution-cold-replay",
+    "trigger": "Error: Unknown module \"PaxosHistVar\"",
+    "checker": "v1.0.0-9-g6c70aa4",
+    "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+    "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+    "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+    "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+    "tlapm_version": "80172c6",
+    "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+    "obligations": "787/787 proved",
+    "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+    "solution_sha256": "86607d445fb9758fa53b56815f12f3d7da11d4de9310033b959624383167e2cf",
+    "baseline_sha256": "85545260de3613f05890af2e4a98ba7679f5eaf42f3bba25b02122c87791f2e4",
+    "dependency_sha256": {
+     "Consensus.tla": "b56657a8c1c5c462de2be84ea2113cba3eedb9dc25ecc1915303fc67ce720a19",
+     "Paxos.tla": "6ebfdc9aa3b631562e003de19104191153d6b67bb8147d3d3e802fbbc3307b72",
+     "PaxosHistVar.tla": "a16b7d24dba5b52ac2a4b178cf8e8058012ee477d5fc23a0681f08f014787396"
+    },
+    "recovered_dependencies": {},
+    "evidence_sha256": "2e3eab2d600c82444af71195368bd4b395415a750bba14e5dbf32dc2207ef082",
+    "original_regraded": true,
+    "date": "2026-08-04"
+   }
   },
   {
    "benchmark": "Paxos/Paxos_Consistent.tla",
@@ -10365,19 +12265,48 @@
    "backend": "copilot",
    "mode": "proof-from-scratch",
    "agent_exit": 0,
-   "check_verdict": "FAIL",
    "time_secs": 371.88162636756897,
    "error": "",
    "input_tokens": 0,
    "output_tokens": 26071,
-   "sany_valid": true,
-   "failed_gates": [
-    "B:discharge"
-   ],
-   "obligations_failed": 1,
-   "obligations_total": 1,
    "source": "Ivy liveness",
-   "regraded": true
+   "regraded": true,
+   "check_verdict": "PASS",
+   "sany_valid": true,
+   "obligations": 43,
+   "original_check_verdict": "FAIL",
+   "original_grading": {
+    "sany_valid": true,
+    "check_verdict": "FAIL",
+    "obligations_total": 1,
+    "obligations_failed": 1,
+    "failed_gates": [
+     "B:discharge"
+    ]
+   },
+   "regrade": {
+    "category": "archived-input-context",
+    "method": "exact-archived-solution-cold-replay",
+    "trigger": "Error: Unknown module \"IvyTicketNested\"",
+    "checker": "v1.0.0-9-g6c70aa4",
+    "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+    "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+    "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+    "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+    "tlapm_version": "80172c6",
+    "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+    "obligations": "43/43 proved",
+    "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+    "solution_sha256": "deae3c74fba4d8e9697c9d4c48a0b93c8d404a6be2fa60113a4cb91dcc142882",
+    "baseline_sha256": "b1e1b93ab13dd03e462c67df603e782c13333b9da8c766ae9accbcb0cbb42ae7",
+    "dependency_sha256": {
+     "IvyTicketNested.tla": "7ebcb1536ed3eb515963cbf05ccfc15c98193613786cd711bcb4d3583f5dbec0"
+    },
+    "recovered_dependencies": {},
+    "evidence_sha256": "a33c27aa870c0dc07c00b1e573ee3c6af00f39c217a3d5d595044cf55994cddb",
+    "original_regraded": true,
+    "date": "2026-08-04"
+   }
   },
   {
    "benchmark": "ivy_examples_tlb/ivy_examples_tlb_Liveness.tla",
@@ -10484,19 +12413,49 @@
    "backend": "copilot",
    "mode": "proof-from-scratch",
    "agent_exit": 0,
-   "check_verdict": "FAIL",
    "time_secs": 3683.4312756061554,
    "error": "",
    "input_tokens": 0,
    "output_tokens": 208159,
-   "sany_valid": true,
-   "failed_gates": [
-    "B:discharge"
-   ],
-   "obligations_failed": 1,
-   "obligations_total": 1,
    "source": "tlaplus/Examples",
-   "regraded": true
+   "regraded": true,
+   "check_verdict": "PASS",
+   "sany_valid": true,
+   "obligations": 49,
+   "original_check_verdict": "FAIL",
+   "original_grading": {
+    "sany_valid": true,
+    "check_verdict": "FAIL",
+    "obligations_total": 1,
+    "obligations_failed": 1,
+    "failed_gates": [
+     "B:discharge"
+    ]
+   },
+   "regrade": {
+    "category": "archived-input-context",
+    "method": "exact-archived-solution-cold-replay",
+    "trigger": "Error: Unknown module \"Boulanger\"",
+    "checker": "v1.0.0-9-g6c70aa4",
+    "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+    "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+    "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+    "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+    "tlapm_version": "80172c6",
+    "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+    "obligations": "49/49 proved",
+    "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+    "solution_sha256": "2d98dda33fd754a189ca2e0e3c3e00e96a6e83b50368bcb9651d1ea25c11a7d9",
+    "baseline_sha256": "6499e118ef46d95148b33cc7098a4c65ae2a69bba08c9d0c90e16c20cf2d3644",
+    "dependency_sha256": {
+     "Bakery.tla": "2c8c35da304ecb802462510de35ab790425e64c7423f6675e6681aadaeecadcf",
+     "Boulanger.tla": "fc105e7d6c8db760810c416e764a82f786bdf8493a9a438c62c193275e0da8f9"
+    },
+    "recovered_dependencies": {},
+    "evidence_sha256": "7848825a530fe2cca4c0cdaa87ab141f6195ef6cbac7b25d3d590d5384aa48f3",
+    "original_regraded": true,
+    "date": "2026-08-04"
+   }
   },
   {
    "benchmark": "tlaplus_examples_BlockingQueue/BlockingQueueFair_proofs_BQS_Spec.tla",
@@ -10539,19 +12498,50 @@
    "backend": "copilot",
    "mode": "proof-from-scratch",
    "agent_exit": 0,
-   "check_verdict": "FAIL",
    "time_secs": 148.94662189483643,
    "error": "",
    "input_tokens": 0,
    "output_tokens": 8320,
-   "sany_valid": true,
-   "failed_gates": [
-    "B:discharge"
-   ],
-   "obligations_failed": 1,
-   "obligations_total": 1,
    "source": "tlaplus/Examples",
-   "regraded": true
+   "regraded": true,
+   "check_verdict": "PASS",
+   "sany_valid": true,
+   "obligations": 1,
+   "original_check_verdict": "FAIL",
+   "original_grading": {
+    "sany_valid": true,
+    "check_verdict": "FAIL",
+    "obligations_total": 1,
+    "obligations_failed": 1,
+    "failed_gates": [
+     "B:discharge"
+    ]
+   },
+   "regrade": {
+    "category": "archived-input-context",
+    "method": "exact-archived-solution-cold-replay",
+    "trigger": "Error: Unknown module \"BlockingQueueSplit\"",
+    "checker": "v1.0.0-9-g6c70aa4",
+    "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+    "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+    "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+    "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+    "tlapm_version": "80172c6",
+    "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+    "obligations": "1/1 proved",
+    "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+    "solution_sha256": "e1cd2f49dcfe25517292076b9a71c63dbdd433d5918beda6f324ad724026f0b2",
+    "baseline_sha256": "264221c030a9a42cf941fc843b258f3da510986dbbc4e9c019365b25fb6c6abd",
+    "dependency_sha256": {
+     "BlockingQueue.tla": "80683a56c2bcd10d41b094d62c86b335cb6f84ad0d061deaadfb3beef5291131",
+     "BlockingQueueFair.tla": "3d4665019d516cf8c1a7a293e34840faabc9ca07ff2456b78e10ce75729f1963",
+     "BlockingQueueSplit.tla": "04b64d0dd7b592a92de6e98bfa9b7579c29ab1b0c0f83e9e93069a38915a2d27"
+    },
+    "recovered_dependencies": {},
+    "evidence_sha256": "914c1792040ecf1209ed8c5fb07025d6158cf10528362a75efb909592fe84565",
+    "original_regraded": true,
+    "date": "2026-08-04"
+   }
   },
   {
    "benchmark": "tlaplus_examples_BlockingQueue/BlockingQueueSplit_proofs_Implements.tla",
@@ -10560,19 +12550,50 @@
    "backend": "copilot",
    "mode": "proof-from-scratch",
    "agent_exit": 0,
-   "check_verdict": "FAIL",
    "time_secs": 563.4647734165192,
    "error": "",
    "input_tokens": 0,
    "output_tokens": 43313,
-   "sany_valid": true,
-   "failed_gates": [
-    "B:discharge"
-   ],
-   "obligations_failed": 1,
-   "obligations_total": 1,
    "source": "tlaplus/Examples",
-   "regraded": true
+   "regraded": true,
+   "check_verdict": "PASS",
+   "sany_valid": true,
+   "obligations": 52,
+   "original_check_verdict": "FAIL",
+   "original_grading": {
+    "sany_valid": true,
+    "check_verdict": "FAIL",
+    "obligations_total": 1,
+    "obligations_failed": 1,
+    "failed_gates": [
+     "B:discharge"
+    ]
+   },
+   "regrade": {
+    "category": "archived-input-context",
+    "method": "exact-archived-solution-cold-replay",
+    "trigger": "Error: Unknown module \"BlockingQueueSplit\"",
+    "checker": "v1.0.0-9-g6c70aa4",
+    "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+    "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+    "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+    "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+    "tlapm_version": "80172c6",
+    "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+    "obligations": "52/52 proved",
+    "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+    "solution_sha256": "e28ebe5a7ff2955155eb34b60dcd579ff6fb79dcb9b21ce7ca8b5c0565027961",
+    "baseline_sha256": "1bf36ace7bc31a71d3b2de985fe7401b2cb745ad6a913c67004223d97eec19ba",
+    "dependency_sha256": {
+     "BlockingQueue.tla": "80683a56c2bcd10d41b094d62c86b335cb6f84ad0d061deaadfb3beef5291131",
+     "BlockingQueueFair.tla": "3d4665019d516cf8c1a7a293e34840faabc9ca07ff2456b78e10ce75729f1963",
+     "BlockingQueueSplit.tla": "04b64d0dd7b592a92de6e98bfa9b7579c29ab1b0c0f83e9e93069a38915a2d27"
+    },
+    "recovered_dependencies": {},
+    "evidence_sha256": "a4ed3ccaa656b5480aff03da37da003d1b808aed9491d513ea59e710375e612b",
+    "original_regraded": true,
+    "date": "2026-08-04"
+   }
   },
   {
    "benchmark": "tlaplus_examples_BlockingQueue/BlockingQueue_proofs_DeadlockFreedom.tla",
@@ -10581,19 +12602,50 @@
    "backend": "copilot",
    "mode": "proof-from-scratch",
    "agent_exit": 0,
-   "check_verdict": "FAIL",
    "time_secs": 754.3801488876343,
    "error": "",
    "input_tokens": 0,
    "output_tokens": 58277,
-   "sany_valid": true,
-   "failed_gates": [
-    "B:discharge"
-   ],
-   "obligations_failed": 1,
-   "obligations_total": 1,
    "source": "tlaplus/Examples",
-   "regraded": true
+   "regraded": true,
+   "check_verdict": "PASS",
+   "sany_valid": true,
+   "obligations": 234,
+   "original_check_verdict": "FAIL",
+   "original_grading": {
+    "sany_valid": true,
+    "check_verdict": "FAIL",
+    "obligations_total": 1,
+    "obligations_failed": 1,
+    "failed_gates": [
+     "B:discharge"
+    ]
+   },
+   "regrade": {
+    "category": "archived-input-context",
+    "method": "exact-archived-solution-cold-replay",
+    "trigger": "Error: Unknown module \"BlockingQueue\"",
+    "checker": "v1.0.0-9-g6c70aa4",
+    "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+    "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+    "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+    "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+    "tlapm_version": "80172c6",
+    "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+    "obligations": "234/234 proved",
+    "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+    "solution_sha256": "b6727eda7ee1daefd767b54db34cbafda6494b3dc6ccbeffc505828ef4184485",
+    "baseline_sha256": "99fc69bae3f047252a9e0ad0fc085b313308a921099a395a4d3fe78cd47eddec",
+    "dependency_sha256": {
+     "BlockingQueue.tla": "80683a56c2bcd10d41b094d62c86b335cb6f84ad0d061deaadfb3beef5291131",
+     "BlockingQueueFair.tla": "3d4665019d516cf8c1a7a293e34840faabc9ca07ff2456b78e10ce75729f1963",
+     "BlockingQueueSplit.tla": "04b64d0dd7b592a92de6e98bfa9b7579c29ab1b0c0f83e9e93069a38915a2d27"
+    },
+    "recovered_dependencies": {},
+    "evidence_sha256": "ee18d7d5f3bb93bab8f97bfd738afdf3734e0757da306a966dd6bd22ad0cfc85",
+    "original_regraded": true,
+    "date": "2026-08-04"
+   }
   },
   {
    "benchmark": "tlaplus_examples_CigaretteSmokers/CigaretteSmokers_proof_AtMostOneCorrect.tla",
@@ -11246,19 +13298,51 @@
    "backend": "copilot",
    "mode": "proof-from-scratch",
    "agent_exit": 0,
-   "check_verdict": "FAIL",
    "time_secs": 95.33816409111023,
    "error": "",
    "input_tokens": 0,
    "output_tokens": 4051,
-   "sany_valid": true,
-   "failed_gates": [
-    "B:discharge"
-   ],
-   "obligations_failed": 1,
-   "obligations_total": 1,
    "source": "tlaplus/Examples",
-   "regraded": true
+   "regraded": true,
+   "check_verdict": "PASS",
+   "sany_valid": true,
+   "obligations": 6,
+   "original_check_verdict": "FAIL",
+   "original_grading": {
+    "sany_valid": true,
+    "check_verdict": "FAIL",
+    "obligations_total": 1,
+    "obligations_failed": 1,
+    "failed_gates": [
+     "B:discharge"
+    ]
+   },
+   "regrade": {
+    "category": "archived-input-context",
+    "method": "exact-archived-solution-cold-replay",
+    "trigger": "Error: Unknown module \"HourClock\"",
+    "checker": "v1.0.0-9-g6c70aa4",
+    "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+    "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+    "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+    "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+    "tlapm_version": "80172c6",
+    "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+    "obligations": "6/6 proved",
+    "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+    "solution_sha256": "3503f109ced430a33027bc84d35fa24da192dde3e3a92caaf3659d2bc59bada7",
+    "baseline_sha256": "b0d06388a97c10888f92d24a0c5165fdf911de1466e655a005724c17f00bbf6e",
+    "dependency_sha256": {
+     "Channel.tla": "88eff74235f0c82286dd4128571bec8c7863662a4cd65b8ec8cea5132126b11c",
+     "HourClock.tla": "1009a70d2b4520377b18c4cabd7254fb8976db87a5bfbdbe6a788af72a67e8d9",
+     "InternalMemory.tla": "a76ff925ecbc27185016321ff57cfc6151a83e5746d090dd959bcd2be4d43d90",
+     "MemoryInterface.tla": "564dd0e49957829e5493e643c28e5aed392533eb312327e2a688df1c6e4c64dd"
+    },
+    "recovered_dependencies": {},
+    "evidence_sha256": "6aa658b680ed13001cf9ee69a7e0c7ec5c5d3fb12c2b2461a2b5f6545cb860dd",
+    "original_regraded": true,
+    "date": "2026-08-04"
+   }
   },
   {
    "benchmark": "tlaplus_examples_SpecifyingSystems_FIFO/InnerFIFO_proof_TypeCorrect.tla",
@@ -11399,19 +13483,49 @@
    "backend": "copilot",
    "mode": "proof-from-scratch",
    "agent_exit": 0,
-   "check_verdict": "FAIL",
    "time_secs": 500.26637625694275,
    "error": "",
    "input_tokens": 0,
    "output_tokens": 34359,
-   "sany_valid": true,
-   "failed_gates": [
-    "B:discharge"
-   ],
-   "obligations_failed": 1,
-   "obligations_total": 1,
    "source": "tlaplus/Examples",
-   "regraded": true
+   "regraded": true,
+   "check_verdict": "PASS",
+   "sany_valid": true,
+   "obligations": 90,
+   "original_check_verdict": "FAIL",
+   "original_grading": {
+    "sany_valid": true,
+    "check_verdict": "FAIL",
+    "obligations_total": 1,
+    "obligations_failed": 1,
+    "failed_gates": [
+     "B:discharge"
+    ]
+   },
+   "regrade": {
+    "category": "archived-input-context",
+    "method": "exact-archived-solution-cold-replay",
+    "trigger": "Error: Unknown module \"Simple\"",
+    "checker": "v1.0.0-9-g6c70aa4",
+    "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+    "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+    "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+    "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+    "tlapm_version": "80172c6",
+    "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+    "obligations": "90/90 proved",
+    "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+    "solution_sha256": "e0abe70b8588beeea2d4a198d4ddc225982011242af042183b709721a2aeb3d5",
+    "baseline_sha256": "36ad967ec26aeb7db05feb07cf4f0dcce2571345b0a3c737e1949088a71a6c14",
+    "dependency_sha256": {
+     "Simple.tla": "f087a1968e93da8670ad63d656317cb7b023c613cba07f83ec5b86d06cfb6e47",
+     "SimpleRegular.tla": "12232f5d774caac2376f5582339a27294cc41e32b872d4399fd5ccfaca36dc7c"
+    },
+    "recovered_dependencies": {},
+    "evidence_sha256": "397a86e2f15054da356c0de620f36033888bd102e42d4a39e4b0275e0a234926",
+    "original_regraded": true,
+    "date": "2026-08-04"
+   }
   },
   {
    "benchmark": "tlaplus_examples_TeachingConcurrency/Simple_proof_TypeCorrect.tla",
@@ -11576,19 +13690,50 @@
    "backend": "copilot",
    "mode": "proof-from-scratch",
    "agent_exit": 0,
-   "check_verdict": "FAIL",
    "time_secs": 385.44565534591675,
    "error": "",
    "input_tokens": 0,
    "output_tokens": 28027,
-   "sany_valid": true,
-   "failed_gates": [
-    "B:discharge"
-   ],
-   "obligations_failed": 1,
-   "obligations_total": 1,
    "source": "tlaplus/Examples",
-   "regraded": true
+   "regraded": true,
+   "check_verdict": "PASS",
+   "sany_valid": true,
+   "obligations": 137,
+   "original_check_verdict": "FAIL",
+   "original_grading": {
+    "sany_valid": true,
+    "check_verdict": "FAIL",
+    "obligations_total": 1,
+    "obligations_failed": 1,
+    "failed_gates": [
+     "B:discharge"
+    ]
+   },
+   "regrade": {
+    "category": "archived-input-context",
+    "method": "exact-archived-solution-cold-replay",
+    "trigger": "Error: Unknown module \"SimpleAllocator\"",
+    "checker": "v1.0.0-9-g6c70aa4",
+    "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+    "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+    "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+    "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+    "tlapm_version": "80172c6",
+    "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+    "obligations": "137/137 proved",
+    "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+    "solution_sha256": "4faf08edf80a59e74407fc0a7084c2c32503b17840e48bdd293f25ecb1ed51e6",
+    "baseline_sha256": "d4d18192c072e176d73787a34fa3f500401a0346c5176fdd8e9dbfc18f006546",
+    "dependency_sha256": {
+     "AllocatorImplementation.tla": "1b4431845c547660345102fe6d04fb863c5a64baa37daced6a5c78797796c8a3",
+     "SchedulingAllocator.tla": "b8bef576626ece585e3d98ae2022d124c31c6a5f40fa3c6e9e4cc16d7a65ef13",
+     "SimpleAllocator.tla": "6c259e4ddb9e202995e2789db173bce644a9659d830dfcb6f958bf08e91d5fe6"
+    },
+    "recovered_dependencies": {},
+    "evidence_sha256": "f25b4e9b446549519b5b70a1f12f88a7b7d0aef447ab36f4b3b49bc517bcb14b",
+    "original_regraded": true,
+    "date": "2026-08-04"
+   }
   },
   {
    "benchmark": "tlaplus_examples_allocator/SimpleAllocator_proof_TypeCorrect.tla",
@@ -11665,19 +13810,49 @@
    "backend": "copilot",
    "mode": "proof-from-scratch",
    "agent_exit": 0,
-   "check_verdict": "FAIL",
    "time_secs": 2095.2956261634827,
    "error": "",
    "input_tokens": 0,
    "output_tokens": 150147,
-   "sany_valid": true,
-   "failed_gates": [
-    "B:discharge"
-   ],
-   "obligations_failed": 1,
-   "obligations_total": 1,
    "source": "tlaplus/Examples",
-   "regraded": true
+   "regraded": true,
+   "check_verdict": "PASS",
+   "sany_valid": true,
+   "obligations": 453,
+   "original_check_verdict": "FAIL",
+   "original_grading": {
+    "sany_valid": true,
+    "check_verdict": "FAIL",
+    "obligations_total": 1,
+    "obligations_failed": 1,
+    "failed_gates": [
+     "B:discharge"
+    ]
+   },
+   "regrade": {
+    "category": "archived-input-context",
+    "method": "exact-archived-solution-cold-replay",
+    "trigger": "Error: Unknown module \"Barriers\"",
+    "checker": "v1.0.0-9-g6c70aa4",
+    "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+    "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+    "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+    "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+    "tlapm_version": "80172c6",
+    "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+    "obligations": "453/453 proved",
+    "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+    "solution_sha256": "398481525f92f854f361df61033c4d17dddb566a6d9ad8a29a9458eebafb6180",
+    "baseline_sha256": "76239043249d87e1df84f6aeaf100b51af6daec841fd0531d3e9a8ee4f48db1a",
+    "dependency_sha256": {
+     "Barrier.tla": "68c5ba44fc9ce71146c06f0405de79babfa071591da3e6dd655f025a43a544f3",
+     "Barriers.tla": "4ec6728b85ae376c84b101d7976589bbe493e300debb16e9f249de781eb0e22f"
+    },
+    "recovered_dependencies": {},
+    "evidence_sha256": "7ae1402d596d37c9cb2b31bcdbe49665d557d355533803a6c04823a42022c833",
+    "original_regraded": true,
+    "date": "2026-08-04"
+   }
   },
   {
    "benchmark": "tlaplus_examples_barriers/Barriers_Invariant.tla",
@@ -11854,19 +14029,51 @@
    "backend": "copilot",
    "mode": "proof-from-scratch",
    "agent_exit": 0,
-   "check_verdict": "FAIL",
    "time_secs": 230.0254271030426,
    "error": "",
    "input_tokens": 0,
    "output_tokens": 11386,
-   "sany_valid": true,
-   "failed_gates": [
-    "B:discharge"
-   ],
-   "obligations_failed": 1,
-   "obligations_total": 1,
    "source": "tlaplus/Examples",
-   "regraded": true
+   "regraded": true,
+   "check_verdict": "PASS",
+   "sany_valid": true,
+   "obligations": 13,
+   "original_check_verdict": "FAIL",
+   "original_grading": {
+    "sany_valid": true,
+    "check_verdict": "FAIL",
+    "obligations_total": 1,
+    "obligations_failed": 1,
+    "failed_gates": [
+     "B:discharge"
+    ]
+   },
+   "regrade": {
+    "category": "archived-input-context",
+    "method": "exact-archived-solution-cold-replay",
+    "trigger": "Error: Unknown module \"PConProof\"",
+    "checker": "v1.0.0-9-g6c70aa4",
+    "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+    "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+    "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+    "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+    "tlapm_version": "80172c6",
+    "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+    "obligations": "13/13 proved",
+    "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+    "solution_sha256": "1a81324ca505b6d3b9108d0b57cf252835868236c4dccc35d9ea0f1b30b80b12",
+    "baseline_sha256": "ab02252090eccd75056ce5247efa87c30467786ce007b8e9fad3b24b3ff3d7fa",
+    "dependency_sha256": {
+     "BPConProof.tla": "f099cec51e91ed9dd38bf76e23445eb731e58a1f3546df3d868517e5d2254bbb",
+     "Consensus.tla": "dc2cab3e329a79da5ac39235cd234956686b2576b7a7f7470af4e02c0aa387a9",
+     "PConProof.tla": "beb15dc05b114d770f97da54af0a70e2fd2ad8740ae476a26713408ff5b1da81",
+     "VoteProof.tla": "0a2adc4cd5a4473db822c58ee410e8900272b335af4598ed15d130efd5b50042"
+    },
+    "recovered_dependencies": {},
+    "evidence_sha256": "6b060104382dcd59fd345c351903aa3182717047395c1fcfe1002a33279f2b02",
+    "original_regraded": true,
+    "date": "2026-08-04"
+   }
   },
   {
    "benchmark": "tlaplus_examples_byzpaxos/Consensus_Invariance.tla",
@@ -12149,19 +14356,50 @@
    "backend": "copilot",
    "mode": "proof-from-scratch",
    "agent_exit": 0,
-   "check_verdict": "FAIL",
    "time_secs": 956.0915060043335,
    "error": "",
    "input_tokens": 0,
    "output_tokens": 65813,
-   "sany_valid": true,
-   "failed_gates": [
-    "B:discharge"
-   ],
-   "obligations_failed": 1,
-   "obligations_total": 1,
    "source": "tlaplus/Examples",
-   "regraded": true
+   "regraded": true,
+   "check_verdict": "PASS",
+   "sany_valid": true,
+   "obligations": 25,
+   "original_check_verdict": "FAIL",
+   "original_grading": {
+    "sany_valid": true,
+    "check_verdict": "FAIL",
+    "obligations_total": 1,
+    "obligations_failed": 1,
+    "failed_gates": [
+     "B:discharge"
+    ]
+   },
+   "regrade": {
+    "category": "archived-input-context",
+    "method": "exact-archived-solution-cold-replay",
+    "trigger": "Error: Unknown module \"AsyncTerminationDetection\"",
+    "checker": "v1.0.0-9-g6c70aa4",
+    "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+    "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+    "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+    "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+    "tlapm_version": "80172c6",
+    "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+    "obligations": "25/25 proved",
+    "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+    "solution_sha256": "f324230d2d2535355b10160428b4a995618111d187650133186c8897ba97ced7",
+    "baseline_sha256": "7b7bf384703aa79676ca814ad3b5c46b44cb8db72a8fdfb4e10105ac1889582c",
+    "dependency_sha256": {
+     "AsyncTerminationDetection.tla": "fb99591c97ae77753e9eb60f83fa9db3ec5beeaa528b8e0694f30735fb22fb2d",
+     "EWD998.tla": "9640c4e87778859cfe1b427455bd27cd6ae112489c86c71a5745a14105bb5964",
+     "EWD998PCal.tla": "1538a2661e76e5bab7e5dde4a6de869a631ad919524d04cf0b863367badcbcb2"
+    },
+    "recovered_dependencies": {},
+    "evidence_sha256": "7724265c05cacc7b5d4f9d2500dd4e1db6f818a9a4ffe2fd471e7dfb149af6e7",
+    "original_regraded": true,
+    "date": "2026-08-04"
+   }
   },
   {
    "benchmark": "tlaplus_examples_ewd998/AsyncTerminationDetection_proof_Safety.tla",
@@ -12535,16 +14773,46 @@
    "backend": "copilot",
    "mode": "proof-from-scratch",
    "agent_exit": 1,
-   "check_verdict": "FAIL",
    "time_secs": 1576.026106595993,
    "error": "",
    "input_tokens": 0,
    "output_tokens": 88391,
+   "source": "tlaplus/Examples",
+   "check_verdict": "PASS",
    "sany_valid": true,
-   "failed_gates": [
-    "B:discharge"
-   ],
-   "source": "tlaplus/Examples"
+   "obligations": 371,
+   "regraded": true,
+   "original_check_verdict": "FAIL",
+   "original_grading": {
+    "sany_valid": true,
+    "check_verdict": "FAIL",
+    "failed_gates": [
+     "B:discharge"
+    ]
+   },
+   "regrade": {
+    "category": "trusted-community-library",
+    "method": "exact-archived-solution-cold-replay",
+    "trigger": "Error: Unknown module \"SequencesExt\"",
+    "checker": "v1.0.0-9-g6c70aa4",
+    "checker_commit": "6c70aa409dea08da01bd06d271358fe52ef03595",
+    "checker_image": "tlaps-bench-base:b0f34009859728ff63b96ee81cd409d01782e08a3073b41f8f4d5c7957b9e907",
+    "checker_image_id": "sha256:04934053f17a61a8f2ea4f6bb8e41cf70377917657e9a48ef2b49e3940bbd290",
+    "checker_binary_sha256": "f857b9bbfc9ef8bddee7263105e3a98dd0b42a1f6ae8f900032f7d338e9f41e4",
+    "tlapm_version": "80172c6",
+    "tlapm_sha256": "1bdcc145f43ccd7dbb9d6fa530bb54853cf636e2eedb26699ce1b254022e8bf4",
+    "obligations": "371/371 proved",
+    "source_snapshot": "4b683392d24ce3a8b412970870fe6fbc7fb11117",
+    "solution_sha256": "c8311c8e0ec27486a18c516cdc12880671003266e6fb7f948c0315ff89804150",
+    "baseline_sha256": "56e6c68ae54d678a0ed43bf1a1c29133aeee484aa88e3820a3d64379af8b4883",
+    "dependency_sha256": {
+     "tcp.tla": "b16d88c512400b3adc3637b6060f79cc0818e9253540c2631f54a890882a3fe7"
+    },
+    "recovered_dependencies": {},
+    "evidence_sha256": "6ac8d6e41faf0f07d9173af447eb3a817d22d6ae04db078782810ae298d9ece9",
+    "original_regraded": false,
+    "date": "2026-08-04"
+   }
   },
   {
    "benchmark": "tlaplus_examples_transaction_commit/PaxosCommit_proof_TypeOK_Init.tla",
