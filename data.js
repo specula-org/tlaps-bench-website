@@ -1025,10 +1025,12 @@ window.TLAPS_DATA = {
     {
       "id": "copilot-gpt-5.6-sol",
       "name": "GPT-5.6-Sol",
-      "subname": "GitHub Copilot · Agentic",
+      "subname": "GitHub Copilot",
       "org": "GitHub",
       "logo": null,
       "kind": "agent",
+      "cohort": "agentic",
+      "cohortLabel": "Agentic",
       "generated": "2026-07-26",
       "resultsFile": "results/copilot-gpt-5.6-sol.json",
       "resultsVersion": "9e45c37aec99",
@@ -2138,7 +2140,9 @@ window.TLAPS_DATA = {
       "subname": "OpenAI Codex",
       "org": "OpenAI",
       "logo": null,
-      "kind": "agent",
+      "kind": "base",
+      "cohort": "one-shot",
+      "cohortLabel": "One-Shot",
       "generated": "2026-07-07",
       "resultsFile": "results/codex.json",
       "resultsVersion": "d097d0079a0e",
@@ -4167,7 +4171,9 @@ window.TLAPS_DATA = {
       "subname": "GitHub Copilot",
       "org": "GitHub",
       "logo": null,
-      "kind": "agent",
+      "kind": "base",
+      "cohort": "one-shot",
+      "cohortLabel": "One-Shot",
       "generated": "2026-08-04",
       "resultsFile": "results/copilot-gemini-3.1-pro-preview.json",
       "resultsVersion": "4e35fa14a79a",
@@ -6196,7 +6202,9 @@ window.TLAPS_DATA = {
       "subname": "GitHub Copilot",
       "org": "GitHub",
       "logo": null,
-      "kind": "agent",
+      "kind": "base",
+      "cohort": "one-shot",
+      "cohortLabel": "One-Shot",
       "generated": "2026-08-04",
       "resultsFile": "results/copilot.json",
       "resultsVersion": "5119f6fc57cd",
@@ -8222,10 +8230,12 @@ window.TLAPS_DATA = {
     {
       "id": "composer-2.5",
       "name": "Composer 2.5",
-      "subname": "Cursor CLI · Agentic",
+      "subname": "Cursor CLI",
       "org": "Cursor",
       "logo": null,
       "kind": "agent",
+      "cohort": "agentic",
+      "cohortLabel": "Agentic",
       "generated": "2026-08-04",
       "resultsFile": "results/composer-2.5.json",
       "resultsVersion": "538485eb8adf",
@@ -9355,6 +9365,18 @@ window.TLAPS_DATA = {
       "full": "--mode proof-from-scratch",
       "cli": "--mode proof-from-scratch",
       "blurb": "Only the model and the target theorem statement remain; the AI must invent the entire proof structure, including any helper lemmas."
+    }
+  ],
+  "cohorts": [
+    {
+      "id": "one-shot",
+      "label": "One-Shot",
+      "blurb": "Single-response runs ranked by pass rate. Expand a model for per-spec breakdown; task usage and cost stay in the detail views."
+    },
+    {
+      "id": "agentic",
+      "label": "Agentic",
+      "blurb": "Tool-using agent runs, scored separately from one-shot. Same pass-rate ranking and per-spec detail, never mixed into the one-shot table."
     }
   ],
   "coverage": [],

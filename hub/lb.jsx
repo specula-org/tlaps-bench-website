@@ -158,8 +158,8 @@ function ComplexityBreakdown({ model, selectedMode, isOpen }) {
             <th>{meta.label}</th>
             <th>Properties</th>
             <th className="bd-mode">Pass rate</th>
-            <th className="bd-usage-head">Active time / task</th>
-            <th className="bd-usage-head">Output-only cost / task</th>
+            <th className="bd-usage-head bd-supporting">Active time / task</th>
+            <th className="bd-usage-head bd-supporting">Output-only cost / task</th>
           </tr>
         </thead>
         <tbody>
@@ -352,27 +352,63 @@ function TaskBreakdown({ model, selectedMode }) {
   );
 }
 
-function HubLeaderboard({ showFilters = true, fixedMode = null }) {
+function ModelUsageSummary({ model, selectedMode }) {
+  const modeUsage = model.perMode?.[selectedMode];
+  if (!modeUsage) return null;
+  const lowerBound = model.usage.outputCostLowerBound === true;
+  return (
+    <div className="usage-summary" aria-label="Supporting usage metrics">
+      <div className="usage-summary-item">
+        <span className="usage-summary-label">Active time / task</span>
+        <span className="usage-summary-value">{formatDuration(modeUsage.activeTimePerTask)}</span>
+        <span className="usage-summary-total">total {formatDuration(modeUsage.activeTimeSecs, false)}</span>
+      </div>
+      <div className="usage-summary-item">
+        <span className="usage-summary-label">Output-only cost / task</span>
+        <span className="usage-summary-value">
+          {modeUsage.outputCostPerTask == null
+            ? "—"
+            : formatCostUsd(modeUsage.outputCostPerTask, 3, lowerBound)}
+        </span>
+        <span className="usage-summary-total">
+          {modeUsage.outputCostUsd == null
+            ? "no published rate"
+            : `total ${formatCostUsd(modeUsage.outputCostUsd, 2, lowerBound)}`}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function HubLeaderboard({ showFilters = true, fixedMode = null, fixedCohort = null }) {
   const metricById = useM_lb(() => Object.fromEntries(TLAPS_DATA.metrics.map(m => [m.id, m])), []);
   const modeBlurb = useM_lb(() => Object.fromEntries(TLAPS_DATA.modes.map(m => [m.id, m.blurb])), []);
   const isInvert = (key) => key.startsWith("metric:") && metricById[key.slice(7)]?.invert;
+  const modelCohort = (m) => m.cohort || (m.kind === "agent" ? "agentic" : "one-shot");
+  const modelCohortLabel = (m) => m.cohortLabel || (modelCohort(m) === "agentic" ? "Agentic" : "One-Shot");
 
   const initialMode = fixedMode || "completion";
   const [selectedMode, setSelectedMode] = useS_lb(initialMode);
   const [sort, setSort] = useS_lb({ key: `metric:${initialMode}`, dir: "desc" });
   const [expanded, setExpanded] = useS_lb(null);
+  // Spec-level is the primary detail; task/cost live behind secondary tabs.
   const [detailView, setDetailView] = useS_lb("spec");
-  const [kindFilter, setKindFilter] = useS_lb("All");
   const modeLabels = { completion: "Proof completion", scratch: "Proof from scratch" };
-  const hasMultipleKinds = new Set(TLAPS_DATA.models.map(m => m.kind)).size > 1;
+  const cohortLabels = { "one-shot": "one-shot", agentic: "agentic" };
+
+  useE_lb(() => {
+    setExpanded(null);
+    setDetailView("spec");
+    setSort({ key: `metric:${selectedMode}`, dir: "desc" });
+  }, [fixedCohort]);
+
   // The property count for a mode is a property of the benchmark, not of whoever
   // happens to sort first — read it off any model that actually ran the mode.
   const modeTotal = (mode) =>
     TLAPS_DATA.models.find(m => m.perMode?.[mode])?.perMode[mode].total ?? 0;
+  // Main table focuses on pass rate; time/cost stay in the expand panel.
   const visibleMetrics = useM_lb(() => [
     { ...metricById[selectedMode], name: "Pass rate" },
-    metricById.activeTimePerTask,
-    metricById.outputCostPerTask,
   ], [metricById, selectedMode]);
 
   // Sort key forms: "name" or "metric:<id>".
@@ -383,10 +419,10 @@ function HubLeaderboard({ showFilters = true, fixedMode = null }) {
   const getVal = (m, key) => key.startsWith("metric:") ? getMetricVal(m, key.slice(7)) : m[key];
 
   const rows = useM_lb(() => {
-    // A model only appears in a mode it actually ran. Listing it with dashes
-    // would read as a result; it reappears on its own once the run lands.
+    // A model only appears in a mode it actually ran, and only inside its cohort.
     let arr = TLAPS_DATA.models.filter(m =>
-      m.modes.includes(selectedMode) && (kindFilter === "All" || m.kind === kindFilter));
+      m.modes.includes(selectedMode) &&
+      (!fixedCohort || modelCohort(m) === fixedCohort));
     arr = [...arr];
     arr.sort((a, b) => {
       const va = getVal(a, sort.key), vb = getVal(b, sort.key);
@@ -396,12 +432,13 @@ function HubLeaderboard({ showFilters = true, fixedMode = null }) {
       return sort.dir === "asc" ? va - vb : vb - va;
     });
     return arr;
-  }, [sort, kindFilter, selectedMode]);
+  }, [sort, selectedMode, fixedCohort]);
 
   const selectMode = (mode) => {
     if (mode === selectedMode) return;
     setSelectedMode(mode);
     setExpanded(null);
+    setDetailView("spec");
     setSort({ key: `metric:${mode}`, dir: "desc" });
   };
 
@@ -418,24 +455,24 @@ function HubLeaderboard({ showFilters = true, fixedMode = null }) {
   const toggleExpanded = (modelId) => setExpanded((current) => current === modelId ? null : modelId);
   // Each displayed bar scales to that column's own top value.
   const metricMax = useM_lb(() => Object.fromEntries(visibleMetrics.map(mt => {
-    const vals = TLAPS_DATA.models.map(m => {
+    const vals = rows.map(m => {
       if (mt.id === "completion" || mt.id === "scratch") return m.perMetric?.[mt.id];
       return m.perMode?.[selectedMode]?.[mt.id];
     }).filter(v => v != null);
     return [mt.id, vals.length ? Math.max(...vals) : 100];
-  })), [visibleMetrics, selectedMode]);
+  })), [visibleMetrics, selectedMode, rows]);
 
   // FLIP: slide rows to new positions on sort/filter change.
   const rowRefs = useR_lb({});
   const positionsRef = useR_lb({});
-  const lastKeyRef = useR_lb({ k: sort.key, d: sort.dir, mode: selectedMode, kd: kindFilter });
+  const lastKeyRef = useR_lb({ k: sort.key, d: sort.dir, mode: selectedMode, cohort: fixedCohort });
   useLE_lb(() => {
     const oldPositions = positionsRef.current;
     const newPositions = {};
     const refs = rowRefs.current;
     Object.keys(refs).forEach(id => { const el = refs[id]; if (el) newPositions[id] = el.offsetTop; });
     const lk = lastKeyRef.current;
-    const changed = lk.k !== sort.key || lk.d !== sort.dir || lk.mode !== selectedMode || lk.kd !== kindFilter;
+    const changed = lk.k !== sort.key || lk.d !== sort.dir || lk.mode !== selectedMode || lk.cohort !== fixedCohort;
     if (changed && Object.keys(oldPositions).length > 0) {
       Object.keys(refs).forEach(id => {
         const el = refs[id]; if (!el) return;
@@ -451,10 +488,13 @@ function HubLeaderboard({ showFilters = true, fixedMode = null }) {
       });
     }
     positionsRef.current = newPositions;
-    lastKeyRef.current = { k: sort.key, d: sort.dir, mode: selectedMode, kd: kindFilter };
+    lastKeyRef.current = { k: sort.key, d: sort.dir, mode: selectedMode, cohort: fixedCohort };
   });
 
-  const colCount = 3 + visibleMetrics.length; // #, Model, [metric columns], caret
+  const colCount = 4 + visibleMetrics.length; // #, Model, Cohort, [metrics], caret
+  const emptyMessage = fixedCohort
+    ? `No ${cohortLabels[fixedCohort] || fixedCohort} models scored in this mode yet.`
+    : "No models scored in this mode yet.";
 
   return (
     <div>
@@ -467,15 +507,6 @@ function HubLeaderboard({ showFilters = true, fixedMode = null }) {
                 {modeTotal(fixedMode)} properties
               </span>
             </h2>
-            {hasMultipleKinds && (
-              <div className="method-select-wrap">
-                <select className="method-select" value={kindFilter} onChange={e => setKindFilter(e.target.value)}>
-                  <option value="All">All</option>
-                  <option value="base">One-Shot</option>
-                  <option value="agent">Agent</option>
-                </select>
-              </div>
-            )}
           </div>
           {modeBlurb[fixedMode] && <p className="lb-section-sub">{modeBlurb[fixedMode]}</p>}
         </div>
@@ -490,18 +521,9 @@ function HubLeaderboard({ showFilters = true, fixedMode = null }) {
               </button>
             ))}
           </div>
-          {hasMultipleKinds && (
-            <div className="method-select-wrap">
-              <select className="method-select" value={kindFilter} onChange={e => setKindFilter(e.target.value)}>
-                <option value="All">All</option>
-                <option value="base">One-Shot</option>
-                <option value="agent">Agent</option>
-              </select>
-            </div>
-          )}
         </div>
       )}
-      <div className="lb-wrap">
+      <div className="lb-wrap lb-wrap-compact">
         <table className="lb">
           <thead>
             <tr>
@@ -511,10 +533,11 @@ function HubLeaderboard({ showFilters = true, fixedMode = null }) {
                   Model <span className="sort" aria-hidden="true">▾</span>
                 </button>
               </th>
-              {visibleMetrics.map((mt, i) => {
+              <th className="lb-cohort-head">Cohort</th>
+              {visibleMetrics.map((mt) => {
                 const k = "metric:" + mt.id;
                 return (
-                  <th key={mt.id} className={sortCls(k) + ((i === 1 || mt.groupStart) ? " lb-gap" : "") + " lb-metric"}
+                  <th key={mt.id} className={sortCls(k) + " lb-metric"}
                       aria-sort={sortAria(k)} style={{ textAlign: "right" }}>
                     <button type="button" className="sort-button th-mode" onClick={() => onSort(k)}>
                       {mt.name} <span className="sort" aria-hidden="true">▾</span>
@@ -530,15 +553,15 @@ function HubLeaderboard({ showFilters = true, fixedMode = null }) {
             {rows.length === 0 && (
               <tr className="lb-empty-row">
                 <td colSpan={colCount}>
-                  <div className="lb-empty">
-                    No models scored in this mode yet — one-shot results are coming soon.
-                  </div>
+                  <div className="lb-empty">{emptyMessage}</div>
                 </td>
               </tr>
             )}
             {rows.map((m, i) => {
               const isOpen = expanded === m.id;
               const hasRankValue = getVal(m, sort.key) != null;
+              const cohortId = modelCohort(m);
+              const cohortLabel = modelCohortLabel(m);
               return (
                 <React.Fragment key={m.id}>
                   <tr ref={el => { if (el) rowRefs.current[m.id] = el; else delete rowRefs.current[m.id]; }}
@@ -568,10 +591,13 @@ function HubLeaderboard({ showFilters = true, fixedMode = null }) {
                         </div>
                       </div>
                     </td>
-                    {visibleMetrics.map((mt, i) => {
+                    <td className="lb-cohort-cell">
+                      <span className={"cohort-chip cohort-" + cohortId}>{cohortLabel}</span>
+                    </td>
+                    {visibleMetrics.map((mt) => {
                       const v = getMetricVal(m, mt.id);
                       return (
-                        <td key={mt.id} className={(i === 1 || mt.groupStart) ? "lb-gap" : undefined} style={{ textAlign: "right" }}>
+                        <td key={mt.id} style={{ textAlign: "right" }}>
                           {v == null ? <span style={{ color: "var(--ink-3)", fontFamily: "var(--mono)", fontSize: 12 }}>—</span> : (
                             <MetricCell v={v} metric={mt} usage={m.perMode[selectedMode]} max={metricMax[mt.id]}
                               outputCostLowerBound={m.usage.outputCostLowerBound === true} />
@@ -595,15 +621,16 @@ function HubLeaderboard({ showFilters = true, fixedMode = null }) {
                           <div className="pad">
                             <div className="detail-header">
                               <div>
-                                <div className="eyebrow" style={{ marginBottom: 6 }}>{m.name} · {m.subname}</div>
+                                <div className="detail-titleline">
+                                  <span className="eyebrow">{m.name} · {m.subname}</span>
+                                  <span className={"cohort-chip cohort-" + cohortId}>{cohortLabel}</span>
+                                </div>
                                 <div className="detail-caption">
-                                  {detailView === "complexity" && !m.perComplexity?.[selectedMode]
-                                    ? `${modeLabels[selectedMode]}: usage shows the mean per task with the spec total underneath.`
-                                    : detailView === "spec"
-                                    ? `${modeLabels[selectedMode]}: usage shows the mean per task with the spec total underneath.`
+                                  {detailView === "spec"
+                                    ? `${modeLabels[selectedMode]}: per-spec pass rates. Time and cost are supporting detail below.`
                                     : detailView === "complexity"
-                                    ? `${modeLabels[selectedMode]}: pass rate and usage by how many steps the benchmark's own reference proof takes.`
-                                    : `${modeLabels[selectedMode]}: recorded usage for each task in this leaderboard.`}
+                                    ? `${modeLabels[selectedMode]}: pass rate by reference-proof step count.`
+                                    : `${modeLabels[selectedMode]}: per-task verdicts, time, and output-only cost.`}
                                 </div>
                               </div>
                               <div className="detail-tabs" role="group" aria-label="Leaderboard detail view">
@@ -625,11 +652,13 @@ function HubLeaderboard({ showFilters = true, fixedMode = null }) {
                                 actually run, so it is not directly comparable to a full-scope run.
                               </div>
                             )}
+                            {detailView !== "task" && (
+                              <ModelUsageSummary model={m} selectedMode={selectedMode} />
+                            )}
                             {detailView === "complexity" && m.perComplexity?.[selectedMode] ? (
                               <ComplexityBreakdown model={m} selectedMode={selectedMode} isOpen={isOpen} />
                             ) : detailView === "spec" ? (
-                              /* The benchmark and leaderboard share the same spec-level unit.
-                                 A dash marks a mode with no properties, not a failed attempt. */
+                              /* Spec-level is the primary expanded view. */
                               <div className="bd-scroll">
                                 <table className="breakdown dataset-score-table">
                                   <thead>
@@ -637,8 +666,8 @@ function HubLeaderboard({ showFilters = true, fixedMode = null }) {
                                       <th>Spec</th>
                                       <th>Source</th>
                                       <th className="bd-mode">Pass rate</th>
-                                      <th className="bd-usage-head">Active time / task</th>
-                                      <th className="bd-usage-head">Output-only cost / task</th>
+                                      <th className="bd-usage-head bd-supporting">Active time / task</th>
+                                      <th className="bd-usage-head bd-supporting">Output-only cost / task</th>
                                     </tr>
                                   </thead>
                                   <tbody>

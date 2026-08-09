@@ -120,6 +120,13 @@ function PageHome({ go }) {
 
 // ============ LEADERBOARD ============
 function PageLeaderboard() {
+  const cohorts = TLAPS_DATA.cohorts || [
+    { id: "one-shot", label: "One-Shot", blurb: "Single-response runs ranked by pass rate." },
+    { id: "agentic", label: "Agentic", blurb: "Tool-using agent runs, scored separately." },
+  ];
+  const [cohort, setCohort] = useS_p(cohorts[0]?.id || "one-shot");
+  const active = cohorts.find((c) => c.id === cohort) || cohorts[0];
+
   return (
     <section className="section">
       <div className="wrap">
@@ -127,13 +134,34 @@ function PageLeaderboard() {
           <span className="eyebrow accent">Results</span>
           <h1 style={{ fontSize: 44, marginTop: 10 }}>Leaderboard</h1>
           <p className="lead">
-            Models are ranked by the percentage of properties that pass the cheat-checker and TLAPM.
-            Separate leaderboards are shown for each benchmark mode. Expand a model for per-spec
-            results, time, cost, and tasks.
+            One-shot results are the primary ranking. Agentic runs live in their own tab.
+            Models are ranked by pass rate; expand a row for the per-spec breakdown.
+            Task-level results and cost stay in the detail views.
           </p>
         </FadeIn>
-        <div style={{ marginTop: 72 }}><HubLeaderboard fixedMode="completion" /></div>
-        <div style={{ marginTop: 48 }}><HubLeaderboard fixedMode="scratch" /></div>
+
+        <div className="cohort-switch" role="tablist" aria-label="Result cohort">
+          {cohorts.map((c) => (
+            <button
+              key={c.id}
+              type="button"
+              role="tab"
+              aria-selected={cohort === c.id}
+              className={cohort === c.id ? "active" : ""}
+              onClick={() => setCohort(c.id)}
+            >
+              {c.label}
+            </button>
+          ))}
+        </div>
+        {active?.blurb && <p className="cohort-blurb">{active.blurb}</p>}
+
+        <div style={{ marginTop: 48 }}>
+          <HubLeaderboard fixedMode="completion" fixedCohort={cohort} />
+        </div>
+        <div style={{ marginTop: 48 }}>
+          <HubLeaderboard fixedMode="scratch" fixedCohort={cohort} />
+        </div>
       </div>
     </section>
   );

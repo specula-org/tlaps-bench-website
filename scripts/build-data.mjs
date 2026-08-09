@@ -91,13 +91,37 @@ const parseManifestException = (f, meta, covered) => {
 };
 
 // The one hand-maintained table: display info per backend id.
-// name = the underlying model (primary label); subname = the agent/endpoint, shown below it.
+// name = the underlying model (primary label); subname = the harness/endpoint, shown below it.
+// kind "base" = one-shot cohort; kind "agent" = agentic cohort. meta.approach, when
+// present, wins over kind so result bundles can declare their cohort explicitly.
+// Bundles without approach (current Copilot/Codex/Gemini files) are treated as
+// one-shot placeholders until dedicated one-shot result sets land.
 const BACKEND_INFO = {
-  copilot: { name: "Opus-4.8", subname: "GitHub Copilot", org: "GitHub", logo: null, kind: "agent" },
-  "copilot-gemini-3.1-pro-preview": { name: "Gemini 3.1 Pro Preview", subname: "GitHub Copilot", org: "GitHub", logo: null, kind: "agent" },
-  "copilot-gpt-5.6-sol": { name: "GPT-5.6-Sol", subname: "GitHub Copilot · Agentic", org: "GitHub", logo: null, kind: "agent" },
-  codex: { name: "GPT-5.5", subname: "OpenAI Codex", org: "OpenAI", logo: null, kind: "agent" },
-  "composer-2.5": { name: "Composer 2.5", subname: "Cursor CLI · Agentic", org: "Cursor", logo: null, kind: "agent" },
+  copilot: { name: "Opus-4.8", subname: "GitHub Copilot", org: "GitHub", logo: null, kind: "base" },
+  "copilot-gemini-3.1-pro-preview": { name: "Gemini 3.1 Pro Preview", subname: "GitHub Copilot", org: "GitHub", logo: null, kind: "base" },
+  "copilot-gpt-5.6-sol": { name: "GPT-5.6-Sol", subname: "GitHub Copilot", org: "GitHub", logo: null, kind: "agent" },
+  codex: { name: "GPT-5.5", subname: "OpenAI Codex", org: "OpenAI", logo: null, kind: "base" },
+  "composer-2.5": { name: "Composer 2.5", subname: "Cursor CLI", org: "Cursor", logo: null, kind: "agent" },
+};
+
+// Only these backends appear on the live site. Drop an id here (and its results
+// file) when a run is superseded; the leaderboard always shows the latest set.
+const PUBLISHED_BACKENDS = new Set([
+  "copilot",
+  "copilot-gemini-3.1-pro-preview",
+  "copilot-gpt-5.6-sol",
+  "codex",
+  "composer-2.5",
+]);
+
+const COHORT_FROM_KIND = { base: "one-shot", agent: "agentic" };
+const COHORT_LABEL = { "one-shot": "One-Shot", agentic: "Agentic" };
+const resolveCohort = (meta, info) => {
+  if (meta.approach === "agentic" || meta.approach === "agent") return "agentic";
+  if (meta.approach === "one-shot" || meta.approach === "oneshot" || meta.approach === "base") {
+    return "one-shot";
+  }
+  return COHORT_FROM_KIND[info.kind] ?? "one-shot";
 };
 
 // A reproducible output-only estimate, not the experiments' actual bill. Every
@@ -277,17 +301,28 @@ if (resultFiles.length === 0) throw new Error("results/: no backend JSON files f
 // A bundle covers the modes it has records for. Full-scope bundles (both modes)
 // define the canonical spec and task manifests; mode-partial bundles are then
 // checked against those manifests restricted to the modes they claim.
-const bundles = resultFiles.map((f) => {
+// Only PUBLISHED_BACKENDS are emitted to the site; unpublished files are ignored
+// so outdated runs can sit in results/ without appearing on the leaderboard.
+const bundles = resultFiles.flatMap((f) => {
   const resultText = readFileSync(`results/${f}`, "utf8");
   const { meta, results } = JSON.parse(resultText);
+  if (!meta?.backend) throw new Error(`${f}: meta.backend is required`);
+  if (!PUBLISHED_BACKENDS.has(meta.backend)) return [];
   if (!Array.isArray(results) || results.length === 0) throw new Error(`${f}: no results[]`);
   const covered = MODES.filter((mode) => results.some((r) => r.mode === mode));
   if (covered.length === 0) throw new Error(`${f}: no records in any known mode`);
-  return {
+  return [{
     f, meta, results, covered,
     resultsVersion: createHash("sha256").update(resultText).digest("hex").slice(0, 12),
-  };
+  }];
 });
+if (bundles.length === 0) throw new Error("results/: no published backend JSON files found");
+const publishedMissing = [...PUBLISHED_BACKENDS].filter(
+  (id) => !bundles.some((b) => b.meta.backend === id),
+);
+if (publishedMissing.length > 0) {
+  throw new Error(`results/: published backend(s) missing: ${publishedMissing.join(", ")}`);
+}
 if (!bundles.some((b) => b.covered.length === MODES.length)) {
   throw new Error("results/: no full-scope bundle to anchor the canonical manifests");
 }
@@ -686,6 +721,10 @@ const models = ordered.map(({ f, meta, results, covered, resultsVersion }) => {
   }));
 
   const info = BACKEND_INFO[meta.backend] ?? { name: meta.backend, org: "?", logo: null, kind: "base" };
+  if (!BACKEND_INFO[meta.backend]) {
+    throw new Error(`${f}: backend "${meta.backend}" is published but missing from BACKEND_INFO`);
+  }
+  const cohort = resolveCohort(meta, info);
   // A mode this bundle does not cover stays null all the way through, so the
   // leaderboard shows a dash and ranks the model last in that mode.
   const perMode = Object.fromEntries(MODES.map((mode) => [
@@ -698,6 +737,10 @@ const models = ordered.map(({ f, meta, results, covered, resultsVersion }) => {
   return {
     id: meta.backend,
     ...info,
+    // kind stays for older filters; cohort is the leaderboard's primary split.
+    kind: cohort === "agentic" ? "agent" : "base",
+    cohort,
+    cohortLabel: COHORT_LABEL[cohort],
     generated: meta.generated,
     resultsFile: `results/${f}`,
     resultsVersion,
@@ -783,9 +826,11 @@ const data = {
   specs: canonicalSpecs,
   // Initial order matches the leaderboard's default sort. The two modes remain
   // separate; there is deliberately no hidden blended headline score. A model
-  // that did not run a mode has no rate there and sorts last.
+  // that did not run a mode has no rate there and sorts last. Cohorts are also
+  // separate: one-shot and agentic never share a ranking table.
   models: models.sort((a, b) => (b.perMetric.completion ?? -1) - (a.perMetric.completion ?? -1)),
   modes: SITE.modes,
+  cohorts: SITE.cohorts,
   coverage: SITE.coverage,
   bibtex: SITE.bibtex,
 };

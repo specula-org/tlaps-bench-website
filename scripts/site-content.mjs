@@ -25,6 +25,14 @@ export const SITE = {
       blurb: "Only the model and the target theorem statement remain; the AI must invent the entire proof structure, including any helper lemmas." },
   ],
 
+  // Leaderboard cohorts. One-shot is the primary published view; agentic is separate.
+  cohorts: [
+    { id: "one-shot", label: "One-Shot",
+      blurb: "Single-response runs ranked by pass rate. Expand a model for per-spec breakdown; task usage and cost stay in the detail views." },
+    { id: "agentic", label: "Agentic",
+      blurb: "Tool-using agent runs, scored separately from one-shot. Same pass-rate ranking and per-spec detail, never mixed into the one-shot table." },
+  ],
+
   // Benchmark page: the two kinds of source. Counts are deliberately absent
   // here; build-data.mjs derives them from the canonical per-spec manifest.
   categories: [
