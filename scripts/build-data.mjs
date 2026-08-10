@@ -21,6 +21,9 @@ const CANONICAL = {
   "etcd (Specula)": [0, 8],
   "OpenAddressing (lemmy/Examples)": [1, 5],
   "Anvil": [0, 1],
+  // Present in the updated Proof Completion Core; zero here so older full-suite
+  // bundles stay valid, while Core-only runs declare these tasks as extras.
+  "apalache-examples (Konnov)": [0, 0],
 };
 const RECORDS = 710;
 const SPECS = 70;
@@ -101,6 +104,27 @@ const BACKEND_INFO = {
   "copilot-gemini-3.1-pro-preview": { name: "Gemini 3.1 Pro Preview", subname: "GitHub Copilot", org: "GitHub", logo: null, kind: "base" },
   "copilot-gpt-5.6-sol": { name: "GPT-5.6-Sol", subname: "GitHub Copilot", org: "GitHub", logo: null, kind: "agent" },
   codex: { name: "GPT-5.5", subname: "OpenAI Codex", org: "OpenAI", logo: null, kind: "base" },
+  "codex-gpt-5.6-sol": {
+    name: "GPT-5.6-Sol",
+    subname: "OpenAI Codex (xhigh)",
+    org: "OpenAI",
+    logo: null,
+    kind: "agent",
+  },
+  "codex-single-turn-gpt-5.6-sol": {
+    name: "GPT-5.6-Sol",
+    subname: "OpenAI Codex (medium)",
+    org: "OpenAI",
+    logo: null,
+    kind: "base",
+  },
+  "codex-single-turn-gpt-5.6-sol-xhigh": {
+    name: "GPT-5.6-Sol",
+    subname: "OpenAI Codex (xhigh)",
+    org: "OpenAI",
+    logo: null,
+    kind: "base",
+  },
   "composer-2.5": { name: "Composer 2.5", subname: "Cursor CLI", org: "Cursor", logo: null, kind: "agent" },
 };
 
@@ -111,14 +135,19 @@ const PUBLISHED_BACKENDS = new Set([
   "copilot-gemini-3.1-pro-preview",
   "copilot-gpt-5.6-sol",
   "codex",
+  "codex-gpt-5.6-sol",
+  "codex-single-turn-gpt-5.6-sol",
+  "codex-single-turn-gpt-5.6-sol-xhigh",
   "composer-2.5",
 ]);
 
 const COHORT_FROM_KIND = { base: "one-shot", agent: "agentic" };
 const COHORT_LABEL = { "one-shot": "One-Shot", agentic: "Agentic" };
 const resolveCohort = (meta, info) => {
+  if (meta.cohort === "agentic" || meta.cohort === "one-shot") return meta.cohort;
   if (meta.approach === "agentic" || meta.approach === "agent") return "agentic";
-  if (meta.approach === "one-shot" || meta.approach === "oneshot" || meta.approach === "base") {
+  if (meta.approach === "one-shot" || meta.approach === "oneshot" || meta.approach === "base" ||
+      meta.approach === "single_turn_tool_free" || meta.approach === "single_turn") {
     return "one-shot";
   }
   return COHORT_FROM_KIND[info.kind] ?? "one-shot";
@@ -167,6 +196,24 @@ const OUTPUT_PRICING = {
       },
     },
   },
+  "codex-gpt-5.6-sol": {
+    usdPerMillionTokens: 30,
+    tier: "standard",
+    asOf: "2026-08-10",
+    source: "https://developers.openai.com/api/docs/models",
+  },
+  "codex-single-turn-gpt-5.6-sol": {
+    usdPerMillionTokens: 30,
+    tier: "standard",
+    asOf: "2026-08-10",
+    source: "https://developers.openai.com/api/docs/models",
+  },
+  "codex-single-turn-gpt-5.6-sol-xhigh": {
+    usdPerMillionTokens: 30,
+    tier: "standard",
+    asOf: "2026-08-10",
+    source: "https://developers.openai.com/api/docs/models",
+  },
 };
 
 // Upstream provenance per source. The canonical result keys are kept separate
@@ -203,9 +250,17 @@ const SOURCE_INFO = {
     name: "two_thread_mutex",
     url: "https://github.com/anvil-verifier/anvil",
   },
+  "apalache-examples (Konnov)": {
+    name: "apalache-examples (Konnov)",
+    url: "https://github.com/konnov/apalache-examples",
+  },
 };
 
-const LIBRARY_SOURCES = new Set(["tlaplus/Examples", "TLAPS distribution examples"]);
+const LIBRARY_SOURCES = new Set([
+  "tlaplus/Examples",
+  "TLAPS distribution examples",
+  "apalache-examples (Konnov)",
+]);
 const categoryFor = (source) => LIBRARY_SOURCES.has(source) ? "libraries" : "systems";
 const sourceSize = (source) => CANONICAL[source][0] + CANONICAL[source][1];
 
@@ -234,11 +289,13 @@ const SPEC_URL = {
   two_thread_mutex: "https://github.com/anvil-verifier/anvil/blob/main/src/tla_demo.rs",
   // Compatibility with result bundles created before the benchmark rename.
   AnvilLock: "https://github.com/anvil-verifier/anvil/blob/main/src/tla_demo.rs",
+  "apalache_examples_ben-or83": "https://github.com/konnov/apalache-examples/tree/main/ben-or83",
+  apalache_examples_tendermint: "https://github.com/konnov/apalache-examples/tree/main/tendermint-accountability",
 };
 
 const displayName = (group) => {
   if (group === "AnvilLock") return "two_thread_mutex";
-  for (const prefix of ["tlaplus_examples_", "ivy_examples_"]) {
+  for (const prefix of ["tlaplus_examples_", "ivy_examples_", "apalache_examples_"]) {
     if (group.startsWith(prefix)) return group.slice(prefix.length);
   }
   return group;
@@ -369,13 +426,17 @@ const models = ordered.map(({ f, meta, results, covered, resultsVersion }) => {
   const expectedRecords = covered.reduce((n, mode) => n + MODE_RECORDS[mode], 0) -
     (exception ? exception.missing.size - exception.extra.size : 0);
   const usageAudit = meta.usage_audit;
-  // The first two vouch for a count on every task; the third admits that some
-  // sessions ended before their telemetry flushed, making the totals lower bounds.
+  // Legacy audits vouch with active_time_complete + output token flags; newer
+  // Core bundles use complete_for_all_tasks and an exact output_tokens total.
   const outputTokensPartial = usageAudit?.output_tokens_partial === true;
   const outputTokensVouched = usageAudit?.output_tokens_audited === true ||
-    usageAudit?.output_tokens_positive_for_all_tasks === true || outputTokensPartial;
+    usageAudit?.output_tokens_positive_for_all_tasks === true ||
+    outputTokensPartial ||
+    (usageAudit?.complete_for_all_tasks === true && Number.isInteger(usageAudit?.output_tokens));
+  const activeTimeComplete = usageAudit?.active_time_complete === true ||
+    usageAudit?.complete_for_all_tasks === true;
   if (!usageAudit || usageAudit.task_count !== results.length ||
-      usageAudit.active_time_complete !== true || !outputTokensVouched) {
+      !activeTimeComplete || !outputTokensVouched) {
     throw new Error(`${f}: missing audited ${results.length}-task usage data`);
   }
   if (outputTokensPartial && !Number.isInteger(usageAudit.tasks_with_output_tokens)) {
@@ -533,6 +594,9 @@ const models = ordered.map(({ f, meta, results, covered, resultsVersion }) => {
   if (outputCostLowerBound && usageAudit.output_tokens_lower_bound !== outputTokens) {
     throw new Error(`${f}: output token lower bound does not match result rows`);
   }
+  if (Number.isInteger(usageAudit.output_tokens) && usageAudit.output_tokens !== outputTokens) {
+    throw new Error(`${f}: audited output_tokens does not match result rows`);
+  }
   const outputUsageByModel = usageAudit.output_usage_by_model;
   if (outputUsageByModel) {
     if (outputUsageByModel.status !== "lower_bound" ||
@@ -625,10 +689,11 @@ const models = ordered.map(({ f, meta, results, covered, resultsVersion }) => {
     canonicalSpecManifest = serializedManifest;
   } else {
     // Restrict the canon to this bundle's modes: zero out the modes it does not
-    // cover, then drop specs left with no tasks at all.
+    // cover, then drop specs left with no tasks at all. Declared extras may also
+    // introduce wholly new specs (e.g. Proof Completion Core additions).
     const specDelta = (row, mode) =>
       exception?.delta.get(`spec\n${specKey(row.source, row.group)}\n${mode}`) ?? 0;
-    const expected = JSON.parse(canonicalSpecManifest)
+    let expected = JSON.parse(canonicalSpecManifest)
       .map((row) => ({
         ...row,
         completion: covered.includes("proof-completion")
@@ -637,6 +702,23 @@ const models = ordered.map(({ f, meta, results, covered, resultsVersion }) => {
           ? row.scratch + specDelta(row, "proof-from-scratch") : 0,
       }))
       .filter((row) => row.completion + row.scratch > 0);
+    if (exception) {
+      const expectedKeys = new Set(expected.map((row) => specKey(row.source, row.group)));
+      const extraSpecs = new Map();
+      for (const row of exception.extra.values()) {
+        const group = row.benchmark.split("/")[0];
+        const key = specKey(row.source, group);
+        if (expectedKeys.has(key)) continue;
+        const slot = extraSpecs.get(key) ?? {
+          source: row.source, group, completion: 0, scratch: 0,
+        };
+        if (row.mode === "proof-completion") slot.completion++;
+        else slot.scratch++;
+        extraSpecs.set(key, slot);
+      }
+      expected = [...expected, ...extraSpecs.values()]
+        .sort((a, b) => a.source.localeCompare(b.source) || a.group.localeCompare(b.group));
+    }
     if (manifest.length !== expected.length) {
       throw new Error(`${f}: ${manifest.length} specs != ${expected.length} for modes [${covered.join(", ")}]`);
     }
@@ -785,6 +867,31 @@ const models = ordered.map(({ f, meta, results, covered, resultsVersion }) => {
   };
 });
 
+const sortSpecs = (specs) => specs.sort((a, b) =>
+  (a.category === b.category ? 0 : a.category === "libraries" ? -1 : 1) ||
+  sourceSize(b.sourceKey) - sourceSize(a.sourceKey) ||
+  a.sourceName.localeCompare(b.sourceName) || b.total - a.total || a.name.localeCompare(b.name));
+
+const categoriesForSpecs = (specs, label) => {
+  const stats = Object.fromEntries(SITE.categories.map((category) => [category.id, {
+    specCount: 0,
+    completion: 0,
+    scratch: 0,
+    total: 0,
+  }]));
+  for (const spec of specs) {
+    const row = stats[spec.category];
+    if (!row) throw new Error(`${label}: unknown category "${spec.category}" for ${spec.id}`);
+    row.specCount++;
+    row.completion += spec.completion;
+    row.scratch += spec.scratch;
+    row.total += spec.total;
+  }
+  return SITE.categories
+    .map((category) => ({ ...category, ...stats[category.id] }))
+    .filter((category) => category.specCount > 0);
+};
+
 const categoryStats = Object.fromEntries(SITE.categories.map((category) => [category.id, {
   specCount: 0,
   completion: 0,
@@ -805,6 +912,81 @@ if (categories.reduce((n, category) => n + category.specCount, 0) !== SPECS ||
   throw new Error("category totals do not cover the canonical spec manifest");
 }
 
+// Proof Completion Core suite for the Benchmark page: derived from any published
+// Core result bundle (same task/spec set across today's GPT-5.6-Sol Core runs).
+const coreBundle = ordered.find((b) =>
+  Number.isInteger(b.meta?.canonical_scope?.["proof-completion-core"]) ||
+  (typeof b.meta?.result_set === "string" && b.meta.result_set.includes("-core")));
+if (!coreBundle) throw new Error("results/: no Proof Completion Core bundle found for the Core suite");
+const coreBySpec = {};
+for (const r of coreBundle.results) {
+  const group = r.benchmark.split("/")[0];
+  const key = specKey(r.source, group);
+  const spec = (coreBySpec[key] ??= { source: r.source, group, completion: 0, scratch: 0 });
+  if (r.mode === "proof-completion") spec.completion++;
+  else if (r.mode === "proof-from-scratch") spec.scratch++;
+  else throw new Error(`${coreBundle.f}: Core suite has unknown mode "${r.mode}"`);
+}
+const coreSpecs = sortSpecs(Object.values(coreBySpec).map(({ source, group, completion, scratch }) => {
+  const sourceInfo = SOURCE_INFO[source];
+  if (!sourceInfo) throw new Error(`Core suite: missing display info for source "${source}"`);
+  const url = specUrl(group);
+  if (!url) throw new Error(`Core suite: spec "${group}" is missing an upstream URL`);
+  return {
+    id: specId(source, group),
+    group,
+    name: displayName(group),
+    category: categoryFor(source),
+    sourceKey: source,
+    sourceName: sourceInfo.name,
+    sourceUrl: sourceInfo.url,
+    url,
+    completion,
+    scratch,
+    total: completion + scratch,
+  };
+}));
+const coreCategories = categoriesForSpecs(coreSpecs, "Core suite").map((category) => (
+  category.id === "libraries"
+    ? {
+        ...category,
+        blurb: "Specifications and their proof properties from the official TLA+ Examples repository, the TLAPS distribution, and the Apalache examples corpus (Konnov), ranging from teaching exercises to distributed algorithms.",
+      }
+    : category
+));
+const corePropertyCount = coreSpecs.reduce((n, spec) => n + spec.total, 0);
+const expectedCoreCount = coreBundle.meta.canonical_scope?.["proof-completion-core"];
+if (Number.isInteger(expectedCoreCount) && corePropertyCount !== expectedCoreCount) {
+  throw new Error(`Core suite: ${corePropertyCount} properties != meta.canonical_scope ${expectedCoreCount}`);
+}
+const coreIds = new Set(coreSpecs.map((spec) => spec.id));
+if (coreIds.size !== coreSpecs.length) throw new Error("Core suite: spec ids are not unique");
+
+const suiteInfo = Object.fromEntries((SITE.suites ?? []).map((suite) => [suite.id, suite]));
+if (!suiteInfo.core || !suiteInfo.full) {
+  throw new Error("site-content.mjs: suites must declare core and full");
+}
+const suites = [
+  {
+    ...suiteInfo.core,
+    specCount: coreSpecs.length,
+    propertyCount: corePropertyCount,
+    completion: coreSpecs.reduce((n, spec) => n + spec.completion, 0),
+    scratch: coreSpecs.reduce((n, spec) => n + spec.scratch, 0),
+    categories: coreCategories,
+    specs: coreSpecs,
+  },
+  {
+    ...suiteInfo.full,
+    specCount: canonicalSpecs.length,
+    propertyCount: RECORDS,
+    completion: MODE_RECORDS["proof-completion"],
+    scratch: MODE_RECORDS["proof-from-scratch"],
+    categories,
+    specs: canonicalSpecs,
+  },
+];
+
 const data = {
   paper: SITE.paper,
   complexity: {
@@ -822,8 +1004,10 @@ const data = {
     { id: "outputCostPerTask", name: "Output-only cost / task", invert: true, format: "usd", breakdown: false, bar: false,
       tip: "Mean estimated output-only cost per task in the selected mode, using recorded output tokens and public standard-tier rates from each model's audit date. Model-specific rates are applied when a run invokes more than one model. A ≥ prefix marks incomplete telemetry, so the amount is a lower bound. Long-context tiers are not inferred. The secondary value is that mode's total. Lower is better." },
   ],
+  // Top-level specs/categories remain the Full suite for Home and older readers.
   categories,
   specs: canonicalSpecs,
+  suites,
   // Initial order matches the leaderboard's default sort. The two modes remain
   // separate; there is deliberately no hidden blended headline score. A model
   // that did not run a mode has no rate there and sorts last. Cohorts are also
@@ -836,12 +1020,12 @@ const data = {
 };
 
 if (process.argv.includes("--check")) {
-  console.log(`Validated: ${models.length} model(s), ${data.specs.length} specs, ${RECORDS} properties.`);
+  console.log(`Validated: ${models.length} model(s), ${data.specs.length} full specs, ${coreSpecs.length} core specs, ${RECORDS} properties.`);
 } else {
   writeFileSync("data.js",
     "// GENERATED by scripts/build-data.mjs - do not edit by hand.\n" +
     "// Leaderboard data is recomputed from results/*.json;\n" +
     "// page content comes from scripts/site-content.mjs.\n" +
     "window.TLAPS_DATA = " + JSON.stringify(data, null, 2) + ";\n");
-  console.log(`Wrote data.js: ${models.length} model(s), ${data.specs.length} specs.`);
+  console.log(`Wrote data.js: ${models.length} model(s), ${data.specs.length} full specs, ${coreSpecs.length} core specs.`);
 }

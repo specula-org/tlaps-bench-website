@@ -371,6 +371,7 @@ table.task-table tbody tr:hover td { background: var(--paper-2); }
 .dataset-category-card h3 { margin: 12px 0 10px; font-size: 26px; }
 .dataset-category-card > p { max-width: 540px; min-height: 50px; font-family: var(--serif); font-size: 16px; line-height: 1.55; }
 .dataset-category-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; margin: 24px 0 0; padding-top: 18px; border-top: 1px solid var(--line-soft); }
+.dataset-category-stats-compact { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .dataset-category-stats > div { padding: 0 14px; border-left: 1px solid var(--line-soft); }
 .dataset-category-stats > div:first-child { padding-left: 0; border-left: 0; }
 .dataset-category-stats dt { min-height: 30px; font-family: var(--mono); font-size: 9px; line-height: 1.35; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.07em; }

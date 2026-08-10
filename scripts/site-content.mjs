@@ -42,6 +42,15 @@ export const SITE = {
       blurb: "Proof properties from protocol and system specifications drawn from ZooKeeper, Ivy, etcd, OpenAddressing, and Anvil, emphasizing realistic verification targets." },
   ],
 
+  // Benchmark page suite switch. Specs/categories for each suite are filled in
+  // by build-data.mjs (Full = prior 710-task suite; Core = Proof Completion Core).
+  suites: [
+    { id: "core", label: "Core",
+      blurb: "Proof Completion Core: 293 proof-completion properties across example-library specs, including the Apalache examples (ben-or83, tendermint)." },
+    { id: "full", label: "Full",
+      blurb: "Full suite: 710 properties spanning example libraries and systems specs, with both proof-completion and proof-from-scratch modes." },
+  ],
+
   coverage: [],
 
   bibtex: `@misc{tlapsbench,

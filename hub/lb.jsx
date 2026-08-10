@@ -580,12 +580,6 @@ function HubLeaderboard({ showFilters = true, fixedMode = null, fixedCohort = nu
                         <div className="modelname-text">
                           <div className="modelname-main">
                             {m.name}
-                            {m.perMode[selectedMode]?.partialScope && (
-                              <span className="scope-chip"
-                                    title={`${m.perMode[selectedMode].total} of ${m.perMode[selectedMode].canonicalTotal} properties. ${m.scope?.reason ?? ""}`}>
-                                {m.perMode[selectedMode].total}/{m.perMode[selectedMode].canonicalTotal}
-                              </span>
-                            )}
                           </div>
                           {m.subname && <div className="modelname-sub">{m.subname}</div>}
                         </div>
@@ -645,12 +639,8 @@ function HubLeaderboard({ showFilters = true, fixedMode = null, fixedCohort = nu
                                   onClick={() => setDetailView("task")}>By task</button>
                               </div>
                             </div>
-                            {m.perMode[selectedMode]?.partialScope && m.scope && (
-                              <div className="scope-caption">
-                                Partial scope: {m.scope.taskCount} of {m.scope.canonicalTaskCount} canonical
-                                properties. {m.scope.reason} The pass rate is over the properties
-                                actually run, so it is not directly comparable to a full-scope run.
-                              </div>
+                            {m.perMode[selectedMode]?.partialScope && m.scope?.reason && (
+                              <div className="scope-caption">{m.scope.reason}</div>
                             )}
                             {detailView !== "task" && (
                               <ModelUsageSummary model={m} selectedMode={selectedMode} />
