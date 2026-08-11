@@ -166,23 +166,27 @@ function PageLeaderboard() {
 
 // ============ BENCHMARK (specs + modes + grading) ============
 function PageBenchmark() {
-  const suites = TLAPS_DATA.suites || [{
-    id: "core",
-    label: "Core",
-    blurb: "Proof Completion Core.",
-    specs: TLAPS_DATA.specs,
-    categories: TLAPS_DATA.categories,
-    specCount: TLAPS_DATA.specs.length,
-    propertyCount: TLAPS_DATA.specs.reduce((sum, spec) => sum + spec.total, 0),
-    completion: TLAPS_DATA.specs.reduce((sum, spec) => sum + spec.completion, 0),
-    scratch: 0,
-  }];
-  const suite = suites.find((s) => s.id === "core") || suites[0];
+  const suites = TLAPS_DATA.suites || [
+    {
+      id: "full",
+      label: "Full",
+      blurb: "Full benchmark suite.",
+      specs: TLAPS_DATA.specs,
+      categories: TLAPS_DATA.categories,
+      specCount: TLAPS_DATA.specs.length,
+      propertyCount: TLAPS_DATA.specs.reduce((sum, spec) => sum + spec.total, 0),
+      completion: TLAPS_DATA.specs.reduce((sum, spec) => sum + spec.completion, 0),
+      scratch: TLAPS_DATA.specs.reduce((sum, spec) => sum + spec.scratch, 0),
+    },
+  ];
+  const [suiteId, setSuiteId] = useS_p(suites[0]?.id || "core");
+  const suite = suites.find((s) => s.id === suiteId) || suites[0];
   const specs = suite.specs || [];
   const categories = suite.categories || [];
   const totalSpecs = suite.specCount ?? specs.length;
   const totalProperties = suite.propertyCount ?? specs.reduce((sum, spec) => sum + spec.total, 0);
-  const colSpan = 4;
+  const showScratch = false;
+  const colSpan = showScratch ? 5 : 4;
   const categoryGridStyle = categories.length === 1
     ? { gridTemplateColumns: "minmax(0, 1fr)" }
     : undefined;
@@ -195,15 +199,37 @@ function PageBenchmark() {
             <span className="eyebrow accent">Benchmark</span>
             <h1 style={{ fontSize: 44, marginTop: 10 }}>Inside the benchmark</h1>
             <p className="lead">
-              The published leaderboard uses one task set: the Proof Completion Core.
-              For every property, an AI must replace PROOF OBVIOUS with a proof that tlapm
-              mechanically accepts.
+              The benchmark spans classic TLA+ example libraries and real systems
+              specifications. For every property, an AI must replace PROOF OBVIOUS with a proof
+              that tlapm mechanically accepts. Switch between the Proof Completion Core and the
+              Full suite below.
             </p>
+            <div className="cohort-switch" role="tablist" aria-label="Benchmark suite">
+              {suites.map((s) => (
+                <button
+                  key={s.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={suiteId === s.id}
+                  className={suiteId === s.id ? "active" : ""}
+                  onClick={() => setSuiteId(s.id)}
+                >
+                  {s.label}
+                </button>
+              ))}
+            </div>
             {suite.blurb && <p className="lead" style={{ fontSize: 17, marginTop: 14 }}>{suite.blurb}</p>}
             <div className="dataset-facts" aria-label="Benchmark size">
               <div className="dataset-fact"><strong>{totalSpecs}</strong><span>specs</span></div>
               <div className="dataset-fact"><strong>{totalProperties}</strong><span>proof properties</span></div>
-              <div className="dataset-fact"><strong>{suite.completion ?? totalProperties}</strong><span>completion</span></div>
+              {showScratch ? (
+                <>
+                  <div className="dataset-fact"><strong>{suite.completion}</strong><span>completion</span></div>
+                  <div className="dataset-fact"><strong>{suite.scratch}</strong><span>from scratch</span></div>
+                </>
+              ) : (
+                <div className="dataset-fact"><strong>{suite.completion ?? totalProperties}</strong><span>completion</span></div>
+              )}
             </div>
           </FadeIn>
         </div>
@@ -215,8 +241,9 @@ function PageBenchmark() {
           <Reveal>
             <h2 style={{ fontSize: 32 }}>Benchmark sources</h2>
             <p className="lead" style={{ fontSize: 17 }}>
-              The Core draws from established TLA+ proof corpora, including Apalache examples,
-              so every published model is graded on the same mechanically checkable tasks.
+              {suiteId === "core"
+                ? "The Core draws from established TLA+ proof corpora, including Apalache examples, so models are graded on mechanically checkable proof construction."
+                : "Two complementary kinds of source balance established proof corpora with protocols drawn from real systems. Both sets can grow as new specifications are added."}
             </p>
           </Reveal>
           <Reveal delay={80}>
@@ -226,9 +253,12 @@ function PageBenchmark() {
                   <span className="eyebrow accent">Source category {String(index + 1).padStart(2, "0")}</span>
                   <h3>{category.name}</h3>
                   <p>{category.blurb}</p>
-                  <dl className="dataset-category-stats dataset-category-stats-compact">
+                  <dl className={`dataset-category-stats${showScratch ? "" : " dataset-category-stats-compact"}`}>
                     <div><dt>Specs</dt><dd>{category.specCount}</dd></div>
                     <div><dt>Completion properties</dt><dd>{category.completion || "—"}</dd></div>
+                    {showScratch && (
+                      <div><dt>From-scratch properties</dt><dd>{category.scratch || "—"}</dd></div>
+                    )}
                     <div><dt>Total properties</dt><dd>{category.total}</dd></div>
                   </dl>
                 </article>
@@ -240,10 +270,11 @@ function PageBenchmark() {
             <div className="dataset-table-header">
               <div>
                 <span className="eyebrow">Dataset index</span>
-                <h2>Core suite specs</h2>
+                <h2>{suite.label} suite specs</h2>
               </div>
               <p>
-                Each row is one spec, and the numbers are its proof-completion properties.
+                Each row is one spec, and the numbers are its proof properties. A dash (—)
+                means that the spec has no properties for that mode.
               </p>
             </div>
           </Reveal>
@@ -254,6 +285,9 @@ function PageBenchmark() {
                     <th scope="col">Spec</th>
                     <th scope="col">Source</th>
                     <th scope="col" className="dataset-number">Completion properties</th>
+                    {showScratch && (
+                      <th scope="col" className="dataset-number">From-scratch properties</th>
+                    )}
                     <th scope="col" className="dataset-number">Total properties</th>
                   </tr>
                 </thead>
@@ -268,7 +302,7 @@ function PageBenchmark() {
                         </th>
                       </tr>
                       {rows.map((spec) => (
-                        <tr key={`core:${category.id}:${spec.id}`}>
+                        <tr key={`${suite.id}:${category.id}:${spec.id}`}>
                           <th scope="row" className="dataset-spec">
                             {spec.url ? (
                               <a href={spec.url} target="_blank" rel="noopener">{spec.name}<span aria-hidden="true">↗</span></a>
@@ -282,6 +316,11 @@ function PageBenchmark() {
                           <td className="dataset-number">
                             {spec.completion || <span className="dataset-na" title="No proof-completion properties">—</span>}
                           </td>
+                          {showScratch && (
+                            <td className="dataset-number">
+                              {spec.scratch || <span className="dataset-na" title="No proof-from-scratch properties">—</span>}
+                            </td>
+                          )}
                           <td className="dataset-number dataset-total">{spec.total}</td>
                         </tr>
                       ))}
@@ -298,9 +337,7 @@ function PageBenchmark() {
         <div className="wrap">
           <Reveal>
             <h2 style={{ fontSize: 32 }}>Published mode</h2>
-            <p className="lead" style={{ fontSize: 17 }}>
-              How much of the proof is given to the AI before it starts.
-            </p>
+            <p className="lead" style={{ fontSize: 17 }}>How much of the proof is given to the AI before it starts.</p>
           </Reveal>
           <Reveal delay={80}>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 16, marginTop: 24 }}>
@@ -336,7 +373,7 @@ function PageBenchmark() {
   );
 }
 
-// ============ CITE / CONTRIBUTE ============
+
 function PageCite() {
   return (
     <section className="section">

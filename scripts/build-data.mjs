@@ -241,7 +241,7 @@ const EMPTY_BAND = { rate: null, pass: 0, total: 0 };
 const bandFor = (steps) => COMPLEXITY_BANDS.find((b) => steps >= b.min && steps <= b.max);
 
 const resultFiles = readdirSync("results")
-  .filter((f) => f.endsWith(".json") && f !== "core-manifest.json")
+  .filter((f) => f.endsWith(".json") && !["core-manifest.json", "full-suite-catalog.json"].includes(f))
   .sort();
 if (resultFiles.length === 0) throw new Error("results/: no backend JSON files found");
 
@@ -578,17 +578,34 @@ if (propertyCount !== CORE_COUNT) {
 }
 
 const suiteInfo = Object.fromEntries((SITE.suites ?? []).map((suite) => [suite.id, suite]));
-if (!suiteInfo.core) throw new Error("site-content.mjs: suites must declare core");
+if (!suiteInfo.core || !suiteInfo.full) {
+  throw new Error("site-content.mjs: suites must declare core and full");
+}
+const fullCatalog = JSON.parse(readFileSync("results/full-suite-catalog.json", "utf8"));
+if (!Array.isArray(fullCatalog.specs) || fullCatalog.specs.length === 0) {
+  throw new Error("results/full-suite-catalog.json: missing specs");
+}
 const suites = [
   {
     ...suiteInfo.core,
-    blurb: suiteInfo.core.blurb.replace(/\d+/, String(CORE_COUNT)),
+    blurb: suiteInfo.core.blurb.includes(String(CORE_COUNT))
+      ? suiteInfo.core.blurb
+      : suiteInfo.core.blurb.replace(/\d+/, String(CORE_COUNT)),
     specCount: canonicalSpecs.length,
     propertyCount: CORE_COUNT,
     completion: CORE_COUNT,
     scratch: 0,
     categories,
     specs: canonicalSpecs,
+  },
+  {
+    ...suiteInfo.full,
+    specCount: fullCatalog.specCount ?? fullCatalog.specs.length,
+    propertyCount: fullCatalog.propertyCount,
+    completion: fullCatalog.completion,
+    scratch: fullCatalog.scratch,
+    categories: fullCatalog.categories,
+    specs: fullCatalog.specs,
   },
 ];
 
@@ -626,8 +643,9 @@ const data = {
       tip: "Mean estimated output-only cost per task, using recorded output tokens and public standard-tier rates from each model's audit date. Lower is better.",
     },
   ],
-  categories,
-  specs: canonicalSpecs,
+  // Home uses the Full suite catalog; Benchmark page switches via suites[].
+  categories: fullCatalog.categories,
+  specs: fullCatalog.specs,
   suites,
   models: models.sort((a, b) => (b.perMetric.completion ?? -1) - (a.perMetric.completion ?? -1)),
   modes: SITE.modes,

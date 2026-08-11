@@ -15,7 +15,6 @@ export const SITE = {
       "construction a sharp test of an AI's formal reasoning.",
   },
 
-  // Benchmark page: current published mode (Proof Completion Core only).
   modes: [
     {
       id: "completion",
@@ -28,7 +27,6 @@ export const SITE = {
     },
   ],
 
-  // Leaderboard cohorts. One-shot and agentic never share a ranking table.
   cohorts: [
     {
       id: "one-shot",
@@ -46,31 +44,37 @@ export const SITE = {
     },
   ],
 
-  // Benchmark page source categories. Counts are filled by build-data.mjs.
   categories: [
     {
       id: "libraries",
       name: "Example libraries",
       blurb:
-        "Specifications and their proof properties from the official TLA+ Examples repository, " +
-        "the TLAPS distribution, and the Apalache examples corpus.",
+        "Specifications and their proof properties from the official TLA+ Examples repository " +
+        "and the TLAPS distribution, ranging from teaching exercises to distributed algorithms.",
     },
     {
       id: "systems",
       name: "Systems specifications",
       blurb:
-        "Proof properties from protocol and system specifications. None are in the current Core.",
+        "Proof properties from protocol and system specifications drawn from ZooKeeper, Ivy, " +
+        "etcd, OpenAddressing, and Anvil, emphasizing realistic verification targets.",
     },
   ],
 
-  // Published suite. Specs/categories are filled by build-data.mjs from core-manifest.json.
   suites: [
     {
       id: "core",
       label: "Core",
       blurb:
-        "Proof Completion Core: proof-completion properties across example-library specs, " +
+        "Proof Completion Core: 293 proof-completion properties across example-library specs, " +
         "including the Apalache examples (ben-or83, tendermint). Every published model is graded on this same task set.",
+    },
+    {
+      id: "full",
+      label: "Full",
+      blurb:
+        "Full suite catalog: 710 properties across example libraries and systems specs. " +
+        "Published leaderboard scores currently use the Proof Completion Core only.",
     },
   ],
 
