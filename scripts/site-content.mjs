@@ -15,40 +15,63 @@ export const SITE = {
       "construction a sharp test of an AI's formal reasoning.",
   },
 
-  // Benchmark page: the two mode cards.
+  // Benchmark page: current published mode (Proof Completion Core only).
   modes: [
-    { id: "completion", name: "--mode proof-completion", full: "--mode proof-completion",
+    {
+      id: "completion",
+      name: "--mode proof-completion",
+      full: "--mode proof-completion",
       cli: "--mode proof-completion",
-      blurb: "The full scaffolding is given, including inductive invariants, lemma decomposition, and preceding lemmas marked PROOF OMITTED, and the AI fills in one target proof." },
-    { id: "scratch", name: "--mode proof-from-scratch", full: "--mode proof-from-scratch",
-      cli: "--mode proof-from-scratch",
-      blurb: "Only the model and the target theorem statement remain; the AI must invent the entire proof structure, including any helper lemmas." },
+      blurb:
+        "The full scaffolding is given, including inductive invariants, lemma decomposition, " +
+        "and preceding lemmas marked PROOF OMITTED, and the AI fills in one target proof.",
+    },
   ],
 
-  // Leaderboard cohorts. One-shot is the primary published view; agentic is separate.
+  // Leaderboard cohorts. One-shot and agentic never share a ranking table.
   cohorts: [
-    { id: "one-shot", label: "One-Shot",
-      blurb: "Single-response runs ranked by pass rate. Expand a model for per-spec breakdown; task usage and cost stay in the detail views." },
-    { id: "agentic", label: "Agentic",
-      blurb: "Tool-using agent runs, scored separately from one-shot. Same pass-rate ranking and per-spec detail, never mixed into the one-shot table." },
+    {
+      id: "one-shot",
+      label: "One-Shot",
+      blurb:
+        "Single-response runs ranked by pass rate on the Proof Completion Core. " +
+        "Expand a model for per-spec breakdown; task usage and cost stay in the detail views.",
+    },
+    {
+      id: "agentic",
+      label: "Agentic",
+      blurb:
+        "Tool-using agent runs on the same Proof Completion Core, scored separately from one-shot. " +
+        "Same pass-rate ranking and per-spec detail, never mixed into the one-shot table.",
+    },
   ],
 
-  // Benchmark page: the two kinds of source. Counts are deliberately absent
-  // here; build-data.mjs derives them from the canonical per-spec manifest.
+  // Benchmark page source categories. Counts are filled by build-data.mjs.
   categories: [
-    { id: "libraries", name: "Example libraries",
-      blurb: "Specifications and their proof properties from the official TLA+ Examples repository and the TLAPS distribution, ranging from teaching exercises to distributed algorithms." },
-    { id: "systems", name: "Systems specifications",
-      blurb: "Proof properties from protocol and system specifications drawn from ZooKeeper, Ivy, etcd, OpenAddressing, and Anvil, emphasizing realistic verification targets." },
+    {
+      id: "libraries",
+      name: "Example libraries",
+      blurb:
+        "Specifications and their proof properties from the official TLA+ Examples repository, " +
+        "the TLAPS distribution, and the Apalache examples corpus.",
+    },
+    {
+      id: "systems",
+      name: "Systems specifications",
+      blurb:
+        "Proof properties from protocol and system specifications. None are in the current Core.",
+    },
   ],
 
-  // Benchmark page suite switch. Specs/categories for each suite are filled in
-  // by build-data.mjs (Full = prior 710-task suite; Core = Proof Completion Core).
+  // Published suite. Specs/categories are filled by build-data.mjs from core-manifest.json.
   suites: [
-    { id: "core", label: "Core",
-      blurb: "Proof Completion Core: 293 proof-completion properties across example-library specs, including the Apalache examples (ben-or83, tendermint)." },
-    { id: "full", label: "Full",
-      blurb: "Full suite: 710 properties spanning example libraries and systems specs, with both proof-completion and proof-from-scratch modes." },
+    {
+      id: "core",
+      label: "Core",
+      blurb:
+        "Proof Completion Core: proof-completion properties across example-library specs, " +
+        "including the Apalache examples (ben-or83, tendermint). Every published model is graded on this same task set.",
+    },
   ],
 
   coverage: [],
