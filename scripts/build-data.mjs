@@ -27,10 +27,16 @@ const CORE_COUNT = CORE_TASKS.length;
 if (coreManifest.task_count !== CORE_COUNT) {
   throw new Error(`results/core-manifest.json: task_count ${coreManifest.task_count} != ${CORE_COUNT}`);
 }
+for (const t of CORE_TASKS) {
+  if (typeof t.spec_id !== "string" || !t.spec_id.endsWith(".tla")) {
+    throw new Error(`results/core-manifest.json: ${t.benchmark} missing originating spec_id`);
+  }
+}
 const CORE_BY_BENCHMARK = new Map(CORE_TASKS.map((t) => [t.benchmark, t]));
 if (CORE_BY_BENCHMARK.size !== CORE_COUNT) {
   throw new Error("results/core-manifest.json: duplicate benchmarks");
 }
+const CORE_SPEC_COUNT = new Set(CORE_TASKS.map((t) => t.spec_id)).size;
 const CANONICAL = Object.fromEntries(
   Object.entries(coreManifest.sources ?? {}).map(([source, n]) => [source, n]),
 );
@@ -169,6 +175,10 @@ const SPEC_URL = {
   apalache_examples_tendermint: "https://github.com/konnov/apalache-examples/tree/main/tendermint-accountability",
 };
 
+const exampleDir = (benchmarkOrSpecId) => benchmarkOrSpecId.split("/")[0];
+const sourceModuleName = (specSourceId) =>
+  specSourceId.split("/").pop().replace(/\.tla$/i, "");
+
 const displayName = (group) => {
   for (const prefix of ["tlaplus_examples_", "apalache_examples_"]) {
     if (group.startsWith(prefix)) return group.slice(prefix.length);
@@ -192,8 +202,8 @@ const specUrl = (group) => {
 };
 
 const slug = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-const specId = (source, group) => `${slug(source)}--${slug(group)}`;
-const specKey = (source, group) => JSON.stringify([source, group]);
+const specId = (source, scoringKey) => `${slug(source)}--${slug(scoringKey)}`;
+const specKey = (source, scoringKey) => JSON.stringify([source, scoringKey]);
 const r1 = (x) => Math.round(x * 10) / 10;
 
 const modeStat = (pm, pricing) => {
@@ -374,15 +384,18 @@ const models = bundles.map(({ f, meta, results, resultsVersion }) => {
     modeOutput += r.output_tokens ?? 0;
     modeCostUnits += rowOutputCostUnits ?? 0;
 
-    const group = r.benchmark.split("/")[0];
-    if (!group || group === r.benchmark) {
-      throw new Error(`${f}: benchmark "${r.benchmark}" does not identify a spec group`);
+    const example = exampleDir(r.benchmark);
+    if (!example || example === r.benchmark) {
+      throw new Error(`${f}: benchmark "${r.benchmark}" does not identify an example directory`);
     }
+    const scoringKey = expected.spec_id;
     bySource[r.source] = (bySource[r.source] ?? 0) + 1;
-    const key = specKey(r.source, group);
+    const key = specKey(r.source, scoringKey);
     const spec = (bySpec[key] ??= {
       source: r.source,
-      group,
+      group: example,
+      scoringKey,
+      name: sourceModuleName(scoringKey),
       pass: 0,
       total: 0,
       activeTimeSecs: 0,
@@ -436,20 +449,23 @@ const models = bundles.map(({ f, meta, results, resultsVersion }) => {
     .map((spec) => ({
       source: spec.source,
       group: spec.group,
+      scoringKey: spec.scoringKey,
+      name: spec.name,
       completion: spec.total,
       scratch: 0,
     }))
-    .sort((a, b) => a.source.localeCompare(b.source) || a.group.localeCompare(b.group));
+    .sort((a, b) => a.source.localeCompare(b.source) || a.scoringKey.localeCompare(b.scoringKey));
 
-  const rows = manifest.map(({ source, group, completion, scratch }) => {
+  const rows = manifest.map(({ source, group, scoringKey, name, completion, scratch }) => {
     const sourceInfo = SOURCE_INFO[source];
     if (!sourceInfo) throw new Error(`${f}: missing display info for source "${source}"`);
     const url = specUrl(group);
-    if (!url) throw new Error(`${f}: spec "${group}" is missing an upstream URL`);
+    if (!url) throw new Error(`${f}: example "${group}" is missing an upstream URL`);
     return {
-      id: specId(source, group),
+      id: specId(source, scoringKey),
       group,
-      name: displayName(group),
+      scoringKey,
+      name,
       category: categoryFor(source),
       sourceKey: source,
       sourceName: sourceInfo.name,
@@ -463,10 +479,10 @@ const models = bundles.map(({ f, meta, results, resultsVersion }) => {
   const ids = new Set(rows.map((row) => row.id));
   if (ids.size !== rows.length) throw new Error(`${f}: spec ids are not unique`);
 
-  const perSpec = Object.fromEntries(manifest.map(({ source, group }) => {
-    const spec = bySpec[specKey(source, group)];
+  const perSpec = Object.fromEntries(manifest.map(({ source, scoringKey }) => {
+    const spec = bySpec[specKey(source, scoringKey)];
     return [
-      specId(source, group),
+      specId(source, scoringKey),
       {
         completion: modeStat({
           pass: spec.pass,
@@ -584,6 +600,9 @@ const propertyCount = canonicalSpecs.reduce((n, spec) => n + spec.total, 0);
 if (propertyCount !== CORE_COUNT) {
   throw new Error(`Core property count ${propertyCount} != ${CORE_COUNT}`);
 }
+if (canonicalSpecs.length !== CORE_SPEC_COUNT) {
+  throw new Error(`Core spec count ${canonicalSpecs.length} != ${CORE_SPEC_COUNT} originating modules`);
+}
 
 const suiteInfo = Object.fromEntries((SITE.suites ?? []).map((suite) => [suite.id, suite]));
 if (!suiteInfo.core || !suiteInfo.full) {
@@ -675,5 +694,5 @@ if (process.argv.includes("--check")) {
     "// Leaderboard data is recomputed from results/*.json against results/core-manifest.json;\n" +
     "// page content comes from scripts/site-content.mjs.\n" +
     "window.TLAPS_DATA = " + JSON.stringify(data, null, 2) + ";\n");
-  console.log(`Wrote data.js: ${models.length} model(s), ${canonicalSpecs.length} Core specs, ${CORE_COUNT} properties.`);
+  console.log(`Wrote data.js: ${models.length} model(s), ${canonicalSpecs.length} Core specs (${CORE_SPEC_COUNT} originating modules), ${CORE_COUNT} properties.`);
 }

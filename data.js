@@ -1019,8 +1019,8 @@ window.TLAPS_DATA = {
     {
       "id": "core",
       "label": "Core",
-      "blurb": "Proof Completion Core: 190 proof-completion properties across example-library specs, including the Apalache examples (ben-or83, tendermint). Every published model is graded on this same task set.",
-      "specCount": 39,
+      "blurb": "Proof Completion Core: 190 proof-completion properties across 56 originating source modules, including the Apalache examples (ben-or83, tendermint). Every published model is graded on this same task set.",
+      "specCount": 56,
       "propertyCount": 190,
       "completion": 190,
       "scratch": 0,
@@ -1029,7 +1029,7 @@ window.TLAPS_DATA = {
           "id": "libraries",
           "name": "Example libraries",
           "blurb": "Specifications and their proof properties from the official TLA+ Examples repository, the TLAPS distribution, and the Apalache examples corpus (Konnov).",
-          "specCount": 39,
+          "specCount": 56,
           "completion": 190,
           "scratch": 0,
           "total": 190
@@ -1037,35 +1037,24 @@ window.TLAPS_DATA = {
       ],
       "specs": [
         {
-          "id": "tlaplus-examples--tlaplus-examples-ewd998",
+          "id": "tlaplus-examples--tlaplus-examples-ewd998-ewd998-proof-tla",
           "group": "tlaplus_examples_ewd998",
-          "name": "ewd998",
+          "scoringKey": "tlaplus_examples_ewd998/EWD998_proof.tla",
+          "name": "EWD998_proof",
           "category": "libraries",
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
           "url": "https://github.com/tlaplus/Examples/tree/master/specifications/ewd998",
-          "completion": 17,
-          "scratch": 0,
-          "total": 17
-        },
-        {
-          "id": "tlaplus-examples--tlaplus-examples-byzpaxos",
-          "group": "tlaplus_examples_byzpaxos",
-          "name": "byzpaxos",
-          "category": "libraries",
-          "sourceKey": "tlaplus/Examples",
-          "sourceName": "tlaplus/Examples",
-          "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/byzpaxos",
           "completion": 12,
           "scratch": 0,
           "total": 12
         },
         {
-          "id": "tlaplus-examples--tlaplus-examples-tencentpaxos",
+          "id": "tlaplus-examples--tlaplus-examples-tencentpaxos-tpaxoswithproof-tla",
           "group": "tlaplus_examples_TencentPaxos",
-          "name": "TencentPaxos",
+          "scoringKey": "tlaplus_examples_TencentPaxos/TPaxosWithProof.tla",
+          "name": "TPaxosWithProof",
           "category": "libraries",
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
@@ -1076,9 +1065,10 @@ window.TLAPS_DATA = {
           "total": 11
         },
         {
-          "id": "tlaplus-examples--tlaplus-examples-finitemonotonic",
+          "id": "tlaplus-examples--tlaplus-examples-finitemonotonic-crdt-proof-tla",
           "group": "tlaplus_examples_FiniteMonotonic",
-          "name": "FiniteMonotonic",
+          "scoringKey": "tlaplus_examples_FiniteMonotonic/CRDT_proof.tla",
+          "name": "CRDT_proof",
           "category": "libraries",
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
@@ -1089,22 +1079,24 @@ window.TLAPS_DATA = {
           "total": 10
         },
         {
-          "id": "tlaplus-examples--tlaplus-examples-ewd840",
-          "group": "tlaplus_examples_ewd840",
-          "name": "ewd840",
+          "id": "tlaplus-examples--tlaplus-examples-byzpaxos-voteproof-tla",
+          "group": "tlaplus_examples_byzpaxos",
+          "scoringKey": "tlaplus_examples_byzpaxos/VoteProof.tla",
+          "name": "VoteProof",
           "category": "libraries",
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/ewd840",
-          "completion": 6,
+          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/byzpaxos",
+          "completion": 7,
           "scratch": 0,
-          "total": 6
+          "total": 7
         },
         {
-          "id": "tlaplus-examples--tlaplus-examples-tcp",
+          "id": "tlaplus-examples--tlaplus-examples-tcp-tcp-proof-tla",
           "group": "tlaplus_examples_tcp",
-          "name": "tcp",
+          "scoringKey": "tlaplus_examples_tcp/tcp_proof.tla",
+          "name": "tcp_proof",
           "category": "libraries",
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
@@ -1115,47 +1107,51 @@ window.TLAPS_DATA = {
           "total": 6
         },
         {
-          "id": "tlaplus-examples--tlaplus-examples-loopinvariance",
-          "group": "tlaplus_examples_LoopInvariance",
-          "name": "LoopInvariance",
+          "id": "tlaplus-examples--tlaplus-examples-byzpaxos-bpconproof-tla",
+          "group": "tlaplus_examples_byzpaxos",
+          "scoringKey": "tlaplus_examples_byzpaxos/BPConProof.tla",
+          "name": "BPConProof",
           "category": "libraries",
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/LoopInvariance",
-          "completion": 5,
-          "scratch": 0,
-          "total": 5
-        },
-        {
-          "id": "tlaplus-examples--tlaplus-examples-misrareachability",
-          "group": "tlaplus_examples_MisraReachability",
-          "name": "MisraReachability",
-          "category": "libraries",
-          "sourceKey": "tlaplus/Examples",
-          "sourceName": "tlaplus/Examples",
-          "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/MisraReachability",
+          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/byzpaxos",
           "completion": 4,
           "scratch": 0,
           "total": 4
         },
         {
-          "id": "tlaplus-examples--tlaplus-examples-allocator",
-          "group": "tlaplus_examples_allocator",
-          "name": "allocator",
+          "id": "tlaplus-examples--tlaplus-examples-ewd840-ewd840-proof-tla",
+          "group": "tlaplus_examples_ewd840",
+          "scoringKey": "tlaplus_examples_ewd840/EWD840_proof.tla",
+          "name": "EWD840_proof",
           "category": "libraries",
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/allocator",
+          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/ewd840",
+          "completion": 4,
+          "scratch": 0,
+          "total": 4
+        },
+        {
+          "id": "tlaplus-examples--tlaplus-examples-ewd998-asyncterminationdetection-proof-tla",
+          "group": "tlaplus_examples_ewd998",
+          "scoringKey": "tlaplus_examples_ewd998/AsyncTerminationDetection_proof.tla",
+          "name": "AsyncTerminationDetection_proof",
+          "category": "libraries",
+          "sourceKey": "tlaplus/Examples",
+          "sourceName": "tlaplus/Examples",
+          "sourceUrl": "https://github.com/tlaplus/Examples",
+          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/ewd998",
           "completion": 3,
           "scratch": 0,
           "total": 3
         },
         {
-          "id": "tlaplus-examples--tlaplus-examples-bcastbyz",
+          "id": "tlaplus-examples--tlaplus-examples-bcastbyz-bcastbyz-tla",
           "group": "tlaplus_examples_bcastByz",
+          "scoringKey": "tlaplus_examples_bcastByz/bcastByz.tla",
           "name": "bcastByz",
           "category": "libraries",
           "sourceKey": "tlaplus/Examples",
@@ -1167,9 +1163,10 @@ window.TLAPS_DATA = {
           "total": 3
         },
         {
-          "id": "tlaplus-examples--tlaplus-examples-ewd687a",
+          "id": "tlaplus-examples--tlaplus-examples-ewd687a-ewd687a-proof-tla",
           "group": "tlaplus_examples_ewd687a",
-          "name": "ewd687a",
+          "scoringKey": "tlaplus_examples_ewd687a/EWD687a_proof.tla",
+          "name": "EWD687a_proof",
           "category": "libraries",
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
@@ -1180,22 +1177,10 @@ window.TLAPS_DATA = {
           "total": 3
         },
         {
-          "id": "tlaplus-examples--tlaplus-examples-glowingraccoon",
-          "group": "tlaplus_examples_glowingRaccoon",
-          "name": "glowingRaccoon",
-          "category": "libraries",
-          "sourceKey": "tlaplus/Examples",
-          "sourceName": "tlaplus/Examples",
-          "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/glowingRaccoon",
-          "completion": 3,
-          "scratch": 0,
-          "total": 3
-        },
-        {
-          "id": "tlaplus-examples--tlaplus-examples-lamport-mutex",
+          "id": "tlaplus-examples--tlaplus-examples-lamport-mutex-lamportmutex-proofs-tla",
           "group": "tlaplus_examples_lamport_mutex",
-          "name": "lamport_mutex",
+          "scoringKey": "tlaplus_examples_lamport_mutex/LamportMutex_proofs.tla",
+          "name": "LamportMutex_proofs",
           "category": "libraries",
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
@@ -1206,22 +1191,10 @@ window.TLAPS_DATA = {
           "total": 3
         },
         {
-          "id": "tlaplus-examples--tlaplus-examples-locks-auxiliary-vars",
-          "group": "tlaplus_examples_locks_auxiliary_vars",
-          "name": "locks_auxiliary_vars",
-          "category": "libraries",
-          "sourceKey": "tlaplus/Examples",
-          "sourceName": "tlaplus/Examples",
-          "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/locks_auxiliary_vars",
-          "completion": 3,
-          "scratch": 0,
-          "total": 3
-        },
-        {
-          "id": "tlaplus-examples--tlaplus-examples-majority",
+          "id": "tlaplus-examples--tlaplus-examples-majority-majorityproof-tla",
           "group": "tlaplus_examples_Majority",
-          "name": "Majority",
+          "scoringKey": "tlaplus_examples_Majority/MajorityProof.tla",
+          "name": "MajorityProof",
           "category": "libraries",
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
@@ -1232,22 +1205,24 @@ window.TLAPS_DATA = {
           "total": 3
         },
         {
-          "id": "tlaplus-examples--tlaplus-examples-paxoshowtowinaturingaward",
-          "group": "tlaplus_examples_PaxosHowToWinATuringAward",
-          "name": "PaxosHowToWinATuringAward",
+          "id": "tlaplus-examples--tlaplus-examples-loopinvariance-sumsequence-tla",
+          "group": "tlaplus_examples_LoopInvariance",
+          "scoringKey": "tlaplus_examples_LoopInvariance/SumSequence.tla",
+          "name": "SumSequence",
           "category": "libraries",
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/PaxosHowToWinATuringAward",
+          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/LoopInvariance",
           "completion": 3,
           "scratch": 0,
           "total": 3
         },
         {
-          "id": "tlaplus-examples--tlaplus-examples-barriers",
+          "id": "tlaplus-examples--tlaplus-examples-barriers-barriers-tla",
           "group": "tlaplus_examples_barriers",
-          "name": "barriers",
+          "scoringKey": "tlaplus_examples_barriers/Barriers.tla",
+          "name": "Barriers",
           "category": "libraries",
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
@@ -1258,9 +1233,10 @@ window.TLAPS_DATA = {
           "total": 2
         },
         {
-          "id": "tlaplus-examples--tlaplus-examples-blockingqueue",
+          "id": "tlaplus-examples--tlaplus-examples-blockingqueue-blockingqueuesplit-proofs-tla",
           "group": "tlaplus_examples_BlockingQueue",
-          "name": "BlockingQueue",
+          "scoringKey": "tlaplus_examples_BlockingQueue/BlockingQueueSplit_proofs.tla",
+          "name": "BlockingQueueSplit_proofs",
           "category": "libraries",
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
@@ -1271,22 +1247,38 @@ window.TLAPS_DATA = {
           "total": 2
         },
         {
-          "id": "tlaplus-examples--tlaplus-examples-teachingconcurrency",
-          "group": "tlaplus_examples_TeachingConcurrency",
-          "name": "TeachingConcurrency",
+          "id": "tlaplus-examples--tlaplus-examples-glowingraccoon-clean-proof-tla",
+          "group": "tlaplus_examples_glowingRaccoon",
+          "scoringKey": "tlaplus_examples_glowingRaccoon/clean_proof.tla",
+          "name": "clean_proof",
           "category": "libraries",
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/TeachingConcurrency",
+          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/glowingRaccoon",
           "completion": 2,
           "scratch": 0,
           "total": 2
         },
         {
-          "id": "tlaplus-examples--tlaplus-examples-transaction-commit",
+          "id": "tlaplus-examples--tlaplus-examples-ewd998-ewd998pcal-proof-tla",
+          "group": "tlaplus_examples_ewd998",
+          "scoringKey": "tlaplus_examples_ewd998/EWD998PCal_proof.tla",
+          "name": "EWD998PCal_proof",
+          "category": "libraries",
+          "sourceKey": "tlaplus/Examples",
+          "sourceName": "tlaplus/Examples",
+          "sourceUrl": "https://github.com/tlaplus/Examples",
+          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/ewd998",
+          "completion": 2,
+          "scratch": 0,
+          "total": 2
+        },
+        {
+          "id": "tlaplus-examples--tlaplus-examples-transaction-commit-paxoscommit-proof-tla",
           "group": "tlaplus_examples_transaction_commit",
-          "name": "transaction_commit",
+          "scoringKey": "tlaplus_examples_transaction_commit/PaxosCommit_proof.tla",
+          "name": "PaxosCommit_proof",
           "category": "libraries",
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
@@ -1297,9 +1289,94 @@ window.TLAPS_DATA = {
           "total": 2
         },
         {
-          "id": "tlaplus-examples--tlaplus-examples-bakery-boulangerie",
+          "id": "tlaplus-examples--tlaplus-examples-misrareachability-reachableproofs-tla",
+          "group": "tlaplus_examples_MisraReachability",
+          "scoringKey": "tlaplus_examples_MisraReachability/ReachableProofs.tla",
+          "name": "ReachableProofs",
+          "category": "libraries",
+          "sourceKey": "tlaplus/Examples",
+          "sourceName": "tlaplus/Examples",
+          "sourceUrl": "https://github.com/tlaplus/Examples",
+          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/MisraReachability",
+          "completion": 2,
+          "scratch": 0,
+          "total": 2
+        },
+        {
+          "id": "tlaplus-examples--tlaplus-examples-allocator-schedulingallocator-proof-tla",
+          "group": "tlaplus_examples_allocator",
+          "scoringKey": "tlaplus_examples_allocator/SchedulingAllocator_proof.tla",
+          "name": "SchedulingAllocator_proof",
+          "category": "libraries",
+          "sourceKey": "tlaplus/Examples",
+          "sourceName": "tlaplus/Examples",
+          "sourceUrl": "https://github.com/tlaplus/Examples",
+          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/allocator",
+          "completion": 2,
+          "scratch": 0,
+          "total": 2
+        },
+        {
+          "id": "tlaplus-examples--tlaplus-examples-ewd840-syncterminationdetection-proof-tla",
+          "group": "tlaplus_examples_ewd840",
+          "scoringKey": "tlaplus_examples_ewd840/SyncTerminationDetection_proof.tla",
+          "name": "SyncTerminationDetection_proof",
+          "category": "libraries",
+          "sourceKey": "tlaplus/Examples",
+          "sourceName": "tlaplus/Examples",
+          "sourceUrl": "https://github.com/tlaplus/Examples",
+          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/ewd840",
+          "completion": 2,
+          "scratch": 0,
+          "total": 2
+        },
+        {
+          "id": "tlaplus-examples--tlaplus-examples-paxoshowtowinaturingaward-voting-tla",
+          "group": "tlaplus_examples_PaxosHowToWinATuringAward",
+          "scoringKey": "tlaplus_examples_PaxosHowToWinATuringAward/Voting.tla",
+          "name": "Voting",
+          "category": "libraries",
+          "sourceKey": "tlaplus/Examples",
+          "sourceName": "tlaplus/Examples",
+          "sourceUrl": "https://github.com/tlaplus/Examples",
+          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/PaxosHowToWinATuringAward",
+          "completion": 2,
+          "scratch": 0,
+          "total": 2
+        },
+        {
+          "id": "tlaplus-examples--tlaplus-examples-allocator-allocatorimplementation-proof-tla",
+          "group": "tlaplus_examples_allocator",
+          "scoringKey": "tlaplus_examples_allocator/AllocatorImplementation_proof.tla",
+          "name": "AllocatorImplementation_proof",
+          "category": "libraries",
+          "sourceKey": "tlaplus/Examples",
+          "sourceName": "tlaplus/Examples",
+          "sourceUrl": "https://github.com/tlaplus/Examples",
+          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/allocator",
+          "completion": 1,
+          "scratch": 0,
+          "total": 1
+        },
+        {
+          "id": "tlaplus-examples--tlaplus-examples-loopinvariance-binarysearch-tla",
+          "group": "tlaplus_examples_LoopInvariance",
+          "scoringKey": "tlaplus_examples_LoopInvariance/BinarySearch.tla",
+          "name": "BinarySearch",
+          "category": "libraries",
+          "sourceKey": "tlaplus/Examples",
+          "sourceName": "tlaplus/Examples",
+          "sourceUrl": "https://github.com/tlaplus/Examples",
+          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/LoopInvariance",
+          "completion": 1,
+          "scratch": 0,
+          "total": 1
+        },
+        {
+          "id": "tlaplus-examples--tlaplus-examples-bakery-boulangerie-boulanger-tla",
           "group": "tlaplus_examples_Bakery-Boulangerie",
-          "name": "Bakery-Boulangerie",
+          "scoringKey": "tlaplus_examples_Bakery-Boulangerie/Boulanger.tla",
+          "name": "Boulanger",
           "category": "libraries",
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
@@ -1310,9 +1387,10 @@ window.TLAPS_DATA = {
           "total": 1
         },
         {
-          "id": "tlaplus-examples--tlaplus-examples-cigarettesmokers",
+          "id": "tlaplus-examples--tlaplus-examples-cigarettesmokers-cigarettesmokers-proof-tla",
           "group": "tlaplus_examples_CigaretteSmokers",
-          "name": "CigaretteSmokers",
+          "scoringKey": "tlaplus_examples_CigaretteSmokers/CigaretteSmokers_proof.tla",
+          "name": "CigaretteSmokers_proof",
           "category": "libraries",
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
@@ -1323,9 +1401,10 @@ window.TLAPS_DATA = {
           "total": 1
         },
         {
-          "id": "tlaplus-examples--tlaplus-examples-coffeecan",
+          "id": "tlaplus-examples--tlaplus-examples-coffeecan-coffeecan-proof-tla",
           "group": "tlaplus_examples_CoffeeCan",
-          "name": "CoffeeCan",
+          "scoringKey": "tlaplus_examples_CoffeeCan/CoffeeCan_proof.tla",
+          "name": "CoffeeCan_proof",
           "category": "libraries",
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
@@ -1336,48 +1415,10 @@ window.TLAPS_DATA = {
           "total": 1
         },
         {
-          "id": "tlaplus-examples--tlaplus-examples-keyvaluestore",
-          "group": "tlaplus_examples_KeyValueStore",
-          "name": "KeyValueStore",
-          "category": "libraries",
-          "sourceKey": "tlaplus/Examples",
-          "sourceName": "tlaplus/Examples",
-          "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/KeyValueStore",
-          "completion": 1,
-          "scratch": 0,
-          "total": 1
-        },
-        {
-          "id": "tlaplus-examples--tlaplus-examples-missionariesandcannibals",
-          "group": "tlaplus_examples_MissionariesAndCannibals",
-          "name": "MissionariesAndCannibals",
-          "category": "libraries",
-          "sourceKey": "tlaplus/Examples",
-          "sourceName": "tlaplus/Examples",
-          "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/MissionariesAndCannibals",
-          "completion": 1,
-          "scratch": 0,
-          "total": 1
-        },
-        {
-          "id": "tlaplus-examples--tlaplus-examples-multicarelevator",
-          "group": "tlaplus_examples_MultiCarElevator",
-          "name": "MultiCarElevator",
-          "category": "libraries",
-          "sourceKey": "tlaplus/Examples",
-          "sourceName": "tlaplus/Examples",
-          "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/MultiCarElevator",
-          "completion": 1,
-          "scratch": 0,
-          "total": 1
-        },
-        {
-          "id": "tlaplus-examples--tlaplus-examples-paxos",
+          "id": "tlaplus-examples--tlaplus-examples-paxos-consensus-tla",
           "group": "tlaplus_examples_Paxos",
-          "name": "Paxos",
+          "scoringKey": "tlaplus_examples_Paxos/Consensus.tla",
+          "name": "Consensus",
           "category": "libraries",
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
@@ -1388,9 +1429,150 @@ window.TLAPS_DATA = {
           "total": 1
         },
         {
-          "id": "tlaplus-examples--tlaplus-examples-readerswriters",
+          "id": "tlaplus-examples--tlaplus-examples-multicarelevator-elevator-proof-tla",
+          "group": "tlaplus_examples_MultiCarElevator",
+          "scoringKey": "tlaplus_examples_MultiCarElevator/Elevator_proof.tla",
+          "name": "Elevator_proof",
+          "category": "libraries",
+          "sourceKey": "tlaplus/Examples",
+          "sourceName": "tlaplus/Examples",
+          "sourceUrl": "https://github.com/tlaplus/Examples",
+          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/MultiCarElevator",
+          "completion": 1,
+          "scratch": 0,
+          "total": 1
+        },
+        {
+          "id": "tlaplus-examples--tlaplus-examples-keyvaluestore-keyvaluestore-proof-tla",
+          "group": "tlaplus_examples_KeyValueStore",
+          "scoringKey": "tlaplus_examples_KeyValueStore/KeyValueStore_proof.tla",
+          "name": "KeyValueStore_proof",
+          "category": "libraries",
+          "sourceKey": "tlaplus/Examples",
+          "sourceName": "tlaplus/Examples",
+          "sourceUrl": "https://github.com/tlaplus/Examples",
+          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/KeyValueStore",
+          "completion": 1,
+          "scratch": 0,
+          "total": 1
+        },
+        {
+          "id": "tlaplus-examples--tlaplus-examples-locks-auxiliary-vars-lock-tla",
+          "group": "tlaplus_examples_locks_auxiliary_vars",
+          "scoringKey": "tlaplus_examples_locks_auxiliary_vars/Lock.tla",
+          "name": "Lock",
+          "category": "libraries",
+          "sourceKey": "tlaplus/Examples",
+          "sourceName": "tlaplus/Examples",
+          "sourceUrl": "https://github.com/tlaplus/Examples",
+          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/locks_auxiliary_vars",
+          "completion": 1,
+          "scratch": 0,
+          "total": 1
+        },
+        {
+          "id": "tlaplus-examples--tlaplus-examples-locks-auxiliary-vars-lockhs-tla",
+          "group": "tlaplus_examples_locks_auxiliary_vars",
+          "scoringKey": "tlaplus_examples_locks_auxiliary_vars/LockHS.tla",
+          "name": "LockHS",
+          "category": "libraries",
+          "sourceKey": "tlaplus/Examples",
+          "sourceName": "tlaplus/Examples",
+          "sourceUrl": "https://github.com/tlaplus/Examples",
+          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/locks_auxiliary_vars",
+          "completion": 1,
+          "scratch": 0,
+          "total": 1
+        },
+        {
+          "id": "tlaplus-examples--tlaplus-examples-missionariesandcannibals-missionariesandcannibals-proof-tla",
+          "group": "tlaplus_examples_MissionariesAndCannibals",
+          "scoringKey": "tlaplus_examples_MissionariesAndCannibals/MissionariesAndCannibals_proof.tla",
+          "name": "MissionariesAndCannibals_proof",
+          "category": "libraries",
+          "sourceKey": "tlaplus/Examples",
+          "sourceName": "tlaplus/Examples",
+          "sourceUrl": "https://github.com/tlaplus/Examples",
+          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/MissionariesAndCannibals",
+          "completion": 1,
+          "scratch": 0,
+          "total": 1
+        },
+        {
+          "id": "tlaplus-examples--tlaplus-examples-misrareachability-parreachproofs-tla",
+          "group": "tlaplus_examples_MisraReachability",
+          "scoringKey": "tlaplus_examples_MisraReachability/ParReachProofs.tla",
+          "name": "ParReachProofs",
+          "category": "libraries",
+          "sourceKey": "tlaplus/Examples",
+          "sourceName": "tlaplus/Examples",
+          "sourceUrl": "https://github.com/tlaplus/Examples",
+          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/MisraReachability",
+          "completion": 1,
+          "scratch": 0,
+          "total": 1
+        },
+        {
+          "id": "tlaplus-examples--tlaplus-examples-byzpaxos-pconproof-tla",
+          "group": "tlaplus_examples_byzpaxos",
+          "scoringKey": "tlaplus_examples_byzpaxos/PConProof.tla",
+          "name": "PConProof",
+          "category": "libraries",
+          "sourceKey": "tlaplus/Examples",
+          "sourceName": "tlaplus/Examples",
+          "sourceUrl": "https://github.com/tlaplus/Examples",
+          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/byzpaxos",
+          "completion": 1,
+          "scratch": 0,
+          "total": 1
+        },
+        {
+          "id": "tlaplus-examples--tlaplus-examples-locks-auxiliary-vars-peterson-tla",
+          "group": "tlaplus_examples_locks_auxiliary_vars",
+          "scoringKey": "tlaplus_examples_locks_auxiliary_vars/Peterson.tla",
+          "name": "Peterson",
+          "category": "libraries",
+          "sourceKey": "tlaplus/Examples",
+          "sourceName": "tlaplus/Examples",
+          "sourceUrl": "https://github.com/tlaplus/Examples",
+          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/locks_auxiliary_vars",
+          "completion": 1,
+          "scratch": 0,
+          "total": 1
+        },
+        {
+          "id": "tlaplus-examples--tlaplus-examples-loopinvariance-quicksort-tla",
+          "group": "tlaplus_examples_LoopInvariance",
+          "scoringKey": "tlaplus_examples_LoopInvariance/Quicksort.tla",
+          "name": "Quicksort",
+          "category": "libraries",
+          "sourceKey": "tlaplus/Examples",
+          "sourceName": "tlaplus/Examples",
+          "sourceUrl": "https://github.com/tlaplus/Examples",
+          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/LoopInvariance",
+          "completion": 1,
+          "scratch": 0,
+          "total": 1
+        },
+        {
+          "id": "tlaplus-examples--tlaplus-examples-misrareachability-reachabilityproofs-tla",
+          "group": "tlaplus_examples_MisraReachability",
+          "scoringKey": "tlaplus_examples_MisraReachability/ReachabilityProofs.tla",
+          "name": "ReachabilityProofs",
+          "category": "libraries",
+          "sourceKey": "tlaplus/Examples",
+          "sourceName": "tlaplus/Examples",
+          "sourceUrl": "https://github.com/tlaplus/Examples",
+          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/MisraReachability",
+          "completion": 1,
+          "scratch": 0,
+          "total": 1
+        },
+        {
+          "id": "tlaplus-examples--tlaplus-examples-readerswriters-readerswriters-proof-tla",
           "group": "tlaplus_examples_ReadersWriters",
-          "name": "ReadersWriters",
+          "scoringKey": "tlaplus_examples_ReadersWriters/ReadersWriters_proof.tla",
+          "name": "ReadersWriters_proof",
           "category": "libraries",
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
@@ -1401,9 +1583,38 @@ window.TLAPS_DATA = {
           "total": 1
         },
         {
-          "id": "tlaplus-examples--tlaplus-examples-spanning",
+          "id": "tlaplus-examples--tlaplus-examples-teachingconcurrency-simple-tla",
+          "group": "tlaplus_examples_TeachingConcurrency",
+          "scoringKey": "tlaplus_examples_TeachingConcurrency/Simple.tla",
+          "name": "Simple",
+          "category": "libraries",
+          "sourceKey": "tlaplus/Examples",
+          "sourceName": "tlaplus/Examples",
+          "sourceUrl": "https://github.com/tlaplus/Examples",
+          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/TeachingConcurrency",
+          "completion": 1,
+          "scratch": 0,
+          "total": 1
+        },
+        {
+          "id": "tlaplus-examples--tlaplus-examples-teachingconcurrency-simpleregular-tla",
+          "group": "tlaplus_examples_TeachingConcurrency",
+          "scoringKey": "tlaplus_examples_TeachingConcurrency/SimpleRegular.tla",
+          "name": "SimpleRegular",
+          "category": "libraries",
+          "sourceKey": "tlaplus/Examples",
+          "sourceName": "tlaplus/Examples",
+          "sourceUrl": "https://github.com/tlaplus/Examples",
+          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/TeachingConcurrency",
+          "completion": 1,
+          "scratch": 0,
+          "total": 1
+        },
+        {
+          "id": "tlaplus-examples--tlaplus-examples-spanning-spanning-proof-tla",
           "group": "tlaplus_examples_spanning",
-          "name": "spanning",
+          "scoringKey": "tlaplus_examples_spanning/spanning_proof.tla",
+          "name": "spanning_proof",
           "category": "libraries",
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
@@ -1414,9 +1625,24 @@ window.TLAPS_DATA = {
           "total": 1
         },
         {
-          "id": "tlaplus-examples--tlaplus-examples-termination",
+          "id": "tlaplus-examples--tlaplus-examples-glowingraccoon-stages-proof-tla",
+          "group": "tlaplus_examples_glowingRaccoon",
+          "scoringKey": "tlaplus_examples_glowingRaccoon/stages_proof.tla",
+          "name": "stages_proof",
+          "category": "libraries",
+          "sourceKey": "tlaplus/Examples",
+          "sourceName": "tlaplus/Examples",
+          "sourceUrl": "https://github.com/tlaplus/Examples",
+          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/glowingRaccoon",
+          "completion": 1,
+          "scratch": 0,
+          "total": 1
+        },
+        {
+          "id": "tlaplus-examples--tlaplus-examples-termination-termination-proof-tla",
           "group": "tlaplus_examples_Termination",
-          "name": "Termination",
+          "scoringKey": "tlaplus_examples_Termination/Termination_proof.tla",
+          "name": "Termination_proof",
           "category": "libraries",
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
@@ -1427,9 +1653,24 @@ window.TLAPS_DATA = {
           "total": 1
         },
         {
-          "id": "apalache-examples-konnov--apalache-examples-ben-or83",
+          "id": "tlaplus-examples--tlaplus-examples-paxoshowtowinaturingaward-voting-proof-tla",
+          "group": "tlaplus_examples_PaxosHowToWinATuringAward",
+          "scoringKey": "tlaplus_examples_PaxosHowToWinATuringAward/Voting_proof.tla",
+          "name": "Voting_proof",
+          "category": "libraries",
+          "sourceKey": "tlaplus/Examples",
+          "sourceName": "tlaplus/Examples",
+          "sourceUrl": "https://github.com/tlaplus/Examples",
+          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/PaxosHowToWinATuringAward",
+          "completion": 1,
+          "scratch": 0,
+          "total": 1
+        },
+        {
+          "id": "apalache-examples-konnov--apalache-examples-ben-or83-ben-or83-proofs-tla",
           "group": "apalache_examples_ben-or83",
-          "name": "ben-or83",
+          "scoringKey": "apalache_examples_ben-or83/Ben_or83_proofs.tla",
+          "name": "Ben_or83_proofs",
           "category": "libraries",
           "sourceKey": "apalache-examples (Konnov)",
           "sourceName": "apalache-examples (Konnov)",
@@ -1440,9 +1681,10 @@ window.TLAPS_DATA = {
           "total": 41
         },
         {
-          "id": "apalache-examples-konnov--apalache-examples-tendermint",
+          "id": "apalache-examples-konnov--apalache-examples-tendermint-tendermint-single-indinv-proofs-tla",
           "group": "apalache_examples_tendermint",
-          "name": "tendermint",
+          "scoringKey": "apalache_examples_tendermint/tendermint_single_indinv_proofs.tla",
+          "name": "tendermint_single_indinv_proofs",
           "category": "libraries",
           "sourceKey": "apalache-examples (Konnov)",
           "sourceName": "apalache-examples (Konnov)",
@@ -1453,22 +1695,10 @@ window.TLAPS_DATA = {
           "total": 15
         },
         {
-          "id": "tlaps-distribution-examples--paxos",
-          "group": "Paxos",
-          "name": "Paxos",
-          "category": "libraries",
-          "sourceKey": "TLAPS distribution examples",
-          "sourceName": "TLAPS distribution examples",
-          "sourceUrl": "https://github.com/tlaplus/tlapm",
-          "url": "https://github.com/hengxin/tlaps-examples/tree/master/Paxos",
-          "completion": 6,
-          "scratch": 0,
-          "total": 6
-        },
-        {
-          "id": "tlaps-distribution-examples--atomicbakery",
+          "id": "tlaps-distribution-examples--atomicbakery-atomicbakerywithoutsmt-tla",
           "group": "AtomicBakery",
-          "name": "AtomicBakery",
+          "scoringKey": "AtomicBakery/AtomicBakeryWithoutSMT.tla",
+          "name": "AtomicBakeryWithoutSMT",
           "category": "libraries",
           "sourceKey": "TLAPS distribution examples",
           "sourceName": "TLAPS distribution examples",
@@ -1479,9 +1709,24 @@ window.TLAPS_DATA = {
           "total": 5
         },
         {
-          "id": "tlaps-distribution-examples--data",
+          "id": "tlaps-distribution-examples--paxos-paxos-tla",
+          "group": "Paxos",
+          "scoringKey": "Paxos/Paxos.tla",
+          "name": "Paxos",
+          "category": "libraries",
+          "sourceKey": "TLAPS distribution examples",
+          "sourceName": "TLAPS distribution examples",
+          "sourceUrl": "https://github.com/tlaplus/tlapm",
+          "url": "https://github.com/hengxin/tlaps-examples/tree/master/Paxos",
+          "completion": 4,
+          "scratch": 0,
+          "total": 4
+        },
+        {
+          "id": "tlaps-distribution-examples--data-sets-tla",
           "group": "Data",
-          "name": "Data",
+          "scoringKey": "Data/Sets.tla",
+          "name": "Sets",
           "category": "libraries",
           "sourceKey": "TLAPS distribution examples",
           "sourceName": "TLAPS distribution examples",
@@ -1492,22 +1737,10 @@ window.TLAPS_DATA = {
           "total": 4
         },
         {
-          "id": "tlaps-distribution-examples--consensus",
-          "group": "Consensus",
-          "name": "Consensus",
-          "category": "libraries",
-          "sourceKey": "TLAPS distribution examples",
-          "sourceName": "TLAPS distribution examples",
-          "sourceUrl": "https://github.com/tlaplus/tlapm",
-          "url": "https://github.com/tlaplus/tlapm/tree/main/examples_draft/consensus",
-          "completion": 2,
-          "scratch": 0,
-          "total": 2
-        },
-        {
-          "id": "tlaps-distribution-examples--euclid",
+          "id": "tlaps-distribution-examples--euclid-euclid-hyperbook-gcd-tla",
           "group": "Euclid",
-          "name": "Euclid",
+          "scoringKey": "Euclid/Euclid-Hyperbook/GCD.tla",
+          "name": "GCD",
           "category": "libraries",
           "sourceKey": "TLAPS distribution examples",
           "sourceName": "TLAPS distribution examples",
@@ -1518,8 +1751,23 @@ window.TLAPS_DATA = {
           "total": 2
         },
         {
-          "id": "tlaps-distribution-examples--allocator",
+          "id": "tlaps-distribution-examples--paxos-paxoshistvar-tla",
+          "group": "Paxos",
+          "scoringKey": "Paxos/PaxosHistVar.tla",
+          "name": "PaxosHistVar",
+          "category": "libraries",
+          "sourceKey": "TLAPS distribution examples",
+          "sourceName": "TLAPS distribution examples",
+          "sourceUrl": "https://github.com/tlaplus/tlapm",
+          "url": "https://github.com/hengxin/tlaps-examples/tree/master/Paxos",
+          "completion": 2,
+          "scratch": 0,
+          "total": 2
+        },
+        {
+          "id": "tlaps-distribution-examples--allocator-allocator-tla",
           "group": "Allocator",
+          "scoringKey": "Allocator/Allocator.tla",
           "name": "Allocator",
           "category": "libraries",
           "sourceKey": "TLAPS distribution examples",
@@ -1531,8 +1779,37 @@ window.TLAPS_DATA = {
           "total": 1
         },
         {
-          "id": "tlaps-distribution-examples--simplemutex",
+          "id": "tlaps-distribution-examples--consensus-consensus-tla",
+          "group": "Consensus",
+          "scoringKey": "Consensus/Consensus.tla",
+          "name": "Consensus",
+          "category": "libraries",
+          "sourceKey": "TLAPS distribution examples",
+          "sourceName": "TLAPS distribution examples",
+          "sourceUrl": "https://github.com/tlaplus/tlapm",
+          "url": "https://github.com/tlaplus/tlapm/tree/main/examples_draft/consensus",
+          "completion": 1,
+          "scratch": 0,
+          "total": 1
+        },
+        {
+          "id": "tlaps-distribution-examples--consensus-paxosproof-tla",
+          "group": "Consensus",
+          "scoringKey": "Consensus/PaxosProof.tla",
+          "name": "PaxosProof",
+          "category": "libraries",
+          "sourceKey": "TLAPS distribution examples",
+          "sourceName": "TLAPS distribution examples",
+          "sourceUrl": "https://github.com/tlaplus/tlapm",
+          "url": "https://github.com/tlaplus/tlapm/tree/main/examples_draft/consensus",
+          "completion": 1,
+          "scratch": 0,
+          "total": 1
+        },
+        {
+          "id": "tlaps-distribution-examples--simplemutex-simplemutex-tla",
           "group": "SimpleMutex",
+          "scoringKey": "SimpleMutex/SimpleMutex.tla",
           "name": "SimpleMutex",
           "category": "libraries",
           "sourceKey": "TLAPS distribution examples",
@@ -2640,7 +2917,7 @@ window.TLAPS_DATA = {
         "source": "https://developers.openai.com/api/docs/models"
       },
       "perSpec": {
-        "apalache-examples-konnov--apalache-examples-ben-or83": {
+        "apalache-examples-konnov--apalache-examples-ben-or83-ben-or83-proofs-tla": {
           "completion": {
             "rate": 100,
             "pass": 41,
@@ -2657,7 +2934,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "apalache-examples-konnov--apalache-examples-tendermint": {
+        "apalache-examples-konnov--apalache-examples-tendermint-tendermint-single-indinv-proofs-tla": {
           "completion": {
             "rate": 100,
             "pass": 15,
@@ -2674,24 +2951,41 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-allocator": {
+        "tlaplus-examples--tlaplus-examples-allocator-allocatorimplementation-proof-tla": {
           "completion": {
             "rate": 100,
-            "pass": 3,
-            "total": 3,
-            "canonicalTotal": 3,
+            "pass": 1,
+            "total": 1,
+            "canonicalTotal": 1,
             "partialScope": false,
-            "taskCount": 3,
-            "activeTimeSecs": 1300.7307822799776,
-            "activeTimePerTask": 433.5769274266592,
-            "outputTokens": 37932,
-            "outputTokensPerTask": 12644,
-            "outputCostUsd": 1.13796,
-            "outputCostPerTask": 0.37932000000000005
+            "taskCount": 1,
+            "activeTimeSecs": 398.6802307739854,
+            "activeTimePerTask": 398.6802307739854,
+            "outputTokens": 9917,
+            "outputTokensPerTask": 9917,
+            "outputCostUsd": 0.29751,
+            "outputCostPerTask": 0.29751
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-bakery-boulangerie": {
+        "tlaplus-examples--tlaplus-examples-allocator-schedulingallocator-proof-tla": {
+          "completion": {
+            "rate": 100,
+            "pass": 2,
+            "total": 2,
+            "canonicalTotal": 2,
+            "partialScope": false,
+            "taskCount": 2,
+            "activeTimeSecs": 902.0505515059922,
+            "activeTimePerTask": 451.0252757529961,
+            "outputTokens": 28015,
+            "outputTokensPerTask": 14007.5,
+            "outputCostUsd": 0.84045,
+            "outputCostPerTask": 0.420225
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-bakery-boulangerie-boulanger-tla": {
           "completion": {
             "rate": 100,
             "pass": 1,
@@ -2708,7 +3002,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-barriers": {
+        "tlaplus-examples--tlaplus-examples-barriers-barriers-tla": {
           "completion": {
             "rate": 100,
             "pass": 2,
@@ -2725,7 +3019,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-bcastbyz": {
+        "tlaplus-examples--tlaplus-examples-bcastbyz-bcastbyz-tla": {
           "completion": {
             "rate": 100,
             "pass": 3,
@@ -2742,7 +3036,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-blockingqueue": {
+        "tlaplus-examples--tlaplus-examples-blockingqueue-blockingqueuesplit-proofs-tla": {
           "completion": {
             "rate": 100,
             "pass": 2,
@@ -2759,24 +3053,58 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-byzpaxos": {
+        "tlaplus-examples--tlaplus-examples-byzpaxos-bpconproof-tla": {
           "completion": {
-            "rate": 91.7,
-            "pass": 11,
-            "total": 12,
-            "canonicalTotal": 12,
+            "rate": 100,
+            "pass": 4,
+            "total": 4,
+            "canonicalTotal": 4,
             "partialScope": false,
-            "taskCount": 12,
-            "activeTimeSecs": 17847.517306451686,
-            "activeTimePerTask": 1487.2931088709738,
-            "outputTokens": 347003,
-            "outputTokensPerTask": 28916.916666666668,
-            "outputCostUsd": 10.41009,
-            "outputCostPerTask": 0.8675075
+            "taskCount": 4,
+            "activeTimeSecs": 11393.373012054013,
+            "activeTimePerTask": 2848.3432530135033,
+            "outputTokens": 165051,
+            "outputTokensPerTask": 41262.75,
+            "outputCostUsd": 4.95153,
+            "outputCostPerTask": 1.2378825
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-cigarettesmokers": {
+        "tlaplus-examples--tlaplus-examples-byzpaxos-pconproof-tla": {
+          "completion": {
+            "rate": 100,
+            "pass": 1,
+            "total": 1,
+            "canonicalTotal": 1,
+            "partialScope": false,
+            "taskCount": 1,
+            "activeTimeSecs": 70.99331841408275,
+            "activeTimePerTask": 70.99331841408275,
+            "outputTokens": 1124,
+            "outputTokensPerTask": 1124,
+            "outputCostUsd": 0.03372,
+            "outputCostPerTask": 0.03372
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-byzpaxos-voteproof-tla": {
+          "completion": {
+            "rate": 85.7,
+            "pass": 6,
+            "total": 7,
+            "canonicalTotal": 7,
+            "partialScope": false,
+            "taskCount": 7,
+            "activeTimeSecs": 6383.15097598359,
+            "activeTimePerTask": 911.8787108547986,
+            "outputTokens": 180828,
+            "outputTokensPerTask": 25832.571428571428,
+            "outputCostUsd": 5.42484,
+            "outputCostPerTask": 0.7749771428571428
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-cigarettesmokers-cigarettesmokers-proof-tla": {
           "completion": {
             "rate": 100,
             "pass": 1,
@@ -2793,7 +3121,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-coffeecan": {
+        "tlaplus-examples--tlaplus-examples-coffeecan-coffeecan-proof-tla": {
           "completion": {
             "rate": 100,
             "pass": 1,
@@ -2810,7 +3138,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-ewd687a": {
+        "tlaplus-examples--tlaplus-examples-ewd687a-ewd687a-proof-tla": {
           "completion": {
             "rate": 100,
             "pass": 3,
@@ -2827,41 +3155,92 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-ewd840": {
+        "tlaplus-examples--tlaplus-examples-ewd840-ewd840-proof-tla": {
           "completion": {
             "rate": 100,
-            "pass": 6,
-            "total": 6,
-            "canonicalTotal": 6,
+            "pass": 4,
+            "total": 4,
+            "canonicalTotal": 4,
             "partialScope": false,
-            "taskCount": 6,
-            "activeTimeSecs": 3607.284123820951,
-            "activeTimePerTask": 601.2140206368252,
-            "outputTokens": 105997,
-            "outputTokensPerTask": 17666.166666666668,
-            "outputCostUsd": 3.17991,
-            "outputCostPerTask": 0.529985
+            "taskCount": 4,
+            "activeTimeSecs": 3381.0276467078365,
+            "activeTimePerTask": 845.2569116769591,
+            "outputTokens": 98469,
+            "outputTokensPerTask": 24617.25,
+            "outputCostUsd": 2.95407,
+            "outputCostPerTask": 0.7385175
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-ewd998": {
+        "tlaplus-examples--tlaplus-examples-ewd840-syncterminationdetection-proof-tla": {
           "completion": {
             "rate": 100,
-            "pass": 17,
-            "total": 17,
-            "canonicalTotal": 17,
+            "pass": 2,
+            "total": 2,
+            "canonicalTotal": 2,
             "partialScope": false,
-            "taskCount": 17,
-            "activeTimeSecs": 12934.923904998926,
-            "activeTimePerTask": 760.8778767646427,
-            "outputTokens": 380230,
-            "outputTokensPerTask": 22366.470588235294,
-            "outputCostUsd": 11.4069,
-            "outputCostPerTask": 0.6709941176470589
+            "taskCount": 2,
+            "activeTimeSecs": 226.25647711311467,
+            "activeTimePerTask": 113.12823855655733,
+            "outputTokens": 7528,
+            "outputTokensPerTask": 3764,
+            "outputCostUsd": 0.22584,
+            "outputCostPerTask": 0.11292
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-finitemonotonic": {
+        "tlaplus-examples--tlaplus-examples-ewd998-asyncterminationdetection-proof-tla": {
+          "completion": {
+            "rate": 100,
+            "pass": 3,
+            "total": 3,
+            "canonicalTotal": 3,
+            "partialScope": false,
+            "taskCount": 3,
+            "activeTimeSecs": 667.7235356918536,
+            "activeTimePerTask": 222.57451189728454,
+            "outputTokens": 19524,
+            "outputTokensPerTask": 6508,
+            "outputCostUsd": 0.58572,
+            "outputCostPerTask": 0.19524
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-ewd998-ewd998-proof-tla": {
+          "completion": {
+            "rate": 100,
+            "pass": 12,
+            "total": 12,
+            "canonicalTotal": 12,
+            "partialScope": false,
+            "taskCount": 12,
+            "activeTimeSecs": 10347.942265861202,
+            "activeTimePerTask": 862.3285221551001,
+            "outputTokens": 323765,
+            "outputTokensPerTask": 26980.416666666668,
+            "outputCostUsd": 9.71295,
+            "outputCostPerTask": 0.8094125
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-ewd998-ewd998pcal-proof-tla": {
+          "completion": {
+            "rate": 100,
+            "pass": 2,
+            "total": 2,
+            "canonicalTotal": 2,
+            "partialScope": false,
+            "taskCount": 2,
+            "activeTimeSecs": 1919.2581034458708,
+            "activeTimePerTask": 959.6290517229354,
+            "outputTokens": 36941,
+            "outputTokensPerTask": 18470.5,
+            "outputCostUsd": 1.10823,
+            "outputCostPerTask": 0.554115
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-finitemonotonic-crdt-proof-tla": {
           "completion": {
             "rate": 90,
             "pass": 9,
@@ -2878,24 +3257,41 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-glowingraccoon": {
+        "tlaplus-examples--tlaplus-examples-glowingraccoon-clean-proof-tla": {
           "completion": {
             "rate": 100,
-            "pass": 3,
-            "total": 3,
-            "canonicalTotal": 3,
+            "pass": 2,
+            "total": 2,
+            "canonicalTotal": 2,
             "partialScope": false,
-            "taskCount": 3,
-            "activeTimeSecs": 500.86267773690633,
-            "activeTimePerTask": 166.95422591230212,
-            "outputTokens": 15600,
-            "outputTokensPerTask": 5200,
-            "outputCostUsd": 0.468,
-            "outputCostPerTask": 0.156
+            "taskCount": 2,
+            "activeTimeSecs": 413.39422729611397,
+            "activeTimePerTask": 206.69711364805698,
+            "outputTokens": 12445,
+            "outputTokensPerTask": 6222.5,
+            "outputCostUsd": 0.37335,
+            "outputCostPerTask": 0.186675
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-keyvaluestore": {
+        "tlaplus-examples--tlaplus-examples-glowingraccoon-stages-proof-tla": {
+          "completion": {
+            "rate": 100,
+            "pass": 1,
+            "total": 1,
+            "canonicalTotal": 1,
+            "partialScope": false,
+            "taskCount": 1,
+            "activeTimeSecs": 87.46845044079237,
+            "activeTimePerTask": 87.46845044079237,
+            "outputTokens": 3155,
+            "outputTokensPerTask": 3155,
+            "outputCostUsd": 0.09465,
+            "outputCostPerTask": 0.09465
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-keyvaluestore-keyvaluestore-proof-tla": {
           "completion": {
             "rate": 100,
             "pass": 1,
@@ -2912,7 +3308,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-lamport-mutex": {
+        "tlaplus-examples--tlaplus-examples-lamport-mutex-lamportmutex-proofs-tla": {
           "completion": {
             "rate": 100,
             "pass": 3,
@@ -2929,7 +3325,92 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-locks-auxiliary-vars": {
+        "tlaplus-examples--tlaplus-examples-locks-auxiliary-vars-lock-tla": {
+          "completion": {
+            "rate": 100,
+            "pass": 1,
+            "total": 1,
+            "canonicalTotal": 1,
+            "partialScope": false,
+            "taskCount": 1,
+            "activeTimeSecs": 59.038944956846535,
+            "activeTimePerTask": 59.038944956846535,
+            "outputTokens": 1846,
+            "outputTokensPerTask": 1846,
+            "outputCostUsd": 0.05538,
+            "outputCostPerTask": 0.05538
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-locks-auxiliary-vars-lockhs-tla": {
+          "completion": {
+            "rate": 100,
+            "pass": 1,
+            "total": 1,
+            "canonicalTotal": 1,
+            "partialScope": false,
+            "taskCount": 1,
+            "activeTimeSecs": 545.2197864090558,
+            "activeTimePerTask": 545.2197864090558,
+            "outputTokens": 16584,
+            "outputTokensPerTask": 16584,
+            "outputCostUsd": 0.49752,
+            "outputCostPerTask": 0.49752
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-locks-auxiliary-vars-peterson-tla": {
+          "completion": {
+            "rate": 100,
+            "pass": 1,
+            "total": 1,
+            "canonicalTotal": 1,
+            "partialScope": false,
+            "taskCount": 1,
+            "activeTimeSecs": 363.10200030799024,
+            "activeTimePerTask": 363.10200030799024,
+            "outputTokens": 11335,
+            "outputTokensPerTask": 11335,
+            "outputCostUsd": 0.34005,
+            "outputCostPerTask": 0.34005
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-loopinvariance-binarysearch-tla": {
+          "completion": {
+            "rate": 100,
+            "pass": 1,
+            "total": 1,
+            "canonicalTotal": 1,
+            "partialScope": false,
+            "taskCount": 1,
+            "activeTimeSecs": 257.0912309731357,
+            "activeTimePerTask": 257.0912309731357,
+            "outputTokens": 6960,
+            "outputTokensPerTask": 6960,
+            "outputCostUsd": 0.2088,
+            "outputCostPerTask": 0.2088
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-loopinvariance-quicksort-tla": {
+          "completion": {
+            "rate": 100,
+            "pass": 1,
+            "total": 1,
+            "canonicalTotal": 1,
+            "partialScope": false,
+            "taskCount": 1,
+            "activeTimeSecs": 93.818602578016,
+            "activeTimePerTask": 93.818602578016,
+            "outputTokens": 2582,
+            "outputTokensPerTask": 2582,
+            "outputCostUsd": 0.07746,
+            "outputCostPerTask": 0.07746
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-loopinvariance-sumsequence-tla": {
           "completion": {
             "rate": 100,
             "pass": 3,
@@ -2937,33 +3418,16 @@ window.TLAPS_DATA = {
             "canonicalTotal": 3,
             "partialScope": false,
             "taskCount": 3,
-            "activeTimeSecs": 967.3607316738926,
-            "activeTimePerTask": 322.45357722463086,
-            "outputTokens": 29765,
-            "outputTokensPerTask": 9921.666666666666,
-            "outputCostUsd": 0.89295,
-            "outputCostPerTask": 0.29765
+            "activeTimeSecs": 473.2010083759669,
+            "activeTimePerTask": 157.73366945865564,
+            "outputTokens": 12630,
+            "outputTokensPerTask": 4210,
+            "outputCostUsd": 0.3789,
+            "outputCostPerTask": 0.1263
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-loopinvariance": {
-          "completion": {
-            "rate": 100,
-            "pass": 5,
-            "total": 5,
-            "canonicalTotal": 5,
-            "partialScope": false,
-            "taskCount": 5,
-            "activeTimeSecs": 824.1108419271186,
-            "activeTimePerTask": 164.8221683854237,
-            "outputTokens": 22172,
-            "outputTokensPerTask": 4434.4,
-            "outputCostUsd": 0.66516,
-            "outputCostPerTask": 0.13303199999999998
-          },
-          "scratch": null
-        },
-        "tlaplus-examples--tlaplus-examples-majority": {
+        "tlaplus-examples--tlaplus-examples-majority-majorityproof-tla": {
           "completion": {
             "rate": 100,
             "pass": 3,
@@ -2980,24 +3444,58 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-misrareachability": {
+        "tlaplus-examples--tlaplus-examples-misrareachability-parreachproofs-tla": {
           "completion": {
             "rate": 100,
-            "pass": 4,
-            "total": 4,
-            "canonicalTotal": 4,
+            "pass": 1,
+            "total": 1,
+            "canonicalTotal": 1,
             "partialScope": false,
-            "taskCount": 4,
-            "activeTimeSecs": 925.9678805421572,
-            "activeTimePerTask": 231.4919701355393,
-            "outputTokens": 26308,
-            "outputTokensPerTask": 6577,
-            "outputCostUsd": 0.78924,
-            "outputCostPerTask": 0.19731
+            "taskCount": 1,
+            "activeTimeSecs": 84.18693459313363,
+            "activeTimePerTask": 84.18693459313363,
+            "outputTokens": 1945,
+            "outputTokensPerTask": 1945,
+            "outputCostUsd": 0.05835,
+            "outputCostPerTask": 0.05835
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-missionariesandcannibals": {
+        "tlaplus-examples--tlaplus-examples-misrareachability-reachabilityproofs-tla": {
+          "completion": {
+            "rate": 100,
+            "pass": 1,
+            "total": 1,
+            "canonicalTotal": 1,
+            "partialScope": false,
+            "taskCount": 1,
+            "activeTimeSecs": 312.4773108519148,
+            "activeTimePerTask": 312.4773108519148,
+            "outputTokens": 9082,
+            "outputTokensPerTask": 9082,
+            "outputCostUsd": 0.27246,
+            "outputCostPerTask": 0.27246
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-misrareachability-reachableproofs-tla": {
+          "completion": {
+            "rate": 100,
+            "pass": 2,
+            "total": 2,
+            "canonicalTotal": 2,
+            "partialScope": false,
+            "taskCount": 2,
+            "activeTimeSecs": 529.3036350971088,
+            "activeTimePerTask": 264.6518175485544,
+            "outputTokens": 15281,
+            "outputTokensPerTask": 7640.5,
+            "outputCostUsd": 0.45843,
+            "outputCostPerTask": 0.229215
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-missionariesandcannibals-missionariesandcannibals-proof-tla": {
           "completion": {
             "rate": 100,
             "pass": 1,
@@ -3014,7 +3512,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-multicarelevator": {
+        "tlaplus-examples--tlaplus-examples-multicarelevator-elevator-proof-tla": {
           "completion": {
             "rate": 100,
             "pass": 1,
@@ -3031,7 +3529,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-paxos": {
+        "tlaplus-examples--tlaplus-examples-paxos-consensus-tla": {
           "completion": {
             "rate": 100,
             "pass": 1,
@@ -3048,24 +3546,41 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-paxoshowtowinaturingaward": {
+        "tlaplus-examples--tlaplus-examples-paxoshowtowinaturingaward-voting-proof-tla": {
           "completion": {
             "rate": 100,
-            "pass": 3,
-            "total": 3,
-            "canonicalTotal": 3,
+            "pass": 1,
+            "total": 1,
+            "canonicalTotal": 1,
             "partialScope": false,
-            "taskCount": 3,
-            "activeTimeSecs": 2325.7314235710073,
-            "activeTimePerTask": 775.2438078570025,
-            "outputTokens": 74271,
-            "outputTokensPerTask": 24757,
-            "outputCostUsd": 2.22813,
-            "outputCostPerTask": 0.7427100000000001
+            "taskCount": 1,
+            "activeTimeSecs": 543.9844622889068,
+            "activeTimePerTask": 543.9844622889068,
+            "outputTokens": 16588,
+            "outputTokensPerTask": 16588,
+            "outputCostUsd": 0.49764,
+            "outputCostPerTask": 0.49764
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-readerswriters": {
+        "tlaplus-examples--tlaplus-examples-paxoshowtowinaturingaward-voting-tla": {
+          "completion": {
+            "rate": 100,
+            "pass": 2,
+            "total": 2,
+            "canonicalTotal": 2,
+            "partialScope": false,
+            "taskCount": 2,
+            "activeTimeSecs": 1781.7469612821005,
+            "activeTimePerTask": 890.8734806410503,
+            "outputTokens": 57683,
+            "outputTokensPerTask": 28841.5,
+            "outputCostUsd": 1.73049,
+            "outputCostPerTask": 0.865245
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-readerswriters-readerswriters-proof-tla": {
           "completion": {
             "rate": 100,
             "pass": 1,
@@ -3082,7 +3597,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-spanning": {
+        "tlaplus-examples--tlaplus-examples-spanning-spanning-proof-tla": {
           "completion": {
             "rate": 100,
             "pass": 1,
@@ -3099,7 +3614,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-tcp": {
+        "tlaplus-examples--tlaplus-examples-tcp-tcp-proof-tla": {
           "completion": {
             "rate": 100,
             "pass": 6,
@@ -3116,24 +3631,41 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-teachingconcurrency": {
+        "tlaplus-examples--tlaplus-examples-teachingconcurrency-simple-tla": {
           "completion": {
             "rate": 100,
-            "pass": 2,
-            "total": 2,
-            "canonicalTotal": 2,
+            "pass": 1,
+            "total": 1,
+            "canonicalTotal": 1,
             "partialScope": false,
-            "taskCount": 2,
-            "activeTimeSecs": 544.6045041470788,
-            "activeTimePerTask": 272.3022520735394,
-            "outputTokens": 16250,
-            "outputTokensPerTask": 8125,
-            "outputCostUsd": 0.4875,
-            "outputCostPerTask": 0.24375
+            "taskCount": 1,
+            "activeTimeSecs": 411.9728823250625,
+            "activeTimePerTask": 411.9728823250625,
+            "outputTokens": 12749,
+            "outputTokensPerTask": 12749,
+            "outputCostUsd": 0.38247,
+            "outputCostPerTask": 0.38247
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-tencentpaxos": {
+        "tlaplus-examples--tlaplus-examples-teachingconcurrency-simpleregular-tla": {
+          "completion": {
+            "rate": 100,
+            "pass": 1,
+            "total": 1,
+            "canonicalTotal": 1,
+            "partialScope": false,
+            "taskCount": 1,
+            "activeTimeSecs": 132.6316218220163,
+            "activeTimePerTask": 132.6316218220163,
+            "outputTokens": 3501,
+            "outputTokensPerTask": 3501,
+            "outputCostUsd": 0.10503,
+            "outputCostPerTask": 0.10503
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-tencentpaxos-tpaxoswithproof-tla": {
           "completion": {
             "rate": 90.9,
             "pass": 10,
@@ -3150,7 +3682,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-termination": {
+        "tlaplus-examples--tlaplus-examples-termination-termination-proof-tla": {
           "completion": {
             "rate": 100,
             "pass": 1,
@@ -3167,7 +3699,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-transaction-commit": {
+        "tlaplus-examples--tlaplus-examples-transaction-commit-paxoscommit-proof-tla": {
           "completion": {
             "rate": 100,
             "pass": 2,
@@ -3184,7 +3716,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaps-distribution-examples--allocator": {
+        "tlaps-distribution-examples--allocator-allocator-tla": {
           "completion": {
             "rate": 100,
             "pass": 1,
@@ -3201,7 +3733,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaps-distribution-examples--atomicbakery": {
+        "tlaps-distribution-examples--atomicbakery-atomicbakerywithoutsmt-tla": {
           "completion": {
             "rate": 100,
             "pass": 5,
@@ -3218,24 +3750,41 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaps-distribution-examples--consensus": {
+        "tlaps-distribution-examples--consensus-consensus-tla": {
           "completion": {
             "rate": 100,
-            "pass": 2,
-            "total": 2,
-            "canonicalTotal": 2,
+            "pass": 1,
+            "total": 1,
+            "canonicalTotal": 1,
             "partialScope": false,
-            "taskCount": 2,
-            "activeTimeSecs": 1204.3012311691418,
-            "activeTimePerTask": 602.1506155845709,
-            "outputTokens": 39695,
-            "outputTokensPerTask": 19847.5,
-            "outputCostUsd": 1.19085,
-            "outputCostPerTask": 0.595425
+            "taskCount": 1,
+            "activeTimeSecs": 199.05375449405983,
+            "activeTimePerTask": 199.05375449405983,
+            "outputTokens": 6994,
+            "outputTokensPerTask": 6994,
+            "outputCostUsd": 0.20982,
+            "outputCostPerTask": 0.20982
           },
           "scratch": null
         },
-        "tlaps-distribution-examples--data": {
+        "tlaps-distribution-examples--consensus-paxosproof-tla": {
+          "completion": {
+            "rate": 100,
+            "pass": 1,
+            "total": 1,
+            "canonicalTotal": 1,
+            "partialScope": false,
+            "taskCount": 1,
+            "activeTimeSecs": 1005.247476675082,
+            "activeTimePerTask": 1005.247476675082,
+            "outputTokens": 32701,
+            "outputTokensPerTask": 32701,
+            "outputCostUsd": 0.98103,
+            "outputCostPerTask": 0.98103
+          },
+          "scratch": null
+        },
+        "tlaps-distribution-examples--data-sets-tla": {
           "completion": {
             "rate": 100,
             "pass": 4,
@@ -3252,7 +3801,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaps-distribution-examples--euclid": {
+        "tlaps-distribution-examples--euclid-euclid-hyperbook-gcd-tla": {
           "completion": {
             "rate": 100,
             "pass": 2,
@@ -3269,24 +3818,41 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaps-distribution-examples--paxos": {
+        "tlaps-distribution-examples--paxos-paxos-tla": {
           "completion": {
             "rate": 100,
-            "pass": 6,
-            "total": 6,
-            "canonicalTotal": 6,
+            "pass": 4,
+            "total": 4,
+            "canonicalTotal": 4,
             "partialScope": false,
-            "taskCount": 6,
-            "activeTimeSecs": 4012.4747357112356,
-            "activeTimePerTask": 668.7457892852059,
-            "outputTokens": 123680,
-            "outputTokensPerTask": 20613.333333333332,
-            "outputCostUsd": 3.7104,
-            "outputCostPerTask": 0.6184
+            "taskCount": 4,
+            "activeTimeSecs": 3144.82122194604,
+            "activeTimePerTask": 786.20530548651,
+            "outputTokens": 94952,
+            "outputTokensPerTask": 23738,
+            "outputCostUsd": 2.84856,
+            "outputCostPerTask": 0.71214
           },
           "scratch": null
         },
-        "tlaps-distribution-examples--simplemutex": {
+        "tlaps-distribution-examples--paxos-paxoshistvar-tla": {
+          "completion": {
+            "rate": 100,
+            "pass": 2,
+            "total": 2,
+            "canonicalTotal": 2,
+            "partialScope": false,
+            "taskCount": 2,
+            "activeTimeSecs": 867.6535137651954,
+            "activeTimePerTask": 433.8267568825977,
+            "outputTokens": 28728,
+            "outputTokensPerTask": 14364,
+            "outputCostUsd": 0.86184,
+            "outputCostPerTask": 0.43092
+          },
+          "scratch": null
+        },
+        "tlaps-distribution-examples--simplemutex-simplemutex-tla": {
           "completion": {
             "rate": 100,
             "pass": 1,
@@ -3457,7 +4023,7 @@ window.TLAPS_DATA = {
         "source": "https://developers.openai.com/api/docs/models"
       },
       "perSpec": {
-        "apalache-examples-konnov--apalache-examples-ben-or83": {
+        "apalache-examples-konnov--apalache-examples-ben-or83-ben-or83-proofs-tla": {
           "completion": {
             "rate": 19.5,
             "pass": 8,
@@ -3474,7 +4040,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "apalache-examples-konnov--apalache-examples-tendermint": {
+        "apalache-examples-konnov--apalache-examples-tendermint-tendermint-single-indinv-proofs-tla": {
           "completion": {
             "rate": 40,
             "pass": 6,
@@ -3491,24 +4057,41 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-allocator": {
+        "tlaplus-examples--tlaplus-examples-allocator-allocatorimplementation-proof-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
-            "total": 3,
-            "canonicalTotal": 3,
+            "total": 1,
+            "canonicalTotal": 1,
             "partialScope": false,
-            "taskCount": 3,
-            "activeTimeSecs": 396.83420817321166,
-            "activeTimePerTask": 132.27806939107055,
-            "outputTokens": 12036,
-            "outputTokensPerTask": 4012,
-            "outputCostUsd": 0.36108,
-            "outputCostPerTask": 0.12036000000000001
+            "taskCount": 1,
+            "activeTimeSecs": 174.07357916305773,
+            "activeTimePerTask": 174.07357916305773,
+            "outputTokens": 5275,
+            "outputTokensPerTask": 5275,
+            "outputCostUsd": 0.15825,
+            "outputCostPerTask": 0.15825
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-bakery-boulangerie": {
+        "tlaplus-examples--tlaplus-examples-allocator-schedulingallocator-proof-tla": {
+          "completion": {
+            "rate": 0,
+            "pass": 0,
+            "total": 2,
+            "canonicalTotal": 2,
+            "partialScope": false,
+            "taskCount": 2,
+            "activeTimeSecs": 222.76062901015393,
+            "activeTimePerTask": 111.38031450507697,
+            "outputTokens": 6761,
+            "outputTokensPerTask": 3380.5,
+            "outputCostUsd": 0.20283,
+            "outputCostPerTask": 0.101415
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-bakery-boulangerie-boulanger-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -3525,7 +4108,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-barriers": {
+        "tlaplus-examples--tlaplus-examples-barriers-barriers-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -3542,7 +4125,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-bcastbyz": {
+        "tlaplus-examples--tlaplus-examples-bcastbyz-bcastbyz-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -3559,7 +4142,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-blockingqueue": {
+        "tlaplus-examples--tlaplus-examples-blockingqueue-blockingqueuesplit-proofs-tla": {
           "completion": {
             "rate": 50,
             "pass": 1,
@@ -3576,24 +4159,58 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-byzpaxos": {
+        "tlaplus-examples--tlaplus-examples-byzpaxos-bpconproof-tla": {
           "completion": {
-            "rate": 8.3,
-            "pass": 1,
-            "total": 12,
-            "canonicalTotal": 12,
+            "rate": 0,
+            "pass": 0,
+            "total": 4,
+            "canonicalTotal": 4,
             "partialScope": false,
-            "taskCount": 12,
-            "activeTimeSecs": 1448.4588543323334,
-            "activeTimePerTask": 120.70490452769445,
-            "outputTokens": 44590,
-            "outputTokensPerTask": 3715.8333333333335,
-            "outputCostUsd": 1.3377,
-            "outputCostPerTask": 0.11147499999999999
+            "taskCount": 4,
+            "activeTimeSecs": 394.65990509931,
+            "activeTimePerTask": 98.6649762748275,
+            "outputTokens": 12909,
+            "outputTokensPerTask": 3227.25,
+            "outputCostUsd": 0.38727,
+            "outputCostPerTask": 0.0968175
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-cigarettesmokers": {
+        "tlaplus-examples--tlaplus-examples-byzpaxos-pconproof-tla": {
+          "completion": {
+            "rate": 100,
+            "pass": 1,
+            "total": 1,
+            "canonicalTotal": 1,
+            "partialScope": false,
+            "taskCount": 1,
+            "activeTimeSecs": 36.92827365989797,
+            "activeTimePerTask": 36.92827365989797,
+            "outputTokens": 776,
+            "outputTokensPerTask": 776,
+            "outputCostUsd": 0.02328,
+            "outputCostPerTask": 0.02328
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-byzpaxos-voteproof-tla": {
+          "completion": {
+            "rate": 0,
+            "pass": 0,
+            "total": 7,
+            "canonicalTotal": 7,
+            "partialScope": false,
+            "taskCount": 7,
+            "activeTimeSecs": 1016.8706755731255,
+            "activeTimePerTask": 145.26723936758935,
+            "outputTokens": 30905,
+            "outputTokensPerTask": 4415,
+            "outputCostUsd": 0.92715,
+            "outputCostPerTask": 0.13245
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-cigarettesmokers-cigarettesmokers-proof-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -3610,7 +4227,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-coffeecan": {
+        "tlaplus-examples--tlaplus-examples-coffeecan-coffeecan-proof-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -3627,7 +4244,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-ewd687a": {
+        "tlaplus-examples--tlaplus-examples-ewd687a-ewd687a-proof-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -3644,41 +4261,92 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-ewd840": {
+        "tlaplus-examples--tlaplus-examples-ewd840-ewd840-proof-tla": {
           "completion": {
-            "rate": 16.7,
+            "rate": 0,
+            "pass": 0,
+            "total": 4,
+            "canonicalTotal": 4,
+            "partialScope": false,
+            "taskCount": 4,
+            "activeTimeSecs": 755.7165546780452,
+            "activeTimePerTask": 188.9291386695113,
+            "outputTokens": 22009,
+            "outputTokensPerTask": 5502.25,
+            "outputCostUsd": 0.66027,
+            "outputCostPerTask": 0.1650675
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-ewd840-syncterminationdetection-proof-tla": {
+          "completion": {
+            "rate": 50,
             "pass": 1,
-            "total": 6,
-            "canonicalTotal": 6,
+            "total": 2,
+            "canonicalTotal": 2,
             "partialScope": false,
-            "taskCount": 6,
-            "activeTimeSecs": 867.5401383969001,
-            "activeTimePerTask": 144.59002306615002,
-            "outputTokens": 25142,
-            "outputTokensPerTask": 4190.333333333333,
-            "outputCostUsd": 0.75426,
-            "outputCostPerTask": 0.12571000000000002
+            "taskCount": 2,
+            "activeTimeSecs": 111.82358371885493,
+            "activeTimePerTask": 55.91179185942747,
+            "outputTokens": 3133,
+            "outputTokensPerTask": 1566.5,
+            "outputCostUsd": 0.09399,
+            "outputCostPerTask": 0.046995
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-ewd998": {
+        "tlaplus-examples--tlaplus-examples-ewd998-asyncterminationdetection-proof-tla": {
           "completion": {
-            "rate": 17.6,
-            "pass": 3,
-            "total": 17,
-            "canonicalTotal": 17,
+            "rate": 66.7,
+            "pass": 2,
+            "total": 3,
+            "canonicalTotal": 3,
             "partialScope": false,
-            "taskCount": 17,
-            "activeTimeSecs": 1992.54442869802,
-            "activeTimePerTask": 117.20849580576589,
-            "outputTokens": 63266,
-            "outputTokensPerTask": 3721.529411764706,
-            "outputCostUsd": 1.89798,
-            "outputCostPerTask": 0.11164588235294118
+            "taskCount": 3,
+            "activeTimeSecs": 221.52501731808297,
+            "activeTimePerTask": 73.84167243936099,
+            "outputTokens": 6635,
+            "outputTokensPerTask": 2211.6666666666665,
+            "outputCostUsd": 0.19905,
+            "outputCostPerTask": 0.06635
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-finitemonotonic": {
+        "tlaplus-examples--tlaplus-examples-ewd998-ewd998-proof-tla": {
+          "completion": {
+            "rate": 8.3,
+            "pass": 1,
+            "total": 12,
+            "canonicalTotal": 12,
+            "partialScope": false,
+            "taskCount": 12,
+            "activeTimeSecs": 1598.9526097460184,
+            "activeTimePerTask": 133.2460508121682,
+            "outputTokens": 51061,
+            "outputTokensPerTask": 4255.083333333333,
+            "outputCostUsd": 1.53183,
+            "outputCostPerTask": 0.1276525
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-ewd998-ewd998pcal-proof-tla": {
+          "completion": {
+            "rate": 0,
+            "pass": 0,
+            "total": 2,
+            "canonicalTotal": 2,
+            "partialScope": false,
+            "taskCount": 2,
+            "activeTimeSecs": 172.06680163391866,
+            "activeTimePerTask": 86.03340081695933,
+            "outputTokens": 5570,
+            "outputTokensPerTask": 2785,
+            "outputCostUsd": 0.1671,
+            "outputCostPerTask": 0.08355
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-finitemonotonic-crdt-proof-tla": {
           "completion": {
             "rate": 20,
             "pass": 2,
@@ -3695,24 +4363,41 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-glowingraccoon": {
+        "tlaplus-examples--tlaplus-examples-glowingraccoon-clean-proof-tla": {
           "completion": {
-            "rate": 33.3,
+            "rate": 50,
             "pass": 1,
-            "total": 3,
-            "canonicalTotal": 3,
+            "total": 2,
+            "canonicalTotal": 2,
             "partialScope": false,
-            "taskCount": 3,
-            "activeTimeSecs": 190.2829684931785,
-            "activeTimePerTask": 63.42765616439283,
-            "outputTokens": 5108,
-            "outputTokensPerTask": 1702.6666666666667,
-            "outputCostUsd": 0.15324,
-            "outputCostPerTask": 0.05107999999999999
+            "taskCount": 2,
+            "activeTimeSecs": 132.3290449080523,
+            "activeTimePerTask": 66.16452245402616,
+            "outputTokens": 3378,
+            "outputTokensPerTask": 1689,
+            "outputCostUsd": 0.10134,
+            "outputCostPerTask": 0.05067
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-keyvaluestore": {
+        "tlaplus-examples--tlaplus-examples-glowingraccoon-stages-proof-tla": {
+          "completion": {
+            "rate": 0,
+            "pass": 0,
+            "total": 1,
+            "canonicalTotal": 1,
+            "partialScope": false,
+            "taskCount": 1,
+            "activeTimeSecs": 57.95392358512618,
+            "activeTimePerTask": 57.95392358512618,
+            "outputTokens": 1730,
+            "outputTokensPerTask": 1730,
+            "outputCostUsd": 0.0519,
+            "outputCostPerTask": 0.0519
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-keyvaluestore-keyvaluestore-proof-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -3729,7 +4414,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-lamport-mutex": {
+        "tlaplus-examples--tlaplus-examples-lamport-mutex-lamportmutex-proofs-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -3746,7 +4431,92 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-locks-auxiliary-vars": {
+        "tlaplus-examples--tlaplus-examples-locks-auxiliary-vars-lock-tla": {
+          "completion": {
+            "rate": 0,
+            "pass": 0,
+            "total": 1,
+            "canonicalTotal": 1,
+            "partialScope": false,
+            "taskCount": 1,
+            "activeTimeSecs": 131.7559155600611,
+            "activeTimePerTask": 131.7559155600611,
+            "outputTokens": 4023,
+            "outputTokensPerTask": 4023,
+            "outputCostUsd": 0.12069,
+            "outputCostPerTask": 0.12069
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-locks-auxiliary-vars-lockhs-tla": {
+          "completion": {
+            "rate": 0,
+            "pass": 0,
+            "total": 1,
+            "canonicalTotal": 1,
+            "partialScope": false,
+            "taskCount": 1,
+            "activeTimeSecs": 87.60945050604641,
+            "activeTimePerTask": 87.60945050604641,
+            "outputTokens": 2654,
+            "outputTokensPerTask": 2654,
+            "outputCostUsd": 0.07962,
+            "outputCostPerTask": 0.07962
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-locks-auxiliary-vars-peterson-tla": {
+          "completion": {
+            "rate": 0,
+            "pass": 0,
+            "total": 1,
+            "canonicalTotal": 1,
+            "partialScope": false,
+            "taskCount": 1,
+            "activeTimeSecs": 171.09762304392643,
+            "activeTimePerTask": 171.09762304392643,
+            "outputTokens": 5188,
+            "outputTokensPerTask": 5188,
+            "outputCostUsd": 0.15564,
+            "outputCostPerTask": 0.15564
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-loopinvariance-binarysearch-tla": {
+          "completion": {
+            "rate": 0,
+            "pass": 0,
+            "total": 1,
+            "canonicalTotal": 1,
+            "partialScope": false,
+            "taskCount": 1,
+            "activeTimeSecs": 51.661544461967424,
+            "activeTimePerTask": 51.661544461967424,
+            "outputTokens": 1437,
+            "outputTokensPerTask": 1437,
+            "outputCostUsd": 0.04311,
+            "outputCostPerTask": 0.04311
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-loopinvariance-quicksort-tla": {
+          "completion": {
+            "rate": 0,
+            "pass": 0,
+            "total": 1,
+            "canonicalTotal": 1,
+            "partialScope": false,
+            "taskCount": 1,
+            "activeTimeSecs": 106.26037071691826,
+            "activeTimePerTask": 106.26037071691826,
+            "outputTokens": 3549,
+            "outputTokensPerTask": 3549,
+            "outputCostUsd": 0.10647,
+            "outputCostPerTask": 0.10647
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-loopinvariance-sumsequence-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -3754,33 +4524,16 @@ window.TLAPS_DATA = {
             "canonicalTotal": 3,
             "partialScope": false,
             "taskCount": 3,
-            "activeTimeSecs": 390.46298911003396,
-            "activeTimePerTask": 130.15432970334464,
-            "outputTokens": 11865,
-            "outputTokensPerTask": 3955,
-            "outputCostUsd": 0.35595,
-            "outputCostPerTask": 0.11864999999999999
+            "activeTimeSecs": 289.3018593720626,
+            "activeTimePerTask": 96.43395312402087,
+            "outputTokens": 8911,
+            "outputTokensPerTask": 2970.3333333333335,
+            "outputCostUsd": 0.26733,
+            "outputCostPerTask": 0.08911000000000001
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-loopinvariance": {
-          "completion": {
-            "rate": 0,
-            "pass": 0,
-            "total": 5,
-            "canonicalTotal": 5,
-            "partialScope": false,
-            "taskCount": 5,
-            "activeTimeSecs": 447.2237745509483,
-            "activeTimePerTask": 89.44475491018966,
-            "outputTokens": 13897,
-            "outputTokensPerTask": 2779.4,
-            "outputCostUsd": 0.41691,
-            "outputCostPerTask": 0.083382
-          },
-          "scratch": null
-        },
-        "tlaplus-examples--tlaplus-examples-majority": {
+        "tlaplus-examples--tlaplus-examples-majority-majorityproof-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -3797,24 +4550,58 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-misrareachability": {
+        "tlaplus-examples--tlaplus-examples-misrareachability-parreachproofs-tla": {
           "completion": {
-            "rate": 25,
+            "rate": 100,
             "pass": 1,
-            "total": 4,
-            "canonicalTotal": 4,
+            "total": 1,
+            "canonicalTotal": 1,
             "partialScope": false,
-            "taskCount": 4,
-            "activeTimeSecs": 359.9329631268047,
-            "activeTimePerTask": 89.98324078170117,
-            "outputTokens": 12790,
-            "outputTokensPerTask": 3197.5,
-            "outputCostUsd": 0.3837,
-            "outputCostPerTask": 0.095925
+            "taskCount": 1,
+            "activeTimeSecs": 64.82672686502337,
+            "activeTimePerTask": 64.82672686502337,
+            "outputTokens": 2090,
+            "outputTokensPerTask": 2090,
+            "outputCostUsd": 0.0627,
+            "outputCostPerTask": 0.0627
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-missionariesandcannibals": {
+        "tlaplus-examples--tlaplus-examples-misrareachability-reachabilityproofs-tla": {
+          "completion": {
+            "rate": 0,
+            "pass": 0,
+            "total": 1,
+            "canonicalTotal": 1,
+            "partialScope": false,
+            "taskCount": 1,
+            "activeTimeSecs": 85.80037930980325,
+            "activeTimePerTask": 85.80037930980325,
+            "outputTokens": 3394,
+            "outputTokensPerTask": 3394,
+            "outputCostUsd": 0.10182,
+            "outputCostPerTask": 0.10182
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-misrareachability-reachableproofs-tla": {
+          "completion": {
+            "rate": 0,
+            "pass": 0,
+            "total": 2,
+            "canonicalTotal": 2,
+            "partialScope": false,
+            "taskCount": 2,
+            "activeTimeSecs": 209.30585695197806,
+            "activeTimePerTask": 104.65292847598903,
+            "outputTokens": 7306,
+            "outputTokensPerTask": 3653,
+            "outputCostUsd": 0.21918,
+            "outputCostPerTask": 0.10959
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-missionariesandcannibals-missionariesandcannibals-proof-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -3831,7 +4618,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-multicarelevator": {
+        "tlaplus-examples--tlaplus-examples-multicarelevator-elevator-proof-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -3848,7 +4635,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-paxos": {
+        "tlaplus-examples--tlaplus-examples-paxos-consensus-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -3865,24 +4652,41 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-paxoshowtowinaturingaward": {
+        "tlaplus-examples--tlaplus-examples-paxoshowtowinaturingaward-voting-proof-tla": {
           "completion": {
-            "rate": 33.3,
+            "rate": 100,
             "pass": 1,
-            "total": 3,
-            "canonicalTotal": 3,
+            "total": 1,
+            "canonicalTotal": 1,
             "partialScope": false,
-            "taskCount": 3,
-            "activeTimeSecs": 325.89015500596724,
-            "activeTimePerTask": 108.63005166865575,
-            "outputTokens": 10939,
-            "outputTokensPerTask": 3646.3333333333335,
-            "outputCostUsd": 0.32817,
-            "outputCostPerTask": 0.10939
+            "taskCount": 1,
+            "activeTimeSecs": 77.8843980380334,
+            "activeTimePerTask": 77.8843980380334,
+            "outputTokens": 2910,
+            "outputTokensPerTask": 2910,
+            "outputCostUsd": 0.0873,
+            "outputCostPerTask": 0.0873
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-readerswriters": {
+        "tlaplus-examples--tlaplus-examples-paxoshowtowinaturingaward-voting-tla": {
+          "completion": {
+            "rate": 0,
+            "pass": 0,
+            "total": 2,
+            "canonicalTotal": 2,
+            "partialScope": false,
+            "taskCount": 2,
+            "activeTimeSecs": 248.00575696793385,
+            "activeTimePerTask": 124.00287848396692,
+            "outputTokens": 8029,
+            "outputTokensPerTask": 4014.5,
+            "outputCostUsd": 0.24087,
+            "outputCostPerTask": 0.120435
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-readerswriters-readerswriters-proof-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -3899,7 +4703,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-spanning": {
+        "tlaplus-examples--tlaplus-examples-spanning-spanning-proof-tla": {
           "completion": {
             "rate": 100,
             "pass": 1,
@@ -3916,7 +4720,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-tcp": {
+        "tlaplus-examples--tlaplus-examples-tcp-tcp-proof-tla": {
           "completion": {
             "rate": 33.3,
             "pass": 2,
@@ -3933,24 +4737,41 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-teachingconcurrency": {
+        "tlaplus-examples--tlaplus-examples-teachingconcurrency-simple-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
-            "total": 2,
-            "canonicalTotal": 2,
+            "total": 1,
+            "canonicalTotal": 1,
             "partialScope": false,
-            "taskCount": 2,
-            "activeTimeSecs": 172.5685400129296,
-            "activeTimePerTask": 86.2842700064648,
-            "outputTokens": 5636,
-            "outputTokensPerTask": 2818,
-            "outputCostUsd": 0.16908,
-            "outputCostPerTask": 0.08454
+            "taskCount": 1,
+            "activeTimeSecs": 45.6240192130208,
+            "activeTimePerTask": 45.6240192130208,
+            "outputTokens": 1796,
+            "outputTokensPerTask": 1796,
+            "outputCostUsd": 0.05388,
+            "outputCostPerTask": 0.05388
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-tencentpaxos": {
+        "tlaplus-examples--tlaplus-examples-teachingconcurrency-simpleregular-tla": {
+          "completion": {
+            "rate": 0,
+            "pass": 0,
+            "total": 1,
+            "canonicalTotal": 1,
+            "partialScope": false,
+            "taskCount": 1,
+            "activeTimeSecs": 126.94452079990879,
+            "activeTimePerTask": 126.94452079990879,
+            "outputTokens": 3840,
+            "outputTokensPerTask": 3840,
+            "outputCostUsd": 0.1152,
+            "outputCostPerTask": 0.1152
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-tencentpaxos-tpaxoswithproof-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -3967,7 +4788,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-termination": {
+        "tlaplus-examples--tlaplus-examples-termination-termination-proof-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -3984,7 +4805,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-transaction-commit": {
+        "tlaplus-examples--tlaplus-examples-transaction-commit-paxoscommit-proof-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -4001,7 +4822,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaps-distribution-examples--allocator": {
+        "tlaps-distribution-examples--allocator-allocator-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -4018,7 +4839,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaps-distribution-examples--atomicbakery": {
+        "tlaps-distribution-examples--atomicbakery-atomicbakerywithoutsmt-tla": {
           "completion": {
             "rate": 60,
             "pass": 3,
@@ -4035,24 +4856,41 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaps-distribution-examples--consensus": {
+        "tlaps-distribution-examples--consensus-consensus-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
-            "total": 2,
-            "canonicalTotal": 2,
+            "total": 1,
+            "canonicalTotal": 1,
             "partialScope": false,
-            "taskCount": 2,
-            "activeTimeSecs": 147.3274718541652,
-            "activeTimePerTask": 73.6637359270826,
-            "outputTokens": 4194,
-            "outputTokensPerTask": 2097,
-            "outputCostUsd": 0.12582,
-            "outputCostPerTask": 0.06291
+            "taskCount": 1,
+            "activeTimeSecs": 26.214683769037947,
+            "activeTimePerTask": 26.214683769037947,
+            "outputTokens": 840,
+            "outputTokensPerTask": 840,
+            "outputCostUsd": 0.0252,
+            "outputCostPerTask": 0.0252
           },
           "scratch": null
         },
-        "tlaps-distribution-examples--data": {
+        "tlaps-distribution-examples--consensus-paxosproof-tla": {
+          "completion": {
+            "rate": 0,
+            "pass": 0,
+            "total": 1,
+            "canonicalTotal": 1,
+            "partialScope": false,
+            "taskCount": 1,
+            "activeTimeSecs": 121.11278808512725,
+            "activeTimePerTask": 121.11278808512725,
+            "outputTokens": 3354,
+            "outputTokensPerTask": 3354,
+            "outputCostUsd": 0.10062,
+            "outputCostPerTask": 0.10062
+          },
+          "scratch": null
+        },
+        "tlaps-distribution-examples--data-sets-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -4069,7 +4907,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaps-distribution-examples--euclid": {
+        "tlaps-distribution-examples--euclid-euclid-hyperbook-gcd-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -4086,24 +4924,41 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaps-distribution-examples--paxos": {
+        "tlaps-distribution-examples--paxos-paxos-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
-            "total": 6,
-            "canonicalTotal": 6,
+            "total": 4,
+            "canonicalTotal": 4,
             "partialScope": false,
-            "taskCount": 6,
-            "activeTimeSecs": 687.4995219558477,
-            "activeTimePerTask": 114.58325365930796,
-            "outputTokens": 21587,
-            "outputTokensPerTask": 3597.8333333333335,
-            "outputCostUsd": 0.64761,
-            "outputCostPerTask": 0.107935
+            "taskCount": 4,
+            "activeTimeSecs": 452.2448527137749,
+            "activeTimePerTask": 113.06121317844372,
+            "outputTokens": 13964,
+            "outputTokensPerTask": 3491,
+            "outputCostUsd": 0.41892,
+            "outputCostPerTask": 0.10473
           },
           "scratch": null
         },
-        "tlaps-distribution-examples--simplemutex": {
+        "tlaps-distribution-examples--paxos-paxoshistvar-tla": {
+          "completion": {
+            "rate": 0,
+            "pass": 0,
+            "total": 2,
+            "canonicalTotal": 2,
+            "partialScope": false,
+            "taskCount": 2,
+            "activeTimeSecs": 235.25466924207285,
+            "activeTimePerTask": 117.62733462103643,
+            "outputTokens": 7623,
+            "outputTokensPerTask": 3811.5,
+            "outputCostUsd": 0.22869,
+            "outputCostPerTask": 0.114345
+          },
+          "scratch": null
+        },
+        "tlaps-distribution-examples--simplemutex-simplemutex-tla": {
           "completion": {
             "rate": 100,
             "pass": 1,
@@ -4274,7 +5129,7 @@ window.TLAPS_DATA = {
         "source": "https://developers.openai.com/api/docs/models"
       },
       "perSpec": {
-        "apalache-examples-konnov--apalache-examples-ben-or83": {
+        "apalache-examples-konnov--apalache-examples-ben-or83-ben-or83-proofs-tla": {
           "completion": {
             "rate": 19.5,
             "pass": 8,
@@ -4291,7 +5146,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "apalache-examples-konnov--apalache-examples-tendermint": {
+        "apalache-examples-konnov--apalache-examples-tendermint-tendermint-single-indinv-proofs-tla": {
           "completion": {
             "rate": 33.3,
             "pass": 5,
@@ -4308,24 +5163,41 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-allocator": {
+        "tlaplus-examples--tlaplus-examples-allocator-allocatorimplementation-proof-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
-            "total": 3,
-            "canonicalTotal": 3,
+            "total": 1,
+            "canonicalTotal": 1,
             "partialScope": false,
-            "taskCount": 3,
-            "activeTimeSecs": 904.8677399111912,
-            "activeTimePerTask": 301.62257997039706,
-            "outputTokens": 39655,
-            "outputTokensPerTask": 13218.333333333334,
-            "outputCostUsd": 1.18965,
-            "outputCostPerTask": 0.39655
+            "taskCount": 1,
+            "activeTimeSecs": 367.9693574309349,
+            "activeTimePerTask": 367.9693574309349,
+            "outputTokens": 14390,
+            "outputTokensPerTask": 14390,
+            "outputCostUsd": 0.4317,
+            "outputCostPerTask": 0.4317
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-bakery-boulangerie": {
+        "tlaplus-examples--tlaplus-examples-allocator-schedulingallocator-proof-tla": {
+          "completion": {
+            "rate": 0,
+            "pass": 0,
+            "total": 2,
+            "canonicalTotal": 2,
+            "partialScope": false,
+            "taskCount": 2,
+            "activeTimeSecs": 536.8983824802563,
+            "activeTimePerTask": 268.44919124012813,
+            "outputTokens": 25265,
+            "outputTokensPerTask": 12632.5,
+            "outputCostUsd": 0.75795,
+            "outputCostPerTask": 0.378975
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-bakery-boulangerie-boulanger-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -4342,7 +5214,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-barriers": {
+        "tlaplus-examples--tlaplus-examples-barriers-barriers-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -4359,7 +5231,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-bcastbyz": {
+        "tlaplus-examples--tlaplus-examples-bcastbyz-bcastbyz-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -4376,7 +5248,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-blockingqueue": {
+        "tlaplus-examples--tlaplus-examples-blockingqueue-blockingqueuesplit-proofs-tla": {
           "completion": {
             "rate": 50,
             "pass": 1,
@@ -4393,24 +5265,58 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-byzpaxos": {
+        "tlaplus-examples--tlaplus-examples-byzpaxos-bpconproof-tla": {
           "completion": {
-            "rate": 16.7,
-            "pass": 2,
-            "total": 12,
-            "canonicalTotal": 12,
+            "rate": 25,
+            "pass": 1,
+            "total": 4,
+            "canonicalTotal": 4,
             "partialScope": false,
-            "taskCount": 12,
-            "activeTimeSecs": 5131.4328722378705,
-            "activeTimePerTask": 427.6194060198225,
-            "outputTokens": 178745,
-            "outputTokensPerTask": 14895.416666666666,
-            "outputCostUsd": 5.36235,
-            "outputCostPerTask": 0.4468625
+            "taskCount": 4,
+            "activeTimeSecs": 1154.1158354533836,
+            "activeTimePerTask": 288.5289588633459,
+            "outputTokens": 53929,
+            "outputTokensPerTask": 13482.25,
+            "outputCostUsd": 1.61787,
+            "outputCostPerTask": 0.4044675
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-cigarettesmokers": {
+        "tlaplus-examples--tlaplus-examples-byzpaxos-pconproof-tla": {
+          "completion": {
+            "rate": 100,
+            "pass": 1,
+            "total": 1,
+            "canonicalTotal": 1,
+            "partialScope": false,
+            "taskCount": 1,
+            "activeTimeSecs": 45.49305658508092,
+            "activeTimePerTask": 45.49305658508092,
+            "outputTokens": 1702,
+            "outputTokensPerTask": 1702,
+            "outputCostUsd": 0.05106,
+            "outputCostPerTask": 0.05106
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-byzpaxos-voteproof-tla": {
+          "completion": {
+            "rate": 0,
+            "pass": 0,
+            "total": 7,
+            "canonicalTotal": 7,
+            "partialScope": false,
+            "taskCount": 7,
+            "activeTimeSecs": 3931.823980199406,
+            "activeTimePerTask": 561.6891400284866,
+            "outputTokens": 123114,
+            "outputTokensPerTask": 17587.714285714286,
+            "outputCostUsd": 3.69342,
+            "outputCostPerTask": 0.5276314285714286
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-cigarettesmokers-cigarettesmokers-proof-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -4427,7 +5333,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-coffeecan": {
+        "tlaplus-examples--tlaplus-examples-coffeecan-coffeecan-proof-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -4444,7 +5350,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-ewd687a": {
+        "tlaplus-examples--tlaplus-examples-ewd687a-ewd687a-proof-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -4461,41 +5367,92 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-ewd840": {
+        "tlaplus-examples--tlaplus-examples-ewd840-ewd840-proof-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
-            "total": 6,
-            "canonicalTotal": 6,
+            "total": 4,
+            "canonicalTotal": 4,
             "partialScope": false,
-            "taskCount": 6,
-            "activeTimeSecs": 2159.673523346195,
-            "activeTimePerTask": 359.94558722436585,
-            "outputTokens": 100325,
-            "outputTokensPerTask": 16720.833333333332,
-            "outputCostUsd": 3.00975,
-            "outputCostPerTask": 0.501625
+            "taskCount": 4,
+            "activeTimeSecs": 1922.8090036360081,
+            "activeTimePerTask": 480.70225090900203,
+            "outputTokens": 88615,
+            "outputTokensPerTask": 22153.75,
+            "outputCostUsd": 2.65845,
+            "outputCostPerTask": 0.6646125
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-ewd998": {
+        "tlaplus-examples--tlaplus-examples-ewd840-syncterminationdetection-proof-tla": {
           "completion": {
-            "rate": 23.5,
-            "pass": 4,
-            "total": 17,
-            "canonicalTotal": 17,
+            "rate": 0,
+            "pass": 0,
+            "total": 2,
+            "canonicalTotal": 2,
             "partialScope": false,
-            "taskCount": 17,
-            "activeTimeSecs": 5417.678953612689,
-            "activeTimePerTask": 318.68699727133463,
-            "outputTokens": 236180,
-            "outputTokensPerTask": 13892.941176470587,
-            "outputCostUsd": 7.0854,
-            "outputCostPerTask": 0.4167882352941176
+            "taskCount": 2,
+            "activeTimeSecs": 236.86451971018687,
+            "activeTimePerTask": 118.43225985509343,
+            "outputTokens": 11710,
+            "outputTokensPerTask": 5855,
+            "outputCostUsd": 0.3513,
+            "outputCostPerTask": 0.17565
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-finitemonotonic": {
+        "tlaplus-examples--tlaplus-examples-ewd998-asyncterminationdetection-proof-tla": {
+          "completion": {
+            "rate": 100,
+            "pass": 3,
+            "total": 3,
+            "canonicalTotal": 3,
+            "partialScope": false,
+            "taskCount": 3,
+            "activeTimeSecs": 405.1842380797025,
+            "activeTimePerTask": 135.06141269323416,
+            "outputTokens": 18661,
+            "outputTokensPerTask": 6220.333333333333,
+            "outputCostUsd": 0.55983,
+            "outputCostPerTask": 0.18661000000000003
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-ewd998-ewd998-proof-tla": {
+          "completion": {
+            "rate": 8.3,
+            "pass": 1,
+            "total": 12,
+            "canonicalTotal": 12,
+            "partialScope": false,
+            "taskCount": 12,
+            "activeTimeSecs": 4164.173652228899,
+            "activeTimePerTask": 347.01447101907496,
+            "outputTokens": 181130,
+            "outputTokensPerTask": 15094.166666666666,
+            "outputCostUsd": 5.4339,
+            "outputCostPerTask": 0.45282500000000003
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-ewd998-ewd998pcal-proof-tla": {
+          "completion": {
+            "rate": 0,
+            "pass": 0,
+            "total": 2,
+            "canonicalTotal": 2,
+            "partialScope": false,
+            "taskCount": 2,
+            "activeTimeSecs": 848.3210633040871,
+            "activeTimePerTask": 424.1605316520436,
+            "outputTokens": 36389,
+            "outputTokensPerTask": 18194.5,
+            "outputCostUsd": 1.09167,
+            "outputCostPerTask": 0.545835
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-finitemonotonic-crdt-proof-tla": {
           "completion": {
             "rate": 10,
             "pass": 1,
@@ -4512,24 +5469,41 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-glowingraccoon": {
+        "tlaplus-examples--tlaplus-examples-glowingraccoon-clean-proof-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
-            "total": 3,
-            "canonicalTotal": 3,
+            "total": 2,
+            "canonicalTotal": 2,
             "partialScope": false,
-            "taskCount": 3,
-            "activeTimeSecs": 388.59528474882245,
-            "activeTimePerTask": 129.53176158294082,
-            "outputTokens": 17243,
-            "outputTokensPerTask": 5747.666666666667,
-            "outputCostUsd": 0.51729,
-            "outputCostPerTask": 0.17243
+            "taskCount": 2,
+            "activeTimeSecs": 250.65376258292235,
+            "activeTimePerTask": 125.32688129146118,
+            "outputTokens": 11060,
+            "outputTokensPerTask": 5530,
+            "outputCostUsd": 0.3318,
+            "outputCostPerTask": 0.1659
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-keyvaluestore": {
+        "tlaplus-examples--tlaplus-examples-glowingraccoon-stages-proof-tla": {
+          "completion": {
+            "rate": 0,
+            "pass": 0,
+            "total": 1,
+            "canonicalTotal": 1,
+            "partialScope": false,
+            "taskCount": 1,
+            "activeTimeSecs": 137.9415221659001,
+            "activeTimePerTask": 137.9415221659001,
+            "outputTokens": 6183,
+            "outputTokensPerTask": 6183,
+            "outputCostUsd": 0.18549,
+            "outputCostPerTask": 0.18549
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-keyvaluestore-keyvaluestore-proof-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -4546,7 +5520,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-lamport-mutex": {
+        "tlaplus-examples--tlaplus-examples-lamport-mutex-lamportmutex-proofs-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -4563,7 +5537,92 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-locks-auxiliary-vars": {
+        "tlaplus-examples--tlaplus-examples-locks-auxiliary-vars-lock-tla": {
+          "completion": {
+            "rate": 0,
+            "pass": 0,
+            "total": 1,
+            "canonicalTotal": 1,
+            "partialScope": false,
+            "taskCount": 1,
+            "activeTimeSecs": 142.75670459493995,
+            "activeTimePerTask": 142.75670459493995,
+            "outputTokens": 7668,
+            "outputTokensPerTask": 7668,
+            "outputCostUsd": 0.23004,
+            "outputCostPerTask": 0.23004
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-locks-auxiliary-vars-lockhs-tla": {
+          "completion": {
+            "rate": 0,
+            "pass": 0,
+            "total": 1,
+            "canonicalTotal": 1,
+            "partialScope": false,
+            "taskCount": 1,
+            "activeTimeSecs": 295.5238965949975,
+            "activeTimePerTask": 295.5238965949975,
+            "outputTokens": 15474,
+            "outputTokensPerTask": 15474,
+            "outputCostUsd": 0.46422,
+            "outputCostPerTask": 0.46422
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-locks-auxiliary-vars-peterson-tla": {
+          "completion": {
+            "rate": 0,
+            "pass": 0,
+            "total": 1,
+            "canonicalTotal": 1,
+            "partialScope": false,
+            "taskCount": 1,
+            "activeTimeSecs": 292.16243045101874,
+            "activeTimePerTask": 292.16243045101874,
+            "outputTokens": 14289,
+            "outputTokensPerTask": 14289,
+            "outputCostUsd": 0.42867,
+            "outputCostPerTask": 0.42867
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-loopinvariance-binarysearch-tla": {
+          "completion": {
+            "rate": 0,
+            "pass": 0,
+            "total": 1,
+            "canonicalTotal": 1,
+            "partialScope": false,
+            "taskCount": 1,
+            "activeTimeSecs": 65.12108444306068,
+            "activeTimePerTask": 65.12108444306068,
+            "outputTokens": 2329,
+            "outputTokensPerTask": 2329,
+            "outputCostUsd": 0.06987,
+            "outputCostPerTask": 0.06987
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-loopinvariance-quicksort-tla": {
+          "completion": {
+            "rate": 0,
+            "pass": 0,
+            "total": 1,
+            "canonicalTotal": 1,
+            "partialScope": false,
+            "taskCount": 1,
+            "activeTimeSecs": 343.42701013898477,
+            "activeTimePerTask": 343.42701013898477,
+            "outputTokens": 13578,
+            "outputTokensPerTask": 13578,
+            "outputCostUsd": 0.40734,
+            "outputCostPerTask": 0.40734
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-loopinvariance-sumsequence-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -4571,33 +5630,16 @@ window.TLAPS_DATA = {
             "canonicalTotal": 3,
             "partialScope": false,
             "taskCount": 3,
-            "activeTimeSecs": 730.4430316409562,
-            "activeTimePerTask": 243.4810105469854,
-            "outputTokens": 37431,
-            "outputTokensPerTask": 12477,
-            "outputCostUsd": 1.12293,
-            "outputCostPerTask": 0.37431
+            "activeTimeSecs": 593.4406352969818,
+            "activeTimePerTask": 197.81354509899393,
+            "outputTokens": 25213,
+            "outputTokensPerTask": 8404.333333333334,
+            "outputCostUsd": 0.75639,
+            "outputCostPerTask": 0.25213
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-loopinvariance": {
-          "completion": {
-            "rate": 0,
-            "pass": 0,
-            "total": 5,
-            "canonicalTotal": 5,
-            "partialScope": false,
-            "taskCount": 5,
-            "activeTimeSecs": 1001.9887298790272,
-            "activeTimePerTask": 200.39774597580544,
-            "outputTokens": 41120,
-            "outputTokensPerTask": 8224,
-            "outputCostUsd": 1.2336,
-            "outputCostPerTask": 0.24672
-          },
-          "scratch": null
-        },
-        "tlaplus-examples--tlaplus-examples-majority": {
+        "tlaplus-examples--tlaplus-examples-majority-majorityproof-tla": {
           "completion": {
             "rate": 33.3,
             "pass": 1,
@@ -4614,24 +5656,58 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-misrareachability": {
+        "tlaplus-examples--tlaplus-examples-misrareachability-parreachproofs-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
-            "total": 4,
-            "canonicalTotal": 4,
+            "total": 1,
+            "canonicalTotal": 1,
             "partialScope": false,
-            "taskCount": 4,
-            "activeTimeSecs": 1205.5357527257875,
-            "activeTimePerTask": 301.38393818144687,
-            "outputTokens": 44010,
-            "outputTokensPerTask": 11002.5,
-            "outputCostUsd": 1.3203,
-            "outputCostPerTask": 0.330075
+            "taskCount": 1,
+            "activeTimeSecs": 385.57473573996685,
+            "activeTimePerTask": 385.57473573996685,
+            "outputTokens": 14509,
+            "outputTokensPerTask": 14509,
+            "outputCostUsd": 0.43527,
+            "outputCostPerTask": 0.43527
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-missionariesandcannibals": {
+        "tlaplus-examples--tlaplus-examples-misrareachability-reachabilityproofs-tla": {
+          "completion": {
+            "rate": 0,
+            "pass": 0,
+            "total": 1,
+            "canonicalTotal": 1,
+            "partialScope": false,
+            "taskCount": 1,
+            "activeTimeSecs": 584.2432185809594,
+            "activeTimePerTask": 584.2432185809594,
+            "outputTokens": 20242,
+            "outputTokensPerTask": 20242,
+            "outputCostUsd": 0.60726,
+            "outputCostPerTask": 0.60726
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-misrareachability-reachableproofs-tla": {
+          "completion": {
+            "rate": 0,
+            "pass": 0,
+            "total": 2,
+            "canonicalTotal": 2,
+            "partialScope": false,
+            "taskCount": 2,
+            "activeTimeSecs": 235.71779840486124,
+            "activeTimePerTask": 117.85889920243062,
+            "outputTokens": 9259,
+            "outputTokensPerTask": 4629.5,
+            "outputCostUsd": 0.27777,
+            "outputCostPerTask": 0.138885
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-missionariesandcannibals-missionariesandcannibals-proof-tla": {
           "completion": {
             "rate": 100,
             "pass": 1,
@@ -4648,7 +5724,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-multicarelevator": {
+        "tlaplus-examples--tlaplus-examples-multicarelevator-elevator-proof-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -4665,7 +5741,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-paxos": {
+        "tlaplus-examples--tlaplus-examples-paxos-consensus-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -4682,24 +5758,41 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-paxoshowtowinaturingaward": {
+        "tlaplus-examples--tlaplus-examples-paxoshowtowinaturingaward-voting-proof-tla": {
           "completion": {
-            "rate": 33.3,
+            "rate": 100,
             "pass": 1,
-            "total": 3,
-            "canonicalTotal": 3,
+            "total": 1,
+            "canonicalTotal": 1,
             "partialScope": false,
-            "taskCount": 3,
-            "activeTimeSecs": 933.5571167070884,
-            "activeTimePerTask": 311.1857055690295,
-            "outputTokens": 46948,
-            "outputTokensPerTask": 15649.333333333334,
-            "outputCostUsd": 1.40844,
-            "outputCostPerTask": 0.46947999999999995
+            "taskCount": 1,
+            "activeTimeSecs": 76.66908818902448,
+            "activeTimePerTask": 76.66908818902448,
+            "outputTokens": 3876,
+            "outputTokensPerTask": 3876,
+            "outputCostUsd": 0.11628,
+            "outputCostPerTask": 0.11628
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-readerswriters": {
+        "tlaplus-examples--tlaplus-examples-paxoshowtowinaturingaward-voting-tla": {
+          "completion": {
+            "rate": 0,
+            "pass": 0,
+            "total": 2,
+            "canonicalTotal": 2,
+            "partialScope": false,
+            "taskCount": 2,
+            "activeTimeSecs": 856.888028518064,
+            "activeTimePerTask": 428.444014259032,
+            "outputTokens": 43072,
+            "outputTokensPerTask": 21536,
+            "outputCostUsd": 1.29216,
+            "outputCostPerTask": 0.64608
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-readerswriters-readerswriters-proof-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -4716,7 +5809,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-spanning": {
+        "tlaplus-examples--tlaplus-examples-spanning-spanning-proof-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -4733,7 +5826,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-tcp": {
+        "tlaplus-examples--tlaplus-examples-tcp-tcp-proof-tla": {
           "completion": {
             "rate": 16.7,
             "pass": 1,
@@ -4750,24 +5843,41 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-teachingconcurrency": {
+        "tlaplus-examples--tlaplus-examples-teachingconcurrency-simple-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
-            "total": 2,
-            "canonicalTotal": 2,
+            "total": 1,
+            "canonicalTotal": 1,
             "partialScope": false,
-            "taskCount": 2,
-            "activeTimeSecs": 647.936325468123,
-            "activeTimePerTask": 323.9681627340615,
-            "outputTokens": 26435,
-            "outputTokensPerTask": 13217.5,
-            "outputCostUsd": 0.79305,
-            "outputCostPerTask": 0.396525
+            "taskCount": 1,
+            "activeTimeSecs": 229.96713534602895,
+            "activeTimePerTask": 229.96713534602895,
+            "outputTokens": 11494,
+            "outputTokensPerTask": 11494,
+            "outputCostUsd": 0.34482,
+            "outputCostPerTask": 0.34482
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-tencentpaxos": {
+        "tlaplus-examples--tlaplus-examples-teachingconcurrency-simpleregular-tla": {
+          "completion": {
+            "rate": 0,
+            "pass": 0,
+            "total": 1,
+            "canonicalTotal": 1,
+            "partialScope": false,
+            "taskCount": 1,
+            "activeTimeSecs": 417.969190122094,
+            "activeTimePerTask": 417.969190122094,
+            "outputTokens": 14941,
+            "outputTokensPerTask": 14941,
+            "outputCostUsd": 0.44823,
+            "outputCostPerTask": 0.44823
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-tencentpaxos-tpaxoswithproof-tla": {
           "completion": {
             "rate": 18.2,
             "pass": 2,
@@ -4784,7 +5894,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-termination": {
+        "tlaplus-examples--tlaplus-examples-termination-termination-proof-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -4801,7 +5911,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-transaction-commit": {
+        "tlaplus-examples--tlaplus-examples-transaction-commit-paxoscommit-proof-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -4818,7 +5928,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaps-distribution-examples--allocator": {
+        "tlaps-distribution-examples--allocator-allocator-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -4835,7 +5945,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaps-distribution-examples--atomicbakery": {
+        "tlaps-distribution-examples--atomicbakery-atomicbakerywithoutsmt-tla": {
           "completion": {
             "rate": 20,
             "pass": 1,
@@ -4852,24 +5962,41 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaps-distribution-examples--consensus": {
+        "tlaps-distribution-examples--consensus-consensus-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
-            "total": 2,
-            "canonicalTotal": 2,
+            "total": 1,
+            "canonicalTotal": 1,
             "partialScope": false,
-            "taskCount": 2,
-            "activeTimeSecs": 665.5153454842512,
-            "activeTimePerTask": 332.7576727421256,
-            "outputTokens": 26818,
-            "outputTokensPerTask": 13409,
-            "outputCostUsd": 0.80454,
-            "outputCostPerTask": 0.40227
+            "taskCount": 1,
+            "activeTimeSecs": 123.96950266510248,
+            "activeTimePerTask": 123.96950266510248,
+            "outputTokens": 4944,
+            "outputTokensPerTask": 4944,
+            "outputCostUsd": 0.14832,
+            "outputCostPerTask": 0.14832
           },
           "scratch": null
         },
-        "tlaps-distribution-examples--data": {
+        "tlaps-distribution-examples--consensus-paxosproof-tla": {
+          "completion": {
+            "rate": 0,
+            "pass": 0,
+            "total": 1,
+            "canonicalTotal": 1,
+            "partialScope": false,
+            "taskCount": 1,
+            "activeTimeSecs": 541.5458428191487,
+            "activeTimePerTask": 541.5458428191487,
+            "outputTokens": 21874,
+            "outputTokensPerTask": 21874,
+            "outputCostUsd": 0.65622,
+            "outputCostPerTask": 0.65622
+          },
+          "scratch": null
+        },
+        "tlaps-distribution-examples--data-sets-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -4886,7 +6013,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaps-distribution-examples--euclid": {
+        "tlaps-distribution-examples--euclid-euclid-hyperbook-gcd-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -4903,24 +6030,41 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaps-distribution-examples--paxos": {
+        "tlaps-distribution-examples--paxos-paxos-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
-            "total": 6,
-            "canonicalTotal": 6,
+            "total": 4,
+            "canonicalTotal": 4,
             "partialScope": false,
-            "taskCount": 6,
-            "activeTimeSecs": 2255.8134845220484,
-            "activeTimePerTask": 375.96891408700805,
-            "outputTokens": 106033,
-            "outputTokensPerTask": 17672.166666666668,
-            "outputCostUsd": 3.18099,
-            "outputCostPerTask": 0.530165
+            "taskCount": 4,
+            "activeTimeSecs": 1486.191886239918,
+            "activeTimePerTask": 371.5479715599795,
+            "outputTokens": 66957,
+            "outputTokensPerTask": 16739.25,
+            "outputCostUsd": 2.00871,
+            "outputCostPerTask": 0.5021775
           },
           "scratch": null
         },
-        "tlaps-distribution-examples--simplemutex": {
+        "tlaps-distribution-examples--paxos-paxoshistvar-tla": {
+          "completion": {
+            "rate": 0,
+            "pass": 0,
+            "total": 2,
+            "canonicalTotal": 2,
+            "partialScope": false,
+            "taskCount": 2,
+            "activeTimeSecs": 769.6215982821304,
+            "activeTimePerTask": 384.8107991410652,
+            "outputTokens": 39076,
+            "outputTokensPerTask": 19538,
+            "outputCostUsd": 1.17228,
+            "outputCostPerTask": 0.58614
+          },
+          "scratch": null
+        },
+        "tlaps-distribution-examples--simplemutex-simplemutex-tla": {
           "completion": {
             "rate": 100,
             "pass": 1,
@@ -5091,7 +6235,7 @@ window.TLAPS_DATA = {
         "source": "https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing"
       },
       "perSpec": {
-        "apalache-examples-konnov--apalache-examples-ben-or83": {
+        "apalache-examples-konnov--apalache-examples-ben-or83-ben-or83-proofs-tla": {
           "completion": {
             "rate": 4.9,
             "pass": 2,
@@ -5108,7 +6252,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "apalache-examples-konnov--apalache-examples-tendermint": {
+        "apalache-examples-konnov--apalache-examples-tendermint-tendermint-single-indinv-proofs-tla": {
           "completion": {
             "rate": 6.7,
             "pass": 1,
@@ -5125,24 +6269,41 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-allocator": {
+        "tlaplus-examples--tlaplus-examples-allocator-allocatorimplementation-proof-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
-            "total": 3,
-            "canonicalTotal": 3,
+            "total": 1,
+            "canonicalTotal": 1,
             "partialScope": false,
-            "taskCount": 3,
-            "activeTimeSecs": 836.5438396220561,
-            "activeTimePerTask": 278.84794654068537,
-            "outputTokens": 45097,
-            "outputTokensPerTask": 15032.333333333334,
-            "outputCostUsd": 0.676455,
-            "outputCostPerTask": 0.22548500000000002
+            "taskCount": 1,
+            "activeTimeSecs": 291.7976756230928,
+            "activeTimePerTask": 291.7976756230928,
+            "outputTokens": 15289,
+            "outputTokensPerTask": 15289,
+            "outputCostUsd": 0.229335,
+            "outputCostPerTask": 0.229335
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-bakery-boulangerie": {
+        "tlaplus-examples--tlaplus-examples-allocator-schedulingallocator-proof-tla": {
+          "completion": {
+            "rate": 0,
+            "pass": 0,
+            "total": 2,
+            "canonicalTotal": 2,
+            "partialScope": false,
+            "taskCount": 2,
+            "activeTimeSecs": 544.7461639989633,
+            "activeTimePerTask": 272.37308199948166,
+            "outputTokens": 29808,
+            "outputTokensPerTask": 14904,
+            "outputCostUsd": 0.44712,
+            "outputCostPerTask": 0.22356
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-bakery-boulangerie-boulanger-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -5159,7 +6320,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-barriers": {
+        "tlaplus-examples--tlaplus-examples-barriers-barriers-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -5176,7 +6337,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-bcastbyz": {
+        "tlaplus-examples--tlaplus-examples-bcastbyz-bcastbyz-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -5193,7 +6354,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-blockingqueue": {
+        "tlaplus-examples--tlaplus-examples-blockingqueue-blockingqueuesplit-proofs-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -5210,24 +6371,58 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-byzpaxos": {
+        "tlaplus-examples--tlaplus-examples-byzpaxos-bpconproof-tla": {
           "completion": {
-            "rate": 8.3,
-            "pass": 1,
-            "total": 12,
-            "canonicalTotal": 12,
+            "rate": 0,
+            "pass": 0,
+            "total": 4,
+            "canonicalTotal": 4,
             "partialScope": false,
-            "taskCount": 12,
-            "activeTimeSecs": 4387.4042049979325,
-            "activeTimePerTask": 365.61701708316104,
-            "outputTokens": 237805,
-            "outputTokensPerTask": 19817.083333333332,
-            "outputCostUsd": 3.567075,
-            "outputCostPerTask": 0.29725625
+            "taskCount": 4,
+            "activeTimeSecs": 1254.8072206482757,
+            "activeTimePerTask": 313.7018051620689,
+            "outputTokens": 68662,
+            "outputTokensPerTask": 17165.5,
+            "outputCostUsd": 1.02993,
+            "outputCostPerTask": 0.2574825
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-cigarettesmokers": {
+        "tlaplus-examples--tlaplus-examples-byzpaxos-pconproof-tla": {
+          "completion": {
+            "rate": 100,
+            "pass": 1,
+            "total": 1,
+            "canonicalTotal": 1,
+            "partialScope": false,
+            "taskCount": 1,
+            "activeTimeSecs": 44.41240124008618,
+            "activeTimePerTask": 44.41240124008618,
+            "outputTokens": 2171,
+            "outputTokensPerTask": 2171,
+            "outputCostUsd": 0.032565,
+            "outputCostPerTask": 0.032565
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-byzpaxos-voteproof-tla": {
+          "completion": {
+            "rate": 0,
+            "pass": 0,
+            "total": 7,
+            "canonicalTotal": 7,
+            "partialScope": false,
+            "taskCount": 7,
+            "activeTimeSecs": 3088.1845831095707,
+            "activeTimePerTask": 441.16922615851007,
+            "outputTokens": 166972,
+            "outputTokensPerTask": 23853.14285714286,
+            "outputCostUsd": 2.50458,
+            "outputCostPerTask": 0.3577971428571428
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-cigarettesmokers-cigarettesmokers-proof-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -5244,7 +6439,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-coffeecan": {
+        "tlaplus-examples--tlaplus-examples-coffeecan-coffeecan-proof-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -5261,7 +6456,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-ewd687a": {
+        "tlaplus-examples--tlaplus-examples-ewd687a-ewd687a-proof-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -5278,41 +6473,92 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-ewd840": {
+        "tlaplus-examples--tlaplus-examples-ewd840-ewd840-proof-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
-            "total": 6,
-            "canonicalTotal": 6,
+            "total": 4,
+            "canonicalTotal": 4,
             "partialScope": false,
-            "taskCount": 6,
-            "activeTimeSecs": 1559.3420374379493,
-            "activeTimePerTask": 259.89033957299154,
-            "outputTokens": 85118,
-            "outputTokensPerTask": 14186.333333333334,
-            "outputCostUsd": 1.27677,
-            "outputCostPerTask": 0.21279499999999998
+            "taskCount": 4,
+            "activeTimeSecs": 1420.5124524699058,
+            "activeTimePerTask": 355.12811311747646,
+            "outputTokens": 77883,
+            "outputTokensPerTask": 19470.75,
+            "outputCostUsd": 1.168245,
+            "outputCostPerTask": 0.29206125
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-ewd998": {
+        "tlaplus-examples--tlaplus-examples-ewd840-syncterminationdetection-proof-tla": {
           "completion": {
-            "rate": 17.6,
-            "pass": 3,
-            "total": 17,
-            "canonicalTotal": 17,
+            "rate": 0,
+            "pass": 0,
+            "total": 2,
+            "canonicalTotal": 2,
             "partialScope": false,
-            "taskCount": 17,
-            "activeTimeSecs": 5226.824747971492,
-            "activeTimePerTask": 307.4602792924407,
-            "outputTokens": 281144,
-            "outputTokensPerTask": 16537.882352941175,
-            "outputCostUsd": 4.21716,
-            "outputCostPerTask": 0.24806823529411764
+            "taskCount": 2,
+            "activeTimeSecs": 138.8295849680435,
+            "activeTimePerTask": 69.41479248402175,
+            "outputTokens": 7235,
+            "outputTokensPerTask": 3617.5,
+            "outputCostUsd": 0.108525,
+            "outputCostPerTask": 0.0542625
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-finitemonotonic": {
+        "tlaplus-examples--tlaplus-examples-ewd998-asyncterminationdetection-proof-tla": {
+          "completion": {
+            "rate": 66.7,
+            "pass": 2,
+            "total": 3,
+            "canonicalTotal": 3,
+            "partialScope": false,
+            "taskCount": 3,
+            "activeTimeSecs": 364.9116889380384,
+            "activeTimePerTask": 121.63722964601281,
+            "outputTokens": 19428,
+            "outputTokensPerTask": 6476,
+            "outputCostUsd": 0.29142,
+            "outputCostPerTask": 0.09714
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-ewd998-ewd998-proof-tla": {
+          "completion": {
+            "rate": 8.3,
+            "pass": 1,
+            "total": 12,
+            "canonicalTotal": 12,
+            "partialScope": false,
+            "taskCount": 12,
+            "activeTimeSecs": 4184.147454508347,
+            "activeTimePerTask": 348.6789545423623,
+            "outputTokens": 224563,
+            "outputTokensPerTask": 18713.583333333332,
+            "outputCostUsd": 3.368445,
+            "outputCostPerTask": 0.28070375
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-ewd998-ewd998pcal-proof-tla": {
+          "completion": {
+            "rate": 0,
+            "pass": 0,
+            "total": 2,
+            "canonicalTotal": 2,
+            "partialScope": false,
+            "taskCount": 2,
+            "activeTimeSecs": 677.765604525106,
+            "activeTimePerTask": 338.882802262553,
+            "outputTokens": 37153,
+            "outputTokensPerTask": 18576.5,
+            "outputCostUsd": 0.557295,
+            "outputCostPerTask": 0.2786475
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-finitemonotonic-crdt-proof-tla": {
           "completion": {
             "rate": 10,
             "pass": 1,
@@ -5329,24 +6575,41 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-glowingraccoon": {
+        "tlaplus-examples--tlaplus-examples-glowingraccoon-clean-proof-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
-            "total": 3,
-            "canonicalTotal": 3,
+            "total": 2,
+            "canonicalTotal": 2,
             "partialScope": false,
-            "taskCount": 3,
-            "activeTimeSecs": 655.7561488370411,
-            "activeTimePerTask": 218.58538294568038,
-            "outputTokens": 35597,
-            "outputTokensPerTask": 11865.666666666666,
-            "outputCostUsd": 0.533955,
-            "outputCostPerTask": 0.17798499999999998
+            "taskCount": 2,
+            "activeTimeSecs": 429.3112874031067,
+            "activeTimePerTask": 214.65564370155334,
+            "outputTokens": 23232,
+            "outputTokensPerTask": 11616,
+            "outputCostUsd": 0.34848,
+            "outputCostPerTask": 0.17424
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-keyvaluestore": {
+        "tlaplus-examples--tlaplus-examples-glowingraccoon-stages-proof-tla": {
+          "completion": {
+            "rate": 0,
+            "pass": 0,
+            "total": 1,
+            "canonicalTotal": 1,
+            "partialScope": false,
+            "taskCount": 1,
+            "activeTimeSecs": 226.44486143393442,
+            "activeTimePerTask": 226.44486143393442,
+            "outputTokens": 12365,
+            "outputTokensPerTask": 12365,
+            "outputCostUsd": 0.185475,
+            "outputCostPerTask": 0.185475
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-keyvaluestore-keyvaluestore-proof-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -5363,7 +6626,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-lamport-mutex": {
+        "tlaplus-examples--tlaplus-examples-lamport-mutex-lamportmutex-proofs-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -5380,7 +6643,92 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-locks-auxiliary-vars": {
+        "tlaplus-examples--tlaplus-examples-locks-auxiliary-vars-lock-tla": {
+          "completion": {
+            "rate": 0,
+            "pass": 0,
+            "total": 1,
+            "canonicalTotal": 1,
+            "partialScope": false,
+            "taskCount": 1,
+            "activeTimeSecs": 109.0336799910292,
+            "activeTimePerTask": 109.0336799910292,
+            "outputTokens": 5864,
+            "outputTokensPerTask": 5864,
+            "outputCostUsd": 0.08796,
+            "outputCostPerTask": 0.08796
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-locks-auxiliary-vars-lockhs-tla": {
+          "completion": {
+            "rate": 0,
+            "pass": 0,
+            "total": 1,
+            "canonicalTotal": 1,
+            "partialScope": false,
+            "taskCount": 1,
+            "activeTimeSecs": 498.74199140281416,
+            "activeTimePerTask": 498.74199140281416,
+            "outputTokens": 27423,
+            "outputTokensPerTask": 27423,
+            "outputCostUsd": 0.411345,
+            "outputCostPerTask": 0.411345
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-locks-auxiliary-vars-peterson-tla": {
+          "completion": {
+            "rate": 0,
+            "pass": 0,
+            "total": 1,
+            "canonicalTotal": 1,
+            "partialScope": false,
+            "taskCount": 1,
+            "activeTimeSecs": 184.5705916217994,
+            "activeTimePerTask": 184.5705916217994,
+            "outputTokens": 10039,
+            "outputTokensPerTask": 10039,
+            "outputCostUsd": 0.150585,
+            "outputCostPerTask": 0.150585
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-loopinvariance-binarysearch-tla": {
+          "completion": {
+            "rate": 0,
+            "pass": 0,
+            "total": 1,
+            "canonicalTotal": 1,
+            "partialScope": false,
+            "taskCount": 1,
+            "activeTimeSecs": 62.292642791057006,
+            "activeTimePerTask": 62.292642791057006,
+            "outputTokens": 2879,
+            "outputTokensPerTask": 2879,
+            "outputCostUsd": 0.043185,
+            "outputCostPerTask": 0.043185
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-loopinvariance-quicksort-tla": {
+          "completion": {
+            "rate": 0,
+            "pass": 0,
+            "total": 1,
+            "canonicalTotal": 1,
+            "partialScope": false,
+            "taskCount": 1,
+            "activeTimeSecs": 244.22637539100833,
+            "activeTimePerTask": 244.22637539100833,
+            "outputTokens": 13195,
+            "outputTokensPerTask": 13195,
+            "outputCostUsd": 0.197925,
+            "outputCostPerTask": 0.197925
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-loopinvariance-sumsequence-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -5388,33 +6736,16 @@ window.TLAPS_DATA = {
             "canonicalTotal": 3,
             "partialScope": false,
             "taskCount": 3,
-            "activeTimeSecs": 792.3462630156428,
-            "activeTimePerTask": 264.1154210052143,
-            "outputTokens": 43326,
-            "outputTokensPerTask": 14442,
-            "outputCostUsd": 0.64989,
-            "outputCostPerTask": 0.21663
+            "activeTimeSecs": 506.7692495950032,
+            "activeTimePerTask": 168.9230831983344,
+            "outputTokens": 27328,
+            "outputTokensPerTask": 9109.333333333334,
+            "outputCostUsd": 0.40992,
+            "outputCostPerTask": 0.13664
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-loopinvariance": {
-          "completion": {
-            "rate": 0,
-            "pass": 0,
-            "total": 5,
-            "canonicalTotal": 5,
-            "partialScope": false,
-            "taskCount": 5,
-            "activeTimeSecs": 813.2882677770685,
-            "activeTimePerTask": 162.6576535554137,
-            "outputTokens": 43402,
-            "outputTokensPerTask": 8680.4,
-            "outputCostUsd": 0.65103,
-            "outputCostPerTask": 0.130206
-          },
-          "scratch": null
-        },
-        "tlaplus-examples--tlaplus-examples-majority": {
+        "tlaplus-examples--tlaplus-examples-majority-majorityproof-tla": {
           "completion": {
             "rate": 33.3,
             "pass": 1,
@@ -5431,24 +6762,58 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-misrareachability": {
+        "tlaplus-examples--tlaplus-examples-misrareachability-parreachproofs-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
-            "total": 4,
-            "canonicalTotal": 4,
+            "total": 1,
+            "canonicalTotal": 1,
             "partialScope": false,
-            "taskCount": 4,
-            "activeTimeSecs": 1092.9147638366558,
-            "activeTimePerTask": 273.22869095916394,
-            "outputTokens": 59661,
-            "outputTokensPerTask": 14915.25,
-            "outputCostUsd": 0.894915,
-            "outputCostPerTask": 0.22372875
+            "taskCount": 1,
+            "activeTimeSecs": 156.9228972478304,
+            "activeTimePerTask": 156.9228972478304,
+            "outputTokens": 8494,
+            "outputTokensPerTask": 8494,
+            "outputCostUsd": 0.12741,
+            "outputCostPerTask": 0.12741
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-missionariesandcannibals": {
+        "tlaplus-examples--tlaplus-examples-misrareachability-reachabilityproofs-tla": {
+          "completion": {
+            "rate": 0,
+            "pass": 0,
+            "total": 1,
+            "canonicalTotal": 1,
+            "partialScope": false,
+            "taskCount": 1,
+            "activeTimeSecs": 263.326079063816,
+            "activeTimePerTask": 263.326079063816,
+            "outputTokens": 14395,
+            "outputTokensPerTask": 14395,
+            "outputCostUsd": 0.215925,
+            "outputCostPerTask": 0.215925
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-misrareachability-reachableproofs-tla": {
+          "completion": {
+            "rate": 0,
+            "pass": 0,
+            "total": 2,
+            "canonicalTotal": 2,
+            "partialScope": false,
+            "taskCount": 2,
+            "activeTimeSecs": 672.6657875250094,
+            "activeTimePerTask": 336.3328937625047,
+            "outputTokens": 36772,
+            "outputTokensPerTask": 18386,
+            "outputCostUsd": 0.55158,
+            "outputCostPerTask": 0.27579
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-missionariesandcannibals-missionariesandcannibals-proof-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -5465,7 +6830,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-multicarelevator": {
+        "tlaplus-examples--tlaplus-examples-multicarelevator-elevator-proof-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -5482,7 +6847,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-paxos": {
+        "tlaplus-examples--tlaplus-examples-paxos-consensus-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -5499,24 +6864,41 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-paxoshowtowinaturingaward": {
+        "tlaplus-examples--tlaplus-examples-paxoshowtowinaturingaward-voting-proof-tla": {
           "completion": {
-            "rate": 33.3,
+            "rate": 100,
             "pass": 1,
-            "total": 3,
-            "canonicalTotal": 3,
+            "total": 1,
+            "canonicalTotal": 1,
             "partialScope": false,
-            "taskCount": 3,
-            "activeTimeSecs": 961.6901868081186,
-            "activeTimePerTask": 320.5633956027062,
-            "outputTokens": 52753,
-            "outputTokensPerTask": 17584.333333333332,
-            "outputCostUsd": 0.791295,
-            "outputCostPerTask": 0.26376499999999997
+            "taskCount": 1,
+            "activeTimeSecs": 114.05794844892807,
+            "activeTimePerTask": 114.05794844892807,
+            "outputTokens": 6110,
+            "outputTokensPerTask": 6110,
+            "outputCostUsd": 0.09165,
+            "outputCostPerTask": 0.09165
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-readerswriters": {
+        "tlaplus-examples--tlaplus-examples-paxoshowtowinaturingaward-voting-tla": {
+          "completion": {
+            "rate": 0,
+            "pass": 0,
+            "total": 2,
+            "canonicalTotal": 2,
+            "partialScope": false,
+            "taskCount": 2,
+            "activeTimeSecs": 847.6322383591905,
+            "activeTimePerTask": 423.81611917959526,
+            "outputTokens": 46643,
+            "outputTokensPerTask": 23321.5,
+            "outputCostUsd": 0.699645,
+            "outputCostPerTask": 0.3498225
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-readerswriters-readerswriters-proof-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -5533,7 +6915,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-spanning": {
+        "tlaplus-examples--tlaplus-examples-spanning-spanning-proof-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -5550,7 +6932,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-tcp": {
+        "tlaplus-examples--tlaplus-examples-tcp-tcp-proof-tla": {
           "completion": {
             "rate": 16.7,
             "pass": 1,
@@ -5567,24 +6949,41 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-teachingconcurrency": {
+        "tlaplus-examples--tlaplus-examples-teachingconcurrency-simple-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
-            "total": 2,
-            "canonicalTotal": 2,
+            "total": 1,
+            "canonicalTotal": 1,
             "partialScope": false,
-            "taskCount": 2,
-            "activeTimeSecs": 570.2966694750357,
-            "activeTimePerTask": 285.14833473751787,
-            "outputTokens": 31173,
-            "outputTokensPerTask": 15586.5,
-            "outputCostUsd": 0.467595,
-            "outputCostPerTask": 0.2337975
+            "taskCount": 1,
+            "activeTimeSecs": 314.034803773975,
+            "activeTimePerTask": 314.034803773975,
+            "outputTokens": 17215,
+            "outputTokensPerTask": 17215,
+            "outputCostUsd": 0.258225,
+            "outputCostPerTask": 0.258225
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-tencentpaxos": {
+        "tlaplus-examples--tlaplus-examples-teachingconcurrency-simpleregular-tla": {
+          "completion": {
+            "rate": 0,
+            "pass": 0,
+            "total": 1,
+            "canonicalTotal": 1,
+            "partialScope": false,
+            "taskCount": 1,
+            "activeTimeSecs": 256.26186570106074,
+            "activeTimePerTask": 256.26186570106074,
+            "outputTokens": 13958,
+            "outputTokensPerTask": 13958,
+            "outputCostUsd": 0.20937,
+            "outputCostPerTask": 0.20937
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-tencentpaxos-tpaxoswithproof-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -5601,7 +7000,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-termination": {
+        "tlaplus-examples--tlaplus-examples-termination-termination-proof-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -5618,7 +7017,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-transaction-commit": {
+        "tlaplus-examples--tlaplus-examples-transaction-commit-paxoscommit-proof-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -5635,7 +7034,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaps-distribution-examples--allocator": {
+        "tlaps-distribution-examples--allocator-allocator-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -5652,7 +7051,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaps-distribution-examples--atomicbakery": {
+        "tlaps-distribution-examples--atomicbakery-atomicbakerywithoutsmt-tla": {
           "completion": {
             "rate": 20,
             "pass": 1,
@@ -5669,24 +7068,41 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaps-distribution-examples--consensus": {
+        "tlaps-distribution-examples--consensus-consensus-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
-            "total": 2,
-            "canonicalTotal": 2,
+            "total": 1,
+            "canonicalTotal": 1,
             "partialScope": false,
-            "taskCount": 2,
-            "activeTimeSecs": 507.4914732829202,
-            "activeTimePerTask": 253.7457366414601,
-            "outputTokens": 27624,
-            "outputTokensPerTask": 13812,
-            "outputCostUsd": 0.41436,
-            "outputCostPerTask": 0.20718
+            "taskCount": 1,
+            "activeTimeSecs": 30.516019897069782,
+            "activeTimePerTask": 30.516019897069782,
+            "outputTokens": 1495,
+            "outputTokensPerTask": 1495,
+            "outputCostUsd": 0.022425,
+            "outputCostPerTask": 0.022425
           },
           "scratch": null
         },
-        "tlaps-distribution-examples--data": {
+        "tlaps-distribution-examples--consensus-paxosproof-tla": {
+          "completion": {
+            "rate": 0,
+            "pass": 0,
+            "total": 1,
+            "canonicalTotal": 1,
+            "partialScope": false,
+            "taskCount": 1,
+            "activeTimeSecs": 476.9754533858504,
+            "activeTimePerTask": 476.9754533858504,
+            "outputTokens": 26129,
+            "outputTokensPerTask": 26129,
+            "outputCostUsd": 0.391935,
+            "outputCostPerTask": 0.391935
+          },
+          "scratch": null
+        },
+        "tlaps-distribution-examples--data-sets-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -5703,7 +7119,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaps-distribution-examples--euclid": {
+        "tlaps-distribution-examples--euclid-euclid-hyperbook-gcd-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -5720,24 +7136,41 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaps-distribution-examples--paxos": {
+        "tlaps-distribution-examples--paxos-paxos-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
-            "total": 6,
-            "canonicalTotal": 6,
+            "total": 4,
+            "canonicalTotal": 4,
             "partialScope": false,
-            "taskCount": 6,
-            "activeTimeSecs": 2435.5920986218844,
-            "activeTimePerTask": 405.93201643698075,
-            "outputTokens": 133650,
-            "outputTokensPerTask": 22275,
-            "outputCostUsd": 2.00475,
-            "outputCostPerTask": 0.334125
+            "taskCount": 4,
+            "activeTimeSecs": 1902.6821254929528,
+            "activeTimePerTask": 475.6705313732382,
+            "outputTokens": 104655,
+            "outputTokensPerTask": 26163.75,
+            "outputCostUsd": 1.569825,
+            "outputCostPerTask": 0.39245625
           },
           "scratch": null
         },
-        "tlaps-distribution-examples--simplemutex": {
+        "tlaps-distribution-examples--paxos-paxoshistvar-tla": {
+          "completion": {
+            "rate": 0,
+            "pass": 0,
+            "total": 2,
+            "canonicalTotal": 2,
+            "partialScope": false,
+            "taskCount": 2,
+            "activeTimeSecs": 532.9099731289316,
+            "activeTimePerTask": 266.4549865644658,
+            "outputTokens": 28995,
+            "outputTokensPerTask": 14497.5,
+            "outputCostUsd": 0.434925,
+            "outputCostPerTask": 0.2174625
+          },
+          "scratch": null
+        },
+        "tlaps-distribution-examples--simplemutex-simplemutex-tla": {
           "completion": {
             "rate": 100,
             "pass": 1,
@@ -5903,7 +7336,7 @@ window.TLAPS_DATA = {
       },
       "pricing": null,
       "perSpec": {
-        "apalache-examples-konnov--apalache-examples-ben-or83": {
+        "apalache-examples-konnov--apalache-examples-ben-or83-ben-or83-proofs-tla": {
           "completion": {
             "rate": 2.4,
             "pass": 1,
@@ -5920,7 +7353,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "apalache-examples-konnov--apalache-examples-tendermint": {
+        "apalache-examples-konnov--apalache-examples-tendermint-tendermint-single-indinv-proofs-tla": {
           "completion": {
             "rate": 6.7,
             "pass": 1,
@@ -5937,24 +7370,41 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-allocator": {
+        "tlaplus-examples--tlaplus-examples-allocator-allocatorimplementation-proof-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
-            "total": 3,
-            "canonicalTotal": 3,
+            "total": 1,
+            "canonicalTotal": 1,
             "partialScope": false,
-            "taskCount": 3,
-            "activeTimeSecs": 1624.2840994170401,
-            "activeTimePerTask": 541.4280331390133,
-            "outputTokens": 89475,
-            "outputTokensPerTask": 29825,
+            "taskCount": 1,
+            "activeTimeSecs": 550.9825541989412,
+            "activeTimePerTask": 550.9825541989412,
+            "outputTokens": 30278,
+            "outputTokensPerTask": 30278,
             "outputCostUsd": null,
             "outputCostPerTask": null
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-bakery-boulangerie": {
+        "tlaplus-examples--tlaplus-examples-allocator-schedulingallocator-proof-tla": {
+          "completion": {
+            "rate": 0,
+            "pass": 0,
+            "total": 2,
+            "canonicalTotal": 2,
+            "partialScope": false,
+            "taskCount": 2,
+            "activeTimeSecs": 1073.301545218099,
+            "activeTimePerTask": 536.6507726090495,
+            "outputTokens": 59197,
+            "outputTokensPerTask": 29598.5,
+            "outputCostUsd": null,
+            "outputCostPerTask": null
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-bakery-boulangerie-boulanger-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -5971,7 +7421,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-barriers": {
+        "tlaplus-examples--tlaplus-examples-barriers-barriers-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -5988,7 +7438,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-bcastbyz": {
+        "tlaplus-examples--tlaplus-examples-bcastbyz-bcastbyz-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -6005,7 +7455,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-blockingqueue": {
+        "tlaplus-examples--tlaplus-examples-blockingqueue-blockingqueuesplit-proofs-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -6022,24 +7472,58 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-byzpaxos": {
+        "tlaplus-examples--tlaplus-examples-byzpaxos-bpconproof-tla": {
           "completion": {
-            "rate": 8.3,
-            "pass": 1,
-            "total": 12,
-            "canonicalTotal": 12,
+            "rate": 0,
+            "pass": 0,
+            "total": 4,
+            "canonicalTotal": 4,
             "partialScope": false,
-            "taskCount": 12,
-            "activeTimeSecs": 7066.310084943892,
-            "activeTimePerTask": 588.8591737453244,
-            "outputTokens": 324257,
-            "outputTokensPerTask": 27021.416666666668,
+            "taskCount": 4,
+            "activeTimeSecs": 1887.2342949018348,
+            "activeTimePerTask": 471.8085737254587,
+            "outputTokens": 104146,
+            "outputTokensPerTask": 26036.5,
             "outputCostUsd": null,
             "outputCostPerTask": null
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-cigarettesmokers": {
+        "tlaplus-examples--tlaplus-examples-byzpaxos-pconproof-tla": {
+          "completion": {
+            "rate": 100,
+            "pass": 1,
+            "total": 1,
+            "canonicalTotal": 1,
+            "partialScope": false,
+            "taskCount": 1,
+            "activeTimeSecs": 60.446173103991896,
+            "activeTimePerTask": 60.446173103991896,
+            "outputTokens": 3202,
+            "outputTokensPerTask": 3202,
+            "outputCostUsd": null,
+            "outputCostPerTask": null
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-byzpaxos-voteproof-tla": {
+          "completion": {
+            "rate": 0,
+            "pass": 0,
+            "total": 7,
+            "canonicalTotal": 7,
+            "partialScope": false,
+            "taskCount": 7,
+            "activeTimeSecs": 5118.629616938066,
+            "activeTimePerTask": 731.2328024197237,
+            "outputTokens": 216909,
+            "outputTokensPerTask": 30987,
+            "outputCostUsd": null,
+            "outputCostPerTask": null
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-cigarettesmokers-cigarettesmokers-proof-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -6056,7 +7540,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-coffeecan": {
+        "tlaplus-examples--tlaplus-examples-coffeecan-coffeecan-proof-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -6073,7 +7557,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-ewd687a": {
+        "tlaplus-examples--tlaplus-examples-ewd687a-ewd687a-proof-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -6090,41 +7574,92 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-ewd840": {
+        "tlaplus-examples--tlaplus-examples-ewd840-ewd840-proof-tla": {
+          "completion": {
+            "rate": 0,
+            "pass": 0,
+            "total": 4,
+            "canonicalTotal": 4,
+            "partialScope": false,
+            "taskCount": 4,
+            "activeTimeSecs": 3646.2753454248887,
+            "activeTimePerTask": 911.5688363562222,
+            "outputTokens": 107668,
+            "outputTokensPerTask": 26917,
+            "outputCostUsd": null,
+            "outputCostPerTask": null
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-ewd840-syncterminationdetection-proof-tla": {
+          "completion": {
+            "rate": 50,
+            "pass": 1,
+            "total": 2,
+            "canonicalTotal": 2,
+            "partialScope": false,
+            "taskCount": 2,
+            "activeTimeSecs": 532.4887963579968,
+            "activeTimePerTask": 266.2443981789984,
+            "outputTokens": 29175,
+            "outputTokensPerTask": 14587.5,
+            "outputCostUsd": null,
+            "outputCostPerTask": null
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-ewd998-asyncterminationdetection-proof-tla": {
+          "completion": {
+            "rate": 0,
+            "pass": 0,
+            "total": 3,
+            "canonicalTotal": 3,
+            "partialScope": false,
+            "taskCount": 3,
+            "activeTimeSecs": 807.708737669047,
+            "activeTimePerTask": 269.2362458896823,
+            "outputTokens": 44303,
+            "outputTokensPerTask": 14767.666666666666,
+            "outputCostUsd": null,
+            "outputCostPerTask": null
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-ewd998-ewd998-proof-tla": {
           "completion": {
             "rate": 16.7,
-            "pass": 1,
-            "total": 6,
-            "canonicalTotal": 6,
-            "partialScope": false,
-            "taskCount": 6,
-            "activeTimeSecs": 4178.764141782885,
-            "activeTimePerTask": 696.4606902971476,
-            "outputTokens": 136843,
-            "outputTokensPerTask": 22807.166666666668,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
-          },
-          "scratch": null
-        },
-        "tlaplus-examples--tlaplus-examples-ewd998": {
-          "completion": {
-            "rate": 11.8,
             "pass": 2,
-            "total": 17,
-            "canonicalTotal": 17,
+            "total": 12,
+            "canonicalTotal": 12,
             "partialScope": false,
-            "taskCount": 17,
-            "activeTimeSecs": 10740.063195961062,
-            "activeTimePerTask": 631.7684232918272,
-            "outputTokens": 579907,
-            "outputTokensPerTask": 34112.17647058824,
+            "taskCount": 12,
+            "activeTimeSecs": 8627.369420265779,
+            "activeTimePerTask": 718.9474516888149,
+            "outputTokens": 463614,
+            "outputTokensPerTask": 38634.5,
             "outputCostUsd": null,
             "outputCostPerTask": null
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-finitemonotonic": {
+        "tlaplus-examples--tlaplus-examples-ewd998-ewd998pcal-proof-tla": {
+          "completion": {
+            "rate": 0,
+            "pass": 0,
+            "total": 2,
+            "canonicalTotal": 2,
+            "partialScope": false,
+            "taskCount": 2,
+            "activeTimeSecs": 1304.985038026236,
+            "activeTimePerTask": 652.492519013118,
+            "outputTokens": 71990,
+            "outputTokensPerTask": 35995,
+            "outputCostUsd": null,
+            "outputCostPerTask": null
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-finitemonotonic-crdt-proof-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -6141,24 +7676,41 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-glowingraccoon": {
+        "tlaplus-examples--tlaplus-examples-glowingraccoon-clean-proof-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
-            "total": 3,
-            "canonicalTotal": 3,
+            "total": 2,
+            "canonicalTotal": 2,
             "partialScope": false,
-            "taskCount": 3,
-            "activeTimeSecs": 501.9797605238855,
-            "activeTimePerTask": 167.32658684129515,
-            "outputTokens": 27231,
-            "outputTokensPerTask": 9077,
+            "taskCount": 2,
+            "activeTimeSecs": 263.3425183868967,
+            "activeTimePerTask": 131.67125919344835,
+            "outputTokens": 14158,
+            "outputTokensPerTask": 7079,
             "outputCostUsd": null,
             "outputCostPerTask": null
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-keyvaluestore": {
+        "tlaplus-examples--tlaplus-examples-glowingraccoon-stages-proof-tla": {
+          "completion": {
+            "rate": 0,
+            "pass": 0,
+            "total": 1,
+            "canonicalTotal": 1,
+            "partialScope": false,
+            "taskCount": 1,
+            "activeTimeSecs": 238.6372421369888,
+            "activeTimePerTask": 238.6372421369888,
+            "outputTokens": 13073,
+            "outputTokensPerTask": 13073,
+            "outputCostUsd": null,
+            "outputCostPerTask": null
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-keyvaluestore-keyvaluestore-proof-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -6175,7 +7727,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-lamport-mutex": {
+        "tlaplus-examples--tlaplus-examples-lamport-mutex-lamportmutex-proofs-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -6192,7 +7744,92 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-locks-auxiliary-vars": {
+        "tlaplus-examples--tlaplus-examples-locks-auxiliary-vars-lock-tla": {
+          "completion": {
+            "rate": 0,
+            "pass": 0,
+            "total": 1,
+            "canonicalTotal": 1,
+            "partialScope": false,
+            "taskCount": 1,
+            "activeTimeSecs": 159.6399895120412,
+            "activeTimePerTask": 159.6399895120412,
+            "outputTokens": 8548,
+            "outputTokensPerTask": 8548,
+            "outputCostUsd": null,
+            "outputCostPerTask": null
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-locks-auxiliary-vars-lockhs-tla": {
+          "completion": {
+            "rate": 0,
+            "pass": 0,
+            "total": 1,
+            "canonicalTotal": 1,
+            "partialScope": false,
+            "taskCount": 1,
+            "activeTimeSecs": 956.3701676740311,
+            "activeTimePerTask": 956.3701676740311,
+            "outputTokens": 52896,
+            "outputTokensPerTask": 52896,
+            "outputCostUsd": null,
+            "outputCostPerTask": null
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-locks-auxiliary-vars-peterson-tla": {
+          "completion": {
+            "rate": 0,
+            "pass": 0,
+            "total": 1,
+            "canonicalTotal": 1,
+            "partialScope": false,
+            "taskCount": 1,
+            "activeTimeSecs": 970.6553145158105,
+            "activeTimePerTask": 970.6553145158105,
+            "outputTokens": 53653,
+            "outputTokensPerTask": 53653,
+            "outputCostUsd": null,
+            "outputCostPerTask": null
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-loopinvariance-binarysearch-tla": {
+          "completion": {
+            "rate": 0,
+            "pass": 0,
+            "total": 1,
+            "canonicalTotal": 1,
+            "partialScope": false,
+            "taskCount": 1,
+            "activeTimeSecs": 108.28379911696538,
+            "activeTimePerTask": 108.28379911696538,
+            "outputTokens": 4958,
+            "outputTokensPerTask": 4958,
+            "outputCostUsd": null,
+            "outputCostPerTask": null
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-loopinvariance-quicksort-tla": {
+          "completion": {
+            "rate": 0,
+            "pass": 0,
+            "total": 1,
+            "canonicalTotal": 1,
+            "partialScope": false,
+            "taskCount": 1,
+            "activeTimeSecs": 108.31889232504182,
+            "activeTimePerTask": 108.31889232504182,
+            "outputTokens": 5341,
+            "outputTokensPerTask": 5341,
+            "outputCostUsd": null,
+            "outputCostPerTask": null
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-loopinvariance-sumsequence-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -6200,33 +7837,16 @@ window.TLAPS_DATA = {
             "canonicalTotal": 3,
             "partialScope": false,
             "taskCount": 3,
-            "activeTimeSecs": 2086.665471701883,
-            "activeTimePerTask": 695.5551572339609,
-            "outputTokens": 115097,
-            "outputTokensPerTask": 38365.666666666664,
+            "activeTimeSecs": 962.8455068666954,
+            "activeTimePerTask": 320.94850228889845,
+            "outputTokens": 50411,
+            "outputTokensPerTask": 16803.666666666668,
             "outputCostUsd": null,
             "outputCostPerTask": null
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-loopinvariance": {
-          "completion": {
-            "rate": 0,
-            "pass": 0,
-            "total": 5,
-            "canonicalTotal": 5,
-            "partialScope": false,
-            "taskCount": 5,
-            "activeTimeSecs": 1179.4481983087026,
-            "activeTimePerTask": 235.88963966174052,
-            "outputTokens": 60710,
-            "outputTokensPerTask": 12142,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
-          },
-          "scratch": null
-        },
-        "tlaplus-examples--tlaplus-examples-majority": {
+        "tlaplus-examples--tlaplus-examples-majority-majorityproof-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -6243,24 +7863,58 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-misrareachability": {
+        "tlaplus-examples--tlaplus-examples-misrareachability-parreachproofs-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
-            "total": 4,
-            "canonicalTotal": 4,
+            "total": 1,
+            "canonicalTotal": 1,
             "partialScope": false,
-            "taskCount": 4,
-            "activeTimeSecs": 2285.9091639439575,
-            "activeTimePerTask": 571.4772909859894,
-            "outputTokens": 125992,
-            "outputTokensPerTask": 31498,
+            "taskCount": 1,
+            "activeTimeSecs": 613.9752527009696,
+            "activeTimePerTask": 613.9752527009696,
+            "outputTokens": 33854,
+            "outputTokensPerTask": 33854,
             "outputCostUsd": null,
             "outputCostPerTask": null
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-missionariesandcannibals": {
+        "tlaplus-examples--tlaplus-examples-misrareachability-reachabilityproofs-tla": {
+          "completion": {
+            "rate": 0,
+            "pass": 0,
+            "total": 1,
+            "canonicalTotal": 1,
+            "partialScope": false,
+            "taskCount": 1,
+            "activeTimeSecs": 808.4884306229651,
+            "activeTimePerTask": 808.4884306229651,
+            "outputTokens": 44709,
+            "outputTokensPerTask": 44709,
+            "outputCostUsd": null,
+            "outputCostPerTask": null
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-misrareachability-reachableproofs-tla": {
+          "completion": {
+            "rate": 0,
+            "pass": 0,
+            "total": 2,
+            "canonicalTotal": 2,
+            "partialScope": false,
+            "taskCount": 2,
+            "activeTimeSecs": 863.4454806200229,
+            "activeTimePerTask": 431.72274031001143,
+            "outputTokens": 47429,
+            "outputTokensPerTask": 23714.5,
+            "outputCostUsd": null,
+            "outputCostPerTask": null
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-missionariesandcannibals-missionariesandcannibals-proof-tla": {
           "completion": {
             "rate": 100,
             "pass": 1,
@@ -6277,7 +7931,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-multicarelevator": {
+        "tlaplus-examples--tlaplus-examples-multicarelevator-elevator-proof-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -6294,7 +7948,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-paxos": {
+        "tlaplus-examples--tlaplus-examples-paxos-consensus-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -6311,24 +7965,41 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-paxoshowtowinaturingaward": {
+        "tlaplus-examples--tlaplus-examples-paxoshowtowinaturingaward-voting-proof-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
-            "total": 3,
-            "canonicalTotal": 3,
+            "total": 1,
+            "canonicalTotal": 1,
             "partialScope": false,
-            "taskCount": 3,
-            "activeTimeSecs": 1979.9219929378014,
-            "activeTimePerTask": 659.9739976459338,
-            "outputTokens": 109011,
-            "outputTokensPerTask": 36337,
+            "taskCount": 1,
+            "activeTimeSecs": 545.8452933698427,
+            "activeTimePerTask": 545.8452933698427,
+            "outputTokens": 30042,
+            "outputTokensPerTask": 30042,
             "outputCostUsd": null,
             "outputCostPerTask": null
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-readerswriters": {
+        "tlaplus-examples--tlaplus-examples-paxoshowtowinaturingaward-voting-tla": {
+          "completion": {
+            "rate": 0,
+            "pass": 0,
+            "total": 2,
+            "canonicalTotal": 2,
+            "partialScope": false,
+            "taskCount": 2,
+            "activeTimeSecs": 1434.0766995679587,
+            "activeTimePerTask": 717.0383497839794,
+            "outputTokens": 78969,
+            "outputTokensPerTask": 39484.5,
+            "outputCostUsd": null,
+            "outputCostPerTask": null
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-readerswriters-readerswriters-proof-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -6345,7 +8016,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-spanning": {
+        "tlaplus-examples--tlaplus-examples-spanning-spanning-proof-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -6362,7 +8033,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-tcp": {
+        "tlaplus-examples--tlaplus-examples-tcp-tcp-proof-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -6379,24 +8050,41 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-teachingconcurrency": {
+        "tlaplus-examples--tlaplus-examples-teachingconcurrency-simple-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
-            "total": 2,
-            "canonicalTotal": 2,
+            "total": 1,
+            "canonicalTotal": 1,
             "partialScope": false,
-            "taskCount": 2,
-            "activeTimeSecs": 1324.691247649258,
-            "activeTimePerTask": 662.345623824629,
-            "outputTokens": 73195,
-            "outputTokensPerTask": 36597.5,
+            "taskCount": 1,
+            "activeTimeSecs": 679.283341769129,
+            "activeTimePerTask": 679.283341769129,
+            "outputTokens": 37524,
+            "outputTokensPerTask": 37524,
             "outputCostUsd": null,
             "outputCostPerTask": null
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-tencentpaxos": {
+        "tlaplus-examples--tlaplus-examples-teachingconcurrency-simpleregular-tla": {
+          "completion": {
+            "rate": 0,
+            "pass": 0,
+            "total": 1,
+            "canonicalTotal": 1,
+            "partialScope": false,
+            "taskCount": 1,
+            "activeTimeSecs": 645.407905880129,
+            "activeTimePerTask": 645.407905880129,
+            "outputTokens": 35671,
+            "outputTokensPerTask": 35671,
+            "outputCostUsd": null,
+            "outputCostPerTask": null
+          },
+          "scratch": null
+        },
+        "tlaplus-examples--tlaplus-examples-tencentpaxos-tpaxoswithproof-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -6413,7 +8101,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-termination": {
+        "tlaplus-examples--tlaplus-examples-termination-termination-proof-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -6430,7 +8118,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaplus-examples--tlaplus-examples-transaction-commit": {
+        "tlaplus-examples--tlaplus-examples-transaction-commit-paxoscommit-proof-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -6447,7 +8135,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaps-distribution-examples--allocator": {
+        "tlaps-distribution-examples--allocator-allocator-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -6464,7 +8152,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaps-distribution-examples--atomicbakery": {
+        "tlaps-distribution-examples--atomicbakery-atomicbakerywithoutsmt-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -6481,24 +8169,41 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaps-distribution-examples--consensus": {
+        "tlaps-distribution-examples--consensus-consensus-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
-            "total": 2,
-            "canonicalTotal": 2,
+            "total": 1,
+            "canonicalTotal": 1,
             "partialScope": false,
-            "taskCount": 2,
-            "activeTimeSecs": 1029.5403947150335,
-            "activeTimePerTask": 514.7701973575167,
-            "outputTokens": 56789,
-            "outputTokensPerTask": 28394.5,
+            "taskCount": 1,
+            "activeTimeSecs": 239.6439489258919,
+            "activeTimePerTask": 239.6439489258919,
+            "outputTokens": 13146,
+            "outputTokensPerTask": 13146,
             "outputCostUsd": null,
             "outputCostPerTask": null
           },
           "scratch": null
         },
-        "tlaps-distribution-examples--data": {
+        "tlaps-distribution-examples--consensus-paxosproof-tla": {
+          "completion": {
+            "rate": 0,
+            "pass": 0,
+            "total": 1,
+            "canonicalTotal": 1,
+            "partialScope": false,
+            "taskCount": 1,
+            "activeTimeSecs": 789.8964457891416,
+            "activeTimePerTask": 789.8964457891416,
+            "outputTokens": 43643,
+            "outputTokensPerTask": 43643,
+            "outputCostUsd": null,
+            "outputCostPerTask": null
+          },
+          "scratch": null
+        },
+        "tlaps-distribution-examples--data-sets-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -6515,7 +8220,7 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaps-distribution-examples--euclid": {
+        "tlaps-distribution-examples--euclid-euclid-hyperbook-gcd-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
@@ -6532,24 +8237,41 @@ window.TLAPS_DATA = {
           },
           "scratch": null
         },
-        "tlaps-distribution-examples--paxos": {
+        "tlaps-distribution-examples--paxos-paxos-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,
-            "total": 6,
-            "canonicalTotal": 6,
+            "total": 4,
+            "canonicalTotal": 4,
             "partialScope": false,
-            "taskCount": 6,
-            "activeTimeSecs": 5156.206568332855,
-            "activeTimePerTask": 859.3677613888091,
-            "outputTokens": 261880,
-            "outputTokensPerTask": 43646.666666666664,
+            "taskCount": 4,
+            "activeTimeSecs": 2945.6341082938015,
+            "activeTimePerTask": 736.4085270734504,
+            "outputTokens": 162656,
+            "outputTokensPerTask": 40664,
             "outputCostUsd": null,
             "outputCostPerTask": null
           },
           "scratch": null
         },
-        "tlaps-distribution-examples--simplemutex": {
+        "tlaps-distribution-examples--paxos-paxoshistvar-tla": {
+          "completion": {
+            "rate": 0,
+            "pass": 0,
+            "total": 2,
+            "canonicalTotal": 2,
+            "partialScope": false,
+            "taskCount": 2,
+            "activeTimeSecs": 2210.572460039053,
+            "activeTimePerTask": 1105.2862300195266,
+            "outputTokens": 99224,
+            "outputTokensPerTask": 49612,
+            "outputCostUsd": null,
+            "outputCostPerTask": null
+          },
+          "scratch": null
+        },
+        "tlaps-distribution-examples--simplemutex-simplemutex-tla": {
           "completion": {
             "rate": 0,
             "pass": 0,

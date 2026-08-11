@@ -51,12 +51,35 @@ for (const r of results) {
   }
 }
 
+let previousSpecIds = new Map();
+try {
+  const previous = JSON.parse(readFileSync(OUT, "utf8"));
+  for (const t of previous.tasks ?? []) {
+    if (t.benchmark && t.spec_id) previousSpecIds.set(t.benchmark, t.spec_id);
+  }
+} catch {
+  previousSpecIds = new Map();
+}
+
 const tasks = [...results]
-  .map((r) => ({ benchmark: r.benchmark, theorem: r.theorem, source: r.source }))
+  .map((r) => {
+    const task = { benchmark: r.benchmark, theorem: r.theorem, source: r.source };
+    const specId = r.spec_id || previousSpecIds.get(r.benchmark);
+    if (specId) task.spec_id = specId;
+    return task;
+  })
   .sort((a, b) => a.benchmark.localeCompare(b.benchmark));
 const ids = new Set(tasks.map((t) => t.benchmark));
 if (ids.size !== tasks.length) {
   throw new Error(`${sourcePath}: duplicate benchmarks in Core bundle`);
+}
+const missingSpecIds = tasks.filter((t) => !t.spec_id).map((t) => t.benchmark);
+if (missingSpecIds.length) {
+  throw new Error(
+    `${OUT}: missing originating spec_id for ${missingSpecIds.length} task(s); ` +
+    `preserve them from the previous manifest or set results[].spec_id. ` +
+    `sample: ${missingSpecIds.slice(0, 5).join(", ")}`,
+  );
 }
 
 const sources = {};
@@ -73,5 +96,6 @@ const manifest = {
 };
 
 writeFileSync(OUT, JSON.stringify(manifest, null, 2) + "\n");
-console.log(`Wrote ${OUT}: ${tasks.length} tasks from ${sourcePath}` +
+const specCount = new Set(tasks.map((t) => t.spec_id)).size;
+console.log(`Wrote ${OUT}: ${tasks.length} tasks / ${specCount} originating modules from ${sourcePath}` +
   (meta?.backend ? ` (${meta.backend})` : ""));

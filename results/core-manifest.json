@@ -13,952 +13,1142 @@
     {
       "benchmark": "Allocator/Allocator_AllocateMutex.tla",
       "theorem": "Allocator_AllocateMutex",
-      "source": "TLAPS distribution examples"
+      "source": "TLAPS distribution examples",
+      "spec_id": "Allocator/Allocator.tla"
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Agreement.tla",
       "theorem": "Ben_or83_proofs_Agreement",
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "spec_id": "apalache_examples_ben-or83/Ben_or83_proofs.tla"
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Arith_OtherLtFromStrictOverlap.tla",
       "theorem": "Ben_or83_proofs_Arith_OtherLtFromStrictOverlap",
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "spec_id": "apalache_examples_ben-or83/Ben_or83_proofs.tla"
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_CardUnion3LeSum.tla",
       "theorem": "Ben_or83_proofs_CardUnion3LeSum",
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "spec_id": "apalache_examples_ben-or83/Ben_or83_proofs.tla"
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_CrossRoundStrictQuorum.tla",
       "theorem": "Ben_or83_proofs_CrossRoundStrictQuorum",
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "spec_id": "apalache_examples_ben-or83/Ben_or83_proofs.tla"
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_FaultyStepProps.tla",
       "theorem": "Ben_or83_proofs_FaultyStepProps",
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "spec_id": "apalache_examples_ben-or83/Ben_or83_proofs.tla"
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_HighWeightReceivedL11Witness.tla",
       "theorem": "Ben_or83_proofs_HighWeightReceivedL11Witness",
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "spec_id": "apalache_examples_ben-or83/Ben_or83_proofs.tla"
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_InitInd.tla",
       "theorem": "Ben_or83_proofs_InitInd",
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "spec_id": "apalache_examples_ben-or83/Ben_or83_proofs.tla"
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_LowWeightsReceivedL11Witness.tla",
       "theorem": "Ben_or83_proofs_LowWeightsReceivedL11Witness",
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "spec_id": "apalache_examples_ben-or83/Ben_or83_proofs.tla"
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_LowWeightsReceivedL8Witness.tla",
       "theorem": "Ben_or83_proofs_LowWeightsReceivedL8Witness",
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "spec_id": "apalache_examples_ben-or83/Ben_or83_proofs.tla"
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_MajorityIntersect.tla",
       "theorem": "Ben_or83_proofs_MajorityIntersect",
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "spec_id": "apalache_examples_ben-or83/Ben_or83_proofs.tla"
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Msgs1Shape.tla",
       "theorem": "Ben_or83_proofs_Msgs1Shape",
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "spec_id": "apalache_examples_ben-or83/Ben_or83_proofs.tla"
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Msgs2AddDRep.tla",
       "theorem": "Ben_or83_proofs_Msgs2AddDRep",
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "spec_id": "apalache_examples_ben-or83/Ben_or83_proofs.tla"
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Msgs2Decomp.tla",
       "theorem": "Ben_or83_proofs_Msgs2Decomp",
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "spec_id": "apalache_examples_ben-or83/Ben_or83_proofs.tla"
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Msgs2SenderPartitionBound.tla",
       "theorem": "Ben_or83_proofs_Msgs2SenderPartitionBound",
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "spec_id": "apalache_examples_ben-or83/Ben_or83_proofs.tla"
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Msgs2Step2Mono.tla",
       "theorem": "Ben_or83_proofs_Msgs2Step2Mono",
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "spec_id": "apalache_examples_ben-or83/Ben_or83_proofs.tla"
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_L1_S3_DecidedCarry.tla",
       "theorem": "Ben_or83_proofs_Pres_L1_S3_DecidedCarry",
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "spec_id": "apalache_examples_ben-or83/Ben_or83_proofs.tla"
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_L1_S3.tla",
       "theorem": "Ben_or83_proofs_Pres_L1_S3",
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "spec_id": "apalache_examples_ben-or83/Ben_or83_proofs.tla"
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_L10_S2.tla",
       "theorem": "Ben_or83_proofs_Pres_L10_S2",
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "spec_id": "apalache_examples_ben-or83/Ben_or83_proofs.tla"
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_L11_S3.tla",
       "theorem": "Ben_or83_proofs_Pres_L11_S3",
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "spec_id": "apalache_examples_ben-or83/Ben_or83_proofs.tla"
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_L12_S1.tla",
       "theorem": "Ben_or83_proofs_Pres_L12_S1",
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "spec_id": "apalache_examples_ben-or83/Ben_or83_proofs.tla"
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_L13_S3.tla",
       "theorem": "Ben_or83_proofs_Pres_L13_S3",
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "spec_id": "apalache_examples_ben-or83/Ben_or83_proofs.tla"
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_L2_S1.tla",
       "theorem": "Ben_or83_proofs_Pres_L2_S1",
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "spec_id": "apalache_examples_ben-or83/Ben_or83_proofs.tla"
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_L3_S2.tla",
       "theorem": "Ben_or83_proofs_Pres_L3_S2",
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "spec_id": "apalache_examples_ben-or83/Ben_or83_proofs.tla"
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_L4_S1.tla",
       "theorem": "Ben_or83_proofs_Pres_L4_S1",
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "spec_id": "apalache_examples_ben-or83/Ben_or83_proofs.tla"
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_L5_F.tla",
       "theorem": "Ben_or83_proofs_Pres_L5_F",
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "spec_id": "apalache_examples_ben-or83/Ben_or83_proofs.tla"
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_L6_F.tla",
       "theorem": "Ben_or83_proofs_Pres_L6_F",
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "spec_id": "apalache_examples_ben-or83/Ben_or83_proofs.tla"
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_L7_S1.tla",
       "theorem": "Ben_or83_proofs_Pres_L7_S1",
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "spec_id": "apalache_examples_ben-or83/Ben_or83_proofs.tla"
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_L8_S2.tla",
       "theorem": "Ben_or83_proofs_Pres_L8_S2",
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "spec_id": "apalache_examples_ben-or83/Ben_or83_proofs.tla"
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_L9_F.tla",
       "theorem": "Ben_or83_proofs_Pres_L9_F",
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "spec_id": "apalache_examples_ben-or83/Ben_or83_proofs.tla"
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_Lemma12.tla",
       "theorem": "Ben_or83_proofs_Pres_Lemma12",
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "spec_id": "apalache_examples_ben-or83/Ben_or83_proofs.tla"
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_Lemma2.tla",
       "theorem": "Ben_or83_proofs_Pres_Lemma2",
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "spec_id": "apalache_examples_ben-or83/Ben_or83_proofs.tla"
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_Lemma3.tla",
       "theorem": "Ben_or83_proofs_Pres_Lemma3",
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "spec_id": "apalache_examples_ben-or83/Ben_or83_proofs.tla"
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_QuorumIntersect.tla",
       "theorem": "Ben_or83_proofs_QuorumIntersect",
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "spec_id": "apalache_examples_ben-or83/Ben_or83_proofs.tla"
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_QuorumUnique.tla",
       "theorem": "Ben_or83_proofs_QuorumUnique",
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "spec_id": "apalache_examples_ben-or83/Ben_or83_proofs.tla"
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Senders2_CardLeSet.tla",
       "theorem": "Ben_or83_proofs_Senders2_CardLeSet",
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "spec_id": "apalache_examples_ben-or83/Ben_or83_proofs.tla"
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_StrictQuorumCarriesToQuorumRound.tla",
       "theorem": "Ben_or83_proofs_StrictQuorumCarriesToQuorumRound",
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "spec_id": "apalache_examples_ben-or83/Ben_or83_proofs.tla"
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_StrictQuorumNextCorrectType2.tla",
       "theorem": "Ben_or83_proofs_StrictQuorumNextCorrectType2",
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "spec_id": "apalache_examples_ben-or83/Ben_or83_proofs.tla"
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_StrictQuorumNextReceiveStrictD.tla",
       "theorem": "Ben_or83_proofs_StrictQuorumNextReceiveStrictD",
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "spec_id": "apalache_examples_ben-or83/Ben_or83_proofs.tla"
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_SupportedSingletonPinsNextM1.tla",
       "theorem": "Ben_or83_proofs_SupportedSingletonPinsNextM1",
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "spec_id": "apalache_examples_ben-or83/Ben_or83_proofs.tla"
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_SupportedUnique.tla",
       "theorem": "Ben_or83_proofs_SupportedUnique",
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "spec_id": "apalache_examples_ben-or83/Ben_or83_proofs.tla"
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_TypePres.tla",
       "theorem": "Ben_or83_proofs_TypePres",
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "spec_id": "apalache_examples_ben-or83/Ben_or83_proofs.tla"
     },
     {
       "benchmark": "apalache_examples_tendermint/tendermint_single_indinv_proofs_BoundedMaxExists.tla",
       "theorem": "tendermint_single_indinv_proofs_BoundedMaxExists",
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "spec_id": "apalache_examples_tendermint/tendermint_single_indinv_proofs.tla"
     },
     {
       "benchmark": "apalache_examples_tendermint/tendermint_single_indinv_proofs_OnRoundCatchupGivesSender.tla",
       "theorem": "tendermint_single_indinv_proofs_OnRoundCatchupGivesSender",
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "spec_id": "apalache_examples_tendermint/tendermint_single_indinv_proofs.tla"
     },
     {
       "benchmark": "apalache_examples_tendermint/tendermint_single_indinv_proofs_PastStartRoundQuorumMonotone.tla",
       "theorem": "tendermint_single_indinv_proofs_PastStartRoundQuorumMonotone",
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "spec_id": "apalache_examples_tendermint/tendermint_single_indinv_proofs.tla"
     },
     {
       "benchmark": "apalache_examples_tendermint/tendermint_single_indinv_proofs_PrecommitByCorrectGivesPrevoteQuorum.tla",
       "theorem": "tendermint_single_indinv_proofs_PrecommitByCorrectGivesPrevoteQuorum",
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "spec_id": "apalache_examples_tendermint/tendermint_single_indinv_proofs.tla"
     },
     {
       "benchmark": "apalache_examples_tendermint/tendermint_single_indinv_proofs_PrecommitLockContra.tla",
       "theorem": "tendermint_single_indinv_proofs_PrecommitLockContra",
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "spec_id": "apalache_examples_tendermint/tendermint_single_indinv_proofs.tla"
     },
     {
       "benchmark": "apalache_examples_tendermint/tendermint_single_indinv_proofs_PrecommitsLockValueOp.tla",
       "theorem": "tendermint_single_indinv_proofs_PrecommitsLockValueOp",
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "spec_id": "apalache_examples_tendermint/tendermint_single_indinv_proofs.tla"
     },
     {
       "benchmark": "apalache_examples_tendermint/tendermint_single_indinv_proofs_Pres_Bounded_UponProposalInPrevoteOrCommitAndPrevote.tla",
       "theorem": "tendermint_single_indinv_proofs_Pres_Bounded_UponProposalInPrevoteOrCommitAndPrevote",
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "spec_id": "apalache_examples_tendermint/tendermint_single_indinv_proofs.tla"
     },
     {
       "benchmark": "apalache_examples_tendermint/tendermint_single_indinv_proofs_Pres_Bounded_UponQuorumOfPrecommitsAny.tla",
       "theorem": "tendermint_single_indinv_proofs_Pres_Bounded_UponQuorumOfPrecommitsAny",
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "spec_id": "apalache_examples_tendermint/tendermint_single_indinv_proofs.tla"
     },
     {
       "benchmark": "apalache_examples_tendermint/tendermint_single_indinv_proofs_Pres_PrecommitLocksLaterPrevotes.tla",
       "theorem": "tendermint_single_indinv_proofs_Pres_PrecommitLocksLaterPrevotes",
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "spec_id": "apalache_examples_tendermint/tendermint_single_indinv_proofs.tla"
     },
     {
       "benchmark": "apalache_examples_tendermint/tendermint_single_indinv_proofs_ProposeRecTyped.tla",
       "theorem": "tendermint_single_indinv_proofs_ProposeRecTyped",
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "spec_id": "apalache_examples_tendermint/tendermint_single_indinv_proofs.tla"
     },
     {
       "benchmark": "apalache_examples_tendermint/tendermint_single_indinv_proofs_PVSetPFlipCard.tla",
       "theorem": "tendermint_single_indinv_proofs_PVSetPFlipCard",
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "spec_id": "apalache_examples_tendermint/tendermint_single_indinv_proofs.tla"
     },
     {
       "benchmark": "apalache_examples_tendermint/tendermint_single_indinv_proofs_PVSetQuorumMonotone.tla",
       "theorem": "tendermint_single_indinv_proofs_PVSetQuorumMonotone",
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "spec_id": "apalache_examples_tendermint/tendermint_single_indinv_proofs.tla"
     },
     {
       "benchmark": "apalache_examples_tendermint/tendermint_single_indinv_proofs_Q3UnionMonotone.tla",
       "theorem": "tendermint_single_indinv_proofs_Q3UnionMonotone",
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "spec_id": "apalache_examples_tendermint/tendermint_single_indinv_proofs.tla"
     },
     {
       "benchmark": "apalache_examples_tendermint/tendermint_single_indinv_proofs_QuorumsIntersectInCorrect.tla",
       "theorem": "tendermint_single_indinv_proofs_QuorumsIntersectInCorrect",
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "spec_id": "apalache_examples_tendermint/tendermint_single_indinv_proofs.tla"
     },
     {
       "benchmark": "apalache_examples_tendermint/tendermint_single_indinv_proofs_StepChangeChar.tla",
       "theorem": "tendermint_single_indinv_proofs_StepChangeChar",
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "spec_id": "apalache_examples_tendermint/tendermint_single_indinv_proofs.tla"
     },
     {
       "benchmark": "AtomicBakery/AtomicBakeryWithoutSMT_GGIrreflexive.tla",
       "theorem": "AtomicBakeryWithoutSMT_GGIrreflexive",
-      "source": "TLAPS distribution examples"
+      "source": "TLAPS distribution examples",
+      "spec_id": "AtomicBakery/AtomicBakeryWithoutSMT.tla"
     },
     {
       "benchmark": "AtomicBakery/AtomicBakeryWithoutSMT_InductiveInvariant.tla",
       "theorem": "AtomicBakeryWithoutSMT_InductiveInvariant",
-      "source": "TLAPS distribution examples"
+      "source": "TLAPS distribution examples",
+      "spec_id": "AtomicBakery/AtomicBakeryWithoutSMT.tla"
     },
     {
       "benchmark": "AtomicBakery/AtomicBakeryWithoutSMT_InitImpliesTypeOK.tla",
       "theorem": "AtomicBakeryWithoutSMT_InitImpliesTypeOK",
-      "source": "TLAPS distribution examples"
+      "source": "TLAPS distribution examples",
+      "spec_id": "AtomicBakery/AtomicBakeryWithoutSMT.tla"
     },
     {
       "benchmark": "AtomicBakery/AtomicBakeryWithoutSMT_Safety.tla",
       "theorem": "AtomicBakeryWithoutSMT_Safety",
-      "source": "TLAPS distribution examples"
+      "source": "TLAPS distribution examples",
+      "spec_id": "AtomicBakery/AtomicBakeryWithoutSMT.tla"
     },
     {
       "benchmark": "AtomicBakery/AtomicBakeryWithoutSMT_TypeOKInvariant.tla",
       "theorem": "AtomicBakeryWithoutSMT_TypeOKInvariant",
-      "source": "TLAPS distribution examples"
+      "source": "TLAPS distribution examples",
+      "spec_id": "AtomicBakery/AtomicBakeryWithoutSMT.tla"
     },
     {
       "benchmark": "Consensus/Consensus_Invariance.tla",
       "theorem": "Consensus_Invariance",
-      "source": "TLAPS distribution examples"
+      "source": "TLAPS distribution examples",
+      "spec_id": "Consensus/Consensus.tla"
     },
     {
       "benchmark": "Consensus/PaxosProof_struct_lemma.tla",
       "theorem": "PaxosProof_struct_lemma",
-      "source": "TLAPS distribution examples"
+      "source": "TLAPS distribution examples",
+      "spec_id": "Consensus/PaxosProof.tla"
     },
     {
       "benchmark": "Data/Sets_CardinalitySetMinus.tla",
       "theorem": "Sets_CardinalitySetMinus",
-      "source": "TLAPS distribution examples"
+      "source": "TLAPS distribution examples",
+      "spec_id": "Data/Sets.tla"
     },
     {
       "benchmark": "Data/Sets_FiniteSubset.tla",
       "theorem": "Sets_FiniteSubset",
-      "source": "TLAPS distribution examples"
+      "source": "TLAPS distribution examples",
+      "spec_id": "Data/Sets.tla"
     },
     {
       "benchmark": "Data/Sets_IntervalCardinality.tla",
       "theorem": "Sets_IntervalCardinality",
-      "source": "TLAPS distribution examples"
+      "source": "TLAPS distribution examples",
+      "spec_id": "Data/Sets.tla"
     },
     {
       "benchmark": "Data/Sets_PigeonHole.tla",
       "theorem": "Sets_PigeonHole",
-      "source": "TLAPS distribution examples"
+      "source": "TLAPS distribution examples",
+      "spec_id": "Data/Sets.tla"
     },
     {
       "benchmark": "Euclid/GCD_GCD1.tla",
       "theorem": "GCD_GCD1",
-      "source": "TLAPS distribution examples"
+      "source": "TLAPS distribution examples",
+      "spec_id": "Euclid/Euclid-Hyperbook/GCD.tla"
     },
     {
       "benchmark": "Euclid/GCD_GCD3.tla",
       "theorem": "GCD_GCD3",
-      "source": "TLAPS distribution examples"
+      "source": "TLAPS distribution examples",
+      "spec_id": "Euclid/Euclid-Hyperbook/GCD.tla"
     },
     {
       "benchmark": "Paxos/Paxos_Consistent.tla",
       "theorem": "Paxos_Consistent",
-      "source": "TLAPS distribution examples"
+      "source": "TLAPS distribution examples",
+      "spec_id": "Paxos/Paxos.tla"
     },
     {
       "benchmark": "Paxos/Paxos_Invariant.tla",
       "theorem": "Paxos_Invariant",
-      "source": "TLAPS distribution examples"
+      "source": "TLAPS distribution examples",
+      "spec_id": "Paxos/Paxos.tla"
     },
     {
       "benchmark": "Paxos/Paxos_Refinement.tla",
       "theorem": "Paxos_Refinement",
-      "source": "TLAPS distribution examples"
+      "source": "TLAPS distribution examples",
+      "spec_id": "Paxos/Paxos.tla"
     },
     {
       "benchmark": "Paxos/Paxos_SafeAtStable.tla",
       "theorem": "Paxos_SafeAtStable",
-      "source": "TLAPS distribution examples"
+      "source": "TLAPS distribution examples",
+      "spec_id": "Paxos/Paxos.tla"
     },
     {
       "benchmark": "Paxos/PaxosHistVar_Consistent.tla",
       "theorem": "PaxosHistVar_Consistent",
-      "source": "TLAPS distribution examples"
+      "source": "TLAPS distribution examples",
+      "spec_id": "Paxos/PaxosHistVar.tla"
     },
     {
       "benchmark": "Paxos/PaxosHistVar_Invariant.tla",
       "theorem": "PaxosHistVar_Invariant",
-      "source": "TLAPS distribution examples"
+      "source": "TLAPS distribution examples",
+      "spec_id": "Paxos/PaxosHistVar.tla"
     },
     {
       "benchmark": "SimpleMutex/SimpleMutex_Invariance.tla",
       "theorem": "SimpleMutex_Invariance",
-      "source": "TLAPS distribution examples"
+      "source": "TLAPS distribution examples",
+      "spec_id": "SimpleMutex/SimpleMutex.tla"
     },
     {
       "benchmark": "tlaplus_examples_allocator/AllocatorImplementation_proof_TypeCorrect.tla",
       "theorem": "AllocatorImplementation_proof_TypeCorrect",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_allocator/AllocatorImplementation_proof.tla"
     },
     {
       "benchmark": "tlaplus_examples_allocator/SchedulingAllocator_proof_Mutex.tla",
       "theorem": "SchedulingAllocator_proof_Mutex",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_allocator/SchedulingAllocator_proof.tla"
     },
     {
       "benchmark": "tlaplus_examples_allocator/SchedulingAllocator_proof_PermSeqsType.tla",
       "theorem": "SchedulingAllocator_proof_PermSeqsType",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_allocator/SchedulingAllocator_proof.tla"
     },
     {
       "benchmark": "tlaplus_examples_Bakery-Boulangerie/Boulanger_TypeCorrect.tla",
       "theorem": "Boulanger_TypeCorrect",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_Bakery-Boulangerie/Boulanger.tla"
     },
     {
       "benchmark": "tlaplus_examples_barriers/Barriers_FlushInvariant.tla",
       "theorem": "Barriers_FlushInvariant",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_barriers/Barriers.tla"
     },
     {
       "benchmark": "tlaplus_examples_barriers/Barriers_Invariant.tla",
       "theorem": "Barriers_Invariant",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_barriers/Barriers.tla"
     },
     {
       "benchmark": "tlaplus_examples_bcastByz/bcastByz_FCConstraints_TypeOK_InitNoBcast.tla",
       "theorem": "bcastByz_FCConstraints_TypeOK_InitNoBcast",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_bcastByz/bcastByz.tla"
     },
     {
       "benchmark": "tlaplus_examples_bcastByz/bcastByz_FCConstraints_TypeOK_Next.tla",
       "theorem": "bcastByz_FCConstraints_TypeOK_Next",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_bcastByz/bcastByz.tla"
     },
     {
       "benchmark": "tlaplus_examples_bcastByz/bcastByz_Unforg_Step2.tla",
       "theorem": "bcastByz_Unforg_Step2",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_bcastByz/bcastByz.tla"
     },
     {
       "benchmark": "tlaplus_examples_BlockingQueue/BlockingQueueSplit_proofs_DeadlockFreedom.tla",
       "theorem": "BlockingQueueSplit_proofs_DeadlockFreedom",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_BlockingQueue/BlockingQueueSplit_proofs.tla"
     },
     {
       "benchmark": "tlaplus_examples_BlockingQueue/BlockingQueueSplit_proofs_Implements.tla",
       "theorem": "BlockingQueueSplit_proofs_Implements",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_BlockingQueue/BlockingQueueSplit_proofs.tla"
     },
     {
       "benchmark": "tlaplus_examples_byzpaxos/BPConProof_Invariance.tla",
       "theorem": "BPConProof_Invariance",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_byzpaxos/BPConProof.tla"
     },
     {
       "benchmark": "tlaplus_examples_byzpaxos/BPConProof_MaxBallotLemma2.tla",
       "theorem": "BPConProof_MaxBallotLemma2",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_byzpaxos/BPConProof.tla"
     },
     {
       "benchmark": "tlaplus_examples_byzpaxos/BPConProof_MsgsLemma.tla",
       "theorem": "BPConProof_MsgsLemma",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_byzpaxos/BPConProof.tla"
     },
     {
       "benchmark": "tlaplus_examples_byzpaxos/BPConProof_PNextDef.tla",
       "theorem": "BPConProof_PNextDef",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_byzpaxos/BPConProof.tla"
     },
     {
       "benchmark": "tlaplus_examples_byzpaxos/PConProof_NextDef.tla",
       "theorem": "PConProof_NextDef",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_byzpaxos/PConProof.tla"
     },
     {
       "benchmark": "tlaplus_examples_byzpaxos/VoteProof_InductiveInvariance.tla",
       "theorem": "VoteProof_InductiveInvariance",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_byzpaxos/VoteProof.tla"
     },
     {
       "benchmark": "tlaplus_examples_byzpaxos/VoteProof_Liveness.tla",
       "theorem": "VoteProof_Liveness",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_byzpaxos/VoteProof.tla"
     },
     {
       "benchmark": "tlaplus_examples_byzpaxos/VoteProof_SafeAtProp.tla",
       "theorem": "VoteProof_SafeAtProp",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_byzpaxos/VoteProof.tla"
     },
     {
       "benchmark": "tlaplus_examples_byzpaxos/VoteProof_SafeLemma.tla",
       "theorem": "VoteProof_SafeLemma",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_byzpaxos/VoteProof.tla"
     },
     {
       "benchmark": "tlaplus_examples_byzpaxos/VoteProof_VT1Prime.tla",
       "theorem": "VoteProof_VT1Prime",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_byzpaxos/VoteProof.tla"
     },
     {
       "benchmark": "tlaplus_examples_byzpaxos/VoteProof_VT3.tla",
       "theorem": "VoteProof_VT3",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_byzpaxos/VoteProof.tla"
     },
     {
       "benchmark": "tlaplus_examples_byzpaxos/VoteProof_VT4.tla",
       "theorem": "VoteProof_VT4",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_byzpaxos/VoteProof.tla"
     },
     {
       "benchmark": "tlaplus_examples_CigaretteSmokers/CigaretteSmokers_proof_UniqueComplement2.tla",
       "theorem": "CigaretteSmokers_proof_UniqueComplement2",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_CigaretteSmokers/CigaretteSmokers_proof.tla"
     },
     {
       "benchmark": "tlaplus_examples_CoffeeCan/CoffeeCan_proof_TypeCorrect.tla",
       "theorem": "CoffeeCan_proof_TypeCorrect",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_CoffeeCan/CoffeeCan_proof.tla"
     },
     {
       "benchmark": "tlaplus_examples_ewd687a/EWD687a_proof_Invariant1.tla",
       "theorem": "EWD687a_proof_Invariant1",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_ewd687a/EWD687a_proof.tla"
     },
     {
       "benchmark": "tlaplus_examples_ewd687a/EWD687a_proof_Safety.tla",
       "theorem": "EWD687a_proof_Safety",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_ewd687a/EWD687a_proof.tla"
     },
     {
       "benchmark": "tlaplus_examples_ewd687a/EWD687a_proof_TreeInvariant.tla",
       "theorem": "EWD687a_proof_TreeInvariant",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_ewd687a/EWD687a_proof.tla"
     },
     {
       "benchmark": "tlaplus_examples_ewd840/EWD840_proof_EnabledSystem.tla",
       "theorem": "EWD840_proof_EnabledSystem",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_ewd840/EWD840_proof.tla"
     },
     {
       "benchmark": "tlaplus_examples_ewd840/EWD840_proof_Round1.tla",
       "theorem": "EWD840_proof_Round1",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_ewd840/EWD840_proof.tla"
     },
     {
       "benchmark": "tlaplus_examples_ewd840/EWD840_proof_Round2.tla",
       "theorem": "EWD840_proof_Round2",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_ewd840/EWD840_proof.tla"
     },
     {
       "benchmark": "tlaplus_examples_ewd840/EWD840_proof_Round3.tla",
       "theorem": "EWD840_proof_Round3",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_ewd840/EWD840_proof.tla"
     },
     {
       "benchmark": "tlaplus_examples_ewd840/SyncTerminationDetection_proof_CorrectDetection.tla",
       "theorem": "SyncTerminationDetection_proof_CorrectDetection",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_ewd840/SyncTerminationDetection_proof.tla"
     },
     {
       "benchmark": "tlaplus_examples_ewd840/SyncTerminationDetection_proof_Live.tla",
       "theorem": "SyncTerminationDetection_proof_Live",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_ewd840/SyncTerminationDetection_proof.tla"
     },
     {
       "benchmark": "tlaplus_examples_ewd998/AsyncTerminationDetection_proof_Liveness.tla",
       "theorem": "AsyncTerminationDetection_proof_Liveness",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_ewd998/AsyncTerminationDetection_proof.tla"
     },
     {
       "benchmark": "tlaplus_examples_ewd998/AsyncTerminationDetection_proof_Safety.tla",
       "theorem": "AsyncTerminationDetection_proof_Safety",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_ewd998/AsyncTerminationDetection_proof.tla"
     },
     {
       "benchmark": "tlaplus_examples_ewd998/AsyncTerminationDetection_proof_TypeCorrect.tla",
       "theorem": "AsyncTerminationDetection_proof_TypeCorrect",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_ewd998/AsyncTerminationDetection_proof.tla"
     },
     {
       "benchmark": "tlaplus_examples_ewd998/EWD998_proof_B0NoMessagePending.tla",
       "theorem": "EWD998_proof_B0NoMessagePending",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_ewd998/EWD998_proof.tla"
     },
     {
       "benchmark": "tlaplus_examples_ewd998/EWD998_proof_Detection.tla",
       "theorem": "EWD998_proof_Detection",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_ewd998/EWD998_proof.tla"
     },
     {
       "benchmark": "tlaplus_examples_ewd998/EWD998_proof_EnabledAtMaster.tla",
       "theorem": "EWD998_proof_EnabledAtMaster",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_ewd998/EWD998_proof.tla"
     },
     {
       "benchmark": "tlaplus_examples_ewd998/EWD998_proof_EnabledSystem.tla",
       "theorem": "EWD998_proof_EnabledSystem",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_ewd998/EWD998_proof.tla"
     },
     {
       "benchmark": "tlaplus_examples_ewd998/EWD998_proof_Invariance.tla",
       "theorem": "EWD998_proof_Invariance",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_ewd998/EWD998_proof.tla"
     },
     {
       "benchmark": "tlaplus_examples_ewd998/EWD998_proof_Refinement.tla",
       "theorem": "EWD998_proof_Refinement",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_ewd998/EWD998_proof.tla"
     },
     {
       "benchmark": "tlaplus_examples_ewd998/EWD998_proof_Round1.tla",
       "theorem": "EWD998_proof_Round1",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_ewd998/EWD998_proof.tla"
     },
     {
       "benchmark": "tlaplus_examples_ewd998/EWD998_proof_Round2.tla",
       "theorem": "EWD998_proof_Round2",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_ewd998/EWD998_proof.tla"
     },
     {
       "benchmark": "tlaplus_examples_ewd998/EWD998_proof_Round3.tla",
       "theorem": "EWD998_proof_Round3",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_ewd998/EWD998_proof.tla"
     },
     {
       "benchmark": "tlaplus_examples_ewd998/EWD998_proof_Safety.tla",
       "theorem": "EWD998_proof_Safety",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_ewd998/EWD998_proof.tla"
     },
     {
       "benchmark": "tlaplus_examples_ewd998/EWD998_proof_SumZero.tla",
       "theorem": "EWD998_proof_SumZero",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_ewd998/EWD998_proof.tla"
     },
     {
       "benchmark": "tlaplus_examples_ewd998/EWD998_proof_TerminationDetectionInv.tla",
       "theorem": "EWD998_proof_TerminationDetectionInv",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_ewd998/EWD998_proof.tla"
     },
     {
       "benchmark": "tlaplus_examples_ewd998/EWD998PCal_proof_InitNetworkOK.tla",
       "theorem": "EWD998PCal_proof_InitNetworkOK",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_ewd998/EWD998PCal_proof.tla"
     },
     {
       "benchmark": "tlaplus_examples_ewd998/EWD998PCal_proof_TypeOK_Step.tla",
       "theorem": "EWD998PCal_proof_TypeOK_Step",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_ewd998/EWD998PCal_proof.tla"
     },
     {
       "benchmark": "tlaplus_examples_FiniteMonotonic/CRDT_proof_EnabledGossip.tla",
       "theorem": "CRDT_proof_EnabledGossip",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_FiniteMonotonic/CRDT_proof.tla"
     },
     {
       "benchmark": "tlaplus_examples_FiniteMonotonic/CRDT_proof_GossipDecreasesMeasure.tla",
       "theorem": "CRDT_proof_GossipDecreasesMeasure",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_FiniteMonotonic/CRDT_proof.tla"
     },
     {
       "benchmark": "tlaplus_examples_FiniteMonotonic/CRDT_proof_GossipDoesntIncreaseMeasure.tla",
       "theorem": "CRDT_proof_GossipDoesntIncreaseMeasure",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_FiniteMonotonic/CRDT_proof.tla"
     },
     {
       "benchmark": "tlaplus_examples_FiniteMonotonic/CRDT_proof_MeasureIsZero.tla",
       "theorem": "CRDT_proof_MeasureIsZero",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_FiniteMonotonic/CRDT_proof.tla"
     },
     {
       "benchmark": "tlaplus_examples_FiniteMonotonic/CRDT_proof_MeasureType.tla",
       "theorem": "CRDT_proof_MeasureType",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_FiniteMonotonic/CRDT_proof.tla"
     },
     {
       "benchmark": "tlaplus_examples_FiniteMonotonic/CRDT_proof_OGLiveness.tla",
       "theorem": "CRDT_proof_OGLiveness",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_FiniteMonotonic/CRDT_proof.tla"
     },
     {
       "benchmark": "tlaplus_examples_FiniteMonotonic/CRDT_proof_Safe.tla",
       "theorem": "CRDT_proof_Safe",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_FiniteMonotonic/CRDT_proof.tla"
     },
     {
       "benchmark": "tlaplus_examples_FiniteMonotonic/CRDT_proof_SumStronglyMonotonic.tla",
       "theorem": "CRDT_proof_SumStronglyMonotonic",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_FiniteMonotonic/CRDT_proof.tla"
     },
     {
       "benchmark": "tlaplus_examples_FiniteMonotonic/CRDT_proof_SumType.tla",
       "theorem": "CRDT_proof_SumType",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_FiniteMonotonic/CRDT_proof.tla"
     },
     {
       "benchmark": "tlaplus_examples_FiniteMonotonic/CRDT_proof_SumWeaklyMonotonic.tla",
       "theorem": "CRDT_proof_SumWeaklyMonotonic",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_FiniteMonotonic/CRDT_proof.tla"
     },
     {
       "benchmark": "tlaplus_examples_glowingRaccoon/clean_proof_Preservation.tla",
       "theorem": "clean_proof_Preservation",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_glowingRaccoon/clean_proof.tla"
     },
     {
       "benchmark": "tlaplus_examples_glowingRaccoon/clean_proof_TypeCorrect.tla",
       "theorem": "clean_proof_TypeCorrect",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_glowingRaccoon/clean_proof.tla"
     },
     {
       "benchmark": "tlaplus_examples_glowingRaccoon/stages_proof_TypeCorrect.tla",
       "theorem": "stages_proof_TypeCorrect",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_glowingRaccoon/stages_proof.tla"
     },
     {
       "benchmark": "tlaplus_examples_KeyValueStore/KeyValueStore_proof_TypeAndLifecycle.tla",
       "theorem": "KeyValueStore_proof_TypeAndLifecycle",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_KeyValueStore/KeyValueStore_proof.tla"
     },
     {
       "benchmark": "tlaplus_examples_lamport_mutex/LamportMutex_proofs_BasicInvariant.tla",
       "theorem": "LamportMutex_proofs_BasicInvariant",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_lamport_mutex/LamportMutex_proofs.tla"
     },
     {
       "benchmark": "tlaplus_examples_lamport_mutex/LamportMutex_proofs_ClockInvariant.tla",
       "theorem": "LamportMutex_proofs_ClockInvariant",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_lamport_mutex/LamportMutex_proofs.tla"
     },
     {
       "benchmark": "tlaplus_examples_lamport_mutex/LamportMutex_proofs_TypeCorrect.tla",
       "theorem": "LamportMutex_proofs_TypeCorrect",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_lamport_mutex/LamportMutex_proofs.tla"
     },
     {
       "benchmark": "tlaplus_examples_locks_auxiliary_vars/Lock_MutualExclusion.tla",
       "theorem": "Lock_MutualExclusion",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_locks_auxiliary_vars/Lock.tla"
     },
     {
       "benchmark": "tlaplus_examples_locks_auxiliary_vars/LockHS_IndInvHS.tla",
       "theorem": "LockHS_IndInvHS",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_locks_auxiliary_vars/LockHS.tla"
     },
     {
       "benchmark": "tlaplus_examples_locks_auxiliary_vars/Peterson_Refinement.tla",
       "theorem": "Peterson_Refinement",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_locks_auxiliary_vars/Peterson.tla"
     },
     {
       "benchmark": "tlaplus_examples_LoopInvariance/BinarySearch_SortedLess.tla",
       "theorem": "BinarySearch_SortedLess",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_LoopInvariance/BinarySearch.tla"
     },
     {
       "benchmark": "tlaplus_examples_LoopInvariance/Quicksort_NonemptyMin.tla",
       "theorem": "Quicksort_NonemptyMin",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_LoopInvariance/Quicksort.tla"
     },
     {
       "benchmark": "tlaplus_examples_LoopInvariance/SumSequence_Lemma2.tla",
       "theorem": "SumSequence_Lemma2",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_LoopInvariance/SumSequence.tla"
     },
     {
       "benchmark": "tlaplus_examples_LoopInvariance/SumSequence_Lemma3.tla",
       "theorem": "SumSequence_Lemma3",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_LoopInvariance/SumSequence.tla"
     },
     {
       "benchmark": "tlaplus_examples_LoopInvariance/SumSequence_Lemma4.tla",
       "theorem": "SumSequence_Lemma4",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_LoopInvariance/SumSequence.tla"
     },
     {
       "benchmark": "tlaplus_examples_Majority/MajorityProof_Correctness.tla",
       "theorem": "MajorityProof_Correctness",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_Majority/MajorityProof.tla"
     },
     {
       "benchmark": "tlaplus_examples_Majority/MajorityProof_OccurrencesPlusOne.tla",
       "theorem": "MajorityProof_OccurrencesPlusOne",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_Majority/MajorityProof.tla"
     },
     {
       "benchmark": "tlaplus_examples_Majority/MajorityProof_TypeCorrect.tla",
       "theorem": "MajorityProof_TypeCorrect",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_Majority/MajorityProof.tla"
     },
     {
       "benchmark": "tlaplus_examples_MisraReachability/ParReachProofs_TypeInvariant.tla",
       "theorem": "ParReachProofs_TypeInvariant",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_MisraReachability/ParReachProofs.tla"
     },
     {
       "benchmark": "tlaplus_examples_MisraReachability/ReachabilityProofs_Reachable2.tla",
       "theorem": "ReachabilityProofs_Reachable2",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_MisraReachability/ReachabilityProofs.tla"
     },
     {
       "benchmark": "tlaplus_examples_MisraReachability/ReachableProofs_Thm2.tla",
       "theorem": "ReachableProofs_Thm2",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_MisraReachability/ReachableProofs.tla"
     },
     {
       "benchmark": "tlaplus_examples_MisraReachability/ReachableProofs_Thm3.tla",
       "theorem": "ReachableProofs_Thm3",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_MisraReachability/ReachableProofs.tla"
     },
     {
       "benchmark": "tlaplus_examples_MissionariesAndCannibals/MissionariesAndCannibals_proof_TypeCorrect.tla",
       "theorem": "MissionariesAndCannibals_proof_TypeCorrect",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_MissionariesAndCannibals/MissionariesAndCannibals_proof.tla"
     },
     {
       "benchmark": "tlaplus_examples_MultiCarElevator/Elevator_proof_Inv1Next.tla",
       "theorem": "Elevator_proof_Inv1Next",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_MultiCarElevator/Elevator_proof.tla"
     },
     {
       "benchmark": "tlaplus_examples_Paxos/Consensus_LivenessTheorem.tla",
       "theorem": "Consensus_LivenessTheorem",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_Paxos/Consensus.tla"
     },
     {
       "benchmark": "tlaplus_examples_PaxosHowToWinATuringAward/Voting_Implementation.tla",
       "theorem": "Voting_Implementation",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_PaxosHowToWinATuringAward/Voting.tla"
     },
     {
       "benchmark": "tlaplus_examples_PaxosHowToWinATuringAward/Voting_Invariance.tla",
       "theorem": "Voting_Invariance",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_PaxosHowToWinATuringAward/Voting.tla"
     },
     {
       "benchmark": "tlaplus_examples_PaxosHowToWinATuringAward/Voting_proof_ShowsSafety_T.tla",
       "theorem": "Voting_proof_ShowsSafety_T",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_PaxosHowToWinATuringAward/Voting_proof.tla"
     },
     {
       "benchmark": "tlaplus_examples_ReadersWriters/ReadersWriters_proof_TypeCorrect.tla",
       "theorem": "ReadersWriters_proof_TypeCorrect",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_ReadersWriters/ReadersWriters_proof.tla"
     },
     {
       "benchmark": "tlaplus_examples_spanning/spanning_proof_SntMsgStep.tla",
       "theorem": "spanning_proof_SntMsgStep",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_spanning/spanning_proof.tla"
     },
     {
       "benchmark": "tlaplus_examples_tcp/tcp_proof_IndInvInit.tla",
       "theorem": "tcp_proof_IndInvInit",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_tcp/tcp_proof.tla"
     },
     {
       "benchmark": "tlaplus_examples_tcp/tcp_proof_IndInvReset.tla",
       "theorem": "tcp_proof_IndInvReset",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_tcp/tcp_proof.tla"
     },
     {
       "benchmark": "tlaplus_examples_tcp/tcp_proof_IndInvSystem.tla",
       "theorem": "tcp_proof_IndInvSystem",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_tcp/tcp_proof.tla"
     },
     {
       "benchmark": "tlaplus_examples_tcp/tcp_proof_IndInvUser.tla",
       "theorem": "tcp_proof_IndInvUser",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_tcp/tcp_proof.tla"
     },
     {
       "benchmark": "tlaplus_examples_tcp/tcp_proof_PrefixTwoNonEmpty.tla",
       "theorem": "tcp_proof_PrefixTwoNonEmpty",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_tcp/tcp_proof.tla"
     },
     {
       "benchmark": "tlaplus_examples_tcp/tcp_proof_TypeOKInductive.tla",
       "theorem": "tcp_proof_TypeOKInductive",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_tcp/tcp_proof.tla"
     },
     {
       "benchmark": "tlaplus_examples_TeachingConcurrency/Simple_Correctness.tla",
       "theorem": "Simple_Correctness",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_TeachingConcurrency/Simple.tla"
     },
     {
       "benchmark": "tlaplus_examples_TeachingConcurrency/SimpleRegular_Correctness.tla",
       "theorem": "SimpleRegular_Correctness",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_TeachingConcurrency/SimpleRegular.tla"
     },
     {
       "benchmark": "tlaplus_examples_TencentPaxos/TPaxosWithProof_AcceptMsgInv.tla",
       "theorem": "TPaxosWithProof_AcceptMsgInv",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_TencentPaxos/TPaxosWithProof.tla"
     },
     {
       "benchmark": "tlaplus_examples_TencentPaxos/TPaxosWithProof_Consistent.tla",
       "theorem": "TPaxosWithProof_Consistent",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_TencentPaxos/TPaxosWithProof.tla"
     },
     {
       "benchmark": "tlaplus_examples_TencentPaxos/TPaxosWithProof_Invariant.tla",
       "theorem": "TPaxosWithProof_Invariant",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_TencentPaxos/TPaxosWithProof.tla"
     },
     {
       "benchmark": "tlaplus_examples_TencentPaxos/TPaxosWithProof_OnMessageAccInv.tla",
       "theorem": "TPaxosWithProof_OnMessageAccInv",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_TencentPaxos/TPaxosWithProof.tla"
     },
     {
       "benchmark": "tlaplus_examples_TencentPaxos/TPaxosWithProof_OnMessageMsgInv.tla",
       "theorem": "TPaxosWithProof_OnMessageMsgInv",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_TencentPaxos/TPaxosWithProof.tla"
     },
     {
       "benchmark": "tlaplus_examples_TencentPaxos/TPaxosWithProof_PrepareMsgInv.tla",
       "theorem": "TPaxosWithProof_PrepareMsgInv",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_TencentPaxos/TPaxosWithProof.tla"
     },
     {
       "benchmark": "tlaplus_examples_TencentPaxos/TPaxosWithProof_SafeAtStable.tla",
       "theorem": "TPaxosWithProof_SafeAtStable",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_TencentPaxos/TPaxosWithProof.tla"
     },
     {
       "benchmark": "tlaplus_examples_TencentPaxos/TPaxosWithProof_UpdateStateMsgInv.tla",
       "theorem": "TPaxosWithProof_UpdateStateMsgInv",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_TencentPaxos/TPaxosWithProof.tla"
     },
     {
       "benchmark": "tlaplus_examples_TencentPaxos/TPaxosWithProof_UpdateStateTypeOKProperty.tla",
       "theorem": "TPaxosWithProof_UpdateStateTypeOKProperty",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_TencentPaxos/TPaxosWithProof.tla"
     },
     {
       "benchmark": "tlaplus_examples_TencentPaxos/TPaxosWithProof_UpdateStateValue.tla",
       "theorem": "TPaxosWithProof_UpdateStateValue",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_TencentPaxos/TPaxosWithProof.tla"
     },
     {
       "benchmark": "tlaplus_examples_TencentPaxos/TPaxosWithProof_UpdateStateViewValue.tla",
       "theorem": "TPaxosWithProof_UpdateStateViewValue",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_TencentPaxos/TPaxosWithProof.tla"
     },
     {
       "benchmark": "tlaplus_examples_Termination/Termination_proof_Invariant2.tla",
       "theorem": "Termination_proof_Invariant2",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_Termination/Termination_proof.tla"
     },
     {
       "benchmark": "tlaplus_examples_transaction_commit/PaxosCommit_proof_MaximumProp.tla",
       "theorem": "PaxosCommit_proof_MaximumProp",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_transaction_commit/PaxosCommit_proof.tla"
     },
     {
       "benchmark": "tlaplus_examples_transaction_commit/PaxosCommit_proof_NextInv.tla",
       "theorem": "PaxosCommit_proof_NextInv",
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "spec_id": "tlaplus_examples_transaction_commit/PaxosCommit_proof.tla"
     }
   ]
 }
