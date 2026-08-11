@@ -202,9 +202,10 @@ function MetricCell({ v, metric, usage, max, outputCostLowerBound = false }) {
       </span>
     );
   }
+  const barPct = Math.max(0, Math.min(100, v));
   return (
     <span className="scorecell">
-      {metric.bar !== false && <span className="bar"><AnimBar pct={(v / max) * 100} /></span>}
+      {metric.bar !== false && <span className="bar"><AnimBar pct={barPct} /></span>}
       <span className="score-num">{v.toFixed(1)}</span>
     </span>
   );
@@ -453,12 +454,9 @@ function HubLeaderboard({ showFilters = true, fixedMode = null, fixedCohort = nu
   const sortCls = (k) => sort.key === k ? "sorted" + (sort.dir === "asc" ? " sorted-asc" : "") : "";
   const sortAria = (key) => sort.key === key ? (sort.dir === "asc" ? "ascending" : "descending") : "none";
   const toggleExpanded = (modelId) => setExpanded((current) => current === modelId ? null : modelId);
-  // Each displayed bar scales to that column's own top value.
   const metricMax = useM_lb(() => Object.fromEntries(visibleMetrics.map(mt => {
-    const vals = rows.map(m => {
-      if (mt.id === "completion" || mt.id === "scratch") return m.perMetric?.[mt.id];
-      return m.perMode?.[selectedMode]?.[mt.id];
-    }).filter(v => v != null);
+    if (mt.id === "completion" || mt.id === "scratch") return [mt.id, 100];
+    const vals = rows.map(m => m.perMode?.[selectedMode]?.[mt.id]).filter(v => v != null);
     return [mt.id, vals.length ? Math.max(...vals) : 100];
   })), [visibleMetrics, selectedMode, rows]);
 

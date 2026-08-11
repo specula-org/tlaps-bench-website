@@ -62,6 +62,20 @@ const BACKEND_INFO = {
     logo: null,
     kind: "base",
   },
+  "codex-single-turn-gpt-5.6-luna": {
+    name: "GPT-5.6-Luna",
+    subname: "OpenAI Codex (xhigh)",
+    org: "OpenAI",
+    logo: null,
+    kind: "base",
+  },
+  "codex-single-turn-gpt-5.6-terra": {
+    name: "GPT-5.6-Terra",
+    subname: "OpenAI Codex (xhigh)",
+    org: "OpenAI",
+    logo: null,
+    kind: "base",
+  },
 };
 
 // Only these backends appear on the live site.
@@ -69,6 +83,8 @@ const PUBLISHED_BACKENDS = new Set([
   "codex-gpt-5.6-sol",
   "codex-single-turn-gpt-5.6-sol",
   "codex-single-turn-gpt-5.6-sol-xhigh",
+  "codex-single-turn-gpt-5.6-luna",
+  "codex-single-turn-gpt-5.6-terra",
 ]);
 
 const COHORT_FROM_KIND = { base: "one-shot", agent: "agentic" };
@@ -103,6 +119,12 @@ const OUTPUT_PRICING = {
     tier: "standard",
     asOf: "2026-08-10",
     source: "https://developers.openai.com/api/docs/models",
+  },
+  "codex-single-turn-gpt-5.6-terra": {
+    usdPerMillionTokens: 15,
+    tier: "standard",
+    asOf: "2026-08-11",
+    source: "https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing",
   },
 };
 
