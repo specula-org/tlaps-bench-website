@@ -228,6 +228,14 @@ const serializeTaskManifest = (rows) => JSON.stringify(
 const canonicalTaskManifest = serializeTaskManifest(CORE_TASKS);
 
 const complexityByTask = new Map();
+const complexityCatalog = JSON.parse(readFileSync("results/core-complexity.json", "utf8"));
+for (const [benchmark, steps] of Object.entries(complexityCatalog.steps ?? {})) {
+  if (!Number.isInteger(steps) || steps < 0) {
+    throw new Error(`results/core-complexity.json: invalid steps for ${benchmark}`);
+  }
+  complexityByTask.set(benchmark, steps);
+}
+
 const COMPLEXITY_BANDS = [
   { id: "d0", label: "0", min: 0, max: 0, note: "reference proof is a single step" },
   { id: "d1", label: "1–4", min: 1, max: 4 },
@@ -241,7 +249,7 @@ const EMPTY_BAND = { rate: null, pass: 0, total: 0 };
 const bandFor = (steps) => COMPLEXITY_BANDS.find((b) => steps >= b.min && steps <= b.max);
 
 const resultFiles = readdirSync("results")
-  .filter((f) => f.endsWith(".json") && !["core-manifest.json", "full-suite-catalog.json"].includes(f))
+  .filter((f) => f.endsWith(".json") && !["core-manifest.json", "full-suite-catalog.json", "core-complexity.json"].includes(f))
   .sort();
 if (resultFiles.length === 0) throw new Error("results/: no backend JSON files found");
 

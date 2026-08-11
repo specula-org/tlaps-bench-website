@@ -391,14 +391,14 @@ function HubLeaderboard({ showFilters = true, fixedMode = null, fixedCohort = nu
   const initialMode = fixedMode || "completion";
   const [selectedMode, setSelectedMode] = useS_lb(initialMode);
   const [sort, setSort] = useS_lb({ key: `metric:${initialMode}`, dir: "desc" });
-  const [expanded, setExpanded] = useS_lb(null);
+  const [expanded, setExpanded] = useS_lb({});
   // Spec-level is the primary detail; task/cost live behind secondary tabs.
   const [detailView, setDetailView] = useS_lb("spec");
   const modeLabels = { completion: "Proof completion", scratch: "Proof from scratch" };
   const cohortLabels = { "one-shot": "one-shot", agentic: "agentic" };
 
   useE_lb(() => {
-    setExpanded(null);
+    setExpanded({});
     setDetailView("spec");
     setSort({ key: `metric:${selectedMode}`, dir: "desc" });
   }, [fixedCohort]);
@@ -438,13 +438,13 @@ function HubLeaderboard({ showFilters = true, fixedMode = null, fixedCohort = nu
   const selectMode = (mode) => {
     if (mode === selectedMode) return;
     setSelectedMode(mode);
-    setExpanded(null);
+    setExpanded({});
     setDetailView("spec");
     setSort({ key: `metric:${mode}`, dir: "desc" });
   };
 
   const onSort = (key) => {
-    setExpanded(null);
+    setExpanded({});
     setSort(s => {
       if (s.key === key) return { key, dir: s.dir === "desc" ? "asc" : "desc" };
       // any lower-is-better column starts ascending; everything else descending.
@@ -453,7 +453,12 @@ function HubLeaderboard({ showFilters = true, fixedMode = null, fixedCohort = nu
   };
   const sortCls = (k) => sort.key === k ? "sorted" + (sort.dir === "asc" ? " sorted-asc" : "") : "";
   const sortAria = (key) => sort.key === key ? (sort.dir === "asc" ? "ascending" : "descending") : "none";
-  const toggleExpanded = (modelId) => setExpanded((current) => current === modelId ? null : modelId);
+  const toggleExpanded = (modelId) => setExpanded((current) => {
+    const next = { ...current };
+    if (next[modelId]) delete next[modelId];
+    else next[modelId] = true;
+    return next;
+  });
   const metricMax = useM_lb(() => Object.fromEntries(visibleMetrics.map(mt => {
     if (mt.id === "completion" || mt.id === "scratch") return [mt.id, 100];
     const vals = rows.map(m => m.perMode?.[selectedMode]?.[mt.id]).filter(v => v != null);
@@ -556,7 +561,7 @@ function HubLeaderboard({ showFilters = true, fixedMode = null, fixedCohort = nu
               </tr>
             )}
             {rows.map((m, i) => {
-              const isOpen = expanded === m.id;
+              const isOpen = !!expanded[m.id];
               const hasRankValue = getVal(m, sort.key) != null;
               const cohortId = modelCohort(m);
               const cohortLabel = modelCohortLabel(m);

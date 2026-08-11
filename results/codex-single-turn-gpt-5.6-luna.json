@@ -5,12 +5,16 @@
     "model": "gpt-5.6-luna",
     "approach": "single_turn_tool_free",
     "cohort": "one-shot",
+    "reasoning_effort": "xhigh",
     "result_set": "codex_single_turn_gpt-5.6-luna-xhigh-core",
     "run_id": "codex-single-turn-gpt56luna-xhigh-core-20260809_172159-repaired-1",
     "generated": "2026-08-11",
-    "note": "Codex CLI one-shot GPT-5.6-Luna (xhigh) on Proof Completion Core (293 tasks).",
-    "reasoning_effort": "xhigh",
     "suite": "proof-completion-core",
+    "note": "Codex CLI one-shot GPT-5.6-Luna (xhigh) on Proof Completion Core (293 tasks).",
+    "record_count": 293,
+    "canonical_scope": {
+      "proof-completion": 293
+    },
     "summary_by_mode": {
       "proof-completion": {
         "total": 293,
@@ -31,7 +35,7 @@
           "CHEATING": 0,
           "ERROR": 0,
           "TIMEOUT": 0,
-          "pass_rate": 0.0
+          "pass_rate": 0
         }
       },
       "apalache-examples (Konnov)": {
@@ -57,19 +61,6 @@
         }
       }
     },
-    "record_count": 293,
-    "canonical_scope": {
-      "proof-completion": 293
-    },
-    "usage_audit": {
-      "date": "2026-08-11",
-      "task_count": 293,
-      "complete_for_all_tasks": true,
-      "active_time_complete": true,
-      "input_tokens": 5818119,
-      "output_tokens": 6866956,
-      "output_tokens_positive_for_all_tasks": true
-    },
     "scoring": {
       "primary": "specification-pass-rate",
       "specification_pass_rate": {
@@ -83,6 +74,15 @@
         "pct": 4.09556313993174
       },
       "specification_macro_pct": 5.949707792648036
+    },
+    "usage_audit": {
+      "date": "2026-08-11",
+      "task_count": 293,
+      "complete_for_all_tasks": true,
+      "active_time_complete": true,
+      "input_tokens": 5818119,
+      "output_tokens": 6866956,
+      "output_tokens_positive_for_all_tasks": true
     }
   },
   "results": [
@@ -2470,7 +2470,6 @@
       "mode": "proof-completion",
       "model": "gpt-5.6-luna",
       "module": "apalache_examples_ben-or83",
-      "obligations": 6,
       "output_tokens": 12559,
       "provider": "openai",
       "result_set": "codex_single_turn_gpt-5.6-luna-xhigh-core",
@@ -3080,7 +3079,6 @@
       "mode": "proof-completion",
       "model": "gpt-5.6-luna",
       "module": "apalache_examples_ben-or83",
-      "obligations": 7,
       "output_tokens": 9469,
       "provider": "openai",
       "result_set": "codex_single_turn_gpt-5.6-luna-xhigh-core",
@@ -3123,7 +3121,6 @@
       "mode": "proof-completion",
       "model": "gpt-5.6-luna",
       "module": "apalache_examples_ben-or83",
-      "obligations": 2,
       "output_tokens": 498,
       "provider": "openai",
       "result_set": "codex_single_turn_gpt-5.6-luna-xhigh-core",
@@ -3502,7 +3499,6 @@
       "mode": "proof-completion",
       "model": "gpt-5.6-luna",
       "module": "apalache_examples_tendermint",
-      "obligations": 3,
       "output_tokens": 5283,
       "provider": "openai",
       "result_set": "codex_single_turn_gpt-5.6-luna-xhigh-core",
@@ -4112,7 +4108,6 @@
       "mode": "proof-completion",
       "model": "gpt-5.6-luna",
       "module": "tlaplus_examples_LoopInvariance",
-      "obligations": 2,
       "output_tokens": 1653,
       "provider": "openai",
       "result_set": "codex_single_turn_gpt-5.6-luna-xhigh-core",
@@ -4197,7 +4192,6 @@
       "mode": "proof-completion",
       "model": "gpt-5.6-luna",
       "module": "tlaplus_examples_LoopInvariance",
-      "obligations": 2,
       "output_tokens": 1654,
       "provider": "openai",
       "result_set": "codex_single_turn_gpt-5.6-luna-xhigh-core",
@@ -4366,7 +4360,6 @@
       "mode": "proof-completion",
       "model": "gpt-5.6-luna",
       "module": "tlaplus_examples_MissionariesAndCannibals",
-      "obligations": 6,
       "output_tokens": 8238,
       "provider": "openai",
       "result_set": "codex_single_turn_gpt-5.6-luna-xhigh-core",
@@ -4535,7 +4528,6 @@
       "mode": "proof-completion",
       "model": "gpt-5.6-luna",
       "module": "tlaplus_examples_TeachingConcurrency",
-      "obligations": 2,
       "output_tokens": 528,
       "provider": "openai",
       "result_set": "codex_single_turn_gpt-5.6-luna-xhigh-core",
@@ -5166,7 +5158,6 @@
       "mode": "proof-completion",
       "model": "gpt-5.6-luna",
       "module": "tlaplus_examples_byzpaxos",
-      "obligations": 1,
       "output_tokens": 3202,
       "provider": "openai",
       "result_set": "codex_single_turn_gpt-5.6-luna-xhigh-core",
@@ -5482,7 +5473,6 @@
       "mode": "proof-completion",
       "model": "gpt-5.6-luna",
       "module": "tlaplus_examples_ewd840",
-      "obligations": 5,
       "output_tokens": 4267,
       "provider": "openai",
       "result_set": "codex_single_turn_gpt-5.6-luna-xhigh-core",
@@ -5651,7 +5641,6 @@
       "mode": "proof-completion",
       "model": "gpt-5.6-luna",
       "module": "tlaplus_examples_ewd998",
-      "obligations": 14,
       "output_tokens": 27057,
       "provider": "openai",
       "result_set": "codex_single_turn_gpt-5.6-luna-xhigh-core",
@@ -5862,7 +5851,6 @@
       "mode": "proof-completion",
       "model": "gpt-5.6-luna",
       "module": "tlaplus_examples_ewd998",
-      "obligations": 12,
       "output_tokens": 4262,
       "provider": "openai",
       "result_set": "codex_single_turn_gpt-5.6-luna-xhigh-core",
