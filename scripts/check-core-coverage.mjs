@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Report how a result bundle covers results/core-manifest.json.
-// Exit 0 only when coverage is exact (same 293 Core tasks).
+// Exit 0 only when coverage is exact (same Core tasks as core-manifest.json).
 //
 //   node scripts/check-core-coverage.mjs path/to/bundle.json
 import { readFileSync } from "node:fs";

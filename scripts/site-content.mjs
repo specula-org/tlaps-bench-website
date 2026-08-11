@@ -66,7 +66,7 @@ export const SITE = {
       id: "core",
       label: "Core",
       blurb:
-        "Proof Completion Core: 293 proof-completion properties across example-library specs, " +
+        "Proof Completion Core: 190 proof-completion properties across example-library specs, " +
         "including the Apalache examples (ben-or83, tendermint). Every published model is graded on this same task set.",
     },
     {

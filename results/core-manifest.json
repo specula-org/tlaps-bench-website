@@ -1,13 +1,13 @@
 {
   "suite": "proof-completion-core",
   "mode": "proof-completion",
-  "task_count": 293,
+  "task_count": 190,
   "generated_from": "codex-gpt-5.6-sol.json",
   "note": "Canonical Proof Completion Core task list. Regenerate with: node scripts/sync-core-manifest.mjs <results-file.json>",
   "sources": {
-    "apalache-examples (Konnov)": 150,
-    "tlaplus/Examples": 121,
-    "TLAPS distribution examples": 22
+    "apalache-examples (Konnov)": 56,
+    "tlaplus/Examples": 113,
+    "TLAPS distribution examples": 21
   },
   "tasks": [
     {
@@ -21,23 +21,8 @@
       "source": "apalache-examples (Konnov)"
     },
     {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_ALL_Card.tla",
-      "theorem": "Ben_or83_proofs_ALL_Card",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Arith_OtherLtFromStrictOverlap.tla",
       "theorem": "Ben_or83_proofs_Arith_OtherLtFromStrictOverlap",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Arith_SupportedQuorumGeContrad.tla",
-      "theorem": "Ben_or83_proofs_Arith_SupportedQuorumGeContrad",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_CardUnion2LeSum.tla",
-      "theorem": "Ben_or83_proofs_CardUnion2LeSum",
       "source": "apalache-examples (Konnov)"
     },
     {
@@ -46,58 +31,8 @@
       "source": "apalache-examples (Konnov)"
     },
     {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_CorrectD2Exists.tla",
-      "theorem": "Ben_or83_proofs_CorrectD2Exists",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_CrossRoundStrictQuorum.tla",
       "theorem": "Ben_or83_proofs_CrossRoundStrictQuorum",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_D2Fixed_CardLeSenders.tla",
-      "theorem": "Ben_or83_proofs_D2Fixed_CardLeSenders",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_D2SetFinite.tla",
-      "theorem": "Ben_or83_proofs_D2SetFinite",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_DQuorumDominatesMajorityD.tla",
-      "theorem": "Ben_or83_proofs_DQuorumDominatesMajorityD",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_DvFaultyMono.tla",
-      "theorem": "Ben_or83_proofs_DvFaultyMono",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_DvPSenderWitness.tla",
-      "theorem": "Ben_or83_proofs_DvPSenderWitness",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_DvSenderWitness.tla",
-      "theorem": "Ben_or83_proofs_DvSenderWitness",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_DvStep2Mono.tla",
-      "theorem": "Ben_or83_proofs_DvStep2Mono",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_FaultyD2Bound.tla",
-      "theorem": "Ben_or83_proofs_FaultyD2Bound",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_FaultyMsgs2AddedFaulty.tla",
-      "theorem": "Ben_or83_proofs_FaultyMsgs2AddedFaulty",
       "source": "apalache-examples (Konnov)"
     },
     {
@@ -116,41 +51,6 @@
       "source": "apalache-examples (Konnov)"
     },
     {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_LaterQuorumGivesTotalBefore.tla",
-      "theorem": "Ben_or83_proofs_LaterQuorumGivesTotalBefore",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_LockedFullCorrectType2Strict.tla",
-      "theorem": "Ben_or83_proofs_LockedFullCorrectType2Strict",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_LockedNextCorrectD2Value.tla",
-      "theorem": "Ben_or83_proofs_LockedNextCorrectD2Value",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_LockedNextNoCorrectQ2.tla",
-      "theorem": "Ben_or83_proofs_LockedNextNoCorrectQ2",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_LockedReceiveCorrectType2Strict.tla",
-      "theorem": "Ben_or83_proofs_LockedReceiveCorrectType2Strict",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_LockedReceiveStrictD.tla",
-      "theorem": "Ben_or83_proofs_LockedReceiveStrictD",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_LockLemma.tla",
-      "theorem": "Ben_or83_proofs_LockLemma",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_LowWeightsReceivedL11Witness.tla",
       "theorem": "Ben_or83_proofs_LowWeightsReceivedL11Witness",
       "source": "apalache-examples (Konnov)"
@@ -161,28 +61,8 @@
       "source": "apalache-examples (Konnov)"
     },
     {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_LowWeightsSupportedEmpty.tla",
-      "theorem": "Ben_or83_proofs_LowWeightsSupportedEmpty",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_MajCardBound.tla",
-      "theorem": "Ben_or83_proofs_MajCardBound",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_MajorityIntersect.tla",
       "theorem": "Ben_or83_proofs_MajorityIntersect",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_MajorityM1HasCorrect.tla",
-      "theorem": "Ben_or83_proofs_MajorityM1HasCorrect",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Msgs1AddOneRep.tla",
-      "theorem": "Ben_or83_proofs_Msgs1AddOneRep",
       "source": "apalache-examples (Konnov)"
     },
     {
@@ -201,21 +81,6 @@
       "source": "apalache-examples (Konnov)"
     },
     {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Msgs2DomR.tla",
-      "theorem": "Ben_or83_proofs_Msgs2DomR",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Msgs2FaultyMono.tla",
-      "theorem": "Ben_or83_proofs_Msgs2FaultyMono",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Msgs2Finite.tla",
-      "theorem": "Ben_or83_proofs_Msgs2Finite",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Msgs2SenderPartitionBound.tla",
       "theorem": "Ben_or83_proofs_Msgs2SenderPartitionBound",
       "source": "apalache-examples (Konnov)"
@@ -223,16 +88,6 @@
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Msgs2Step2Mono.tla",
       "theorem": "Ben_or83_proofs_Msgs2Step2Mono",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_L1_F.tla",
-      "theorem": "Ben_or83_proofs_Pres_L1_F",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_L1_S2.tla",
-      "theorem": "Ben_or83_proofs_Pres_L1_S2",
       "source": "apalache-examples (Konnov)"
     },
     {
@@ -246,28 +101,8 @@
       "source": "apalache-examples (Konnov)"
     },
     {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_L10_F.tla",
-      "theorem": "Ben_or83_proofs_Pres_L10_F",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_L10_S1.tla",
-      "theorem": "Ben_or83_proofs_Pres_L10_S1",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_L10_S2.tla",
       "theorem": "Ben_or83_proofs_Pres_L10_S2",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_L11_F.tla",
-      "theorem": "Ben_or83_proofs_Pres_L11_F",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_L11_S2.tla",
-      "theorem": "Ben_or83_proofs_Pres_L11_S2",
       "source": "apalache-examples (Konnov)"
     },
     {
@@ -276,43 +111,13 @@
       "source": "apalache-examples (Konnov)"
     },
     {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_L12_F.tla",
-      "theorem": "Ben_or83_proofs_Pres_L12_F",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_L12_S1.tla",
       "theorem": "Ben_or83_proofs_Pres_L12_S1",
       "source": "apalache-examples (Konnov)"
     },
     {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_L12_S2.tla",
-      "theorem": "Ben_or83_proofs_Pres_L12_S2",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_L12_S3.tla",
-      "theorem": "Ben_or83_proofs_Pres_L12_S3",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_L13_F.tla",
-      "theorem": "Ben_or83_proofs_Pres_L13_F",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_L13_S2.tla",
-      "theorem": "Ben_or83_proofs_Pres_L13_S2",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_L13_S3.tla",
       "theorem": "Ben_or83_proofs_Pres_L13_S3",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_L2_F.tla",
-      "theorem": "Ben_or83_proofs_Pres_L2_F",
       "source": "apalache-examples (Konnov)"
     },
     {
@@ -326,23 +131,8 @@
       "source": "apalache-examples (Konnov)"
     },
     {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_L4_F.tla",
-      "theorem": "Ben_or83_proofs_Pres_L4_F",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_L4_S1.tla",
       "theorem": "Ben_or83_proofs_Pres_L4_S1",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_L4_S2.tla",
-      "theorem": "Ben_or83_proofs_Pres_L4_S2",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_L4_S3.tla",
-      "theorem": "Ben_or83_proofs_Pres_L4_S3",
       "source": "apalache-examples (Konnov)"
     },
     {
@@ -351,53 +141,13 @@
       "source": "apalache-examples (Konnov)"
     },
     {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_L5_S1.tla",
-      "theorem": "Ben_or83_proofs_Pres_L5_S1",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_L5_S2.tla",
-      "theorem": "Ben_or83_proofs_Pres_L5_S2",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_L5_S3.tla",
-      "theorem": "Ben_or83_proofs_Pres_L5_S3",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_L6_F.tla",
       "theorem": "Ben_or83_proofs_Pres_L6_F",
       "source": "apalache-examples (Konnov)"
     },
     {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_L6_S3.tla",
-      "theorem": "Ben_or83_proofs_Pres_L6_S3",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_L7_F.tla",
-      "theorem": "Ben_or83_proofs_Pres_L7_F",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_L7_S1.tla",
       "theorem": "Ben_or83_proofs_Pres_L7_S1",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_L7_S2.tla",
-      "theorem": "Ben_or83_proofs_Pres_L7_S2",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_L8_F.tla",
-      "theorem": "Ben_or83_proofs_Pres_L8_F",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_L8_S1.tla",
-      "theorem": "Ben_or83_proofs_Pres_L8_S1",
       "source": "apalache-examples (Konnov)"
     },
     {
@@ -411,38 +161,8 @@
       "source": "apalache-examples (Konnov)"
     },
     {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_L9_S1.tla",
-      "theorem": "Ben_or83_proofs_Pres_L9_S1",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_L9_S2.tla",
-      "theorem": "Ben_or83_proofs_Pres_L9_S2",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_Lemma1.tla",
-      "theorem": "Ben_or83_proofs_Pres_Lemma1",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_Lemma10.tla",
-      "theorem": "Ben_or83_proofs_Pres_Lemma10",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_Lemma11.tla",
-      "theorem": "Ben_or83_proofs_Pres_Lemma11",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_Lemma12.tla",
       "theorem": "Ben_or83_proofs_Pres_Lemma12",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_Lemma13.tla",
-      "theorem": "Ben_or83_proofs_Pres_Lemma13",
       "source": "apalache-examples (Konnov)"
     },
     {
@@ -456,51 +176,6 @@
       "source": "apalache-examples (Konnov)"
     },
     {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_Lemma4.tla",
-      "theorem": "Ben_or83_proofs_Pres_Lemma4",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_Lemma5.tla",
-      "theorem": "Ben_or83_proofs_Pres_Lemma5",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_Lemma6.tla",
-      "theorem": "Ben_or83_proofs_Pres_Lemma6",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_Lemma7.tla",
-      "theorem": "Ben_or83_proofs_Pres_Lemma7",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_Lemma8.tla",
-      "theorem": "Ben_or83_proofs_Pres_Lemma8",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_Lemma9.tla",
-      "theorem": "Ben_or83_proofs_Pres_Lemma9",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_QuorumDominatesSupported.tla",
-      "theorem": "Ben_or83_proofs_QuorumDominatesSupported",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_QuorumHasCorrectM1.tla",
-      "theorem": "Ben_or83_proofs_QuorumHasCorrectM1",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_QuorumHasM1Majority.tla",
-      "theorem": "Ben_or83_proofs_QuorumHasM1Majority",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_QuorumIntersect.tla",
       "theorem": "Ben_or83_proofs_QuorumIntersect",
       "source": "apalache-examples (Konnov)"
@@ -511,53 +186,13 @@
       "source": "apalache-examples (Konnov)"
     },
     {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_ReceivedDQuorumDominatesSupported.tla",
-      "theorem": "Ben_or83_proofs_ReceivedDQuorumDominatesSupported",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_ReplicaPredRoundHasTotal.tla",
-      "theorem": "Ben_or83_proofs_ReplicaPredRoundHasTotal",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Senders2_CardLeSet.tla",
       "theorem": "Ben_or83_proofs_Senders2_CardLeSet",
       "source": "apalache-examples (Konnov)"
     },
     {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Senders2_Mono.tla",
-      "theorem": "Ben_or83_proofs_Senders2_Mono",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Senders2_Sub.tla",
-      "theorem": "Ben_or83_proofs_Senders2_Sub",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_ShapeHelperR.tla",
-      "theorem": "Ben_or83_proofs_ShapeHelperR",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_ShapeHelperSrcQ.tla",
-      "theorem": "Ben_or83_proofs_ShapeHelperSrcQ",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_ShapeSrcQFromExists.tla",
-      "theorem": "Ben_or83_proofs_ShapeSrcQFromExists",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_StrictQuorumCarriesToQuorumRound.tla",
       "theorem": "Ben_or83_proofs_StrictQuorumCarriesToQuorumRound",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_StrictQuorumFewOthers.tla",
-      "theorem": "Ben_or83_proofs_StrictQuorumFewOthers",
       "source": "apalache-examples (Konnov)"
     },
     {
@@ -571,51 +206,6 @@
       "source": "apalache-examples (Konnov)"
     },
     {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_StrictQuorumNextStrictQuorum.tla",
-      "theorem": "Ben_or83_proofs_StrictQuorumNextStrictQuorum",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_StrictQuorumSenderStrict.tla",
-      "theorem": "Ben_or83_proofs_StrictQuorumSenderStrict",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_StrictQuorumSupportedSingleton.tla",
-      "theorem": "Ben_or83_proofs_StrictQuorumSupportedSingleton",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_SupportedFromTotalAndFewOthers.tla",
-      "theorem": "Ben_or83_proofs_SupportedFromTotalAndFewOthers",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_SupportedInReceivedQuorum.tla",
-      "theorem": "Ben_or83_proofs_SupportedInReceivedQuorum",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_SupportedPHasOldCorrectD2.tla",
-      "theorem": "Ben_or83_proofs_SupportedPHasOldCorrectD2",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_SupportedPToOldWhenTotal.tla",
-      "theorem": "Ben_or83_proofs_SupportedPToOldWhenTotal",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_SupportedSingletonNextQuorum.tla",
-      "theorem": "Ben_or83_proofs_SupportedSingletonNextQuorum",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_SupportedSingletonNextSupported.tla",
-      "theorem": "Ben_or83_proofs_SupportedSingletonNextSupported",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_SupportedSingletonPinsNextM1.tla",
       "theorem": "Ben_or83_proofs_SupportedSingletonPinsNextM1",
       "source": "apalache-examples (Konnov)"
@@ -623,11 +213,6 @@
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_SupportedUnique.tla",
       "theorem": "Ben_or83_proofs_SupportedUnique",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_TplusOneHasCorrect.tla",
-      "theorem": "Ben_or83_proofs_TplusOneHasCorrect",
       "source": "apalache-examples (Konnov)"
     },
     {
@@ -641,11 +226,6 @@
       "source": "apalache-examples (Konnov)"
     },
     {
-      "benchmark": "apalache_examples_tendermint/tendermint_single_indinv_proofs_MaxReachedProps.tla",
-      "theorem": "tendermint_single_indinv_proofs_MaxReachedProps",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
       "benchmark": "apalache_examples_tendermint/tendermint_single_indinv_proofs_OnRoundCatchupGivesSender.tla",
       "theorem": "tendermint_single_indinv_proofs_OnRoundCatchupGivesSender",
       "source": "apalache-examples (Konnov)"
@@ -656,16 +236,6 @@
       "source": "apalache-examples (Konnov)"
     },
     {
-      "benchmark": "apalache_examples_tendermint/tendermint_single_indinv_proofs_PCAllMonotone.tla",
-      "theorem": "tendermint_single_indinv_proofs_PCAllMonotone",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_tendermint/tendermint_single_indinv_proofs_PostPrecommitByCorrectGivesPostPrevoteQuorum.tla",
-      "theorem": "tendermint_single_indinv_proofs_PostPrecommitByCorrectGivesPostPrevoteQuorum",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
       "benchmark": "apalache_examples_tendermint/tendermint_single_indinv_proofs_PrecommitByCorrectGivesPrevoteQuorum.tla",
       "theorem": "tendermint_single_indinv_proofs_PrecommitByCorrectGivesPrevoteQuorum",
       "source": "apalache-examples (Konnov)"
@@ -673,21 +243,6 @@
     {
       "benchmark": "apalache_examples_tendermint/tendermint_single_indinv_proofs_PrecommitLockContra.tla",
       "theorem": "tendermint_single_indinv_proofs_PrecommitLockContra",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_tendermint/tendermint_single_indinv_proofs_PrecommitLocksLaterPrevotesOp.tla",
-      "theorem": "tendermint_single_indinv_proofs_PrecommitLocksLaterPrevotesOp",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_tendermint/tendermint_single_indinv_proofs_PrecommitRecTyped.tla",
-      "theorem": "tendermint_single_indinv_proofs_PrecommitRecTyped",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_tendermint/tendermint_single_indinv_proofs_PrecommitSenderSetCardinalityMonotone.tla",
-      "theorem": "tendermint_single_indinv_proofs_PrecommitSenderSetCardinalityMonotone",
       "source": "apalache-examples (Konnov)"
     },
     {
@@ -708,21 +263,6 @@
     {
       "benchmark": "apalache_examples_tendermint/tendermint_single_indinv_proofs_Pres_PrecommitLocksLaterPrevotes.tla",
       "theorem": "tendermint_single_indinv_proofs_Pres_PrecommitLocksLaterPrevotes",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_tendermint/tendermint_single_indinv_proofs_PrevoteAllSenderSetCardinalityMonotone.tla",
-      "theorem": "tendermint_single_indinv_proofs_PrevoteAllSenderSetCardinalityMonotone",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_tendermint/tendermint_single_indinv_proofs_PrevoteEvidenceSenderSetCardinalityLeAllSenders.tla",
-      "theorem": "tendermint_single_indinv_proofs_PrevoteEvidenceSenderSetCardinalityLeAllSenders",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_tendermint/tendermint_single_indinv_proofs_PrevoteRecTyped.tla",
-      "theorem": "tendermint_single_indinv_proofs_PrevoteRecTyped",
       "source": "apalache-examples (Konnov)"
     },
     {
@@ -751,18 +291,8 @@
       "source": "apalache-examples (Konnov)"
     },
     {
-      "benchmark": "apalache_examples_tendermint/tendermint_single_indinv_proofs_SmallQuorumHasCorrect.tla",
-      "theorem": "tendermint_single_indinv_proofs_SmallQuorumHasCorrect",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
       "benchmark": "apalache_examples_tendermint/tendermint_single_indinv_proofs_StepChangeChar.tla",
       "theorem": "tendermint_single_indinv_proofs_StepChangeChar",
-      "source": "apalache-examples (Konnov)"
-    },
-    {
-      "benchmark": "apalache_examples_tendermint/tendermint_single_indinv_proofs_SubsetCardGeq.tla",
-      "theorem": "tendermint_single_indinv_proofs_SubsetCardGeq",
       "source": "apalache-examples (Konnov)"
     },
     {
@@ -798,11 +328,6 @@
     {
       "benchmark": "Consensus/PaxosProof_struct_lemma.tla",
       "theorem": "PaxosProof_struct_lemma",
-      "source": "TLAPS distribution examples"
-    },
-    {
-      "benchmark": "Consensus/Voting_Refinement.tla",
-      "theorem": "Voting_Refinement",
       "source": "TLAPS distribution examples"
     },
     {
@@ -871,11 +396,6 @@
       "source": "TLAPS distribution examples"
     },
     {
-      "benchmark": "tlaplus_examples_allocator/AllocatorImplementation_proof_PermSeqsType.tla",
-      "theorem": "AllocatorImplementation_proof_PermSeqsType",
-      "source": "tlaplus/Examples"
-    },
-    {
       "benchmark": "tlaplus_examples_allocator/AllocatorImplementation_proof_TypeCorrect.tla",
       "theorem": "AllocatorImplementation_proof_TypeCorrect",
       "source": "tlaplus/Examples"
@@ -888,11 +408,6 @@
     {
       "benchmark": "tlaplus_examples_allocator/SchedulingAllocator_proof_PermSeqsType.tla",
       "theorem": "SchedulingAllocator_proof_PermSeqsType",
-      "source": "tlaplus/Examples"
-    },
-    {
-      "benchmark": "tlaplus_examples_Bakery-Boulangerie/Bakery_TypeCorrect.tla",
-      "theorem": "Bakery_TypeCorrect",
       "source": "tlaplus/Examples"
     },
     {
@@ -953,11 +468,6 @@
     {
       "benchmark": "tlaplus_examples_byzpaxos/BPConProof_PNextDef.tla",
       "theorem": "BPConProof_PNextDef",
-      "source": "tlaplus/Examples"
-    },
-    {
-      "benchmark": "tlaplus_examples_byzpaxos/Consensus_Liveness.tla",
-      "theorem": "Consensus_Liveness",
       "source": "tlaplus/Examples"
     },
     {
@@ -1251,11 +761,6 @@
       "source": "tlaplus/Examples"
     },
     {
-      "benchmark": "tlaplus_examples_LoopInvariance/SumSequence_Lemma1_Proof.tla",
-      "theorem": "SumSequence_Lemma1_Proof",
-      "source": "tlaplus/Examples"
-    },
-    {
       "benchmark": "tlaplus_examples_LoopInvariance/SumSequence_Lemma2.tla",
       "theorem": "SumSequence_Lemma2",
       "source": "tlaplus/Examples"
@@ -1268,11 +773,6 @@
     {
       "benchmark": "tlaplus_examples_LoopInvariance/SumSequence_Lemma4.tla",
       "theorem": "SumSequence_Lemma4",
-      "source": "tlaplus/Examples"
-    },
-    {
-      "benchmark": "tlaplus_examples_LoopInvariance/SumSequence_Lemma5_Proof.tla",
-      "theorem": "SumSequence_Lemma5_Proof",
       "source": "tlaplus/Examples"
     },
     {
@@ -1386,23 +886,8 @@
       "source": "tlaplus/Examples"
     },
     {
-      "benchmark": "tlaplus_examples_TeachingConcurrency/Simple_proof_TypeCorrect.tla",
-      "theorem": "Simple_proof_TypeCorrect",
-      "source": "tlaplus/Examples"
-    },
-    {
       "benchmark": "tlaplus_examples_TeachingConcurrency/SimpleRegular_Correctness.tla",
       "theorem": "SimpleRegular_Correctness",
-      "source": "tlaplus/Examples"
-    },
-    {
-      "benchmark": "tlaplus_examples_TeachingConcurrency/SimpleRegular_Correctness2.tla",
-      "theorem": "SimpleRegular_Correctness2",
-      "source": "tlaplus/Examples"
-    },
-    {
-      "benchmark": "tlaplus_examples_TeachingConcurrency/SimpleRegular_proof_InvInvariant.tla",
-      "theorem": "SimpleRegular_proof_InvInvariant",
       "source": "tlaplus/Examples"
     },
     {

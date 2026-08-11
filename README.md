@@ -2,7 +2,7 @@
 
 Static site for the TLAPS Proof Benchmark.
 
-The published leaderboard is **Proof Completion Core only**: every model is graded on the same task list in `results/core-manifest.json` (currently 293 proof-completion tasks). Proof-from-scratch and Full-suite runs are not shown.
+The published leaderboard is **Proof Completion Core only**: every model is graded on the same task list in `results/core-manifest.json` (currently 190 proof-completion tasks). Proof-from-scratch and Full-suite runs are not shown.
 
 A bundle is published only when it covers that Core set **exactly**. Older Full-suite dumps that omit Apalache (`ben-or83`, `tendermint`) or other Core tasks cannot appear on the leaderboard, even if they were produced this week — their numbers would not be comparable.
 
