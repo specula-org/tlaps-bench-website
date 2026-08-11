@@ -284,6 +284,7 @@ table.lb tr.expand-row > td { padding: 0; border-bottom: 1px solid var(--line-so
 .detail-titleline { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 6px; }
 .detail-caption { color: var(--ink-3); font-size: 12px; }
 .scope-caption { margin: 2px 0 14px; color: var(--caution); font-size: 11.5px; line-height: 1.5; }
+.complexity-partial-note { margin: 2px 0 14px; color: var(--warn); font-size: 12px; line-height: 1.5; font-weight: 500; }
 .detail-tabs { display: inline-flex; padding: 3px; border: 1px solid var(--line); border-radius: 8px; background: var(--paper-2); }
 .detail-tabs button { padding: 6px 11px; border: 0; border-radius: 5px; background: transparent; color: var(--ink-3); font-family: var(--mono); font-size: 10.5px; cursor: pointer; }
 .detail-tabs button:hover { color: var(--ink); }

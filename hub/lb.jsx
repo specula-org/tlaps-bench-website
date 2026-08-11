@@ -645,6 +645,15 @@ function HubLeaderboard({ showFilters = true, fixedMode = null, fixedCohort = nu
                             {m.perMode[selectedMode]?.partialScope && m.scope?.reason && (
                               <div className="scope-caption">{m.scope.reason}</div>
                             )}
+                            {detailView === "complexity" && m.perComplexity?.[selectedMode] && (() => {
+                              const covered = m.perComplexity[selectedMode].reduce((sum, band) => sum + (band.total || 0), 0);
+                              const total = m.perMode[selectedMode]?.total ?? TLAPS_DATA.core?.taskCount;
+                              return (
+                                <div className="complexity-partial-note" role="status">
+                                  Partial only — by complexity covers {covered} of {total} Core tasks, not the full suite. Tasks without reference-proof step counts are omitted.
+                                </div>
+                              );
+                            })()}
                             {detailView !== "task" && (
                               <ModelUsageSummary model={m} selectedMode={selectedMode} />
                             )}
