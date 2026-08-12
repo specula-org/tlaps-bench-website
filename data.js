@@ -11350,12 +11350,12 @@ window.TLAPS_DATA = {
     {
       "id": "one-shot",
       "label": "One-Shot",
-      "blurb": "Single-response runs ranked by Spec-balanced pass rate on the Proof Completion Core. Expand a model for per-specification details."
+      "blurb": "The model gets one response to write the proof. Core modules stay fixed; only the marked helper and proof regions in the task file may change. Ranked by Spec-balanced pass rate."
     },
     {
       "id": "agentic",
       "label": "Agentic",
-      "blurb": "Tool-using agent runs on the same Proof Completion Core, scored separately from one-shot. Same Spec-balanced pass rate, never mixed into the one-shot table."
+      "blurb": "The model may use tools and take multiple steps to write the proof. Same rules as one-shot: Core modules are read-only, and edits stay in the marked task-file regions. Ranked by Spec-balanced pass rate."
     }
   ],
   "coverage": [],

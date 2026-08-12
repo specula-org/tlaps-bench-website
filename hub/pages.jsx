@@ -1,5 +1,5 @@
 /* global React, TLAPS_DATA, HubLeaderboard, Reveal, CountUp, FadeIn, AnimBar, APipeline */
-const { useState: useS_p, useEffect: useE_p, useRef: useR_p } = React;
+const { useState: useS_p, useEffect: useE_p, useRef: useR_p, useTransition: useT_p } = React;
 const PIPE_NATIVE_WIDTH = 1078;
 const PIPE_NATIVE_HEIGHT = 300;
 
@@ -125,7 +125,16 @@ function PageLeaderboard() {
     { id: "agentic", label: "Agentic", blurb: "Tool-using agent runs, scored separately." },
   ];
   const [cohort, setCohort] = useS_p(cohorts[0]?.id || "one-shot");
-  const active = cohorts.find((c) => c.id === cohort) || cohorts[0];
+  // Keep the tab chrome snappy: paint the selection immediately, defer the heavy table.
+  const [uiCohort, setUiCohort] = useS_p(cohort);
+  const [, startTransition] = useT_p();
+  const active = cohorts.find((c) => c.id === uiCohort) || cohorts[0];
+
+  const selectCohort = (id) => {
+    if (id === uiCohort) return;
+    setUiCohort(id);
+    startTransition(() => setCohort(id));
+  };
 
   return (
     <section className="section">
@@ -134,9 +143,9 @@ function PageLeaderboard() {
           <span className="eyebrow accent">Results</span>
           <h1 style={{ fontSize: 44, marginTop: 10 }}>Leaderboard</h1>
           <p className="lead">
-            Every model is graded on the same Proof Completion Core. One-shot and agentic
-            runs live in separate tabs. Models are ranked by Spec-balanced pass rate, with
-            each Core specification weighted equally. Expand a row for the full breakdown.
+            Every model is graded on the same Proof Completion Core. Models are ranked by
+            Spec-balanced pass rate, with each Core specification weighted equally. Expand a
+            row for the full breakdown.
           </p>
         </FadeIn>
 
@@ -146,9 +155,9 @@ function PageLeaderboard() {
               key={c.id}
               type="button"
               role="tab"
-              aria-selected={cohort === c.id}
-              className={cohort === c.id ? "active" : ""}
-              onClick={() => setCohort(c.id)}
+              aria-selected={uiCohort === c.id}
+              className={uiCohort === c.id ? "active" : ""}
+              onClick={() => selectCohort(c.id)}
             >
               {c.label}
             </button>
