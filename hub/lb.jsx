@@ -674,7 +674,10 @@ function HubLeaderboard({ showFilters = true, fixedMode = null, fixedCohort = nu
                                     </tr>
                                   </thead>
                                   <tbody>
-                                    {TLAPS_DATA.specs.filter(spec => m.perSpec?.[spec.id]?.[selectedMode]).map(spec => {
+                                    {(
+                                      (TLAPS_DATA.suites || []).find((s) => s.id === "core")?.specs
+                                      || TLAPS_DATA.specs
+                                    ).filter((spec) => m.perSpec?.[spec.id]?.[selectedMode]).map((spec) => {
                                       const score = m.perSpec[spec.id][selectedMode];
                                       return (
                                         <tr className="bd-row dataset-score-spec-row" key={spec.id}>
