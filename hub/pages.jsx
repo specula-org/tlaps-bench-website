@@ -135,11 +135,8 @@ function PageLeaderboard() {
           <h1 style={{ fontSize: 44, marginTop: 10 }}>Leaderboard</h1>
           <p className="lead">
             Every model is graded on the same Proof Completion Core. One-shot and agentic
-            runs live in separate tabs. Models are ranked by spec-balanced pass rate: we
-            calculate each Core module's task pass rate, then average across all 56 modules
-            so every module has equal weight. Task and completed-module counts are shown
-            beside the score; a module is complete only when all its selected Core tasks
-            pass. Expand a row for the full breakdown.
+            runs live in separate tabs. Models are ranked by spec-balanced pass rate, with
+            each Core module weighted equally. Expand a row for the full breakdown.
           </p>
         </FadeIn>
 
