@@ -364,7 +364,7 @@ function HubLeaderboard({ showFilters = true, fixedMode = null, fixedCohort = nu
     metricById[selectedMode],
   ], [metricById, selectedMode]);
 
-  // Sort key forms: "name" or "metric:<id>".
+  // Sort key forms: "metric:<id>" only (Model column is not sortable).
   const getMetricVal = (m, metricId) => {
     if (metricId === "completion" || metricId === "scratch") return m.perMetric?.[metricId] ?? null;
     return m.perMode?.[selectedMode]?.[metricId] ?? null;
@@ -406,6 +406,8 @@ function HubLeaderboard({ showFilters = true, fixedMode = null, fixedCohort = nu
   };
 
   const onSort = (key) => {
+    // Only metric columns are sortable; Model stays in score order.
+    if (!key.startsWith("metric:")) return;
     setExpanded({});
     setSort(s => {
       if (s.key === key) return { key, dir: s.dir === "desc" ? "asc" : "desc" };
@@ -493,11 +495,7 @@ function HubLeaderboard({ showFilters = true, fixedMode = null, fixedCohort = nu
           <thead>
             <tr>
               <th className="rank">#</th>
-              <th className={sortCls("name")} aria-sort={sortAria("name")}>
-                <button type="button" className="sort-button" onClick={() => onSort("name")}>
-                  Model <span className="sort" aria-hidden="true">▾</span>
-                </button>
-              </th>
+              <th>Model</th>
               {visibleMetrics.map((mt) => {
                 const k = "metric:" + mt.id;
                 return (
