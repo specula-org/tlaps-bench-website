@@ -337,9 +337,7 @@ function ModelUsageSummary({ model, selectedMode }) {
 function HubLeaderboard({ showFilters = true, fixedMode = null, fixedCohort = null }) {
   const metricById = useM_lb(() => Object.fromEntries(TLAPS_DATA.metrics.map(m => [m.id, m])), []);
   const modeBlurb = useM_lb(() => Object.fromEntries(TLAPS_DATA.modes.map(m => [m.id, m.blurb])), []);
-  const isInvert = (key) =>
-    (key.startsWith("metric:") && metricById[key.slice(7)]?.invert) ||
-    key === "usage:totalTokens" || key === "usage:equivalentCostUsd";
+  const isInvert = (key) => key.startsWith("metric:") && metricById[key.slice(7)]?.invert;
   const modelCohort = (m) => m.cohort || (m.kind === "agent" ? "agentic" : "one-shot");
 
   const initialMode = fixedMode || "completion";
@@ -371,9 +369,7 @@ function HubLeaderboard({ showFilters = true, fixedMode = null, fixedCohort = nu
     if (metricId === "completion" || metricId === "scratch") return m.perMetric?.[metricId] ?? null;
     return m.perMode?.[selectedMode]?.[metricId] ?? null;
   };
-  const getVal = (m, key) => key.startsWith("metric:")
-    ? getMetricVal(m, key.slice(7))
-    : key.startsWith("usage:") ? m.usage?.[key.slice(6)] : m[key];
+  const getVal = (m, key) => key.startsWith("metric:") ? getMetricVal(m, key.slice(7)) : m[key];
 
   const rows = useM_lb(() => {
     // A model only appears in a mode it actually ran, and only inside its cohort.
@@ -460,7 +456,7 @@ function HubLeaderboard({ showFilters = true, fixedMode = null, fixedCohort = nu
     lastKeyRef.current = { k: sort.key, d: sort.dir, mode: selectedMode, cohort: fixedCohort };
   });
 
-  const colCount = 8 + visibleMetrics.length;
+  const colCount = 6 + visibleMetrics.length;
   const emptyMessage = fixedCohort
     ? `No ${cohortLabels[fixedCohort] || fixedCohort} models scored in this mode yet.`
     : "No models scored in this mode yet.";
@@ -507,37 +503,21 @@ function HubLeaderboard({ showFilters = true, fixedMode = null, fixedCohort = nu
                 return (
                   <th key={mt.id} className={sortCls(k) + " lb-metric"}
                       aria-sort={sortAria(k)} style={{ textAlign: "right" }}>
-                    <button type="button" className="sort-button th-mode" onClick={() => onSort(k)}>
-                      {mt.name} <span className="sort" aria-hidden="true">▾</span>
+                    <button type="button" className="sort-button th-mode" aria-label={mt.name}
+                      onClick={() => onSort(k)}>
+                      Spec-balanced <span className="sort" aria-hidden="true">▾</span>
                       {mt.tip && <span className="col-tip" role="tooltip">{mt.tip}</span>}
                     </button>
                   </th>
                 );
               })}
               <th className="lb-supporting-head" title="Task-micro: passed Core tasks divided by all Core tasks.">
-                Tasks passed
+                Tasks
               </th>
               <th className="lb-supporting-head" title="Specifications where every selected Core task passed.">
-                Specifications completed
+                Specs completed
               </th>
-              <th className={sortCls("usage:totalTokens") + " lb-usage-head"}
-                  aria-sort={sortAria("usage:totalTokens")} title="Input plus output tokens; cached input is included once.">
-                <button type="button" className="sort-button" onClick={() => onSort("usage:totalTokens")}>
-                  Tokens <span className="sort" aria-hidden="true">▾</span>
-                </button>
-              </th>
-              <th className={sortCls("usage:cacheRatePct") + " lb-usage-head"}
-                  aria-sort={sortAria("usage:cacheRatePct")} title="Cached input tokens divided by input tokens.">
-                <button type="button" className="sort-button" onClick={() => onSort("usage:cacheRatePct")}>
-                  Cache rate <span className="sort" aria-hidden="true">▾</span>
-                </button>
-              </th>
-              <th className={sortCls("usage:equivalentCostUsd") + " lb-usage-head"}
-                  aria-sort={sortAria("usage:equivalentCostUsd")} title="Recorded public-API-equivalent price for the full run.">
-                <button type="button" className="sort-button" onClick={() => onSort("usage:equivalentCostUsd")}>
-                  Price <span className="sort" aria-hidden="true">▾</span>
-                </button>
-              </th>
+              <th className="lb-cost-head" title="Tokens, input cache rate, and recorded public-API-equivalent price.">Cost</th>
               <th style={{ width: 32 }}></th>
             </tr>
           </thead>
@@ -592,14 +572,16 @@ function HubLeaderboard({ showFilters = true, fixedMode = null, fixedCohort = nu
                         ? `${modeScore.completeSpecifications}/${modeScore.representedSpecifications}`
                         : "—"}
                     </td>
-                    <td className="lb-supporting-cell" title={`${formatTokens(m.usage.inputTokens)} input + ${formatTokens(m.usage.outputTokens)} output`}>
-                      {formatCompactTokens(m.usage.totalTokens)}
-                    </td>
-                    <td className="lb-supporting-cell" title={`${formatTokens(m.usage.cacheReadInputTokens)} cached input / ${formatTokens(m.usage.inputTokens)} input`}>
-                      {formatPercent(m.usage.cacheRatePct)}
-                    </td>
-                    <td className="lb-supporting-cell" title={`Public API equivalent as of ${m.pricing.asOf}`}>
-                      {formatCostUsd(m.usage.equivalentCostUsd, 2)}
+                    <td className="lb-cost-cell">
+                      <span className="lb-cost-item" title={`${formatTokens(m.usage.inputTokens)} input + ${formatTokens(m.usage.outputTokens)} output`}>
+                        <small>Tokens</small><strong>{formatCompactTokens(m.usage.totalTokens)}</strong>
+                      </span>
+                      <span className="lb-cost-item" title={`${formatTokens(m.usage.cacheReadInputTokens)} cached input / ${formatTokens(m.usage.inputTokens)} input`}>
+                        <small>Cache</small><strong>{formatPercent(m.usage.cacheRatePct)}</strong>
+                      </span>
+                      <span className="lb-cost-item" title={`Public API equivalent as of ${m.pricing.asOf}`}>
+                        <small>Price</small><strong>{formatCostUsd(m.usage.equivalentCostUsd, 2)}</strong>
+                      </span>
                     </td>
                     <td className="expand-cell">
                       <button type="button" className="expand-toggle" aria-expanded={isOpen}

@@ -148,13 +148,17 @@ p.lead { font-family: var(--serif); font-size: 20px; line-height: 1.6; color: va
   margin: 14px 0 0; max-width: 720px;
   font-size: 14px; line-height: 1.6; color: var(--ink-2);
 }
-.lb-supporting-head { width: 170px; text-align: right !important; white-space: nowrap; }
-.lb-usage-head { width: 104px; text-align: right !important; white-space: nowrap; }
-.lb-usage-head .sort-button { justify-content: flex-end; }
+.lb-supporting-head { width: 96px; text-align: right !important; white-space: nowrap; }
+.lb-cost-head { width: 220px; text-align: right !important; white-space: nowrap; }
 .lb-supporting-cell {
   text-align: right !important; color: var(--ink-2); font-family: var(--mono);
   font-size: 12px; font-weight: 500; font-variant-numeric: tabular-nums; white-space: nowrap;
 }
+.lb-cost-cell { min-width: 220px; text-align: right !important; }
+.lb-cost-item { display: inline-flex; min-width: 58px; flex-direction: column; align-items: flex-end; gap: 2px; margin-left: 12px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.lb-cost-item:first-child { margin-left: 0; }
+.lb-cost-item small { font-family: var(--mono); font-size: 8px; font-weight: 500; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.06em; }
+.lb-cost-item strong { font-family: var(--mono); font-size: 11.5px; font-weight: 600; color: var(--ink-2); }
 .usage-summary {
   display: flex; flex-wrap: wrap; gap: 10px 18px;
   margin: 0 0 14px; padding: 12px 14px;
@@ -188,8 +192,9 @@ table.breakdown td.bd-usage-cell {
 .lb-wrap { border: 1px solid var(--line-soft); border-radius: 12px; overflow: visible; -webkit-overflow-scrolling: touch; background: var(--paper); }
 table.lb thead th:first-child { border-top-left-radius: 12px; }
 table.lb thead th:last-child { border-top-right-radius: 12px; }
-table.lb { width: 100%; min-width: 1080px; border-collapse: collapse; font-size: 14px; }
+table.lb { width: 100%; min-width: 980px; border-collapse: collapse; font-size: 14px; }
 table.lb th, table.lb td { text-align: left; padding: 14px 20px; border-bottom: 1px solid var(--line-soft); }
+table.lb th:nth-child(2), table.lb tbody > tr:not(.expand-row) > td:nth-child(2) { min-width: 250px; }
 table.lb thead th { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink-3); font-weight: 500; background: var(--paper-2); user-select: none; border-bottom: 1px solid var(--line-soft); }
 table.lb thead th:hover { color: var(--ink); }
 .sort-button { display: inline-flex; width: 100%; align-items: center; gap: 2px; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; text-align: inherit; text-transform: inherit; letter-spacing: inherit; cursor: pointer; }
@@ -251,6 +256,7 @@ table.lb tr.expand-row > td { padding: 0; border-bottom: 1px solid var(--line-so
 .modelname { font-weight: 600; font-size: 15px; display: flex; align-items: center; gap: 10px; }
 .modelname-text { display: flex; flex-direction: column; line-height: 1.25; min-width: 0; }
 .modelname-main { font-weight: 600; }
+.modelname-main, .modelname-sub { white-space: nowrap; }
 .modelname-sub { font-family: var(--mono); font-size: 11.5px; font-weight: 500; color: var(--ink-2); letter-spacing: 0.02em; margin-top: 2px; }
 .modelname-main .scope-chip { display: inline-block; margin-left: 8px; padding: 1px 6px; border-radius: 999px; border: 1px solid var(--caution-soft); color: var(--caution); background: var(--caution-soft); font-family: var(--mono); font-size: 10px; font-weight: 500; letter-spacing: 0.02em; vertical-align: 1px; cursor: help; }
 .expand-cell { width: 32px; text-align: center !important; }
@@ -454,8 +460,8 @@ hr.sep { border: none; border-top: 1px solid var(--line-soft); margin: 40px 0; }
 /* responsive */
 @media (max-width: 1180px) {
   .lb-wrap { overflow-x: auto; overflow-y: hidden; }
-  table.lb { min-width: 1080px; }
-  .lb-wrap-compact table.lb { min-width: 1080px; }
+  table.lb { min-width: 980px; }
+  .lb-wrap-compact table.lb { min-width: 980px; }
 }
 @media (max-width: 900px) {
   .coverage-grid { grid-template-columns: 1fr; }
