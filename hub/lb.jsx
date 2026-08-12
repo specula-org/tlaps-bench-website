@@ -648,6 +648,7 @@ function HubLeaderboard({ showFilters = true, fixedMode = null, fixedCohort = nu
                             {detailView === "complexity" && m.perComplexity?.[selectedMode] && (() => {
                               const covered = m.perComplexity[selectedMode].reduce((sum, band) => sum + (band.total || 0), 0);
                               const total = m.perMode[selectedMode]?.total ?? TLAPS_DATA.core?.taskCount;
+                              if (!(total > 0) || covered >= total) return null;
                               return (
                                 <div className="complexity-partial-note" role="status">
                                   Partial only — by complexity covers {covered} of {total} Core tasks, not the full suite. Tasks without reference-proof step counts are omitted.

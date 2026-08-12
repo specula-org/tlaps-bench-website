@@ -103,7 +103,8 @@
       "input_tokens": 7681,
       "output_tokens": 1658,
       "sany_valid": false,
-      "source": "TLAPS distribution examples"
+      "source": "TLAPS distribution examples",
+      "gt_proof_steps": 25
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Agreement.tla",
@@ -124,7 +125,8 @@
       "input_tokens": 34280,
       "output_tokens": 12404,
       "sany_valid": false,
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "gt_proof_steps": 18
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Arith_OtherLtFromStrictOverlap.tla",
@@ -146,7 +148,8 @@
       "output_tokens": 1172,
       "sany_valid": true,
       "obligations": 10,
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "gt_proof_steps": 3
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_CardUnion3LeSum.tla",
@@ -167,7 +170,8 @@
       "input_tokens": 15396,
       "output_tokens": 8257,
       "sany_valid": false,
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "gt_proof_steps": 10
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_CrossRoundStrictQuorum.tla",
@@ -189,7 +193,8 @@
       "output_tokens": 386,
       "sany_valid": true,
       "obligations": 5,
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "gt_proof_steps": 2
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_FaultyStepProps.tla",
@@ -210,7 +215,8 @@
       "input_tokens": 27196,
       "output_tokens": 14032,
       "sany_valid": true,
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "gt_proof_steps": 17
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_HighWeightReceivedL11Witness.tla",
@@ -231,7 +237,8 @@
       "input_tokens": 23416,
       "output_tokens": 27276,
       "sany_valid": false,
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "gt_proof_steps": 62
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_InitInd.tla",
@@ -252,7 +259,8 @@
       "input_tokens": 27537,
       "output_tokens": 14826,
       "sany_valid": true,
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "gt_proof_steps": 48
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_LowWeightsReceivedL11Witness.tla",
@@ -273,7 +281,8 @@
       "input_tokens": 20970,
       "output_tokens": 23885,
       "sany_valid": false,
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "gt_proof_steps": 35
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_LowWeightsReceivedL8Witness.tla",
@@ -294,7 +303,8 @@
       "input_tokens": 30526,
       "output_tokens": 29730,
       "sany_valid": false,
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "gt_proof_steps": 70
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_MajorityIntersect.tla",
@@ -315,7 +325,8 @@
       "input_tokens": 15817,
       "output_tokens": 8179,
       "sany_valid": true,
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "gt_proof_steps": 11
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Msgs1Shape.tla",
@@ -337,7 +348,8 @@
       "output_tokens": 2828,
       "sany_valid": true,
       "obligations": 13,
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "gt_proof_steps": 3
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Msgs2AddDRep.tla",
@@ -358,7 +370,8 @@
       "input_tokens": 25696,
       "output_tokens": 9599,
       "sany_valid": false,
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "gt_proof_steps": 12
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Msgs2Decomp.tla",
@@ -379,7 +392,8 @@
       "input_tokens": 17298,
       "output_tokens": 4105,
       "sany_valid": true,
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "gt_proof_steps": 4
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Msgs2SenderPartitionBound.tla",
@@ -400,7 +414,8 @@
       "input_tokens": 20764,
       "output_tokens": 10719,
       "sany_valid": false,
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "gt_proof_steps": 20
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Msgs2Step2Mono.tla",
@@ -421,7 +436,8 @@
       "input_tokens": 20641,
       "output_tokens": 8057,
       "sany_valid": false,
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "gt_proof_steps": 10
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_L1_S3_DecidedCarry.tla",
@@ -442,7 +458,8 @@
       "input_tokens": 33171,
       "output_tokens": 11800,
       "sany_valid": false,
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "gt_proof_steps": 21
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_L1_S3.tla",
@@ -463,7 +480,8 @@
       "input_tokens": 33192,
       "output_tokens": 22210,
       "sany_valid": false,
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "gt_proof_steps": 56
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_L10_S2.tla",
@@ -484,7 +502,8 @@
       "input_tokens": 31296,
       "output_tokens": 9389,
       "sany_valid": false,
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "gt_proof_steps": 20
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_L11_S3.tla",
@@ -505,7 +524,8 @@
       "input_tokens": 33695,
       "output_tokens": 12286,
       "sany_valid": true,
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "gt_proof_steps": 27
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_L12_S1.tla",
@@ -526,7 +546,8 @@
       "input_tokens": 31775,
       "output_tokens": 5887,
       "sany_valid": true,
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "gt_proof_steps": 12
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_L13_S3.tla",
@@ -547,7 +568,8 @@
       "input_tokens": 32111,
       "output_tokens": 23821,
       "sany_valid": false,
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "gt_proof_steps": 47
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_L2_S1.tla",
@@ -568,7 +590,8 @@
       "input_tokens": 28046,
       "output_tokens": 17844,
       "sany_valid": true,
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "gt_proof_steps": 29
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_L3_S2.tla",
@@ -589,7 +612,8 @@
       "input_tokens": 28283,
       "output_tokens": 22760,
       "sany_valid": false,
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "gt_proof_steps": 18
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_L4_S1.tla",
@@ -610,7 +634,8 @@
       "input_tokens": 28671,
       "output_tokens": 15282,
       "sany_valid": false,
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "gt_proof_steps": 42
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_L5_F.tla",
@@ -632,7 +657,8 @@
       "output_tokens": 3496,
       "sany_valid": true,
       "obligations": 6,
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "gt_proof_steps": 5
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_L6_F.tla",
@@ -654,7 +680,8 @@
       "output_tokens": 656,
       "sany_valid": true,
       "obligations": 6,
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "gt_proof_steps": 2
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_L7_S1.tla",
@@ -675,7 +702,8 @@
       "input_tokens": 29935,
       "output_tokens": 7945,
       "sany_valid": false,
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "gt_proof_steps": 11
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_L8_S2.tla",
@@ -697,7 +725,8 @@
       "output_tokens": 16585,
       "sany_valid": true,
       "obligations": 102,
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "gt_proof_steps": 25
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_L9_F.tla",
@@ -718,7 +747,8 @@
       "input_tokens": 31048,
       "output_tokens": 23030,
       "sany_valid": false,
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "gt_proof_steps": 39
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_Lemma12.tla",
@@ -739,7 +769,8 @@
       "input_tokens": 31991,
       "output_tokens": 2298,
       "sany_valid": true,
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "gt_proof_steps": 13
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_Lemma2.tla",
@@ -760,7 +791,8 @@
       "input_tokens": 28160,
       "output_tokens": 1887,
       "sany_valid": true,
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "gt_proof_steps": 1
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_Lemma3.tla",
@@ -781,7 +813,8 @@
       "input_tokens": 28443,
       "output_tokens": 2764,
       "sany_valid": true,
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "gt_proof_steps": 7
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_QuorumIntersect.tla",
@@ -802,7 +835,8 @@
       "input_tokens": 15569,
       "output_tokens": 16183,
       "sany_valid": false,
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "gt_proof_steps": 13
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_QuorumUnique.tla",
@@ -824,7 +858,8 @@
       "output_tokens": 5152,
       "sany_valid": true,
       "obligations": 30,
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "gt_proof_steps": 14
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Senders2_CardLeSet.tla",
@@ -845,7 +880,8 @@
       "input_tokens": 13349,
       "output_tokens": 16163,
       "sany_valid": false,
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "gt_proof_steps": 10
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_StrictQuorumCarriesToQuorumRound.tla",
@@ -866,7 +902,8 @@
       "input_tokens": 34012,
       "output_tokens": 17416,
       "sany_valid": true,
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "gt_proof_steps": 47
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_StrictQuorumNextCorrectType2.tla",
@@ -887,7 +924,8 @@
       "input_tokens": 22742,
       "output_tokens": 1666,
       "sany_valid": true,
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "gt_proof_steps": 9
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_StrictQuorumNextReceiveStrictD.tla",
@@ -908,7 +946,8 @@
       "input_tokens": 23050,
       "output_tokens": 1965,
       "sany_valid": false,
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "gt_proof_steps": 6
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_SupportedSingletonPinsNextM1.tla",
@@ -930,7 +969,8 @@
       "output_tokens": 2621,
       "sany_valid": true,
       "obligations": 16,
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "gt_proof_steps": 7
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_SupportedUnique.tla",
@@ -951,7 +991,8 @@
       "input_tokens": 21415,
       "output_tokens": 12028,
       "sany_valid": true,
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "gt_proof_steps": 21
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_TypePres.tla",
@@ -972,7 +1013,8 @@
       "input_tokens": 27603,
       "output_tokens": 23724,
       "sany_valid": false,
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "gt_proof_steps": 80
     },
     {
       "benchmark": "apalache_examples_tendermint/tendermint_single_indinv_proofs_BoundedMaxExists.tla",
@@ -993,7 +1035,8 @@
       "input_tokens": 36257,
       "output_tokens": 7394,
       "sany_valid": true,
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "gt_proof_steps": 24
     },
     {
       "benchmark": "apalache_examples_tendermint/tendermint_single_indinv_proofs_OnRoundCatchupGivesSender.tla",
@@ -1015,7 +1058,8 @@
       "output_tokens": 7745,
       "sany_valid": true,
       "obligations": 21,
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "gt_proof_steps": 15
     },
     {
       "benchmark": "apalache_examples_tendermint/tendermint_single_indinv_proofs_PastStartRoundQuorumMonotone.tla",
@@ -1036,7 +1080,8 @@
       "input_tokens": 38052,
       "output_tokens": 1523,
       "sany_valid": false,
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "gt_proof_steps": 17
     },
     {
       "benchmark": "apalache_examples_tendermint/tendermint_single_indinv_proofs_PrecommitByCorrectGivesPrevoteQuorum.tla",
@@ -1057,7 +1102,8 @@
       "input_tokens": 28116,
       "output_tokens": 3394,
       "sany_valid": false,
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "gt_proof_steps": 3
     },
     {
       "benchmark": "apalache_examples_tendermint/tendermint_single_indinv_proofs_PrecommitLockContra.tla",
@@ -1078,7 +1124,8 @@
       "input_tokens": 29979,
       "output_tokens": 5201,
       "sany_valid": true,
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "gt_proof_steps": 7
     },
     {
       "benchmark": "apalache_examples_tendermint/tendermint_single_indinv_proofs_PrecommitsLockValueOp.tla",
@@ -1099,7 +1146,8 @@
       "input_tokens": 29421,
       "output_tokens": 7152,
       "sany_valid": true,
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "gt_proof_steps": 22
     },
     {
       "benchmark": "apalache_examples_tendermint/tendermint_single_indinv_proofs_Pres_Bounded_UponProposalInPrevoteOrCommitAndPrevote.tla",
@@ -1121,7 +1169,8 @@
       "output_tokens": 10337,
       "sany_valid": true,
       "obligations": 21,
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "gt_proof_steps": 8
     },
     {
       "benchmark": "apalache_examples_tendermint/tendermint_single_indinv_proofs_Pres_Bounded_UponQuorumOfPrecommitsAny.tla",
@@ -1143,7 +1192,8 @@
       "output_tokens": 7380,
       "sany_valid": true,
       "obligations": 36,
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "gt_proof_steps": 7
     },
     {
       "benchmark": "apalache_examples_tendermint/tendermint_single_indinv_proofs_Pres_PrecommitLocksLaterPrevotes.tla",
@@ -1164,7 +1214,8 @@
       "input_tokens": 36265,
       "output_tokens": 3485,
       "sany_valid": true,
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "gt_proof_steps": 12
     },
     {
       "benchmark": "apalache_examples_tendermint/tendermint_single_indinv_proofs_ProposeRecTyped.tla",
@@ -1185,7 +1236,8 @@
       "input_tokens": 21842,
       "output_tokens": 5207,
       "sany_valid": true,
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "gt_proof_steps": 2
     },
     {
       "benchmark": "apalache_examples_tendermint/tendermint_single_indinv_proofs_PVSetPFlipCard.tla",
@@ -1207,7 +1259,8 @@
       "output_tokens": 625,
       "sany_valid": true,
       "obligations": 10,
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "gt_proof_steps": 2
     },
     {
       "benchmark": "apalache_examples_tendermint/tendermint_single_indinv_proofs_PVSetQuorumMonotone.tla",
@@ -1228,7 +1281,8 @@
       "input_tokens": 28195,
       "output_tokens": 8178,
       "sany_valid": false,
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "gt_proof_steps": 6
     },
     {
       "benchmark": "apalache_examples_tendermint/tendermint_single_indinv_proofs_Q3UnionMonotone.tla",
@@ -1250,7 +1304,8 @@
       "output_tokens": 3208,
       "sany_valid": true,
       "obligations": 15,
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "gt_proof_steps": 5
     },
     {
       "benchmark": "apalache_examples_tendermint/tendermint_single_indinv_proofs_QuorumsIntersectInCorrect.tla",
@@ -1271,7 +1326,8 @@
       "input_tokens": 21377,
       "output_tokens": 20055,
       "sany_valid": false,
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "gt_proof_steps": 41
     },
     {
       "benchmark": "apalache_examples_tendermint/tendermint_single_indinv_proofs_StepChangeChar.tla",
@@ -1292,7 +1348,8 @@
       "input_tokens": 23848,
       "output_tokens": 12625,
       "sany_valid": true,
-      "source": "apalache-examples (Konnov)"
+      "source": "apalache-examples (Konnov)",
+      "gt_proof_steps": 49
     },
     {
       "benchmark": "AtomicBakery/AtomicBakeryWithoutSMT_GGIrreflexive.tla",
@@ -1313,7 +1370,8 @@
       "input_tokens": 9094,
       "output_tokens": 3002,
       "sany_valid": true,
-      "source": "TLAPS distribution examples"
+      "source": "TLAPS distribution examples",
+      "gt_proof_steps": 8
     },
     {
       "benchmark": "AtomicBakery/AtomicBakeryWithoutSMT_InductiveInvariant.tla",
@@ -1334,7 +1392,8 @@
       "input_tokens": 12389,
       "output_tokens": 21331,
       "sany_valid": true,
-      "source": "TLAPS distribution examples"
+      "source": "TLAPS distribution examples",
+      "gt_proof_steps": 137
     },
     {
       "benchmark": "AtomicBakery/AtomicBakeryWithoutSMT_InitImpliesTypeOK.tla",
@@ -1356,7 +1415,8 @@
       "output_tokens": 3374,
       "sany_valid": true,
       "obligations": 17,
-      "source": "TLAPS distribution examples"
+      "source": "TLAPS distribution examples",
+      "gt_proof_steps": 5
     },
     {
       "benchmark": "AtomicBakery/AtomicBakeryWithoutSMT_Safety.tla",
@@ -1377,7 +1437,8 @@
       "input_tokens": 9282,
       "output_tokens": 1689,
       "sany_valid": false,
-      "source": "TLAPS distribution examples"
+      "source": "TLAPS distribution examples",
+      "gt_proof_steps": 2
     },
     {
       "benchmark": "AtomicBakery/AtomicBakeryWithoutSMT_TypeOKInvariant.tla",
@@ -1398,7 +1459,8 @@
       "input_tokens": 9125,
       "output_tokens": 8871,
       "sany_valid": true,
-      "source": "TLAPS distribution examples"
+      "source": "TLAPS distribution examples",
+      "gt_proof_steps": 21
     },
     {
       "benchmark": "Consensus/Consensus_Invariance.tla",
@@ -1419,7 +1481,8 @@
       "input_tokens": 7719,
       "output_tokens": 4944,
       "sany_valid": true,
-      "source": "TLAPS distribution examples"
+      "source": "TLAPS distribution examples",
+      "gt_proof_steps": 3
     },
     {
       "benchmark": "Consensus/PaxosProof_struct_lemma.tla",
@@ -1440,7 +1503,8 @@
       "input_tokens": 10605,
       "output_tokens": 21874,
       "sany_valid": true,
-      "source": "TLAPS distribution examples"
+      "source": "TLAPS distribution examples",
+      "gt_proof_steps": 4
     },
     {
       "benchmark": "Data/Sets_CardinalitySetMinus.tla",
@@ -1461,7 +1525,8 @@
       "input_tokens": 7382,
       "output_tokens": 14664,
       "sany_valid": true,
-      "source": "TLAPS distribution examples"
+      "source": "TLAPS distribution examples",
+      "gt_proof_steps": 20
     },
     {
       "benchmark": "Data/Sets_FiniteSubset.tla",
@@ -1482,7 +1547,8 @@
       "input_tokens": 7423,
       "output_tokens": 7022,
       "sany_valid": false,
-      "source": "TLAPS distribution examples"
+      "source": "TLAPS distribution examples",
+      "gt_proof_steps": 22
     },
     {
       "benchmark": "Data/Sets_IntervalCardinality.tla",
@@ -1503,7 +1569,8 @@
       "input_tokens": 7022,
       "output_tokens": 10171,
       "sany_valid": true,
-      "source": "TLAPS distribution examples"
+      "source": "TLAPS distribution examples",
+      "gt_proof_steps": 8
     },
     {
       "benchmark": "Data/Sets_PigeonHole.tla",
@@ -1524,7 +1591,8 @@
       "input_tokens": 7576,
       "output_tokens": 10291,
       "sany_valid": false,
-      "source": "TLAPS distribution examples"
+      "source": "TLAPS distribution examples",
+      "gt_proof_steps": 22
     },
     {
       "benchmark": "Euclid/GCD_GCD1.tla",
@@ -1545,7 +1613,8 @@
       "input_tokens": 6532,
       "output_tokens": 11492,
       "sany_valid": true,
-      "source": "TLAPS distribution examples"
+      "source": "TLAPS distribution examples",
+      "gt_proof_steps": 4
     },
     {
       "benchmark": "Euclid/GCD_GCD3.tla",
@@ -1566,7 +1635,8 @@
       "input_tokens": 6618,
       "output_tokens": 11895,
       "sany_valid": true,
-      "source": "TLAPS distribution examples"
+      "source": "TLAPS distribution examples",
+      "gt_proof_steps": 3
     },
     {
       "benchmark": "Paxos/Paxos_Consistent.tla",
@@ -1587,7 +1657,8 @@
       "input_tokens": 8633,
       "output_tokens": 16835,
       "sany_valid": true,
-      "source": "TLAPS distribution examples"
+      "source": "TLAPS distribution examples",
+      "gt_proof_steps": 11
     },
     {
       "benchmark": "Paxos/Paxos_Invariant.tla",
@@ -1608,7 +1679,8 @@
       "input_tokens": 8609,
       "output_tokens": 21815,
       "sany_valid": false,
-      "source": "TLAPS distribution examples"
+      "source": "TLAPS distribution examples",
+      "gt_proof_steps": 73
     },
     {
       "benchmark": "Paxos/Paxos_Refinement.tla",
@@ -1629,7 +1701,8 @@
       "input_tokens": 8673,
       "output_tokens": 12048,
       "sany_valid": true,
-      "source": "TLAPS distribution examples"
+      "source": "TLAPS distribution examples",
+      "gt_proof_steps": 8
     },
     {
       "benchmark": "Paxos/Paxos_SafeAtStable.tla",
@@ -1650,7 +1723,8 @@
       "input_tokens": 8609,
       "output_tokens": 16259,
       "sany_valid": true,
-      "source": "TLAPS distribution examples"
+      "source": "TLAPS distribution examples",
+      "gt_proof_steps": 21
     },
     {
       "benchmark": "Paxos/PaxosHistVar_Consistent.tla",
@@ -1671,7 +1745,8 @@
       "input_tokens": 8678,
       "output_tokens": 11661,
       "sany_valid": true,
-      "source": "TLAPS distribution examples"
+      "source": "TLAPS distribution examples",
+      "gt_proof_steps": 11
     },
     {
       "benchmark": "Paxos/PaxosHistVar_Invariant.tla",
@@ -1692,7 +1767,8 @@
       "input_tokens": 8654,
       "output_tokens": 27415,
       "sany_valid": true,
-      "source": "TLAPS distribution examples"
+      "source": "TLAPS distribution examples",
+      "gt_proof_steps": 57
     },
     {
       "benchmark": "SimpleMutex/SimpleMutex_Invariance.tla",
@@ -1714,7 +1790,8 @@
       "output_tokens": 4008,
       "sany_valid": true,
       "obligations": 2,
-      "source": "TLAPS distribution examples"
+      "source": "TLAPS distribution examples",
+      "gt_proof_steps": 13
     },
     {
       "benchmark": "tlaplus_examples_allocator/AllocatorImplementation_proof_TypeCorrect.tla",
@@ -1735,7 +1812,8 @@
       "input_tokens": 9976,
       "output_tokens": 14390,
       "sany_valid": false,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 27
     },
     {
       "benchmark": "tlaplus_examples_allocator/SchedulingAllocator_proof_Mutex.tla",
@@ -1756,7 +1834,8 @@
       "input_tokens": 10652,
       "output_tokens": 10519,
       "sany_valid": false,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 45
     },
     {
       "benchmark": "tlaplus_examples_allocator/SchedulingAllocator_proof_PermSeqsType.tla",
@@ -1777,7 +1856,8 @@
       "input_tokens": 8543,
       "output_tokens": 14746,
       "sany_valid": true,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 24
     },
     {
       "benchmark": "tlaplus_examples_Bakery-Boulangerie/Boulanger_TypeCorrect.tla",
@@ -1798,7 +1878,8 @@
       "input_tokens": 9963,
       "output_tokens": 6993,
       "sany_valid": true,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 16
     },
     {
       "benchmark": "tlaplus_examples_barriers/Barriers_FlushInvariant.tla",
@@ -1819,7 +1900,8 @@
       "input_tokens": 10177,
       "output_tokens": 20795,
       "sany_valid": true,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 61
     },
     {
       "benchmark": "tlaplus_examples_barriers/Barriers_Invariant.tla",
@@ -1840,7 +1922,8 @@
       "input_tokens": 29416,
       "output_tokens": 3775,
       "sany_valid": true,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 255
     },
     {
       "benchmark": "tlaplus_examples_bcastByz/bcastByz_FCConstraints_TypeOK_InitNoBcast.tla",
@@ -1861,7 +1944,8 @@
       "input_tokens": 10780,
       "output_tokens": 12420,
       "sany_valid": true,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 37
     },
     {
       "benchmark": "tlaplus_examples_bcastByz/bcastByz_FCConstraints_TypeOK_Next.tla",
@@ -1882,7 +1966,8 @@
       "input_tokens": 10430,
       "output_tokens": 10386,
       "sany_valid": true,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 134
     },
     {
       "benchmark": "tlaplus_examples_bcastByz/bcastByz_Unforg_Step2.tla",
@@ -1903,7 +1988,8 @@
       "input_tokens": 10584,
       "output_tokens": 24174,
       "sany_valid": true,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 91
     },
     {
       "benchmark": "tlaplus_examples_BlockingQueue/BlockingQueueSplit_proofs_DeadlockFreedom.tla",
@@ -1924,7 +2010,8 @@
       "input_tokens": 8033,
       "output_tokens": 17393,
       "sany_valid": true,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 10
     },
     {
       "benchmark": "tlaplus_examples_BlockingQueue/BlockingQueueSplit_proofs_Implements.tla",
@@ -1946,7 +2033,8 @@
       "output_tokens": 7633,
       "sany_valid": true,
       "obligations": 21,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 4
     },
     {
       "benchmark": "tlaplus_examples_byzpaxos/BPConProof_Invariance.tla",
@@ -1967,7 +2055,8 @@
       "input_tokens": 22791,
       "output_tokens": 17905,
       "sany_valid": true,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 145
     },
     {
       "benchmark": "tlaplus_examples_byzpaxos/BPConProof_MaxBallotLemma2.tla",
@@ -1988,7 +2077,8 @@
       "input_tokens": 19314,
       "output_tokens": 10874,
       "sany_valid": true,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 22
     },
     {
       "benchmark": "tlaplus_examples_byzpaxos/BPConProof_MsgsLemma.tla",
@@ -2009,7 +2099,8 @@
       "input_tokens": 22764,
       "output_tokens": 22357,
       "sany_valid": false,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 65
     },
     {
       "benchmark": "tlaplus_examples_byzpaxos/BPConProof_PNextDef.tla",
@@ -2031,7 +2122,8 @@
       "output_tokens": 2793,
       "sany_valid": true,
       "obligations": 8,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 3
     },
     {
       "benchmark": "tlaplus_examples_byzpaxos/PConProof_NextDef.tla",
@@ -2053,7 +2145,8 @@
       "output_tokens": 1702,
       "sany_valid": true,
       "obligations": 5,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 3
     },
     {
       "benchmark": "tlaplus_examples_byzpaxos/VoteProof_InductiveInvariance.tla",
@@ -2074,7 +2167,8 @@
       "input_tokens": 32674,
       "output_tokens": 1910,
       "sany_valid": true,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 87
     },
     {
       "benchmark": "tlaplus_examples_byzpaxos/VoteProof_Liveness.tla",
@@ -2095,7 +2189,8 @@
       "input_tokens": 13880,
       "output_tokens": 28350,
       "sany_valid": false,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 149
     },
     {
       "benchmark": "tlaplus_examples_byzpaxos/VoteProof_SafeAtProp.tla",
@@ -2116,7 +2211,8 @@
       "input_tokens": 10071,
       "output_tokens": 29415,
       "sany_valid": false,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 12
     },
     {
       "benchmark": "tlaplus_examples_byzpaxos/VoteProof_SafeLemma.tla",
@@ -2137,7 +2233,8 @@
       "input_tokens": 10454,
       "output_tokens": 15348,
       "sany_valid": true,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 22
     },
     {
       "benchmark": "tlaplus_examples_byzpaxos/VoteProof_VT1Prime.tla",
@@ -2158,7 +2255,8 @@
       "input_tokens": 11677,
       "output_tokens": 15876,
       "sany_valid": true,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 2
     },
     {
       "benchmark": "tlaplus_examples_byzpaxos/VoteProof_VT3.tla",
@@ -2179,7 +2277,8 @@
       "input_tokens": 12739,
       "output_tokens": 22674,
       "sany_valid": false,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 28
     },
     {
       "benchmark": "tlaplus_examples_byzpaxos/VoteProof_VT4.tla",
@@ -2200,7 +2299,8 @@
       "input_tokens": 13164,
       "output_tokens": 9541,
       "sany_valid": true,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 23
     },
     {
       "benchmark": "tlaplus_examples_CigaretteSmokers/CigaretteSmokers_proof_UniqueComplement2.tla",
@@ -2221,7 +2321,8 @@
       "input_tokens": 15137,
       "output_tokens": 12839,
       "sany_valid": false,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 42
     },
     {
       "benchmark": "tlaplus_examples_CoffeeCan/CoffeeCan_proof_TypeCorrect.tla",
@@ -2242,7 +2343,8 @@
       "input_tokens": 7026,
       "output_tokens": 5118,
       "sany_valid": true,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 51
     },
     {
       "benchmark": "tlaplus_examples_ewd687a/EWD687a_proof_Invariant1.tla",
@@ -2263,7 +2365,8 @@
       "input_tokens": 8104,
       "output_tokens": 9676,
       "sany_valid": true,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 16
     },
     {
       "benchmark": "tlaplus_examples_ewd687a/EWD687a_proof_Safety.tla",
@@ -2284,7 +2387,8 @@
       "input_tokens": 8346,
       "output_tokens": 12936,
       "sany_valid": false,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 21
     },
     {
       "benchmark": "tlaplus_examples_ewd687a/EWD687a_proof_TreeInvariant.tla",
@@ -2305,7 +2409,8 @@
       "input_tokens": 8296,
       "output_tokens": 17723,
       "sany_valid": true,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 135
     },
     {
       "benchmark": "tlaplus_examples_ewd840/EWD840_proof_EnabledSystem.tla",
@@ -2326,7 +2431,8 @@
       "input_tokens": 8021,
       "output_tokens": 15926,
       "sany_valid": false,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 6
     },
     {
       "benchmark": "tlaplus_examples_ewd840/EWD840_proof_Round1.tla",
@@ -2347,7 +2453,8 @@
       "input_tokens": 8360,
       "output_tokens": 19934,
       "sany_valid": false,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 19
     },
     {
       "benchmark": "tlaplus_examples_ewd840/EWD840_proof_Round2.tla",
@@ -2368,7 +2475,8 @@
       "input_tokens": 8396,
       "output_tokens": 26928,
       "sany_valid": false,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 25
     },
     {
       "benchmark": "tlaplus_examples_ewd840/EWD840_proof_Round3.tla",
@@ -2389,7 +2497,8 @@
       "input_tokens": 8441,
       "output_tokens": 25827,
       "sany_valid": false,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 26
     },
     {
       "benchmark": "tlaplus_examples_ewd840/SyncTerminationDetection_proof_CorrectDetection.tla",
@@ -2410,7 +2519,8 @@
       "input_tokens": 6832,
       "output_tokens": 559,
       "sany_valid": true,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 3
     },
     {
       "benchmark": "tlaplus_examples_ewd840/SyncTerminationDetection_proof_Live.tla",
@@ -2431,7 +2541,8 @@
       "input_tokens": 6964,
       "output_tokens": 11151,
       "sany_valid": false,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 5
     },
     {
       "benchmark": "tlaplus_examples_ewd998/AsyncTerminationDetection_proof_Liveness.tla",
@@ -2453,7 +2564,8 @@
       "output_tokens": 9905,
       "sany_valid": true,
       "obligations": 13,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 5
     },
     {
       "benchmark": "tlaplus_examples_ewd998/AsyncTerminationDetection_proof_Safety.tla",
@@ -2475,7 +2587,8 @@
       "output_tokens": 4073,
       "sany_valid": true,
       "obligations": 9,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 4
     },
     {
       "benchmark": "tlaplus_examples_ewd998/AsyncTerminationDetection_proof_TypeCorrect.tla",
@@ -2497,7 +2610,8 @@
       "output_tokens": 4683,
       "sany_valid": true,
       "obligations": 24,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 4
     },
     {
       "benchmark": "tlaplus_examples_ewd998/EWD998_proof_B0NoMessagePending.tla",
@@ -2518,7 +2632,8 @@
       "input_tokens": 9849,
       "output_tokens": 11138,
       "sany_valid": true,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 7
     },
     {
       "benchmark": "tlaplus_examples_ewd998/EWD998_proof_Detection.tla",
@@ -2539,7 +2654,8 @@
       "input_tokens": 10507,
       "output_tokens": 8939,
       "sany_valid": false,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 8
     },
     {
       "benchmark": "tlaplus_examples_ewd998/EWD998_proof_EnabledAtMaster.tla",
@@ -2560,7 +2676,8 @@
       "input_tokens": 10095,
       "output_tokens": 21282,
       "sany_valid": true,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 19
     },
     {
       "benchmark": "tlaplus_examples_ewd998/EWD998_proof_EnabledSystem.tla",
@@ -2581,7 +2698,8 @@
       "input_tokens": 10005,
       "output_tokens": 15043,
       "sany_valid": false,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 4
     },
     {
       "benchmark": "tlaplus_examples_ewd998/EWD998_proof_Invariance.tla",
@@ -2602,7 +2720,8 @@
       "input_tokens": 15377,
       "output_tokens": 13005,
       "sany_valid": false,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 131
     },
     {
       "benchmark": "tlaplus_examples_ewd998/EWD998_proof_Refinement.tla",
@@ -2623,7 +2742,8 @@
       "input_tokens": 10636,
       "output_tokens": 22470,
       "sany_valid": true,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 46
     },
     {
       "benchmark": "tlaplus_examples_ewd998/EWD998_proof_Round1.tla",
@@ -2644,7 +2764,8 @@
       "input_tokens": 10404,
       "output_tokens": 19271,
       "sany_valid": false,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 21
     },
     {
       "benchmark": "tlaplus_examples_ewd998/EWD998_proof_Round2.tla",
@@ -2665,7 +2786,8 @@
       "input_tokens": 10435,
       "output_tokens": 19557,
       "sany_valid": false,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 30
     },
     {
       "benchmark": "tlaplus_examples_ewd998/EWD998_proof_Round3.tla",
@@ -2686,7 +2808,8 @@
       "input_tokens": 10477,
       "output_tokens": 26296,
       "sany_valid": false,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 41
     },
     {
       "benchmark": "tlaplus_examples_ewd998/EWD998_proof_Safety.tla",
@@ -2707,7 +2830,8 @@
       "input_tokens": 9741,
       "output_tokens": 14327,
       "sany_valid": true,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 29
     },
     {
       "benchmark": "tlaplus_examples_ewd998/EWD998_proof_SumZero.tla",
@@ -2728,7 +2852,8 @@
       "input_tokens": 9647,
       "output_tokens": 8323,
       "sany_valid": false,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 11
     },
     {
       "benchmark": "tlaplus_examples_ewd998/EWD998_proof_TerminationDetectionInv.tla",
@@ -2750,7 +2875,8 @@
       "output_tokens": 1479,
       "sany_valid": true,
       "obligations": 12,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 4
     },
     {
       "benchmark": "tlaplus_examples_ewd998/EWD998PCal_proof_InitNetworkOK.tla",
@@ -2771,7 +2897,8 @@
       "input_tokens": 10918,
       "output_tokens": 10810,
       "sany_valid": true,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 33
     },
     {
       "benchmark": "tlaplus_examples_ewd998/EWD998PCal_proof_TypeOK_Step.tla",
@@ -2792,7 +2919,8 @@
       "input_tokens": 11549,
       "output_tokens": 25579,
       "sany_valid": false,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 340
     },
     {
       "benchmark": "tlaplus_examples_FiniteMonotonic/CRDT_proof_EnabledGossip.tla",
@@ -2813,7 +2941,8 @@
       "input_tokens": 8006,
       "output_tokens": 9552,
       "sany_valid": true,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 9
     },
     {
       "benchmark": "tlaplus_examples_FiniteMonotonic/CRDT_proof_GossipDecreasesMeasure.tla",
@@ -2834,7 +2963,8 @@
       "input_tokens": 7910,
       "output_tokens": 15516,
       "sany_valid": false,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 4
     },
     {
       "benchmark": "tlaplus_examples_FiniteMonotonic/CRDT_proof_GossipDoesntIncreaseMeasure.tla",
@@ -2855,7 +2985,8 @@
       "input_tokens": 7855,
       "output_tokens": 13522,
       "sany_valid": false,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 9
     },
     {
       "benchmark": "tlaplus_examples_FiniteMonotonic/CRDT_proof_MeasureIsZero.tla",
@@ -2876,7 +3007,8 @@
       "input_tokens": 7743,
       "output_tokens": 12461,
       "sany_valid": false,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 5
     },
     {
       "benchmark": "tlaplus_examples_FiniteMonotonic/CRDT_proof_MeasureType.tla",
@@ -2898,7 +3030,8 @@
       "output_tokens": 3989,
       "sany_valid": true,
       "obligations": 19,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 2
     },
     {
       "benchmark": "tlaplus_examples_FiniteMonotonic/CRDT_proof_OGLiveness.tla",
@@ -2919,7 +3052,8 @@
       "input_tokens": 18536,
       "output_tokens": 18620,
       "sany_valid": false,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 63
     },
     {
       "benchmark": "tlaplus_examples_FiniteMonotonic/CRDT_proof_Safe.tla",
@@ -2940,7 +3074,8 @@
       "input_tokens": 13643,
       "output_tokens": 8088,
       "sany_valid": true,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 3
     },
     {
       "benchmark": "tlaplus_examples_FiniteMonotonic/CRDT_proof_SumStronglyMonotonic.tla",
@@ -2961,7 +3096,8 @@
       "input_tokens": 7346,
       "output_tokens": 3082,
       "sany_valid": false,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 8
     },
     {
       "benchmark": "tlaplus_examples_FiniteMonotonic/CRDT_proof_SumType.tla",
@@ -2982,7 +3118,8 @@
       "input_tokens": 7128,
       "output_tokens": 1617,
       "sany_valid": false,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 3
     },
     {
       "benchmark": "tlaplus_examples_FiniteMonotonic/CRDT_proof_SumWeaklyMonotonic.tla",
@@ -3003,7 +3140,8 @@
       "input_tokens": 7270,
       "output_tokens": 1506,
       "sany_valid": false,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 7
     },
     {
       "benchmark": "tlaplus_examples_glowingRaccoon/clean_proof_Preservation.tla",
@@ -3024,7 +3162,8 @@
       "input_tokens": 7128,
       "output_tokens": 7738,
       "sany_valid": true,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 37
     },
     {
       "benchmark": "tlaplus_examples_glowingRaccoon/clean_proof_TypeCorrect.tla",
@@ -3045,7 +3184,8 @@
       "input_tokens": 7094,
       "output_tokens": 3322,
       "sany_valid": true,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 20
     },
     {
       "benchmark": "tlaplus_examples_glowingRaccoon/stages_proof_TypeCorrect.tla",
@@ -3066,7 +3206,8 @@
       "input_tokens": 7648,
       "output_tokens": 6183,
       "sany_valid": true,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 19
     },
     {
       "benchmark": "tlaplus_examples_KeyValueStore/KeyValueStore_proof_TypeAndLifecycle.tla",
@@ -3087,7 +3228,8 @@
       "input_tokens": 7555,
       "output_tokens": 446,
       "sany_valid": true,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 13
     },
     {
       "benchmark": "tlaplus_examples_lamport_mutex/LamportMutex_proofs_BasicInvariant.tla",
@@ -3108,7 +3250,8 @@
       "input_tokens": 9105,
       "output_tokens": 25109,
       "sany_valid": true,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 131
     },
     {
       "benchmark": "tlaplus_examples_lamport_mutex/LamportMutex_proofs_ClockInvariant.tla",
@@ -3129,7 +3272,8 @@
       "input_tokens": 9360,
       "output_tokens": 18600,
       "sany_valid": false,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 129
     },
     {
       "benchmark": "tlaplus_examples_lamport_mutex/LamportMutex_proofs_TypeCorrect.tla",
@@ -3150,7 +3294,8 @@
       "input_tokens": 7635,
       "output_tokens": 18536,
       "sany_valid": true,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 25
     },
     {
       "benchmark": "tlaplus_examples_locks_auxiliary_vars/Lock_MutualExclusion.tla",
@@ -3171,7 +3316,8 @@
       "input_tokens": 7053,
       "output_tokens": 7668,
       "sany_valid": true,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 11
     },
     {
       "benchmark": "tlaplus_examples_locks_auxiliary_vars/LockHS_IndInvHS.tla",
@@ -3192,7 +3338,8 @@
       "input_tokens": 9595,
       "output_tokens": 15474,
       "sany_valid": true,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 34
     },
     {
       "benchmark": "tlaplus_examples_locks_auxiliary_vars/Peterson_Refinement.tla",
@@ -3213,7 +3360,8 @@
       "input_tokens": 7964,
       "output_tokens": 14289,
       "sany_valid": true,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 14
     },
     {
       "benchmark": "tlaplus_examples_LoopInvariance/BinarySearch_SortedLess.tla",
@@ -3234,7 +3382,8 @@
       "input_tokens": 6755,
       "output_tokens": 2329,
       "sany_valid": false,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 2
     },
     {
       "benchmark": "tlaplus_examples_LoopInvariance/Quicksort_NonemptyMin.tla",
@@ -3255,7 +3404,8 @@
       "input_tokens": 7563,
       "output_tokens": 13578,
       "sany_valid": true,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 23
     },
     {
       "benchmark": "tlaplus_examples_LoopInvariance/SumSequence_Lemma2.tla",
@@ -3276,7 +3426,8 @@
       "input_tokens": 8590,
       "output_tokens": 8383,
       "sany_valid": false,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 4
     },
     {
       "benchmark": "tlaplus_examples_LoopInvariance/SumSequence_Lemma3.tla",
@@ -3297,7 +3448,8 @@
       "input_tokens": 8699,
       "output_tokens": 11123,
       "sany_valid": true,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 13
     },
     {
       "benchmark": "tlaplus_examples_LoopInvariance/SumSequence_Lemma4.tla",
@@ -3318,7 +3470,8 @@
       "input_tokens": 8788,
       "output_tokens": 5707,
       "sany_valid": false,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 16
     },
     {
       "benchmark": "tlaplus_examples_Majority/MajorityProof_Correctness.tla",
@@ -3339,7 +3492,8 @@
       "input_tokens": 7234,
       "output_tokens": 25934,
       "sany_valid": true,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 21
     },
     {
       "benchmark": "tlaplus_examples_Majority/MajorityProof_OccurrencesPlusOne.tla",
@@ -3360,7 +3514,8 @@
       "input_tokens": 7214,
       "output_tokens": 4087,
       "sany_valid": false,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 7
     },
     {
       "benchmark": "tlaplus_examples_Majority/MajorityProof_TypeCorrect.tla",
@@ -3382,7 +3537,8 @@
       "output_tokens": 2646,
       "sany_valid": true,
       "obligations": 6,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 3
     },
     {
       "benchmark": "tlaplus_examples_MisraReachability/ParReachProofs_TypeInvariant.tla",
@@ -3403,7 +3559,8 @@
       "input_tokens": 8101,
       "output_tokens": 14509,
       "sany_valid": false,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 3
     },
     {
       "benchmark": "tlaplus_examples_MisraReachability/ReachabilityProofs_Reachable2.tla",
@@ -3424,7 +3581,8 @@
       "input_tokens": 7341,
       "output_tokens": 20242,
       "sany_valid": true,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 13
     },
     {
       "benchmark": "tlaplus_examples_MisraReachability/ReachableProofs_Thm2.tla",
@@ -3445,7 +3603,8 @@
       "input_tokens": 7985,
       "output_tokens": 2904,
       "sany_valid": false,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 2
     },
     {
       "benchmark": "tlaplus_examples_MisraReachability/ReachableProofs_Thm3.tla",
@@ -3466,7 +3625,8 @@
       "input_tokens": 8168,
       "output_tokens": 6355,
       "sany_valid": true,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 20
     },
     {
       "benchmark": "tlaplus_examples_MissionariesAndCannibals/MissionariesAndCannibals_proof_TypeCorrect.tla",
@@ -3488,7 +3648,8 @@
       "output_tokens": 2416,
       "sany_valid": true,
       "obligations": 8,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 23
     },
     {
       "benchmark": "tlaplus_examples_MultiCarElevator/Elevator_proof_Inv1Next.tla",
@@ -3509,7 +3670,8 @@
       "input_tokens": 9768,
       "output_tokens": 20093,
       "sany_valid": false,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 84
     },
     {
       "benchmark": "tlaplus_examples_Paxos/Consensus_LivenessTheorem.tla",
@@ -3530,7 +3692,8 @@
       "input_tokens": 6758,
       "output_tokens": 4365,
       "sany_valid": false,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 6
     },
     {
       "benchmark": "tlaplus_examples_PaxosHowToWinATuringAward/Voting_Implementation.tla",
@@ -3551,7 +3714,8 @@
       "input_tokens": 9713,
       "output_tokens": 22266,
       "sany_valid": false,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 3
     },
     {
       "benchmark": "tlaplus_examples_PaxosHowToWinATuringAward/Voting_Invariance.tla",
@@ -3572,7 +3736,8 @@
       "input_tokens": 9380,
       "output_tokens": 20806,
       "sany_valid": false,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 3
     },
     {
       "benchmark": "tlaplus_examples_PaxosHowToWinATuringAward/Voting_proof_ShowsSafety_T.tla",
@@ -3594,7 +3759,8 @@
       "output_tokens": 3876,
       "sany_valid": true,
       "obligations": 2,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 38
     },
     {
       "benchmark": "tlaplus_examples_ReadersWriters/ReadersWriters_proof_TypeCorrect.tla",
@@ -3615,7 +3781,8 @@
       "input_tokens": 7566,
       "output_tokens": 16281,
       "sany_valid": true,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 36
     },
     {
       "benchmark": "tlaplus_examples_spanning/spanning_proof_SntMsgStep.tla",
@@ -3636,7 +3803,8 @@
       "input_tokens": 7385,
       "output_tokens": 15089,
       "sany_valid": false,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 67
     },
     {
       "benchmark": "tlaplus_examples_tcp/tcp_proof_IndInvInit.tla",
@@ -3657,7 +3825,8 @@
       "input_tokens": 11315,
       "output_tokens": 3183,
       "sany_valid": true,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 10
     },
     {
       "benchmark": "tlaplus_examples_tcp/tcp_proof_IndInvReset.tla",
@@ -3678,7 +3847,8 @@
       "input_tokens": 11997,
       "output_tokens": 26963,
       "sany_valid": true,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 239
     },
     {
       "benchmark": "tlaplus_examples_tcp/tcp_proof_IndInvSystem.tla",
@@ -3699,7 +3869,8 @@
       "input_tokens": 11873,
       "output_tokens": 32921,
       "sany_valid": true,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 1433
     },
     {
       "benchmark": "tlaplus_examples_tcp/tcp_proof_IndInvUser.tla",
@@ -3720,7 +3891,8 @@
       "input_tokens": 11695,
       "output_tokens": 32299,
       "sany_valid": false,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 601
     },
     {
       "benchmark": "tlaplus_examples_tcp/tcp_proof_PrefixTwoNonEmpty.tla",
@@ -3742,7 +3914,8 @@
       "output_tokens": 5531,
       "sany_valid": true,
       "obligations": 7,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 5
     },
     {
       "benchmark": "tlaplus_examples_tcp/tcp_proof_TypeOKInductive.tla",
@@ -3763,7 +3936,8 @@
       "input_tokens": 10178,
       "output_tokens": 16980,
       "sany_valid": true,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 116
     },
     {
       "benchmark": "tlaplus_examples_TeachingConcurrency/Simple_Correctness.tla",
@@ -3784,7 +3958,8 @@
       "input_tokens": 7780,
       "output_tokens": 11494,
       "sany_valid": true,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 10
     },
     {
       "benchmark": "tlaplus_examples_TeachingConcurrency/SimpleRegular_Correctness.tla",
@@ -3805,7 +3980,8 @@
       "input_tokens": 8146,
       "output_tokens": 14941,
       "sany_valid": false,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 15
     },
     {
       "benchmark": "tlaplus_examples_TencentPaxos/TPaxosWithProof_AcceptMsgInv.tla",
@@ -3826,7 +4002,8 @@
       "input_tokens": 10823,
       "output_tokens": 30346,
       "sany_valid": false,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 128
     },
     {
       "benchmark": "tlaplus_examples_TencentPaxos/TPaxosWithProof_Consistent.tla",
@@ -3848,7 +4025,8 @@
       "output_tokens": 15037,
       "sany_valid": true,
       "obligations": 142,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 11
     },
     {
       "benchmark": "tlaplus_examples_TencentPaxos/TPaxosWithProof_Invariant.tla",
@@ -3869,7 +4047,8 @@
       "input_tokens": 10976,
       "output_tokens": 23496,
       "sany_valid": true,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 105
     },
     {
       "benchmark": "tlaplus_examples_TencentPaxos/TPaxosWithProof_OnMessageAccInv.tla",
@@ -3890,7 +4069,8 @@
       "input_tokens": 10976,
       "output_tokens": 25563,
       "sany_valid": false,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 132
     },
     {
       "benchmark": "tlaplus_examples_TencentPaxos/TPaxosWithProof_OnMessageMsgInv.tla",
@@ -3911,7 +4091,8 @@
       "input_tokens": 10939,
       "output_tokens": 16168,
       "sany_valid": false,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 53
     },
     {
       "benchmark": "tlaplus_examples_TencentPaxos/TPaxosWithProof_PrepareMsgInv.tla",
@@ -3932,7 +4113,8 @@
       "input_tokens": 10355,
       "output_tokens": 17999,
       "sany_valid": false,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 65
     },
     {
       "benchmark": "tlaplus_examples_TencentPaxos/TPaxosWithProof_SafeAtStable.tla",
@@ -3953,7 +4135,8 @@
       "input_tokens": 10313,
       "output_tokens": 20913,
       "sany_valid": false,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 62
     },
     {
       "benchmark": "tlaplus_examples_TencentPaxos/TPaxosWithProof_UpdateStateMsgInv.tla",
@@ -3974,7 +4157,8 @@
       "input_tokens": 10904,
       "output_tokens": 23946,
       "sany_valid": false,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 157
     },
     {
       "benchmark": "tlaplus_examples_TencentPaxos/TPaxosWithProof_UpdateStateTypeOKProperty.tla",
@@ -3996,7 +4180,8 @@
       "output_tokens": 7337,
       "sany_valid": true,
       "obligations": 13,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 6
     },
     {
       "benchmark": "tlaplus_examples_TencentPaxos/TPaxosWithProof_UpdateStateValue.tla",
@@ -4017,7 +4202,8 @@
       "input_tokens": 10757,
       "output_tokens": 10652,
       "sany_valid": true,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 24
     },
     {
       "benchmark": "tlaplus_examples_TencentPaxos/TPaxosWithProof_UpdateStateViewValue.tla",
@@ -4038,7 +4224,8 @@
       "input_tokens": 10564,
       "output_tokens": 18984,
       "sany_valid": true,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 49
     },
     {
       "benchmark": "tlaplus_examples_Termination/Termination_proof_Invariant2.tla",
@@ -4059,7 +4246,8 @@
       "input_tokens": 7509,
       "output_tokens": 23261,
       "sany_valid": true,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 57
     },
     {
       "benchmark": "tlaplus_examples_transaction_commit/PaxosCommit_proof_MaximumProp.tla",
@@ -4080,7 +4268,8 @@
       "input_tokens": 9506,
       "output_tokens": 23718,
       "sany_valid": false,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 69
     },
     {
       "benchmark": "tlaplus_examples_transaction_commit/PaxosCommit_proof_NextInv.tla",
@@ -4101,7 +4290,8 @@
       "input_tokens": 9685,
       "output_tokens": 22864,
       "sany_valid": true,
-      "source": "tlaplus/Examples"
+      "source": "tlaplus/Examples",
+      "gt_proof_steps": 103
     }
   ]
 }

@@ -68,6 +68,13 @@ const BACKEND_INFO = {
     logo: null,
     kind: "base",
   },
+  "codex-single-turn-gpt-5.6-sol-max": {
+    name: "GPT-5.6-Sol",
+    subname: "OpenAI Codex (max)",
+    org: "OpenAI",
+    logo: null,
+    kind: "base",
+  },
   "codex-single-turn-gpt-5.6-luna": {
     name: "GPT-5.6-Luna",
     subname: "OpenAI Codex (xhigh)",
@@ -89,6 +96,7 @@ const PUBLISHED_BACKENDS = new Set([
   "codex-gpt-5.6-sol",
   "codex-single-turn-gpt-5.6-sol",
   "codex-single-turn-gpt-5.6-sol-xhigh",
+  "codex-single-turn-gpt-5.6-sol-max",
   "codex-single-turn-gpt-5.6-luna",
   "codex-single-turn-gpt-5.6-terra",
 ]);
@@ -124,6 +132,12 @@ const OUTPUT_PRICING = {
     usdPerMillionTokens: 30,
     tier: "standard",
     asOf: "2026-08-10",
+    source: "https://developers.openai.com/api/docs/models",
+  },
+  "codex-single-turn-gpt-5.6-sol-max": {
+    usdPerMillionTokens: 30,
+    tier: "standard",
+    asOf: "2026-08-12",
     source: "https://developers.openai.com/api/docs/models",
   },
   "codex-single-turn-gpt-5.6-terra": {
@@ -237,11 +251,16 @@ const serializeTaskManifest = (rows) => JSON.stringify(
 );
 const canonicalTaskManifest = serializeTaskManifest(CORE_TASKS);
 
+// Complexity bands prefer per-result gt_proof_steps when present; core-complexity.json
+// is the fallback catalog for tasks that omit them.
 const complexityByTask = new Map();
 const complexityCatalog = JSON.parse(readFileSync("results/core-complexity.json", "utf8"));
 for (const [benchmark, steps] of Object.entries(complexityCatalog.steps ?? {})) {
   if (!Number.isInteger(steps) || steps < 0) {
     throw new Error(`results/core-complexity.json: invalid steps for ${benchmark}`);
+  }
+  if (!CORE_BY_BENCHMARK.has(benchmark)) {
+    throw new Error(`results/core-complexity.json: ${benchmark} is not in Core`);
   }
   complexityByTask.set(benchmark, steps);
 }
