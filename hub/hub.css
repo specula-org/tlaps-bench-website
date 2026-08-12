@@ -286,7 +286,7 @@ table.lb tr.expand-row > td { padding: 0; border-bottom: 1px solid var(--line-so
 /* Expanded model details: the full per-spec score table. */
 .bd-scroll { max-height: min(68vh, 680px); overflow: auto; border: 1px solid var(--line-soft); border-radius: 9px; background: var(--paper); -webkit-overflow-scrolling: touch; }
 table.breakdown { width: 100%; min-width: 1300px; border-collapse: separate; border-spacing: 0; }
-table.breakdown thead th { position: sticky; top: 0; z-index: 3; text-align: left; font-family: var(--mono); font-size: 15px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-3); font-weight: 500; padding: 11px 14px; border-bottom: 1px solid var(--line); background: var(--paper); white-space: nowrap; }
+table.breakdown thead th { position: sticky; top: 0; z-index: 3; text-align: left; font-family: var(--mono); font-size: 14px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-3); font-weight: 500; padding: 11px 14px; border-bottom: 1px solid var(--line); background: var(--paper); white-space: nowrap; }
 table.breakdown th.bd-mode { text-align: right; width: 210px; }
 table.breakdown th.bd-usage-head { min-width: 170px; text-align: right; }
 table.breakdown td { padding: 9px 14px; border-bottom: 1px solid var(--line-soft); vertical-align: middle; background: var(--paper); }
@@ -333,7 +333,7 @@ table.task-table th:nth-child(3) { width: 14%; }
 table.task-table th:nth-child(4) { width: 14%; }
 table.task-table th:nth-child(5) { width: 12%; }
 table.task-table th:nth-child(6) { width: 14%; }
-table.task-table th { position: sticky; top: 0; z-index: 3; padding: 11px 13px; border-bottom: 1px solid var(--line); background: var(--paper); color: var(--ink-3); font-family: var(--mono); font-size: 14.5px; font-weight: 500; text-align: left; text-transform: uppercase; letter-spacing: 0.07em; white-space: nowrap; }
+table.task-table th { position: sticky; top: 0; z-index: 3; padding: 11px 13px; border-bottom: 1px solid var(--line); background: var(--paper); color: var(--ink-3); font-family: var(--mono); font-size: 13.5px; font-weight: 500; text-align: left; text-transform: uppercase; letter-spacing: 0.07em; white-space: nowrap; }
 table.task-table th:nth-child(n+3) { text-align: right; }
 .task-sort-button { display: inline-flex; width: 100%; align-items: center; gap: 2px; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; text-align: inherit; text-transform: inherit; letter-spacing: inherit; cursor: pointer; }
 table.task-table th:nth-child(n+3) .task-sort-button { justify-content: flex-end; }
