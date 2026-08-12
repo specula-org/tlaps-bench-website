@@ -44,15 +44,15 @@ a.link:hover { text-decoration: underline; }
 .nav-inner { max-width: 1180px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; padding: 14px 32px; }
 .nav-brand { display: flex; align-items: center; gap: 10px; cursor: pointer; }
 .nav-brand-logo { display: block; width: 28px; height: 28px; flex: 0 0 28px; border: 1px solid var(--line-soft); border-radius: 7px; object-fit: cover; }
-.nav-brand-name { font-family: var(--serif); font-weight: 600; font-size: 18px; letter-spacing: -0.01em; }
+.nav-brand-name { font-family: var(--serif); font-weight: 600; font-size: 20px; letter-spacing: -0.01em; }
 .nav-right { display: flex; align-items: center; gap: 12px; }
 .nav-actions { display: flex; align-items: center; gap: 6px; }
 .nav-links { display: flex; gap: 4px; align-items: center; }
 .nav-links .nav-cta { margin-left: 8px; }
-.nav-link { font-size: 13px; font-weight: 500; padding: 8px 14px; color: var(--ink-2); border-radius: 6px; cursor: pointer; transition: color 200ms, background 200ms; }
+.nav-link { font-size: 15px; font-weight: 500; padding: 8px 14px; color: var(--ink-2); border-radius: 6px; cursor: pointer; transition: color 200ms, background 200ms; }
 .nav-link:hover { color: var(--ink); background: var(--paper-2); }
 .nav-link.active { color: var(--accent); }
-.nav-cta { font-family: var(--sans); font-size: 13px; font-weight: 500; padding: 7px 14px; border-radius: 6px; border: 1px solid var(--line); display: inline-flex; align-items: center; gap: 6px; color: var(--ink); transition: border-color 200ms, background 200ms, color 200ms; }
+.nav-cta { font-family: var(--sans); font-size: 15px; font-weight: 500; padding: 7px 14px; border-radius: 6px; border: 1px solid var(--line); display: inline-flex; align-items: center; gap: 6px; color: var(--ink); transition: border-color 200ms, background 200ms, color 200ms; }
 .nav-cta:hover { background: var(--ink); color: var(--paper); border-color: var(--ink); }
 .theme-toggle { width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; border: 1px solid var(--line); background: var(--paper); color: var(--ink-2); cursor: pointer; font-size: 14px; transition: background 200ms, color 200ms, border-color 200ms; }
 .theme-toggle:hover { background: var(--paper-2); color: var(--ink); border-color: var(--line); }
@@ -296,23 +296,35 @@ table.lb tr.expand-row > td { padding: 0; border-bottom: 1px solid var(--line-so
 .detail-tabs button { padding: 6px 11px; border: 0; border-radius: 5px; background: transparent; color: var(--ink-3); font-family: var(--mono); font-size: 13px; cursor: pointer; }
 .detail-tabs button:hover { color: var(--ink); }
 .detail-tabs button.active { background: var(--paper); color: var(--ink); box-shadow: 0 1px 3px rgba(20, 32, 43, 0.12); }
-/* Expanded model details: the full per-spec score table. */
+/* Expanded model details: the full per-spec score table.
+   Fixed columns keep Spec / Source / Pass / usage metrics aligned across every row. */
 .bd-scroll { max-height: min(68vh, 680px); overflow: auto; border: 1px solid var(--line-soft); border-radius: 9px; background: var(--paper); -webkit-overflow-scrolling: touch; }
-table.breakdown { width: 100%; min-width: 1300px; border-collapse: separate; border-spacing: 0; }
+table.breakdown { width: 100%; min-width: 1500px; table-layout: fixed; border-collapse: separate; border-spacing: 0; }
 table.breakdown thead th { position: sticky; top: 0; z-index: 3; text-align: left; font-family: var(--mono); font-size: 14px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-3); font-weight: 500; padding: 11px 14px; border-bottom: 1px solid var(--line); background: var(--paper); white-space: nowrap; }
-table.breakdown th.bd-mode { text-align: right; width: 210px; }
-table.breakdown th.bd-usage-head { min-width: 170px; text-align: right; }
+table.breakdown th:nth-child(1),
+table.breakdown td:nth-child(1) { width: 240px; }
+table.breakdown th:nth-child(2),
+table.breakdown td:nth-child(2) { width: 200px; }
+table.breakdown th:nth-child(3),
+table.breakdown td:nth-child(3) { width: 210px; }
+table.breakdown th:nth-child(n+4),
+table.breakdown td:nth-child(n+4) { width: 200px; }
+table.breakdown th.bd-mode { text-align: right; }
+table.breakdown th.bd-usage-head { text-align: right; }
 table.breakdown td { padding: 9px 14px; border-bottom: 1px solid var(--line-soft); vertical-align: middle; background: var(--paper); }
 table.breakdown tbody tr:last-child td { border-bottom: none; }
-.bd-name { font-family: var(--mono); font-size: 13px; color: var(--ink-2); padding-right: 24px !important; }
-.bd-name.spec-name { min-width: 220px; color: var(--ink); text-transform: none; letter-spacing: 0; font-weight: 500; white-space: nowrap; }
-.bd-name.spec-name a, .dataset-score-source a { transition: color 160ms; }
+.bd-name { font-family: var(--mono); font-size: 13px; color: var(--ink-2); padding-right: 24px !important; overflow: hidden; text-overflow: ellipsis; }
+.bd-name.spec-name { color: var(--ink); text-transform: none; letter-spacing: 0; font-weight: 500; white-space: nowrap; }
+.bd-name.spec-name a, .dataset-score-source a {
+  display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  transition: color 160ms;
+}
 .bd-name.spec-name a::after, .dataset-score-source a::after { content: "\2197"; margin-left: 6px; color: var(--ink-3); font-size: 9px; opacity: 0; transition: opacity 160ms, color 160ms; }
 .bd-name.spec-name a:hover, .dataset-score-source a:hover { color: var(--accent); }
 .bd-name.spec-name a:hover::after, .dataset-score-source a:hover::after { opacity: 1; color: var(--accent); }
 .bd-cell { text-align: right; }
 .dataset-score-spec-row:hover td { background: var(--paper-2); }
-.dataset-score-source { min-width: 190px; font-family: var(--mono); font-size: 13px; color: var(--ink-3); white-space: nowrap; }
+.dataset-score-source { font-family: var(--mono); font-size: 13px; color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 /* Value cells and the -- placeholder occupy the same fixed-width band (60+46+54 + 2*10
    gaps = 180px), right-aligned in the column. The placeholder centers within that band
    so it lines up with the bars/percentages instead of drifting to one side. */
@@ -320,13 +332,13 @@ table.breakdown tbody tr:last-child td { border-bottom: none; }
 .bd-bar { width: 60px; }
 .bd-rate { font-family: var(--mono); font-weight: 600; font-size: 14px; text-align: right; font-variant-numeric: tabular-nums; }
 .bd-num { font-family: var(--mono); font-weight: 400; font-size: 12px; color: var(--ink-3); text-align: right; font-variant-numeric: tabular-nums; }
-.band-note { display: block; font-family: var(--sans); font-weight: 400; font-size: 12.5px; color: var(--ink-3); margin-top: 1px; }
+.band-note { display: block; font-family: var(--sans); font-weight: 400; font-size: 12.5px; color: var(--ink-3); margin-top: 1px; overflow: hidden; text-overflow: ellipsis; }
 .bd-num .scope-partial { font-style: normal; color: var(--caution); cursor: help; }
 .bd-na { display: inline-flex; justify-content: center; width: 180px; font-family: var(--mono); font-size: 14px; color: var(--ink-3); }
-.bd-usage-cell { min-width: 170px; text-align: right; }
-.bd-usage-value { display: inline-flex; flex-direction: column; align-items: flex-end; gap: 3px; font-family: var(--mono); font-size: 13px; font-weight: 600; color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.bd-usage-cell { text-align: right; }
+.bd-usage-value { display: inline-flex; width: 100%; flex-direction: column; align-items: flex-end; gap: 3px; font-family: var(--mono); font-size: 13px; font-weight: 600; color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .bd-usage-value small { color: var(--ink-3); font-size: 10px; font-weight: 400; }
-.bd-usage-na { color: var(--ink-3); font-family: var(--mono); font-size: 13px; }
+.bd-usage-na { display: inline-block; width: 100%; text-align: right; color: var(--ink-3); font-family: var(--mono); font-size: 13px; }
 
 /* Per-task verdict and usage table. */
 .task-toolbar { display: flex; align-items: center; gap: 8px; margin-bottom: 9px; }
@@ -346,7 +358,7 @@ table.task-table th:nth-child(3) { width: 14%; }
 table.task-table th:nth-child(4) { width: 14%; }
 table.task-table th:nth-child(5) { width: 12%; }
 table.task-table th:nth-child(6) { width: 14%; }
-table.task-table th { position: sticky; top: 0; z-index: 3; padding: 11px 13px; border-bottom: 1px solid var(--line); background: var(--paper); color: var(--ink-3); font-family: var(--mono); font-size: 12.5px; font-weight: 500; text-align: left; text-transform: uppercase; letter-spacing: 0.07em; white-space: nowrap; }
+table.task-table th { position: sticky; top: 0; z-index: 3; padding: 11px 13px; border-bottom: 1px solid var(--line); background: var(--paper); color: var(--ink-3); font-family: var(--mono); font-size: 15.5px; font-weight: 500; text-align: left; text-transform: uppercase; letter-spacing: 0.07em; white-space: nowrap; }
 table.task-table th:nth-child(n+3) { text-align: right; }
 .task-sort-button { display: inline-flex; width: 100%; align-items: center; gap: 2px; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; text-align: inherit; text-transform: inherit; letter-spacing: inherit; cursor: pointer; }
 table.task-table th:nth-child(n+3) .task-sort-button { justify-content: flex-end; }
