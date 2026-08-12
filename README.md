@@ -6,6 +6,10 @@ The published leaderboard is **Proof Completion Core only**: every model is grad
 
 A bundle is published only when it covers that Core set **exactly**. Older Full-suite dumps that omit Apalache (`ben-or83`, `tendermint`) or other Core tasks cannot appear on the leaderboard, even if they were produced this week — their numbers would not be comparable.
 
+## Scoring
+
+The leaderboard's primary score is the **spec-balanced pass rate** (specification-macro): calculate the task pass rate within each Core module, then average those rates so every module has equal weight. The table also reports task-micro (`passed tasks / 190`) and all-leaves-complete (`modules with every selected task passing / 56`) as supporting counts.
+
 ## Run locally
 
 ```bash
@@ -44,7 +48,7 @@ node scripts/sync-core-manifest.mjs results/<that-bundle>.json
 
 ## Adding a model
 
-1. Drop the run into `results/<backend-id>.json` with `meta.backend` set to that id, `meta.cohort` of `one-shot` or `agentic`, and results for every Core task.
+1. Drop the run into `results/<backend-id>.json` with `meta.backend` set to that id, `meta.cohort` of `one-shot` or `agentic`, current three-metric `meta.scoring`, and results for every Core task.
 2. Add a `BACKEND_INFO` entry in `scripts/build-data.mjs` and list the id in `PUBLISHED_BACKENDS`.
 3. Add an `OUTPUT_PRICING` entry if a public output rate is known.
 4. Rebuild, then bump the `?v=` cache-buster on `data.js` in `index.html`.

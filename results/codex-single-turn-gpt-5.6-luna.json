@@ -62,18 +62,18 @@
       }
     },
     "scoring": {
-      "primary": "specification-pass-rate",
-      "specification_pass_rate": {
-        "passed": 1,
-        "total": 39,
-        "pct": 2.564102564102564
-      },
+      "primary": "specification-macro",
+      "specification_macro_pct": 4.9245063879210225,
       "task_micro": {
         "passed": 7,
         "total": 190,
         "pct": 3.684210526315789
       },
-      "specification_macro_pct": 5.949707792648036
+      "all_leaves_complete": {
+        "passed": 2,
+        "total": 56,
+        "pct": 3.571428571428571
+      }
     },
     "usage_audit": {
       "date": "2026-08-11",

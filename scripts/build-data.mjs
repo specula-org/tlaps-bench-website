@@ -219,6 +219,8 @@ const slug = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g
 const specId = (source, scoringKey) => `${slug(source)}--${slug(scoringKey)}`;
 const specKey = (source, scoringKey) => JSON.stringify([source, scoringKey]);
 const r1 = (x) => Math.round(x * 10) / 10;
+const sameNumber = (actual, expected) =>
+  Number.isFinite(actual) && Math.abs(actual - expected) < 1e-9;
 
 const modeStat = (pm, pricing) => {
   if (!pm || pm.total <= 0) return null;
@@ -475,6 +477,25 @@ const models = bundles.map(({ f, meta, results, resultsVersion }) => {
     }))
     .sort((a, b) => a.source.localeCompare(b.source) || a.scoringKey.localeCompare(b.scoringKey));
 
+  const representedSpecifications = manifest.length;
+  const specificationMacroPct = 100 * Object.values(bySpec)
+    .reduce((sum, spec) => sum + spec.pass / spec.total, 0) / representedSpecifications;
+  const completeSpecifications = Object.values(bySpec)
+    .filter((spec) => spec.pass === spec.total).length;
+  const allLeavesCompletePct = 100 * completeSpecifications / representedSpecifications;
+  const taskMicroPct = 100 * pass / results.length;
+  const scoring = meta.scoring;
+  if (scoring?.primary !== "specification-macro" ||
+      !sameNumber(scoring.specification_macro_pct, specificationMacroPct) ||
+      scoring.task_micro?.passed !== pass ||
+      scoring.task_micro?.total !== results.length ||
+      !sameNumber(scoring.task_micro?.pct, taskMicroPct) ||
+      scoring.all_leaves_complete?.passed !== completeSpecifications ||
+      scoring.all_leaves_complete?.total !== representedSpecifications ||
+      !sameNumber(scoring.all_leaves_complete?.pct, allLeavesCompletePct)) {
+    throw new Error(`${f}: meta.scoring does not match the current Core specification metrics`);
+  }
+
   const rows = manifest.map(({ source, group, scoringKey, name, completion, scratch }) => {
     const sourceInfo = SOURCE_INFO[source];
     if (!sourceInfo) throw new Error(`${f}: missing display info for source "${source}"`);
@@ -525,6 +546,12 @@ const models = bundles.map(({ f, meta, results, resultsVersion }) => {
     outputTokens: modeOutput,
     outputCostUnits: modeCostUnits,
   }, pricing);
+  Object.assign(completion, {
+    specificationMacroPct: r1(specificationMacroPct),
+    completeSpecifications,
+    representedSpecifications,
+    allLeavesCompletePct: r1(allLeavesCompletePct),
+  });
   const outputCostUsd = outputCostUnits === null ? null : outputCostUnits / 1_000_000;
 
   return {
@@ -538,7 +565,7 @@ const models = bundles.map(({ f, meta, results, resultsVersion }) => {
     resultsVersion,
     modes: [MODE_KEY],
     perMetric: {
-      completion: completion.rate,
+      completion: completion.specificationMacroPct,
       activeTimePerTask: activeTimeSecs / results.length,
       outputCostPerTask: outputCostUsd === null ? null : outputCostUsd / results.length,
     },
@@ -665,9 +692,9 @@ const data = {
   metrics: [
     {
       id: "completion",
-      name: "--mode proof-completion",
-      blurb: `Pass rate on the ${CORE_COUNT} Proof Completion Core properties.`,
-      tip: "The full proof scaffolding is provided, including inductive invariants, lemma decomposition, and preceding lemmas, and the model fills in one target proof.",
+      name: "Spec-balanced pass rate",
+      blurb: `Average of the per-module task pass rates across the ${CORE_SPEC_COUNT} Core modules.`,
+      tip: `Specification-macro: calculate the task pass rate within each of the ${CORE_SPEC_COUNT} Core modules, then average those rates so every module has equal weight.`,
     },
     {
       id: "activeTimePerTask",

@@ -32,15 +32,15 @@ export const SITE = {
       id: "one-shot",
       label: "One-Shot",
       blurb:
-        "Single-response runs ranked by pass rate on the Proof Completion Core. " +
-        "Expand a model for per-spec breakdown; task usage and cost stay in the detail views.",
+        "Single-response runs ranked by spec-balanced pass rate on the Proof Completion Core. " +
+        "Expand a model for per-module breakdown; task usage and cost stay in the detail views.",
     },
     {
       id: "agentic",
       label: "Agentic",
       blurb:
         "Tool-using agent runs on the same Proof Completion Core, scored separately from one-shot. " +
-        "Same pass-rate ranking and per-spec detail, never mixed into the one-shot table.",
+        "Same spec-balanced ranking and per-module detail, never mixed into the one-shot table.",
     },
   ],
 

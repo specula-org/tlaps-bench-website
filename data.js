@@ -59,9 +59,9 @@ window.TLAPS_DATA = {
   "metrics": [
     {
       "id": "completion",
-      "name": "--mode proof-completion",
-      "blurb": "Pass rate on the 190 Proof Completion Core properties.",
-      "tip": "The full proof scaffolding is provided, including inductive invariants, lemma decomposition, and preceding lemmas, and the model fills in one target proof."
+      "name": "Spec-balanced pass rate",
+      "blurb": "Average of the per-module task pass rates across the 56 Core modules.",
+      "tip": "Specification-macro: calculate the task pass rate within each of the 56 Core modules, then average those rates so every module has equal weight."
     },
     {
       "id": "activeTimePerTask",
@@ -2776,12 +2776,12 @@ window.TLAPS_DATA = {
       "cohortLabel": "Agentic",
       "generated": "2026-08-10",
       "resultsFile": "results/codex-gpt-5.6-sol.json",
-      "resultsVersion": "46194e0aac99",
+      "resultsVersion": "85599f220f1b",
       "modes": [
         "completion"
       ],
       "perMetric": {
-        "completion": 98.4,
+        "completion": 99.4,
         "activeTimePerTask": 593.0866454896027,
         "outputCostPerTask": 0.4649264210526316
       },
@@ -2798,7 +2798,11 @@ window.TLAPS_DATA = {
           "outputTokens": 2944534,
           "outputTokensPerTask": 15497.547368421052,
           "outputCostUsd": 88.33602,
-          "outputCostPerTask": 0.4649264210526316
+          "outputCostPerTask": 0.4649264210526316,
+          "specificationMacroPct": 99.4,
+          "completeSpecifications": 53,
+          "representedSpecifications": 56,
+          "allLeavesCompletePct": 94.6
         },
         "scratch": null
       },
@@ -3882,12 +3886,12 @@ window.TLAPS_DATA = {
       "cohortLabel": "One-Shot",
       "generated": "2026-08-12",
       "resultsFile": "results/codex-single-turn-gpt-5.6-sol-max.json",
-      "resultsVersion": "0eca140e6286",
+      "resultsVersion": "63dd8f0aae4f",
       "modes": [
         "completion"
       ],
       "perMetric": {
-        "completion": 18.9,
+        "completion": 17.8,
         "activeTimePerTask": 593.6602949336184,
         "outputCostPerTask": 0.6886534736842105
       },
@@ -3904,7 +3908,11 @@ window.TLAPS_DATA = {
           "outputTokens": 4361472,
           "outputTokensPerTask": 22955.115789473683,
           "outputCostUsd": 130.84416,
-          "outputCostPerTask": 0.6886534736842105
+          "outputCostPerTask": 0.6886534736842105,
+          "specificationMacroPct": 17.8,
+          "completeSpecifications": 6,
+          "representedSpecifications": 56,
+          "allLeavesCompletePct": 10.7
         },
         "scratch": null
       },
@@ -4988,12 +4996,12 @@ window.TLAPS_DATA = {
       "cohortLabel": "One-Shot",
       "generated": "2026-08-10",
       "resultsFile": "results/codex-single-turn-gpt-5.6-sol.json",
-      "resultsVersion": "728c781851c9",
+      "resultsVersion": "c75b9e95eac2",
       "modes": [
         "completion"
       ],
       "perMetric": {
-        "completion": 16.8,
+        "completion": 16,
         "activeTimePerTask": 103.41345366924192,
         "outputCostPerTask": 0.09678
       },
@@ -5010,7 +5018,11 @@ window.TLAPS_DATA = {
           "outputTokens": 612940,
           "outputTokensPerTask": 3226,
           "outputCostUsd": 18.3882,
-          "outputCostPerTask": 0.09678
+          "outputCostPerTask": 0.09678,
+          "specificationMacroPct": 16,
+          "completeSpecifications": 5,
+          "representedSpecifications": 56,
+          "allLeavesCompletePct": 8.9
         },
         "scratch": null
       },
@@ -6094,12 +6106,12 @@ window.TLAPS_DATA = {
       "cohortLabel": "One-Shot",
       "generated": "2026-08-10",
       "resultsFile": "results/codex-single-turn-gpt-5.6-sol-xhigh.json",
-      "resultsVersion": "77a20252a9fa",
+      "resultsVersion": "73e662860303",
       "modes": [
         "completion"
       ],
       "perMetric": {
-        "completion": 15.3,
+        "completion": 13.1,
         "activeTimePerTask": 309.6908126059969,
         "outputCostPerTask": 0.37702263157894733
       },
@@ -6116,7 +6128,11 @@ window.TLAPS_DATA = {
           "outputTokens": 2387810,
           "outputTokensPerTask": 12567.421052631578,
           "outputCostUsd": 71.6343,
-          "outputCostPerTask": 0.37702263157894733
+          "outputCostPerTask": 0.37702263157894733,
+          "specificationMacroPct": 13.1,
+          "completeSpecifications": 5,
+          "representedSpecifications": 56,
+          "allLeavesCompletePct": 8.9
         },
         "scratch": null
       },
@@ -7200,12 +7216,12 @@ window.TLAPS_DATA = {
       "cohortLabel": "One-Shot",
       "generated": "2026-08-11",
       "resultsFile": "results/codex-single-turn-gpt-5.6-terra.json",
-      "resultsVersion": "80bb7dc2a448",
+      "resultsVersion": "ba131641337c",
       "modes": [
         "completion"
       ],
       "perMetric": {
-        "completion": 6.8,
+        "completion": 8.3,
         "activeTimePerTask": 269.83787194268876,
         "outputCostPerTask": 0.21535492105263157
       },
@@ -7222,7 +7238,11 @@ window.TLAPS_DATA = {
           "outputTokens": 2727829,
           "outputTokensPerTask": 14356.994736842105,
           "outputCostUsd": 40.917435,
-          "outputCostPerTask": 0.21535492105263157
+          "outputCostPerTask": 0.21535492105263157,
+          "specificationMacroPct": 8.3,
+          "completeSpecifications": 3,
+          "representedSpecifications": 56,
+          "allLeavesCompletePct": 5.4
         },
         "scratch": null
       },
@@ -8306,12 +8326,12 @@ window.TLAPS_DATA = {
       "cohortLabel": "One-Shot",
       "generated": "2026-08-11",
       "resultsFile": "results/codex-single-turn-gpt-5.6-luna.json",
-      "resultsVersion": "6b60fe00c4e7",
+      "resultsVersion": "f8359476b9c9",
       "modes": [
         "completion"
       ],
       "perMetric": {
-        "completion": 3.7,
+        "completion": 4.9,
         "activeTimePerTask": 524.9271024738304,
         "outputCostPerTask": null
       },
@@ -8328,7 +8348,11 @@ window.TLAPS_DATA = {
           "outputTokens": 4964960,
           "outputTokensPerTask": 26131.36842105263,
           "outputCostUsd": null,
-          "outputCostPerTask": null
+          "outputCostPerTask": null,
+          "specificationMacroPct": 4.9,
+          "completeSpecifications": 2,
+          "representedSpecifications": 56,
+          "allLeavesCompletePct": 3.6
         },
         "scratch": null
       },
@@ -9410,12 +9434,12 @@ window.TLAPS_DATA = {
     {
       "id": "one-shot",
       "label": "One-Shot",
-      "blurb": "Single-response runs ranked by pass rate on the Proof Completion Core. Expand a model for per-spec breakdown; task usage and cost stay in the detail views."
+      "blurb": "Single-response runs ranked by spec-balanced pass rate on the Proof Completion Core. Expand a model for per-module breakdown; task usage and cost stay in the detail views."
     },
     {
       "id": "agentic",
       "label": "Agentic",
-      "blurb": "Tool-using agent runs on the same Proof Completion Core, scored separately from one-shot. Same pass-rate ranking and per-spec detail, never mixed into the one-shot table."
+      "blurb": "Tool-using agent runs on the same Proof Completion Core, scored separately from one-shot. Same spec-balanced ranking and per-module detail, never mixed into the one-shot table."
     }
   ],
   "coverage": [],

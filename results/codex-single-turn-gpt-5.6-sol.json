@@ -69,16 +69,17 @@
     "cohort": "one-shot",
     "reasoning_effort": "medium",
     "scoring": {
-      "primary": "specification-pass-rate",
-      "specification_pass_rate": {
-        "passed": 2,
-        "total": 39,
-        "pct": 5.128205128205128
-      },
+      "primary": "specification-macro",
+      "specification_macro_pct": 16.032955865272935,
       "task_micro": {
         "passed": 32,
         "total": 190,
         "pct": 16.842105263157894
+      },
+      "all_leaves_complete": {
+        "passed": 5,
+        "total": 56,
+        "pct": 8.928571428571429
       }
     },
     "suite": "proof-completion-core"

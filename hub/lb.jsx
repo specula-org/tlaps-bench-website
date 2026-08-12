@@ -206,7 +206,7 @@ function MetricCell({ v, metric, usage, max, outputCostLowerBound = false }) {
   return (
     <span className="scorecell">
       {metric.bar !== false && <span className="bar"><AnimBar pct={barPct} /></span>}
-      <span className="score-num">{v.toFixed(1)}</span>
+      <span className="score-num">{v.toFixed(1)}%</span>
     </span>
   );
 }
@@ -386,7 +386,6 @@ function HubLeaderboard({ showFilters = true, fixedMode = null, fixedCohort = nu
   const modeBlurb = useM_lb(() => Object.fromEntries(TLAPS_DATA.modes.map(m => [m.id, m.blurb])), []);
   const isInvert = (key) => key.startsWith("metric:") && metricById[key.slice(7)]?.invert;
   const modelCohort = (m) => m.cohort || (m.kind === "agent" ? "agentic" : "one-shot");
-  const modelCohortLabel = (m) => m.cohortLabel || (modelCohort(m) === "agentic" ? "Agentic" : "One-Shot");
 
   const initialMode = fixedMode || "completion";
   const [selectedMode, setSelectedMode] = useS_lb(initialMode);
@@ -407,9 +406,10 @@ function HubLeaderboard({ showFilters = true, fixedMode = null, fixedCohort = nu
   // happens to sort first — read it off any model that actually ran the mode.
   const modeTotal = (mode) =>
     TLAPS_DATA.models.find(m => m.perMode?.[mode])?.perMode[mode].total ?? 0;
-  // Main table focuses on pass rate; time/cost stay in the expand panel.
+  // The primary table score is specification-macro; task-micro and strict
+  // all-leaves completion are supporting counts beside it.
   const visibleMetrics = useM_lb(() => [
-    { ...metricById[selectedMode], name: "Pass rate" },
+    metricById[selectedMode],
   ], [metricById, selectedMode]);
 
   // Sort key forms: "name" or "metric:<id>".
@@ -434,6 +434,16 @@ function HubLeaderboard({ showFilters = true, fixedMode = null, fixedCohort = nu
     });
     return arr;
   }, [sort, selectedMode, fixedCohort]);
+  const primaryRankById = useM_lb(() => Object.fromEntries(
+    [...rows]
+      .filter((model) => getMetricVal(model, selectedMode) != null)
+      .sort((a, b) => {
+        const av = getMetricVal(a, selectedMode);
+        const bv = getMetricVal(b, selectedMode);
+        return bv - av || a.name.localeCompare(b.name) || (a.subname ?? "").localeCompare(b.subname ?? "");
+      })
+      .map((model, index) => [model.id, index + 1]),
+  ), [rows, selectedMode]);
 
   const selectMode = (mode) => {
     if (mode === selectedMode) return;
@@ -494,7 +504,7 @@ function HubLeaderboard({ showFilters = true, fixedMode = null, fixedCohort = nu
     lastKeyRef.current = { k: sort.key, d: sort.dir, mode: selectedMode, cohort: fixedCohort };
   });
 
-  const colCount = 4 + visibleMetrics.length; // #, Model, Cohort, [metrics], caret
+  const colCount = 5 + visibleMetrics.length; // #, Model, [primary], task count, module count, caret
   const emptyMessage = fixedCohort
     ? `No ${cohortLabels[fixedCohort] || fixedCohort} models scored in this mode yet.`
     : "No models scored in this mode yet.";
@@ -536,7 +546,6 @@ function HubLeaderboard({ showFilters = true, fixedMode = null, fixedCohort = nu
                   Model <span className="sort" aria-hidden="true">▾</span>
                 </button>
               </th>
-              <th className="lb-cohort-head">Cohort</th>
               {visibleMetrics.map((mt) => {
                 const k = "metric:" + mt.id;
                 return (
@@ -549,6 +558,12 @@ function HubLeaderboard({ showFilters = true, fixedMode = null, fixedCohort = nu
                   </th>
                 );
               })}
+              <th className="lb-supporting-head" title="Task-micro: passed Core tasks divided by all Core tasks.">
+                Tasks passed
+              </th>
+              <th className="lb-supporting-head" title="All-leaves-complete: modules where every selected Core task passed.">
+                Modules completed
+              </th>
               <th style={{ width: 32 }}></th>
             </tr>
           </thead>
@@ -560,21 +575,18 @@ function HubLeaderboard({ showFilters = true, fixedMode = null, fixedCohort = nu
                 </td>
               </tr>
             )}
-            {rows.map((m, i) => {
+            {rows.map((m) => {
               const isOpen = !!expanded[m.id];
-              const hasRankValue = getVal(m, sort.key) != null;
-              const cohortId = modelCohort(m);
-              const cohortLabel = modelCohortLabel(m);
+              const primaryRank = primaryRankById[m.id];
+              const modeScore = m.perMode?.[selectedMode];
               return (
                 <React.Fragment key={m.id}>
                   <tr ref={el => { if (el) rowRefs.current[m.id] = el; else delete rowRefs.current[m.id]; }}
                       className={isOpen ? "expanded" : ""}
                       onClick={() => toggleExpanded(m.id)}>
-                    {/* Every ranked row gets a chip so the column reads as one set;
-                        only the top three carry a podium colour. */}
                     <td className="rank"><span className="rank-slot">{
-                      !hasRankValue ? "—" : (
-                        <span className={"rank-medal " + (["gold","silver","bronze"][i] || "plain")}>{i + 1}</span>
+                      !primaryRank ? "—" : (
+                        <span className={"rank-medal " + (["gold","silver","bronze"][primaryRank - 1] || "plain")}>{primaryRank}</span>
                       )
                     }</span></td>
                     <td>
@@ -588,9 +600,6 @@ function HubLeaderboard({ showFilters = true, fixedMode = null, fixedCohort = nu
                         </div>
                       </div>
                     </td>
-                    <td className="lb-cohort-cell">
-                      <span className={"cohort-chip cohort-" + cohortId}>{cohortLabel}</span>
-                    </td>
                     {visibleMetrics.map((mt) => {
                       const v = getMetricVal(m, mt.id);
                       return (
@@ -602,6 +611,14 @@ function HubLeaderboard({ showFilters = true, fixedMode = null, fixedCohort = nu
                         </td>
                       );
                     })}
+                    <td className="lb-supporting-cell">
+                      {modeScore ? `${modeScore.pass}/${modeScore.total}` : "—"}
+                    </td>
+                    <td className="lb-supporting-cell">
+                      {modeScore?.representedSpecifications
+                        ? `${modeScore.completeSpecifications}/${modeScore.representedSpecifications}`
+                        : "—"}
+                    </td>
                     <td className="expand-cell">
                       <button type="button" className="expand-toggle" aria-expanded={isOpen}
                         aria-controls={`model-detail-${m.id}`}
@@ -620,11 +637,10 @@ function HubLeaderboard({ showFilters = true, fixedMode = null, fixedCohort = nu
                               <div>
                                 <div className="detail-titleline">
                                   <span className="eyebrow">{m.name} · {m.subname}</span>
-                                  <span className={"cohort-chip cohort-" + cohortId}>{cohortLabel}</span>
                                 </div>
                                 <div className="detail-caption">
                                   {detailView === "spec"
-                                    ? `${modeLabels[selectedMode]}: per-spec pass rates. Time and cost are supporting detail below.`
+                                    ? `${modeLabels[selectedMode]}: per-module task pass rates used in the spec-balanced score. Time and cost are supporting detail below.`
                                     : detailView === "complexity"
                                     ? `${modeLabels[selectedMode]}: pass rate by reference-proof step count.`
                                     : `${modeLabels[selectedMode]}: per-task verdicts, time, and output-only cost.`}
