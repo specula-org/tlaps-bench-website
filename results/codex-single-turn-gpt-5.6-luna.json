@@ -62,8 +62,7 @@
       }
     },
     "scoring": {
-      "primary": "specification-macro",
-      "specification_macro_pct": 4.9245063879210225,
+      "primary": "spec-balanced-pass-rate",
       "task_micro": {
         "passed": 7,
         "total": 190,
@@ -73,7 +72,8 @@
         "passed": 2,
         "total": 56,
         "pct": 3.571428571428571
-      }
+      },
+      "spec_balanced_pass_rate_pct": 4.9245063879210225
     },
     "usage_audit": {
       "date": "2026-08-11",
@@ -82,6 +82,9 @@
       "active_time_complete": true,
       "input_tokens": 3250649,
       "output_tokens": 4964960,
+      "cache_read_input_tokens": 261120,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 32.805401,
       "output_tokens_positive_for_all_tasks": true
     }
   },
@@ -106,7 +109,10 @@
       "termination_reason": "OK",
       "theorem": "Allocator_AllocateMutex",
       "time_secs": 207.04789627715945,
-      "gt_proof_steps": 25
+      "gt_proof_steps": 25,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.075289
     },
     {
       "agent_exit": 0,
@@ -128,7 +134,10 @@
       "termination_reason": "OK",
       "theorem": "Ben_or83_proofs_Agreement",
       "time_secs": 611.5309286820702,
-      "gt_proof_steps": 18
+      "gt_proof_steps": 18,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.236846
     },
     {
       "agent_exit": 0,
@@ -150,7 +159,10 @@
       "termination_reason": "OK",
       "theorem": "Ben_or83_proofs_Arith_OtherLtFromStrictOverlap",
       "time_secs": 147.089410191169,
-      "gt_proof_steps": 3
+      "gt_proof_steps": 3,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.06305
     },
     {
       "agent_exit": 0,
@@ -172,7 +184,10 @@
       "termination_reason": "OK",
       "theorem": "Ben_or83_proofs_CardUnion3LeSum",
       "time_secs": 398.2925113949459,
-      "gt_proof_steps": 10
+      "gt_proof_steps": 10,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.146712
     },
     {
       "agent_exit": 0,
@@ -194,7 +209,10 @@
       "termination_reason": "OK",
       "theorem": "Ben_or83_proofs_CrossRoundStrictQuorum",
       "time_secs": 53.741143925115466,
-      "gt_proof_steps": 2
+      "gt_proof_steps": 2,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.050254
     },
     {
       "agent_exit": 0,
@@ -216,7 +234,10 @@
       "termination_reason": "OK",
       "theorem": "Ben_or83_proofs_FaultyStepProps",
       "time_secs": 352.81039453600533,
-      "gt_proof_steps": 17
+      "gt_proof_steps": 17,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.143422
     },
     {
       "agent_exit": 0,
@@ -238,7 +259,10 @@
       "termination_reason": "OK",
       "theorem": "Ben_or83_proofs_HighWeightReceivedL11Witness",
       "time_secs": 631.9424178961199,
-      "gt_proof_steps": 62
+      "gt_proof_steps": 62,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.232468
     },
     {
       "agent_exit": 0,
@@ -260,7 +284,10 @@
       "termination_reason": "OK",
       "theorem": "Ben_or83_proofs_InitInd",
       "time_secs": 422.13025899301283,
-      "gt_proof_steps": 48
+      "gt_proof_steps": 48,
+      "cache_read_input_tokens": 27392,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.0728702
     },
     {
       "agent_exit": 0,
@@ -282,7 +309,10 @@
       "termination_reason": "OK",
       "theorem": "Ben_or83_proofs_LowWeightsReceivedL11Witness",
       "time_secs": 707.1512835628819,
-      "gt_proof_steps": 35
+      "gt_proof_steps": 35,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.251466
     },
     {
       "agent_exit": 0,
@@ -304,7 +334,10 @@
       "termination_reason": "OK",
       "theorem": "Ben_or83_proofs_LowWeightsReceivedL8Witness",
       "time_secs": 731.2931659698952,
-      "gt_proof_steps": 70
+      "gt_proof_steps": 70,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.272584
     },
     {
       "agent_exit": 0,
@@ -326,7 +359,10 @@
       "termination_reason": "OK",
       "theorem": "Ben_or83_proofs_MajorityIntersect",
       "time_secs": 536.1017558458261,
-      "gt_proof_steps": 11
+      "gt_proof_steps": 11,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.192601
     },
     {
       "agent_exit": 0,
@@ -348,7 +384,10 @@
       "termination_reason": "OK",
       "theorem": "Ben_or83_proofs_Msgs1Shape",
       "time_secs": 140.6828259760514,
-      "gt_proof_steps": 3
+      "gt_proof_steps": 3,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.060174
     },
     {
       "agent_exit": 0,
@@ -370,7 +409,10 @@
       "termination_reason": "OK",
       "theorem": "Ben_or83_proofs_Msgs2AddDRep",
       "time_secs": 368.73492403910495,
-      "gt_proof_steps": 12
+      "gt_proof_steps": 12,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.143164
     },
     {
       "agent_exit": 0,
@@ -392,7 +434,10 @@
       "termination_reason": "OK",
       "theorem": "Ben_or83_proofs_Msgs2Decomp",
       "time_secs": 323.5803158809431,
-      "gt_proof_steps": 4
+      "gt_proof_steps": 4,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.123918
     },
     {
       "agent_exit": 0,
@@ -414,7 +459,10 @@
       "termination_reason": "OK",
       "theorem": "Ben_or83_proofs_Msgs2SenderPartitionBound",
       "time_secs": 525.9658232429065,
-      "gt_proof_steps": 20
+      "gt_proof_steps": 20,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.194074
     },
     {
       "agent_exit": 0,
@@ -436,7 +484,10 @@
       "termination_reason": "OK",
       "theorem": "Ben_or83_proofs_Msgs2Step2Mono",
       "time_secs": 604.4752061080653,
-      "gt_proof_steps": 10
+      "gt_proof_steps": 10,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.220687
     },
     {
       "agent_exit": 0,
@@ -458,7 +509,10 @@
       "termination_reason": "OK",
       "theorem": "Ben_or83_proofs_Pres_L1_S3_DecidedCarry",
       "time_secs": 382.66356600401923,
-      "gt_proof_steps": 21
+      "gt_proof_steps": 21,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.159345
     },
     {
       "agent_exit": 0,
@@ -480,7 +534,10 @@
       "termination_reason": "OK",
       "theorem": "Ben_or83_proofs_Pres_L1_S3",
       "time_secs": 174.20814382797107,
-      "gt_proof_steps": 56
+      "gt_proof_steps": 56,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.089916
     },
     {
       "agent_exit": 0,
@@ -502,7 +559,10 @@
       "termination_reason": "OK",
       "theorem": "Ben_or83_proofs_Pres_L10_S2",
       "time_secs": 366.65005167596973,
-      "gt_proof_steps": 20
+      "gt_proof_steps": 20,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.150984
     },
     {
       "agent_exit": 0,
@@ -524,7 +584,10 @@
       "termination_reason": "OK",
       "theorem": "Ben_or83_proofs_Pres_L11_S3",
       "time_secs": 543.6771985990927,
-      "gt_proof_steps": 27
+      "gt_proof_steps": 27,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.208587
     },
     {
       "agent_exit": 0,
@@ -546,7 +609,10 @@
       "termination_reason": "OK",
       "theorem": "Ben_or83_proofs_Pres_L12_S1",
       "time_secs": 375.9686059781816,
-      "gt_proof_steps": 12
+      "gt_proof_steps": 12,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.152903
     },
     {
       "agent_exit": 0,
@@ -568,7 +634,10 @@
       "termination_reason": "OK",
       "theorem": "Ben_or83_proofs_Pres_L13_S3",
       "time_secs": 780.1519907049369,
-      "gt_proof_steps": 47
+      "gt_proof_steps": 47,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.290405
     },
     {
       "agent_exit": 0,
@@ -590,7 +659,10 @@
       "termination_reason": "OK",
       "theorem": "Ben_or83_proofs_Pres_L2_S1",
       "time_secs": 425.79839502298273,
-      "gt_proof_steps": 29
+      "gt_proof_steps": 29,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.168752
     },
     {
       "agent_exit": 0,
@@ -612,7 +684,10 @@
       "termination_reason": "OK",
       "theorem": "Ben_or83_proofs_Pres_L3_S2",
       "time_secs": 638.3694880821276,
-      "gt_proof_steps": 18
+      "gt_proof_steps": 18,
+      "cache_read_input_tokens": 27392,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.1859482
     },
     {
       "agent_exit": 0,
@@ -634,7 +709,10 @@
       "termination_reason": "OK",
       "theorem": "Ben_or83_proofs_Pres_L4_S1",
       "time_secs": 503.7135076210834,
-      "gt_proof_steps": 42
+      "gt_proof_steps": 42,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.1905414
     },
     {
       "agent_exit": 0,
@@ -656,7 +734,10 @@
       "termination_reason": "OK",
       "theorem": "Ben_or83_proofs_Pres_L5_F",
       "time_secs": 152.7426659699995,
-      "gt_proof_steps": 5
+      "gt_proof_steps": 5,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.078821
     },
     {
       "agent_exit": 0,
@@ -678,7 +759,10 @@
       "termination_reason": "OK",
       "theorem": "Ben_or83_proofs_Pres_L6_F",
       "time_secs": 107.05078264209442,
-      "gt_proof_steps": 2
+      "gt_proof_steps": 2,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.064024
     },
     {
       "agent_exit": 0,
@@ -700,7 +784,10 @@
       "termination_reason": "OK",
       "theorem": "Ben_or83_proofs_Pres_L7_S1",
       "time_secs": 394.0359866959043,
-      "gt_proof_steps": 11
+      "gt_proof_steps": 11,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.159985
     },
     {
       "agent_exit": 0,
@@ -722,7 +809,10 @@
       "termination_reason": "OK",
       "theorem": "Ben_or83_proofs_Pres_L8_S2",
       "time_secs": 616.8169728750363,
-      "gt_proof_steps": 25
+      "gt_proof_steps": 25,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.234551
     },
     {
       "agent_exit": 0,
@@ -744,7 +834,10 @@
       "termination_reason": "OK",
       "theorem": "Ben_or83_proofs_Pres_L9_F",
       "time_secs": 582.6938771449495,
-      "gt_proof_steps": 39
+      "gt_proof_steps": 39,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.223738
     },
     {
       "agent_exit": 0,
@@ -766,7 +859,10 @@
       "termination_reason": "OK",
       "theorem": "Ben_or83_proofs_Pres_Lemma12",
       "time_secs": 121.14303833781742,
-      "gt_proof_steps": 13
+      "gt_proof_steps": 13,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.070121
     },
     {
       "agent_exit": 0,
@@ -788,7 +884,10 @@
       "termination_reason": "OK",
       "theorem": "Ben_or83_proofs_Pres_Lemma2",
       "time_secs": 167.19922355399467,
-      "gt_proof_steps": 1
+      "gt_proof_steps": 1,
+      "cache_read_input_tokens": 27392,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.0376772
     },
     {
       "agent_exit": 0,
@@ -810,7 +909,10 @@
       "termination_reason": "OK",
       "theorem": "Ben_or83_proofs_Pres_Lemma3",
       "time_secs": 251.69010220095515,
-      "gt_proof_steps": 7
+      "gt_proof_steps": 7,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.1066734
     },
     {
       "agent_exit": 0,
@@ -832,7 +934,10 @@
       "termination_reason": "OK",
       "theorem": "Ben_or83_proofs_QuorumIntersect",
       "time_secs": 938.3572932151146,
-      "gt_proof_steps": 13
+      "gt_proof_steps": 13,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.327197
     },
     {
       "agent_exit": 0,
@@ -854,7 +959,10 @@
       "termination_reason": "OK",
       "theorem": "Ben_or83_proofs_QuorumUnique",
       "time_secs": 117.44238479901105,
-      "gt_proof_steps": 14
+      "gt_proof_steps": 14,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.067663
     },
     {
       "agent_exit": 0,
@@ -876,7 +984,10 @@
       "termination_reason": "OK",
       "theorem": "Ben_or83_proofs_Senders2_CardLeSet",
       "time_secs": 411.0499332069885,
-      "gt_proof_steps": 10
+      "gt_proof_steps": 10,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.144941
     },
     {
       "agent_exit": 0,
@@ -898,7 +1009,10 @@
       "termination_reason": "OK",
       "theorem": "Ben_or83_proofs_StrictQuorumCarriesToQuorumRound",
       "time_secs": 676.1552599559072,
-      "gt_proof_steps": 47
+      "gt_proof_steps": 47,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.2538364
     },
     {
       "agent_exit": 0,
@@ -920,7 +1034,10 @@
       "termination_reason": "OK",
       "theorem": "Ben_or83_proofs_StrictQuorumNextCorrectType2",
       "time_secs": 230.23683263617568,
-      "gt_proof_steps": 9
+      "gt_proof_steps": 9,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.091214
     },
     {
       "agent_exit": 0,
@@ -942,7 +1059,10 @@
       "termination_reason": "OK",
       "theorem": "Ben_or83_proofs_StrictQuorumNextReceiveStrictD",
       "time_secs": 125.05771824903786,
-      "gt_proof_steps": 6
+      "gt_proof_steps": 6,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.059002
     },
     {
       "agent_exit": 0,
@@ -964,7 +1084,10 @@
       "termination_reason": "OK",
       "theorem": "Ben_or83_proofs_SupportedSingletonPinsNextM1",
       "time_secs": 189.78784883907065,
-      "gt_proof_steps": 7
+      "gt_proof_steps": 7,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.078673
     },
     {
       "agent_exit": 0,
@@ -986,7 +1109,10 @@
       "termination_reason": "OK",
       "theorem": "Ben_or83_proofs_SupportedUnique",
       "time_secs": 440.54845114494674,
-      "gt_proof_steps": 21
+      "gt_proof_steps": 21,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.159889
     },
     {
       "agent_exit": 0,
@@ -1008,7 +1134,10 @@
       "termination_reason": "OK",
       "theorem": "Ben_or83_proofs_TypePres",
       "time_secs": 687.1899935039692,
-      "gt_proof_steps": 80
+      "gt_proof_steps": 80,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.2457894
     },
     {
       "agent_exit": 0,
@@ -1030,7 +1159,10 @@
       "termination_reason": "OK",
       "theorem": "tendermint_single_indinv_proofs_BoundedMaxExists",
       "time_secs": 728.4301679620985,
-      "gt_proof_steps": 24
+      "gt_proof_steps": 24,
+      "cache_read_input_tokens": 34560,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.107967
     },
     {
       "agent_exit": 0,
@@ -1052,7 +1184,10 @@
       "termination_reason": "OK",
       "theorem": "tendermint_single_indinv_proofs_OnRoundCatchupGivesSender",
       "time_secs": 212.60805163090117,
-      "gt_proof_steps": 15
+      "gt_proof_steps": 15,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.0924004
     },
     {
       "agent_exit": 0,
@@ -1074,7 +1209,10 @@
       "termination_reason": "OK",
       "theorem": "tendermint_single_indinv_proofs_PastStartRoundQuorumMonotone",
       "time_secs": 209.46347365807742,
-      "gt_proof_steps": 17
+      "gt_proof_steps": 17,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.098001
     },
     {
       "agent_exit": 0,
@@ -1096,7 +1234,10 @@
       "termination_reason": "OK",
       "theorem": "tendermint_single_indinv_proofs_PrecommitByCorrectGivesPrevoteQuorum",
       "time_secs": 121.39790652296506,
-      "gt_proof_steps": 3
+      "gt_proof_steps": 3,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.063348
     },
     {
       "agent_exit": 0,
@@ -1118,7 +1259,10 @@
       "termination_reason": "OK",
       "theorem": "tendermint_single_indinv_proofs_PrecommitLockContra",
       "time_secs": 316.9405227820389,
-      "gt_proof_steps": 7
+      "gt_proof_steps": 7,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.128427
     },
     {
       "agent_exit": 0,
@@ -1140,7 +1284,10 @@
       "termination_reason": "OK",
       "theorem": "tendermint_single_indinv_proofs_PrecommitsLockValueOp",
       "time_secs": 162.6569427351933,
-      "gt_proof_steps": 22
+      "gt_proof_steps": 22,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.082173
     },
     {
       "agent_exit": 0,
@@ -1162,7 +1309,10 @@
       "termination_reason": "OK",
       "theorem": "tendermint_single_indinv_proofs_Pres_Bounded_UponProposalInPrevoteOrCommitAndPrevote",
       "time_secs": 310.54722200497054,
-      "gt_proof_steps": 8
+      "gt_proof_steps": 8,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.124117
     },
     {
       "agent_exit": 0,
@@ -1184,7 +1334,10 @@
       "termination_reason": "OK",
       "theorem": "tendermint_single_indinv_proofs_Pres_Bounded_UponQuorumOfPrecommitsAny",
       "time_secs": 263.1907436649781,
-      "gt_proof_steps": 7
+      "gt_proof_steps": 7,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.107681
     },
     {
       "agent_exit": 0,
@@ -1206,7 +1359,10 @@
       "termination_reason": "OK",
       "theorem": "tendermint_single_indinv_proofs_Pres_PrecommitLocksLaterPrevotes",
       "time_secs": 100.68167729815468,
-      "gt_proof_steps": 12
+      "gt_proof_steps": 12,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.067963
     },
     {
       "agent_exit": 0,
@@ -1228,7 +1384,10 @@
       "termination_reason": "OK",
       "theorem": "tendermint_single_indinv_proofs_ProposeRecTyped",
       "time_secs": 175.7147847430315,
-      "gt_proof_steps": 2
+      "gt_proof_steps": 2,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.07268
     },
     {
       "agent_exit": 0,
@@ -1250,7 +1409,10 @@
       "termination_reason": "OK",
       "theorem": "tendermint_single_indinv_proofs_PVSetPFlipCard",
       "time_secs": 143.32669736607932,
-      "gt_proof_steps": 2
+      "gt_proof_steps": 2,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.07011
     },
     {
       "agent_exit": 0,
@@ -1272,7 +1434,10 @@
       "termination_reason": "OK",
       "theorem": "tendermint_single_indinv_proofs_PVSetQuorumMonotone",
       "time_secs": 94.53191948705353,
-      "gt_proof_steps": 6
+      "gt_proof_steps": 6,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.0531274
     },
     {
       "agent_exit": 0,
@@ -1294,7 +1459,10 @@
       "termination_reason": "OK",
       "theorem": "tendermint_single_indinv_proofs_Q3UnionMonotone",
       "time_secs": 517.620137440972,
-      "gt_proof_steps": 5
+      "gt_proof_steps": 5,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.198524
     },
     {
       "agent_exit": 0,
@@ -1316,7 +1484,10 @@
       "termination_reason": "OK",
       "theorem": "tendermint_single_indinv_proofs_QuorumsIntersectInCorrect",
       "time_secs": 676.5958777440246,
-      "gt_proof_steps": 41
+      "gt_proof_steps": 41,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.238709
     },
     {
       "agent_exit": 0,
@@ -1338,7 +1509,10 @@
       "termination_reason": "OK",
       "theorem": "tendermint_single_indinv_proofs_StepChangeChar",
       "time_secs": 227.575535121141,
-      "gt_proof_steps": 49
+      "gt_proof_steps": 49,
+      "cache_read_input_tokens": 23296,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.0244016
     },
     {
       "agent_exit": 0,
@@ -1360,7 +1534,10 @@
       "termination_reason": "OK",
       "theorem": "AtomicBakeryWithoutSMT_GGIrreflexive",
       "time_secs": 177.61823608004488,
-      "gt_proof_steps": 8
+      "gt_proof_steps": 8,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.066484
     },
     {
       "agent_exit": 0,
@@ -1382,7 +1559,10 @@
       "termination_reason": "OK",
       "theorem": "AtomicBakeryWithoutSMT_InductiveInvariant",
       "time_secs": 711.9642477070447,
-      "gt_proof_steps": 137
+      "gt_proof_steps": 137,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.061973
     },
     {
       "agent_exit": 0,
@@ -1404,7 +1584,10 @@
       "termination_reason": "OK",
       "theorem": "AtomicBakeryWithoutSMT_InitImpliesTypeOK",
       "time_secs": 120.28056270605884,
-      "gt_proof_steps": 5
+      "gt_proof_steps": 5,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.047465
     },
     {
       "agent_exit": 0,
@@ -1426,7 +1609,10 @@
       "termination_reason": "OK",
       "theorem": "AtomicBakeryWithoutSMT_Safety",
       "time_secs": 128.43671548902057,
-      "gt_proof_steps": 2
+      "gt_proof_steps": 2,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.050856
     },
     {
       "agent_exit": 0,
@@ -1448,7 +1634,10 @@
       "termination_reason": "OK",
       "theorem": "AtomicBakeryWithoutSMT_TypeOKInvariant",
       "time_secs": 473.56329051288776,
-      "gt_proof_steps": 21
+      "gt_proof_steps": 21,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.165989
     },
     {
       "agent_exit": 0,
@@ -1470,7 +1659,10 @@
       "termination_reason": "OK",
       "theorem": "Consensus_Invariance",
       "time_secs": 239.6439489258919,
-      "gt_proof_steps": 3
+      "gt_proof_steps": 3,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.086595
     },
     {
       "agent_exit": 0,
@@ -1492,7 +1684,10 @@
       "termination_reason": "OK",
       "theorem": "PaxosProof_struct_lemma",
       "time_secs": 789.8964457891416,
-      "gt_proof_steps": 4
+      "gt_proof_steps": 4,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.2680854
     },
     {
       "agent_exit": 0,
@@ -1514,7 +1709,10 @@
       "termination_reason": "OK",
       "theorem": "Sets_CardinalitySetMinus",
       "time_secs": 868.9843119909056,
-      "gt_proof_steps": 20
+      "gt_proof_steps": 20,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.112543
     },
     {
       "agent_exit": 0,
@@ -1536,7 +1734,10 @@
       "termination_reason": "OK",
       "theorem": "Sets_FiniteSubset",
       "time_secs": 600.4815900879912,
-      "gt_proof_steps": 22
+      "gt_proof_steps": 22,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.094195
     },
     {
       "agent_exit": 0,
@@ -1558,7 +1759,10 @@
       "termination_reason": "OK",
       "theorem": "Sets_IntervalCardinality",
       "time_secs": 774.6785962879658,
-      "gt_proof_steps": 8
+      "gt_proof_steps": 8,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.263864
     },
     {
       "agent_exit": 0,
@@ -1580,7 +1784,10 @@
       "termination_reason": "OK",
       "theorem": "Sets_PigeonHole",
       "time_secs": 478.1237251700368,
-      "gt_proof_steps": 22
+      "gt_proof_steps": 22,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.165814
     },
     {
       "agent_exit": 0,
@@ -1602,7 +1809,10 @@
       "termination_reason": "OK",
       "theorem": "GCD_GCD1",
       "time_secs": 590.2012400969397,
-      "gt_proof_steps": 4
+      "gt_proof_steps": 4,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.202042
     },
     {
       "agent_exit": 0,
@@ -1624,7 +1834,10 @@
       "termination_reason": "OK",
       "theorem": "GCD_GCD3",
       "time_secs": 624.0893020099029,
-      "gt_proof_steps": 3
+      "gt_proof_steps": 3,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.213324
     },
     {
       "agent_exit": 0,
@@ -1646,7 +1859,10 @@
       "termination_reason": "OK",
       "theorem": "Paxos_Consistent",
       "time_secs": 780.5300845219754,
-      "gt_proof_steps": 11
+      "gt_proof_steps": 11,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.267677
     },
     {
       "agent_exit": 0,
@@ -1668,7 +1884,10 @@
       "termination_reason": "OK",
       "theorem": "Paxos_Invariant",
       "time_secs": 755.9911291098688,
-      "gt_proof_steps": 73
+      "gt_proof_steps": 73,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.259313
     },
     {
       "agent_exit": 0,
@@ -1690,7 +1909,10 @@
       "termination_reason": "OK",
       "theorem": "Paxos_Refinement",
       "time_secs": 662.7110836238135,
-      "gt_proof_steps": 8
+      "gt_proof_steps": 8,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.228117
     },
     {
       "agent_exit": 0,
@@ -1712,7 +1934,10 @@
       "termination_reason": "OK",
       "theorem": "Paxos_SafeAtStable",
       "time_secs": 746.4018110381439,
-      "gt_proof_steps": 21
+      "gt_proof_steps": 21,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.255353
     },
     {
       "agent_exit": 0,
@@ -1734,7 +1959,10 @@
       "termination_reason": "OK",
       "theorem": "PaxosHistVar_Consistent",
       "time_secs": 717.5640897790436,
-      "gt_proof_steps": 11
+      "gt_proof_steps": 11,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.130624
     },
     {
       "agent_exit": 0,
@@ -1756,7 +1984,10 @@
       "termination_reason": "OK",
       "theorem": "PaxosHistVar_Invariant",
       "time_secs": 1493.0083702600095,
-      "gt_proof_steps": 57
+      "gt_proof_steps": 57,
+      "cache_read_input_tokens": 7936,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.4971836
     },
     {
       "agent_exit": 0,
@@ -1778,7 +2009,10 @@
       "termination_reason": "OK",
       "theorem": "SimpleMutex_Invariance",
       "time_secs": 34.04443757189438,
-      "gt_proof_steps": 13
+      "gt_proof_steps": 13,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.017379
     },
     {
       "agent_exit": 0,
@@ -1800,7 +2034,10 @@
       "termination_reason": "OK",
       "theorem": "AllocatorImplementation_proof_TypeCorrect",
       "time_secs": 550.9825541989412,
-      "gt_proof_steps": 27
+      "gt_proof_steps": 27,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.191644
     },
     {
       "agent_exit": 0,
@@ -1822,7 +2059,10 @@
       "termination_reason": "OK",
       "theorem": "SchedulingAllocator_proof_Mutex",
       "time_secs": 439.54873481206596,
-      "gt_proof_steps": 45
+      "gt_proof_steps": 45,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.153468
     },
     {
       "agent_exit": 0,
@@ -1844,7 +2084,10 @@
       "termination_reason": "OK",
       "theorem": "SchedulingAllocator_proof_PermSeqsType",
       "time_secs": 633.752810406033,
-      "gt_proof_steps": 24
+      "gt_proof_steps": 24,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.2144594
     },
     {
       "agent_exit": 0,
@@ -1866,7 +2109,10 @@
       "termination_reason": "OK",
       "theorem": "Boulanger_TypeCorrect",
       "time_secs": 118.3375071180053,
-      "gt_proof_steps": 16
+      "gt_proof_steps": 16,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.041949
     },
     {
       "agent_exit": 0,
@@ -1888,7 +2134,10 @@
       "termination_reason": "OK",
       "theorem": "Barriers_FlushInvariant",
       "time_secs": 655.2456360899378,
-      "gt_proof_steps": 61
+      "gt_proof_steps": 61,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.227593
     },
     {
       "agent_exit": 0,
@@ -1910,7 +2159,10 @@
       "termination_reason": "OK",
       "theorem": "Barriers_Invariant",
       "time_secs": 729.6569096588064,
-      "gt_proof_steps": 255
+      "gt_proof_steps": 255,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.252096
     },
     {
       "agent_exit": 0,
@@ -1932,7 +2184,10 @@
       "termination_reason": "OK",
       "theorem": "bcastByz_FCConstraints_TypeOK_InitNoBcast",
       "time_secs": 768.591859926004,
-      "gt_proof_steps": 37
+      "gt_proof_steps": 37,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.265406
     },
     {
       "agent_exit": 0,
@@ -1954,7 +2209,10 @@
       "termination_reason": "OK",
       "theorem": "bcastByz_FCConstraints_TypeOK_Next",
       "time_secs": 859.0051620372105,
-      "gt_proof_steps": 134
+      "gt_proof_steps": 134,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.29561
     },
     {
       "agent_exit": 0,
@@ -1976,7 +2234,10 @@
       "termination_reason": "OK",
       "theorem": "bcastByz_Unforg_Step2",
       "time_secs": 847.4042539319489,
-      "gt_proof_steps": 91
+      "gt_proof_steps": 91,
+      "cache_read_input_tokens": 9984,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.2827464
     },
     {
       "agent_exit": 0,
@@ -1998,7 +2259,10 @@
       "termination_reason": "OK",
       "theorem": "BlockingQueueSplit_proofs_DeadlockFreedom",
       "time_secs": 818.1625383740757,
-      "gt_proof_steps": 10
+      "gt_proof_steps": 10,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.274679
     },
     {
       "agent_exit": 0,
@@ -2020,7 +2284,10 @@
       "termination_reason": "OK",
       "theorem": "BlockingQueueSplit_proofs_Implements",
       "time_secs": 845.4184734909795,
-      "gt_proof_steps": 4
+      "gt_proof_steps": 4,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.2832514
     },
     {
       "agent_exit": 0,
@@ -2042,7 +2309,10 @@
       "termination_reason": "OK",
       "theorem": "BPConProof_Invariance",
       "time_secs": 407.7240664330311,
-      "gt_proof_steps": 145
+      "gt_proof_steps": 145,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.157719
     },
     {
       "agent_exit": 0,
@@ -2064,7 +2334,10 @@
       "termination_reason": "OK",
       "theorem": "BPConProof_MaxBallotLemma2",
       "time_secs": 509.5119092648383,
-      "gt_proof_steps": 22
+      "gt_proof_steps": 22,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.18801
     },
     {
       "agent_exit": 0,
@@ -2086,7 +2359,10 @@
       "termination_reason": "OK",
       "theorem": "BPConProof_MsgsLemma",
       "time_secs": 825.8449144719634,
-      "gt_proof_steps": 65
+      "gt_proof_steps": 65,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.296952
     },
     {
       "agent_exit": 0,
@@ -2108,7 +2384,10 @@
       "termination_reason": "OK",
       "theorem": "BPConProof_PNextDef",
       "time_secs": 144.15340473200195,
-      "gt_proof_steps": 3
+      "gt_proof_steps": 3,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.068454
     },
     {
       "agent_exit": 0,
@@ -2130,7 +2409,10 @@
       "termination_reason": "OK",
       "theorem": "PConProof_NextDef",
       "time_secs": 60.446173103991896,
-      "gt_proof_steps": 3
+      "gt_proof_steps": 3,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.033367
     },
     {
       "agent_exit": 0,
@@ -2152,7 +2434,10 @@
       "termination_reason": "OK",
       "theorem": "VoteProof_InductiveInvariance",
       "time_secs": 806.6945213400759,
-      "gt_proof_steps": 87
+      "gt_proof_steps": 87,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.279408
     },
     {
       "agent_exit": 0,
@@ -2174,7 +2459,10 @@
       "termination_reason": "OK",
       "theorem": "VoteProof_Liveness",
       "time_secs": 1149.1918579288758,
-      "gt_proof_steps": 149
+      "gt_proof_steps": 149,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.39569
     },
     {
       "agent_exit": 0,
@@ -2196,7 +2484,10 @@
       "termination_reason": "OK",
       "theorem": "VoteProof_SafeAtProp",
       "time_secs": 441.8687885289546,
-      "gt_proof_steps": 12
+      "gt_proof_steps": 12,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.121035
     },
     {
       "agent_exit": 0,
@@ -2218,7 +2509,10 @@
       "termination_reason": "OK",
       "theorem": "VoteProof_SafeLemma",
       "time_secs": 893.7243714870419,
-      "gt_proof_steps": 22
+      "gt_proof_steps": 22,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.26736
     },
     {
       "agent_exit": 0,
@@ -2240,7 +2534,10 @@
       "termination_reason": "OK",
       "theorem": "VoteProof_VT1Prime",
       "time_secs": 117.44560826290399,
-      "gt_proof_steps": 2
+      "gt_proof_steps": 2,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.049633
     },
     {
       "agent_exit": 0,
@@ -2262,7 +2559,10 @@
       "termination_reason": "OK",
       "theorem": "VoteProof_VT3",
       "time_secs": 752.5665024891496,
-      "gt_proof_steps": 28
+      "gt_proof_steps": 28,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.262495
     },
     {
       "agent_exit": 0,
@@ -2284,7 +2584,10 @@
       "termination_reason": "OK",
       "theorem": "VoteProof_VT4",
       "time_secs": 957.1379669010639,
-      "gt_proof_steps": 23
+      "gt_proof_steps": 23,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.074457
     },
     {
       "agent_exit": 0,
@@ -2306,7 +2609,10 @@
       "termination_reason": "OK",
       "theorem": "CigaretteSmokers_proof_UniqueComplement2",
       "time_secs": 754.859046483878,
-      "gt_proof_steps": 42
+      "gt_proof_steps": 42,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.253433
     },
     {
       "agent_exit": 0,
@@ -2328,7 +2634,10 @@
       "termination_reason": "OK",
       "theorem": "CoffeeCan_proof_TypeCorrect",
       "time_secs": 248.51366922981106,
-      "gt_proof_steps": 51
+      "gt_proof_steps": 51,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.08277
     },
     {
       "agent_exit": 0,
@@ -2350,7 +2659,10 @@
       "termination_reason": "OK",
       "theorem": "EWD687a_proof_Invariant1",
       "time_secs": 544.6102758119814,
-      "gt_proof_steps": 16
+      "gt_proof_steps": 16,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.18754
     },
     {
       "agent_exit": 0,
@@ -2372,7 +2684,10 @@
       "termination_reason": "OK",
       "theorem": "EWD687a_proof_Safety",
       "time_secs": 896.4287316820119,
-      "gt_proof_steps": 21
+      "gt_proof_steps": 21,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.305706
     },
     {
       "agent_exit": 0,
@@ -2394,7 +2709,10 @@
       "termination_reason": "OK",
       "theorem": "EWD687a_proof_TreeInvariant",
       "time_secs": 662.160934618907,
-      "gt_proof_steps": 135
+      "gt_proof_steps": 135,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.227944
     },
     {
       "agent_exit": 0,
@@ -2416,7 +2734,10 @@
       "termination_reason": "OK",
       "theorem": "EWD840_proof_EnabledSystem",
       "time_secs": 382.18649928597733,
-      "gt_proof_steps": 6
+      "gt_proof_steps": 6,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.134453
     },
     {
       "agent_exit": 0,
@@ -2438,7 +2759,10 @@
       "termination_reason": "OK",
       "theorem": "EWD840_proof_Round1",
       "time_secs": 1210.5424081869423,
-      "gt_proof_steps": 19
+      "gt_proof_steps": 19,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.103372
     },
     {
       "agent_exit": 0,
@@ -2460,7 +2784,10 @@
       "termination_reason": "OK",
       "theorem": "EWD840_proof_Round2",
       "time_secs": 988.6889451299794,
-      "gt_proof_steps": 25
+      "gt_proof_steps": 25,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.33689
     },
     {
       "agent_exit": 0,
@@ -2482,7 +2809,10 @@
       "termination_reason": "OK",
       "theorem": "EWD840_proof_Round3",
       "time_secs": 1064.8574928219896,
-      "gt_proof_steps": 26
+      "gt_proof_steps": 26,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.197751
     },
     {
       "agent_exit": 0,
@@ -2504,7 +2834,10 @@
       "termination_reason": "OK",
       "theorem": "SyncTerminationDetection_proof_CorrectDetection",
       "time_secs": 81.08096829801798,
-      "gt_proof_steps": 3
+      "gt_proof_steps": 3,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.032434
     },
     {
       "agent_exit": 0,
@@ -2526,7 +2859,10 @@
       "termination_reason": "OK",
       "theorem": "SyncTerminationDetection_proof_Live",
       "time_secs": 451.4078280599788,
-      "gt_proof_steps": 5
+      "gt_proof_steps": 5,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.156412
     },
     {
       "agent_exit": 0,
@@ -2548,7 +2884,10 @@
       "termination_reason": "OK",
       "theorem": "AsyncTerminationDetection_proof_Liveness",
       "time_secs": 387.3880141589325,
-      "gt_proof_steps": 5
+      "gt_proof_steps": 5,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.135244
     },
     {
       "agent_exit": 0,
@@ -2570,7 +2909,10 @@
       "termination_reason": "OK",
       "theorem": "AsyncTerminationDetection_proof_Safety",
       "time_secs": 148.48834259109572,
-      "gt_proof_steps": 4
+      "gt_proof_steps": 4,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.055509
     },
     {
       "agent_exit": 0,
@@ -2592,7 +2934,10 @@
       "termination_reason": "OK",
       "theorem": "AsyncTerminationDetection_proof_TypeCorrect",
       "time_secs": 271.83238091901876,
-      "gt_proof_steps": 4
+      "gt_proof_steps": 4,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.096456
     },
     {
       "agent_exit": 0,
@@ -2614,7 +2959,10 @@
       "termination_reason": "OK",
       "theorem": "EWD998_proof_B0NoMessagePending",
       "time_secs": 290.0677919748705,
-      "gt_proof_steps": 7
+      "gt_proof_steps": 7,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.105405
     },
     {
       "agent_exit": 0,
@@ -2636,7 +2984,10 @@
       "termination_reason": "OK",
       "theorem": "EWD998_proof_Detection",
       "time_secs": 489.9198823450133,
-      "gt_proof_steps": 8
+      "gt_proof_steps": 8,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.172849
     },
     {
       "agent_exit": 0,
@@ -2658,7 +3009,10 @@
       "termination_reason": "OK",
       "theorem": "EWD998_proof_EnabledAtMaster",
       "time_secs": 825.8432951369323,
-      "gt_proof_steps": 19
+      "gt_proof_steps": 19,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.283473
     },
     {
       "agent_exit": 0,
@@ -2680,7 +3034,10 @@
       "termination_reason": "OK",
       "theorem": "EWD998_proof_EnabledSystem",
       "time_secs": 603.2625100868754,
-      "gt_proof_steps": 4
+      "gt_proof_steps": 4,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.210093
     },
     {
       "agent_exit": 0,
@@ -2702,7 +3059,10 @@
       "termination_reason": "OK",
       "theorem": "EWD998_proof_Invariance",
       "time_secs": 1003.7909725750796,
-      "gt_proof_steps": 131
+      "gt_proof_steps": 131,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.343171
     },
     {
       "agent_exit": 0,
@@ -2724,7 +3084,10 @@
       "termination_reason": "OK",
       "theorem": "EWD998_proof_Refinement",
       "time_secs": 127.28388130082749,
-      "gt_proof_steps": 46
+      "gt_proof_steps": 46,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.051088
     },
     {
       "agent_exit": 0,
@@ -2746,7 +3109,10 @@
       "termination_reason": "OK",
       "theorem": "EWD998_proof_Round1",
       "time_secs": 1005.108677112963,
-      "gt_proof_steps": 21
+      "gt_proof_steps": 21,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.344496
     },
     {
       "agent_exit": 0,
@@ -2768,7 +3134,10 @@
       "termination_reason": "OK",
       "theorem": "EWD998_proof_Round2",
       "time_secs": 1064.801300341962,
-      "gt_proof_steps": 30
+      "gt_proof_steps": 30,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.364387
     },
     {
       "agent_exit": 0,
@@ -2790,7 +3159,10 @@
       "termination_reason": "OK",
       "theorem": "EWD998_proof_Round3",
       "time_secs": 1244.6991201681085,
-      "gt_proof_steps": 41
+      "gt_proof_steps": 41,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.418729
     },
     {
       "agent_exit": 0,
@@ -2812,7 +3184,10 @@
       "termination_reason": "OK",
       "theorem": "EWD998_proof_Safety",
       "time_secs": 864.6840842030942,
-      "gt_proof_steps": 29
+      "gt_proof_steps": 29,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.234487
     },
     {
       "agent_exit": 0,
@@ -2834,7 +3209,10 @@
       "termination_reason": "OK",
       "theorem": "EWD998_proof_SumZero",
       "time_secs": 1027.9694493820425,
-      "gt_proof_steps": 11
+      "gt_proof_steps": 11,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.351323
     },
     {
       "agent_exit": 0,
@@ -2856,7 +3234,10 @@
       "termination_reason": "OK",
       "theorem": "EWD998_proof_TerminationDetectionInv",
       "time_secs": 79.93845563801005,
-      "gt_proof_steps": 4
+      "gt_proof_steps": 4,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.036297
     },
     {
       "agent_exit": 0,
@@ -2878,7 +3259,10 @@
       "termination_reason": "OK",
       "theorem": "EWD998PCal_proof_InitNetworkOK",
       "time_secs": 757.4748703320511,
-      "gt_proof_steps": 33
+      "gt_proof_steps": 33,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.261128
     },
     {
       "agent_exit": 0,
@@ -2900,7 +3284,10 @@
       "termination_reason": "OK",
       "theorem": "EWD998PCal_proof_TypeOK_Step",
       "time_secs": 547.5101676941849,
-      "gt_proof_steps": 340
+      "gt_proof_steps": 340,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.192761
     },
     {
       "agent_exit": 0,
@@ -2922,7 +3309,10 @@
       "termination_reason": "OK",
       "theorem": "CRDT_proof_EnabledGossip",
       "time_secs": 276.70014225994237,
-      "gt_proof_steps": 9
+      "gt_proof_steps": 9,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.08825
     },
     {
       "agent_exit": 0,
@@ -2944,7 +3334,10 @@
       "termination_reason": "OK",
       "theorem": "CRDT_proof_GossipDecreasesMeasure",
       "time_secs": 916.4436416081153,
-      "gt_proof_steps": 4
+      "gt_proof_steps": 4,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.307232
     },
     {
       "agent_exit": 0,
@@ -2966,7 +3359,10 @@
       "termination_reason": "OK",
       "theorem": "CRDT_proof_GossipDoesntIncreaseMeasure",
       "time_secs": 610.3829365319107,
-      "gt_proof_steps": 9
+      "gt_proof_steps": 9,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.206353
     },
     {
       "agent_exit": 0,
@@ -2988,7 +3384,10 @@
       "termination_reason": "OK",
       "theorem": "CRDT_proof_MeasureIsZero",
       "time_secs": 572.3041540719569,
-      "gt_proof_steps": 5
+      "gt_proof_steps": 5,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.189747
     },
     {
       "agent_exit": 0,
@@ -3010,7 +3409,10 @@
       "termination_reason": "OK",
       "theorem": "CRDT_proof_MeasureType",
       "time_secs": 288.89971820707433,
-      "gt_proof_steps": 2
+      "gt_proof_steps": 2,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.096142
     },
     {
       "agent_exit": 0,
@@ -3032,7 +3434,10 @@
       "termination_reason": "OK",
       "theorem": "CRDT_proof_OGLiveness",
       "time_secs": 1269.9136054050177,
-      "gt_proof_steps": 63
+      "gt_proof_steps": 63,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.117402
     },
     {
       "agent_exit": 0,
@@ -3054,7 +3459,10 @@
       "termination_reason": "OK",
       "theorem": "CRDT_proof_Safe",
       "time_secs": 180.71831267490052,
-      "gt_proof_steps": 3
+      "gt_proof_steps": 3,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.0553494
     },
     {
       "agent_exit": 0,
@@ -3076,7 +3484,10 @@
       "termination_reason": "OK",
       "theorem": "CRDT_proof_SumStronglyMonotonic",
       "time_secs": 289.88903292804025,
-      "gt_proof_steps": 8
+      "gt_proof_steps": 8,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.099326
     },
     {
       "agent_exit": 0,
@@ -3098,7 +3509,10 @@
       "termination_reason": "OK",
       "theorem": "CRDT_proof_SumType",
       "time_secs": 178.91240688599646,
-      "gt_proof_steps": 3
+      "gt_proof_steps": 3,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.063594
     },
     {
       "agent_exit": 0,
@@ -3120,7 +3534,10 @@
       "termination_reason": "OK",
       "theorem": "CRDT_proof_SumWeaklyMonotonic",
       "time_secs": 248.17235667002387,
-      "gt_proof_steps": 7
+      "gt_proof_steps": 7,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.081988
     },
     {
       "agent_exit": 0,
@@ -3142,7 +3559,10 @@
       "termination_reason": "OK",
       "theorem": "clean_proof_Preservation",
       "time_secs": 73.18075146502815,
-      "gt_proof_steps": 37
+      "gt_proof_steps": 37,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.029712
     },
     {
       "agent_exit": 0,
@@ -3164,7 +3584,10 @@
       "termination_reason": "OK",
       "theorem": "clean_proof_TypeCorrect",
       "time_secs": 190.16176692186855,
-      "gt_proof_steps": 20
+      "gt_proof_steps": 20,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.069458
     },
     {
       "agent_exit": 0,
@@ -3186,7 +3609,10 @@
       "termination_reason": "OK",
       "theorem": "stages_proof_TypeCorrect",
       "time_secs": 238.6372421369888,
-      "gt_proof_steps": 19
+      "gt_proof_steps": 19,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.086086
     },
     {
       "agent_exit": 0,
@@ -3208,7 +3634,10 @@
       "termination_reason": "OK",
       "theorem": "KeyValueStore_proof_TypeAndLifecycle",
       "time_secs": 68.96399400592782,
-      "gt_proof_steps": 13
+      "gt_proof_steps": 13,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.023611
     },
     {
       "agent_exit": 0,
@@ -3230,7 +3659,10 @@
       "termination_reason": "OK",
       "theorem": "LamportMutex_proofs_BasicInvariant",
       "time_secs": 769.2206188791897,
-      "gt_proof_steps": 131
+      "gt_proof_steps": 131,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.263961
     },
     {
       "agent_exit": 0,
@@ -3252,7 +3684,10 @@
       "termination_reason": "OK",
       "theorem": "LamportMutex_proofs_ClockInvariant",
       "time_secs": 897.7242292240262,
-      "gt_proof_steps": 129
+      "gt_proof_steps": 129,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.307032
     },
     {
       "agent_exit": 0,
@@ -3274,7 +3709,10 @@
       "termination_reason": "OK",
       "theorem": "LamportMutex_proofs_TypeCorrect",
       "time_secs": 576.3973973488901,
-      "gt_proof_steps": 25
+      "gt_proof_steps": 25,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.198687
     },
     {
       "agent_exit": 0,
@@ -3296,7 +3734,10 @@
       "termination_reason": "OK",
       "theorem": "Lock_MutualExclusion",
       "time_secs": 159.6399895120412,
-      "gt_proof_steps": 11
+      "gt_proof_steps": 11,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.058341
     },
     {
       "agent_exit": 0,
@@ -3318,7 +3759,10 @@
       "termination_reason": "OK",
       "theorem": "LockHS_IndInvHS",
       "time_secs": 956.3701676740311,
-      "gt_proof_steps": 34
+      "gt_proof_steps": 34,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.326971
     },
     {
       "agent_exit": 0,
@@ -3340,7 +3784,10 @@
       "termination_reason": "OK",
       "theorem": "Peterson_Refinement",
       "time_secs": 970.6553145158105,
-      "gt_proof_steps": 14
+      "gt_proof_steps": 14,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.329882
     },
     {
       "agent_exit": 0,
@@ -3362,7 +3809,10 @@
       "termination_reason": "OK",
       "theorem": "BinarySearch_SortedLess",
       "time_secs": 108.28379911696538,
-      "gt_proof_steps": 2
+      "gt_proof_steps": 2,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.036503
     },
     {
       "agent_exit": 0,
@@ -3384,7 +3834,10 @@
       "termination_reason": "OK",
       "theorem": "Quicksort_NonemptyMin",
       "time_secs": 108.31889232504182,
-      "gt_proof_steps": 23
+      "gt_proof_steps": 23,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.0352314
     },
     {
       "agent_exit": 0,
@@ -3406,7 +3859,10 @@
       "termination_reason": "OK",
       "theorem": "SumSequence_Lemma2",
       "time_secs": 321.5589715738315,
-      "gt_proof_steps": 4
+      "gt_proof_steps": 4,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.107068
     },
     {
       "agent_exit": 0,
@@ -3428,7 +3884,10 @@
       "termination_reason": "OK",
       "theorem": "SumSequence_Lemma3",
       "time_secs": 384.42270206683315,
-      "gt_proof_steps": 13
+      "gt_proof_steps": 13,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.133817
     },
     {
       "agent_exit": 0,
@@ -3450,7 +3909,10 @@
       "termination_reason": "OK",
       "theorem": "SumSequence_Lemma4",
       "time_secs": 256.8638332260307,
-      "gt_proof_steps": 16
+      "gt_proof_steps": 16,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.0832804
     },
     {
       "agent_exit": 0,
@@ -3472,7 +3934,10 @@
       "termination_reason": "OK",
       "theorem": "MajorityProof_Correctness",
       "time_secs": 687.3992068618536,
-      "gt_proof_steps": 21
+      "gt_proof_steps": 21,
+      "cache_read_input_tokens": 5888,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.2298208
     },
     {
       "agent_exit": 0,
@@ -3494,7 +3959,10 @@
       "termination_reason": "OK",
       "theorem": "MajorityProof_OccurrencesPlusOne",
       "time_secs": 488.1262459428981,
-      "gt_proof_steps": 7
+      "gt_proof_steps": 7,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.1605464
     },
     {
       "agent_exit": 0,
@@ -3516,7 +3984,10 @@
       "termination_reason": "OK",
       "theorem": "MajorityProof_TypeCorrect",
       "time_secs": 89.289088036865,
-      "gt_proof_steps": 3
+      "gt_proof_steps": 3,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.032456
     },
     {
       "agent_exit": 0,
@@ -3538,7 +4009,10 @@
       "termination_reason": "OK",
       "theorem": "ParReachProofs_TypeInvariant",
       "time_secs": 613.9752527009696,
-      "gt_proof_steps": 3
+      "gt_proof_steps": 3,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.2068474
     },
     {
       "agent_exit": 0,
@@ -3560,7 +4034,10 @@
       "termination_reason": "OK",
       "theorem": "ReachabilityProofs_Reachable2",
       "time_secs": 808.4884306229651,
-      "gt_proof_steps": 13
+      "gt_proof_steps": 13,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.275595
     },
     {
       "agent_exit": 0,
@@ -3582,7 +4059,10 @@
       "termination_reason": "OK",
       "theorem": "ReachableProofs_Thm2",
       "time_secs": 297.13781638490036,
-      "gt_proof_steps": 2
+      "gt_proof_steps": 2,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.105515
     },
     {
       "agent_exit": 0,
@@ -3604,7 +4084,10 @@
       "termination_reason": "OK",
       "theorem": "ReachableProofs_Thm3",
       "time_secs": 566.3076642351225,
-      "gt_proof_steps": 20
+      "gt_proof_steps": 20,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.195212
     },
     {
       "agent_exit": 0,
@@ -3626,7 +4109,10 @@
       "termination_reason": "OK",
       "theorem": "MissionariesAndCannibals_proof_TypeCorrect",
       "time_secs": 151.43011025199667,
-      "gt_proof_steps": 23
+      "gt_proof_steps": 23,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.056476
     },
     {
       "agent_exit": 0,
@@ -3648,7 +4134,10 @@
       "termination_reason": "OK",
       "theorem": "Elevator_proof_Inv1Next",
       "time_secs": 514.8763681559358,
-      "gt_proof_steps": 84
+      "gt_proof_steps": 84,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.179484
     },
     {
       "agent_exit": 0,
@@ -3670,7 +4159,10 @@
       "termination_reason": "OK",
       "theorem": "Consensus_LivenessTheorem",
       "time_secs": 725.5404678180348,
-      "gt_proof_steps": 6
+      "gt_proof_steps": 6,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.24746
     },
     {
       "agent_exit": 0,
@@ -3692,7 +4184,10 @@
       "termination_reason": "OK",
       "theorem": "Voting_Implementation",
       "time_secs": 800.3541726630647,
-      "gt_proof_steps": 3
+      "gt_proof_steps": 3,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.273413
     },
     {
       "agent_exit": 0,
@@ -3714,7 +4209,10 @@
       "termination_reason": "OK",
       "theorem": "Voting_Invariance",
       "time_secs": 633.722526904894,
-      "gt_proof_steps": 3
+      "gt_proof_steps": 3,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.219494
     },
     {
       "agent_exit": 0,
@@ -3736,7 +4234,10 @@
       "termination_reason": "OK",
       "theorem": "Voting_proof_ShowsSafety_T",
       "time_secs": 545.8452933698427,
-      "gt_proof_steps": 38
+      "gt_proof_steps": 38,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.188401
     },
     {
       "agent_exit": 0,
@@ -3758,7 +4259,10 @@
       "termination_reason": "OK",
       "theorem": "ReadersWriters_proof_TypeCorrect",
       "time_secs": 536.1122892349958,
-      "gt_proof_steps": 36
+      "gt_proof_steps": 36,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.1806624
     },
     {
       "agent_exit": 0,
@@ -3780,7 +4284,10 @@
       "termination_reason": "OK",
       "theorem": "spanning_proof_SntMsgStep",
       "time_secs": 694.8913164180703,
-      "gt_proof_steps": 67
+      "gt_proof_steps": 67,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.237929
     },
     {
       "agent_exit": 0,
@@ -3802,7 +4309,10 @@
       "termination_reason": "OK",
       "theorem": "tcp_proof_IndInvInit",
       "time_secs": 101.95677379891276,
-      "gt_proof_steps": 10
+      "gt_proof_steps": 10,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.0398234
     },
     {
       "agent_exit": 0,
@@ -3824,7 +4334,10 @@
       "termination_reason": "OK",
       "theorem": "tcp_proof_IndInvReset",
       "time_secs": 867.2572279069573,
-      "gt_proof_steps": 239
+      "gt_proof_steps": 239,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.164737
     },
     {
       "agent_exit": 0,
@@ -3846,7 +4359,10 @@
       "termination_reason": "OK",
       "theorem": "tcp_proof_IndInvSystem",
       "time_secs": 552.3844321658835,
-      "gt_proof_steps": 1433
+      "gt_proof_steps": 1433,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.126587
     },
     {
       "agent_exit": 0,
@@ -3868,7 +4384,10 @@
       "termination_reason": "OK",
       "theorem": "tcp_proof_IndInvUser",
       "time_secs": 906.7010205609258,
-      "gt_proof_steps": 601
+      "gt_proof_steps": 601,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.312157
     },
     {
       "agent_exit": 0,
@@ -3890,7 +4409,10 @@
       "termination_reason": "OK",
       "theorem": "tcp_proof_PrefixTwoNonEmpty",
       "time_secs": 672.0164725449868,
-      "gt_proof_steps": 5
+      "gt_proof_steps": 5,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.231663
     },
     {
       "agent_exit": 0,
@@ -3912,7 +4434,10 @@
       "termination_reason": "OK",
       "theorem": "tcp_proof_TypeOKInductive",
       "time_secs": 541.2834371249191,
-      "gt_proof_steps": 116
+      "gt_proof_steps": 116,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.186344
     },
     {
       "agent_exit": 0,
@@ -3934,7 +4459,10 @@
       "termination_reason": "OK",
       "theorem": "Simple_Correctness",
       "time_secs": 679.283341769129,
-      "gt_proof_steps": 10
+      "gt_proof_steps": 10,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.2285464
     },
     {
       "agent_exit": 0,
@@ -3956,7 +4484,10 @@
       "termination_reason": "OK",
       "theorem": "SimpleRegular_Correctness",
       "time_secs": 645.407905880129,
-      "gt_proof_steps": 15
+      "gt_proof_steps": 15,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.222172
     },
     {
       "agent_exit": 0,
@@ -3978,7 +4509,10 @@
       "termination_reason": "OK",
       "theorem": "TPaxosWithProof_AcceptMsgInv",
       "time_secs": 1042.2012773449533,
-      "gt_proof_steps": 128
+      "gt_proof_steps": 128,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.3527294
     },
     {
       "agent_exit": 0,
@@ -4000,7 +4534,10 @@
       "termination_reason": "OK",
       "theorem": "TPaxosWithProof_Consistent",
       "time_secs": 775.2126134780701,
-      "gt_proof_steps": 11
+      "gt_proof_steps": 11,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.268232
     },
     {
       "agent_exit": 0,
@@ -4022,7 +4559,10 @@
       "termination_reason": "OK",
       "theorem": "TPaxosWithProof_Invariant",
       "time_secs": 596.0712991750333,
-      "gt_proof_steps": 105
+      "gt_proof_steps": 105,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.208478
     },
     {
       "agent_exit": 0,
@@ -4044,7 +4584,10 @@
       "termination_reason": "OK",
       "theorem": "TPaxosWithProof_OnMessageAccInv",
       "time_secs": 918.8246870061848,
-      "gt_proof_steps": 132
+      "gt_proof_steps": 132,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.316094
     },
     {
       "agent_exit": 0,
@@ -4066,7 +4609,10 @@
       "termination_reason": "OK",
       "theorem": "TPaxosWithProof_OnMessageMsgInv",
       "time_secs": 695.6474987440743,
-      "gt_proof_steps": 53
+      "gt_proof_steps": 53,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.241573
     },
     {
       "agent_exit": 0,
@@ -4088,7 +4634,10 @@
       "termination_reason": "OK",
       "theorem": "TPaxosWithProof_PrepareMsgInv",
       "time_secs": 700.8890458589885,
-      "gt_proof_steps": 65
+      "gt_proof_steps": 65,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.242759
     },
     {
       "agent_exit": 0,
@@ -4110,7 +4659,10 @@
       "termination_reason": "OK",
       "theorem": "TPaxosWithProof_SafeAtStable",
       "time_secs": 873.896888788091,
-      "gt_proof_steps": 62
+      "gt_proof_steps": 62,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.300251
     },
     {
       "agent_exit": 0,
@@ -4132,7 +4684,10 @@
       "termination_reason": "OK",
       "theorem": "TPaxosWithProof_UpdateStateMsgInv",
       "time_secs": 613.2238133370411,
-      "gt_proof_steps": 157
+      "gt_proof_steps": 157,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.2098244
     },
     {
       "agent_exit": 0,
@@ -4154,7 +4709,10 @@
       "termination_reason": "OK",
       "theorem": "TPaxosWithProof_UpdateStateTypeOKProperty",
       "time_secs": 420.7557312399149,
-      "gt_proof_steps": 6
+      "gt_proof_steps": 6,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.1488
     },
     {
       "agent_exit": 0,
@@ -4176,7 +4734,10 @@
       "termination_reason": "OK",
       "theorem": "TPaxosWithProof_UpdateStateValue",
       "time_secs": 546.4744497770444,
-      "gt_proof_steps": 24
+      "gt_proof_steps": 24,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.191747
     },
     {
       "agent_exit": 0,
@@ -4198,7 +4759,10 @@
       "termination_reason": "OK",
       "theorem": "TPaxosWithProof_UpdateStateViewValue",
       "time_secs": 615.3162823871244,
-      "gt_proof_steps": 49
+      "gt_proof_steps": 49,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.2098744
     },
     {
       "agent_exit": 0,
@@ -4220,7 +4784,10 @@
       "termination_reason": "OK",
       "theorem": "Termination_proof_Invariant2",
       "time_secs": 794.7389169940725,
-      "gt_proof_steps": 57
+      "gt_proof_steps": 57,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.271299
     },
     {
       "agent_exit": 0,
@@ -4242,7 +4809,10 @@
       "termination_reason": "OK",
       "theorem": "PaxosCommit_proof_MaximumProp",
       "time_secs": 794.4389093010686,
-      "gt_proof_steps": 69
+      "gt_proof_steps": 69,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.065868
     },
     {
       "agent_exit": 0,
@@ -4264,7 +4834,10 @@
       "termination_reason": "OK",
       "theorem": "PaxosCommit_proof_NextInv",
       "time_secs": 765.654243519064,
-      "gt_proof_steps": 103
+      "gt_proof_steps": 103,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.263161
     }
   ]
 }

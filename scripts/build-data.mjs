@@ -113,39 +113,10 @@ const resolveCohort = (meta, info) => {
   return COHORT_FROM_KIND[info.kind] ?? "one-shot";
 };
 
-// Output-only estimate from public standard-tier rates. No entry => cost cells
-// render as a dash.
-const OUTPUT_PRICING = {
-  "codex-gpt-5.6-sol": {
-    usdPerMillionTokens: 30,
-    tier: "standard",
-    asOf: "2026-08-10",
-    source: "https://developers.openai.com/api/docs/models",
-  },
-  "codex-single-turn-gpt-5.6-sol": {
-    usdPerMillionTokens: 30,
-    tier: "standard",
-    asOf: "2026-08-10",
-    source: "https://developers.openai.com/api/docs/models",
-  },
-  "codex-single-turn-gpt-5.6-sol-xhigh": {
-    usdPerMillionTokens: 30,
-    tier: "standard",
-    asOf: "2026-08-10",
-    source: "https://developers.openai.com/api/docs/models",
-  },
-  "codex-single-turn-gpt-5.6-sol-max": {
-    usdPerMillionTokens: 30,
-    tier: "standard",
-    asOf: "2026-08-12",
-    source: "https://developers.openai.com/api/docs/models",
-  },
-  "codex-single-turn-gpt-5.6-terra": {
-    usdPerMillionTokens: 15,
-    tier: "standard",
-    asOf: "2026-08-11",
-    source: "https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing",
-  },
+const PRICE_SOURCE_BY_MODEL = {
+  "gpt-5.6-sol": "https://developers.openai.com/api/docs/models/gpt-5.6-sol",
+  "gpt-5.6-terra": "https://developers.openai.com/api/docs/models/gpt-5.6-terra",
+  "gpt-5.6-luna": "https://developers.openai.com/api/docs/models/gpt-5.6-luna",
 };
 
 const SOURCE_INFO = {
@@ -190,7 +161,7 @@ const SPEC_URL = {
 };
 
 const exampleDir = (benchmarkOrSpecId) => benchmarkOrSpecId.split("/")[0];
-const sourceModuleName = (specSourceId) =>
+const sourceSpecName = (specSourceId) =>
   specSourceId.split("/").pop().replace(/\.tla$/i, "");
 
 const displayName = (group) => {
@@ -222,9 +193,11 @@ const r1 = (x) => Math.round(x * 10) / 10;
 const sameNumber = (actual, expected) =>
   Number.isFinite(actual) && Math.abs(actual - expected) < 1e-9;
 
-const modeStat = (pm, pricing) => {
+const modeStat = (pm) => {
   if (!pm || pm.total <= 0) return null;
-  const outputCostUsd = pricing ? pm.outputCostUnits / 1_000_000 : null;
+  const cacheRatePct = pm.inputTokens > 0
+    ? 100 * pm.cacheReadInputTokens / pm.inputTokens
+    : null;
   return {
     rate: r1((pm.pass / pm.total) * 100),
     pass: pm.pass,
@@ -234,10 +207,15 @@ const modeStat = (pm, pricing) => {
     taskCount: pm.total,
     activeTimeSecs: pm.activeTimeSecs,
     activeTimePerTask: pm.activeTimeSecs / pm.total,
+    inputTokens: pm.inputTokens,
     outputTokens: pm.outputTokens,
-    outputTokensPerTask: pm.outputTokens / pm.total,
-    outputCostUsd,
-    outputCostPerTask: outputCostUsd === null ? null : outputCostUsd / pm.total,
+    totalTokens: pm.inputTokens + pm.outputTokens,
+    totalTokensPerTask: (pm.inputTokens + pm.outputTokens) / pm.total,
+    cacheReadInputTokens: pm.cacheReadInputTokens,
+    cacheWriteInputTokens: pm.cacheWriteInputTokens,
+    cacheRatePct,
+    equivalentCostUsd: pm.equivalentCostUsd,
+    equivalentCostPerTask: pm.equivalentCostUsd / pm.total,
   };
 };
 
@@ -317,29 +295,13 @@ for (const { f, results } of bundles) {
 
 const models = bundles.map(({ f, meta, results, resultsVersion }) => {
   const usageAudit = meta.usage_audit;
-  const outputTokensPartial = usageAudit?.output_tokens_partial === true;
-  const outputTokensVouched = usageAudit?.output_tokens_audited === true ||
-    usageAudit?.output_tokens_positive_for_all_tasks === true ||
-    outputTokensPartial ||
-    (usageAudit?.complete_for_all_tasks === true && Number.isInteger(usageAudit?.output_tokens));
-  const activeTimeComplete = usageAudit?.active_time_complete === true ||
-    usageAudit?.complete_for_all_tasks === true;
   if (!usageAudit || usageAudit.task_count !== results.length ||
-      !activeTimeComplete || !outputTokensVouched) {
+      usageAudit.complete_for_all_tasks !== true || usageAudit.active_time_complete !== true) {
     throw new Error(`${f}: missing audited ${results.length}-task usage data`);
   }
-  if (outputTokensPartial && !Number.isInteger(usageAudit.tasks_with_output_tokens)) {
-    throw new Error(`${f}: partial output telemetry must declare tasks_with_output_tokens`);
-  }
-
-  const pricing = OUTPUT_PRICING[meta.backend] ?? null;
-  if (pricing) {
-    if (!Number.isFinite(pricing.usdPerMillionTokens) || pricing.usdPerMillionTokens <= 0) {
-      throw new Error(`${f}: invalid output pricing for ${meta.backend}`);
-    }
-    if (pricing.asOf !== usageAudit.date) {
-      throw new Error(`${f}: pricing date ${pricing.asOf} does not match usage audit ${usageAudit.date}`);
-    }
+  const priceSource = PRICE_SOURCE_BY_MODEL[meta.model];
+  if (!priceSource) {
+    throw new Error(`${f}: no public pricing source for ${meta.model}`);
   }
 
   if (results.length !== CORE_COUNT) {
@@ -357,14 +319,19 @@ const models = bundles.map(({ f, meta, results, resultsVersion }) => {
   const bySpec = {};
   const byBand = {};
   let activeTimeSecs = 0;
+  let inputTokens = 0;
   let outputTokens = 0;
-  let tasksWithOutputTokens = 0;
-  let outputCostUnits = pricing ? 0 : null;
+  let cacheReadInputTokens = 0;
+  let cacheWriteInputTokens = 0;
+  let equivalentCostUsd = 0;
   let pass = 0;
   let cheating = 0;
   let modeActive = 0;
+  let modeInput = 0;
   let modeOutput = 0;
-  let modeCostUnits = 0;
+  let modeCacheRead = 0;
+  let modeCacheWrite = 0;
+  let modeEquivalentCost = 0;
 
   for (const r of results) {
     if (!["PASS", "FAIL", "CHEATING"].includes(r.check_verdict)) {
@@ -383,27 +350,36 @@ const models = bundles.map(({ f, meta, results, resultsVersion }) => {
     if (!Number.isFinite(r.time_secs) || r.time_secs <= 0) {
       throw new Error(`${f}: ${r.benchmark} has invalid time_secs ${r.time_secs}`);
     }
-    const hasOutputTokens = r.output_tokens !== undefined;
-    if (!hasOutputTokens && !outputTokensPartial) {
-      throw new Error(`${f}: ${r.benchmark} has no output_tokens`);
+    if (!Number.isInteger(r.input_tokens) || r.input_tokens <= 0) {
+      throw new Error(`${f}: ${r.benchmark} has invalid input_tokens ${r.input_tokens}`);
     }
-    if (hasOutputTokens && (!Number.isInteger(r.output_tokens) || r.output_tokens <= 0)) {
+    if (!Number.isInteger(r.output_tokens) || r.output_tokens <= 0) {
       throw new Error(`${f}: ${r.benchmark} has invalid output_tokens ${r.output_tokens}`);
     }
-    if (hasOutputTokens) tasksWithOutputTokens++;
+    if (!Number.isInteger(r.cache_read_input_tokens) || r.cache_read_input_tokens < 0 ||
+        !Number.isInteger(r.cache_write_input_tokens) || r.cache_write_input_tokens < 0 ||
+        r.cache_read_input_tokens + r.cache_write_input_tokens > r.input_tokens) {
+      throw new Error(`${f}: ${r.benchmark} has invalid cache token counts`);
+    }
+    if (!Number.isFinite(r.equivalent_cost_usd) || r.equivalent_cost_usd < 0) {
+      throw new Error(`${f}: ${r.benchmark} has invalid equivalent_cost_usd ${r.equivalent_cost_usd}`);
+    }
 
     activeTimeSecs += r.time_secs;
-    outputTokens += r.output_tokens ?? 0;
-    const rowOutputCostUnits = pricing && hasOutputTokens
-      ? r.output_tokens * pricing.usdPerMillionTokens
-      : null;
-    if (outputCostUnits !== null) outputCostUnits += rowOutputCostUnits ?? 0;
+    inputTokens += r.input_tokens;
+    outputTokens += r.output_tokens;
+    cacheReadInputTokens += r.cache_read_input_tokens;
+    cacheWriteInputTokens += r.cache_write_input_tokens;
+    equivalentCostUsd += r.equivalent_cost_usd;
 
     if (r.check_verdict === "PASS") pass++;
     if (r.check_verdict === "CHEATING") cheating++;
     modeActive += r.time_secs;
-    modeOutput += r.output_tokens ?? 0;
-    modeCostUnits += rowOutputCostUnits ?? 0;
+    modeInput += r.input_tokens;
+    modeOutput += r.output_tokens;
+    modeCacheRead += r.cache_read_input_tokens;
+    modeCacheWrite += r.cache_write_input_tokens;
+    modeEquivalentCost += r.equivalent_cost_usd;
 
     const example = exampleDir(r.benchmark);
     if (!example || example === r.benchmark) {
@@ -416,29 +392,39 @@ const models = bundles.map(({ f, meta, results, resultsVersion }) => {
       source: r.source,
       group: example,
       scoringKey,
-      name: sourceModuleName(scoringKey),
+      name: sourceSpecName(scoringKey),
       pass: 0,
       total: 0,
       activeTimeSecs: 0,
+      inputTokens: 0,
       outputTokens: 0,
-      outputCostUnits: 0,
+      cacheReadInputTokens: 0,
+      cacheWriteInputTokens: 0,
+      equivalentCostUsd: 0,
     });
     spec.total++;
     if (r.check_verdict === "PASS") spec.pass++;
     spec.activeTimeSecs += r.time_secs;
-    spec.outputTokens += r.output_tokens ?? 0;
-    spec.outputCostUnits += rowOutputCostUnits ?? 0;
+    spec.inputTokens += r.input_tokens;
+    spec.outputTokens += r.output_tokens;
+    spec.cacheReadInputTokens += r.cache_read_input_tokens;
+    spec.cacheWriteInputTokens += r.cache_write_input_tokens;
+    spec.equivalentCostUsd += r.equivalent_cost_usd;
 
     const steps = complexityByTask.get(r.benchmark);
     if (steps !== undefined) {
       const band = (byBand[bandFor(steps).id] ??= {
-        pass: 0, total: 0, activeTimeSecs: 0, outputTokens: 0, outputCostUnits: 0,
+        pass: 0, total: 0, activeTimeSecs: 0, inputTokens: 0, outputTokens: 0,
+        cacheReadInputTokens: 0, cacheWriteInputTokens: 0, equivalentCostUsd: 0,
       });
       band.total++;
       if (r.check_verdict === "PASS") band.pass++;
       band.activeTimeSecs += r.time_secs;
-      band.outputTokens += r.output_tokens ?? 0;
-      band.outputCostUnits += rowOutputCostUnits ?? 0;
+      band.inputTokens += r.input_tokens;
+      band.outputTokens += r.output_tokens;
+      band.cacheReadInputTokens += r.cache_read_input_tokens;
+      band.cacheWriteInputTokens += r.cache_write_input_tokens;
+      band.equivalentCostUsd += r.equivalent_cost_usd;
     }
   }
 
@@ -451,11 +437,19 @@ const models = bundles.map(({ f, meta, results, resultsVersion }) => {
     }
   }
 
-  if (Number.isInteger(usageAudit.output_tokens) && usageAudit.output_tokens !== outputTokens) {
-    throw new Error(`${f}: audited output_tokens does not match result rows`);
+  const auditedTotals = {
+    input_tokens: inputTokens,
+    output_tokens: outputTokens,
+    cache_read_input_tokens: cacheReadInputTokens,
+    cache_write_input_tokens: cacheWriteInputTokens,
+  };
+  for (const [field, total] of Object.entries(auditedTotals)) {
+    if (usageAudit[field] !== total) {
+      throw new Error(`${f}: audited ${field} does not match result rows`);
+    }
   }
-  if (outputTokensPartial && usageAudit.tasks_with_output_tokens !== tasksWithOutputTokens) {
-    throw new Error(`${f}: output token task count mismatch`);
+  if (!sameNumber(usageAudit.equivalent_cost_usd, equivalentCostUsd)) {
+    throw new Error(`${f}: audited equivalent_cost_usd does not match result rows`);
   }
 
   const rate = r1((pass / results.length) * 100);
@@ -478,15 +472,15 @@ const models = bundles.map(({ f, meta, results, resultsVersion }) => {
     .sort((a, b) => a.source.localeCompare(b.source) || a.scoringKey.localeCompare(b.scoringKey));
 
   const representedSpecifications = manifest.length;
-  const specificationMacroPct = 100 * Object.values(bySpec)
+  const specBalancedPassRatePct = 100 * Object.values(bySpec)
     .reduce((sum, spec) => sum + spec.pass / spec.total, 0) / representedSpecifications;
   const completeSpecifications = Object.values(bySpec)
     .filter((spec) => spec.pass === spec.total).length;
   const allLeavesCompletePct = 100 * completeSpecifications / representedSpecifications;
   const taskMicroPct = 100 * pass / results.length;
   const scoring = meta.scoring;
-  if (scoring?.primary !== "specification-macro" ||
-      !sameNumber(scoring.specification_macro_pct, specificationMacroPct) ||
+  if (scoring?.primary !== "spec-balanced-pass-rate" ||
+      !sameNumber(scoring.spec_balanced_pass_rate_pct, specBalancedPassRatePct) ||
       scoring.task_micro?.passed !== pass ||
       scoring.task_micro?.total !== results.length ||
       !sameNumber(scoring.task_micro?.pct, taskMicroPct) ||
@@ -528,9 +522,12 @@ const models = bundles.map(({ f, meta, results, resultsVersion }) => {
           pass: spec.pass,
           total: spec.total,
           activeTimeSecs: spec.activeTimeSecs,
+          inputTokens: spec.inputTokens,
           outputTokens: spec.outputTokens,
-          outputCostUnits: spec.outputCostUnits,
-        }, pricing),
+          cacheReadInputTokens: spec.cacheReadInputTokens,
+          cacheWriteInputTokens: spec.cacheWriteInputTokens,
+          equivalentCostUsd: spec.equivalentCostUsd,
+        }),
         scratch: null,
       },
     ];
@@ -543,17 +540,18 @@ const models = bundles.map(({ f, meta, results, resultsVersion }) => {
     pass,
     total: results.length,
     activeTimeSecs: modeActive,
+    inputTokens: modeInput,
     outputTokens: modeOutput,
-    outputCostUnits: modeCostUnits,
-  }, pricing);
+    cacheReadInputTokens: modeCacheRead,
+    cacheWriteInputTokens: modeCacheWrite,
+    equivalentCostUsd: modeEquivalentCost,
+  });
   Object.assign(completion, {
-    specificationMacroPct: r1(specificationMacroPct),
+    specBalancedPassRatePct: r1(specBalancedPassRatePct),
     completeSpecifications,
     representedSpecifications,
     allLeavesCompletePct: r1(allLeavesCompletePct),
   });
-  const outputCostUsd = outputCostUnits === null ? null : outputCostUnits / 1_000_000;
-
   return {
     id: meta.backend,
     ...info,
@@ -565,16 +563,18 @@ const models = bundles.map(({ f, meta, results, resultsVersion }) => {
     resultsVersion,
     modes: [MODE_KEY],
     perMetric: {
-      completion: completion.specificationMacroPct,
+      completion: completion.specBalancedPassRatePct,
       activeTimePerTask: activeTimeSecs / results.length,
-      outputCostPerTask: outputCostUsd === null ? null : outputCostUsd / results.length,
+      totalTokens: inputTokens + outputTokens,
+      cacheRatePct: 100 * cacheReadInputTokens / inputTokens,
+      equivalentCostUsd,
     },
     perMode: { completion, scratch: null },
     perComplexity: {
       completion: byBand
         ? COMPLEXITY_BANDS.map((band) => {
             const b = byBand[band.id];
-            return b ? { id: band.id, ...modeStat({ ...b }, pricing) } : { id: band.id, ...EMPTY_BAND };
+            return b ? { id: band.id, ...modeStat({ ...b }) } : { id: band.id, ...EMPTY_BAND };
           })
         : null,
       scratch: null,
@@ -583,13 +583,18 @@ const models = bundles.map(({ f, meta, results, resultsVersion }) => {
     usage: {
       taskCount: results.length,
       activeTimeSecs,
+      inputTokens,
       outputTokens,
-      outputCostUsd,
-      ...(outputTokensPartial
-        ? { outputTokensPartial: true, tasksWithOutputTokens: tasksWithOutputTokens }
-        : {}),
+      totalTokens: inputTokens + outputTokens,
+      cacheReadInputTokens,
+      cacheWriteInputTokens,
+      cacheRatePct: 100 * cacheReadInputTokens / inputTokens,
+      equivalentCostUsd,
     },
-    pricing,
+    pricing: {
+      asOf: usageAudit.date,
+      source: priceSource,
+    },
     perSpec,
     _specRows: rows,
     _cheating: cheating,
@@ -647,7 +652,7 @@ if (propertyCount !== CORE_COUNT) {
   throw new Error(`Core property count ${propertyCount} != ${CORE_COUNT}`);
 }
 if (canonicalSpecs.length !== CORE_SPEC_COUNT) {
-  throw new Error(`Core spec count ${canonicalSpecs.length} != ${CORE_SPEC_COUNT} originating modules`);
+  throw new Error(`Core spec count ${canonicalSpecs.length} != ${CORE_SPEC_COUNT} originating specifications`);
 }
 
 const suiteInfo = Object.fromEntries((SITE.suites ?? []).map((suite) => [suite.id, suite]));
@@ -693,8 +698,8 @@ const data = {
     {
       id: "completion",
       name: "Spec-balanced pass rate",
-      blurb: `Average of the per-module task pass rates across the ${CORE_SPEC_COUNT} Core modules.`,
-      tip: `Specification-macro: calculate the task pass rate within each of the ${CORE_SPEC_COUNT} Core modules, then average those rates so every module has equal weight.`,
+      blurb: `Average of the task pass rates across the ${CORE_SPEC_COUNT} Core specifications.`,
+      tip: `Average each Core specification's task pass rate, weighting all ${CORE_SPEC_COUNT} specifications equally.`,
     },
     {
       id: "activeTimePerTask",
@@ -705,15 +710,6 @@ const data = {
       groupStart: true,
       bar: false,
       tip: "Mean active agent time per task. The secondary value is the sum of task time; parallel tasks overlap, so it is not experiment wall-clock time. Lower is better.",
-    },
-    {
-      id: "outputCostPerTask",
-      name: "Output-only cost / task",
-      invert: true,
-      format: "usd",
-      breakdown: false,
-      bar: false,
-      tip: "Mean estimated output-only cost per task, using recorded output tokens and public standard-tier rates from each model's audit date. Lower is better.",
     },
   ],
   // Home uses the Full suite catalog; Benchmark page switches via suites[].
@@ -740,5 +736,5 @@ if (process.argv.includes("--check")) {
     "// Leaderboard data is recomputed from results/*.json against results/core-manifest.json;\n" +
     "// page content comes from scripts/site-content.mjs.\n" +
     "window.TLAPS_DATA = " + JSON.stringify(data, null, 2) + ";\n");
-  console.log(`Wrote data.js: ${models.length} model(s), ${canonicalSpecs.length} Core specs (${CORE_SPEC_COUNT} originating modules), ${CORE_COUNT} properties.`);
+  console.log(`Wrote data.js: ${models.length} model(s), ${canonicalSpecs.length} Core specs (${CORE_SPEC_COUNT} originating specifications), ${CORE_COUNT} properties.`);
 }

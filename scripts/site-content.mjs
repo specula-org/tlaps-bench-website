@@ -32,15 +32,15 @@ export const SITE = {
       id: "one-shot",
       label: "One-Shot",
       blurb:
-        "Single-response runs ranked by spec-balanced pass rate on the Proof Completion Core. " +
-        "Expand a model for per-module breakdown; task usage and cost stay in the detail views.",
+        "Single-response runs ranked by Spec-balanced pass rate on the Proof Completion Core. " +
+        "Expand a model for per-specification details.",
     },
     {
       id: "agentic",
       label: "Agentic",
       blurb:
         "Tool-using agent runs on the same Proof Completion Core, scored separately from one-shot. " +
-        "Same spec-balanced ranking and per-module detail, never mixed into the one-shot table.",
+        "Same Spec-balanced pass rate, never mixed into the one-shot table.",
     },
   ],
 
@@ -66,7 +66,7 @@ export const SITE = {
       id: "core",
       label: "Core",
       blurb:
-        "Proof Completion Core: 190 proof-completion properties across 56 originating source modules, " +
+        "Proof Completion Core: 190 proof-completion properties across 56 specifications, " +
         "including the Apalache examples (ben-or83, tendermint). Every published model is graded on this same task set.",
     },
     {

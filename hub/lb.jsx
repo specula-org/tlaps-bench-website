@@ -47,24 +47,22 @@ function BreakdownCell({ v, isOpen }) {
   );
 }
 
-function BreakdownUsageCell({ v, format, lowerBound = false }) {
-  const isDuration = format === "duration";
-  // Two separate reasons for a dash: no properties in this mode (v is null), or
-  // a cost column for a model with no published output rate (the fields are null).
-  if (v == null || (!isDuration && v.outputCostPerTask == null)) {
+function BreakdownUsageCell({ v, format }) {
+  if (v == null) {
     return <td className="bd-usage-cell"><span className="bd-usage-na">—</span></td>;
   }
-  const primary = isDuration
-    ? formatDuration(v.activeTimePerTask)
-    : formatCostUsd(v.outputCostPerTask, 4, lowerBound);
-  const total = isDuration
-    ? formatDuration(v.activeTimeSecs, false)
-    : formatCostUsd(v.outputCostUsd, 2, lowerBound);
+  const values = {
+    duration: [formatDuration(v.activeTimePerTask), `total ${formatDuration(v.activeTimeSecs, false)}`],
+    tokens: [formatCompactTokens(v.totalTokensPerTask), `total ${formatCompactTokens(v.totalTokens)}`],
+    cache: [formatPercent(v.cacheRatePct), `${formatCompactTokens(v.cacheReadInputTokens)} cached`],
+    usd: [formatCostUsd(v.equivalentCostPerTask, 4), `total ${formatCostUsd(v.equivalentCostUsd, 2)}`],
+  };
+  const [primary, secondary] = values[format];
   return (
     <td className="bd-usage-cell">
       <span className="bd-usage-value">
         <span>{primary}</span>
-        <small>total {total}</small>
+        <small>{secondary}</small>
       </span>
     </td>
   );
@@ -85,63 +83,20 @@ function formatDuration(totalSecs, includeSeconds = true) {
 }
 
 const formatUsd = (value, digits = 2) => `$${value.toFixed(digits)}`;
-const formatCostUsd = (value, digits = 2, lowerBound = false) =>
-  `${lowerBound ? "≥" : ""}${formatUsd(value, digits)}`;
+const formatCostUsd = (value, digits = 2) => formatUsd(value, digits);
 const formatTokens = (value) => Math.round(value).toLocaleString("en-US");
-const outputCostForTask = (row, pricing) => {
-  if (!pricing || row.output_tokens == null) return null;
-  let cost = row.output_tokens * pricing.usdPerMillionTokens / 1_000_000;
-  for (const [model, usage] of Object.entries(row.secondary_model_usage ?? {})) {
-    if (usage.output_tokens_lower_bound <= 0) continue;
-    const modelPricing = pricing.additionalModels?.[model];
-    if (!modelPricing) return null;
-    cost += usage.output_tokens_lower_bound *
-      (modelPricing.usdPerMillionTokens - pricing.usdPerMillionTokens) / 1_000_000;
-  }
-  return cost;
-};
-
-function TelemetryNote({ model }) {
-  if (model.usage.outputTokensPartial !== true) return null;
-  const missing = model.usage.taskCount - model.usage.tasksWithOutputTokens;
-  return (
-    <React.Fragment>
-      {" "}{missing} of {model.usage.taskCount} tasks ended before their usage telemetry
-      flushed and carry no token count; those rows show a dash, and every token
-      total here is a sum over the remaining {model.usage.tasksWithOutputTokens}.
-    </React.Fragment>
-  );
-}
+const formatCompactTokens = (value) => new Intl.NumberFormat("en-US", {
+  notation: "compact",
+  maximumFractionDigits: 1,
+}).format(Math.round(value));
+const formatPercent = (value) => value == null ? "—" : `${value.toFixed(1)}%`;
 
 function PricingNote({ model }) {
   const pricing = model.pricing;
-  if (!pricing) {
-    return (
-      <React.Fragment>
-        No published output rate is on file for this model, so cost is not estimated.
-        <TelemetryNote model={model} />
-      </React.Fragment>
-    );
-  }
-  const components = [
-    { name: model.name, ...pricing },
-    ...Object.values(pricing.additionalModels ?? {}),
-  ];
-  const lowerBound = model.usage.outputCostLowerBound === true;
   return (
     <React.Fragment>
-      {lowerBound
-        ? "Recorded output-only lower bound (not the full bill). Rates: "
-        : "Output-only estimate using "}
-      {components.map((component, index) => (
-        <React.Fragment key={component.name}>
-          {index > 0 && (lowerBound ? "; " : " and ")}
-          {component.name} at {formatUsd(component.usdPerMillionTokens, 0)} / 1M
-          {" "}({component.tier})
-        </React.Fragment>
-      ))}{", as of "}{pricing.asOf}. {lowerBound && "Missing output telemetry is not included. "}
+      Recorded public-API-equivalent price as of {pricing.asOf}; not a subscription bill. {" "}
       <a href={pricing.source} target="_blank" rel="noopener">Pricing source</a>
-      <TelemetryNote model={model} />
     </React.Fragment>
   );
 }
@@ -159,7 +114,9 @@ function ComplexityBreakdown({ model, selectedMode, isOpen }) {
             <th>Properties</th>
             <th className="bd-mode">Pass rate</th>
             <th className="bd-usage-head bd-supporting">Active time / task</th>
-            <th className="bd-usage-head bd-supporting">Output-only cost / task</th>
+            <th className="bd-usage-head bd-supporting">Tokens / task</th>
+            <th className="bd-usage-head bd-supporting">Cache rate</th>
+            <th className="bd-usage-head bd-supporting">Price / task</th>
           </tr>
         </thead>
         <tbody>
@@ -172,8 +129,9 @@ function ComplexityBreakdown({ model, selectedMode, isOpen }) {
               <td className="dataset-score-source">{band.total}</td>
               <BreakdownCell v={band.rate == null ? null : band} isOpen={isOpen} />
               <BreakdownUsageCell v={band.rate == null ? null : band} format="duration" />
-              <BreakdownUsageCell v={band.rate == null ? null : band} format="usd"
-                lowerBound={model.usage.outputCostLowerBound === true} />
+              <BreakdownUsageCell v={band.rate == null ? null : band} format="tokens" />
+              <BreakdownUsageCell v={band.rate == null ? null : band} format="cache" />
+              <BreakdownUsageCell v={band.rate == null ? null : band} format="usd" />
             </tr>
           ))}
         </tbody>
@@ -182,7 +140,7 @@ function ComplexityBreakdown({ model, selectedMode, isOpen }) {
   );
 }
 
-function MetricCell({ v, metric, usage, max, outputCostLowerBound = false }) {
+function MetricCell({ v, metric, usage, max }) {
   if (v == null) {
     return <span className="metric-na">—</span>;
   }
@@ -191,14 +149,6 @@ function MetricCell({ v, metric, usage, max, outputCostLowerBound = false }) {
       <span className="metric-value">
         <span className="metric-primary">{formatDuration(v)}</span>
         <span className="metric-secondary">total {formatDuration(usage.activeTimeSecs, false)}</span>
-      </span>
-    );
-  }
-  if (metric.format === "usd") {
-    return (
-      <span className="metric-value">
-        <span className="metric-primary">{formatCostUsd(v, 3, outputCostLowerBound)}</span>
-        <span className="metric-secondary">total {formatCostUsd(usage.outputCostUsd, 2, outputCostLowerBound)}</span>
       </span>
     );
   }
@@ -219,7 +169,6 @@ function TaskBreakdown({ model, selectedMode }) {
   const [sort, setSort] = useS_lb({ key: "benchmark", dir: "asc" });
   const rawMode = selectedMode === "completion" ? "proof-completion" : "proof-from-scratch";
   const modeTaskCount = model.perMode[selectedMode]?.total ?? 0;
-  const pricing = model.pricing;
 
   useE_lb(() => {
     const controller = new AbortController();
@@ -243,8 +192,11 @@ function TaskBreakdown({ model, selectedMode }) {
           mode: row.mode,
           verdict: row.check_verdict,
           timeSecs: row.time_secs,
-          outputTokens: row.output_tokens ?? null,
-          outputCostUsd: outputCostForTask(row, pricing),
+          totalTokens: row.input_tokens + row.output_tokens,
+          cacheRatePct: row.input_tokens > 0
+            ? 100 * row.cache_read_input_tokens / row.input_tokens
+            : null,
+          equivalentCostUsd: row.equivalent_cost_usd,
         })));
       })
       .catch((error) => {
@@ -284,8 +236,9 @@ function TaskBreakdown({ model, selectedMode }) {
     ["benchmark", "Task"],
     ["verdict", "Verdict"],
     ["timeSecs", "Active time"],
-    ["outputTokens", "Output tokens"],
-    ["outputCostUsd", "Output-only cost"],
+    ["totalTokens", "Tokens"],
+    ["cacheRatePct", "Cache rate"],
+    ["equivalentCostUsd", "Price"],
   ];
   const taskStatus = loadError
     ? "Task data unavailable"
@@ -331,20 +284,19 @@ function TaskBreakdown({ model, selectedMode }) {
                 </td>
                 <td><span className={`task-verdict ${row.verdict.toLowerCase()}`}>{row.verdict}</span></td>
                 <td className="task-number">{formatDuration(row.timeSecs)}</td>
-                <td className="task-number">{row.outputTokens == null ? "—" : formatTokens(row.outputTokens)}</td>
-                <td className="task-number">{row.outputCostUsd == null
-                  ? "—"
-                  : formatCostUsd(row.outputCostUsd, 4, model.usage.outputCostLowerBound)}</td>
+                <td className="task-number">{formatTokens(row.totalTokens)}</td>
+                <td className="task-number">{formatPercent(row.cacheRatePct)}</td>
+                <td className="task-number">{formatCostUsd(row.equivalentCostUsd, 4)}</td>
               </tr>
             ))}
             {!taskRows && !loadError && (
-              <tr><td className="task-no-results" colSpan="5">Loading task usage…</td></tr>
+              <tr><td className="task-no-results" colSpan="6">Loading task usage…</td></tr>
             )}
             {loadError && (
-              <tr><td className="task-no-results" colSpan="5">Could not load task usage: {loadError}</td></tr>
+              <tr><td className="task-no-results" colSpan="6">Could not load task usage: {loadError}</td></tr>
             )}
             {taskRows && rows.length === 0 && (
-              <tr><td className="task-no-results" colSpan="5">No tasks match these filters.</td></tr>
+              <tr><td className="task-no-results" colSpan="6">No tasks match these filters.</td></tr>
             )}
           </tbody>
         </table>
@@ -356,7 +308,6 @@ function TaskBreakdown({ model, selectedMode }) {
 function ModelUsageSummary({ model, selectedMode }) {
   const modeUsage = model.perMode?.[selectedMode];
   if (!modeUsage) return null;
-  const lowerBound = model.usage.outputCostLowerBound === true;
   return (
     <div className="usage-summary" aria-label="Supporting usage metrics">
       <div className="usage-summary-item">
@@ -365,17 +316,19 @@ function ModelUsageSummary({ model, selectedMode }) {
         <span className="usage-summary-total">total {formatDuration(modeUsage.activeTimeSecs, false)}</span>
       </div>
       <div className="usage-summary-item">
-        <span className="usage-summary-label">Output-only cost / task</span>
-        <span className="usage-summary-value">
-          {modeUsage.outputCostPerTask == null
-            ? "—"
-            : formatCostUsd(modeUsage.outputCostPerTask, 3, lowerBound)}
-        </span>
-        <span className="usage-summary-total">
-          {modeUsage.outputCostUsd == null
-            ? "no published rate"
-            : `total ${formatCostUsd(modeUsage.outputCostUsd, 2, lowerBound)}`}
-        </span>
+        <span className="usage-summary-label">Tokens</span>
+        <span className="usage-summary-value">{formatTokens(modeUsage.totalTokens)}</span>
+        <span className="usage-summary-total">input + output</span>
+      </div>
+      <div className="usage-summary-item">
+        <span className="usage-summary-label">Cache rate</span>
+        <span className="usage-summary-value">{formatPercent(modeUsage.cacheRatePct)}</span>
+        <span className="usage-summary-total">cached input / input</span>
+      </div>
+      <div className="usage-summary-item">
+        <span className="usage-summary-label">Price</span>
+        <span className="usage-summary-value">{formatCostUsd(modeUsage.equivalentCostUsd, 2)}</span>
+        <span className="usage-summary-total">public API equivalent</span>
       </div>
     </div>
   );
@@ -384,7 +337,9 @@ function ModelUsageSummary({ model, selectedMode }) {
 function HubLeaderboard({ showFilters = true, fixedMode = null, fixedCohort = null }) {
   const metricById = useM_lb(() => Object.fromEntries(TLAPS_DATA.metrics.map(m => [m.id, m])), []);
   const modeBlurb = useM_lb(() => Object.fromEntries(TLAPS_DATA.modes.map(m => [m.id, m.blurb])), []);
-  const isInvert = (key) => key.startsWith("metric:") && metricById[key.slice(7)]?.invert;
+  const isInvert = (key) =>
+    (key.startsWith("metric:") && metricById[key.slice(7)]?.invert) ||
+    key === "usage:totalTokens" || key === "usage:equivalentCostUsd";
   const modelCohort = (m) => m.cohort || (m.kind === "agent" ? "agentic" : "one-shot");
 
   const initialMode = fixedMode || "completion";
@@ -406,8 +361,7 @@ function HubLeaderboard({ showFilters = true, fixedMode = null, fixedCohort = nu
   // happens to sort first — read it off any model that actually ran the mode.
   const modeTotal = (mode) =>
     TLAPS_DATA.models.find(m => m.perMode?.[mode])?.perMode[mode].total ?? 0;
-  // The primary table score is specification-macro; task-micro and strict
-  // all-leaves completion are supporting counts beside it.
+  // The score and its two supporting counts stay together before usage data.
   const visibleMetrics = useM_lb(() => [
     metricById[selectedMode],
   ], [metricById, selectedMode]);
@@ -417,7 +371,9 @@ function HubLeaderboard({ showFilters = true, fixedMode = null, fixedCohort = nu
     if (metricId === "completion" || metricId === "scratch") return m.perMetric?.[metricId] ?? null;
     return m.perMode?.[selectedMode]?.[metricId] ?? null;
   };
-  const getVal = (m, key) => key.startsWith("metric:") ? getMetricVal(m, key.slice(7)) : m[key];
+  const getVal = (m, key) => key.startsWith("metric:")
+    ? getMetricVal(m, key.slice(7))
+    : key.startsWith("usage:") ? m.usage?.[key.slice(6)] : m[key];
 
   const rows = useM_lb(() => {
     // A model only appears in a mode it actually ran, and only inside its cohort.
@@ -504,7 +460,7 @@ function HubLeaderboard({ showFilters = true, fixedMode = null, fixedCohort = nu
     lastKeyRef.current = { k: sort.key, d: sort.dir, mode: selectedMode, cohort: fixedCohort };
   });
 
-  const colCount = 5 + visibleMetrics.length; // #, Model, [primary], task count, module count, caret
+  const colCount = 8 + visibleMetrics.length;
   const emptyMessage = fixedCohort
     ? `No ${cohortLabels[fixedCohort] || fixedCohort} models scored in this mode yet.`
     : "No models scored in this mode yet.";
@@ -561,8 +517,26 @@ function HubLeaderboard({ showFilters = true, fixedMode = null, fixedCohort = nu
               <th className="lb-supporting-head" title="Task-micro: passed Core tasks divided by all Core tasks.">
                 Tasks passed
               </th>
-              <th className="lb-supporting-head" title="All-leaves-complete: modules where every selected Core task passed.">
-                Modules completed
+              <th className="lb-supporting-head" title="Specifications where every selected Core task passed.">
+                Specifications completed
+              </th>
+              <th className={sortCls("usage:totalTokens") + " lb-usage-head"}
+                  aria-sort={sortAria("usage:totalTokens")} title="Input plus output tokens; cached input is included once.">
+                <button type="button" className="sort-button" onClick={() => onSort("usage:totalTokens")}>
+                  Tokens <span className="sort" aria-hidden="true">▾</span>
+                </button>
+              </th>
+              <th className={sortCls("usage:cacheRatePct") + " lb-usage-head"}
+                  aria-sort={sortAria("usage:cacheRatePct")} title="Cached input tokens divided by input tokens.">
+                <button type="button" className="sort-button" onClick={() => onSort("usage:cacheRatePct")}>
+                  Cache rate <span className="sort" aria-hidden="true">▾</span>
+                </button>
+              </th>
+              <th className={sortCls("usage:equivalentCostUsd") + " lb-usage-head"}
+                  aria-sort={sortAria("usage:equivalentCostUsd")} title="Recorded public-API-equivalent price for the full run.">
+                <button type="button" className="sort-button" onClick={() => onSort("usage:equivalentCostUsd")}>
+                  Price <span className="sort" aria-hidden="true">▾</span>
+                </button>
               </th>
               <th style={{ width: 32 }}></th>
             </tr>
@@ -605,8 +579,7 @@ function HubLeaderboard({ showFilters = true, fixedMode = null, fixedCohort = nu
                       return (
                         <td key={mt.id} style={{ textAlign: "right" }}>
                           {v == null ? <span style={{ color: "var(--ink-3)", fontFamily: "var(--mono)", fontSize: 12 }}>—</span> : (
-                            <MetricCell v={v} metric={mt} usage={m.perMode[selectedMode]} max={metricMax[mt.id]}
-                              outputCostLowerBound={m.usage.outputCostLowerBound === true} />
+                            <MetricCell v={v} metric={mt} usage={m.perMode[selectedMode]} max={metricMax[mt.id]} />
                           )}
                         </td>
                       );
@@ -618,6 +591,15 @@ function HubLeaderboard({ showFilters = true, fixedMode = null, fixedCohort = nu
                       {modeScore?.representedSpecifications
                         ? `${modeScore.completeSpecifications}/${modeScore.representedSpecifications}`
                         : "—"}
+                    </td>
+                    <td className="lb-supporting-cell" title={`${formatTokens(m.usage.inputTokens)} input + ${formatTokens(m.usage.outputTokens)} output`}>
+                      {formatCompactTokens(m.usage.totalTokens)}
+                    </td>
+                    <td className="lb-supporting-cell" title={`${formatTokens(m.usage.cacheReadInputTokens)} cached input / ${formatTokens(m.usage.inputTokens)} input`}>
+                      {formatPercent(m.usage.cacheRatePct)}
+                    </td>
+                    <td className="lb-supporting-cell" title={`Public API equivalent as of ${m.pricing.asOf}`}>
+                      {formatCostUsd(m.usage.equivalentCostUsd, 2)}
                     </td>
                     <td className="expand-cell">
                       <button type="button" className="expand-toggle" aria-expanded={isOpen}
@@ -640,10 +622,10 @@ function HubLeaderboard({ showFilters = true, fixedMode = null, fixedCohort = nu
                                 </div>
                                 <div className="detail-caption">
                                   {detailView === "spec"
-                                    ? `${modeLabels[selectedMode]}: per-module task pass rates used in the spec-balanced score. Time and cost are supporting detail below.`
+                                    ? `${modeLabels[selectedMode]}: per-specification task pass rates used in the Spec-balanced pass rate.`
                                     : detailView === "complexity"
                                     ? `${modeLabels[selectedMode]}: pass rate by reference-proof step count.`
-                                    : `${modeLabels[selectedMode]}: per-task verdicts, time, and output-only cost.`}
+                                    : `${modeLabels[selectedMode]}: per-task verdicts and usage.`}
                                 </div>
                               </div>
                               <div className="detail-tabs" role="group" aria-label="Leaderboard detail view">
@@ -686,7 +668,9 @@ function HubLeaderboard({ showFilters = true, fixedMode = null, fixedCohort = nu
                                       <th>Source</th>
                                       <th className="bd-mode">Pass rate</th>
                                       <th className="bd-usage-head bd-supporting">Active time / task</th>
-                                      <th className="bd-usage-head bd-supporting">Output-only cost / task</th>
+                                      <th className="bd-usage-head bd-supporting">Tokens / task</th>
+                                      <th className="bd-usage-head bd-supporting">Cache rate</th>
+                                      <th className="bd-usage-head bd-supporting">Price / task</th>
                                     </tr>
                                   </thead>
                                   <tbody>
@@ -711,8 +695,9 @@ function HubLeaderboard({ showFilters = true, fixedMode = null, fixedCohort = nu
                                           </td>
                                           <BreakdownCell v={score} isOpen={isOpen} />
                                           <BreakdownUsageCell v={score} format="duration" />
-                                          <BreakdownUsageCell v={score} format="usd"
-                                            lowerBound={m.usage.outputCostLowerBound === true} />
+                                          <BreakdownUsageCell v={score} format="tokens" />
+                                          <BreakdownUsageCell v={score} format="cache" />
+                                          <BreakdownUsageCell v={score} format="usd" />
                                         </tr>
                                       );
                                     })}

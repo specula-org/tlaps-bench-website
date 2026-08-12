@@ -60,8 +60,8 @@ window.TLAPS_DATA = {
     {
       "id": "completion",
       "name": "Spec-balanced pass rate",
-      "blurb": "Average of the per-module task pass rates across the 56 Core modules.",
-      "tip": "Specification-macro: calculate the task pass rate within each of the 56 Core modules, then average those rates so every module has equal weight."
+      "blurb": "Average of the task pass rates across the 56 Core specifications.",
+      "tip": "Average each Core specification's task pass rate, weighting all 56 specifications equally."
     },
     {
       "id": "activeTimePerTask",
@@ -72,15 +72,6 @@ window.TLAPS_DATA = {
       "groupStart": true,
       "bar": false,
       "tip": "Mean active agent time per task. The secondary value is the sum of task time; parallel tasks overlap, so it is not experiment wall-clock time. Lower is better."
-    },
-    {
-      "id": "outputCostPerTask",
-      "name": "Output-only cost / task",
-      "invert": true,
-      "format": "usd",
-      "breakdown": false,
-      "bar": false,
-      "tip": "Mean estimated output-only cost per task, using recorded output tokens and public standard-tier rates from each model's audit date. Lower is better."
     }
   ],
   "categories": [
@@ -1019,7 +1010,7 @@ window.TLAPS_DATA = {
     {
       "id": "core",
       "label": "Core",
-      "blurb": "Proof Completion Core: 190 proof-completion properties across 56 originating source modules, including the Apalache examples (ben-or83, tendermint). Every published model is graded on this same task set.",
+      "blurb": "Proof Completion Core: 190 proof-completion properties across 56 specifications, including the Apalache examples (ben-or83, tendermint). Every published model is graded on this same task set.",
       "specCount": 56,
       "propertyCount": 190,
       "completion": 190,
@@ -2776,14 +2767,16 @@ window.TLAPS_DATA = {
       "cohortLabel": "Agentic",
       "generated": "2026-08-10",
       "resultsFile": "results/codex-gpt-5.6-sol.json",
-      "resultsVersion": "85599f220f1b",
+      "resultsVersion": "b88207d7bc2e",
       "modes": [
         "completion"
       ],
       "perMetric": {
         "completion": 99.4,
         "activeTimePerTask": 593.0866454896027,
-        "outputCostPerTask": 0.4649264210526316
+        "totalTokens": 585790824,
+        "cacheRatePct": 96.57316133898699,
+        "equivalentCostUsd": 469.6385740000001
       },
       "perMode": {
         "completion": {
@@ -2795,11 +2788,16 @@ window.TLAPS_DATA = {
           "taskCount": 190,
           "activeTimeSecs": 112686.46264302451,
           "activeTimePerTask": 593.0866454896027,
+          "inputTokens": 582846290,
           "outputTokens": 2944534,
-          "outputTokensPerTask": 15497.547368421052,
-          "outputCostUsd": 88.33602,
-          "outputCostPerTask": 0.4649264210526316,
-          "specificationMacroPct": 99.4,
+          "totalTokens": 585790824,
+          "totalTokensPerTask": 3083109.6,
+          "cacheReadInputTokens": 562873088,
+          "cacheWriteInputTokens": 0,
+          "cacheRatePct": 96.57316133898699,
+          "equivalentCostUsd": 469.6385740000001,
+          "equivalentCostPerTask": 2.471781968421053,
+          "specBalancedPassRatePct": 99.4,
           "completeSpecifications": 53,
           "representedSpecifications": 56,
           "allLeavesCompletePct": 94.6
@@ -2824,10 +2822,15 @@ window.TLAPS_DATA = {
             "taskCount": 34,
             "activeTimeSecs": 8247.530762753682,
             "activeTimePerTask": 242.5744341986377,
+            "inputTokens": 25077281,
             "outputTokens": 240909,
-            "outputTokensPerTask": 7085.558823529412,
-            "outputCostUsd": 7.22727,
-            "outputCostPerTask": 0.21256676470588234
+            "totalTokens": 25318190,
+            "totalTokensPerTask": 744652.6470588235,
+            "cacheReadInputTokens": 23066880,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 91.98317792108323,
+            "equivalentCostUsd": 28.812715000000004,
+            "equivalentCostPerTask": 0.8474327941176472
           },
           {
             "id": "d2",
@@ -2839,10 +2842,15 @@ window.TLAPS_DATA = {
             "taskCount": 45,
             "activeTimeSecs": 8683.656504828483,
             "activeTimePerTask": 192.97014455174406,
+            "inputTokens": 27139864,
             "outputTokens": 242776,
-            "outputTokensPerTask": 5395.022222222222,
-            "outputCostUsd": 7.28328,
-            "outputCostPerTask": 0.16185066666666667
+            "totalTokens": 27382640,
+            "totalTokensPerTask": 608503.1111111111,
+            "cacheReadInputTokens": 24727552,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 91.11155457521821,
+            "equivalentCostUsd": 31.708616000000006,
+            "equivalentCostPerTask": 0.7046359111111112
           },
           {
             "id": "d3",
@@ -2854,10 +2862,15 @@ window.TLAPS_DATA = {
             "taskCount": 54,
             "activeTimeSecs": 25519.7674565746,
             "activeTimePerTask": 472.5882862328629,
+            "inputTokens": 108203862,
             "outputTokens": 767950,
-            "outputTokensPerTask": 14221.296296296296,
-            "outputCostUsd": 23.0385,
-            "outputCostPerTask": 0.42663888888888885
+            "totalTokens": 108971812,
+            "totalTokensPerTask": 2017996.5185185184,
+            "cacheReadInputTokens": 103181824,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 95.35872573568585,
+            "equivalentCostUsd": 99.73960200000002,
+            "equivalentCostPerTask": 1.847029666666667
           },
           {
             "id": "d4",
@@ -2869,10 +2882,15 @@ window.TLAPS_DATA = {
             "taskCount": 19,
             "activeTimeSecs": 8812.883530021878,
             "activeTimePerTask": 463.83597526430935,
+            "inputTokens": 28157389,
             "outputTokens": 262438,
-            "outputTokensPerTask": 13812.526315789473,
-            "outputCostUsd": 7.87314,
-            "outputCostPerTask": 0.4143757894736842
+            "totalTokens": 28419827,
+            "totalTokensPerTask": 1495780.3684210526,
+            "cacheReadInputTokens": 26406144,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 93.78051352701772,
+            "equivalentCostUsd": 29.832437,
+            "equivalentCostPerTask": 1.5701282631578948
           },
           {
             "id": "d5",
@@ -2884,10 +2902,15 @@ window.TLAPS_DATA = {
             "taskCount": 19,
             "activeTimeSecs": 20888.190233304864,
             "activeTimePerTask": 1099.378433331835,
+            "inputTokens": 106581100,
             "outputTokens": 596939,
-            "outputTokensPerTask": 31417.842105263157,
-            "outputCostUsd": 17.90817,
-            "outputCostPerTask": 0.9425352631578946
+            "totalTokens": 107178039,
+            "totalTokensPerTask": 5640949.421052632,
+            "cacheReadInputTokens": 102862336,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 96.51085980535011,
+            "equivalentCostUsd": 87.93315799999999,
+            "equivalentCostPerTask": 4.628060947368421
           },
           {
             "id": "d6",
@@ -2899,10 +2922,15 @@ window.TLAPS_DATA = {
             "taskCount": 19,
             "activeTimeSecs": 40534.43415554101,
             "activeTimePerTask": 2133.3912713442637,
+            "inputTokens": 287686794,
             "outputTokens": 833522,
-            "outputTokensPerTask": 43869.57894736842,
-            "outputCostUsd": 25.00566,
-            "outputCostPerTask": 1.3160873684210526
+            "totalTokens": 288520316,
+            "totalTokensPerTask": 15185279.789473685,
+            "cacheReadInputTokens": 282628352,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 98.24168432284729,
+            "equivalentCostUsd": 191.61204600000002,
+            "equivalentCostPerTask": 10.084844526315791
           }
         ],
         "scratch": null
@@ -2911,14 +2939,17 @@ window.TLAPS_DATA = {
       "usage": {
         "taskCount": 190,
         "activeTimeSecs": 112686.46264302451,
+        "inputTokens": 582846290,
         "outputTokens": 2944534,
-        "outputCostUsd": 88.33602
+        "totalTokens": 585790824,
+        "cacheReadInputTokens": 562873088,
+        "cacheWriteInputTokens": 0,
+        "cacheRatePct": 96.57316133898699,
+        "equivalentCostUsd": 469.6385740000001
       },
       "pricing": {
-        "usdPerMillionTokens": 30,
-        "tier": "standard",
         "asOf": "2026-08-10",
-        "source": "https://developers.openai.com/api/docs/models"
+        "source": "https://developers.openai.com/api/docs/models/gpt-5.6-sol"
       },
       "perSpec": {
         "apalache-examples-konnov--apalache-examples-ben-or83-ben-or83-proofs-tla": {
@@ -2931,10 +2962,15 @@ window.TLAPS_DATA = {
             "taskCount": 41,
             "activeTimeSecs": 13764.199199822731,
             "activeTimePerTask": 335.7121756054325,
+            "inputTokens": 60709168,
             "outputTokens": 367298,
-            "outputTokensPerTask": 8958.487804878048,
-            "outputCostUsd": 11.01894,
-            "outputCostPerTask": 0.2687546341463415
+            "totalTokens": 61076466,
+            "totalTokensPerTask": 1489669.9024390243,
+            "cacheReadInputTokens": 57527552,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 94.75924954201317,
+            "equivalentCostUsd": 55.690796000000006,
+            "equivalentCostPerTask": 1.3583120975609757
           },
           "scratch": null
         },
@@ -2948,10 +2984,15 @@ window.TLAPS_DATA = {
             "taskCount": 15,
             "activeTimeSecs": 3287.627311854856,
             "activeTimePerTask": 219.17515412365708,
+            "inputTokens": 10393163,
             "outputTokens": 90216,
-            "outputTokensPerTask": 6014.4,
-            "outputCostUsd": 2.70648,
-            "outputCostPerTask": 0.180432
+            "totalTokens": 10483379,
+            "totalTokensPerTask": 698891.9333333333,
+            "cacheReadInputTokens": 9529088,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 91.68612096240577,
+            "equivalentCostUsd": 11.791398999999998,
+            "equivalentCostPerTask": 0.7860932666666666
           },
           "scratch": null
         },
@@ -2965,10 +3006,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 398.6802307739854,
             "activeTimePerTask": 398.6802307739854,
+            "inputTokens": 1172031,
             "outputTokens": 9917,
-            "outputTokensPerTask": 9917,
-            "outputCostUsd": 0.29751,
-            "outputCostPerTask": 0.29751
+            "totalTokens": 1181948,
+            "totalTokensPerTask": 1181948,
+            "cacheReadInputTokens": 1050368,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 89.61947252248447,
+            "equivalentCostUsd": 1.431009,
+            "equivalentCostPerTask": 1.431009
           },
           "scratch": null
         },
@@ -2982,10 +3028,15 @@ window.TLAPS_DATA = {
             "taskCount": 2,
             "activeTimeSecs": 902.0505515059922,
             "activeTimePerTask": 451.0252757529961,
+            "inputTokens": 3312396,
             "outputTokens": 28015,
-            "outputTokensPerTask": 14007.5,
-            "outputCostUsd": 0.84045,
-            "outputCostPerTask": 0.420225
+            "totalTokens": 3340411,
+            "totalTokensPerTask": 1670205.5,
+            "cacheReadInputTokens": 3128064,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 94.43508566004789,
+            "equivalentCostUsd": 3.3261420000000004,
+            "equivalentCostPerTask": 1.6630710000000002
           },
           "scratch": null
         },
@@ -2999,10 +3050,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 320.1309452459682,
             "activeTimePerTask": 320.1309452459682,
+            "inputTokens": 1178112,
             "outputTokens": 8631,
-            "outputTokensPerTask": 8631,
-            "outputCostUsd": 0.25893,
-            "outputCostPerTask": 0.25893
+            "totalTokens": 1186743,
+            "totalTokensPerTask": 1186743,
+            "cacheReadInputTokens": 1095936,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 93.02477183833116,
+            "equivalentCostUsd": 1.2177779999999996,
+            "equivalentCostPerTask": 1.2177779999999996
           },
           "scratch": null
         },
@@ -3016,10 +3072,15 @@ window.TLAPS_DATA = {
             "taskCount": 2,
             "activeTimeSecs": 1403.6974269789644,
             "activeTimePerTask": 701.8487134894822,
+            "inputTokens": 5677423,
             "outputTokens": 44131,
-            "outputTokensPerTask": 22065.5,
-            "outputCostUsd": 1.32393,
-            "outputCostPerTask": 0.661965
+            "totalTokens": 5721554,
+            "totalTokensPerTask": 2860777,
+            "cacheReadInputTokens": 5382656,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 94.80808458344569,
+            "equivalentCostUsd": 5.4890929999999996,
+            "equivalentCostPerTask": 2.7445464999999998
           },
           "scratch": null
         },
@@ -3033,10 +3094,15 @@ window.TLAPS_DATA = {
             "taskCount": 3,
             "activeTimeSecs": 1162.6888142260723,
             "activeTimePerTask": 387.5629380753574,
+            "inputTokens": 3423172,
             "outputTokens": 32340,
-            "outputTokensPerTask": 10780,
-            "outputCostUsd": 0.9702,
-            "outputCostPerTask": 0.32339999999999997
+            "totalTokens": 3455512,
+            "totalTokensPerTask": 1151837.3333333333,
+            "cacheReadInputTokens": 3152896,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 92.1045159285014,
+            "equivalentCostUsd": 3.8980280000000005,
+            "equivalentCostPerTask": 1.2993426666666668
           },
           "scratch": null
         },
@@ -3050,10 +3116,15 @@ window.TLAPS_DATA = {
             "taskCount": 2,
             "activeTimeSecs": 696.5703190059867,
             "activeTimePerTask": 348.28515950299334,
+            "inputTokens": 2019201,
             "outputTokens": 18298,
-            "outputTokensPerTask": 9149,
-            "outputCostUsd": 0.54894,
-            "outputCostPerTask": 0.27447
+            "totalTokens": 2037499,
+            "totalTokensPerTask": 1018749.5,
+            "cacheReadInputTokens": 1898240,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 94.00946215854687,
+            "equivalentCostUsd": 2.1028649999999995,
+            "equivalentCostPerTask": 1.0514324999999998
           },
           "scratch": null
         },
@@ -3067,10 +3138,15 @@ window.TLAPS_DATA = {
             "taskCount": 4,
             "activeTimeSecs": 11393.373012054013,
             "activeTimePerTask": 2848.3432530135033,
+            "inputTokens": 91267540,
             "outputTokens": 165051,
-            "outputTokensPerTask": 41262.75,
-            "outputCostUsd": 4.95153,
-            "outputCostPerTask": 1.2378825
+            "totalTokens": 91432591,
+            "totalTokensPerTask": 22858147.75,
+            "cacheReadInputTokens": 90008576,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 98.6205785759099,
+            "equivalentCostUsd": 56.250638000000016,
+            "equivalentCostPerTask": 14.062659500000004
           },
           "scratch": null
         },
@@ -3084,10 +3160,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 70.99331841408275,
             "activeTimePerTask": 70.99331841408275,
+            "inputTokens": 140273,
             "outputTokens": 1124,
-            "outputTokensPerTask": 1124,
-            "outputCostUsd": 0.03372,
-            "outputCostPerTask": 0.03372
+            "totalTokens": 141397,
+            "totalTokensPerTask": 141397,
+            "cacheReadInputTokens": 96512,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 68.80297705189167,
+            "equivalentCostUsd": 0.300781,
+            "equivalentCostPerTask": 0.300781
           },
           "scratch": null
         },
@@ -3101,10 +3182,15 @@ window.TLAPS_DATA = {
             "taskCount": 7,
             "activeTimeSecs": 6383.15097598359,
             "activeTimePerTask": 911.8787108547986,
+            "inputTokens": 38315491,
             "outputTokens": 180828,
-            "outputTokensPerTask": 25832.571428571428,
-            "outputCostUsd": 5.42484,
-            "outputCostPerTask": 0.7749771428571428
+            "totalTokens": 38496319,
+            "totalTokensPerTask": 5499474.142857143,
+            "cacheReadInputTokens": 37149184,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 96.95604318368255,
+            "equivalentCostUsd": 29.830967,
+            "equivalentCostPerTask": 4.261566714285714
           },
           "scratch": null
         },
@@ -3118,10 +3204,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 137.49665740597993,
             "activeTimePerTask": 137.49665740597993,
+            "inputTokens": 358261,
             "outputTokens": 3874,
-            "outputTokensPerTask": 3874,
-            "outputCostUsd": 0.11622,
-            "outputCostPerTask": 0.11622
+            "totalTokens": 362135,
+            "totalTokensPerTask": 362135,
+            "cacheReadInputTokens": 311040,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 86.81938586672845,
+            "equivalentCostUsd": 0.507845,
+            "equivalentCostPerTask": 0.507845
           },
           "scratch": null
         },
@@ -3135,10 +3226,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 621.9468967460562,
             "activeTimePerTask": 621.9468967460562,
+            "inputTokens": 3092688,
             "outputTokens": 16485,
-            "outputTokensPerTask": 16485,
-            "outputCostUsd": 0.49455,
-            "outputCostPerTask": 0.49455
+            "totalTokens": 3109173,
+            "totalTokensPerTask": 3109173,
+            "cacheReadInputTokens": 2945792,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 95.25021599333654,
+            "equivalentCostUsd": 2.701926,
+            "equivalentCostPerTask": 2.701926
           },
           "scratch": null
         },
@@ -3152,10 +3248,15 @@ window.TLAPS_DATA = {
             "taskCount": 3,
             "activeTimeSecs": 3270.4858319461346,
             "activeTimePerTask": 1090.161943982045,
+            "inputTokens": 20105985,
             "outputTokens": 82486,
-            "outputTokensPerTask": 27495.333333333332,
-            "outputCostUsd": 2.47458,
-            "outputCostPerTask": 0.82486
+            "totalTokens": 20188471,
+            "totalTokensPerTask": 6729490.333333333,
+            "cacheReadInputTokens": 19574528,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 97.35672238888073,
+            "equivalentCostUsd": 14.919129000000002,
+            "equivalentCostPerTask": 4.9730430000000005
           },
           "scratch": null
         },
@@ -3169,10 +3270,15 @@ window.TLAPS_DATA = {
             "taskCount": 4,
             "activeTimeSecs": 3381.0276467078365,
             "activeTimePerTask": 845.2569116769591,
+            "inputTokens": 13107483,
             "outputTokens": 98469,
-            "outputTokensPerTask": 24617.25,
-            "outputCostUsd": 2.95407,
-            "outputCostPerTask": 0.7385175
+            "totalTokens": 13205952,
+            "totalTokensPerTask": 3301488,
+            "cacheReadInputTokens": 12435712,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 94.87490466323702,
+            "equivalentCostUsd": 12.530780999999998,
+            "equivalentCostPerTask": 3.1326952499999994
           },
           "scratch": null
         },
@@ -3186,10 +3292,15 @@ window.TLAPS_DATA = {
             "taskCount": 2,
             "activeTimeSecs": 226.25647711311467,
             "activeTimePerTask": 113.12823855655733,
+            "inputTokens": 510979,
             "outputTokens": 7528,
-            "outputTokensPerTask": 3764,
-            "outputCostUsd": 0.22584,
-            "outputCostPerTask": 0.11292
+            "totalTokens": 518507,
+            "totalTokensPerTask": 259253.5,
+            "cacheReadInputTokens": 420096,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 82.21394616999916,
+            "equivalentCostUsd": 0.8903030000000001,
+            "equivalentCostPerTask": 0.44515150000000003
           },
           "scratch": null
         },
@@ -3203,10 +3314,15 @@ window.TLAPS_DATA = {
             "taskCount": 3,
             "activeTimeSecs": 667.7235356918536,
             "activeTimePerTask": 222.57451189728454,
+            "inputTokens": 1425974,
             "outputTokens": 19524,
-            "outputTokensPerTask": 6508,
-            "outputCostUsd": 0.58572,
-            "outputCostPerTask": 0.19524
+            "totalTokens": 1445498,
+            "totalTokensPerTask": 481832.6666666667,
+            "cacheReadInputTokens": 1306624,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 91.63028217905796,
+            "equivalentCostUsd": 1.835782,
+            "equivalentCostPerTask": 0.6119273333333334
           },
           "scratch": null
         },
@@ -3220,10 +3336,15 @@ window.TLAPS_DATA = {
             "taskCount": 12,
             "activeTimeSecs": 10347.942265861202,
             "activeTimePerTask": 862.3285221551001,
+            "inputTokens": 56458372,
             "outputTokens": 323765,
-            "outputTokensPerTask": 26980.416666666668,
-            "outputCostUsd": 9.71295,
-            "outputCostPerTask": 0.8094125
+            "totalTokens": 56782137,
+            "totalTokensPerTask": 4731844.75,
+            "cacheReadInputTokens": 54937600,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 97.30638354219636,
+            "equivalentCostUsd": 44.78560999999999,
+            "equivalentCostPerTask": 3.732134166666666
           },
           "scratch": null
         },
@@ -3237,10 +3358,15 @@ window.TLAPS_DATA = {
             "taskCount": 2,
             "activeTimeSecs": 1919.2581034458708,
             "activeTimePerTask": 959.6290517229354,
+            "inputTokens": 10009570,
             "outputTokens": 36941,
-            "outputTokensPerTask": 18470.5,
-            "outputCostUsd": 1.10823,
-            "outputCostPerTask": 0.554115
+            "totalTokens": 10046511,
+            "totalTokensPerTask": 5023255.5,
+            "cacheReadInputTokens": 9771008,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 97.61666085556122,
+            "equivalentCostUsd": 7.186543999999998,
+            "equivalentCostPerTask": 3.593271999999999
           },
           "scratch": null
         },
@@ -3254,10 +3380,15 @@ window.TLAPS_DATA = {
             "taskCount": 10,
             "activeTimeSecs": 7848.491008359473,
             "activeTimePerTask": 784.8491008359473,
+            "inputTokens": 39454691,
             "outputTokens": 232767,
-            "outputTokensPerTask": 23276.7,
-            "outputCostUsd": 6.98301,
-            "outputCostPerTask": 0.6983010000000001
+            "totalTokens": 39687458,
+            "totalTokensPerTask": 3968745.8,
+            "cacheReadInputTokens": 38068224,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 96.48592609684866,
+            "equivalentCostUsd": 32.949456999999995,
+            "equivalentCostPerTask": 3.2949456999999995
           },
           "scratch": null
         },
@@ -3271,10 +3402,15 @@ window.TLAPS_DATA = {
             "taskCount": 2,
             "activeTimeSecs": 413.39422729611397,
             "activeTimePerTask": 206.69711364805698,
+            "inputTokens": 1397939,
             "outputTokens": 12445,
-            "outputTokensPerTask": 6222.5,
-            "outputCostUsd": 0.37335,
-            "outputCostPerTask": 0.186675
+            "totalTokens": 1410384,
+            "totalTokensPerTask": 705192,
+            "cacheReadInputTokens": 1243648,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 88.96296619523456,
+            "equivalentCostUsd": 1.766629,
+            "equivalentCostPerTask": 0.8833145
           },
           "scratch": null
         },
@@ -3288,10 +3424,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 87.46845044079237,
             "activeTimePerTask": 87.46845044079237,
+            "inputTokens": 200574,
             "outputTokens": 3155,
-            "outputTokensPerTask": 3155,
-            "outputCostUsd": 0.09465,
-            "outputCostPerTask": 0.09465
+            "totalTokens": 203729,
+            "totalTokensPerTask": 203729,
+            "cacheReadInputTokens": 186368,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 92.917327270733,
+            "equivalentCostUsd": 0.258864,
+            "equivalentCostPerTask": 0.258864
           },
           "scratch": null
         },
@@ -3305,10 +3446,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 182.62903510290198,
             "activeTimePerTask": 182.62903510290198,
+            "inputTokens": 297070,
             "outputTokens": 6459,
-            "outputTokensPerTask": 6459,
-            "outputCostUsd": 0.19377,
-            "outputCostPerTask": 0.19377
+            "totalTokens": 303529,
+            "totalTokensPerTask": 303529,
+            "cacheReadInputTokens": 263424,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 88.67404988723196,
+            "equivalentCostUsd": 0.49371200000000004,
+            "equivalentCostPerTask": 0.49371200000000004
           },
           "scratch": null
         },
@@ -3322,10 +3468,15 @@ window.TLAPS_DATA = {
             "taskCount": 3,
             "activeTimeSecs": 3973.2452814499848,
             "activeTimePerTask": 1324.4150938166615,
+            "inputTokens": 26782745,
             "outputTokens": 118676,
-            "outputTokensPerTask": 39558.666666666664,
-            "outputCostUsd": 3.56028,
-            "outputCostPerTask": 1.18676
+            "totalTokens": 26901421,
+            "totalTokensPerTask": 8967140.333333334,
+            "cacheReadInputTokens": 26156288,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 97.66096791049611,
+            "equivalentCostUsd": 19.770708999999997,
+            "equivalentCostPerTask": 6.5902363333333325
           },
           "scratch": null
         },
@@ -3339,10 +3490,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 59.038944956846535,
             "activeTimePerTask": 59.038944956846535,
+            "inputTokens": 121649,
             "outputTokens": 1846,
-            "outputTokensPerTask": 1846,
-            "outputCostUsd": 0.05538,
-            "outputCostPerTask": 0.05538
+            "totalTokens": 123495,
+            "totalTokensPerTask": 123495,
+            "cacheReadInputTokens": 108544,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 89.22720285411306,
+            "equivalentCostUsd": 0.17517700000000003,
+            "equivalentCostPerTask": 0.17517700000000003
           },
           "scratch": null
         },
@@ -3356,10 +3512,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 545.2197864090558,
             "activeTimePerTask": 545.2197864090558,
+            "inputTokens": 1309020,
             "outputTokens": 16584,
-            "outputTokensPerTask": 16584,
-            "outputCostUsd": 0.49752,
-            "outputCostPerTask": 0.49752
+            "totalTokens": 1325604,
+            "totalTokensPerTask": 1325604,
+            "cacheReadInputTokens": 1235712,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 94.39977998808268,
+            "equivalentCostUsd": 1.4819160000000002,
+            "equivalentCostPerTask": 1.4819160000000002
           },
           "scratch": null
         },
@@ -3373,10 +3534,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 363.10200030799024,
             "activeTimePerTask": 363.10200030799024,
+            "inputTokens": 1058166,
             "outputTokens": 11335,
-            "outputTokensPerTask": 11335,
-            "outputCostUsd": 0.34005,
-            "outputCostPerTask": 0.34005
+            "totalTokens": 1069501,
+            "totalTokensPerTask": 1069501,
+            "cacheReadInputTokens": 983040,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 92.90035778885354,
+            "equivalentCostUsd": 1.2072,
+            "equivalentCostPerTask": 1.2072
           },
           "scratch": null
         },
@@ -3390,10 +3556,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 257.0912309731357,
             "activeTimePerTask": 257.0912309731357,
+            "inputTokens": 765472,
             "outputTokens": 6960,
-            "outputTokensPerTask": 6960,
-            "outputCostUsd": 0.2088,
-            "outputCostPerTask": 0.2088
+            "totalTokens": 772432,
+            "totalTokensPerTask": 772432,
+            "cacheReadInputTokens": 685824,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 89.59491660047657,
+            "equivalentCostUsd": 0.9499519999999999,
+            "equivalentCostPerTask": 0.9499519999999999
           },
           "scratch": null
         },
@@ -3407,10 +3578,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 93.818602578016,
             "activeTimePerTask": 93.818602578016,
+            "inputTokens": 284903,
             "outputTokens": 2582,
-            "outputTokensPerTask": 2582,
-            "outputCostUsd": 0.07746,
-            "outputCostPerTask": 0.07746
+            "totalTokens": 287485,
+            "totalTokensPerTask": 287485,
+            "cacheReadInputTokens": 248320,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 87.1594893700663,
+            "equivalentCostUsd": 0.384535,
+            "equivalentCostPerTask": 0.384535
           },
           "scratch": null
         },
@@ -3424,10 +3600,15 @@ window.TLAPS_DATA = {
             "taskCount": 3,
             "activeTimeSecs": 473.2010083759669,
             "activeTimePerTask": 157.73366945865564,
+            "inputTokens": 1316395,
             "outputTokens": 12630,
-            "outputTokensPerTask": 4210,
-            "outputCostUsd": 0.3789,
-            "outputCostPerTask": 0.1263
+            "totalTokens": 1329025,
+            "totalTokensPerTask": 443008.3333333333,
+            "cacheReadInputTokens": 1152768,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 87.57006825458924,
+            "equivalentCostUsd": 1.773419,
+            "equivalentCostPerTask": 0.5911396666666667
           },
           "scratch": null
         },
@@ -3441,10 +3622,15 @@ window.TLAPS_DATA = {
             "taskCount": 3,
             "activeTimeSecs": 881.9315728058573,
             "activeTimePerTask": 293.97719093528576,
+            "inputTokens": 2507166,
             "outputTokens": 25153,
-            "outputTokensPerTask": 8384.333333333334,
-            "outputCostUsd": 0.75459,
-            "outputCostPerTask": 0.25153
+            "totalTokens": 2532319,
+            "totalTokensPerTask": 844106.3333333334,
+            "cacheReadInputTokens": 2324736,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 92.72365690983365,
+            "equivalentCostUsd": 2.8291080000000006,
+            "equivalentCostPerTask": 0.9430360000000002
           },
           "scratch": null
         },
@@ -3458,10 +3644,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 84.18693459313363,
             "activeTimePerTask": 84.18693459313363,
+            "inputTokens": 150638,
             "outputTokens": 1945,
-            "outputTokensPerTask": 1945,
-            "outputCostUsd": 0.05835,
-            "outputCostPerTask": 0.05835
+            "totalTokens": 152583,
+            "totalTokensPerTask": 152583,
+            "cacheReadInputTokens": 120576,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 80.04354810871095,
+            "equivalentCostUsd": 0.268948,
+            "equivalentCostPerTask": 0.268948
           },
           "scratch": null
         },
@@ -3475,10 +3666,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 312.4773108519148,
             "activeTimePerTask": 312.4773108519148,
+            "inputTokens": 913451,
             "outputTokens": 9082,
-            "outputTokensPerTask": 9082,
-            "outputCostUsd": 0.27246,
-            "outputCostPerTask": 0.27246
+            "totalTokens": 922533,
+            "totalTokensPerTask": 922533,
+            "cacheReadInputTokens": 853760,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 93.46533092634417,
+            "equivalentCostUsd": 0.997795,
+            "equivalentCostPerTask": 0.997795
           },
           "scratch": null
         },
@@ -3492,10 +3688,15 @@ window.TLAPS_DATA = {
             "taskCount": 2,
             "activeTimeSecs": 529.3036350971088,
             "activeTimePerTask": 264.6518175485544,
+            "inputTokens": 1199364,
             "outputTokens": 15281,
-            "outputTokensPerTask": 7640.5,
-            "outputCostUsd": 0.45843,
-            "outputCostPerTask": 0.229215
+            "totalTokens": 1214645,
+            "totalTokensPerTask": 607322.5,
+            "cacheReadInputTokens": 1096448,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 91.41911879963047,
+            "equivalentCostUsd": 1.5212340000000002,
+            "equivalentCostPerTask": 0.7606170000000001
           },
           "scratch": null
         },
@@ -3509,10 +3710,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 58.91261188709177,
             "activeTimePerTask": 58.91261188709177,
+            "inputTokens": 138221,
             "outputTokens": 1539,
-            "outputTokensPerTask": 1539,
-            "outputCostUsd": 0.04617,
-            "outputCostPerTask": 0.04617
+            "totalTokens": 139760,
+            "totalTokensPerTask": 139760,
+            "cacheReadInputTokens": 107264,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 77.60325854971386,
+            "equivalentCostUsd": 0.254587,
+            "equivalentCostPerTask": 0.254587
           },
           "scratch": null
         },
@@ -3526,10 +3732,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 380.3498799719382,
             "activeTimePerTask": 380.3498799719382,
+            "inputTokens": 593444,
             "outputTokens": 13700,
-            "outputTokensPerTask": 13700,
-            "outputCostUsd": 0.411,
-            "outputCostPerTask": 0.411
+            "totalTokens": 607144,
+            "totalTokensPerTask": 607144,
+            "cacheReadInputTokens": 538880,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 90.805535147377,
+            "equivalentCostUsd": 0.9532600000000001,
+            "equivalentCostPerTask": 0.9532600000000001
           },
           "scratch": null
         },
@@ -3543,10 +3754,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 582.155085981125,
             "activeTimePerTask": 582.155085981125,
+            "inputTokens": 2114093,
             "outputTokens": 18158,
-            "outputTokensPerTask": 18158,
-            "outputCostUsd": 0.54474,
-            "outputCostPerTask": 0.54474
+            "totalTokens": 2132251,
+            "totalTokensPerTask": 2132251,
+            "cacheReadInputTokens": 1947136,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 92.10266530374965,
+            "equivalentCostUsd": 2.3530930000000008,
+            "equivalentCostPerTask": 2.3530930000000008
           },
           "scratch": null
         },
@@ -3560,10 +3776,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 543.9844622889068,
             "activeTimePerTask": 543.9844622889068,
+            "inputTokens": 1397802,
             "outputTokens": 16588,
-            "outputTokensPerTask": 16588,
-            "outputCostUsd": 0.49764,
-            "outputCostPerTask": 0.49764
+            "totalTokens": 1414390,
+            "totalTokensPerTask": 1414390,
+            "cacheReadInputTokens": 1325056,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 94.79568637045877,
+            "equivalentCostUsd": 1.5238979999999998,
+            "equivalentCostPerTask": 1.5238979999999998
           },
           "scratch": null
         },
@@ -3577,10 +3798,15 @@ window.TLAPS_DATA = {
             "taskCount": 2,
             "activeTimeSecs": 1781.7469612821005,
             "activeTimePerTask": 890.8734806410503,
+            "inputTokens": 7261046,
             "outputTokens": 57683,
-            "outputTokensPerTask": 28841.5,
-            "outputCostUsd": 1.73049,
-            "outputCostPerTask": 0.865245
+            "totalTokens": 7318729,
+            "totalTokensPerTask": 3659364.5,
+            "cacheReadInputTokens": 6942208,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 95.60892466457312,
+            "equivalentCostUsd": 6.795784000000001,
+            "equivalentCostPerTask": 3.3978920000000006
           },
           "scratch": null
         },
@@ -3594,10 +3820,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 340.7130408871453,
             "activeTimePerTask": 340.7130408871453,
+            "inputTokens": 938582,
             "outputTokens": 8698,
-            "outputTokensPerTask": 8698,
-            "outputCostUsd": 0.26094,
-            "outputCostPerTask": 0.26094
+            "totalTokens": 947280,
+            "totalTokensPerTask": 947280,
+            "cacheReadInputTokens": 843008,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 89.81719231777298,
+            "equivalentCostUsd": 1.1603139999999998,
+            "equivalentCostPerTask": 1.1603139999999998
           },
           "scratch": null
         },
@@ -3611,10 +3842,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 66.68223519506864,
             "activeTimePerTask": 66.68223519506864,
+            "inputTokens": 124287,
             "outputTokens": 1348,
-            "outputTokensPerTask": 1348,
-            "outputCostUsd": 0.04044,
-            "outputCostPerTask": 0.04044
+            "totalTokens": 125635,
+            "totalTokensPerTask": 125635,
+            "cacheReadInputTokens": 109312,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 87.95127406727977,
+            "equivalentCostUsd": 0.169971,
+            "equivalentCostPerTask": 0.169971
           },
           "scratch": null
         },
@@ -3628,10 +3864,15 @@ window.TLAPS_DATA = {
             "taskCount": 6,
             "activeTimeSecs": 9819.92155225575,
             "activeTimePerTask": 1636.653592042625,
+            "inputTokens": 71872288,
             "outputTokens": 160714,
-            "outputTokensPerTask": 26785.666666666668,
-            "outputCostUsd": 4.82142,
-            "outputCostPerTask": 0.80357
+            "totalTokens": 72033002,
+            "totalTokensPerTask": 12005500.333333334,
+            "cacheReadInputTokens": 70669312,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 98.32623110593056,
+            "equivalentCostUsd": 46.17095600000001,
+            "equivalentCostPerTask": 7.6951593333333355
           },
           "scratch": null
         },
@@ -3645,10 +3886,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 411.9728823250625,
             "activeTimePerTask": 411.9728823250625,
+            "inputTokens": 1087423,
             "outputTokens": 12749,
-            "outputTokensPerTask": 12749,
-            "outputCostUsd": 0.38247,
-            "outputCostPerTask": 0.38247
+            "totalTokens": 1100172,
+            "totalTokensPerTask": 1100172,
+            "cacheReadInputTokens": 1025792,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 94.33238031566373,
+            "equivalentCostUsd": 1.2035209999999996,
+            "equivalentCostPerTask": 1.2035209999999996
           },
           "scratch": null
         },
@@ -3662,10 +3908,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 132.6316218220163,
             "activeTimePerTask": 132.6316218220163,
+            "inputTokens": 269570,
             "outputTokens": 3501,
-            "outputTokensPerTask": 3501,
-            "outputCostUsd": 0.10503,
-            "outputCostPerTask": 0.10503
+            "totalTokens": 273071,
+            "totalTokensPerTask": 273071,
+            "cacheReadInputTokens": 227584,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 84.42482472085173,
+            "equivalentCostUsd": 0.4287520000000001,
+            "equivalentCostPerTask": 0.4287520000000001
           },
           "scratch": null
         },
@@ -3679,10 +3930,15 @@ window.TLAPS_DATA = {
             "taskCount": 11,
             "activeTimeSecs": 12064.558850685135,
             "activeTimePerTask": 1096.7780773350123,
+            "inputTokens": 57904362,
             "outputTokens": 341605,
-            "outputTokensPerTask": 31055,
-            "outputCostUsd": 10.24815,
-            "outputCostPerTask": 0.9316500000000001
+            "totalTokens": 58245967,
+            "totalTokensPerTask": 5295087.909090909,
+            "cacheReadInputTokens": 56020224,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 96.74612078447562,
+            "equivalentCostUsd": 47.678951999999995,
+            "equivalentCostPerTask": 4.334450181818181
           },
           "scratch": null
         },
@@ -3696,10 +3952,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 656.9855503919534,
             "activeTimePerTask": 656.9855503919534,
+            "inputTokens": 1847892,
             "outputTokens": 13858,
-            "outputTokensPerTask": 13858,
-            "outputCostUsd": 0.41574,
-            "outputCostPerTask": 0.41574
+            "totalTokens": 1861750,
+            "totalTokensPerTask": 1861750,
+            "cacheReadInputTokens": 1758208,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 95.14668606173954,
+            "equivalentCostUsd": 1.7432640000000001,
+            "equivalentCostPerTask": 1.7432640000000001
           },
           "scratch": null
         },
@@ -3713,10 +3974,15 @@ window.TLAPS_DATA = {
             "taskCount": 2,
             "activeTimeSecs": 1094.7865356970578,
             "activeTimePerTask": 547.3932678485289,
+            "inputTokens": 4142446,
             "outputTokens": 32600,
-            "outputTokensPerTask": 16300,
-            "outputCostUsd": 0.978,
-            "outputCostPerTask": 0.489
+            "totalTokens": 4175046,
+            "totalTokensPerTask": 2087523,
+            "cacheReadInputTokens": 3962880,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 95.66521808612593,
+            "equivalentCostUsd": 3.8572699999999998,
+            "equivalentCostPerTask": 1.9286349999999999
           },
           "scratch": null
         },
@@ -3730,10 +3996,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 354.0946216140874,
             "activeTimePerTask": 354.0946216140874,
+            "inputTokens": 783265,
             "outputTokens": 12317,
-            "outputTokensPerTask": 12317,
-            "outputCostUsd": 0.36951,
-            "outputCostPerTask": 0.36951
+            "totalTokens": 795582,
+            "totalTokensPerTask": 795582,
+            "cacheReadInputTokens": 696832,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 88.96503737560084,
+            "equivalentCostUsd": 1.150091,
+            "equivalentCostPerTask": 1.150091
           },
           "scratch": null
         },
@@ -3747,10 +4018,15 @@ window.TLAPS_DATA = {
             "taskCount": 5,
             "activeTimeSecs": 1276.2673527691513,
             "activeTimePerTask": 255.25347055383025,
+            "inputTokens": 3696458,
             "outputTokens": 31021,
-            "outputTokensPerTask": 6204.2,
-            "outputCostUsd": 0.93063,
-            "outputCostPerTask": 0.18612599999999999
+            "totalTokens": 3727479,
+            "totalTokensPerTask": 745495.8,
+            "cacheReadInputTokens": 3396096,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 91.87432942562853,
+            "equivalentCostUsd": 4.130488000000001,
+            "equivalentCostPerTask": 0.8260976000000001
           },
           "scratch": null
         },
@@ -3764,10 +4040,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 199.05375449405983,
             "activeTimePerTask": 199.05375449405983,
+            "inputTokens": 450730,
             "outputTokens": 6994,
-            "outputTokensPerTask": 6994,
-            "outputCostUsd": 0.20982,
-            "outputCostPerTask": 0.20982
+            "totalTokens": 457724,
+            "totalTokensPerTask": 457724,
+            "cacheReadInputTokens": 394240,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 87.46699798105296,
+            "equivalentCostUsd": 0.6893900000000001,
+            "equivalentCostPerTask": 0.6893900000000001
           },
           "scratch": null
         },
@@ -3781,10 +4062,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 1005.247476675082,
             "activeTimePerTask": 1005.247476675082,
+            "inputTokens": 3521923,
             "outputTokens": 32701,
-            "outputTokensPerTask": 32701,
-            "outputCostUsd": 0.98103,
-            "outputCostPerTask": 0.98103
+            "totalTokens": 3554624,
+            "totalTokensPerTask": 3554624,
+            "cacheReadInputTokens": 3390208,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 96.26013970208889,
+            "equivalentCostUsd": 3.334709,
+            "equivalentCostPerTask": 3.334709
           },
           "scratch": null
         },
@@ -3798,10 +4084,15 @@ window.TLAPS_DATA = {
             "taskCount": 4,
             "activeTimeSecs": 839.0453955628909,
             "activeTimePerTask": 209.76134889072273,
+            "inputTokens": 1972842,
             "outputTokens": 25085,
-            "outputTokensPerTask": 6271.25,
-            "outputCostUsd": 0.75255,
-            "outputCostPerTask": 0.1881375
+            "totalTokens": 1997927,
+            "totalTokensPerTask": 499481.75,
+            "cacheReadInputTokens": 1781248,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 90.28842654404154,
+            "equivalentCostUsd": 2.6011439999999997,
+            "equivalentCostPerTask": 0.6502859999999999
           },
           "scratch": null
         },
@@ -3815,10 +4106,15 @@ window.TLAPS_DATA = {
             "taskCount": 2,
             "activeTimeSecs": 532.7904671961442,
             "activeTimePerTask": 266.3952335980721,
+            "inputTokens": 1403518,
             "outputTokens": 16026,
-            "outputTokensPerTask": 8013,
-            "outputCostUsd": 0.48078,
-            "outputCostPerTask": 0.24039
+            "totalTokens": 1419544,
+            "totalTokensPerTask": 709772,
+            "cacheReadInputTokens": 1274112,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 90.77988312226847,
+            "equivalentCostUsd": 1.764866,
+            "equivalentCostPerTask": 0.882433
           },
           "scratch": null
         },
@@ -3832,10 +4128,15 @@ window.TLAPS_DATA = {
             "taskCount": 4,
             "activeTimeSecs": 3144.82122194604,
             "activeTimePerTask": 786.20530548651,
+            "inputTokens": 16777033,
             "outputTokens": 94952,
-            "outputTokensPerTask": 23738,
-            "outputCostUsd": 2.84856,
-            "outputCostPerTask": 0.71214
+            "totalTokens": 16871985,
+            "totalTokensPerTask": 4217996.25,
+            "cacheReadInputTokens": 16159488,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 96.3191048143018,
+            "equivalentCostUsd": 14.016028999999996,
+            "equivalentCostPerTask": 3.504007249999999
           },
           "scratch": null
         },
@@ -3849,10 +4150,15 @@ window.TLAPS_DATA = {
             "taskCount": 2,
             "activeTimeSecs": 867.6535137651954,
             "activeTimePerTask": 433.8267568825977,
+            "inputTokens": 3977244,
             "outputTokens": 28728,
-            "outputTokensPerTask": 14364,
-            "outputCostUsd": 0.86184,
-            "outputCostPerTask": 0.43092
+            "totalTokens": 4005972,
+            "totalTokensPerTask": 2002986,
+            "cacheReadInputTokens": 3733248,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 93.86519911778106,
+            "equivalentCostUsd": 3.9484440000000003,
+            "equivalentCostPerTask": 1.9742220000000001
           },
           "scratch": null
         },
@@ -3866,10 +4172,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 72.18901794892736,
             "activeTimePerTask": 72.18901794892736,
+            "inputTokens": 135296,
             "outputTokens": 2148,
-            "outputTokensPerTask": 2148,
-            "outputCostUsd": 0.06444,
-            "outputCostPerTask": 0.06444
+            "totalTokens": 137444,
+            "totalTokensPerTask": 137444,
+            "cacheReadInputTokens": 121600,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 89.87701040681173,
+            "equivalentCostUsd": 0.19372,
+            "equivalentCostPerTask": 0.19372
           },
           "scratch": null
         }
@@ -3886,14 +4197,16 @@ window.TLAPS_DATA = {
       "cohortLabel": "One-Shot",
       "generated": "2026-08-12",
       "resultsFile": "results/codex-single-turn-gpt-5.6-sol-max.json",
-      "resultsVersion": "63dd8f0aae4f",
+      "resultsVersion": "e2347fbb480d",
       "modes": [
         "completion"
       ],
       "perMetric": {
         "completion": 17.8,
         "activeTimePerTask": 593.6602949336184,
-        "outputCostPerTask": 0.6886534736842105
+        "totalTokens": 7467082,
+        "cacheRatePct": 19.725850960036837,
+        "equivalentCostUsd": 143.61547399999998
       },
       "perMode": {
         "completion": {
@@ -3905,11 +4218,16 @@ window.TLAPS_DATA = {
           "taskCount": 190,
           "activeTimeSecs": 112795.45603738748,
           "activeTimePerTask": 593.6602949336184,
+          "inputTokens": 3105610,
           "outputTokens": 4361472,
-          "outputTokensPerTask": 22955.115789473683,
-          "outputCostUsd": 130.84416,
-          "outputCostPerTask": 0.6886534736842105,
-          "specificationMacroPct": 17.8,
+          "totalTokens": 7467082,
+          "totalTokensPerTask": 39300.43157894737,
+          "cacheReadInputTokens": 612608,
+          "cacheWriteInputTokens": 0,
+          "cacheRatePct": 19.725850960036837,
+          "equivalentCostUsd": 143.61547399999998,
+          "equivalentCostPerTask": 0.7558709157894735,
+          "specBalancedPassRatePct": 17.8,
           "completeSpecifications": 6,
           "representedSpecifications": 56,
           "allLeavesCompletePct": 10.7
@@ -3934,10 +4252,15 @@ window.TLAPS_DATA = {
             "taskCount": 34,
             "activeTimeSecs": 11142.01529934723,
             "activeTimePerTask": 327.706332333742,
+            "inputTokens": 446149,
             "outputTokens": 459034,
-            "outputTokensPerTask": 13501,
-            "outputCostUsd": 13.77102,
-            "outputCostPerTask": 0.40503
+            "totalTokens": 905183,
+            "totalTokensPerTask": 26623.029411764706,
+            "cacheReadInputTokens": 38144,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 8.54961010783393,
+            "equivalentCostUsd": 15.830117000000001,
+            "equivalentCostPerTask": 0.4655916764705883
           },
           {
             "id": "d2",
@@ -3949,10 +4272,15 @@ window.TLAPS_DATA = {
             "taskCount": 45,
             "activeTimeSecs": 17576.484432824655,
             "activeTimePerTask": 390.588542951659,
+            "inputTokens": 801909,
             "outputTokens": 614233,
-            "outputTokensPerTask": 13649.622222222222,
-            "outputCostUsd": 18.42699,
-            "outputCostPerTask": 0.40948866666666667
+            "totalTokens": 1416142,
+            "totalTokensPerTask": 31469.82222222222,
+            "cacheReadInputTokens": 142080,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 17.717721088053633,
+            "equivalentCostUsd": 21.797175,
+            "equivalentCostPerTask": 0.48438166666666665
           },
           {
             "id": "d3",
@@ -3964,10 +4292,15 @@ window.TLAPS_DATA = {
             "taskCount": 54,
             "activeTimeSecs": 31981.685156108695,
             "activeTimePerTask": 592.2534288168276,
+            "inputTokens": 928529,
             "outputTokens": 1280349,
-            "outputTokensPerTask": 23710.166666666668,
-            "outputCostUsd": 38.41047,
-            "outputCostPerTask": 0.711305
+            "totalTokens": 2208878,
+            "totalTokensPerTask": 40905.148148148146,
+            "cacheReadInputTokens": 214528,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 23.104071062939337,
+            "equivalentCostUsd": 42.08773899999999,
+            "equivalentCostPerTask": 0.7794025740740739
           },
           {
             "id": "d4",
@@ -3979,10 +4312,15 @@ window.TLAPS_DATA = {
             "taskCount": 19,
             "activeTimeSecs": 14897.463075599051,
             "activeTimePerTask": 784.0770039788974,
+            "inputTokens": 345162,
             "outputTokens": 595734,
-            "outputTokensPerTask": 31354.42105263158,
-            "outputCostUsd": 17.87202,
-            "outputCostPerTask": 0.9406326315789473
+            "totalTokens": 940896,
+            "totalTokensPerTask": 49520.84210526316,
+            "cacheReadInputTokens": 59136,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 17.132824586715802,
+            "equivalentCostUsd": 19.331718,
+            "equivalentCostPerTask": 1.017458842105263
           },
           {
             "id": "d5",
@@ -3994,10 +4332,15 @@ window.TLAPS_DATA = {
             "taskCount": 19,
             "activeTimeSecs": 16410.66545936279,
             "activeTimePerTask": 863.7192347033048,
+            "inputTokens": 269945,
             "outputTokens": 672454,
-            "outputTokensPerTask": 35392.31578947369,
-            "outputCostUsd": 20.17362,
-            "outputCostPerTask": 1.0617694736842105
+            "totalTokens": 942399,
+            "totalTokensPerTask": 49599.94736842105,
+            "cacheReadInputTokens": 78592,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 29.114078793828373,
+            "equivalentCostUsd": 21.169681,
+            "equivalentCostPerTask": 1.1141937368421053
           },
           {
             "id": "d6",
@@ -4009,10 +4352,15 @@ window.TLAPS_DATA = {
             "taskCount": 19,
             "activeTimeSecs": 20787.142614145065,
             "activeTimePerTask": 1094.0601375865824,
+            "inputTokens": 313916,
             "outputTokens": 739668,
-            "outputTokensPerTask": 38929.89473684211,
-            "outputCostUsd": 22.19004,
-            "outputCostPerTask": 1.1678968421052631
+            "totalTokens": 1053584,
+            "totalTokensPerTask": 55451.78947368421,
+            "cacheReadInputTokens": 80128,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 25.525299761719694,
+            "equivalentCostUsd": 23.399044000000004,
+            "equivalentCostPerTask": 1.2315286315789475
           }
         ],
         "scratch": null
@@ -4021,14 +4369,17 @@ window.TLAPS_DATA = {
       "usage": {
         "taskCount": 190,
         "activeTimeSecs": 112795.45603738748,
+        "inputTokens": 3105610,
         "outputTokens": 4361472,
-        "outputCostUsd": 130.84416
+        "totalTokens": 7467082,
+        "cacheReadInputTokens": 612608,
+        "cacheWriteInputTokens": 0,
+        "cacheRatePct": 19.725850960036837,
+        "equivalentCostUsd": 143.61547399999998
       },
       "pricing": {
-        "usdPerMillionTokens": 30,
-        "tier": "standard",
         "asOf": "2026-08-12",
-        "source": "https://developers.openai.com/api/docs/models"
+        "source": "https://developers.openai.com/api/docs/models/gpt-5.6-sol"
       },
       "perSpec": {
         "apalache-examples-konnov--apalache-examples-ben-or83-ben-or83-proofs-tla": {
@@ -4041,10 +4392,15 @@ window.TLAPS_DATA = {
             "taskCount": 41,
             "activeTimeSecs": 19311.32013933349,
             "activeTimePerTask": 471.00780827642654,
+            "inputTokens": 1125502,
             "outputTokens": 817350,
-            "outputTokensPerTask": 19935.365853658535,
-            "outputCostUsd": 24.5205,
-            "outputCostPerTask": 0.598060975609756
+            "totalTokens": 1942852,
+            "totalTokensPerTask": 47386.634146341465,
+            "cacheReadInputTokens": 169728,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 15.080204211098692,
+            "equivalentCostUsd": 29.384233999999996,
+            "equivalentCostPerTask": 0.7166886341463413
           },
           "scratch": null
         },
@@ -4058,10 +4414,15 @@ window.TLAPS_DATA = {
             "taskCount": 15,
             "activeTimeSecs": 4926.426365170162,
             "activeTimePerTask": 328.42842434467747,
+            "inputTokens": 443555,
             "outputTokens": 217190,
-            "outputTokensPerTask": 14479.333333333334,
-            "outputCostUsd": 6.5157,
-            "outputCostPerTask": 0.43438
+            "totalTokens": 660745,
+            "totalTokensPerTask": 44049.666666666664,
+            "cacheReadInputTokens": 93952,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 21.18158965629967,
+            "equivalentCostUsd": 8.310691000000002,
+            "equivalentCostPerTask": 0.5540460666666668
           },
           "scratch": null
         },
@@ -4075,10 +4436,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 849.0291063499171,
             "activeTimePerTask": 849.0291063499171,
+            "inputTokens": 9976,
             "outputTokens": 39498,
-            "outputTokensPerTask": 39498,
-            "outputCostUsd": 1.18494,
-            "outputCostPerTask": 1.18494
+            "totalTokens": 49474,
+            "totalTokensPerTask": 49474,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 1.23482,
+            "equivalentCostPerTask": 1.23482
           },
           "scratch": null
         },
@@ -4092,10 +4458,15 @@ window.TLAPS_DATA = {
             "taskCount": 2,
             "activeTimeSecs": 1245.9498438178562,
             "activeTimePerTask": 622.9749219089281,
+            "inputTokens": 17123,
             "outputTokens": 51047,
-            "outputTokensPerTask": 25523.5,
-            "outputCostUsd": 1.53141,
-            "outputCostPerTask": 0.765705
+            "totalTokens": 68170,
+            "totalTokensPerTask": 34085,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 1.617025,
+            "equivalentCostPerTask": 0.8085125
           },
           "scratch": null
         },
@@ -4109,10 +4480,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 495.8863204859663,
             "activeTimePerTask": 495.8863204859663,
+            "inputTokens": 9963,
             "outputTokens": 18224,
-            "outputTokensPerTask": 18224,
-            "outputCostUsd": 0.54672,
-            "outputCostPerTask": 0.54672
+            "totalTokens": 28187,
+            "totalTokensPerTask": 28187,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.596535,
+            "equivalentCostPerTask": 0.596535
           },
           "scratch": null
         },
@@ -4126,10 +4502,15 @@ window.TLAPS_DATA = {
             "taskCount": 2,
             "activeTimeSecs": 1921.990963170887,
             "activeTimePerTask": 960.9954815854435,
+            "inputTokens": 40845,
             "outputTokens": 54253,
-            "outputTokensPerTask": 27126.5,
-            "outputCostUsd": 1.62759,
-            "outputCostPerTask": 0.813795
+            "totalTokens": 95098,
+            "totalTokensPerTask": 47549,
+            "cacheReadInputTokens": 13824,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 33.84502387073081,
+            "equivalentCostUsd": 1.7696070000000002,
+            "equivalentCostPerTask": 0.8848035000000001
           },
           "scratch": null
         },
@@ -4143,10 +4524,15 @@ window.TLAPS_DATA = {
             "taskCount": 3,
             "activeTimeSecs": 2429.7078950507566,
             "activeTimePerTask": 809.9026316835856,
+            "inputTokens": 31276,
             "outputTokens": 81679,
-            "outputTokensPerTask": 27226.333333333332,
-            "outputCostUsd": 2.45037,
-            "outputCostPerTask": 0.81679
+            "totalTokens": 112955,
+            "totalTokensPerTask": 37651.666666666664,
+            "cacheReadInputTokens": 9984,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 31.922240695741145,
+            "equivalentCostUsd": 2.5618220000000003,
+            "equivalentCostPerTask": 0.8539406666666668
           },
           "scratch": null
         },
@@ -4160,10 +4546,15 @@ window.TLAPS_DATA = {
             "taskCount": 2,
             "activeTimeSecs": 1168.206629970111,
             "activeTimePerTask": 584.1033149850555,
+            "inputTokens": 15714,
             "outputTokens": 58458,
-            "outputTokensPerTask": 29229,
-            "outputCostUsd": 1.75374,
-            "outputCostPerTask": 0.87687
+            "totalTokens": 74172,
+            "totalTokensPerTask": 37086,
+            "cacheReadInputTokens": 4864,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 30.95329005981927,
+            "equivalentCostUsd": 1.810422,
+            "equivalentCostPerTask": 0.905211
           },
           "scratch": null
         },
@@ -4177,10 +4568,15 @@ window.TLAPS_DATA = {
             "taskCount": 4,
             "activeTimeSecs": 2958.2722014463507,
             "activeTimePerTask": 739.5680503615877,
+            "inputTokens": 86259,
             "outputTokens": 110041,
-            "outputTokensPerTask": 27510.25,
-            "outputCostUsd": 3.30123,
-            "outputCostPerTask": 0.8253075
+            "totalTokens": 196300,
+            "totalTokensPerTask": 49075,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 3.732525,
+            "equivalentCostPerTask": 0.93313125
           },
           "scratch": null
         },
@@ -4194,10 +4590,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 142.94505143817514,
             "activeTimePerTask": 142.94505143817514,
+            "inputTokens": 14155,
             "outputTokens": 4205,
-            "outputTokensPerTask": 4205,
-            "outputCostUsd": 0.12615,
-            "outputCostPerTask": 0.12615
+            "totalTokens": 18360,
+            "totalTokensPerTask": 18360,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.196925,
+            "equivalentCostPerTask": 0.196925
           },
           "scratch": null
         },
@@ -4211,10 +4612,15 @@ window.TLAPS_DATA = {
             "taskCount": 7,
             "activeTimeSecs": 5395.671599499532,
             "activeTimePerTask": 770.8102284999331,
+            "inputTokens": 140337,
             "outputTokens": 176721,
-            "outputTokensPerTask": 25245.85714285714,
-            "outputCostUsd": 5.30163,
-            "outputCostPerTask": 0.7573757142857144
+            "totalTokens": 317058,
+            "totalTokensPerTask": 45294,
+            "cacheReadInputTokens": 25856,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 18.424221694920085,
+            "equivalentCostUsd": 5.886963000000001,
+            "equivalentCostPerTask": 0.8409947142857144
           },
           "scratch": null
         },
@@ -4228,10 +4634,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 652.3928710760083,
             "activeTimePerTask": 652.3928710760083,
+            "inputTokens": 7367,
             "outputTokens": 26083,
-            "outputTokensPerTask": 26083,
-            "outputCostUsd": 0.78249,
-            "outputCostPerTask": 0.78249
+            "totalTokens": 33450,
+            "totalTokensPerTask": 33450,
+            "cacheReadInputTokens": 4864,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 66.02416180263336,
+            "equivalentCostUsd": 0.797437,
+            "equivalentCostPerTask": 0.797437
           },
           "scratch": null
         },
@@ -4245,10 +4656,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 229.07702740607783,
             "activeTimePerTask": 229.07702740607783,
+            "inputTokens": 7026,
             "outputTokens": 10825,
-            "outputTokensPerTask": 10825,
-            "outputCostUsd": 0.32475,
-            "outputCostPerTask": 0.32475
+            "totalTokens": 17851,
+            "totalTokensPerTask": 17851,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.35988,
+            "equivalentCostPerTask": 0.35988
           },
           "scratch": null
         },
@@ -4262,10 +4678,15 @@ window.TLAPS_DATA = {
             "taskCount": 3,
             "activeTimeSecs": 1692.4074721430661,
             "activeTimePerTask": 564.1358240476887,
+            "inputTokens": 64113,
             "outputTokens": 39041,
-            "outputTokensPerTask": 13013.666666666666,
-            "outputCostUsd": 1.17123,
-            "outputCostPerTask": 0.39041
+            "totalTokens": 103154,
+            "totalTokensPerTask": 34384.666666666664,
+            "cacheReadInputTokens": 12800,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 19.964749738742533,
+            "equivalentCostUsd": 1.4341949999999999,
+            "equivalentCostPerTask": 0.47806499999999996
           },
           "scratch": null
         },
@@ -4279,10 +4700,15 @@ window.TLAPS_DATA = {
             "taskCount": 4,
             "activeTimeSecs": 3780.23563271109,
             "activeTimePerTask": 945.0589081777725,
+            "inputTokens": 33218,
             "outputTokens": 157427,
-            "outputTokensPerTask": 39356.75,
-            "outputCostUsd": 4.72281,
-            "outputCostPerTask": 1.1807025
+            "totalTokens": 190645,
+            "totalTokensPerTask": 47661.25,
+            "cacheReadInputTokens": 4864,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 14.642663616111747,
+            "equivalentCostUsd": 4.867012,
+            "equivalentCostPerTask": 1.216753
           },
           "scratch": null
         },
@@ -4296,10 +4722,15 @@ window.TLAPS_DATA = {
             "taskCount": 2,
             "activeTimeSecs": 614.0361422179267,
             "activeTimePerTask": 307.01807110896334,
+            "inputTokens": 13796,
             "outputTokens": 26477,
-            "outputTokensPerTask": 13238.5,
-            "outputCostUsd": 0.79431,
-            "outputCostPerTask": 0.397155
+            "totalTokens": 40273,
+            "totalTokensPerTask": 20136.5,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.86329,
+            "equivalentCostPerTask": 0.431645
           },
           "scratch": null
         },
@@ -4313,10 +4744,15 @@ window.TLAPS_DATA = {
             "taskCount": 3,
             "activeTimeSecs": 1014.5932858589804,
             "activeTimePerTask": 338.19776195299346,
+            "inputTokens": 21391,
             "outputTokens": 46701,
-            "outputTokensPerTask": 15567,
-            "outputCostUsd": 1.40103,
-            "outputCostPerTask": 0.46701
+            "totalTokens": 68092,
+            "totalTokensPerTask": 22697.333333333332,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 1.5079850000000001,
+            "equivalentCostPerTask": 0.5026616666666667
           },
           "scratch": null
         },
@@ -4330,10 +4766,15 @@ window.TLAPS_DATA = {
             "taskCount": 12,
             "activeTimeSecs": 9317.596973154112,
             "activeTimePerTask": 776.4664144295093,
+            "inputTokens": 147064,
             "outputTokens": 348055,
-            "outputTokensPerTask": 29004.583333333332,
-            "outputCostUsd": 10.44165,
-            "outputCostPerTask": 0.8701374999999999
+            "totalTokens": 495119,
+            "totalTokensPerTask": 41259.916666666664,
+            "cacheReadInputTokens": 34816,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 23.67404667355709,
+            "equivalentCostUsd": 11.020298,
+            "equivalentCostPerTask": 0.9183581666666667
           },
           "scratch": null
         },
@@ -4347,10 +4788,15 @@ window.TLAPS_DATA = {
             "taskCount": 2,
             "activeTimeSecs": 1459.1520331560168,
             "activeTimePerTask": 729.5760165780084,
+            "inputTokens": 28682,
             "outputTokens": 51619,
-            "outputTokensPerTask": 25809.5,
-            "outputCostUsd": 1.54857,
-            "outputCostPerTask": 0.774285
+            "totalTokens": 80301,
+            "totalTokensPerTask": 40150.5,
+            "cacheReadInputTokens": 11008,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 38.37947144550589,
+            "equivalentCostUsd": 1.6424440000000002,
+            "equivalentCostPerTask": 0.8212220000000001
           },
           "scratch": null
         },
@@ -4364,10 +4810,15 @@ window.TLAPS_DATA = {
             "taskCount": 10,
             "activeTimeSecs": 4311.125228455989,
             "activeTimePerTask": 431.11252284559885,
+            "inputTokens": 75858,
             "outputTokens": 177477,
-            "outputTokensPerTask": 17747.7,
-            "outputCostUsd": 5.32431,
-            "outputCostPerTask": 0.532431
+            "totalTokens": 253335,
+            "totalTokensPerTask": 25333.5,
+            "cacheReadInputTokens": 31232,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 41.171662843734346,
+            "equivalentCostUsd": 5.5630560000000004,
+            "equivalentCostPerTask": 0.5563056000000001
           },
           "scratch": null
         },
@@ -4381,10 +4832,15 @@ window.TLAPS_DATA = {
             "taskCount": 2,
             "activeTimeSecs": 1030.1808356170077,
             "activeTimePerTask": 515.0904178085038,
+            "inputTokens": 14222,
             "outputTokens": 36979,
-            "outputTokensPerTask": 18489.5,
-            "outputCostUsd": 1.10937,
-            "outputCostPerTask": 0.554685
+            "totalTokens": 51201,
+            "totalTokensPerTask": 25600.5,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 1.18048,
+            "equivalentCostPerTask": 0.59024
           },
           "scratch": null
         },
@@ -4398,10 +4854,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 454.4948891568929,
             "activeTimePerTask": 454.4948891568929,
+            "inputTokens": 7648,
             "outputTokens": 15877,
-            "outputTokensPerTask": 15877,
-            "outputCostUsd": 0.47631,
-            "outputCostPerTask": 0.47631
+            "totalTokens": 23525,
+            "totalTokensPerTask": 23525,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.51455,
+            "equivalentCostPerTask": 0.51455
           },
           "scratch": null
         },
@@ -4415,10 +4876,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 56.83184978296049,
             "activeTimePerTask": 56.83184978296049,
+            "inputTokens": 7555,
             "outputTokens": 2018,
-            "outputTokensPerTask": 2018,
-            "outputCostUsd": 0.06054,
-            "outputCostPerTask": 0.06054
+            "totalTokens": 9573,
+            "totalTokensPerTask": 9573,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.098315,
+            "equivalentCostPerTask": 0.098315
           },
           "scratch": null
         },
@@ -4432,10 +4898,15 @@ window.TLAPS_DATA = {
             "taskCount": 3,
             "activeTimeSecs": 3581.6097194651375,
             "activeTimePerTask": 1193.8699064883792,
+            "inputTokens": 49410,
             "outputTokens": 119183,
-            "outputTokensPerTask": 39727.666666666664,
-            "outputCostUsd": 3.57549,
-            "outputCostPerTask": 1.19183
+            "totalTokens": 168593,
+            "totalTokensPerTask": 56197.666666666664,
+            "cacheReadInputTokens": 24832,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 50.257032989273426,
+            "equivalentCostUsd": 3.710796,
+            "equivalentCostPerTask": 1.2369320000000001
           },
           "scratch": null
         },
@@ -4449,10 +4920,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 434.04176568007097,
             "activeTimePerTask": 434.04176568007097,
+            "inputTokens": 7053,
             "outputTokens": 16167,
-            "outputTokensPerTask": 16167,
-            "outputCostUsd": 0.48501,
-            "outputCostPerTask": 0.48501
+            "totalTokens": 23220,
+            "totalTokensPerTask": 23220,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.520275,
+            "equivalentCostPerTask": 0.520275
           },
           "scratch": null
         },
@@ -4466,10 +4942,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 1015.4106397340074,
             "activeTimePerTask": 1015.4106397340074,
+            "inputTokens": 9595,
             "outputTokens": 45676,
-            "outputTokensPerTask": 45676,
-            "outputCostUsd": 1.37028,
-            "outputCostPerTask": 1.37028
+            "totalTokens": 55271,
+            "totalTokensPerTask": 55271,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 1.418255,
+            "equivalentCostPerTask": 1.418255
           },
           "scratch": null
         },
@@ -4483,10 +4964,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 895.1820889969822,
             "activeTimePerTask": 895.1820889969822,
+            "inputTokens": 41116,
             "outputTokens": 4830,
-            "outputTokensPerTask": 4830,
-            "outputCostUsd": 0.1449,
-            "outputCostPerTask": 0.1449
+            "totalTokens": 45946,
+            "totalTokensPerTask": 45946,
+            "cacheReadInputTokens": 4864,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 11.829944547134936,
+            "equivalentCostUsd": 0.328592,
+            "equivalentCostPerTask": 0.328592
           },
           "scratch": null
         },
@@ -4500,10 +4986,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 744.5791705220472,
             "activeTimePerTask": 744.5791705220472,
+            "inputTokens": 6755,
             "outputTokens": 25583,
-            "outputTokensPerTask": 25583,
-            "outputCostUsd": 0.76749,
-            "outputCostPerTask": 0.76749
+            "totalTokens": 32338,
+            "totalTokensPerTask": 32338,
+            "cacheReadInputTokens": 4864,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 72.0059215396003,
+            "equivalentCostUsd": 0.779377,
+            "equivalentCostPerTask": 0.779377
           },
           "scratch": null
         },
@@ -4517,10 +5008,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 620.7563465929125,
             "activeTimePerTask": 620.7563465929125,
+            "inputTokens": 7563,
             "outputTokens": 24169,
-            "outputTokensPerTask": 24169,
-            "outputCostUsd": 0.72507,
-            "outputCostPerTask": 0.72507
+            "totalTokens": 31732,
+            "totalTokensPerTask": 31732,
+            "cacheReadInputTokens": 4864,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 64.31310326589977,
+            "equivalentCostUsd": 0.740997,
+            "equivalentCostPerTask": 0.740997
           },
           "scratch": null
         },
@@ -4534,10 +5030,15 @@ window.TLAPS_DATA = {
             "taskCount": 3,
             "activeTimeSecs": 1243.0983107771026,
             "activeTimePerTask": 414.36610359236755,
+            "inputTokens": 26077,
             "outputTokens": 50069,
-            "outputTokensPerTask": 16689.666666666668,
-            "outputCostUsd": 1.50207,
-            "outputCostPerTask": 0.50069
+            "totalTokens": 76146,
+            "totalTokensPerTask": 25382,
+            "cacheReadInputTokens": 7936,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 30.432948575372933,
+            "equivalentCostUsd": 1.596743,
+            "equivalentCostPerTask": 0.5322476666666667
           },
           "scratch": null
         },
@@ -4551,10 +5052,15 @@ window.TLAPS_DATA = {
             "taskCount": 3,
             "activeTimeSecs": 1858.8253442710266,
             "activeTimePerTask": 619.6084480903422,
+            "inputTokens": 21332,
             "outputTokens": 67324,
-            "outputTokensPerTask": 22441.333333333332,
-            "outputCostUsd": 2.01972,
-            "outputCostPerTask": 0.67324
+            "totalTokens": 88656,
+            "totalTokensPerTask": 29552,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 2.12638,
+            "equivalentCostPerTask": 0.7087933333333334
           },
           "scratch": null
         },
@@ -4568,10 +5074,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 544.4581115969922,
             "activeTimePerTask": 544.4581115969922,
+            "inputTokens": 8101,
             "outputTokens": 17864,
-            "outputTokensPerTask": 17864,
-            "outputCostUsd": 0.53592,
-            "outputCostPerTask": 0.53592
+            "totalTokens": 25965,
+            "totalTokensPerTask": 25965,
+            "cacheReadInputTokens": 7936,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 97.96321441797309,
+            "equivalentCostUsd": 0.540713,
+            "equivalentCostPerTask": 0.540713
           },
           "scratch": null
         },
@@ -4585,10 +5096,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 340.10785722197033,
             "activeTimePerTask": 340.10785722197033,
+            "inputTokens": 7341,
             "outputTokens": 17885,
-            "outputTokensPerTask": 17885,
-            "outputCostUsd": 0.53655,
-            "outputCostPerTask": 0.53655
+            "totalTokens": 25226,
+            "totalTokensPerTask": 25226,
+            "cacheReadInputTokens": 4864,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 66.2580029968669,
+            "equivalentCostUsd": 0.551367,
+            "equivalentCostPerTask": 0.551367
           },
           "scratch": null
         },
@@ -4602,10 +5118,15 @@ window.TLAPS_DATA = {
             "taskCount": 2,
             "activeTimeSecs": 652.8109453878133,
             "activeTimePerTask": 326.40547269390663,
+            "inputTokens": 16153,
             "outputTokens": 30101,
-            "outputTokensPerTask": 15050.5,
-            "outputCostUsd": 0.90303,
-            "outputCostPerTask": 0.451515
+            "totalTokens": 46254,
+            "totalTokensPerTask": 23127,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.983795,
+            "equivalentCostPerTask": 0.4918975
           },
           "scratch": null
         },
@@ -4619,10 +5140,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 365.004634832032,
             "activeTimePerTask": 365.004634832032,
+            "inputTokens": 7048,
             "outputTokens": 19243,
-            "outputTokensPerTask": 19243,
-            "outputCostUsd": 0.57729,
-            "outputCostPerTask": 0.57729
+            "totalTokens": 26291,
+            "totalTokensPerTask": 26291,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.61253,
+            "equivalentCostPerTask": 0.61253
           },
           "scratch": null
         },
@@ -4636,10 +5162,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 978.7359872079687,
             "activeTimePerTask": 978.7359872079687,
+            "inputTokens": 9768,
             "outputTokens": 33110,
-            "outputTokensPerTask": 33110,
-            "outputCostUsd": 0.9933,
-            "outputCostPerTask": 0.9933
+            "totalTokens": 42878,
+            "totalTokensPerTask": 42878,
+            "cacheReadInputTokens": 8960,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 91.72809172809173,
+            "equivalentCostUsd": 1.00182,
+            "equivalentCostPerTask": 1.00182
           },
           "scratch": null
         },
@@ -4653,10 +5184,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 341.8468195388559,
             "activeTimePerTask": 341.8468195388559,
+            "inputTokens": 6758,
             "outputTokens": 14290,
-            "outputTokensPerTask": 14290,
-            "outputCostUsd": 0.4287,
-            "outputCostPerTask": 0.4287
+            "totalTokens": 21048,
+            "totalTokensPerTask": 21048,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.46249,
+            "equivalentCostPerTask": 0.46249
           },
           "scratch": null
         },
@@ -4670,10 +5206,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 638.1167406459572,
             "activeTimePerTask": 638.1167406459572,
+            "inputTokens": 8149,
             "outputTokens": 31105,
-            "outputTokensPerTask": 31105,
-            "outputCostUsd": 0.93315,
-            "outputCostPerTask": 0.93315
+            "totalTokens": 39254,
+            "totalTokensPerTask": 39254,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.973895,
+            "equivalentCostPerTask": 0.973895
           },
           "scratch": null
         },
@@ -4687,10 +5228,15 @@ window.TLAPS_DATA = {
             "taskCount": 2,
             "activeTimeSecs": 2256.8370694410987,
             "activeTimePerTask": 1128.4185347205494,
+            "inputTokens": 19093,
             "outputTokens": 97243,
-            "outputTokensPerTask": 48621.5,
-            "outputCostUsd": 2.91729,
-            "outputCostPerTask": 1.458645
+            "totalTokens": 116336,
+            "totalTokensPerTask": 58168,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 3.0127550000000003,
+            "equivalentCostPerTask": 1.5063775000000001
           },
           "scratch": null
         },
@@ -4704,10 +5250,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 908.0478637639899,
             "activeTimePerTask": 908.0478637639899,
+            "inputTokens": 7566,
             "outputTokens": 30528,
-            "outputTokensPerTask": 30528,
-            "outputCostUsd": 0.91584,
-            "outputCostPerTask": 0.91584
+            "totalTokens": 38094,
+            "totalTokensPerTask": 38094,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.95367,
+            "equivalentCostPerTask": 0.95367
           },
           "scratch": null
         },
@@ -4721,10 +5272,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 280.15185595699586,
             "activeTimePerTask": 280.15185595699586,
+            "inputTokens": 7385,
             "outputTokens": 13108,
-            "outputTokensPerTask": 13108,
-            "outputCostUsd": 0.39324,
-            "outputCostPerTask": 0.39324
+            "totalTokens": 20493,
+            "totalTokensPerTask": 20493,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.430165,
+            "equivalentCostPerTask": 0.430165
           },
           "scratch": null
         },
@@ -4738,10 +5294,15 @@ window.TLAPS_DATA = {
             "taskCount": 6,
             "activeTimeSecs": 5144.6213218701305,
             "activeTimePerTask": 857.4368869783551,
+            "inputTokens": 67207,
             "outputTokens": 207111,
-            "outputTokensPerTask": 34518.5,
-            "outputCostUsd": 6.21333,
-            "outputCostPerTask": 1.035555
+            "totalTokens": 274318,
+            "totalTokensPerTask": 45719.666666666664,
+            "cacheReadInputTokens": 11008,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 16.379246209472228,
+            "equivalentCostUsd": 6.499829,
+            "equivalentCostPerTask": 1.0833048333333333
           },
           "scratch": null
         },
@@ -4755,10 +5316,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 486.0050599009264,
             "activeTimePerTask": 486.0050599009264,
+            "inputTokens": 7780,
             "outputTokens": 17361,
-            "outputTokensPerTask": 17361,
-            "outputCostUsd": 0.52083,
-            "outputCostPerTask": 0.52083
+            "totalTokens": 25141,
+            "totalTokensPerTask": 25141,
+            "cacheReadInputTokens": 4864,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 62.51928020565553,
+            "equivalentCostUsd": 0.537842,
+            "equivalentCostPerTask": 0.537842
           },
           "scratch": null
         },
@@ -4772,10 +5338,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 801.403416148969,
             "activeTimePerTask": 801.403416148969,
+            "inputTokens": 8146,
             "outputTokens": 27244,
-            "outputTokensPerTask": 27244,
-            "outputCostUsd": 0.81732,
-            "outputCostPerTask": 0.81732
+            "totalTokens": 35390,
+            "totalTokensPerTask": 35390,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.85805,
+            "equivalentCostPerTask": 0.85805
           },
           "scratch": null
         },
@@ -4789,10 +5360,15 @@ window.TLAPS_DATA = {
             "taskCount": 11,
             "activeTimeSecs": 10483.328545483062,
             "activeTimePerTask": 953.0298677711875,
+            "inputTokens": 130089,
             "outputTokens": 381079,
-            "outputTokensPerTask": 34643.545454545456,
-            "outputCostUsd": 11.43237,
-            "outputCostPerTask": 1.0393063636363638
+            "totalTokens": 511168,
+            "totalTokensPerTask": 46469.818181818184,
+            "cacheReadInputTokens": 28928,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 22.237083842600065,
+            "equivalentCostUsd": 11.952639,
+            "equivalentCostPerTask": 1.0866035454545455
           },
           "scratch": null
         },
@@ -4806,10 +5382,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 1037.7185879799072,
             "activeTimePerTask": 1037.7185879799072,
+            "inputTokens": 7509,
             "outputTokens": 33432,
-            "outputTokensPerTask": 33432,
-            "outputCostUsd": 1.00296,
-            "outputCostPerTask": 1.00296
+            "totalTokens": 40941,
+            "totalTokensPerTask": 40941,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 1.040505,
+            "equivalentCostPerTask": 1.040505
           },
           "scratch": null
         },
@@ -4823,10 +5404,15 @@ window.TLAPS_DATA = {
             "taskCount": 2,
             "activeTimeSecs": 1868.6466842609225,
             "activeTimePerTask": 934.3233421304612,
+            "inputTokens": 19191,
             "outputTokens": 86959,
-            "outputTokensPerTask": 43479.5,
-            "outputCostUsd": 2.60877,
-            "outputCostPerTask": 1.304385
+            "totalTokens": 106150,
+            "totalTokensPerTask": 53075,
+            "cacheReadInputTokens": 8960,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 46.68855192538169,
+            "equivalentCostUsd": 2.664405,
+            "equivalentCostPerTask": 1.3322025
           },
           "scratch": null
         },
@@ -4840,10 +5426,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 89.02844918495975,
             "activeTimePerTask": 89.02844918495975,
+            "inputTokens": 8717,
             "outputTokens": 2469,
-            "outputTokensPerTask": 2469,
-            "outputCostUsd": 0.07407,
-            "outputCostPerTask": 0.07407
+            "totalTokens": 11186,
+            "totalTokensPerTask": 11186,
+            "cacheReadInputTokens": 6912,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 79.29333486291155,
+            "equivalentCostUsd": 0.086551,
+            "equivalentCostPerTask": 0.086551
           },
           "scratch": null
         },
@@ -4857,10 +5448,15 @@ window.TLAPS_DATA = {
             "taskCount": 5,
             "activeTimeSecs": 1585.5195306112291,
             "activeTimePerTask": 317.1039061222458,
+            "inputTokens": 82673,
             "outputTokens": 37336,
-            "outputTokensPerTask": 7467.2,
-            "outputCostUsd": 1.12008,
-            "outputCostPerTask": 0.224016
+            "totalTokens": 120009,
+            "totalTokensPerTask": 24001.8,
+            "cacheReadInputTokens": 43264,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 52.33147460476818,
+            "equivalentCostUsd": 1.338757,
+            "equivalentCostPerTask": 0.2677514
           },
           "scratch": null
         },
@@ -4874,10 +5470,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 180.88194419199135,
             "activeTimePerTask": 180.88194419199135,
+            "inputTokens": 7719,
             "outputTokens": 6694,
-            "outputTokensPerTask": 6694,
-            "outputCostUsd": 0.20082,
-            "outputCostPerTask": 0.20082
+            "totalTokens": 14413,
+            "totalTokensPerTask": 14413,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.239415,
+            "equivalentCostPerTask": 0.239415
           },
           "scratch": null
         },
@@ -4891,10 +5492,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 866.4922485679854,
             "activeTimePerTask": 866.4922485679854,
+            "inputTokens": 10605,
             "outputTokens": 34013,
-            "outputTokensPerTask": 34013,
-            "outputCostUsd": 1.02039,
-            "outputCostPerTask": 1.02039
+            "totalTokens": 44618,
+            "totalTokensPerTask": 44618,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 1.073415,
+            "equivalentCostPerTask": 1.073415
           },
           "scratch": null
         },
@@ -4908,10 +5514,15 @@ window.TLAPS_DATA = {
             "taskCount": 4,
             "activeTimeSecs": 1919.9645119691268,
             "activeTimePerTask": 479.9911279922817,
+            "inputTokens": 29403,
             "outputTokens": 84322,
-            "outputTokensPerTask": 21080.5,
-            "outputCostUsd": 2.52966,
-            "outputCostPerTask": 0.632415
+            "totalTokens": 113725,
+            "totalTokensPerTask": 28431.25,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 2.6766750000000004,
+            "equivalentCostPerTask": 0.6691687500000001
           },
           "scratch": null
         },
@@ -4925,10 +5536,15 @@ window.TLAPS_DATA = {
             "taskCount": 2,
             "activeTimeSecs": 755.9049403510289,
             "activeTimePerTask": 377.95247017551446,
+            "inputTokens": 13150,
             "outputTokens": 35158,
-            "outputTokensPerTask": 17579,
-            "outputCostUsd": 1.05474,
-            "outputCostPerTask": 0.52737
+            "totalTokens": 48308,
+            "totalTokensPerTask": 24154,
+            "cacheReadInputTokens": 5888,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 44.77566539923954,
+            "equivalentCostUsd": 1.093994,
+            "equivalentCostPerTask": 0.546997
           },
           "scratch": null
         },
@@ -4942,10 +5558,15 @@ window.TLAPS_DATA = {
             "taskCount": 4,
             "activeTimeSecs": 3166.1412216860335,
             "activeTimePerTask": 791.5353054215084,
+            "inputTokens": 59906,
             "outputTokens": 120576,
-            "outputTokensPerTask": 30144,
-            "outputCostUsd": 3.61728,
-            "outputCostPerTask": 0.90432
+            "totalTokens": 180482,
+            "totalTokensPerTask": 45120.5,
+            "cacheReadInputTokens": 15872,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 26.494841919006443,
+            "equivalentCostUsd": 3.8453859999999995,
+            "equivalentCostPerTask": 0.9613464999999999
           },
           "scratch": null
         },
@@ -4959,10 +5580,15 @@ window.TLAPS_DATA = {
             "taskCount": 2,
             "activeTimeSecs": 1158.0920557709178,
             "activeTimePerTask": 579.0460278854589,
+            "inputTokens": 17332,
             "outputTokens": 59287,
-            "outputTokensPerTask": 29643.5,
-            "outputCostUsd": 1.77861,
-            "outputCostPerTask": 0.889305
+            "totalTokens": 76619,
+            "totalTokensPerTask": 38309.5,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 1.8652700000000002,
+            "equivalentCostPerTask": 0.9326350000000001
           },
           "scratch": null
         },
@@ -4976,10 +5602,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 94.55589130800217,
             "activeTimePerTask": 94.55589130800217,
+            "inputTokens": 7275,
             "outputTokens": 3708,
-            "outputTokensPerTask": 3708,
-            "outputCostUsd": 0.11124,
-            "outputCostPerTask": 0.11124
+            "totalTokens": 10983,
+            "totalTokensPerTask": 10983,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.147615,
+            "equivalentCostPerTask": 0.147615
           },
           "scratch": null
         }
@@ -4996,14 +5627,16 @@ window.TLAPS_DATA = {
       "cohortLabel": "One-Shot",
       "generated": "2026-08-10",
       "resultsFile": "results/codex-single-turn-gpt-5.6-sol.json",
-      "resultsVersion": "c75b9e95eac2",
+      "resultsVersion": "4e817bc5846c",
       "modes": [
         "completion"
       ],
       "perMetric": {
         "completion": 16,
         "activeTimePerTask": 103.41345366924192,
-        "outputCostPerTask": 0.09678
+        "totalTokens": 3387550,
+        "cacheRatePct": 22.28205045033356,
+        "equivalentCostUsd": 29.47917000000002
       },
       "perMode": {
         "completion": {
@@ -5015,11 +5648,16 @@ window.TLAPS_DATA = {
           "taskCount": 190,
           "activeTimeSecs": 19648.556197155965,
           "activeTimePerTask": 103.41345366924192,
+          "inputTokens": 2774610,
           "outputTokens": 612940,
-          "outputTokensPerTask": 3226,
-          "outputCostUsd": 18.3882,
-          "outputCostPerTask": 0.09678,
-          "specificationMacroPct": 16,
+          "totalTokens": 3387550,
+          "totalTokensPerTask": 17829.21052631579,
+          "cacheReadInputTokens": 618240,
+          "cacheWriteInputTokens": 0,
+          "cacheRatePct": 22.28205045033356,
+          "equivalentCostUsd": 29.47917000000002,
+          "equivalentCostPerTask": 0.15515352631578957,
+          "specBalancedPassRatePct": 16,
           "completeSpecifications": 5,
           "representedSpecifications": 56,
           "allLeavesCompletePct": 8.9
@@ -5044,10 +5682,15 @@ window.TLAPS_DATA = {
             "taskCount": 34,
             "activeTimeSecs": 2010.5999599155039,
             "activeTimePerTask": 59.13529293869129,
+            "inputTokens": 446149,
             "outputTokens": 62438,
-            "outputTokensPerTask": 1836.4117647058824,
-            "outputCostUsd": 1.87314,
-            "outputCostPerTask": 0.055092352941176474
+            "totalTokens": 508587,
+            "totalTokensPerTask": 14958.441176470587,
+            "cacheReadInputTokens": 93440,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 20.943675767512648,
+            "equivalentCostUsd": 3.6834050000000005,
+            "equivalentCostPerTask": 0.1083354411764706
           },
           {
             "id": "d2",
@@ -5059,10 +5702,15 @@ window.TLAPS_DATA = {
             "taskCount": 45,
             "activeTimeSecs": 3441.8606119651813,
             "activeTimePerTask": 76.48579137700403,
+            "inputTokens": 688467,
             "outputTokens": 103802,
-            "outputTokensPerTask": 2306.711111111111,
-            "outputCostUsd": 3.11406,
-            "outputCostPerTask": 0.06920133333333332
+            "totalTokens": 792269,
+            "totalTokensPerTask": 17605.977777777778,
+            "cacheReadInputTokens": 149248,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 21.678308473754008,
+            "equivalentCostUsd": 5.884779000000001,
+            "equivalentCostPerTask": 0.13077286666666668
           },
           {
             "id": "d3",
@@ -5074,10 +5722,15 @@ window.TLAPS_DATA = {
             "taskCount": 54,
             "activeTimeSecs": 6248.318964879261,
             "activeTimePerTask": 115.70961046072706,
+            "inputTokens": 832699,
             "outputTokens": 197355,
-            "outputTokensPerTask": 3654.722222222222,
-            "outputCostUsd": 5.92065,
-            "outputCostPerTask": 0.10964166666666667
+            "totalTokens": 1030054,
+            "totalTokensPerTask": 19075.074074074073,
+            "cacheReadInputTokens": 161024,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 19.337599780953262,
+            "equivalentCostUsd": 9.359537,
+            "equivalentCostPerTask": 0.17332475925925925
           },
           {
             "id": "d4",
@@ -5089,10 +5742,15 @@ window.TLAPS_DATA = {
             "taskCount": 19,
             "activeTimeSecs": 2302.4874748343136,
             "activeTimePerTask": 121.18355130706914,
+            "inputTokens": 320816,
             "outputTokens": 73172,
-            "outputTokensPerTask": 3851.157894736842,
-            "outputCostUsd": 2.19516,
-            "outputCostPerTask": 0.11553473684210526
+            "totalTokens": 393988,
+            "totalTokensPerTask": 20736.21052631579,
+            "cacheReadInputTokens": 72192,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 22.502618323275648,
+            "equivalentCostUsd": 3.4743759999999995,
+            "equivalentCostPerTask": 0.18286189473684208
           },
           {
             "id": "d5",
@@ -5104,10 +5762,15 @@ window.TLAPS_DATA = {
             "taskCount": 19,
             "activeTimeSecs": 2771.9329449317884,
             "activeTimePerTask": 145.89120762798885,
+            "inputTokens": 273053,
             "outputTokens": 86141,
-            "outputTokensPerTask": 4533.736842105263,
-            "outputCostUsd": 2.58423,
-            "outputCostPerTask": 0.13601210526315788
+            "totalTokens": 359194,
+            "totalTokensPerTask": 18904.947368421053,
+            "cacheReadInputTokens": 68352,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 25.03250284743255,
+            "equivalentCostUsd": 3.641911,
+            "equivalentCostPerTask": 0.19167952631578947
           },
           {
             "id": "d6",
@@ -5119,10 +5782,15 @@ window.TLAPS_DATA = {
             "taskCount": 19,
             "activeTimeSecs": 2873.356240629917,
             "activeTimePerTask": 151.22927582262722,
+            "inputTokens": 213426,
             "outputTokens": 90032,
-            "outputTokensPerTask": 4738.526315789473,
-            "outputCostUsd": 2.70096,
-            "outputCostPerTask": 0.1421557894736842
+            "totalTokens": 303458,
+            "totalTokensPerTask": 15971.473684210527,
+            "cacheReadInputTokens": 73984,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 34.66494241563821,
+            "equivalentCostUsd": 3.435162,
+            "equivalentCostPerTask": 0.18079800000000001
           }
         ],
         "scratch": null
@@ -5131,14 +5799,17 @@ window.TLAPS_DATA = {
       "usage": {
         "taskCount": 190,
         "activeTimeSecs": 19648.556197155965,
+        "inputTokens": 2774610,
         "outputTokens": 612940,
-        "outputCostUsd": 18.3882
+        "totalTokens": 3387550,
+        "cacheReadInputTokens": 618240,
+        "cacheWriteInputTokens": 0,
+        "cacheRatePct": 22.28205045033356,
+        "equivalentCostUsd": 29.47917000000002
       },
       "pricing": {
-        "usdPerMillionTokens": 30,
-        "tier": "standard",
         "asOf": "2026-08-10",
-        "source": "https://developers.openai.com/api/docs/models"
+        "source": "https://developers.openai.com/api/docs/models/gpt-5.6-sol"
       },
       "perSpec": {
         "apalache-examples-konnov--apalache-examples-ben-or83-ben-or83-proofs-tla": {
@@ -5151,10 +5822,15 @@ window.TLAPS_DATA = {
             "taskCount": 41,
             "activeTimeSecs": 3830.4782749312,
             "activeTimePerTask": 93.42629938856585,
+            "inputTokens": 1078882,
             "outputTokens": 127002,
-            "outputTokensPerTask": 3097.609756097561,
-            "outputCostUsd": 3.81006,
-            "outputCostPerTask": 0.09292829268292684
+            "totalTokens": 1205884,
+            "totalTokensPerTask": 29411.80487804878,
+            "cacheReadInputTokens": 174336,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 16.158949727588375,
+            "equivalentCostUsd": 8.419958000000001,
+            "equivalentCostPerTask": 0.20536482926829272
           },
           "scratch": null
         },
@@ -5168,10 +5844,15 @@ window.TLAPS_DATA = {
             "taskCount": 15,
             "activeTimeSecs": 1038.123800738249,
             "activeTimePerTask": 69.20825338254993,
+            "inputTokens": 435267,
             "outputTokens": 32356,
-            "outputTokensPerTask": 2157.0666666666666,
-            "outputCostUsd": 0.97068,
-            "outputCostPerTask": 0.064712
+            "totalTokens": 467623,
+            "totalTokensPerTask": 31174.866666666665,
+            "cacheReadInputTokens": 68352,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 15.703464769899854,
+            "equivalentCostUsd": 2.8394310000000003,
+            "equivalentCostPerTask": 0.18929540000000003
           },
           "scratch": null
         },
@@ -5185,10 +5866,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 174.07357916305773,
             "activeTimePerTask": 174.07357916305773,
+            "inputTokens": 9976,
             "outputTokens": 5275,
-            "outputTokensPerTask": 5275,
-            "outputCostUsd": 0.15825,
-            "outputCostPerTask": 0.15825
+            "totalTokens": 15251,
+            "totalTokensPerTask": 15251,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.20813,
+            "equivalentCostPerTask": 0.20813
           },
           "scratch": null
         },
@@ -5202,10 +5888,15 @@ window.TLAPS_DATA = {
             "taskCount": 2,
             "activeTimeSecs": 222.76062901015393,
             "activeTimePerTask": 111.38031450507697,
+            "inputTokens": 17123,
             "outputTokens": 6761,
-            "outputTokensPerTask": 3380.5,
-            "outputCostUsd": 0.20283,
-            "outputCostPerTask": 0.101415
+            "totalTokens": 23884,
+            "totalTokensPerTask": 11942,
+            "cacheReadInputTokens": 9728,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 56.81247444957075,
+            "equivalentCostUsd": 0.24466900000000003,
+            "equivalentCostPerTask": 0.12233450000000001
           },
           "scratch": null
         },
@@ -5219,10 +5910,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 90.55671665887348,
             "activeTimePerTask": 90.55671665887348,
+            "inputTokens": 9963,
             "outputTokens": 2829,
-            "outputTokensPerTask": 2829,
-            "outputCostUsd": 0.08487,
-            "outputCostPerTask": 0.08487
+            "totalTokens": 12792,
+            "totalTokensPerTask": 12792,
+            "cacheReadInputTokens": 4864,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 48.82063635451169,
+            "equivalentCostUsd": 0.112797,
+            "equivalentCostPerTask": 0.112797
           },
           "scratch": null
         },
@@ -5236,10 +5932,15 @@ window.TLAPS_DATA = {
             "taskCount": 2,
             "activeTimeSecs": 360.50238127890043,
             "activeTimePerTask": 180.25119063945021,
+            "inputTokens": 20125,
             "outputTokens": 10941,
-            "outputTokensPerTask": 5470.5,
-            "outputCostUsd": 0.32823,
-            "outputCostPerTask": 0.164115
+            "totalTokens": 31066,
+            "totalTokensPerTask": 15533,
+            "cacheReadInputTokens": 5888,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 29.257142857142856,
+            "equivalentCostUsd": 0.402359,
+            "equivalentCostPerTask": 0.2011795
           },
           "scratch": null
         },
@@ -5253,10 +5954,15 @@ window.TLAPS_DATA = {
             "taskCount": 3,
             "activeTimeSecs": 338.3863875491079,
             "activeTimePerTask": 112.7954625163693,
+            "inputTokens": 34384,
             "outputTokens": 6996,
-            "outputTokensPerTask": 2332,
-            "outputCostUsd": 0.20988,
-            "outputCostPerTask": 0.06996000000000001
+            "totalTokens": 41380,
+            "totalTokensPerTask": 13793.333333333334,
+            "cacheReadInputTokens": 14848,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 43.18287575616566,
+            "equivalentCostUsd": 0.31498400000000004,
+            "equivalentCostPerTask": 0.10499466666666668
           },
           "scratch": null
         },
@@ -5270,10 +5976,15 @@ window.TLAPS_DATA = {
             "taskCount": 2,
             "activeTimeSecs": 270.0222223100718,
             "activeTimePerTask": 135.0111111550359,
+            "inputTokens": 15714,
             "outputTokens": 7752,
-            "outputTokensPerTask": 3876,
-            "outputCostUsd": 0.23256,
-            "outputCostPerTask": 0.11628
+            "totalTokens": 23466,
+            "totalTokensPerTask": 11733,
+            "cacheReadInputTokens": 9728,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 61.90658011963854,
+            "equivalentCostUsd": 0.267354,
+            "equivalentCostPerTask": 0.133677
           },
           "scratch": null
         },
@@ -5287,10 +5998,15 @@ window.TLAPS_DATA = {
             "taskCount": 4,
             "activeTimeSecs": 394.65990509931,
             "activeTimePerTask": 98.6649762748275,
+            "inputTokens": 86259,
             "outputTokens": 12909,
-            "outputTokensPerTask": 3227.25,
-            "outputCostUsd": 0.38727,
-            "outputCostPerTask": 0.0968175
+            "totalTokens": 99168,
+            "totalTokensPerTask": 24792,
+            "cacheReadInputTokens": 4864,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 5.63883189000568,
+            "equivalentCostUsd": 0.796677,
+            "equivalentCostPerTask": 0.19916925
           },
           "scratch": null
         },
@@ -5304,10 +6020,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 36.92827365989797,
             "activeTimePerTask": 36.92827365989797,
+            "inputTokens": 14155,
             "outputTokens": 776,
-            "outputTokensPerTask": 776,
-            "outputCostUsd": 0.02328,
-            "outputCostPerTask": 0.02328
+            "totalTokens": 14931,
+            "totalTokensPerTask": 14931,
+            "cacheReadInputTokens": 4864,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 34.36241610738255,
+            "equivalentCostUsd": 0.072167,
+            "equivalentCostPerTask": 0.072167
           },
           "scratch": null
         },
@@ -5321,10 +6042,15 @@ window.TLAPS_DATA = {
             "taskCount": 7,
             "activeTimeSecs": 1016.8706755731255,
             "activeTimePerTask": 145.26723936758935,
+            "inputTokens": 84393,
             "outputTokens": 30905,
-            "outputTokensPerTask": 4415,
-            "outputCostUsd": 0.92715,
-            "outputCostPerTask": 0.13245
+            "totalTokens": 115298,
+            "totalTokensPerTask": 16471.14285714286,
+            "cacheReadInputTokens": 9728,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 11.527022383373028,
+            "equivalentCostUsd": 1.3053390000000002,
+            "equivalentCostPerTask": 0.18647700000000003
           },
           "scratch": null
         },
@@ -5338,10 +6064,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 130.0903874509968,
             "activeTimePerTask": 130.0903874509968,
+            "inputTokens": 7367,
             "outputTokens": 4221,
-            "outputTokensPerTask": 4221,
-            "outputCostUsd": 0.12663,
-            "outputCostPerTask": 0.12663
+            "totalTokens": 11588,
+            "totalTokensPerTask": 11588,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.163465,
+            "equivalentCostPerTask": 0.163465
           },
           "scratch": null
         },
@@ -5355,10 +6086,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 44.529172766022384,
             "activeTimePerTask": 44.529172766022384,
+            "inputTokens": 7026,
             "outputTokens": 1386,
-            "outputTokensPerTask": 1386,
-            "outputCostUsd": 0.04158,
-            "outputCostPerTask": 0.04158
+            "totalTokens": 8412,
+            "totalTokensPerTask": 8412,
+            "cacheReadInputTokens": 4864,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 69.22857956162824,
+            "equivalentCostUsd": 0.054822,
+            "equivalentCostPerTask": 0.054822
           },
           "scratch": null
         },
@@ -5372,10 +6108,15 @@ window.TLAPS_DATA = {
             "taskCount": 3,
             "activeTimeSecs": 537.1753737530671,
             "activeTimePerTask": 179.05845791768903,
+            "inputTokens": 24746,
             "outputTokens": 12200,
-            "outputTokensPerTask": 4066.6666666666665,
-            "outputCostUsd": 0.366,
-            "outputCostPerTask": 0.122
+            "totalTokens": 36946,
+            "totalTokensPerTask": 12315.333333333334,
+            "cacheReadInputTokens": 7936,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 32.06982946738867,
+            "equivalentCostUsd": 0.45401800000000003,
+            "equivalentCostPerTask": 0.15133933333333335
           },
           "scratch": null
         },
@@ -5389,10 +6130,15 @@ window.TLAPS_DATA = {
             "taskCount": 4,
             "activeTimeSecs": 755.7165546780452,
             "activeTimePerTask": 188.9291386695113,
+            "inputTokens": 33218,
             "outputTokens": 22009,
-            "outputTokensPerTask": 5502.25,
-            "outputCostUsd": 0.66027,
-            "outputCostPerTask": 0.1650675
+            "totalTokens": 55227,
+            "totalTokensPerTask": 13806.75,
+            "cacheReadInputTokens": 9728,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 29.285327232223494,
+            "equivalentCostUsd": 0.7825840000000001,
+            "equivalentCostPerTask": 0.19564600000000001
           },
           "scratch": null
         },
@@ -5406,10 +6152,15 @@ window.TLAPS_DATA = {
             "taskCount": 2,
             "activeTimeSecs": 111.82358371885493,
             "activeTimePerTask": 55.91179185942747,
+            "inputTokens": 13796,
             "outputTokens": 3133,
-            "outputTokensPerTask": 1566.5,
-            "outputCostUsd": 0.09399,
-            "outputCostPerTask": 0.046995
+            "totalTokens": 16929,
+            "totalTokensPerTask": 8464.5,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.16297,
+            "equivalentCostPerTask": 0.081485
           },
           "scratch": null
         },
@@ -5423,10 +6174,15 @@ window.TLAPS_DATA = {
             "taskCount": 3,
             "activeTimeSecs": 221.52501731808297,
             "activeTimePerTask": 73.84167243936099,
+            "inputTokens": 21391,
             "outputTokens": 6635,
-            "outputTokensPerTask": 2211.6666666666665,
-            "outputCostUsd": 0.19905,
-            "outputCostPerTask": 0.06635
+            "totalTokens": 28026,
+            "totalTokensPerTask": 9342,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.306005,
+            "equivalentCostPerTask": 0.10200166666666667
           },
           "scratch": null
         },
@@ -5440,10 +6196,15 @@ window.TLAPS_DATA = {
             "taskCount": 12,
             "activeTimeSecs": 1598.9526097460184,
             "activeTimePerTask": 133.2460508121682,
+            "inputTokens": 122200,
             "outputTokens": 51061,
-            "outputTokensPerTask": 4255.083333333333,
-            "outputCostUsd": 1.53183,
-            "outputCostPerTask": 0.1276525
+            "totalTokens": 173261,
+            "totalTokensPerTask": 14438.416666666666,
+            "cacheReadInputTokens": 43008,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 35.194762684124385,
+            "equivalentCostUsd": 1.949294,
+            "equivalentCostPerTask": 0.16244116666666666
           },
           "scratch": null
         },
@@ -5457,10 +6218,15 @@ window.TLAPS_DATA = {
             "taskCount": 2,
             "activeTimeSecs": 172.06680163391866,
             "activeTimePerTask": 86.03340081695933,
+            "inputTokens": 21949,
             "outputTokens": 5570,
-            "outputTokensPerTask": 2785,
-            "outputCostUsd": 0.1671,
-            "outputCostPerTask": 0.08355
+            "totalTokens": 27519,
+            "totalTokensPerTask": 13759.5,
+            "cacheReadInputTokens": 9728,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 44.320925782495785,
+            "equivalentCostUsd": 0.233069,
+            "equivalentCostPerTask": 0.1165345
           },
           "scratch": null
         },
@@ -5474,10 +6240,15 @@ window.TLAPS_DATA = {
             "taskCount": 10,
             "activeTimeSecs": 964.9789210029412,
             "activeTimePerTask": 96.49789210029412,
+            "inputTokens": 75858,
             "outputTokens": 26510,
-            "outputTokensPerTask": 2651,
-            "outputCostUsd": 0.7953,
-            "outputCostPerTask": 0.07953
+            "totalTokens": 102368,
+            "totalTokensPerTask": 10236.8,
+            "cacheReadInputTokens": 46848,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 61.757494265601515,
+            "equivalentCostUsd": 0.963774,
+            "equivalentCostPerTask": 0.0963774
           },
           "scratch": null
         },
@@ -5491,10 +6262,15 @@ window.TLAPS_DATA = {
             "taskCount": 2,
             "activeTimeSecs": 132.3290449080523,
             "activeTimePerTask": 66.16452245402616,
+            "inputTokens": 14740,
             "outputTokens": 3378,
-            "outputTokensPerTask": 1689,
-            "outputCostUsd": 0.10134,
-            "outputCostPerTask": 0.05067
+            "totalTokens": 18118,
+            "totalTokensPerTask": 9059,
+            "cacheReadInputTokens": 11776,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 79.89145183175035,
+            "equivalentCostUsd": 0.122048,
+            "equivalentCostPerTask": 0.061024
           },
           "scratch": null
         },
@@ -5508,10 +6284,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 57.95392358512618,
             "activeTimePerTask": 57.95392358512618,
+            "inputTokens": 7648,
             "outputTokens": 1730,
-            "outputTokensPerTask": 1730,
-            "outputCostUsd": 0.0519,
-            "outputCostPerTask": 0.0519
+            "totalTokens": 9378,
+            "totalTokensPerTask": 9378,
+            "cacheReadInputTokens": 4864,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 63.59832635983263,
+            "equivalentCostUsd": 0.068252,
+            "equivalentCostPerTask": 0.068252
           },
           "scratch": null
         },
@@ -5525,10 +6306,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 15.963817375944927,
             "activeTimePerTask": 15.963817375944927,
+            "inputTokens": 7555,
             "outputTokens": 284,
-            "outputTokensPerTask": 284,
-            "outputCostUsd": 0.00852,
-            "outputCostPerTask": 0.00852
+            "totalTokens": 7839,
+            "totalTokensPerTask": 7839,
+            "cacheReadInputTokens": 4864,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 64.38120450033091,
+            "equivalentCostUsd": 0.024407,
+            "equivalentCostPerTask": 0.024407
           },
           "scratch": null
         },
@@ -5542,10 +6328,15 @@ window.TLAPS_DATA = {
             "taskCount": 3,
             "activeTimeSecs": 410.13390556094237,
             "activeTimePerTask": 136.71130185364746,
+            "inputTokens": 26100,
             "outputTokens": 13504,
-            "outputTokensPerTask": 4501.333333333333,
-            "outputCostUsd": 0.40512,
-            "outputCostPerTask": 0.13504
+            "totalTokens": 39604,
+            "totalTokensPerTask": 13201.333333333334,
+            "cacheReadInputTokens": 9728,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 37.272030651341,
+            "equivalentCostUsd": 0.491844,
+            "equivalentCostPerTask": 0.163948
           },
           "scratch": null
         },
@@ -5559,10 +6350,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 131.7559155600611,
             "activeTimePerTask": 131.7559155600611,
+            "inputTokens": 7053,
             "outputTokens": 4023,
-            "outputTokensPerTask": 4023,
-            "outputCostUsd": 0.12069,
-            "outputCostPerTask": 0.12069
+            "totalTokens": 11076,
+            "totalTokensPerTask": 11076,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.155955,
+            "equivalentCostPerTask": 0.155955
           },
           "scratch": null
         },
@@ -5576,10 +6372,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 87.60945050604641,
             "activeTimePerTask": 87.60945050604641,
+            "inputTokens": 9595,
             "outputTokens": 2654,
-            "outputTokensPerTask": 2654,
-            "outputCostUsd": 0.07962,
-            "outputCostPerTask": 0.07962
+            "totalTokens": 12249,
+            "totalTokensPerTask": 12249,
+            "cacheReadInputTokens": 5888,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 61.36529442417926,
+            "equivalentCostUsd": 0.101099,
+            "equivalentCostPerTask": 0.101099
           },
           "scratch": null
         },
@@ -5593,10 +6394,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 171.09762304392643,
             "activeTimePerTask": 171.09762304392643,
+            "inputTokens": 7964,
             "outputTokens": 5188,
-            "outputTokensPerTask": 5188,
-            "outputCostUsd": 0.15564,
-            "outputCostPerTask": 0.15564
+            "totalTokens": 13152,
+            "totalTokensPerTask": 13152,
+            "cacheReadInputTokens": 4864,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 61.0748367654445,
+            "equivalentCostUsd": 0.173572,
+            "equivalentCostPerTask": 0.173572
           },
           "scratch": null
         },
@@ -5610,10 +6416,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 51.661544461967424,
             "activeTimePerTask": 51.661544461967424,
+            "inputTokens": 6755,
             "outputTokens": 1437,
-            "outputTokensPerTask": 1437,
-            "outputCostUsd": 0.04311,
-            "outputCostPerTask": 0.04311
+            "totalTokens": 8192,
+            "totalTokensPerTask": 8192,
+            "cacheReadInputTokens": 4864,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 72.0059215396003,
+            "equivalentCostUsd": 0.054997,
+            "equivalentCostPerTask": 0.054997
           },
           "scratch": null
         },
@@ -5627,10 +6438,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 106.26037071691826,
             "activeTimePerTask": 106.26037071691826,
+            "inputTokens": 7563,
             "outputTokens": 3549,
-            "outputTokensPerTask": 3549,
-            "outputCostUsd": 0.10647,
-            "outputCostPerTask": 0.10647
+            "totalTokens": 11112,
+            "totalTokensPerTask": 11112,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.144285,
+            "equivalentCostPerTask": 0.144285
           },
           "scratch": null
         },
@@ -5644,10 +6460,15 @@ window.TLAPS_DATA = {
             "taskCount": 3,
             "activeTimeSecs": 289.3018593720626,
             "activeTimePerTask": 96.43395312402087,
+            "inputTokens": 26077,
             "outputTokens": 8911,
-            "outputTokensPerTask": 2970.3333333333335,
-            "outputCostUsd": 0.26733,
-            "outputCostPerTask": 0.08911000000000001
+            "totalTokens": 34988,
+            "totalTokensPerTask": 11662.666666666666,
+            "cacheReadInputTokens": 4864,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 18.652452352647927,
+            "equivalentCostUsd": 0.375827,
+            "equivalentCostPerTask": 0.12527566666666667
           },
           "scratch": null
         },
@@ -5661,10 +6482,15 @@ window.TLAPS_DATA = {
             "taskCount": 3,
             "activeTimeSecs": 219.52102153981104,
             "activeTimePerTask": 73.17367384660368,
+            "inputTokens": 21332,
             "outputTokens": 8299,
-            "outputTokensPerTask": 2766.3333333333335,
-            "outputCostUsd": 0.24897,
-            "outputCostPerTask": 0.08299
+            "totalTokens": 29631,
+            "totalTokensPerTask": 9877,
+            "cacheReadInputTokens": 9728,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 45.60285017813614,
+            "equivalentCostUsd": 0.31185399999999996,
+            "equivalentCostPerTask": 0.10395133333333333
           },
           "scratch": null
         },
@@ -5678,10 +6504,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 64.82672686502337,
             "activeTimePerTask": 64.82672686502337,
+            "inputTokens": 8101,
             "outputTokens": 2090,
-            "outputTokensPerTask": 2090,
-            "outputCostUsd": 0.0627,
-            "outputCostPerTask": 0.0627
+            "totalTokens": 10191,
+            "totalTokensPerTask": 10191,
+            "cacheReadInputTokens": 4864,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 60.04197012714479,
+            "equivalentCostUsd": 0.081317,
+            "equivalentCostPerTask": 0.081317
           },
           "scratch": null
         },
@@ -5695,10 +6526,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 85.80037930980325,
             "activeTimePerTask": 85.80037930980325,
+            "inputTokens": 7341,
             "outputTokens": 3394,
-            "outputTokensPerTask": 3394,
-            "outputCostUsd": 0.10182,
-            "outputCostPerTask": 0.10182
+            "totalTokens": 10735,
+            "totalTokensPerTask": 10735,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.138525,
+            "equivalentCostPerTask": 0.138525
           },
           "scratch": null
         },
@@ -5712,10 +6548,15 @@ window.TLAPS_DATA = {
             "taskCount": 2,
             "activeTimeSecs": 209.30585695197806,
             "activeTimePerTask": 104.65292847598903,
+            "inputTokens": 16153,
             "outputTokens": 7306,
-            "outputTokensPerTask": 3653,
-            "outputCostUsd": 0.21918,
-            "outputCostPerTask": 0.10959
+            "totalTokens": 23459,
+            "totalTokensPerTask": 11729.5,
+            "cacheReadInputTokens": 4864,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 30.112053488516064,
+            "equivalentCostUsd": 0.278057,
+            "equivalentCostPerTask": 0.1390285
           },
           "scratch": null
         },
@@ -5729,10 +6570,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 77.96015385189094,
             "activeTimePerTask": 77.96015385189094,
+            "inputTokens": 7048,
             "outputTokens": 2180,
-            "outputTokensPerTask": 2180,
-            "outputCostUsd": 0.0654,
-            "outputCostPerTask": 0.0654
+            "totalTokens": 9228,
+            "totalTokensPerTask": 9228,
+            "cacheReadInputTokens": 4864,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 69.01248581157775,
+            "equivalentCostUsd": 0.078752,
+            "equivalentCostPerTask": 0.078752
           },
           "scratch": null
         },
@@ -5746,10 +6592,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 82.68577084690332,
             "activeTimePerTask": 82.68577084690332,
+            "inputTokens": 9768,
             "outputTokens": 2884,
-            "outputTokensPerTask": 2884,
-            "outputCostUsd": 0.08652,
-            "outputCostPerTask": 0.08652
+            "totalTokens": 12652,
+            "totalTokensPerTask": 12652,
+            "cacheReadInputTokens": 4864,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 49.795249795249795,
+            "equivalentCostUsd": 0.113472,
+            "equivalentCostPerTask": 0.113472
           },
           "scratch": null
         },
@@ -5763,10 +6614,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 144.42530429619364,
             "activeTimePerTask": 144.42530429619364,
+            "inputTokens": 6758,
             "outputTokens": 3819,
-            "outputTokensPerTask": 3819,
-            "outputCostUsd": 0.11457,
-            "outputCostPerTask": 0.11457
+            "totalTokens": 10577,
+            "totalTokensPerTask": 10577,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.14836,
+            "equivalentCostPerTask": 0.14836
           },
           "scratch": null
         },
@@ -5780,10 +6636,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 77.8843980380334,
             "activeTimePerTask": 77.8843980380334,
+            "inputTokens": 8149,
             "outputTokens": 2910,
-            "outputTokensPerTask": 2910,
-            "outputCostUsd": 0.0873,
-            "outputCostPerTask": 0.0873
+            "totalTokens": 11059,
+            "totalTokensPerTask": 11059,
+            "cacheReadInputTokens": 4864,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 59.6883053135354,
+            "equivalentCostUsd": 0.106157,
+            "equivalentCostPerTask": 0.106157
           },
           "scratch": null
         },
@@ -5797,10 +6658,15 @@ window.TLAPS_DATA = {
             "taskCount": 2,
             "activeTimeSecs": 248.00575696793385,
             "activeTimePerTask": 124.00287848396692,
+            "inputTokens": 19093,
             "outputTokens": 8029,
-            "outputTokensPerTask": 4014.5,
-            "outputCostUsd": 0.24087,
-            "outputCostPerTask": 0.120435
+            "totalTokens": 27122,
+            "totalTokensPerTask": 13561,
+            "cacheReadInputTokens": 4864,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 25.47530508563348,
+            "equivalentCostUsd": 0.31444700000000003,
+            "equivalentCostPerTask": 0.15722350000000002
           },
           "scratch": null
         },
@@ -5814,10 +6680,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 80.901421925053,
             "activeTimePerTask": 80.901421925053,
+            "inputTokens": 7566,
             "outputTokens": 2459,
-            "outputTokensPerTask": 2459,
-            "outputCostUsd": 0.07377,
-            "outputCostPerTask": 0.07377
+            "totalTokens": 10025,
+            "totalTokensPerTask": 10025,
+            "cacheReadInputTokens": 4864,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 64.28760243193233,
+            "equivalentCostUsd": 0.089712,
+            "equivalentCostPerTask": 0.089712
           },
           "scratch": null
         },
@@ -5831,10 +6702,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 58.96306348498911,
             "activeTimePerTask": 58.96306348498911,
+            "inputTokens": 7385,
             "outputTokens": 2178,
-            "outputTokensPerTask": 2178,
-            "outputCostUsd": 0.06534,
-            "outputCostPerTask": 0.06534
+            "totalTokens": 9563,
+            "totalTokensPerTask": 9563,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.102265,
+            "equivalentCostPerTask": 0.102265
           },
           "scratch": null
         },
@@ -5848,10 +6724,15 @@ window.TLAPS_DATA = {
             "taskCount": 6,
             "activeTimeSecs": 700.4632696090266,
             "activeTimePerTask": 116.7438782681711,
+            "inputTokens": 67207,
             "outputTokens": 21380,
-            "outputTokensPerTask": 3563.3333333333335,
-            "outputCostUsd": 0.6414,
-            "outputCostPerTask": 0.1069
+            "totalTokens": 88587,
+            "totalTokensPerTask": 14764.5,
+            "cacheReadInputTokens": 19456,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 28.9493653934858,
+            "equivalentCostUsd": 0.8898830000000001,
+            "equivalentCostPerTask": 0.14831383333333334
           },
           "scratch": null
         },
@@ -5865,10 +6746,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 45.6240192130208,
             "activeTimePerTask": 45.6240192130208,
+            "inputTokens": 7780,
             "outputTokens": 1796,
-            "outputTokensPerTask": 1796,
-            "outputCostUsd": 0.05388,
-            "outputCostPerTask": 0.05388
+            "totalTokens": 9576,
+            "totalTokensPerTask": 9576,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.09278,
+            "equivalentCostPerTask": 0.09278
           },
           "scratch": null
         },
@@ -5882,10 +6768,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 126.94452079990879,
             "activeTimePerTask": 126.94452079990879,
+            "inputTokens": 8146,
             "outputTokens": 3840,
-            "outputTokensPerTask": 3840,
-            "outputCostUsd": 0.1152,
-            "outputCostPerTask": 0.1152
+            "totalTokens": 11986,
+            "totalTokensPerTask": 11986,
+            "cacheReadInputTokens": 5888,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 72.28087404861282,
+            "equivalentCostUsd": 0.129434,
+            "equivalentCostPerTask": 0.129434
           },
           "scratch": null
         },
@@ -5899,10 +6790,15 @@ window.TLAPS_DATA = {
             "taskCount": 11,
             "activeTimeSecs": 1501.1777056613937,
             "activeTimePerTask": 136.47070051467216,
+            "inputTokens": 117657,
             "outputTokens": 49840,
-            "outputTokensPerTask": 4530.909090909091,
-            "outputCostUsd": 1.4952,
-            "outputCostPerTask": 0.13592727272727273
+            "totalTokens": 167497,
+            "totalTokensPerTask": 15227,
+            "cacheReadInputTokens": 29184,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 24.80430403630893,
+            "equivalentCostUsd": 1.952157,
+            "equivalentCostPerTask": 0.17746881818181817
           },
           "scratch": null
         },
@@ -5916,10 +6812,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 188.34684001817368,
             "activeTimePerTask": 188.34684001817368,
+            "inputTokens": 7509,
             "outputTokens": 6780,
-            "outputTokensPerTask": 6780,
-            "outputCostUsd": 0.2034,
-            "outputCostPerTask": 0.2034
+            "totalTokens": 14289,
+            "totalTokensPerTask": 14289,
+            "cacheReadInputTokens": 4864,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 64.77560261020109,
+            "equivalentCostUsd": 0.219057,
+            "equivalentCostPerTask": 0.219057
           },
           "scratch": null
         },
@@ -5933,10 +6834,15 @@ window.TLAPS_DATA = {
             "taskCount": 2,
             "activeTimeSecs": 276.2903470119927,
             "activeTimePerTask": 138.14517350599635,
+            "inputTokens": 19191,
             "outputTokens": 9648,
-            "outputTokensPerTask": 4824,
-            "outputCostUsd": 0.28944,
-            "outputCostPerTask": 0.14472
+            "totalTokens": 28839,
+            "totalTokensPerTask": 14419.5,
+            "cacheReadInputTokens": 4864,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 25.34521390235006,
+            "equivalentCostUsd": 0.363507,
+            "equivalentCostPerTask": 0.1817535
           },
           "scratch": null
         },
@@ -5950,10 +6856,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 55.01612528390251,
             "activeTimePerTask": 55.01612528390251,
+            "inputTokens": 7681,
             "outputTokens": 1347,
-            "outputTokensPerTask": 1347,
-            "outputCostUsd": 0.04041,
-            "outputCostPerTask": 0.04041
+            "totalTokens": 9028,
+            "totalTokensPerTask": 9028,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.078815,
+            "equivalentCostPerTask": 0.078815
           },
           "scratch": null
         },
@@ -5967,10 +6878,15 @@ window.TLAPS_DATA = {
             "taskCount": 5,
             "activeTimeSecs": 317.97937652352266,
             "activeTimePerTask": 63.595875304704535,
+            "inputTokens": 45895,
             "outputTokens": 9710,
-            "outputTokensPerTask": 1942,
-            "outputCostUsd": 0.2913,
-            "outputCostPerTask": 0.05826
+            "totalTokens": 55605,
+            "totalTokensPerTask": 11121,
+            "cacheReadInputTokens": 9728,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 21.196208737335223,
+            "equivalentCostUsd": 0.476999,
+            "equivalentCostPerTask": 0.0953998
           },
           "scratch": null
         },
@@ -5984,10 +6900,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 26.214683769037947,
             "activeTimePerTask": 26.214683769037947,
+            "inputTokens": 7719,
             "outputTokens": 840,
-            "outputTokensPerTask": 840,
-            "outputCostUsd": 0.0252,
-            "outputCostPerTask": 0.0252
+            "totalTokens": 8559,
+            "totalTokensPerTask": 8559,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.063795,
+            "equivalentCostPerTask": 0.063795
           },
           "scratch": null
         },
@@ -6001,10 +6922,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 121.11278808512725,
             "activeTimePerTask": 121.11278808512725,
+            "inputTokens": 10605,
             "outputTokens": 3354,
-            "outputTokensPerTask": 3354,
-            "outputCostUsd": 0.10062,
-            "outputCostPerTask": 0.10062
+            "totalTokens": 13959,
+            "totalTokensPerTask": 13959,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.153645,
+            "equivalentCostPerTask": 0.153645
           },
           "scratch": null
         },
@@ -6018,10 +6944,15 @@ window.TLAPS_DATA = {
             "taskCount": 4,
             "activeTimeSecs": 283.24914618139155,
             "activeTimePerTask": 70.81228654534789,
+            "inputTokens": 29403,
             "outputTokens": 9148,
-            "outputTokensPerTask": 2287,
-            "outputCostUsd": 0.27444,
-            "outputCostPerTask": 0.06861
+            "totalTokens": 38551,
+            "totalTokensPerTask": 9637.75,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.421455,
+            "equivalentCostPerTask": 0.10536375
           },
           "scratch": null
         },
@@ -6035,10 +6966,15 @@ window.TLAPS_DATA = {
             "taskCount": 2,
             "activeTimeSecs": 167.54852312710136,
             "activeTimePerTask": 83.77426156355068,
+            "inputTokens": 13150,
             "outputTokens": 5290,
-            "outputTokensPerTask": 2645,
-            "outputCostUsd": 0.1587,
-            "outputCostPerTask": 0.07935
+            "totalTokens": 18440,
+            "totalTokensPerTask": 9220,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.22444999999999998,
+            "equivalentCostPerTask": 0.11222499999999999
           },
           "scratch": null
         },
@@ -6052,10 +6988,15 @@ window.TLAPS_DATA = {
             "taskCount": 4,
             "activeTimeSecs": 452.2448527137749,
             "activeTimePerTask": 113.06121317844372,
+            "inputTokens": 34524,
             "outputTokens": 13964,
-            "outputTokensPerTask": 3491,
-            "outputCostUsd": 0.41892,
-            "outputCostPerTask": 0.10473
+            "totalTokens": 48488,
+            "totalTokensPerTask": 12122,
+            "cacheReadInputTokens": 14592,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 42.26624956551964,
+            "equivalentCostUsd": 0.525876,
+            "equivalentCostPerTask": 0.131469
           },
           "scratch": null
         },
@@ -6069,10 +7010,15 @@ window.TLAPS_DATA = {
             "taskCount": 2,
             "activeTimeSecs": 235.25466924207285,
             "activeTimePerTask": 117.62733462103643,
+            "inputTokens": 17332,
             "outputTokens": 7623,
-            "outputTokensPerTask": 3811.5,
-            "outputCostUsd": 0.22869,
-            "outputCostPerTask": 0.114345
+            "totalTokens": 24955,
+            "totalTokensPerTask": 12477.5,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.31535,
+            "equivalentCostPerTask": 0.157675
           },
           "scratch": null
         },
@@ -6086,10 +7032,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 36.52075270796195,
             "activeTimePerTask": 36.52075270796195,
+            "inputTokens": 7275,
             "outputTokens": 947,
-            "outputTokensPerTask": 947,
-            "outputCostUsd": 0.02841,
-            "outputCostPerTask": 0.02841
+            "totalTokens": 8222,
+            "totalTokensPerTask": 8222,
+            "cacheReadInputTokens": 4864,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 66.85910652920963,
+            "equivalentCostUsd": 0.042897,
+            "equivalentCostPerTask": 0.042897
           },
           "scratch": null
         }
@@ -6106,14 +7057,16 @@ window.TLAPS_DATA = {
       "cohortLabel": "One-Shot",
       "generated": "2026-08-10",
       "resultsFile": "results/codex-single-turn-gpt-5.6-sol-xhigh.json",
-      "resultsVersion": "73e662860303",
+      "resultsVersion": "e3ee97f3333c",
       "modes": [
         "completion"
       ],
       "perMetric": {
         "completion": 13.1,
         "activeTimePerTask": 309.6908126059969,
-        "outputCostPerTask": 0.37702263157894733
+        "totalTokens": 5247738,
+        "cacheRatePct": 17.204349200399452,
+        "equivalentCostUsd": 83.71979600000002
       },
       "perMode": {
         "completion": {
@@ -6125,11 +7078,16 @@ window.TLAPS_DATA = {
           "taskCount": 190,
           "activeTimeSecs": 58841.254395139404,
           "activeTimePerTask": 309.6908126059969,
+          "inputTokens": 2859928,
           "outputTokens": 2387810,
-          "outputTokensPerTask": 12567.421052631578,
-          "outputCostUsd": 71.6343,
-          "outputCostPerTask": 0.37702263157894733,
-          "specificationMacroPct": 13.1,
+          "totalTokens": 5247738,
+          "totalTokensPerTask": 27619.673684210527,
+          "cacheReadInputTokens": 492032,
+          "cacheWriteInputTokens": 0,
+          "cacheRatePct": 17.204349200399452,
+          "equivalentCostUsd": 83.71979600000002,
+          "equivalentCostPerTask": 0.440630505263158,
+          "specBalancedPassRatePct": 13.1,
           "completeSpecifications": 5,
           "representedSpecifications": 56,
           "allLeavesCompletePct": 8.9
@@ -6154,10 +7112,15 @@ window.TLAPS_DATA = {
             "taskCount": 34,
             "activeTimeSecs": 5699.734051192179,
             "activeTimePerTask": 167.63923679976998,
+            "inputTokens": 452883,
             "outputTokens": 229048,
-            "outputTokensPerTask": 6736.705882352941,
-            "outputCostUsd": 6.87144,
-            "outputCostPerTask": 0.20210117647058823
+            "totalTokens": 681931,
+            "totalTokensPerTask": 20056.79411764706,
+            "cacheReadInputTokens": 65792,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 14.527372411859133,
+            "equivalentCostUsd": 8.839791000000002,
+            "equivalentCostPerTask": 0.2599938529411765
           },
           {
             "id": "d2",
@@ -6169,10 +7132,15 @@ window.TLAPS_DATA = {
             "taskCount": 45,
             "activeTimeSecs": 9550.059614160098,
             "activeTimePerTask": 212.22354698133552,
+            "inputTokens": 694165,
             "outputTokens": 382494,
-            "outputTokensPerTask": 8499.866666666667,
-            "outputCostUsd": 11.47482,
-            "outputCostPerTask": 0.254996
+            "totalTokens": 1076659,
+            "totalTokensPerTask": 23925.755555555555,
+            "cacheReadInputTokens": 106240,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 15.304718618772194,
+            "equivalentCostUsd": 14.467564999999997,
+            "equivalentCostPerTask": 0.3215014444444444
           },
           {
             "id": "d3",
@@ -6184,10 +7152,15 @@ window.TLAPS_DATA = {
             "taskCount": 54,
             "activeTimeSecs": 15702.132461064262,
             "activeTimePerTask": 290.7802307604493,
+            "inputTokens": 840468,
             "outputTokens": 668095,
-            "outputTokensPerTask": 12372.12962962963,
-            "outputCostUsd": 20.04285,
-            "outputCostPerTask": 0.3711638888888889
+            "totalTokens": 1508563,
+            "totalTokensPerTask": 27936.35185185185,
+            "cacheReadInputTokens": 157952,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 18.79333894925208,
+            "equivalentCostUsd": 23.534406,
+            "equivalentCostPerTask": 0.43582233333333337
           },
           {
             "id": "d4",
@@ -6199,10 +7172,15 @@ window.TLAPS_DATA = {
             "taskCount": 19,
             "activeTimeSecs": 7732.635887103388,
             "activeTimePerTask": 406.9808361633362,
+            "inputTokens": 331176,
             "outputTokens": 308647,
-            "outputTokensPerTask": 16244.578947368422,
-            "outputCostUsd": 9.25941,
-            "outputCostPerTask": 0.4873373684210527
+            "totalTokens": 639823,
+            "totalTokensPerTask": 33674.89473684211,
+            "cacheReadInputTokens": 67840,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 20.484576177017658,
+            "equivalentCostUsd": 10.610009999999999,
+            "equivalentCostPerTask": 0.5584215789473683
           },
           {
             "id": "d5",
@@ -6214,10 +7192,15 @@ window.TLAPS_DATA = {
             "taskCount": 19,
             "activeTimeSecs": 9737.948725444265,
             "activeTimePerTask": 512.5236171286455,
+            "inputTokens": 299536,
             "outputTokens": 382385,
-            "outputTokensPerTask": 20125.526315789473,
-            "outputCostUsd": 11.47155,
-            "outputCostPerTask": 0.6037657894736842
+            "totalTokens": 681921,
+            "totalTokensPerTask": 35890.57894736842,
+            "cacheReadInputTokens": 31488,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 10.512258960525614,
+            "equivalentCostUsd": 12.827534,
+            "equivalentCostPerTask": 0.6751333684210526
           },
           {
             "id": "d6",
@@ -6229,10 +7212,15 @@ window.TLAPS_DATA = {
             "taskCount": 19,
             "activeTimeSecs": 10418.743656175211,
             "activeTimePerTask": 548.3549292723795,
+            "inputTokens": 241700,
             "outputTokens": 417141,
-            "outputTokensPerTask": 21954.78947368421,
-            "outputCostUsd": 12.51423,
-            "outputCostPerTask": 0.6586436842105263
+            "totalTokens": 658841,
+            "totalTokensPerTask": 34675.84210526316,
+            "cacheReadInputTokens": 62720,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 25.94952420355813,
+            "equivalentCostUsd": 13.440489999999999,
+            "equivalentCostPerTask": 0.7073942105263157
           }
         ],
         "scratch": null
@@ -6241,14 +7229,17 @@ window.TLAPS_DATA = {
       "usage": {
         "taskCount": 190,
         "activeTimeSecs": 58841.254395139404,
+        "inputTokens": 2859928,
         "outputTokens": 2387810,
-        "outputCostUsd": 71.6343
+        "totalTokens": 5247738,
+        "cacheReadInputTokens": 492032,
+        "cacheWriteInputTokens": 0,
+        "cacheRatePct": 17.204349200399452,
+        "equivalentCostUsd": 83.71979600000002
       },
       "pricing": {
-        "usdPerMillionTokens": 30,
-        "tier": "standard",
         "asOf": "2026-08-10",
-        "source": "https://developers.openai.com/api/docs/models"
+        "source": "https://developers.openai.com/api/docs/models/gpt-5.6-sol"
       },
       "perSpec": {
         "apalache-examples-konnov--apalache-examples-ben-or83-ben-or83-proofs-tla": {
@@ -6261,10 +7252,15 @@ window.TLAPS_DATA = {
             "taskCount": 41,
             "activeTimeSecs": 11615.22841943358,
             "activeTimePerTask": 283.2982541325264,
+            "inputTokens": 1079918,
             "outputTokens": 472313,
-            "outputTokensPerTask": 11519.829268292682,
-            "outputCostUsd": 14.16939,
-            "outputCostPerTask": 0.3455948780487805
+            "totalTokens": 1552231,
+            "totalTokensPerTask": 37859.29268292683,
+            "cacheReadInputTokens": 80128,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 7.419822616161597,
+            "equivalentCostUsd": 19.208404,
+            "equivalentCostPerTask": 0.4684976585365854
           },
           "scratch": null
         },
@@ -6278,10 +7274,15 @@ window.TLAPS_DATA = {
             "taskCount": 15,
             "activeTimeSecs": 3080.006697571138,
             "activeTimePerTask": 205.33377983807586,
+            "inputTokens": 446662,
             "outputTokens": 103509,
-            "outputTokensPerTask": 6900.6,
-            "outputCostUsd": 3.10527,
-            "outputCostPerTask": 0.207018
+            "totalTokens": 550171,
+            "totalTokensPerTask": 36678.066666666666,
+            "cacheReadInputTokens": 117760,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 26.3644545540028,
+            "equivalentCostUsd": 4.80866,
+            "equivalentCostPerTask": 0.3205773333333333
           },
           "scratch": null
         },
@@ -6295,10 +7296,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 367.9693574309349,
             "activeTimePerTask": 367.9693574309349,
+            "inputTokens": 9976,
             "outputTokens": 14390,
-            "outputTokensPerTask": 14390,
-            "outputCostUsd": 0.4317,
-            "outputCostPerTask": 0.4317
+            "totalTokens": 24366,
+            "totalTokensPerTask": 24366,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.48158,
+            "equivalentCostPerTask": 0.48158
           },
           "scratch": null
         },
@@ -6312,10 +7318,15 @@ window.TLAPS_DATA = {
             "taskCount": 2,
             "activeTimeSecs": 536.8983824802563,
             "activeTimePerTask": 268.44919124012813,
+            "inputTokens": 19195,
             "outputTokens": 25265,
-            "outputTokensPerTask": 12632.5,
-            "outputCostUsd": 0.75795,
-            "outputCostPerTask": 0.378975
+            "totalTokens": 44460,
+            "totalTokensPerTask": 22230,
+            "cacheReadInputTokens": 4864,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 25.339932274029696,
+            "equivalentCostUsd": 0.8320369999999999,
+            "equivalentCostPerTask": 0.41601849999999996
           },
           "scratch": null
         },
@@ -6329,10 +7340,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 145.77317272382788,
             "activeTimePerTask": 145.77317272382788,
+            "inputTokens": 9963,
             "outputTokens": 6993,
-            "outputTokensPerTask": 6993,
-            "outputCostUsd": 0.20979,
-            "outputCostPerTask": 0.20979
+            "totalTokens": 16956,
+            "totalTokensPerTask": 16956,
+            "cacheReadInputTokens": 4864,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 48.82063635451169,
+            "equivalentCostUsd": 0.237717,
+            "equivalentCostPerTask": 0.237717
           },
           "scratch": null
         },
@@ -6346,10 +7362,15 @@ window.TLAPS_DATA = {
             "taskCount": 2,
             "activeTimeSecs": 1127.8855255201925,
             "activeTimePerTask": 563.9427627600962,
+            "inputTokens": 39593,
             "outputTokens": 24570,
-            "outputTokensPerTask": 12285,
-            "outputCostUsd": 0.7371,
-            "outputCostPerTask": 0.36855
+            "totalTokens": 64163,
+            "totalTokensPerTask": 32081.5,
+            "cacheReadInputTokens": 21248,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 53.666052079913115,
+            "equivalentCostUsd": 0.839449,
+            "equivalentCostPerTask": 0.4197245
           },
           "scratch": null
         },
@@ -6363,10 +7384,15 @@ window.TLAPS_DATA = {
             "taskCount": 3,
             "activeTimeSecs": 1115.8690667848568,
             "activeTimePerTask": 371.9563555949523,
+            "inputTokens": 31794,
             "outputTokens": 46980,
-            "outputTokensPerTask": 15660,
-            "outputCostUsd": 1.4094,
-            "outputCostPerTask": 0.4698
+            "totalTokens": 78774,
+            "totalTokensPerTask": 26258,
+            "cacheReadInputTokens": 9984,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 31.40215134931119,
+            "equivalentCostUsd": 1.5234420000000002,
+            "equivalentCostPerTask": 0.5078140000000001
           },
           "scratch": null
         },
@@ -6380,10 +7406,15 @@ window.TLAPS_DATA = {
             "taskCount": 2,
             "activeTimeSecs": 669.1538063911721,
             "activeTimePerTask": 334.57690319558606,
+            "inputTokens": 15714,
             "outputTokens": 25026,
-            "outputTokensPerTask": 12513,
-            "outputCostUsd": 0.75078,
-            "outputCostPerTask": 0.37539
+            "totalTokens": 40740,
+            "totalTokensPerTask": 20370,
+            "cacheReadInputTokens": 4864,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 30.95329005981927,
+            "equivalentCostUsd": 0.807462,
+            "equivalentCostPerTask": 0.403731
           },
           "scratch": null
         },
@@ -6397,10 +7428,15 @@ window.TLAPS_DATA = {
             "taskCount": 4,
             "activeTimeSecs": 1154.1158354533836,
             "activeTimePerTask": 288.5289588633459,
+            "inputTokens": 86259,
             "outputTokens": 53929,
-            "outputTokensPerTask": 13482.25,
-            "outputCostUsd": 1.61787,
-            "outputCostPerTask": 0.4044675
+            "totalTokens": 140188,
+            "totalTokensPerTask": 35047,
+            "cacheReadInputTokens": 4864,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 5.63883189000568,
+            "equivalentCostUsd": 2.027277,
+            "equivalentCostPerTask": 0.50681925
           },
           "scratch": null
         },
@@ -6414,10 +7450,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 45.49305658508092,
             "activeTimePerTask": 45.49305658508092,
+            "inputTokens": 14155,
             "outputTokens": 1702,
-            "outputTokensPerTask": 1702,
-            "outputCostUsd": 0.05106,
-            "outputCostPerTask": 0.05106
+            "totalTokens": 15857,
+            "totalTokensPerTask": 15857,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.121835,
+            "equivalentCostPerTask": 0.121835
           },
           "scratch": null
         },
@@ -6431,10 +7472,15 @@ window.TLAPS_DATA = {
             "taskCount": 7,
             "activeTimeSecs": 3931.823980199406,
             "activeTimePerTask": 561.6891400284866,
+            "inputTokens": 104659,
             "outputTokens": 123114,
-            "outputTokensPerTask": 17587.714285714286,
-            "outputCostUsd": 3.69342,
-            "outputCostPerTask": 0.5276314285714286
+            "totalTokens": 227773,
+            "totalTokensPerTask": 32539,
+            "cacheReadInputTokens": 23040,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 22.014351369686313,
+            "equivalentCostUsd": 4.113035,
+            "equivalentCostPerTask": 0.5875764285714286
           },
           "scratch": null
         },
@@ -6448,10 +7494,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 501.68571857805364,
             "activeTimePerTask": 501.68571857805364,
+            "inputTokens": 15137,
             "outputTokens": 12839,
-            "outputTokensPerTask": 12839,
-            "outputCostUsd": 0.38517,
-            "outputCostPerTask": 0.38517
+            "totalTokens": 27976,
+            "totalTokensPerTask": 27976,
+            "cacheReadInputTokens": 6912,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 45.662945101407146,
+            "equivalentCostUsd": 0.429751,
+            "equivalentCostPerTask": 0.429751
           },
           "scratch": null
         },
@@ -6465,10 +7516,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 112.40570912300609,
             "activeTimePerTask": 112.40570912300609,
+            "inputTokens": 7026,
             "outputTokens": 5118,
-            "outputTokensPerTask": 5118,
-            "outputCostUsd": 0.15354,
-            "outputCostPerTask": 0.15354
+            "totalTokens": 12144,
+            "totalTokensPerTask": 12144,
+            "cacheReadInputTokens": 4864,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 69.22857956162824,
+            "equivalentCostUsd": 0.166782,
+            "equivalentCostPerTask": 0.166782
           },
           "scratch": null
         },
@@ -6482,10 +7538,15 @@ window.TLAPS_DATA = {
             "taskCount": 3,
             "activeTimeSecs": 975.5526543930173,
             "activeTimePerTask": 325.18421813100576,
+            "inputTokens": 24746,
             "outputTokens": 40335,
-            "outputTokensPerTask": 13445,
-            "outputCostUsd": 1.21005,
-            "outputCostPerTask": 0.40335000000000004
+            "totalTokens": 65081,
+            "totalTokensPerTask": 21693.666666666668,
+            "cacheReadInputTokens": 4864,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 19.655701931625313,
+            "equivalentCostUsd": 1.3118919999999998,
+            "equivalentCostPerTask": 0.43729733333333326
           },
           "scratch": null
         },
@@ -6499,10 +7560,15 @@ window.TLAPS_DATA = {
             "taskCount": 4,
             "activeTimeSecs": 1922.8090036360081,
             "activeTimePerTask": 480.70225090900203,
+            "inputTokens": 33218,
             "outputTokens": 88615,
-            "outputTokensPerTask": 22153.75,
-            "outputCostUsd": 2.65845,
-            "outputCostPerTask": 0.6646125
+            "totalTokens": 121833,
+            "totalTokensPerTask": 30458.25,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 2.8245400000000003,
+            "equivalentCostPerTask": 0.7061350000000001
           },
           "scratch": null
         },
@@ -6516,10 +7582,15 @@ window.TLAPS_DATA = {
             "taskCount": 2,
             "activeTimeSecs": 236.86451971018687,
             "activeTimePerTask": 118.43225985509343,
+            "inputTokens": 13796,
             "outputTokens": 11710,
-            "outputTokensPerTask": 5855,
-            "outputCostUsd": 0.3513,
-            "outputCostPerTask": 0.17565
+            "totalTokens": 25506,
+            "totalTokensPerTask": 12753,
+            "cacheReadInputTokens": 4864,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 35.25659611481589,
+            "equivalentCostUsd": 0.39839199999999997,
+            "equivalentCostPerTask": 0.19919599999999998
           },
           "scratch": null
         },
@@ -6533,10 +7604,15 @@ window.TLAPS_DATA = {
             "taskCount": 3,
             "activeTimeSecs": 405.1842380797025,
             "activeTimePerTask": 135.06141269323416,
+            "inputTokens": 21391,
             "outputTokens": 18661,
-            "outputTokensPerTask": 6220.333333333333,
-            "outputCostUsd": 0.55983,
-            "outputCostPerTask": 0.18661000000000003
+            "totalTokens": 40052,
+            "totalTokensPerTask": 13350.666666666666,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.666785,
+            "equivalentCostPerTask": 0.22226166666666666
           },
           "scratch": null
         },
@@ -6550,10 +7626,15 @@ window.TLAPS_DATA = {
             "taskCount": 12,
             "activeTimeSecs": 4164.173652228899,
             "activeTimePerTask": 347.01447101907496,
+            "inputTokens": 127898,
             "outputTokens": 181130,
-            "outputTokensPerTask": 15094.166666666666,
-            "outputCostUsd": 5.4339,
-            "outputCostPerTask": 0.45282500000000003
+            "totalTokens": 309028,
+            "totalTokensPerTask": 25752.333333333332,
+            "cacheReadInputTokens": 18688,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 14.611643653536412,
+            "equivalentCostUsd": 5.989293999999999,
+            "equivalentCostPerTask": 0.49910783333333325
           },
           "scratch": null
         },
@@ -6567,10 +7648,15 @@ window.TLAPS_DATA = {
             "taskCount": 2,
             "activeTimeSecs": 848.3210633040871,
             "activeTimePerTask": 424.1605316520436,
+            "inputTokens": 22467,
             "outputTokens": 36389,
-            "outputTokensPerTask": 18194.5,
-            "outputCostUsd": 1.09167,
-            "outputCostPerTask": 0.545835
+            "totalTokens": 58856,
+            "totalTokensPerTask": 29428,
+            "cacheReadInputTokens": 9984,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 44.43850981439444,
+            "equivalentCostUsd": 1.159077,
+            "equivalentCostPerTask": 0.5795385
           },
           "scratch": null
         },
@@ -6584,10 +7670,15 @@ window.TLAPS_DATA = {
             "taskCount": 10,
             "activeTimeSecs": 2615.4087375765666,
             "activeTimePerTask": 261.54087375765664,
+            "inputTokens": 92953,
             "outputTokens": 87953,
-            "outputTokensPerTask": 8795.3,
-            "outputCostUsd": 2.63859,
-            "outputCostPerTask": 0.263859
+            "totalTokens": 180906,
+            "totalTokensPerTask": 18090.6,
+            "cacheReadInputTokens": 32256,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 34.701408238572185,
+            "equivalentCostUsd": 2.958203,
+            "equivalentCostPerTask": 0.29582030000000004
           },
           "scratch": null
         },
@@ -6601,10 +7692,15 @@ window.TLAPS_DATA = {
             "taskCount": 2,
             "activeTimeSecs": 250.65376258292235,
             "activeTimePerTask": 125.32688129146118,
+            "inputTokens": 14222,
             "outputTokens": 11060,
-            "outputTokensPerTask": 5530,
-            "outputCostUsd": 0.3318,
-            "outputCostPerTask": 0.1659
+            "totalTokens": 25282,
+            "totalTokensPerTask": 12641,
+            "cacheReadInputTokens": 9728,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 68.40106876669948,
+            "equivalentCostUsd": 0.359134,
+            "equivalentCostPerTask": 0.179567
           },
           "scratch": null
         },
@@ -6618,10 +7714,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 137.9415221659001,
             "activeTimePerTask": 137.9415221659001,
+            "inputTokens": 7648,
             "outputTokens": 6183,
-            "outputTokensPerTask": 6183,
-            "outputCostUsd": 0.18549,
-            "outputCostPerTask": 0.18549
+            "totalTokens": 13831,
+            "totalTokensPerTask": 13831,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.22373,
+            "equivalentCostPerTask": 0.22373
           },
           "scratch": null
         },
@@ -6635,10 +7736,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 13.683041837066412,
             "activeTimePerTask": 13.683041837066412,
+            "inputTokens": 7555,
             "outputTokens": 446,
-            "outputTokensPerTask": 446,
-            "outputCostUsd": 0.01338,
-            "outputCostPerTask": 0.01338
+            "totalTokens": 8001,
+            "totalTokensPerTask": 8001,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.051155,
+            "equivalentCostPerTask": 0.051155
           },
           "scratch": null
         },
@@ -6652,10 +7758,15 @@ window.TLAPS_DATA = {
             "taskCount": 3,
             "activeTimeSecs": 1352.6950031029992,
             "activeTimePerTask": 450.8983343676664,
+            "inputTokens": 26100,
             "outputTokens": 62245,
-            "outputTokensPerTask": 20748.333333333332,
-            "outputCostUsd": 1.86735,
-            "outputCostPerTask": 0.6224500000000001
+            "totalTokens": 88345,
+            "totalTokensPerTask": 29448.333333333332,
+            "cacheReadInputTokens": 8960,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 34.32950191570881,
+            "equivalentCostUsd": 1.95753,
+            "equivalentCostPerTask": 0.65251
           },
           "scratch": null
         },
@@ -6669,10 +7780,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 142.75670459493995,
             "activeTimePerTask": 142.75670459493995,
+            "inputTokens": 7053,
             "outputTokens": 7668,
-            "outputTokensPerTask": 7668,
-            "outputCostUsd": 0.23004,
-            "outputCostPerTask": 0.23004
+            "totalTokens": 14721,
+            "totalTokensPerTask": 14721,
+            "cacheReadInputTokens": 4864,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 68.96356160499079,
+            "equivalentCostUsd": 0.243417,
+            "equivalentCostPerTask": 0.243417
           },
           "scratch": null
         },
@@ -6686,10 +7802,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 295.5238965949975,
             "activeTimePerTask": 295.5238965949975,
+            "inputTokens": 9595,
             "outputTokens": 15474,
-            "outputTokensPerTask": 15474,
-            "outputCostUsd": 0.46422,
-            "outputCostPerTask": 0.46422
+            "totalTokens": 25069,
+            "totalTokensPerTask": 25069,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.512195,
+            "equivalentCostPerTask": 0.512195
           },
           "scratch": null
         },
@@ -6703,10 +7824,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 292.16243045101874,
             "activeTimePerTask": 292.16243045101874,
+            "inputTokens": 7964,
             "outputTokens": 14289,
-            "outputTokensPerTask": 14289,
-            "outputCostUsd": 0.42867,
-            "outputCostPerTask": 0.42867
+            "totalTokens": 22253,
+            "totalTokensPerTask": 22253,
+            "cacheReadInputTokens": 4864,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 61.0748367654445,
+            "equivalentCostUsd": 0.446602,
+            "equivalentCostPerTask": 0.446602
           },
           "scratch": null
         },
@@ -6720,10 +7846,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 65.12108444306068,
             "activeTimePerTask": 65.12108444306068,
+            "inputTokens": 6755,
             "outputTokens": 2329,
-            "outputTokensPerTask": 2329,
-            "outputCostUsd": 0.06987,
-            "outputCostPerTask": 0.06987
+            "totalTokens": 9084,
+            "totalTokensPerTask": 9084,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.103645,
+            "equivalentCostPerTask": 0.103645
           },
           "scratch": null
         },
@@ -6737,10 +7868,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 343.42701013898477,
             "activeTimePerTask": 343.42701013898477,
+            "inputTokens": 7563,
             "outputTokens": 13578,
-            "outputTokensPerTask": 13578,
-            "outputCostUsd": 0.40734,
-            "outputCostPerTask": 0.40734
+            "totalTokens": 21141,
+            "totalTokensPerTask": 21141,
+            "cacheReadInputTokens": 4864,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 64.31310326589977,
+            "equivalentCostUsd": 0.423267,
+            "equivalentCostPerTask": 0.423267
           },
           "scratch": null
         },
@@ -6754,10 +7890,15 @@ window.TLAPS_DATA = {
             "taskCount": 3,
             "activeTimeSecs": 593.4406352969818,
             "activeTimePerTask": 197.81354509899393,
+            "inputTokens": 26077,
             "outputTokens": 25213,
-            "outputTokensPerTask": 8404.333333333334,
-            "outputCostUsd": 0.75639,
-            "outputCostPerTask": 0.25213
+            "totalTokens": 51290,
+            "totalTokensPerTask": 17096.666666666668,
+            "cacheReadInputTokens": 4864,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 18.652452352647927,
+            "equivalentCostUsd": 0.864887,
+            "equivalentCostPerTask": 0.2882956666666667
           },
           "scratch": null
         },
@@ -6771,10 +7912,15 @@ window.TLAPS_DATA = {
             "taskCount": 3,
             "activeTimeSecs": 663.4029769529589,
             "activeTimePerTask": 221.13432565098628,
+            "inputTokens": 21332,
             "outputTokens": 32667,
-            "outputTokensPerTask": 10889,
-            "outputCostUsd": 0.98001,
-            "outputCostPerTask": 0.32667
+            "totalTokens": 53999,
+            "totalTokensPerTask": 17999.666666666668,
+            "cacheReadInputTokens": 4864,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 22.80142508906807,
+            "equivalentCostUsd": 1.064782,
+            "equivalentCostPerTask": 0.3549273333333333
           },
           "scratch": null
         },
@@ -6788,10 +7934,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 385.57473573996685,
             "activeTimePerTask": 385.57473573996685,
+            "inputTokens": 8101,
             "outputTokens": 14509,
-            "outputTokensPerTask": 14509,
-            "outputCostUsd": 0.43527,
-            "outputCostPerTask": 0.43527
+            "totalTokens": 22610,
+            "totalTokensPerTask": 22610,
+            "cacheReadInputTokens": 5888,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 72.68238489075422,
+            "equivalentCostUsd": 0.449279,
+            "equivalentCostPerTask": 0.449279
           },
           "scratch": null
         },
@@ -6805,10 +7956,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 584.2432185809594,
             "activeTimePerTask": 584.2432185809594,
+            "inputTokens": 7341,
             "outputTokens": 20242,
-            "outputTokensPerTask": 20242,
-            "outputCostUsd": 0.60726,
-            "outputCostPerTask": 0.60726
+            "totalTokens": 27583,
+            "totalTokensPerTask": 27583,
+            "cacheReadInputTokens": 4864,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 66.2580029968669,
+            "equivalentCostUsd": 0.622077,
+            "equivalentCostPerTask": 0.622077
           },
           "scratch": null
         },
@@ -6822,10 +7978,15 @@ window.TLAPS_DATA = {
             "taskCount": 2,
             "activeTimeSecs": 235.71779840486124,
             "activeTimePerTask": 117.85889920243062,
+            "inputTokens": 16153,
             "outputTokens": 9259,
-            "outputTokensPerTask": 4629.5,
-            "outputCostUsd": 0.27777,
-            "outputCostPerTask": 0.138885
+            "totalTokens": 25412,
+            "totalTokensPerTask": 12706,
+            "cacheReadInputTokens": 4864,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 30.112053488516064,
+            "equivalentCostUsd": 0.33664700000000003,
+            "equivalentCostPerTask": 0.16832350000000001
           },
           "scratch": null
         },
@@ -6839,10 +8000,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 59.435291775967926,
             "activeTimePerTask": 59.435291775967926,
+            "inputTokens": 7048,
             "outputTokens": 2416,
-            "outputTokensPerTask": 2416,
-            "outputCostUsd": 0.07248,
-            "outputCostPerTask": 0.07248
+            "totalTokens": 9464,
+            "totalTokensPerTask": 9464,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.10772,
+            "equivalentCostPerTask": 0.10772
           },
           "scratch": null
         },
@@ -6856,10 +8022,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 420.912234361982,
             "activeTimePerTask": 420.912234361982,
+            "inputTokens": 9768,
             "outputTokens": 20093,
-            "outputTokensPerTask": 20093,
-            "outputCostUsd": 0.60279,
-            "outputCostPerTask": 0.60279
+            "totalTokens": 29861,
+            "totalTokensPerTask": 29861,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.65163,
+            "equivalentCostPerTask": 0.65163
           },
           "scratch": null
         },
@@ -6873,10 +8044,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 102.16868608584628,
             "activeTimePerTask": 102.16868608584628,
+            "inputTokens": 6758,
             "outputTokens": 4365,
-            "outputTokensPerTask": 4365,
-            "outputCostUsd": 0.13095,
-            "outputCostPerTask": 0.13095
+            "totalTokens": 11123,
+            "totalTokensPerTask": 11123,
+            "cacheReadInputTokens": 4864,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 71.97395679195029,
+            "equivalentCostUsd": 0.142852,
+            "equivalentCostPerTask": 0.142852
           },
           "scratch": null
         },
@@ -6890,10 +8066,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 76.66908818902448,
             "activeTimePerTask": 76.66908818902448,
+            "inputTokens": 8149,
             "outputTokens": 3876,
-            "outputTokensPerTask": 3876,
-            "outputCostUsd": 0.11628,
-            "outputCostPerTask": 0.11628
+            "totalTokens": 12025,
+            "totalTokensPerTask": 12025,
+            "cacheReadInputTokens": 4864,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 59.6883053135354,
+            "equivalentCostUsd": 0.135137,
+            "equivalentCostPerTask": 0.135137
           },
           "scratch": null
         },
@@ -6907,10 +8088,15 @@ window.TLAPS_DATA = {
             "taskCount": 2,
             "activeTimeSecs": 856.888028518064,
             "activeTimePerTask": 428.444014259032,
+            "inputTokens": 19093,
             "outputTokens": 43072,
-            "outputTokensPerTask": 21536,
-            "outputCostUsd": 1.29216,
-            "outputCostPerTask": 0.64608
+            "totalTokens": 62165,
+            "totalTokensPerTask": 31082.5,
+            "cacheReadInputTokens": 4864,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 25.47530508563348,
+            "equivalentCostUsd": 1.365737,
+            "equivalentCostPerTask": 0.6828685
           },
           "scratch": null
         },
@@ -6924,10 +8110,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 444.15139076299965,
             "activeTimePerTask": 444.15139076299965,
+            "inputTokens": 7566,
             "outputTokens": 16281,
-            "outputTokensPerTask": 16281,
-            "outputCostUsd": 0.48843,
-            "outputCostPerTask": 0.48843
+            "totalTokens": 23847,
+            "totalTokensPerTask": 23847,
+            "cacheReadInputTokens": 6912,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 91.35606661379857,
+            "equivalentCostUsd": 0.495156,
+            "equivalentCostPerTask": 0.495156
           },
           "scratch": null
         },
@@ -6941,10 +8132,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 288.1690765111707,
             "activeTimePerTask": 288.1690765111707,
+            "inputTokens": 7385,
             "outputTokens": 15089,
-            "outputTokensPerTask": 15089,
-            "outputCostUsd": 0.45267,
-            "outputCostPerTask": 0.45267
+            "totalTokens": 22474,
+            "totalTokensPerTask": 22474,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.489595,
+            "equivalentCostPerTask": 0.489595
           },
           "scratch": null
         },
@@ -6958,10 +8154,15 @@ window.TLAPS_DATA = {
             "taskCount": 6,
             "activeTimeSecs": 2382.8722243260127,
             "activeTimePerTask": 397.1453707210021,
+            "inputTokens": 67207,
             "outputTokens": 117877,
-            "outputTokensPerTask": 19646.166666666668,
-            "outputCostUsd": 3.53631,
-            "outputCostPerTask": 0.5893849999999999
+            "totalTokens": 185084,
+            "totalTokensPerTask": 30847.333333333332,
+            "cacheReadInputTokens": 19456,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 28.9493653934858,
+            "equivalentCostUsd": 3.7847929999999996,
+            "equivalentCostPerTask": 0.6307988333333333
           },
           "scratch": null
         },
@@ -6975,10 +8176,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 229.96713534602895,
             "activeTimePerTask": 229.96713534602895,
+            "inputTokens": 7780,
             "outputTokens": 11494,
-            "outputTokensPerTask": 11494,
-            "outputCostUsd": 0.34482,
-            "outputCostPerTask": 0.34482
+            "totalTokens": 19274,
+            "totalTokensPerTask": 19274,
+            "cacheReadInputTokens": 4864,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 62.51928020565553,
+            "equivalentCostUsd": 0.361832,
+            "equivalentCostPerTask": 0.361832
           },
           "scratch": null
         },
@@ -6992,10 +8198,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 417.969190122094,
             "activeTimePerTask": 417.969190122094,
+            "inputTokens": 8146,
             "outputTokens": 14941,
-            "outputTokensPerTask": 14941,
-            "outputCostUsd": 0.44823,
-            "outputCostPerTask": 0.44823
+            "totalTokens": 23087,
+            "totalTokensPerTask": 23087,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.48896,
+            "equivalentCostPerTask": 0.48896
           },
           "scratch": null
         },
@@ -7009,10 +8220,15 @@ window.TLAPS_DATA = {
             "taskCount": 11,
             "activeTimeSecs": 5539.788886595285,
             "activeTimePerTask": 503.61717150866224,
+            "inputTokens": 117657,
             "outputTokens": 210441,
-            "outputTokensPerTask": 19131,
-            "outputCostUsd": 6.31323,
-            "outputCostPerTask": 0.5739299999999999
+            "totalTokens": 328098,
+            "totalTokensPerTask": 29827.090909090908,
+            "cacheReadInputTokens": 9728,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 8.26810134543631,
+            "equivalentCostUsd": 6.857739,
+            "equivalentCostPerTask": 0.6234308181818181
           },
           "scratch": null
         },
@@ -7026,10 +8242,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 560.9574095280841,
             "activeTimePerTask": 560.9574095280841,
+            "inputTokens": 7509,
             "outputTokens": 23261,
-            "outputTokensPerTask": 23261,
-            "outputCostUsd": 0.69783,
-            "outputCostPerTask": 0.69783
+            "totalTokens": 30770,
+            "totalTokensPerTask": 30770,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.735375,
+            "equivalentCostPerTask": 0.735375
           },
           "scratch": null
         },
@@ -7043,10 +8264,15 @@ window.TLAPS_DATA = {
             "taskCount": 2,
             "activeTimeSecs": 942.2812035311945,
             "activeTimePerTask": 471.14060176559724,
+            "inputTokens": 19191,
             "outputTokens": 46582,
-            "outputTokensPerTask": 23291,
-            "outputCostUsd": 1.39746,
-            "outputCostPerTask": 0.69873
+            "totalTokens": 65773,
+            "totalTokensPerTask": 32886.5,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 1.4934150000000002,
+            "equivalentCostPerTask": 0.7467075000000001
           },
           "scratch": null
         },
@@ -7060,10 +8286,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 55.94148738402873,
             "activeTimePerTask": 55.94148738402873,
+            "inputTokens": 7681,
             "outputTokens": 1658,
-            "outputTokensPerTask": 1658,
-            "outputCostUsd": 0.04974,
-            "outputCostPerTask": 0.04974
+            "totalTokens": 9339,
+            "totalTokensPerTask": 9339,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.088145,
+            "equivalentCostPerTask": 0.088145
           },
           "scratch": null
         },
@@ -7077,10 +8308,15 @@ window.TLAPS_DATA = {
             "taskCount": 5,
             "activeTimeSecs": 1047.5742444721982,
             "activeTimePerTask": 209.51484889443964,
+            "inputTokens": 49003,
             "outputTokens": 38267,
-            "outputTokensPerTask": 7653.4,
-            "outputCostUsd": 1.14801,
-            "outputCostPerTask": 0.229602
+            "totalTokens": 87270,
+            "totalTokensPerTask": 17454,
+            "cacheReadInputTokens": 8960,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 18.28459482072526,
+            "equivalentCostUsd": 1.352705,
+            "equivalentCostPerTask": 0.27054100000000003
           },
           "scratch": null
         },
@@ -7094,10 +8330,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 123.96950266510248,
             "activeTimePerTask": 123.96950266510248,
+            "inputTokens": 7719,
             "outputTokens": 4944,
-            "outputTokensPerTask": 4944,
-            "outputCostUsd": 0.14832,
-            "outputCostPerTask": 0.14832
+            "totalTokens": 12663,
+            "totalTokensPerTask": 12663,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.186915,
+            "equivalentCostPerTask": 0.186915
           },
           "scratch": null
         },
@@ -7111,10 +8352,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 541.5458428191487,
             "activeTimePerTask": 541.5458428191487,
+            "inputTokens": 10605,
             "outputTokens": 21874,
-            "outputTokensPerTask": 21874,
-            "outputCostUsd": 0.65622,
-            "outputCostPerTask": 0.65622
+            "totalTokens": 32479,
+            "totalTokensPerTask": 32479,
+            "cacheReadInputTokens": 9984,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 94.14427157001414,
+            "equivalentCostUsd": 0.664317,
+            "equivalentCostPerTask": 0.664317
           },
           "scratch": null
         },
@@ -7128,10 +8374,15 @@ window.TLAPS_DATA = {
             "taskCount": 4,
             "activeTimeSecs": 929.366007468896,
             "activeTimePerTask": 232.341501867224,
+            "inputTokens": 29403,
             "outputTokens": 42148,
-            "outputTokensPerTask": 10537,
-            "outputCostUsd": 1.26444,
-            "outputCostPerTask": 0.31611
+            "totalTokens": 71551,
+            "totalTokensPerTask": 17887.75,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 1.4114550000000001,
+            "equivalentCostPerTask": 0.35286375000000003
           },
           "scratch": null
         },
@@ -7145,10 +8396,15 @@ window.TLAPS_DATA = {
             "taskCount": 2,
             "activeTimeSecs": 514.597611595178,
             "activeTimePerTask": 257.298805797589,
+            "inputTokens": 13150,
             "outputTokens": 23387,
-            "outputTokensPerTask": 11693.5,
-            "outputCostUsd": 0.70161,
-            "outputCostPerTask": 0.350805
+            "totalTokens": 36537,
+            "totalTokensPerTask": 18268.5,
+            "cacheReadInputTokens": 4864,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 36.98859315589353,
+            "equivalentCostUsd": 0.745472,
+            "equivalentCostPerTask": 0.372736
           },
           "scratch": null
         },
@@ -7162,10 +8418,15 @@ window.TLAPS_DATA = {
             "taskCount": 4,
             "activeTimeSecs": 1486.191886239918,
             "activeTimePerTask": 371.5479715599795,
+            "inputTokens": 34524,
             "outputTokens": 66957,
-            "outputTokensPerTask": 16739.25,
-            "outputCostUsd": 2.00871,
-            "outputCostPerTask": 0.5021775
+            "totalTokens": 101481,
+            "totalTokensPerTask": 25370.25,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 2.18133,
+            "equivalentCostPerTask": 0.5453325
           },
           "scratch": null
         },
@@ -7179,10 +8440,15 @@ window.TLAPS_DATA = {
             "taskCount": 2,
             "activeTimeSecs": 769.6215982821304,
             "activeTimePerTask": 384.8107991410652,
+            "inputTokens": 17332,
             "outputTokens": 39076,
-            "outputTokensPerTask": 19538,
-            "outputCostUsd": 1.17228,
-            "outputCostPerTask": 0.58614
+            "totalTokens": 56408,
+            "totalTokensPerTask": 28204,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 1.25894,
+            "equivalentCostPerTask": 0.62947
           },
           "scratch": null
         },
@@ -7196,10 +8462,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 121.24995046807453,
             "activeTimePerTask": 121.24995046807453,
+            "inputTokens": 7275,
             "outputTokens": 4008,
-            "outputTokensPerTask": 4008,
-            "outputCostUsd": 0.12024,
-            "outputCostPerTask": 0.12024
+            "totalTokens": 11283,
+            "totalTokensPerTask": 11283,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.156615,
+            "equivalentCostPerTask": 0.156615
           },
           "scratch": null
         }
@@ -7216,14 +8487,16 @@ window.TLAPS_DATA = {
       "cohortLabel": "One-Shot",
       "generated": "2026-08-11",
       "resultsFile": "results/codex-single-turn-gpt-5.6-terra.json",
-      "resultsVersion": "ba131641337c",
+      "resultsVersion": "98434e9473c8",
       "modes": [
         "completion"
       ],
       "perMetric": {
         "completion": 8.3,
         "activeTimePerTask": 269.83787194268876,
-        "outputCostPerTask": 0.21535492105263157
+        "totalTokens": 5554238,
+        "cacheRatePct": 36.04856904998533,
+        "equivalentCostUsd": 45.690977499999995
       },
       "perMode": {
         "completion": {
@@ -7235,11 +8508,16 @@ window.TLAPS_DATA = {
           "taskCount": 190,
           "activeTimeSecs": 51269.195669110864,
           "activeTimePerTask": 269.83787194268876,
+          "inputTokens": 2826409,
           "outputTokens": 2727829,
-          "outputTokensPerTask": 14356.994736842105,
-          "outputCostUsd": 40.917435,
-          "outputCostPerTask": 0.21535492105263157,
-          "specificationMacroPct": 8.3,
+          "totalTokens": 5554238,
+          "totalTokensPerTask": 29232.831578947367,
+          "cacheReadInputTokens": 1018880,
+          "cacheWriteInputTokens": 0,
+          "cacheRatePct": 36.04856904998533,
+          "equivalentCostUsd": 45.690977499999995,
+          "equivalentCostPerTask": 0.24047882894736838,
+          "specBalancedPassRatePct": 8.3,
           "completeSpecifications": 3,
           "representedSpecifications": 56,
           "allLeavesCompletePct": 5.4
@@ -7264,10 +8542,15 @@ window.TLAPS_DATA = {
             "taskCount": 34,
             "activeTimeSecs": 4859.546746969456,
             "activeTimePerTask": 142.92784549910164,
+            "inputTokens": 454437,
             "outputTokens": 251659,
-            "outputTokensPerTask": 7401.735294117647,
-            "outputCostUsd": 3.774885,
-            "outputCostPerTask": 0.1110260294117647
+            "totalTokens": 706096,
+            "totalTokensPerTask": 20767.529411764706,
+            "cacheReadInputTokens": 151040,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 33.23673028384572,
+            "equivalentCostUsd": 4.571137500000001,
+            "equivalentCostPerTask": 0.13444522058823533
           },
           {
             "id": "d2",
@@ -7279,10 +8562,15 @@ window.TLAPS_DATA = {
             "taskCount": 45,
             "activeTimeSecs": 8711.713120261673,
             "activeTimePerTask": 193.59362489470385,
+            "inputTokens": 695201,
             "outputTokens": 462924,
-            "outputTokensPerTask": 10287.2,
-            "outputCostUsd": 6.94386,
-            "outputCostPerTask": 0.154308
+            "totalTokens": 1158125,
+            "totalTokensPerTask": 25736.11111111111,
+            "cacheReadInputTokens": 225280,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 32.405016678629636,
+            "equivalentCostUsd": 8.1749825,
+            "equivalentCostPerTask": 0.1816662777777778
           },
           {
             "id": "d3",
@@ -7294,10 +8582,15 @@ window.TLAPS_DATA = {
             "taskCount": 54,
             "activeTimeSecs": 14106.234589594882,
             "activeTimePerTask": 261.2265664739793,
+            "inputTokens": 832699,
             "outputTokens": 766501,
-            "outputTokensPerTask": 14194.462962962964,
-            "outputCostUsd": 11.497515,
-            "outputCostPerTask": 0.21291694444444445
+            "totalTokens": 1599200,
+            "totalTokensPerTask": 29614.814814814814,
+            "cacheReadInputTokens": 257024,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 30.866375485019198,
+            "equivalentCostUsd": 13.0009585,
+            "equivalentCostPerTask": 0.24075849074074074
           },
           {
             "id": "d4",
@@ -7309,10 +8602,15 @@ window.TLAPS_DATA = {
             "taskCount": 19,
             "activeTimeSecs": 6476.99861258571,
             "activeTimePerTask": 340.89466382030054,
+            "inputTokens": 327032,
             "outputTokens": 346335,
-            "outputTokensPerTask": 18228.157894736843,
-            "outputCostUsd": 5.195025,
-            "outputCostPerTask": 0.27342236842105266
+            "totalTokens": 673367,
+            "totalTokensPerTask": 35440.36842105263,
+            "cacheReadInputTokens": 139520,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 42.6624917439272,
+            "equivalentCostUsd": 5.698684999999999,
+            "equivalentCostPerTask": 0.2999307894736842
           },
           {
             "id": "d5",
@@ -7324,10 +8622,15 @@ window.TLAPS_DATA = {
             "taskCount": 19,
             "activeTimeSecs": 8113.187211127719,
             "activeTimePerTask": 427.00985321724835,
+            "inputTokens": 276161,
             "outputTokens": 436856,
-            "outputTokensPerTask": 22992.42105263158,
-            "outputCostUsd": 6.55284,
-            "outputCostPerTask": 0.34488631578947365
+            "totalTokens": 713017,
+            "totalTokensPerTask": 37527.21052631579,
+            "cacheReadInputTokens": 145920,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 52.838742617531075,
+            "equivalentCostUsd": 6.9149225,
+            "equivalentCostPerTask": 0.3639432894736842
           },
           {
             "id": "d6",
@@ -7339,10 +8642,15 @@ window.TLAPS_DATA = {
             "taskCount": 19,
             "activeTimeSecs": 9001.515388571424,
             "activeTimePerTask": 473.76396781954867,
+            "inputTokens": 240879,
             "outputTokens": 463554,
-            "outputTokensPerTask": 24397.57894736842,
-            "outputCostUsd": 6.95331,
-            "outputCostPerTask": 0.36596368421052633
+            "totalTokens": 704433,
+            "totalTokensPerTask": 37075.42105263158,
+            "cacheReadInputTokens": 100096,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 41.55447340781056,
+            "equivalentCostUsd": 7.330291499999999,
+            "equivalentCostPerTask": 0.3858048157894736
           }
         ],
         "scratch": null
@@ -7351,14 +8659,17 @@ window.TLAPS_DATA = {
       "usage": {
         "taskCount": 190,
         "activeTimeSecs": 51269.195669110864,
+        "inputTokens": 2826409,
         "outputTokens": 2727829,
-        "outputCostUsd": 40.917435
+        "totalTokens": 5554238,
+        "cacheReadInputTokens": 1018880,
+        "cacheWriteInputTokens": 0,
+        "cacheRatePct": 36.04856904998533,
+        "equivalentCostUsd": 45.690977499999995
       },
       "pricing": {
-        "usdPerMillionTokens": 15,
-        "tier": "standard",
         "asOf": "2026-08-11",
-        "source": "https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing"
+        "source": "https://developers.openai.com/api/docs/models/gpt-5.6-terra"
       },
       "perSpec": {
         "apalache-examples-konnov--apalache-examples-ben-or83-ben-or83-proofs-tla": {
@@ -7371,10 +8682,15 @@ window.TLAPS_DATA = {
             "taskCount": 41,
             "activeTimeSecs": 9127.189912240021,
             "activeTimePerTask": 222.61438810341514,
+            "inputTokens": 1095458,
             "outputTokens": 476009,
-            "outputTokensPerTask": 11609.975609756097,
-            "outputCostUsd": 7.140135,
-            "outputCostPerTask": 0.17414963414634146
+            "totalTokens": 1571467,
+            "totalTokensPerTask": 38328.46341463415,
+            "cacheReadInputTokens": 291584,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 26.617542616878055,
+            "equivalentCostUsd": 9.222716000000004,
+            "equivalentCostPerTask": 0.22494429268292693
           },
           "scratch": null
         },
@@ -7388,10 +8704,15 @@ window.TLAPS_DATA = {
             "taskCount": 15,
             "activeTimeSecs": 2483.980054696556,
             "activeTimePerTask": 165.59867031310375,
+            "inputTokens": 435267,
             "outputTokens": 132521,
-            "outputTokensPerTask": 8834.733333333334,
-            "outputCostUsd": 1.987815,
-            "outputCostPerTask": 0.132521
+            "totalTokens": 567788,
+            "totalTokensPerTask": 37852.53333333333,
+            "cacheReadInputTokens": 73984,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 16.99738321535977,
+            "equivalentCostUsd": 2.9095185,
+            "equivalentCostPerTask": 0.1939679
           },
           "scratch": null
         },
@@ -7405,10 +8726,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 291.7976756230928,
             "activeTimePerTask": 291.7976756230928,
+            "inputTokens": 9976,
             "outputTokens": 15289,
-            "outputTokensPerTask": 15289,
-            "outputCostUsd": 0.229335,
-            "outputCostPerTask": 0.229335
+            "totalTokens": 25265,
+            "totalTokensPerTask": 25265,
+            "cacheReadInputTokens": 5888,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 59.02165196471532,
+            "equivalentCostUsd": 0.241027,
+            "equivalentCostPerTask": 0.241027
           },
           "scratch": null
         },
@@ -7422,10 +8748,15 @@ window.TLAPS_DATA = {
             "taskCount": 2,
             "activeTimeSecs": 544.7461639989633,
             "activeTimePerTask": 272.37308199948166,
+            "inputTokens": 17123,
             "outputTokens": 29808,
-            "outputTokensPerTask": 14904,
-            "outputCostUsd": 0.44712,
-            "outputCostPerTask": 0.22356
+            "totalTokens": 46931,
+            "totalTokensPerTask": 23465.5,
+            "cacheReadInputTokens": 10752,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 62.792734917946625,
+            "equivalentCostUsd": 0.46573549999999997,
+            "equivalentCostPerTask": 0.23286774999999998
           },
           "scratch": null
         },
@@ -7439,10 +8770,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 58.082891998812556,
             "activeTimePerTask": 58.082891998812556,
+            "inputTokens": 9963,
             "outputTokens": 2786,
-            "outputTokensPerTask": 2786,
-            "outputCostUsd": 0.04179,
-            "outputCostPerTask": 0.04179
+            "totalTokens": 12749,
+            "totalTokensPerTask": 12749,
+            "cacheReadInputTokens": 4864,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 48.82063635451169,
+            "equivalentCostUsd": 0.0557535,
+            "equivalentCostPerTask": 0.0557535
           },
           "scratch": null
         },
@@ -7456,10 +8792,15 @@ window.TLAPS_DATA = {
             "taskCount": 2,
             "activeTimeSecs": 721.3750392880756,
             "activeTimePerTask": 360.6875196440378,
+            "inputTokens": 20125,
             "outputTokens": 39530,
-            "outputTokensPerTask": 19765,
-            "outputCostUsd": 0.59295,
-            "outputCostPerTask": 0.296475
+            "totalTokens": 59655,
+            "totalTokensPerTask": 29827.5,
+            "cacheReadInputTokens": 10752,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 53.426086956521736,
+            "equivalentCostUsd": 0.6190705,
+            "equivalentCostPerTask": 0.30953525
           },
           "scratch": null
         },
@@ -7473,10 +8814,15 @@ window.TLAPS_DATA = {
             "taskCount": 3,
             "activeTimeSecs": 660.8386392369866,
             "activeTimePerTask": 220.27954641232887,
+            "inputTokens": 31276,
             "outputTokens": 35746,
-            "outputTokensPerTask": 11915.333333333334,
-            "outputCostUsd": 0.53619,
-            "outputCostPerTask": 0.17873000000000003
+            "totalTokens": 67022,
+            "totalTokensPerTask": 22340.666666666668,
+            "cacheReadInputTokens": 16640,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 53.20373449290191,
+            "equivalentCostUsd": 0.57694,
+            "equivalentCostPerTask": 0.19231333333333334
           },
           "scratch": null
         },
@@ -7490,10 +8836,15 @@ window.TLAPS_DATA = {
             "taskCount": 2,
             "activeTimeSecs": 828.9835761429276,
             "activeTimePerTask": 414.4917880714638,
+            "inputTokens": 15714,
             "outputTokens": 45603,
-            "outputTokensPerTask": 22801.5,
-            "outputCostUsd": 0.684045,
-            "outputCostPerTask": 0.3420225
+            "totalTokens": 61317,
+            "totalTokensPerTask": 30658.5,
+            "cacheReadInputTokens": 9728,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 61.90658011963854,
+            "equivalentCostUsd": 0.701442,
+            "equivalentCostPerTask": 0.350721
           },
           "scratch": null
         },
@@ -7507,10 +8858,15 @@ window.TLAPS_DATA = {
             "taskCount": 4,
             "activeTimeSecs": 1254.8072206482757,
             "activeTimePerTask": 313.7018051620689,
+            "inputTokens": 86259,
             "outputTokens": 68662,
-            "outputTokensPerTask": 17165.5,
-            "outputCostUsd": 1.02993,
-            "outputCostPerTask": 0.2574825
+            "totalTokens": 154921,
+            "totalTokensPerTask": 38730.25,
+            "cacheReadInputTokens": 21504,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 24.929572566340905,
+            "equivalentCostUsd": 1.1971935,
+            "equivalentCostPerTask": 0.299298375
           },
           "scratch": null
         },
@@ -7524,10 +8880,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 44.41240124008618,
             "activeTimePerTask": 44.41240124008618,
+            "inputTokens": 14155,
             "outputTokens": 2171,
-            "outputTokensPerTask": 2171,
-            "outputCostUsd": 0.032565,
-            "outputCostPerTask": 0.032565
+            "totalTokens": 16326,
+            "totalTokensPerTask": 16326,
+            "cacheReadInputTokens": 4864,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 34.36241610738255,
+            "equivalentCostUsd": 0.0570085,
+            "equivalentCostPerTask": 0.0570085
           },
           "scratch": null
         },
@@ -7541,10 +8902,15 @@ window.TLAPS_DATA = {
             "taskCount": 7,
             "activeTimeSecs": 3088.1845831095707,
             "activeTimePerTask": 441.16922615851007,
+            "inputTokens": 86465,
             "outputTokens": 166972,
-            "outputTokensPerTask": 23853.14285714286,
-            "outputCostUsd": 2.50458,
-            "outputCostPerTask": 0.3577971428571428
+            "totalTokens": 253437,
+            "totalTokensPerTask": 36205.28571428572,
+            "cacheReadInputTokens": 52480,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 60.69507893367258,
+            "equivalentCostUsd": 2.6026625,
+            "equivalentCostPerTask": 0.3718089285714286
           },
           "scratch": null
         },
@@ -7558,10 +8924,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 300.16218410898,
             "activeTimePerTask": 300.16218410898,
+            "inputTokens": 7367,
             "outputTokens": 16184,
-            "outputTokensPerTask": 16184,
-            "outputCostUsd": 0.24276,
-            "outputCostPerTask": 0.24276
+            "totalTokens": 23551,
+            "totalTokensPerTask": 23551,
+            "cacheReadInputTokens": 4864,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 66.02416180263336,
+            "equivalentCostUsd": 0.2502335,
+            "equivalentCostPerTask": 0.2502335
           },
           "scratch": null
         },
@@ -7575,10 +8946,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 126.53131117206067,
             "activeTimePerTask": 126.53131117206067,
+            "inputTokens": 7026,
             "outputTokens": 6696,
-            "outputTokensPerTask": 6696,
-            "outputCostUsd": 0.10044,
-            "outputCostPerTask": 0.10044
+            "totalTokens": 13722,
+            "totalTokensPerTask": 13722,
+            "cacheReadInputTokens": 4864,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 69.22857956162824,
+            "equivalentCostUsd": 0.107061,
+            "equivalentCostPerTask": 0.107061
           },
           "scratch": null
         },
@@ -7592,10 +8968,15 @@ window.TLAPS_DATA = {
             "taskCount": 3,
             "activeTimeSecs": 806.6617164439522,
             "activeTimePerTask": 268.88723881465074,
+            "inputTokens": 24746,
             "outputTokens": 44114,
-            "outputTokensPerTask": 14704.666666666666,
-            "outputCostUsd": 0.66171,
-            "outputCostPerTask": 0.22057000000000002
+            "totalTokens": 68860,
+            "totalTokensPerTask": 22953.333333333332,
+            "cacheReadInputTokens": 16640,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 67.24319081871818,
+            "equivalentCostUsd": 0.6861349999999999,
+            "equivalentCostPerTask": 0.22871166666666665
           },
           "scratch": null
         },
@@ -7609,10 +8990,15 @@ window.TLAPS_DATA = {
             "taskCount": 4,
             "activeTimeSecs": 1420.5124524699058,
             "activeTimePerTask": 355.12811311747646,
+            "inputTokens": 33218,
             "outputTokens": 77883,
-            "outputTokensPerTask": 19470.75,
-            "outputCostUsd": 1.168245,
-            "outputCostPerTask": 0.29206125
+            "totalTokens": 111101,
+            "totalTokensPerTask": 27775.25,
+            "cacheReadInputTokens": 23552,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 70.9013185622253,
+            "equivalentCostUsd": 1.1982979999999999,
+            "equivalentCostPerTask": 0.29957449999999997
           },
           "scratch": null
         },
@@ -7626,10 +9012,15 @@ window.TLAPS_DATA = {
             "taskCount": 2,
             "activeTimeSecs": 138.8295849680435,
             "activeTimePerTask": 69.41479248402175,
+            "inputTokens": 13796,
             "outputTokens": 7235,
-            "outputTokensPerTask": 3617.5,
-            "outputCostUsd": 0.108525,
-            "outputCostPerTask": 0.0542625
+            "totalTokens": 21031,
+            "totalTokensPerTask": 10515.5,
+            "cacheReadInputTokens": 10752,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 77.93563351696143,
+            "equivalentCostUsd": 0.118823,
+            "equivalentCostPerTask": 0.0594115
           },
           "scratch": null
         },
@@ -7643,10 +9034,15 @@ window.TLAPS_DATA = {
             "taskCount": 3,
             "activeTimeSecs": 364.9116889380384,
             "activeTimePerTask": 121.63722964601281,
+            "inputTokens": 21391,
             "outputTokens": 19428,
-            "outputTokensPerTask": 6476,
-            "outputCostUsd": 0.29142,
-            "outputCostPerTask": 0.09714
+            "totalTokens": 40819,
+            "totalTokensPerTask": 13606.333333333334,
+            "cacheReadInputTokens": 10752,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 50.26412977420411,
+            "equivalentCostUsd": 0.3207055,
+            "equivalentCostPerTask": 0.10690183333333332
           },
           "scratch": null
         },
@@ -7660,10 +9056,15 @@ window.TLAPS_DATA = {
             "taskCount": 12,
             "activeTimeSecs": 4184.147454508347,
             "activeTimePerTask": 348.6789545423623,
+            "inputTokens": 125308,
             "outputTokens": 224563,
-            "outputTokensPerTask": 18713.583333333332,
-            "outputCostUsd": 3.368445,
-            "outputCostPerTask": 0.28070375
+            "totalTokens": 349871,
+            "totalTokensPerTask": 29155.916666666668,
+            "cacheReadInputTokens": 62720,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 50.0526702205765,
+            "equivalentCostUsd": 3.540595,
+            "equivalentCostPerTask": 0.29504958333333337
           },
           "scratch": null
         },
@@ -7677,10 +9078,15 @@ window.TLAPS_DATA = {
             "taskCount": 2,
             "activeTimeSecs": 677.765604525106,
             "activeTimePerTask": 338.882802262553,
+            "inputTokens": 21949,
             "outputTokens": 37153,
-            "outputTokensPerTask": 18576.5,
-            "outputCostUsd": 0.557295,
-            "outputCostPerTask": 0.2786475
+            "totalTokens": 59102,
+            "totalTokensPerTask": 29551,
+            "cacheReadInputTokens": 10752,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 48.986286391179554,
+            "equivalentCostUsd": 0.5879755,
+            "equivalentCostPerTask": 0.29398775
           },
           "scratch": null
         },
@@ -7694,10 +9100,15 @@ window.TLAPS_DATA = {
             "taskCount": 10,
             "activeTimeSecs": 2280.3977033190895,
             "activeTimePerTask": 228.03977033190895,
+            "inputTokens": 84146,
             "outputTokens": 114504,
-            "outputTokensPerTask": 11450.4,
-            "outputCostUsd": 1.71756,
-            "outputCostPerTask": 0.171756
+            "totalTokens": 198650,
+            "totalTokensPerTask": 19865,
+            "cacheReadInputTokens": 51712,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 61.45508996268391,
+            "equivalentCostUsd": 1.8115729999999999,
+            "equivalentCostPerTask": 0.1811573
           },
           "scratch": null
         },
@@ -7711,10 +9122,15 @@ window.TLAPS_DATA = {
             "taskCount": 2,
             "activeTimeSecs": 429.3112874031067,
             "activeTimePerTask": 214.65564370155334,
+            "inputTokens": 14222,
             "outputTokens": 23232,
-            "outputTokensPerTask": 11616,
-            "outputCostUsd": 0.34848,
-            "outputCostPerTask": 0.17424
+            "totalTokens": 37454,
+            "totalTokensPerTask": 18727,
+            "cacheReadInputTokens": 9728,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 68.40106876669948,
+            "equivalentCostUsd": 0.362147,
+            "equivalentCostPerTask": 0.1810735
           },
           "scratch": null
         },
@@ -7728,10 +9144,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 226.44486143393442,
             "activeTimePerTask": 226.44486143393442,
+            "inputTokens": 7648,
             "outputTokens": 12365,
-            "outputTokensPerTask": 12365,
-            "outputCostUsd": 0.185475,
-            "outputCostPerTask": 0.185475
+            "totalTokens": 20013,
+            "totalTokensPerTask": 20013,
+            "cacheReadInputTokens": 4864,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 63.59832635983263,
+            "equivalentCostUsd": 0.193651,
+            "equivalentCostPerTask": 0.193651
           },
           "scratch": null
         },
@@ -7745,10 +9166,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 148.7549946210347,
             "activeTimePerTask": 148.7549946210347,
+            "inputTokens": 7555,
             "outputTokens": 8026,
-            "outputTokensPerTask": 8026,
-            "outputCostUsd": 0.12039,
-            "outputCostPerTask": 0.12039
+            "totalTokens": 15581,
+            "totalTokensPerTask": 15581,
+            "cacheReadInputTokens": 4864,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 64.38120450033091,
+            "equivalentCostUsd": 0.1283335,
+            "equivalentCostPerTask": 0.1283335
           },
           "scratch": null
         },
@@ -7762,10 +9188,15 @@ window.TLAPS_DATA = {
             "taskCount": 3,
             "activeTimeSecs": 1204.8399795987643,
             "activeTimePerTask": 401.61332653292146,
+            "inputTokens": 26100,
             "outputTokens": 63791,
-            "outputTokensPerTask": 21263.666666666668,
-            "outputCostUsd": 0.956865,
-            "outputCostPerTask": 0.318955
+            "totalTokens": 89891,
+            "totalTokensPerTask": 29963.666666666668,
+            "cacheReadInputTokens": 15616,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 59.83141762452107,
+            "equivalentCostUsd": 0.986979,
+            "equivalentCostPerTask": 0.32899300000000004
           },
           "scratch": null
         },
@@ -7779,10 +9210,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 109.0336799910292,
             "activeTimePerTask": 109.0336799910292,
+            "inputTokens": 7053,
             "outputTokens": 5864,
-            "outputTokensPerTask": 5864,
-            "outputCostUsd": 0.08796,
-            "outputCostPerTask": 0.08796
+            "totalTokens": 12917,
+            "totalTokensPerTask": 12917,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.1055925,
+            "equivalentCostPerTask": 0.1055925
           },
           "scratch": null
         },
@@ -7796,10 +9232,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 498.74199140281416,
             "activeTimePerTask": 498.74199140281416,
+            "inputTokens": 9595,
             "outputTokens": 27423,
-            "outputTokensPerTask": 27423,
-            "outputCostUsd": 0.411345,
-            "outputCostPerTask": 0.411345
+            "totalTokens": 37018,
+            "totalTokensPerTask": 37018,
+            "cacheReadInputTokens": 5888,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 61.36529442417926,
+            "equivalentCostUsd": 0.4220845,
+            "equivalentCostPerTask": 0.4220845
           },
           "scratch": null
         },
@@ -7813,10 +9254,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 184.5705916217994,
             "activeTimePerTask": 184.5705916217994,
+            "inputTokens": 7964,
             "outputTokens": 10039,
-            "outputTokensPerTask": 10039,
-            "outputCostUsd": 0.150585,
-            "outputCostPerTask": 0.150585
+            "totalTokens": 18003,
+            "totalTokensPerTask": 18003,
+            "cacheReadInputTokens": 4864,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 61.0748367654445,
+            "equivalentCostUsd": 0.159551,
+            "equivalentCostPerTask": 0.159551
           },
           "scratch": null
         },
@@ -7830,10 +9276,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 62.292642791057006,
             "activeTimePerTask": 62.292642791057006,
+            "inputTokens": 6755,
             "outputTokens": 2879,
-            "outputTokensPerTask": 2879,
-            "outputCostUsd": 0.043185,
-            "outputCostPerTask": 0.043185
+            "totalTokens": 9634,
+            "totalTokensPerTask": 9634,
+            "cacheReadInputTokens": 4864,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 72.0059215396003,
+            "equivalentCostUsd": 0.0491285,
+            "equivalentCostPerTask": 0.0491285
           },
           "scratch": null
         },
@@ -7847,10 +9298,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 244.22637539100833,
             "activeTimePerTask": 244.22637539100833,
+            "inputTokens": 7563,
             "outputTokens": 13195,
-            "outputTokensPerTask": 13195,
-            "outputCostUsd": 0.197925,
-            "outputCostPerTask": 0.197925
+            "totalTokens": 20758,
+            "totalTokensPerTask": 20758,
+            "cacheReadInputTokens": 5888,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 77.85270395345762,
+            "equivalentCostUsd": 0.2035845,
+            "equivalentCostPerTask": 0.2035845
           },
           "scratch": null
         },
@@ -7864,10 +9320,15 @@ window.TLAPS_DATA = {
             "taskCount": 3,
             "activeTimeSecs": 506.7692495950032,
             "activeTimePerTask": 168.9230831983344,
+            "inputTokens": 26077,
             "outputTokens": 27328,
-            "outputTokensPerTask": 9109.333333333334,
-            "outputCostUsd": 0.40992,
-            "outputCostPerTask": 0.13664
+            "totalTokens": 53405,
+            "totalTokensPerTask": 17801.666666666668,
+            "cacheReadInputTokens": 14592,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 55.95735705794378,
+            "equivalentCostUsd": 0.44228049999999997,
+            "equivalentCostPerTask": 0.1474268333333333
           },
           "scratch": null
         },
@@ -7881,10 +9342,15 @@ window.TLAPS_DATA = {
             "taskCount": 3,
             "activeTimeSecs": 479.64270574902184,
             "activeTimePerTask": 159.8809019163406,
+            "inputTokens": 21332,
             "outputTokens": 25670,
-            "outputTokensPerTask": 8556.666666666666,
-            "outputCostUsd": 0.38505,
-            "outputCostPerTask": 0.12835
+            "totalTokens": 47002,
+            "totalTokensPerTask": 15667.333333333334,
+            "cacheReadInputTokens": 11776,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 55.203450215638476,
+            "equivalentCostUsd": 0.411884,
+            "equivalentCostPerTask": 0.13729466666666665
           },
           "scratch": null
         },
@@ -7898,10 +9364,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 156.9228972478304,
             "activeTimePerTask": 156.9228972478304,
+            "inputTokens": 8101,
             "outputTokens": 8494,
-            "outputTokensPerTask": 8494,
-            "outputCostUsd": 0.12741,
-            "outputCostPerTask": 0.12741
+            "totalTokens": 16595,
+            "totalTokensPerTask": 16595,
+            "cacheReadInputTokens": 4864,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 60.04197012714479,
+            "equivalentCostUsd": 0.1367185,
+            "equivalentCostPerTask": 0.1367185
           },
           "scratch": null
         },
@@ -7915,10 +9386,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 263.326079063816,
             "activeTimePerTask": 263.326079063816,
+            "inputTokens": 7341,
             "outputTokens": 14395,
-            "outputTokensPerTask": 14395,
-            "outputCostUsd": 0.215925,
-            "outputCostPerTask": 0.215925
+            "totalTokens": 21736,
+            "totalTokensPerTask": 21736,
+            "cacheReadInputTokens": 4864,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 66.2580029968669,
+            "equivalentCostUsd": 0.2233335,
+            "equivalentCostPerTask": 0.2233335
           },
           "scratch": null
         },
@@ -7932,10 +9408,15 @@ window.TLAPS_DATA = {
             "taskCount": 2,
             "activeTimeSecs": 672.6657875250094,
             "activeTimePerTask": 336.3328937625047,
+            "inputTokens": 16153,
             "outputTokens": 36772,
-            "outputTokensPerTask": 18386,
-            "outputCostUsd": 0.55158,
-            "outputCostPerTask": 0.27579
+            "totalTokens": 52925,
+            "totalTokensPerTask": 26462.5,
+            "cacheReadInputTokens": 9728,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 60.22410697703213,
+            "equivalentCostUsd": 0.5700745,
+            "equivalentCostPerTask": 0.28503725
           },
           "scratch": null
         },
@@ -7949,10 +9430,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 58.35107493214309,
             "activeTimePerTask": 58.35107493214309,
+            "inputTokens": 7048,
             "outputTokens": 3006,
-            "outputTokensPerTask": 3006,
-            "outputCostUsd": 0.04509,
-            "outputCostPerTask": 0.04509
+            "totalTokens": 10054,
+            "totalTokensPerTask": 10054,
+            "cacheReadInputTokens": 5888,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 83.54143019296254,
+            "equivalentCostUsd": 0.049462,
+            "equivalentCostPerTask": 0.049462
           },
           "scratch": null
         },
@@ -7966,10 +9452,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 267.4473163378425,
             "activeTimePerTask": 267.4473163378425,
+            "inputTokens": 9768,
             "outputTokens": 14620,
-            "outputTokensPerTask": 14620,
-            "outputCostUsd": 0.2193,
-            "outputCostPerTask": 0.2193
+            "totalTokens": 24388,
+            "totalTokensPerTask": 24388,
+            "cacheReadInputTokens": 5888,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 60.27846027846028,
+            "equivalentCostUsd": 0.230472,
+            "equivalentCostPerTask": 0.230472
           },
           "scratch": null
         },
@@ -7983,10 +9474,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 87.59822361613624,
             "activeTimePerTask": 87.59822361613624,
+            "inputTokens": 6758,
             "outputTokens": 4568,
-            "outputTokensPerTask": 4568,
-            "outputCostUsd": 0.06852,
-            "outputCostPerTask": 0.06852
+            "totalTokens": 11326,
+            "totalTokensPerTask": 11326,
+            "cacheReadInputTokens": 5888,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 87.12636874815034,
+            "equivalentCostUsd": 0.072167,
+            "equivalentCostPerTask": 0.072167
           },
           "scratch": null
         },
@@ -8000,10 +9496,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 114.05794844892807,
             "activeTimePerTask": 114.05794844892807,
+            "inputTokens": 8149,
             "outputTokens": 6110,
-            "outputTokensPerTask": 6110,
-            "outputCostUsd": 0.09165,
-            "outputCostPerTask": 0.09165
+            "totalTokens": 14259,
+            "totalTokensPerTask": 14259,
+            "cacheReadInputTokens": 4864,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 59.6883053135354,
+            "equivalentCostUsd": 0.1010785,
+            "equivalentCostPerTask": 0.1010785
           },
           "scratch": null
         },
@@ -8017,10 +9518,15 @@ window.TLAPS_DATA = {
             "taskCount": 2,
             "activeTimeSecs": 847.6322383591905,
             "activeTimePerTask": 423.81611917959526,
+            "inputTokens": 19093,
             "outputTokens": 46643,
-            "outputTokensPerTask": 23321.5,
-            "outputCostUsd": 0.699645,
-            "outputCostPerTask": 0.3498225
+            "totalTokens": 65736,
+            "totalTokensPerTask": 32868,
+            "cacheReadInputTokens": 4864,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 25.47530508563348,
+            "equivalentCostUsd": 0.7364335,
+            "equivalentCostPerTask": 0.36821675
           },
           "scratch": null
         },
@@ -8034,10 +9540,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 262.52894331119023,
             "activeTimePerTask": 262.52894331119023,
+            "inputTokens": 7566,
             "outputTokens": 14163,
-            "outputTokensPerTask": 14163,
-            "outputCostUsd": 0.212445,
-            "outputCostPerTask": 0.212445
+            "totalTokens": 21729,
+            "totalTokensPerTask": 21729,
+            "cacheReadInputTokens": 4864,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 64.28760243193233,
+            "equivalentCostUsd": 0.220416,
+            "equivalentCostPerTask": 0.220416
           },
           "scratch": null
         },
@@ -8051,10 +9562,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 282.84284306294285,
             "activeTimePerTask": 282.84284306294285,
+            "inputTokens": 7385,
             "outputTokens": 15463,
-            "outputTokensPerTask": 15463,
-            "outputCostUsd": 0.231945,
-            "outputCostPerTask": 0.231945
+            "totalTokens": 22848,
+            "totalTokensPerTask": 22848,
+            "cacheReadInputTokens": 4864,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 65.86323628977658,
+            "equivalentCostUsd": 0.2394635,
+            "equivalentCostPerTask": 0.2394635
           },
           "scratch": null
         },
@@ -8068,10 +9584,15 @@ window.TLAPS_DATA = {
             "taskCount": 6,
             "activeTimeSecs": 1907.072390571935,
             "activeTimePerTask": 317.84539842865587,
+            "inputTokens": 67207,
             "outputTokens": 103622,
-            "outputTokensPerTask": 17270.333333333332,
-            "outputCostUsd": 1.55433,
-            "outputCostPerTask": 0.259055
+            "totalTokens": 170829,
+            "totalTokensPerTask": 28471.5,
+            "cacheReadInputTokens": 31232,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 46.471349710595625,
+            "equivalentCostUsd": 1.6520754999999998,
+            "equivalentCostPerTask": 0.27534591666666663
           },
           "scratch": null
         },
@@ -8085,10 +9606,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 314.034803773975,
             "activeTimePerTask": 314.034803773975,
+            "inputTokens": 7780,
             "outputTokens": 17215,
-            "outputTokensPerTask": 17215,
-            "outputCostUsd": 0.258225,
-            "outputCostPerTask": 0.258225
+            "totalTokens": 24995,
+            "totalTokensPerTask": 24995,
+            "cacheReadInputTokens": 4864,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 62.51928020565553,
+            "equivalentCostUsd": 0.266731,
+            "equivalentCostPerTask": 0.266731
           },
           "scratch": null
         },
@@ -8102,10 +9628,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 256.26186570106074,
             "activeTimePerTask": 256.26186570106074,
+            "inputTokens": 8146,
             "outputTokens": 13958,
-            "outputTokensPerTask": 13958,
-            "outputCostUsd": 0.20937,
-            "outputCostPerTask": 0.20937
+            "totalTokens": 22104,
+            "totalTokensPerTask": 22104,
+            "cacheReadInputTokens": 4864,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 59.710287257549716,
+            "equivalentCostUsd": 0.218791,
+            "equivalentCostPerTask": 0.218791
           },
           "scratch": null
         },
@@ -8119,10 +9650,15 @@ window.TLAPS_DATA = {
             "taskCount": 11,
             "activeTimeSecs": 5319.164862046018,
             "activeTimePerTask": 483.56044200418347,
+            "inputTokens": 143038,
             "outputTokens": 266766,
-            "outputTokensPerTask": 24251.454545454544,
-            "outputCostUsd": 4.00149,
-            "outputCostPerTask": 0.3637718181818182
+            "totalTokens": 409804,
+            "totalTokensPerTask": 37254.90909090909,
+            "cacheReadInputTokens": 50688,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 35.436737090842996,
+            "equivalentCostUsd": 4.245037,
+            "equivalentCostPerTask": 0.38591245454545453
           },
           "scratch": null
         },
@@ -8136,10 +9672,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 605.7101702860091,
             "activeTimePerTask": 605.7101702860091,
+            "inputTokens": 7509,
             "outputTokens": 33418,
-            "outputTokensPerTask": 33418,
-            "outputCostUsd": 0.50127,
-            "outputCostPerTask": 0.50127
+            "totalTokens": 40927,
+            "totalTokensPerTask": 40927,
+            "cacheReadInputTokens": 4864,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 64.77560261020109,
+            "equivalentCostUsd": 0.5090985,
+            "equivalentCostPerTask": 0.5090985
           },
           "scratch": null
         },
@@ -8153,10 +9694,15 @@ window.TLAPS_DATA = {
             "taskCount": 2,
             "activeTimeSecs": 777.396387651097,
             "activeTimePerTask": 388.6981938255485,
+            "inputTokens": 19191,
             "outputTokens": 41917,
-            "outputTokensPerTask": 20958.5,
-            "outputCostUsd": 0.628755,
-            "outputCostPerTask": 0.3143775
+            "totalTokens": 61108,
+            "totalTokensPerTask": 30554,
+            "cacheReadInputTokens": 13824,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 72.03376582773176,
+            "equivalentCostUsd": 0.6456284999999999,
+            "equivalentCostPerTask": 0.32281424999999997
           },
           "scratch": null
         },
@@ -8170,10 +9716,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 157.24127039383166,
             "activeTimePerTask": 157.24127039383166,
+            "inputTokens": 7681,
             "outputTokens": 8498,
-            "outputTokensPerTask": 8498,
-            "outputCostUsd": 0.12747,
-            "outputCostPerTask": 0.12747
+            "totalTokens": 16179,
+            "totalTokensPerTask": 16179,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.1466725,
+            "equivalentCostPerTask": 0.1466725
           },
           "scratch": null
         },
@@ -8187,10 +9738,15 @@ window.TLAPS_DATA = {
             "taskCount": 5,
             "activeTimeSecs": 726.094187846873,
             "activeTimePerTask": 145.21883756937459,
+            "inputTokens": 45895,
             "outputTokens": 38890,
-            "outputTokensPerTask": 7778,
-            "outputCostUsd": 0.58335,
-            "outputCostPerTask": 0.11667000000000001
+            "totalTokens": 84785,
+            "totalTokensPerTask": 16957,
+            "cacheReadInputTokens": 10752,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 23.42738860442314,
+            "equivalentCostUsd": 0.6738955,
+            "equivalentCostPerTask": 0.13477909999999999
           },
           "scratch": null
         },
@@ -8204,10 +9760,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 30.516019897069782,
             "activeTimePerTask": 30.516019897069782,
+            "inputTokens": 7719,
             "outputTokens": 1495,
-            "outputTokensPerTask": 1495,
-            "outputCostUsd": 0.022425,
-            "outputCostPerTask": 0.022425
+            "totalTokens": 9214,
+            "totalTokensPerTask": 9214,
+            "cacheReadInputTokens": 4864,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 63.013343697370125,
+            "equivalentCostUsd": 0.0307785,
+            "equivalentCostPerTask": 0.0307785
           },
           "scratch": null
         },
@@ -8221,10 +9782,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 476.9754533858504,
             "activeTimePerTask": 476.9754533858504,
+            "inputTokens": 10605,
             "outputTokens": 26129,
-            "outputTokensPerTask": 26129,
-            "outputCostUsd": 0.391935,
-            "outputCostPerTask": 0.391935
+            "totalTokens": 36734,
+            "totalTokensPerTask": 36734,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.4184475,
+            "equivalentCostPerTask": 0.4184475
           },
           "scratch": null
         },
@@ -8238,10 +9804,15 @@ window.TLAPS_DATA = {
             "taskCount": 4,
             "activeTimeSecs": 1293.2690630657598,
             "activeTimePerTask": 323.31726576643996,
+            "inputTokens": 29403,
             "outputTokens": 70805,
-            "outputTokensPerTask": 17701.25,
-            "outputCostUsd": 1.062075,
-            "outputCostPerTask": 0.26551875
+            "totalTokens": 100208,
+            "totalTokensPerTask": 25052,
+            "cacheReadInputTokens": 9728,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 33.08505934768561,
+            "equivalentCostUsd": 1.1136945,
+            "equivalentCostPerTask": 0.278423625
           },
           "scratch": null
         },
@@ -8255,10 +9826,15 @@ window.TLAPS_DATA = {
             "taskCount": 2,
             "activeTimeSecs": 414.52405931497924,
             "activeTimePerTask": 207.26202965748962,
+            "inputTokens": 13150,
             "outputTokens": 22508,
-            "outputTokensPerTask": 11254,
-            "outputCostUsd": 0.33762,
-            "outputCostPerTask": 0.16881
+            "totalTokens": 35658,
+            "totalTokensPerTask": 17829,
+            "cacheReadInputTokens": 9728,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 73.97718631178707,
+            "equivalentCostUsd": 0.348607,
+            "equivalentCostPerTask": 0.1743035
           },
           "scratch": null
         },
@@ -8272,10 +9848,15 @@ window.TLAPS_DATA = {
             "taskCount": 4,
             "activeTimeSecs": 1902.6821254929528,
             "activeTimePerTask": 475.6705313732382,
+            "inputTokens": 34524,
             "outputTokens": 104655,
-            "outputTokensPerTask": 26163.75,
-            "outputCostUsd": 1.569825,
-            "outputCostPerTask": 0.39245625
+            "totalTokens": 139179,
+            "totalTokensPerTask": 34794.75,
+            "cacheReadInputTokens": 23552,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 68.21920982504925,
+            "equivalentCostUsd": 1.603143,
+            "equivalentCostPerTask": 0.40078575
           },
           "scratch": null
         },
@@ -8289,10 +9870,15 @@ window.TLAPS_DATA = {
             "taskCount": 2,
             "activeTimeSecs": 532.9099731289316,
             "activeTimePerTask": 266.4549865644658,
+            "inputTokens": 17332,
             "outputTokens": 28995,
-            "outputTokensPerTask": 14497.5,
-            "outputCostUsd": 0.434925,
-            "outputCostPerTask": 0.2174625
+            "totalTokens": 46327,
+            "totalTokensPerTask": 23163.5,
+            "cacheReadInputTokens": 10752,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 62.035541195476576,
+            "equivalentCostUsd": 0.454063,
+            "equivalentCostPerTask": 0.2270315
           },
           "scratch": null
         },
@@ -8306,10 +9892,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 43.02346637402661,
             "activeTimePerTask": 43.02346637402661,
+            "inputTokens": 7275,
             "outputTokens": 2055,
-            "outputTokensPerTask": 2055,
-            "outputCostUsd": 0.030825,
-            "outputCostPerTask": 0.030825
+            "totalTokens": 9330,
+            "totalTokensPerTask": 9330,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.0490125,
+            "equivalentCostPerTask": 0.0490125
           },
           "scratch": null
         }
@@ -8326,14 +9917,16 @@ window.TLAPS_DATA = {
       "cohortLabel": "One-Shot",
       "generated": "2026-08-11",
       "resultsFile": "results/codex-single-turn-gpt-5.6-luna.json",
-      "resultsVersion": "f8359476b9c9",
+      "resultsVersion": "29ad4efcfe6f",
       "modes": [
         "completion"
       ],
       "perMetric": {
         "completion": 4.9,
         "activeTimePerTask": 524.9271024738304,
-        "outputCostPerTask": null
+        "totalTokens": 8215609,
+        "cacheRatePct": 8.032857438622257,
+        "equivalentCostUsd": 32.805401
       },
       "perMode": {
         "completion": {
@@ -8345,11 +9938,16 @@ window.TLAPS_DATA = {
           "taskCount": 190,
           "activeTimeSecs": 99736.14947002777,
           "activeTimePerTask": 524.9271024738304,
+          "inputTokens": 3250649,
           "outputTokens": 4964960,
-          "outputTokensPerTask": 26131.36842105263,
-          "outputCostUsd": null,
-          "outputCostPerTask": null,
-          "specificationMacroPct": 4.9,
+          "totalTokens": 8215609,
+          "totalTokensPerTask": 43240.04736842105,
+          "cacheReadInputTokens": 261120,
+          "cacheWriteInputTokens": 0,
+          "cacheRatePct": 8.032857438622257,
+          "equivalentCostUsd": 32.805401,
+          "equivalentCostPerTask": 0.17266000526315792,
+          "specBalancedPassRatePct": 4.9,
           "completeSpecifications": 2,
           "representedSpecifications": 56,
           "allLeavesCompletePct": 3.6
@@ -8374,10 +9972,15 @@ window.TLAPS_DATA = {
             "taskCount": 34,
             "activeTimeSecs": 10533.412766992813,
             "activeTimePerTask": 309.8062578527298,
+            "inputTokens": 449257,
             "outputTokens": 564692,
-            "outputTokensPerTask": 16608.58823529412,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "totalTokens": 1013949,
+            "totalTokensPerTask": 29822.029411764706,
+            "cacheReadInputTokens": 46848,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 10.427884262237427,
+            "equivalentCostUsd": 3.7952458,
+            "equivalentCostPerTask": 0.11162487647058823
           },
           {
             "id": "d2",
@@ -8389,10 +9992,15 @@ window.TLAPS_DATA = {
             "taskCount": 45,
             "activeTimeSecs": 19184.020017517032,
             "activeTimePerTask": 426.31155594482294,
+            "inputTokens": 716957,
             "outputTokens": 1010809,
-            "outputTokensPerTask": 22462.422222222223,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "totalTokens": 1727766,
+            "totalTokensPerTask": 38394.8,
+            "cacheReadInputTokens": 24320,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 3.392114171421717,
+            "equivalentCostUsd": 6.7599230000000015,
+            "equivalentCostPerTask": 0.15022051111111115
           },
           {
             "id": "d3",
@@ -8404,10 +10012,15 @@ window.TLAPS_DATA = {
             "taskCount": 54,
             "activeTimeSecs": 29885.08742732182,
             "activeTimePerTask": 553.4275449504041,
+            "inputTokens": 1084445,
             "outputTokens": 1383026,
-            "outputTokensPerTask": 25611.59259259259,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "totalTokens": 2467471,
+            "totalTokensPerTask": 45693.90740740741,
+            "cacheReadInputTokens": 87296,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 8.049831941684456,
+            "equivalentCostUsd": 9.3040346,
+            "equivalentCostPerTask": 0.17229693703703702
           },
           {
             "id": "d4",
@@ -8419,10 +10032,15 @@ window.TLAPS_DATA = {
             "taskCount": 19,
             "activeTimeSecs": 11395.449888001895,
             "activeTimePerTask": 599.7605204211524,
+            "inputTokens": 342054,
             "outputTokens": 600986,
-            "outputTokensPerTask": 31630.842105263157,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "totalTokens": 943040,
+            "totalTokensPerTask": 49633.68421052631,
+            "cacheReadInputTokens": 70144,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 20.506703619896275,
+            "equivalentCostUsd": 3.8848404,
+            "equivalentCostPerTask": 0.20446528421052632
           },
           {
             "id": "d5",
@@ -8434,10 +10052,15 @@ window.TLAPS_DATA = {
             "taskCount": 19,
             "activeTimeSecs": 14196.62876529689,
             "activeTimePerTask": 747.1909876472047,
+            "inputTokens": 370436,
             "outputTokens": 678893,
-            "outputTokensPerTask": 35731.21052631579,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "totalTokens": 1049329,
+            "totalTokensPerTask": 55227.84210526316,
+            "cacheReadInputTokens": 22784,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 6.150590115431545,
+            "equivalentCostUsd": 4.4232884,
+            "equivalentCostPerTask": 0.23280465263157893
           },
           {
             "id": "d6",
@@ -8449,10 +10072,15 @@ window.TLAPS_DATA = {
             "taskCount": 19,
             "activeTimeSecs": 14541.550604897318,
             "activeTimePerTask": 765.3447686788062,
+            "inputTokens": 287500,
             "outputTokens": 726554,
-            "outputTokensPerTask": 38239.68421052631,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "totalTokens": 1014054,
+            "totalTokensPerTask": 53371.26315789474,
+            "cacheReadInputTokens": 9728,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 3.3836521739130436,
+            "equivalentCostUsd": 4.638068799999999,
+            "equivalentCostPerTask": 0.24410888421052626
           }
         ],
         "scratch": null
@@ -8461,10 +10089,18 @@ window.TLAPS_DATA = {
       "usage": {
         "taskCount": 190,
         "activeTimeSecs": 99736.14947002777,
+        "inputTokens": 3250649,
         "outputTokens": 4964960,
-        "outputCostUsd": null
+        "totalTokens": 8215609,
+        "cacheReadInputTokens": 261120,
+        "cacheWriteInputTokens": 0,
+        "cacheRatePct": 8.032857438622257,
+        "equivalentCostUsd": 32.805401
       },
-      "pricing": null,
+      "pricing": {
+        "asOf": "2026-08-11",
+        "source": "https://developers.openai.com/api/docs/models/gpt-5.6-luna"
+      },
       "perSpec": {
         "apalache-examples-konnov--apalache-examples-ben-or83-ben-or83-proofs-tla": {
           "completion": {
@@ -8476,10 +10112,15 @@ window.TLAPS_DATA = {
             "taskCount": 41,
             "activeTimeSecs": 16955.92167873145,
             "activeTimePerTask": 413.55906533491344,
+            "inputTokens": 1099084,
             "outputTokens": 899642,
-            "outputTokensPerTask": 21942.48780487805,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "totalTokens": 1998726,
+            "totalTokensPerTask": 48749.41463414634,
+            "cacheReadInputTokens": 101632,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 9.246972933824894,
+            "equivalentCostUsd": 6.405467199999999,
+            "equivalentCostPerTask": 0.15623090731707315
           },
           "scratch": null
         },
@@ -8493,10 +10134,15 @@ window.TLAPS_DATA = {
             "taskCount": 15,
             "activeTimeSecs": 4261.28166016168,
             "activeTimePerTask": 284.08544401077864,
+            "inputTokens": 469973,
             "outputTokens": 186747,
-            "outputTokensPerTask": 12449.8,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "totalTokens": 656720,
+            "totalTokensPerTask": 43781.333333333336,
+            "cacheReadInputTokens": 67584,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 14.380400576203314,
+            "equivalentCostUsd": 1.5296294,
+            "equivalentCostPerTask": 0.10197529333333333
           },
           "scratch": null
         },
@@ -8510,10 +10156,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 550.9825541989412,
             "activeTimePerTask": 550.9825541989412,
+            "inputTokens": 9976,
             "outputTokens": 30278,
-            "outputTokensPerTask": 30278,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "totalTokens": 40254,
+            "totalTokensPerTask": 40254,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.191644,
+            "equivalentCostPerTask": 0.191644
           },
           "scratch": null
         },
@@ -8527,10 +10178,15 @@ window.TLAPS_DATA = {
             "taskCount": 2,
             "activeTimeSecs": 1073.301545218099,
             "activeTimePerTask": 536.6507726090495,
+            "inputTokens": 17123,
             "outputTokens": 59197,
-            "outputTokensPerTask": 29598.5,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "totalTokens": 76320,
+            "totalTokensPerTask": 38160,
+            "cacheReadInputTokens": 4864,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 28.406237224785375,
+            "equivalentCostUsd": 0.3679274,
+            "equivalentCostPerTask": 0.1839637
           },
           "scratch": null
         },
@@ -8544,10 +10200,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 118.3375071180053,
             "activeTimePerTask": 118.3375071180053,
+            "inputTokens": 9963,
             "outputTokens": 5331,
-            "outputTokensPerTask": 5331,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "totalTokens": 15294,
+            "totalTokensPerTask": 15294,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.041949,
+            "equivalentCostPerTask": 0.041949
           },
           "scratch": null
         },
@@ -8561,10 +10222,15 @@ window.TLAPS_DATA = {
             "taskCount": 2,
             "activeTimeSecs": 1384.9025457487442,
             "activeTimePerTask": 692.4512728743721,
+            "inputTokens": 20125,
             "outputTokens": 76594,
-            "outputTokensPerTask": 38297,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "totalTokens": 96719,
+            "totalTokensPerTask": 48359.5,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.479689,
+            "equivalentCostPerTask": 0.2398445
           },
           "scratch": null
         },
@@ -8578,10 +10244,15 @@ window.TLAPS_DATA = {
             "taskCount": 3,
             "activeTimeSecs": 2475.0012758951634,
             "activeTimePerTask": 825.0004252983878,
+            "inputTokens": 31276,
             "outputTokens": 136912,
-            "outputTokensPerTask": 45637.333333333336,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "totalTokens": 168188,
+            "totalTokensPerTask": 56062.666666666664,
+            "cacheReadInputTokens": 9984,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 31.922240695741145,
+            "equivalentCostUsd": 0.8437623999999999,
+            "equivalentCostPerTask": 0.2812541333333333
           },
           "scratch": null
         },
@@ -8595,10 +10266,15 @@ window.TLAPS_DATA = {
             "taskCount": 2,
             "activeTimeSecs": 1663.5810118650552,
             "activeTimePerTask": 831.7905059325276,
+            "inputTokens": 15714,
             "outputTokens": 91099,
-            "outputTokensPerTask": 45549.5,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "totalTokens": 106813,
+            "totalTokensPerTask": 53406.5,
+            "cacheReadInputTokens": 4864,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 30.95329005981927,
+            "equivalentCostUsd": 0.5579304,
+            "equivalentCostPerTask": 0.2789652
           },
           "scratch": null
         },
@@ -8612,10 +10288,15 @@ window.TLAPS_DATA = {
             "taskCount": 4,
             "activeTimeSecs": 1887.2342949018348,
             "activeTimePerTask": 471.8085737254587,
+            "inputTokens": 86259,
             "outputTokens": 104146,
-            "outputTokensPerTask": 26036.5,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "totalTokens": 190405,
+            "totalTokensPerTask": 47601.25,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.7111350000000001,
+            "equivalentCostPerTask": 0.17778375000000002
           },
           "scratch": null
         },
@@ -8629,10 +10310,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 60.446173103991896,
             "activeTimePerTask": 60.446173103991896,
+            "inputTokens": 14155,
             "outputTokens": 3202,
-            "outputTokensPerTask": 3202,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "totalTokens": 17357,
+            "totalTokensPerTask": 17357,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.033367,
+            "equivalentCostPerTask": 0.033367
           },
           "scratch": null
         },
@@ -8646,10 +10332,15 @@ window.TLAPS_DATA = {
             "taskCount": 7,
             "activeTimeSecs": 5118.629616938066,
             "activeTimePerTask": 731.2328024197237,
+            "inputTokens": 148624,
             "outputTokens": 216909,
-            "outputTokensPerTask": 30987,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "totalTokens": 365533,
+            "totalTokensPerTask": 52219,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 1.450078,
+            "equivalentCostPerTask": 0.207154
           },
           "scratch": null
         },
@@ -8663,10 +10354,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 754.859046483878,
             "activeTimePerTask": 754.859046483878,
+            "inputTokens": 7367,
             "outputTokens": 41011,
-            "outputTokensPerTask": 41011,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "totalTokens": 48378,
+            "totalTokensPerTask": 48378,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.253433,
+            "equivalentCostPerTask": 0.253433
           },
           "scratch": null
         },
@@ -8680,10 +10376,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 248.51366922981106,
             "activeTimePerTask": 248.51366922981106,
+            "inputTokens": 7026,
             "outputTokens": 12624,
-            "outputTokensPerTask": 12624,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "totalTokens": 19650,
+            "totalTokensPerTask": 19650,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.08277,
+            "equivalentCostPerTask": 0.08277
           },
           "scratch": null
         },
@@ -8697,10 +10398,15 @@ window.TLAPS_DATA = {
             "taskCount": 3,
             "activeTimeSecs": 2103.1999421129003,
             "activeTimePerTask": 701.0666473709667,
+            "inputTokens": 24746,
             "outputTokens": 116074,
-            "outputTokensPerTask": 38691.333333333336,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "totalTokens": 140820,
+            "totalTokensPerTask": 46940,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.72119,
+            "equivalentCostPerTask": 0.24039666666666668
           },
           "scratch": null
         },
@@ -8714,10 +10420,15 @@ window.TLAPS_DATA = {
             "taskCount": 4,
             "activeTimeSecs": 3646.2753454248887,
             "activeTimePerTask": 911.5688363562222,
+            "inputTokens": 126458,
             "outputTokens": 107668,
-            "outputTokensPerTask": 26917,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "totalTokens": 234126,
+            "totalTokensPerTask": 58531.5,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.7724660000000001,
+            "equivalentCostPerTask": 0.19311650000000002
           },
           "scratch": null
         },
@@ -8731,10 +10442,15 @@ window.TLAPS_DATA = {
             "taskCount": 2,
             "activeTimeSecs": 532.4887963579968,
             "activeTimePerTask": 266.2443981789984,
+            "inputTokens": 13796,
             "outputTokens": 29175,
-            "outputTokensPerTask": 14587.5,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "totalTokens": 42971,
+            "totalTokensPerTask": 21485.5,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.18884599999999999,
+            "equivalentCostPerTask": 0.09442299999999999
           },
           "scratch": null
         },
@@ -8748,10 +10464,15 @@ window.TLAPS_DATA = {
             "taskCount": 3,
             "activeTimeSecs": 807.708737669047,
             "activeTimePerTask": 269.2362458896823,
+            "inputTokens": 21391,
             "outputTokens": 44303,
-            "outputTokensPerTask": 14767.666666666666,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "totalTokens": 65694,
+            "totalTokensPerTask": 21898,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.287209,
+            "equivalentCostPerTask": 0.09573633333333333
           },
           "scratch": null
         },
@@ -8765,10 +10486,15 @@ window.TLAPS_DATA = {
             "taskCount": 12,
             "activeTimeSecs": 8627.369420265779,
             "activeTimePerTask": 718.9474516888149,
+            "inputTokens": 134114,
             "outputTokens": 463614,
-            "outputTokensPerTask": 38634.5,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "totalTokens": 597728,
+            "totalTokensPerTask": 49810.666666666664,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 2.9157979999999997,
+            "equivalentCostPerTask": 0.24298316666666664
           },
           "scratch": null
         },
@@ -8782,10 +10508,15 @@ window.TLAPS_DATA = {
             "taskCount": 2,
             "activeTimeSecs": 1304.985038026236,
             "activeTimePerTask": 652.492519013118,
+            "inputTokens": 21949,
             "outputTokens": 71990,
-            "outputTokensPerTask": 35995,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "totalTokens": 93939,
+            "totalTokensPerTask": 46969.5,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.453889,
+            "equivalentCostPerTask": 0.2269445
           },
           "scratch": null
         },
@@ -8799,10 +10530,15 @@ window.TLAPS_DATA = {
             "taskCount": 10,
             "activeTimeSecs": 4832.336307242978,
             "activeTimePerTask": 483.2336307242978,
+            "inputTokens": 136473,
             "outputTokens": 195548,
-            "outputTokensPerTask": 19554.8,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "totalTokens": 332021,
+            "totalTokensPerTask": 33202.1,
+            "cacheReadInputTokens": 4864,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 3.564074945227261,
+            "equivalentCostUsd": 1.3053834,
+            "equivalentCostPerTask": 0.13053834
           },
           "scratch": null
         },
@@ -8816,10 +10552,15 @@ window.TLAPS_DATA = {
             "taskCount": 2,
             "activeTimeSecs": 263.3425183868967,
             "activeTimePerTask": 131.67125919344835,
+            "inputTokens": 14222,
             "outputTokens": 14158,
-            "outputTokensPerTask": 7079,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "totalTokens": 28380,
+            "totalTokensPerTask": 14190,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.09917000000000001,
+            "equivalentCostPerTask": 0.049585000000000004
           },
           "scratch": null
         },
@@ -8833,10 +10574,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 238.6372421369888,
             "activeTimePerTask": 238.6372421369888,
+            "inputTokens": 7648,
             "outputTokens": 13073,
-            "outputTokensPerTask": 13073,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "totalTokens": 20721,
+            "totalTokensPerTask": 20721,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.086086,
+            "equivalentCostPerTask": 0.086086
           },
           "scratch": null
         },
@@ -8850,10 +10596,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 68.96399400592782,
             "activeTimePerTask": 68.96399400592782,
+            "inputTokens": 7555,
             "outputTokens": 2676,
-            "outputTokensPerTask": 2676,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "totalTokens": 10231,
+            "totalTokensPerTask": 10231,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.023611,
+            "equivalentCostPerTask": 0.023611
           },
           "scratch": null
         },
@@ -8867,10 +10618,15 @@ window.TLAPS_DATA = {
             "taskCount": 3,
             "activeTimeSecs": 2243.342245452106,
             "activeTimePerTask": 747.7807484840354,
+            "inputTokens": 26100,
             "outputTokens": 123930,
-            "outputTokensPerTask": 41310,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "totalTokens": 150030,
+            "totalTokensPerTask": 50010,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.7696800000000001,
+            "equivalentCostPerTask": 0.25656000000000007
           },
           "scratch": null
         },
@@ -8884,10 +10640,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 159.6399895120412,
             "activeTimePerTask": 159.6399895120412,
+            "inputTokens": 7053,
             "outputTokens": 8548,
-            "outputTokensPerTask": 8548,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "totalTokens": 15601,
+            "totalTokensPerTask": 15601,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.058341,
+            "equivalentCostPerTask": 0.058341
           },
           "scratch": null
         },
@@ -8901,10 +10662,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 956.3701676740311,
             "activeTimePerTask": 956.3701676740311,
+            "inputTokens": 9595,
             "outputTokens": 52896,
-            "outputTokensPerTask": 52896,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "totalTokens": 62491,
+            "totalTokensPerTask": 62491,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.326971,
+            "equivalentCostPerTask": 0.326971
           },
           "scratch": null
         },
@@ -8918,10 +10684,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 970.6553145158105,
             "activeTimePerTask": 970.6553145158105,
+            "inputTokens": 7964,
             "outputTokens": 53653,
-            "outputTokensPerTask": 53653,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "totalTokens": 61617,
+            "totalTokensPerTask": 61617,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.329882,
+            "equivalentCostPerTask": 0.329882
           },
           "scratch": null
         },
@@ -8935,10 +10706,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 108.28379911696538,
             "activeTimePerTask": 108.28379911696538,
+            "inputTokens": 6755,
             "outputTokens": 4958,
-            "outputTokensPerTask": 4958,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "totalTokens": 11713,
+            "totalTokensPerTask": 11713,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.036503,
+            "equivalentCostPerTask": 0.036503
           },
           "scratch": null
         },
@@ -8952,10 +10728,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 108.31889232504182,
             "activeTimePerTask": 108.31889232504182,
+            "inputTokens": 7563,
             "outputTokens": 5341,
-            "outputTokensPerTask": 5341,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "totalTokens": 12904,
+            "totalTokensPerTask": 12904,
+            "cacheReadInputTokens": 4864,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 64.31310326589977,
+            "equivalentCostUsd": 0.0352314,
+            "equivalentCostPerTask": 0.0352314
           },
           "scratch": null
         },
@@ -8969,10 +10750,15 @@ window.TLAPS_DATA = {
             "taskCount": 3,
             "activeTimeSecs": 962.8455068666954,
             "activeTimePerTask": 320.94850228889845,
+            "inputTokens": 26077,
             "outputTokens": 50411,
-            "outputTokensPerTask": 16803.666666666668,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "totalTokens": 76488,
+            "totalTokensPerTask": 25496,
+            "cacheReadInputTokens": 4864,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 18.652452352647927,
+            "equivalentCostUsd": 0.3241654,
+            "equivalentCostPerTask": 0.10805513333333333
           },
           "scratch": null
         },
@@ -8986,10 +10772,15 @@ window.TLAPS_DATA = {
             "taskCount": 3,
             "activeTimeSecs": 1264.8145408416167,
             "activeTimePerTask": 421.60484694720554,
+            "inputTokens": 21332,
             "outputTokens": 68528,
-            "outputTokensPerTask": 22842.666666666668,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "totalTokens": 89860,
+            "totalTokensPerTask": 29953.333333333332,
+            "cacheReadInputTokens": 10752,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 50.4031501968873,
+            "equivalentCostUsd": 0.4228232,
+            "equivalentCostPerTask": 0.14094106666666667
           },
           "scratch": null
         },
@@ -9003,10 +10794,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 613.9752527009696,
             "activeTimePerTask": 613.9752527009696,
+            "inputTokens": 8101,
             "outputTokens": 33854,
-            "outputTokensPerTask": 33854,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "totalTokens": 41955,
+            "totalTokensPerTask": 41955,
+            "cacheReadInputTokens": 4864,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 60.04197012714479,
+            "equivalentCostUsd": 0.2068474,
+            "equivalentCostPerTask": 0.2068474
           },
           "scratch": null
         },
@@ -9020,10 +10816,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 808.4884306229651,
             "activeTimePerTask": 808.4884306229651,
+            "inputTokens": 7341,
             "outputTokens": 44709,
-            "outputTokensPerTask": 44709,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "totalTokens": 52050,
+            "totalTokensPerTask": 52050,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.275595,
+            "equivalentCostPerTask": 0.275595
           },
           "scratch": null
         },
@@ -9037,10 +10838,15 @@ window.TLAPS_DATA = {
             "taskCount": 2,
             "activeTimeSecs": 863.4454806200229,
             "activeTimePerTask": 431.72274031001143,
+            "inputTokens": 16153,
             "outputTokens": 47429,
-            "outputTokensPerTask": 23714.5,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "totalTokens": 63582,
+            "totalTokensPerTask": 31791,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.30072699999999997,
+            "equivalentCostPerTask": 0.15036349999999998
           },
           "scratch": null
         },
@@ -9054,10 +10860,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 151.43011025199667,
             "activeTimePerTask": 151.43011025199667,
+            "inputTokens": 7048,
             "outputTokens": 8238,
-            "outputTokensPerTask": 8238,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "totalTokens": 15286,
+            "totalTokensPerTask": 15286,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.056476,
+            "equivalentCostPerTask": 0.056476
           },
           "scratch": null
         },
@@ -9071,10 +10882,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 514.8763681559358,
             "activeTimePerTask": 514.8763681559358,
+            "inputTokens": 9768,
             "outputTokens": 28286,
-            "outputTokensPerTask": 28286,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "totalTokens": 38054,
+            "totalTokensPerTask": 38054,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.179484,
+            "equivalentCostPerTask": 0.179484
           },
           "scratch": null
         },
@@ -9088,10 +10904,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 725.5404678180348,
             "activeTimePerTask": 725.5404678180348,
+            "inputTokens": 6758,
             "outputTokens": 40117,
-            "outputTokensPerTask": 40117,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "totalTokens": 46875,
+            "totalTokensPerTask": 46875,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.24746,
+            "equivalentCostPerTask": 0.24746
           },
           "scratch": null
         },
@@ -9105,10 +10926,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 545.8452933698427,
             "activeTimePerTask": 545.8452933698427,
+            "inputTokens": 8149,
             "outputTokens": 30042,
-            "outputTokensPerTask": 30042,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "totalTokens": 38191,
+            "totalTokensPerTask": 38191,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.188401,
+            "equivalentCostPerTask": 0.188401
           },
           "scratch": null
         },
@@ -9122,10 +10948,15 @@ window.TLAPS_DATA = {
             "taskCount": 2,
             "activeTimeSecs": 1434.0766995679587,
             "activeTimePerTask": 717.0383497839794,
+            "inputTokens": 19093,
             "outputTokens": 78969,
-            "outputTokensPerTask": 39484.5,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "totalTokens": 98062,
+            "totalTokensPerTask": 49031,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.492907,
+            "equivalentCostPerTask": 0.2464535
           },
           "scratch": null
         },
@@ -9139,10 +10970,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 536.1122892349958,
             "activeTimePerTask": 536.1122892349958,
+            "inputTokens": 7566,
             "outputTokens": 29579,
-            "outputTokensPerTask": 29579,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "totalTokens": 37145,
+            "totalTokensPerTask": 37145,
+            "cacheReadInputTokens": 4864,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 64.28760243193233,
+            "equivalentCostUsd": 0.1806624,
+            "equivalentCostPerTask": 0.1806624
           },
           "scratch": null
         },
@@ -9156,10 +10992,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 694.8913164180703,
             "activeTimePerTask": 694.8913164180703,
+            "inputTokens": 7385,
             "outputTokens": 38424,
-            "outputTokensPerTask": 38424,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "totalTokens": 45809,
+            "totalTokensPerTask": 45809,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.237929,
+            "equivalentCostPerTask": 0.237929
           },
           "scratch": null
         },
@@ -9173,10 +11014,15 @@ window.TLAPS_DATA = {
             "taskCount": 6,
             "activeTimeSecs": 3641.5993641025852,
             "activeTimePerTask": 606.9332273504309,
+            "inputTokens": 105539,
             "outputTokens": 160025,
-            "outputTokensPerTask": 26670.833333333332,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "totalTokens": 265564,
+            "totalTokensPerTask": 44260.666666666664,
+            "cacheReadInputTokens": 4864,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 4.608722841793082,
+            "equivalentCostUsd": 1.0613114000000001,
+            "equivalentCostPerTask": 0.17688523333333336
           },
           "scratch": null
         },
@@ -9190,10 +11036,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 679.283341769129,
             "activeTimePerTask": 679.283341769129,
+            "inputTokens": 7780,
             "outputTokens": 37524,
-            "outputTokensPerTask": 37524,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "totalTokens": 45304,
+            "totalTokensPerTask": 45304,
+            "cacheReadInputTokens": 4864,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 62.51928020565553,
+            "equivalentCostUsd": 0.2285464,
+            "equivalentCostPerTask": 0.2285464
           },
           "scratch": null
         },
@@ -9207,10 +11058,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 645.407905880129,
             "activeTimePerTask": 645.407905880129,
+            "inputTokens": 8146,
             "outputTokens": 35671,
-            "outputTokensPerTask": 35671,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "totalTokens": 43817,
+            "totalTokensPerTask": 43817,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.222172,
+            "equivalentCostPerTask": 0.222172
           },
           "scratch": null
         },
@@ -9224,10 +11080,15 @@ window.TLAPS_DATA = {
             "taskCount": 11,
             "activeTimeSecs": 7798.51358713652,
             "activeTimePerTask": 708.9557806487745,
+            "inputTokens": 117657,
             "outputTokens": 430973,
-            "outputTokensPerTask": 39179.36363636364,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "totalTokens": 548630,
+            "totalTokensPerTask": 49875.454545454544,
+            "cacheReadInputTokens": 14592,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 12.402152018154466,
+            "equivalentCostUsd": 2.6903622,
+            "equivalentCostPerTask": 0.2445783818181818
           },
           "scratch": null
         },
@@ -9241,10 +11102,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 794.7389169940725,
             "activeTimePerTask": 794.7389169940725,
+            "inputTokens": 7509,
             "outputTokens": 43965,
-            "outputTokensPerTask": 43965,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "totalTokens": 51474,
+            "totalTokensPerTask": 51474,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.271299,
+            "equivalentCostPerTask": 0.271299
           },
           "scratch": null
         },
@@ -9258,10 +11124,15 @@ window.TLAPS_DATA = {
             "taskCount": 2,
             "activeTimeSecs": 1560.0931528201327,
             "activeTimePerTask": 780.0465764100663,
+            "inputTokens": 60103,
             "outputTokens": 44821,
-            "outputTokensPerTask": 22410.5,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "totalTokens": 104924,
+            "totalTokensPerTask": 52462,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.32902899999999996,
+            "equivalentCostPerTask": 0.16451449999999998
           },
           "scratch": null
         },
@@ -9275,10 +11146,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 207.04789627715945,
             "activeTimePerTask": 207.04789627715945,
+            "inputTokens": 7681,
             "outputTokens": 11268,
-            "outputTokensPerTask": 11268,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "totalTokens": 18949,
+            "totalTokensPerTask": 18949,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.075289,
+            "equivalentCostPerTask": 0.075289
           },
           "scratch": null
         },
@@ -9292,10 +11168,15 @@ window.TLAPS_DATA = {
             "taskCount": 5,
             "activeTimeSecs": 1611.8630524950568,
             "activeTimePerTask": 322.37261049901133,
+            "inputTokens": 81637,
             "outputTokens": 51855,
-            "outputTokensPerTask": 10371,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "totalTokens": 133492,
+            "totalTokensPerTask": 26698.4,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.392767,
+            "equivalentCostPerTask": 0.0785534
           },
           "scratch": null
         },
@@ -9309,10 +11190,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 239.6439489258919,
             "activeTimePerTask": 239.6439489258919,
+            "inputTokens": 7719,
             "outputTokens": 13146,
-            "outputTokensPerTask": 13146,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "totalTokens": 20865,
+            "totalTokensPerTask": 20865,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.086595,
+            "equivalentCostPerTask": 0.086595
           },
           "scratch": null
         },
@@ -9326,10 +11212,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 789.8964457891416,
             "activeTimePerTask": 789.8964457891416,
+            "inputTokens": 10605,
             "outputTokens": 43643,
-            "outputTokensPerTask": 43643,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "totalTokens": 54248,
+            "totalTokensPerTask": 54248,
+            "cacheReadInputTokens": 4864,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 45.86515794436586,
+            "equivalentCostUsd": 0.2680854,
+            "equivalentCostPerTask": 0.2680854
           },
           "scratch": null
         },
@@ -9343,10 +11234,15 @@ window.TLAPS_DATA = {
             "taskCount": 4,
             "activeTimeSecs": 2722.2682235368993,
             "activeTimePerTask": 680.5670558842248,
+            "inputTokens": 86900,
             "outputTokens": 91586,
-            "outputTokensPerTask": 22896.5,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "totalTokens": 178486,
+            "totalTokensPerTask": 44621.5,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.636416,
+            "equivalentCostPerTask": 0.159104
           },
           "scratch": null
         },
@@ -9360,10 +11256,15 @@ window.TLAPS_DATA = {
             "taskCount": 2,
             "activeTimeSecs": 1214.2905421068426,
             "activeTimePerTask": 607.1452710534213,
+            "inputTokens": 13150,
             "outputTokens": 67036,
-            "outputTokensPerTask": 33518,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "totalTokens": 80186,
+            "totalTokensPerTask": 40093,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.415366,
+            "equivalentCostPerTask": 0.207683
           },
           "scratch": null
         },
@@ -9377,10 +11278,15 @@ window.TLAPS_DATA = {
             "taskCount": 4,
             "activeTimeSecs": 2945.6341082938015,
             "activeTimePerTask": 736.4085270734504,
+            "inputTokens": 34524,
             "outputTokens": 162656,
-            "outputTokensPerTask": 40664,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "totalTokens": 197180,
+            "totalTokensPerTask": 49295,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 1.0104600000000001,
+            "equivalentCostPerTask": 0.25261500000000003
           },
           "scratch": null
         },
@@ -9394,10 +11300,15 @@ window.TLAPS_DATA = {
             "taskCount": 2,
             "activeTimeSecs": 2210.572460039053,
             "activeTimePerTask": 1105.2862300195266,
+            "inputTokens": 39606,
             "outputTokens": 99224,
-            "outputTokensPerTask": 49612,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "totalTokens": 138830,
+            "totalTokensPerTask": 69415,
+            "cacheReadInputTokens": 7936,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 20.03736807554411,
+            "equivalentCostUsd": 0.6278076,
+            "equivalentCostPerTask": 0.3139038
           },
           "scratch": null
         },
@@ -9411,10 +11322,15 @@ window.TLAPS_DATA = {
             "taskCount": 1,
             "activeTimeSecs": 34.04443757189438,
             "activeTimePerTask": 34.04443757189438,
+            "inputTokens": 7275,
             "outputTokens": 1684,
-            "outputTokensPerTask": 1684,
-            "outputCostUsd": null,
-            "outputCostPerTask": null
+            "totalTokens": 8959,
+            "totalTokensPerTask": 8959,
+            "cacheReadInputTokens": 0,
+            "cacheWriteInputTokens": 0,
+            "cacheRatePct": 0,
+            "equivalentCostUsd": 0.017379,
+            "equivalentCostPerTask": 0.017379
           },
           "scratch": null
         }
@@ -9434,12 +11350,12 @@ window.TLAPS_DATA = {
     {
       "id": "one-shot",
       "label": "One-Shot",
-      "blurb": "Single-response runs ranked by spec-balanced pass rate on the Proof Completion Core. Expand a model for per-module breakdown; task usage and cost stay in the detail views."
+      "blurb": "Single-response runs ranked by Spec-balanced pass rate on the Proof Completion Core. Expand a model for per-specification details."
     },
     {
       "id": "agentic",
       "label": "Agentic",
-      "blurb": "Tool-using agent runs on the same Proof Completion Core, scored separately from one-shot. Same spec-balanced ranking and per-module detail, never mixed into the one-shot table."
+      "blurb": "Tool-using agent runs on the same Proof Completion Core, scored separately from one-shot. Same Spec-balanced pass rate, never mixed into the one-shot table."
     }
   ],
   "coverage": [],

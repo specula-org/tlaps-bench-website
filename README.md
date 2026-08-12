@@ -8,7 +8,7 @@ A bundle is published only when it covers that Core set **exactly**. Older Full-
 
 ## Scoring
 
-The leaderboard's primary score is the **spec-balanced pass rate** (specification-macro): calculate the task pass rate within each Core module, then average those rates so every module has equal weight. The table also reports task-micro (`passed tasks / 190`) and all-leaves-complete (`modules with every selected task passing / 56`) as supporting counts.
+The leaderboard's primary score is the **Spec-balanced pass rate**: calculate the task pass rate within each Core specification, then average those rates so every specification has equal weight. The table also reports tasks passed and specifications completed as supporting counts.
 
 ## Run locally
 
@@ -48,7 +48,7 @@ node scripts/sync-core-manifest.mjs results/<that-bundle>.json
 
 ## Adding a model
 
-1. Drop the run into `results/<backend-id>.json` with `meta.backend` set to that id, `meta.cohort` of `one-shot` or `agentic`, current three-metric `meta.scoring`, and results for every Core task.
+1. Drop the run into `results/<backend-id>.json` with `meta.backend` set to that id, `meta.cohort` of `one-shot` or `agentic`, current `meta.scoring`, complete usage and equivalent-price data, and results for every Core task.
 2. Add a `BACKEND_INFO` entry in `scripts/build-data.mjs` and list the id in `PUBLISHED_BACKENDS`.
-3. Add an `OUTPUT_PRICING` entry if a public output rate is known.
+3. Add the model's public pricing source to `PRICE_SOURCE_BY_MODEL`.
 4. Rebuild, then bump the `?v=` cache-buster on `data.js` in `index.html`.

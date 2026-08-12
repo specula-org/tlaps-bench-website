@@ -97,5 +97,5 @@ const manifest = {
 
 writeFileSync(OUT, JSON.stringify(manifest, null, 2) + "\n");
 const specCount = new Set(tasks.map((t) => t.spec_id)).size;
-console.log(`Wrote ${OUT}: ${tasks.length} tasks / ${specCount} originating modules from ${sourcePath}` +
+console.log(`Wrote ${OUT}: ${tasks.length} tasks / ${specCount} originating specifications from ${sourcePath}` +
   (meta?.backend ? ` (${meta.backend})` : ""));

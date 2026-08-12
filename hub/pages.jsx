@@ -135,8 +135,8 @@ function PageLeaderboard() {
           <h1 style={{ fontSize: 44, marginTop: 10 }}>Leaderboard</h1>
           <p className="lead">
             Every model is graded on the same Proof Completion Core. One-shot and agentic
-            runs live in separate tabs. Models are ranked by spec-balanced pass rate, with
-            each Core module weighted equally. Expand a row for the full breakdown.
+            runs live in separate tabs. Models are ranked by Spec-balanced pass rate, with
+            each Core specification weighted equally. Expand a row for the full breakdown.
           </p>
         </FadeIn>
 

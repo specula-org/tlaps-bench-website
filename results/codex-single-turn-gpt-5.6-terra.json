@@ -65,13 +65,15 @@
       "active_time_complete": true,
       "input_tokens": 2826409,
       "output_tokens": 2727829,
+      "cache_read_input_tokens": 1018880,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 45.690977499999995,
       "output_tokens_positive_for_all_tasks": true
     },
     "cohort": "one-shot",
     "reasoning_effort": "xhigh",
     "scoring": {
-      "primary": "specification-macro",
-      "specification_macro_pct": 8.331155632984903,
+      "primary": "spec-balanced-pass-rate",
       "task_micro": {
         "passed": 13,
         "total": 190,
@@ -81,7 +83,8 @@
         "passed": 3,
         "total": 56,
         "pct": 5.357142857142857
-      }
+      },
+      "spec_balanced_pass_rate_pct": 8.331155632984903
     },
     "suite": "proof-completion-core"
   },
@@ -106,7 +109,10 @@
       "output_tokens": 8498,
       "sany_valid": false,
       "source": "TLAPS distribution examples",
-      "gt_proof_steps": 25
+      "gt_proof_steps": 25,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.1466725
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Agreement.tla",
@@ -128,7 +134,10 @@
       "output_tokens": 12885,
       "sany_valid": false,
       "source": "apalache-examples (Konnov)",
-      "gt_proof_steps": 18
+      "gt_proof_steps": 18,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.268031
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Arith_OtherLtFromStrictOverlap.tla",
@@ -150,7 +159,10 @@
       "output_tokens": 735,
       "sany_valid": false,
       "source": "apalache-examples (Konnov)",
-      "gt_proof_steps": 3
+      "gt_proof_steps": 3,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.038051
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_CardUnion3LeSum.tla",
@@ -172,7 +184,10 @@
       "output_tokens": 21456,
       "sany_valid": false,
       "source": "apalache-examples (Konnov)",
-      "gt_proof_steps": 10
+      "gt_proof_steps": 10,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.36033
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_CrossRoundStrictQuorum.tla",
@@ -194,7 +209,10 @@
       "output_tokens": 1653,
       "sany_valid": true,
       "source": "apalache-examples (Konnov)",
-      "gt_proof_steps": 2
+      "gt_proof_steps": 2,
+      "cache_read_input_tokens": 5888,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.096787
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_FaultyStepProps.tla",
@@ -216,7 +234,10 @@
       "output_tokens": 17152,
       "sany_valid": false,
       "source": "apalache-examples (Konnov)",
-      "gt_proof_steps": 17
+      "gt_proof_steps": 17,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.314326
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_HighWeightReceivedL11Witness.tla",
@@ -238,7 +259,10 @@
       "output_tokens": 22466,
       "sany_valid": false,
       "source": "apalache-examples (Konnov)",
-      "gt_proof_steps": 62
+      "gt_proof_steps": 62,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.39553
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_InitInd.tla",
@@ -260,7 +284,10 @@
       "output_tokens": 20069,
       "sany_valid": false,
       "source": "apalache-examples (Konnov)",
-      "gt_proof_steps": 48
+      "gt_proof_steps": 48,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.3589335
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_LowWeightsReceivedL11Witness.tla",
@@ -282,7 +309,10 @@
       "output_tokens": 23581,
       "sany_valid": false,
       "source": "apalache-examples (Konnov)",
-      "gt_proof_steps": 35
+      "gt_proof_steps": 35,
+      "cache_read_input_tokens": 20224,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.360636
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_LowWeightsReceivedL8Witness.tla",
@@ -304,7 +334,10 @@
       "output_tokens": 29447,
       "sany_valid": false,
       "source": "apalache-examples (Konnov)",
-      "gt_proof_steps": 70
+      "gt_proof_steps": 70,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.507076
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_MajorityIntersect.tla",
@@ -326,7 +359,10 @@
       "output_tokens": 12613,
       "sany_valid": false,
       "source": "apalache-examples (Konnov)",
-      "gt_proof_steps": 11
+      "gt_proof_steps": 11,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.2287375
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Msgs1Shape.tla",
@@ -348,7 +384,10 @@
       "output_tokens": 2311,
       "sany_valid": false,
       "source": "apalache-examples (Konnov)",
-      "gt_proof_steps": 3
+      "gt_proof_steps": 3,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.069321
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Msgs2AddDRep.tla",
@@ -370,7 +409,10 @@
       "output_tokens": 10035,
       "sany_valid": false,
       "source": "apalache-examples (Konnov)",
-      "gt_proof_steps": 12
+      "gt_proof_steps": 12,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.203821
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Msgs2Decomp.tla",
@@ -392,7 +434,10 @@
       "output_tokens": 4804,
       "sany_valid": false,
       "source": "apalache-examples (Konnov)",
-      "gt_proof_steps": 4
+      "gt_proof_steps": 4,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.104361
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Msgs2SenderPartitionBound.tla",
@@ -414,7 +459,10 @@
       "output_tokens": 6083,
       "sany_valid": false,
       "source": "apalache-examples (Konnov)",
-      "gt_proof_steps": 20
+      "gt_proof_steps": 20,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.132211
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Msgs2Step2Mono.tla",
@@ -436,7 +484,10 @@
       "output_tokens": 9459,
       "sany_valid": false,
       "source": "apalache-examples (Konnov)",
-      "gt_proof_steps": 10
+      "gt_proof_steps": 10,
+      "cache_read_input_tokens": 20224,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.1570485
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_L1_S3_DecidedCarry.tla",
@@ -458,7 +509,10 @@
       "output_tokens": 14978,
       "sany_valid": false,
       "source": "apalache-examples (Konnov)",
-      "gt_proof_steps": 21
+      "gt_proof_steps": 21,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.2966535
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_L1_S3.tla",
@@ -480,7 +534,10 @@
       "output_tokens": 25430,
       "sany_valid": null,
       "source": "apalache-examples (Konnov)",
-      "gt_proof_steps": 56
+      "gt_proof_steps": 56,
+      "cache_read_input_tokens": 32512,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.391278
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_L10_S2.tla",
@@ -502,7 +559,10 @@
       "output_tokens": 7829,
       "sany_valid": false,
       "source": "apalache-examples (Konnov)",
-      "gt_proof_steps": 20
+      "gt_proof_steps": 20,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.184731
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_L11_S3.tla",
@@ -524,7 +584,10 @@
       "output_tokens": 14844,
       "sany_valid": false,
       "source": "apalache-examples (Konnov)",
-      "gt_proof_steps": 27
+      "gt_proof_steps": 27,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.2907735
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_L12_S1.tla",
@@ -546,7 +609,10 @@
       "output_tokens": 8913,
       "sany_valid": false,
       "source": "apalache-examples (Konnov)",
-      "gt_proof_steps": 12
+      "gt_proof_steps": 12,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.2021885
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_L13_S3.tla",
@@ -568,7 +634,10 @@
       "output_tokens": 8499,
       "sany_valid": false,
       "source": "apalache-examples (Konnov)",
-      "gt_proof_steps": 47
+      "gt_proof_steps": 47,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.1968185
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_L2_S1.tla",
@@ -590,7 +659,10 @@
       "output_tokens": 16723,
       "sany_valid": false,
       "source": "apalache-examples (Konnov)",
-      "gt_proof_steps": 29
+      "gt_proof_steps": 29,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.310016
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_L3_S2.tla",
@@ -612,7 +684,10 @@
       "output_tokens": 15898,
       "sany_valid": false,
       "source": "apalache-examples (Konnov)",
-      "gt_proof_steps": 18
+      "gt_proof_steps": 18,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.2982335
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_L4_S1.tla",
@@ -634,7 +709,10 @@
       "output_tokens": 32921,
       "sany_valid": false,
       "source": "apalache-examples (Konnov)",
-      "gt_proof_steps": 42
+      "gt_proof_steps": 42,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.5545485
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_L5_F.tla",
@@ -656,7 +734,10 @@
       "output_tokens": 3073,
       "sany_valid": false,
       "source": "apalache-examples (Konnov)",
-      "gt_proof_steps": 5
+      "gt_proof_steps": 5,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.1088585
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_L6_F.tla",
@@ -678,7 +759,10 @@
       "output_tokens": 1111,
       "sany_valid": true,
       "source": "apalache-examples (Konnov)",
-      "gt_proof_steps": 2
+      "gt_proof_steps": 2,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.079936
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_L7_S1.tla",
@@ -700,7 +784,10 @@
       "output_tokens": 7903,
       "sany_valid": false,
       "source": "apalache-examples (Konnov)",
-      "gt_proof_steps": 11
+      "gt_proof_steps": 11,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.1824385
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_L8_S2.tla",
@@ -722,7 +809,10 @@
       "output_tokens": 15518,
       "sany_valid": false,
       "source": "apalache-examples (Konnov)",
-      "gt_proof_steps": 25
+      "gt_proof_steps": 25,
+      "cache_read_input_tokens": 5888,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.2963795
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_L9_F.tla",
@@ -744,7 +834,10 @@
       "output_tokens": 12264,
       "sany_valid": false,
       "source": "apalache-examples (Konnov)",
-      "gt_proof_steps": 39
+      "gt_proof_steps": 39,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.250636
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_Lemma12.tla",
@@ -766,7 +859,10 @@
       "output_tokens": 4500,
       "sany_valid": false,
       "source": "apalache-examples (Konnov)",
-      "gt_proof_steps": 13
+      "gt_proof_steps": 13,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.1474775
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_Lemma2.tla",
@@ -788,7 +884,10 @@
       "output_tokens": 2238,
       "sany_valid": true,
       "source": "apalache-examples (Konnov)",
-      "gt_proof_steps": 1
+      "gt_proof_steps": 1,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.093026
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Pres_Lemma3.tla",
@@ -810,7 +909,10 @@
       "output_tokens": 2752,
       "sany_valid": true,
       "source": "apalache-examples (Konnov)",
-      "gt_proof_steps": 7
+      "gt_proof_steps": 7,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.1014435
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_QuorumIntersect.tla",
@@ -832,7 +934,10 @@
       "output_tokens": 19934,
       "sany_valid": false,
       "source": "apalache-examples (Konnov)",
-      "gt_proof_steps": 13
+      "gt_proof_steps": 13,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.3269885
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_QuorumUnique.tla",
@@ -854,7 +959,10 @@
       "output_tokens": 6822,
       "sany_valid": false,
       "source": "apalache-examples (Konnov)",
-      "gt_proof_steps": 14
+      "gt_proof_steps": 14,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.1752085
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_Senders2_CardLeSet.tla",
@@ -876,7 +984,10 @@
       "output_tokens": 7116,
       "sany_valid": false,
       "source": "apalache-examples (Konnov)",
-      "gt_proof_steps": 10
+      "gt_proof_steps": 10,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.1291685
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_StrictQuorumCarriesToQuorumRound.tla",
@@ -898,7 +1009,10 @@
       "output_tokens": 10422,
       "sany_valid": false,
       "source": "apalache-examples (Konnov)",
-      "gt_proof_steps": 47
+      "gt_proof_steps": 47,
+      "cache_read_input_tokens": 33536,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.182739
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_StrictQuorumNextCorrectType2.tla",
@@ -920,7 +1034,10 @@
       "output_tokens": 4416,
       "sany_valid": false,
       "source": "apalache-examples (Konnov)",
-      "gt_proof_steps": 9
+      "gt_proof_steps": 9,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.112151
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_StrictQuorumNextReceiveStrictD.tla",
@@ -942,7 +1059,10 @@
       "output_tokens": 1787,
       "sany_valid": true,
       "source": "apalache-examples (Konnov)",
-      "gt_proof_steps": 6
+      "gt_proof_steps": 6,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.073486
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_SupportedSingletonPinsNextM1.tla",
@@ -964,7 +1084,10 @@
       "output_tokens": 4026,
       "sany_valid": false,
       "source": "apalache-examples (Konnov)",
-      "gt_proof_steps": 7
+      "gt_proof_steps": 7,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.1040935
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_SupportedUnique.tla",
@@ -986,7 +1109,10 @@
       "output_tokens": 16670,
       "sany_valid": false,
       "source": "apalache-examples (Konnov)",
-      "gt_proof_steps": 21
+      "gt_proof_steps": 21,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.2926435
     },
     {
       "benchmark": "apalache_examples_ben-or83/Ben_or83_proofs_TypePres.tla",
@@ -1008,7 +1134,10 @@
       "output_tokens": 14673,
       "sany_valid": false,
       "source": "apalache-examples (Konnov)",
-      "gt_proof_steps": 80
+      "gt_proof_steps": 80,
+      "cache_read_input_tokens": 27392,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.2456005
     },
     {
       "benchmark": "apalache_examples_tendermint/tendermint_single_indinv_proofs_BoundedMaxExists.tla",
@@ -1030,7 +1159,10 @@
       "output_tokens": 16464,
       "sany_valid": false,
       "source": "apalache-examples (Konnov)",
-      "gt_proof_steps": 24
+      "gt_proof_steps": 24,
+      "cache_read_input_tokens": 5888,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.3204695
     },
     {
       "benchmark": "apalache_examples_tendermint/tendermint_single_indinv_proofs_OnRoundCatchupGivesSender.tla",
@@ -1052,7 +1184,10 @@
       "output_tokens": 6110,
       "sany_valid": false,
       "source": "apalache-examples (Konnov)",
-      "gt_proof_steps": 15
+      "gt_proof_steps": 15,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.164641
     },
     {
       "benchmark": "apalache_examples_tendermint/tendermint_single_indinv_proofs_PastStartRoundQuorumMonotone.tla",
@@ -1074,7 +1209,10 @@
       "output_tokens": 6043,
       "sany_valid": false,
       "source": "apalache-examples (Konnov)",
-      "gt_proof_steps": 17
+      "gt_proof_steps": 17,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.1644735
     },
     {
       "benchmark": "apalache_examples_tendermint/tendermint_single_indinv_proofs_PrecommitByCorrectGivesPrevoteQuorum.tla",
@@ -1096,7 +1234,10 @@
       "output_tokens": 2967,
       "sany_valid": false,
       "source": "apalache-examples (Konnov)",
-      "gt_proof_steps": 3
+      "gt_proof_steps": 3,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.103851
     },
     {
       "benchmark": "apalache_examples_tendermint/tendermint_single_indinv_proofs_PrecommitLockContra.tla",
@@ -1118,7 +1259,10 @@
       "output_tokens": 11603,
       "sany_valid": false,
       "source": "apalache-examples (Konnov)",
-      "gt_proof_steps": 7
+      "gt_proof_steps": 7,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.2380485
     },
     {
       "benchmark": "apalache_examples_tendermint/tendermint_single_indinv_proofs_PrecommitsLockValueOp.tla",
@@ -1140,7 +1284,10 @@
       "output_tokens": 6631,
       "sany_valid": true,
       "source": "apalache-examples (Konnov)",
-      "gt_proof_steps": 22
+      "gt_proof_steps": 22,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.1620735
     },
     {
       "benchmark": "apalache_examples_tendermint/tendermint_single_indinv_proofs_Pres_Bounded_UponProposalInPrevoteOrCommitAndPrevote.tla",
@@ -1162,7 +1309,10 @@
       "output_tokens": 12264,
       "sany_valid": false,
       "source": "apalache-examples (Konnov)",
-      "gt_proof_steps": 8
+      "gt_proof_steps": 8,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.2367235
     },
     {
       "benchmark": "apalache_examples_tendermint/tendermint_single_indinv_proofs_Pres_Bounded_UponQuorumOfPrecommitsAny.tla",
@@ -1184,7 +1334,10 @@
       "output_tokens": 13070,
       "sany_valid": false,
       "source": "apalache-examples (Konnov)",
-      "gt_proof_steps": 7
+      "gt_proof_steps": 7,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.2490485
     },
     {
       "benchmark": "apalache_examples_tendermint/tendermint_single_indinv_proofs_Pres_PrecommitLocksLaterPrevotes.tla",
@@ -1206,7 +1359,10 @@
       "output_tokens": 4033,
       "sany_valid": false,
       "source": "apalache-examples (Konnov)",
-      "gt_proof_steps": 12
+      "gt_proof_steps": 12,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.1402135
     },
     {
       "benchmark": "apalache_examples_tendermint/tendermint_single_indinv_proofs_ProposeRecTyped.tla",
@@ -1228,7 +1384,10 @@
       "output_tokens": 1811,
       "sany_valid": false,
       "source": "apalache-examples (Konnov)",
-      "gt_proof_steps": 2
+      "gt_proof_steps": 2,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.070826
     },
     {
       "benchmark": "apalache_examples_tendermint/tendermint_single_indinv_proofs_PVSetPFlipCard.tla",
@@ -1250,7 +1409,10 @@
       "output_tokens": 775,
       "sany_valid": false,
       "source": "apalache-examples (Konnov)",
-      "gt_proof_steps": 2
+      "gt_proof_steps": 2,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.073851
     },
     {
       "benchmark": "apalache_examples_tendermint/tendermint_single_indinv_proofs_PVSetQuorumMonotone.tla",
@@ -1272,7 +1434,10 @@
       "output_tokens": 733,
       "sany_valid": false,
       "source": "apalache-examples (Konnov)",
-      "gt_proof_steps": 6
+      "gt_proof_steps": 6,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.0705385
     },
     {
       "benchmark": "apalache_examples_tendermint/tendermint_single_indinv_proofs_Q3UnionMonotone.tla",
@@ -1294,7 +1459,10 @@
       "output_tokens": 18450,
       "sany_valid": false,
       "source": "apalache-examples (Konnov)",
-      "gt_proof_steps": 5
+      "gt_proof_steps": 5,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.350081
     },
     {
       "benchmark": "apalache_examples_tendermint/tendermint_single_indinv_proofs_QuorumsIntersectInCorrect.tla",
@@ -1316,7 +1484,10 @@
       "output_tokens": 19591,
       "sany_valid": false,
       "source": "apalache-examples (Konnov)",
-      "gt_proof_steps": 41
+      "gt_proof_steps": 41,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.3363635
     },
     {
       "benchmark": "apalache_examples_tendermint/tendermint_single_indinv_proofs_StepChangeChar.tla",
@@ -1338,7 +1509,10 @@
       "output_tokens": 11976,
       "sany_valid": false,
       "source": "apalache-examples (Konnov)",
-      "gt_proof_steps": 49
+      "gt_proof_steps": 49,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.228316
     },
     {
       "benchmark": "AtomicBakery/AtomicBakeryWithoutSMT_GGIrreflexive.tla",
@@ -1360,7 +1534,10 @@
       "output_tokens": 4723,
       "sany_valid": false,
       "source": "TLAPS distribution examples",
-      "gt_proof_steps": 8
+      "gt_proof_steps": 8,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.09358
     },
     {
       "benchmark": "AtomicBakery/AtomicBakeryWithoutSMT_InductiveInvariant.tla",
@@ -1382,7 +1559,10 @@
       "output_tokens": 17114,
       "sany_valid": false,
       "source": "TLAPS distribution examples",
-      "gt_proof_steps": 137
+      "gt_proof_steps": 137,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.2799125
     },
     {
       "benchmark": "AtomicBakery/AtomicBakeryWithoutSMT_InitImpliesTypeOK.tla",
@@ -1404,7 +1584,10 @@
       "output_tokens": 2979,
       "sany_valid": true,
       "source": "TLAPS distribution examples",
-      "gt_proof_steps": 5
+      "gt_proof_steps": 5,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.0674675
     },
     {
       "benchmark": "AtomicBakery/AtomicBakeryWithoutSMT_Safety.tla",
@@ -1426,7 +1609,10 @@
       "output_tokens": 2725,
       "sany_valid": false,
       "source": "TLAPS distribution examples",
-      "gt_proof_steps": 2
+      "gt_proof_steps": 2,
+      "cache_read_input_tokens": 5888,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.050832
     },
     {
       "benchmark": "AtomicBakery/AtomicBakeryWithoutSMT_TypeOKInvariant.tla",
@@ -1448,7 +1634,10 @@
       "output_tokens": 11349,
       "sany_valid": false,
       "source": "TLAPS distribution examples",
-      "gt_proof_steps": 21
+      "gt_proof_steps": 21,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.1821035
     },
     {
       "benchmark": "Consensus/Consensus_Invariance.tla",
@@ -1470,7 +1659,10 @@
       "output_tokens": 1495,
       "sany_valid": false,
       "source": "TLAPS distribution examples",
-      "gt_proof_steps": 3
+      "gt_proof_steps": 3,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.0307785
     },
     {
       "benchmark": "Consensus/PaxosProof_struct_lemma.tla",
@@ -1492,7 +1684,10 @@
       "output_tokens": 26129,
       "sany_valid": false,
       "source": "TLAPS distribution examples",
-      "gt_proof_steps": 4
+      "gt_proof_steps": 4,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.4184475
     },
     {
       "benchmark": "Data/Sets_CardinalitySetMinus.tla",
@@ -1514,7 +1709,10 @@
       "output_tokens": 867,
       "sany_valid": false,
       "source": "TLAPS distribution examples",
-      "gt_proof_steps": 20
+      "gt_proof_steps": 20,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.03146
     },
     {
       "benchmark": "Data/Sets_FiniteSubset.tla",
@@ -1536,7 +1734,10 @@
       "output_tokens": 20517,
       "sany_valid": false,
       "source": "TLAPS distribution examples",
-      "gt_proof_steps": 22
+      "gt_proof_steps": 22,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.3263125
     },
     {
       "benchmark": "Data/Sets_IntervalCardinality.tla",
@@ -1558,7 +1759,10 @@
       "output_tokens": 25684,
       "sany_valid": false,
       "source": "TLAPS distribution examples",
-      "gt_proof_steps": 8
+      "gt_proof_steps": 8,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.391871
     },
     {
       "benchmark": "Data/Sets_PigeonHole.tla",
@@ -1580,7 +1784,10 @@
       "output_tokens": 23737,
       "sany_valid": false,
       "source": "TLAPS distribution examples",
-      "gt_proof_steps": 22
+      "gt_proof_steps": 22,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.364051
     },
     {
       "benchmark": "Euclid/GCD_GCD1.tla",
@@ -1602,7 +1809,10 @@
       "output_tokens": 12156,
       "sany_valid": false,
       "source": "TLAPS distribution examples",
-      "gt_proof_steps": 4
+      "gt_proof_steps": 4,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.187726
     },
     {
       "benchmark": "Euclid/GCD_GCD3.tla",
@@ -1624,7 +1834,10 @@
       "output_tokens": 10352,
       "sany_valid": false,
       "source": "TLAPS distribution examples",
-      "gt_proof_steps": 3
+      "gt_proof_steps": 3,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.160881
     },
     {
       "benchmark": "Paxos/Paxos_Consistent.tla",
@@ -1646,7 +1859,10 @@
       "output_tokens": 22325,
       "sany_valid": false,
       "source": "TLAPS distribution examples",
-      "gt_proof_steps": 11
+      "gt_proof_steps": 11,
+      "cache_read_input_tokens": 7936,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.3386015
     },
     {
       "benchmark": "Paxos/Paxos_Invariant.tla",
@@ -1668,7 +1884,10 @@
       "output_tokens": 24888,
       "sany_valid": false,
       "source": "TLAPS distribution examples",
-      "gt_proof_steps": 73
+      "gt_proof_steps": 73,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.3838985
     },
     {
       "benchmark": "Paxos/Paxos_Refinement.tla",
@@ -1690,7 +1909,10 @@
       "output_tokens": 22854,
       "sany_valid": false,
       "source": "TLAPS distribution examples",
-      "gt_proof_steps": 8
+      "gt_proof_steps": 8,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.3535485
     },
     {
       "benchmark": "Paxos/Paxos_SafeAtStable.tla",
@@ -1712,7 +1934,10 @@
       "output_tokens": 34588,
       "sany_valid": false,
       "source": "TLAPS distribution examples",
-      "gt_proof_steps": 21
+      "gt_proof_steps": 21,
+      "cache_read_input_tokens": 5888,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.5270945
     },
     {
       "benchmark": "Paxos/PaxosHistVar_Consistent.tla",
@@ -1734,7 +1959,10 @@
       "output_tokens": 11439,
       "sany_valid": false,
       "source": "TLAPS distribution examples",
-      "gt_proof_steps": 11
+      "gt_proof_steps": 11,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.182336
     },
     {
       "benchmark": "Paxos/PaxosHistVar_Invariant.tla",
@@ -1756,7 +1984,10 @@
       "output_tokens": 17556,
       "sany_valid": true,
       "source": "TLAPS distribution examples",
-      "gt_proof_steps": 57
+      "gt_proof_steps": 57,
+      "cache_read_input_tokens": 5888,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.271727
     },
     {
       "benchmark": "SimpleMutex/SimpleMutex_Invariance.tla",
@@ -1778,7 +2009,10 @@
       "output_tokens": 2055,
       "sany_valid": true,
       "source": "TLAPS distribution examples",
-      "gt_proof_steps": 13
+      "gt_proof_steps": 13,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.0490125
     },
     {
       "benchmark": "tlaplus_examples_allocator/AllocatorImplementation_proof_TypeCorrect.tla",
@@ -1800,7 +2034,10 @@
       "output_tokens": 15289,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 27
+      "gt_proof_steps": 27,
+      "cache_read_input_tokens": 5888,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.241027
     },
     {
       "benchmark": "tlaplus_examples_allocator/SchedulingAllocator_proof_Mutex.tla",
@@ -1822,7 +2059,10 @@
       "output_tokens": 15495,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 45
+      "gt_proof_steps": 45,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.242931
     },
     {
       "benchmark": "tlaplus_examples_allocator/SchedulingAllocator_proof_PermSeqsType.tla",
@@ -1844,7 +2084,10 @@
       "output_tokens": 14313,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 24
+      "gt_proof_steps": 24,
+      "cache_read_input_tokens": 5888,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.2228045
     },
     {
       "benchmark": "tlaplus_examples_Bakery-Boulangerie/Boulanger_TypeCorrect.tla",
@@ -1866,7 +2109,10 @@
       "output_tokens": 2786,
       "sany_valid": true,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 16
+      "gt_proof_steps": 16,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.0557535
     },
     {
       "benchmark": "tlaplus_examples_barriers/Barriers_FlushInvariant.tla",
@@ -1888,7 +2134,10 @@
       "output_tokens": 13356,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 61
+      "gt_proof_steps": 61,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.2148385
     },
     {
       "benchmark": "tlaplus_examples_barriers/Barriers_Invariant.tla",
@@ -1910,7 +2159,10 @@
       "output_tokens": 26174,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 255
+      "gt_proof_steps": 255,
+      "cache_read_input_tokens": 5888,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.404232
     },
     {
       "benchmark": "tlaplus_examples_bcastByz/bcastByz_FCConstraints_TypeOK_InitNoBcast.tla",
@@ -1932,7 +2184,10 @@
       "output_tokens": 8599,
       "sany_valid": true,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 37
+      "gt_proof_steps": 37,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.143696
     },
     {
       "benchmark": "tlaplus_examples_bcastByz/bcastByz_FCConstraints_TypeOK_Next.tla",
@@ -1954,7 +2209,10 @@
       "output_tokens": 11969,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 134
+      "gt_proof_steps": 134,
+      "cache_read_input_tokens": 5888,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.192362
     },
     {
       "benchmark": "tlaplus_examples_bcastByz/bcastByz_Unforg_Step2.tla",
@@ -1976,7 +2234,10 @@
       "output_tokens": 15178,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 91
+      "gt_proof_steps": 91,
+      "cache_read_input_tokens": 5888,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.240882
     },
     {
       "benchmark": "tlaplus_examples_BlockingQueue/BlockingQueueSplit_proofs_DeadlockFreedom.tla",
@@ -1998,7 +2259,10 @@
       "output_tokens": 27288,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 10
+      "gt_proof_steps": 10,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.4184585
     },
     {
       "benchmark": "tlaplus_examples_BlockingQueue/BlockingQueueSplit_proofs_Implements.tla",
@@ -2020,7 +2284,10 @@
       "output_tokens": 18315,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 4
+      "gt_proof_steps": 4,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.2829835
     },
     {
       "benchmark": "tlaplus_examples_byzpaxos/BPConProof_Invariance.tla",
@@ -2042,7 +2309,10 @@
       "output_tokens": 18555,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 145
+      "gt_proof_steps": 145,
+      "cache_read_input_tokens": 5888,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.3220545
     },
     {
       "benchmark": "tlaplus_examples_byzpaxos/BPConProof_MaxBallotLemma2.tla",
@@ -2064,7 +2334,10 @@
       "output_tokens": 16138,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 22
+      "gt_proof_steps": 22,
+      "cache_read_input_tokens": 5888,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.277107
     },
     {
       "benchmark": "tlaplus_examples_byzpaxos/BPConProof_MsgsLemma.tla",
@@ -2086,7 +2359,10 @@
       "output_tokens": 27613,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 65
+      "gt_proof_steps": 65,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.460161
     },
     {
       "benchmark": "tlaplus_examples_byzpaxos/BPConProof_PNextDef.tla",
@@ -2108,7 +2384,10 @@
       "output_tokens": 6356,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 3
+      "gt_proof_steps": 3,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.137871
     },
     {
       "benchmark": "tlaplus_examples_byzpaxos/PConProof_NextDef.tla",
@@ -2130,7 +2409,10 @@
       "output_tokens": 2171,
       "sany_valid": true,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 3
+      "gt_proof_steps": 3,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.0570085
     },
     {
       "benchmark": "tlaplus_examples_byzpaxos/VoteProof_InductiveInvariance.tla",
@@ -2152,7 +2434,10 @@
       "output_tokens": 33817,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 87
+      "gt_proof_steps": 87,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.527331
     },
     {
       "benchmark": "tlaplus_examples_byzpaxos/VoteProof_Liveness.tla",
@@ -2174,7 +2459,10 @@
       "output_tokens": 39208,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 149
+      "gt_proof_steps": 149,
+      "cache_read_input_tokens": 15104,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.594016
     },
     {
       "benchmark": "tlaplus_examples_byzpaxos/VoteProof_SafeAtProp.tla",
@@ -2196,7 +2484,10 @@
       "output_tokens": 13219,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 12
+      "gt_proof_steps": 12,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.2125185
     },
     {
       "benchmark": "tlaplus_examples_byzpaxos/VoteProof_SafeLemma.tla",
@@ -2218,7 +2509,10 @@
       "output_tokens": 21614,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 22
+      "gt_proof_steps": 22,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.339401
     },
     {
       "benchmark": "tlaplus_examples_byzpaxos/VoteProof_VT1Prime.tla",
@@ -2240,7 +2534,10 @@
       "output_tokens": 12841,
       "sany_valid": true,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 2
+      "gt_proof_steps": 2,
+      "cache_read_input_tokens": 5888,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.2085595
     },
     {
       "benchmark": "tlaplus_examples_byzpaxos/VoteProof_VT3.tla",
@@ -2262,7 +2559,10 @@
       "output_tokens": 26882,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 28
+      "gt_proof_steps": 28,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.4241335
     },
     {
       "benchmark": "tlaplus_examples_byzpaxos/VoteProof_VT4.tla",
@@ -2284,7 +2584,10 @@
       "output_tokens": 19391,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 23
+      "gt_proof_steps": 23,
+      "cache_read_input_tokens": 12032,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.296703
     },
     {
       "benchmark": "tlaplus_examples_CigaretteSmokers/CigaretteSmokers_proof_UniqueComplement2.tla",
@@ -2306,7 +2609,10 @@
       "output_tokens": 16184,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 42
+      "gt_proof_steps": 42,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.2502335
     },
     {
       "benchmark": "tlaplus_examples_CoffeeCan/CoffeeCan_proof_TypeCorrect.tla",
@@ -2328,7 +2634,10 @@
       "output_tokens": 6696,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 51
+      "gt_proof_steps": 51,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.107061
     },
     {
       "benchmark": "tlaplus_examples_ewd687a/EWD687a_proof_Invariant1.tla",
@@ -2350,7 +2659,10 @@
       "output_tokens": 16403,
       "sany_valid": true,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 16
+      "gt_proof_steps": 16,
+      "cache_read_input_tokens": 5888,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.253057
     },
     {
       "benchmark": "tlaplus_examples_ewd687a/EWD687a_proof_Safety.tla",
@@ -2372,7 +2684,10 @@
       "output_tokens": 10276,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 21
+      "gt_proof_steps": 21,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.164061
     },
     {
       "benchmark": "tlaplus_examples_ewd687a/EWD687a_proof_TreeInvariant.tla",
@@ -2394,7 +2709,10 @@
       "output_tokens": 17435,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 135
+      "gt_proof_steps": 135,
+      "cache_read_input_tokens": 5888,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.269017
     },
     {
       "benchmark": "tlaplus_examples_ewd840/EWD840_proof_EnabledSystem.tla",
@@ -2416,7 +2734,10 @@
       "output_tokens": 6564,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 6
+      "gt_proof_steps": 6,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.1075685
     },
     {
       "benchmark": "tlaplus_examples_ewd840/EWD840_proof_Round1.tla",
@@ -2438,7 +2759,10 @@
       "output_tokens": 26854,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 19
+      "gt_proof_steps": 19,
+      "cache_read_input_tokens": 7936,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.405854
     },
     {
       "benchmark": "tlaplus_examples_ewd840/EWD840_proof_Round2.tla",
@@ -2460,7 +2784,10 @@
       "output_tokens": 25369,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 25
+      "gt_proof_steps": 25,
+      "cache_read_input_tokens": 5888,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.388277
     },
     {
       "benchmark": "tlaplus_examples_ewd840/EWD840_proof_Round3.tla",
@@ -2482,7 +2809,10 @@
       "output_tokens": 19096,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 26
+      "gt_proof_steps": 26,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.2965985
     },
     {
       "benchmark": "tlaplus_examples_ewd840/SyncTerminationDetection_proof_CorrectDetection.tla",
@@ -2504,7 +2834,10 @@
       "output_tokens": 1692,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 3
+      "gt_proof_steps": 3,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.031516
     },
     {
       "benchmark": "tlaplus_examples_ewd840/SyncTerminationDetection_proof_Live.tla",
@@ -2526,7 +2859,10 @@
       "output_tokens": 5543,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 5
+      "gt_proof_steps": 5,
+      "cache_read_input_tokens": 5888,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.087307
     },
     {
       "benchmark": "tlaplus_examples_ewd998/AsyncTerminationDetection_proof_Liveness.tla",
@@ -2548,7 +2884,10 @@
       "output_tokens": 7551,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 5
+      "gt_proof_steps": 5,
+      "cache_read_input_tokens": 5888,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.118087
     },
     {
       "benchmark": "tlaplus_examples_ewd998/AsyncTerminationDetection_proof_Safety.tla",
@@ -2570,7 +2909,10 @@
       "output_tokens": 7574,
       "sany_valid": true,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 4
+      "gt_proof_steps": 4,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.1313625
     },
     {
       "benchmark": "tlaplus_examples_ewd998/AsyncTerminationDetection_proof_TypeCorrect.tla",
@@ -2592,7 +2934,10 @@
       "output_tokens": 4303,
       "sany_valid": true,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 4
+      "gt_proof_steps": 4,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.071256
     },
     {
       "benchmark": "tlaplus_examples_ewd998/EWD998_proof_B0NoMessagePending.tla",
@@ -2614,7 +2959,10 @@
       "output_tokens": 7167,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 7
+      "gt_proof_steps": 7,
+      "cache_read_input_tokens": 8960,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.1197375
     },
     {
       "benchmark": "tlaplus_examples_ewd998/EWD998_proof_Detection.tla",
@@ -2636,7 +2984,10 @@
       "output_tokens": 12150,
       "sany_valid": true,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 8
+      "gt_proof_steps": 8,
+      "cache_read_input_tokens": 5888,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.1952695
     },
     {
       "benchmark": "tlaplus_examples_ewd998/EWD998_proof_EnabledAtMaster.tla",
@@ -2658,7 +3009,10 @@
       "output_tokens": 18647,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 19
+      "gt_proof_steps": 19,
+      "cache_read_input_tokens": 5888,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.2916945
     },
     {
       "benchmark": "tlaplus_examples_ewd998/EWD998_proof_EnabledSystem.tla",
@@ -2680,7 +3034,10 @@
       "output_tokens": 6600,
       "sany_valid": true,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 4
+      "gt_proof_steps": 4,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.1130685
     },
     {
       "benchmark": "tlaplus_examples_ewd998/EWD998_proof_Invariance.tla",
@@ -2702,7 +3059,10 @@
       "output_tokens": 30094,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 131
+      "gt_proof_steps": 131,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.4646635
     },
     {
       "benchmark": "tlaplus_examples_ewd998/EWD998_proof_Refinement.tla",
@@ -2724,7 +3084,10 @@
       "output_tokens": 29218,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 46
+      "gt_proof_steps": 46,
+      "cache_read_input_tokens": 5888,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.451612
     },
     {
       "benchmark": "tlaplus_examples_ewd998/EWD998_proof_Round1.tla",
@@ -2746,7 +3109,10 @@
       "output_tokens": 20868,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 21
+      "gt_proof_steps": 21,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.328086
     },
     {
       "benchmark": "tlaplus_examples_ewd998/EWD998_proof_Round2.tla",
@@ -2768,7 +3134,10 @@
       "output_tokens": 21151,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 30
+      "gt_proof_steps": 30,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.3324085
     },
     {
       "benchmark": "tlaplus_examples_ewd998/EWD998_proof_Round3.tla",
@@ -2790,7 +3159,10 @@
       "output_tokens": 32789,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 41
+      "gt_proof_steps": 41,
+      "cache_read_input_tokens": 5888,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.5047795
     },
     {
       "benchmark": "tlaplus_examples_ewd998/EWD998_proof_Safety.tla",
@@ -2812,7 +3184,10 @@
       "output_tokens": 27397,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 29
+      "gt_proof_steps": 29,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.4353075
     },
     {
       "benchmark": "tlaplus_examples_ewd998/EWD998_proof_SumZero.tla",
@@ -2834,7 +3209,10 @@
       "output_tokens": 17798,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 11
+      "gt_proof_steps": 11,
+      "cache_read_input_tokens": 5888,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.2778395
     },
     {
       "benchmark": "tlaplus_examples_ewd998/EWD998_proof_TerminationDetectionInv.tla",
@@ -2856,7 +3234,10 @@
       "output_tokens": 684,
       "sany_valid": true,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 4
+      "gt_proof_steps": 4,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.0261285
     },
     {
       "benchmark": "tlaplus_examples_ewd998/EWD998PCal_proof_InitNetworkOK.tla",
@@ -2878,7 +3259,10 @@
       "output_tokens": 12652,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 33
+      "gt_proof_steps": 33,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.204836
     },
     {
       "benchmark": "tlaplus_examples_ewd998/EWD998PCal_proof_TypeOK_Step.tla",
@@ -2900,7 +3284,10 @@
       "output_tokens": 24501,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 340
+      "gt_proof_steps": 340,
+      "cache_read_input_tokens": 5888,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.3831395
     },
     {
       "benchmark": "tlaplus_examples_FiniteMonotonic/CRDT_proof_EnabledGossip.tla",
@@ -2922,7 +3309,10 @@
       "output_tokens": 8522,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 9
+      "gt_proof_steps": 9,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.136901
     },
     {
       "benchmark": "tlaplus_examples_FiniteMonotonic/CRDT_proof_GossipDecreasesMeasure.tla",
@@ -2944,7 +3334,10 @@
       "output_tokens": 17292,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 4
+      "gt_proof_steps": 4,
+      "cache_read_input_tokens": 6912,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.284323
     },
     {
       "benchmark": "tlaplus_examples_FiniteMonotonic/CRDT_proof_GossipDoesntIncreaseMeasure.tla",
@@ -2966,7 +3359,10 @@
       "output_tokens": 18314,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 9
+      "gt_proof_steps": 9,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.2834035
     },
     {
       "benchmark": "tlaplus_examples_FiniteMonotonic/CRDT_proof_MeasureIsZero.tla",
@@ -2988,7 +3384,10 @@
       "output_tokens": 15902,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 5
+      "gt_proof_steps": 5,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.2469435
     },
     {
       "benchmark": "tlaplus_examples_FiniteMonotonic/CRDT_proof_MeasureType.tla",
@@ -3010,7 +3409,10 @@
       "output_tokens": 4403,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 2
+      "gt_proof_steps": 2,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.073891
     },
     {
       "benchmark": "tlaplus_examples_FiniteMonotonic/CRDT_proof_OGLiveness.tla",
@@ -3032,7 +3434,10 @@
       "output_tokens": 33734,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 63
+      "gt_proof_steps": 63,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.5155035
     },
     {
       "benchmark": "tlaplus_examples_FiniteMonotonic/CRDT_proof_Safe.tla",
@@ -3054,7 +3459,10 @@
       "output_tokens": 4218,
       "sany_valid": true,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 3
+      "gt_proof_steps": 3,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.0695985
     },
     {
       "benchmark": "tlaplus_examples_FiniteMonotonic/CRDT_proof_SumStronglyMonotonic.tla",
@@ -3076,7 +3484,10 @@
       "output_tokens": 4584,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 8
+      "gt_proof_steps": 8,
+      "cache_read_input_tokens": 5888,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.073877
     },
     {
       "benchmark": "tlaplus_examples_FiniteMonotonic/CRDT_proof_SumType.tla",
@@ -3098,7 +3509,10 @@
       "output_tokens": 1601,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 3
+      "gt_proof_steps": 3,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.030891
     },
     {
       "benchmark": "tlaplus_examples_FiniteMonotonic/CRDT_proof_SumWeaklyMonotonic.tla",
@@ -3120,7 +3534,10 @@
       "output_tokens": 5934,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 7
+      "gt_proof_steps": 7,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.096241
     },
     {
       "benchmark": "tlaplus_examples_glowingRaccoon/clean_proof_Preservation.tla",
@@ -3142,7 +3559,10 @@
       "output_tokens": 15228,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 37
+      "gt_proof_steps": 37,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.235296
     },
     {
       "benchmark": "tlaplus_examples_glowingRaccoon/clean_proof_TypeCorrect.tla",
@@ -3164,7 +3584,10 @@
       "output_tokens": 8004,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 20
+      "gt_proof_steps": 20,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.126851
     },
     {
       "benchmark": "tlaplus_examples_glowingRaccoon/stages_proof_TypeCorrect.tla",
@@ -3186,7 +3609,10 @@
       "output_tokens": 12365,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 19
+      "gt_proof_steps": 19,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.193651
     },
     {
       "benchmark": "tlaplus_examples_KeyValueStore/KeyValueStore_proof_TypeAndLifecycle.tla",
@@ -3208,7 +3634,10 @@
       "output_tokens": 8026,
       "sany_valid": true,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 13
+      "gt_proof_steps": 13,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.1283335
     },
     {
       "benchmark": "tlaplus_examples_lamport_mutex/LamportMutex_proofs_BasicInvariant.tla",
@@ -3230,7 +3659,10 @@
       "output_tokens": 18326,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 131
+      "gt_proof_steps": 131,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.2867085
     },
     {
       "benchmark": "tlaplus_examples_lamport_mutex/LamportMutex_proofs_ClockInvariant.tla",
@@ -3252,7 +3684,10 @@
       "output_tokens": 30448,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 129
+      "gt_proof_steps": 129,
+      "cache_read_input_tokens": 5888,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.466872
     },
     {
       "benchmark": "tlaplus_examples_lamport_mutex/LamportMutex_proofs_TypeCorrect.tla",
@@ -3274,7 +3709,10 @@
       "output_tokens": 15017,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 25
+      "gt_proof_steps": 25,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.2333985
     },
     {
       "benchmark": "tlaplus_examples_locks_auxiliary_vars/Lock_MutualExclusion.tla",
@@ -3296,7 +3734,10 @@
       "output_tokens": 5864,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 11
+      "gt_proof_steps": 11,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.1055925
     },
     {
       "benchmark": "tlaplus_examples_locks_auxiliary_vars/LockHS_IndInvHS.tla",
@@ -3318,7 +3759,10 @@
       "output_tokens": 27423,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 34
+      "gt_proof_steps": 34,
+      "cache_read_input_tokens": 5888,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.4220845
     },
     {
       "benchmark": "tlaplus_examples_locks_auxiliary_vars/Peterson_Refinement.tla",
@@ -3340,7 +3784,10 @@
       "output_tokens": 10039,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 14
+      "gt_proof_steps": 14,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.159551
     },
     {
       "benchmark": "tlaplus_examples_LoopInvariance/BinarySearch_SortedLess.tla",
@@ -3362,7 +3809,10 @@
       "output_tokens": 2879,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 2
+      "gt_proof_steps": 2,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.0491285
     },
     {
       "benchmark": "tlaplus_examples_LoopInvariance/Quicksort_NonemptyMin.tla",
@@ -3384,7 +3834,10 @@
       "output_tokens": 13195,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 23
+      "gt_proof_steps": 23,
+      "cache_read_input_tokens": 5888,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.2035845
     },
     {
       "benchmark": "tlaplus_examples_LoopInvariance/SumSequence_Lemma2.tla",
@@ -3406,7 +3859,10 @@
       "output_tokens": 8372,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 4
+      "gt_proof_steps": 4,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.136111
     },
     {
       "benchmark": "tlaplus_examples_LoopInvariance/SumSequence_Lemma3.tla",
@@ -3428,7 +3884,10 @@
       "output_tokens": 8783,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 13
+      "gt_proof_steps": 13,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.1425485
     },
     {
       "benchmark": "tlaplus_examples_LoopInvariance/SumSequence_Lemma4.tla",
@@ -3450,7 +3909,10 @@
       "output_tokens": 10173,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 16
+      "gt_proof_steps": 16,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.163621
     },
     {
       "benchmark": "tlaplus_examples_Majority/MajorityProof_Correctness.tla",
@@ -3472,7 +3934,10 @@
       "output_tokens": 15945,
       "sany_valid": true,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 21
+      "gt_proof_steps": 21,
+      "cache_read_input_tokens": 5888,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.244012
     },
     {
       "benchmark": "tlaplus_examples_Majority/MajorityProof_OccurrencesPlusOne.tla",
@@ -3494,7 +3959,10 @@
       "output_tokens": 6443,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 7
+      "gt_proof_steps": 7,
+      "cache_read_input_tokens": 5888,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.101432
     },
     {
       "benchmark": "tlaplus_examples_Majority/MajorityProof_TypeCorrect.tla",
@@ -3516,7 +3984,10 @@
       "output_tokens": 3282,
       "sany_valid": true,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 3
+      "gt_proof_steps": 3,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.06644
     },
     {
       "benchmark": "tlaplus_examples_MisraReachability/ParReachProofs_TypeInvariant.tla",
@@ -3538,7 +4009,10 @@
       "output_tokens": 8494,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 3
+      "gt_proof_steps": 3,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.1367185
     },
     {
       "benchmark": "tlaplus_examples_MisraReachability/ReachabilityProofs_Reachable2.tla",
@@ -3560,7 +4034,10 @@
       "output_tokens": 14395,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 13
+      "gt_proof_steps": 13,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.2233335
     },
     {
       "benchmark": "tlaplus_examples_MisraReachability/ReachableProofs_Thm2.tla",
@@ -3582,7 +4059,10 @@
       "output_tokens": 22677,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 2
+      "gt_proof_steps": 2,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.3491735
     },
     {
       "benchmark": "tlaplus_examples_MisraReachability/ReachableProofs_Thm3.tla",
@@ -3604,7 +4084,10 @@
       "output_tokens": 14095,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 20
+      "gt_proof_steps": 20,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.220901
     },
     {
       "benchmark": "tlaplus_examples_MissionariesAndCannibals/MissionariesAndCannibals_proof_TypeCorrect.tla",
@@ -3626,7 +4109,10 @@
       "output_tokens": 3006,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 23
+      "gt_proof_steps": 23,
+      "cache_read_input_tokens": 5888,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.049462
     },
     {
       "benchmark": "tlaplus_examples_MultiCarElevator/Elevator_proof_Inv1Next.tla",
@@ -3648,7 +4134,10 @@
       "output_tokens": 14620,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 84
+      "gt_proof_steps": 84,
+      "cache_read_input_tokens": 5888,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.230472
     },
     {
       "benchmark": "tlaplus_examples_Paxos/Consensus_LivenessTheorem.tla",
@@ -3670,7 +4159,10 @@
       "output_tokens": 4568,
       "sany_valid": true,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 6
+      "gt_proof_steps": 6,
+      "cache_read_input_tokens": 5888,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.072167
     },
     {
       "benchmark": "tlaplus_examples_PaxosHowToWinATuringAward/Voting_Implementation.tla",
@@ -3692,7 +4184,10 @@
       "output_tokens": 31859,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 3
+      "gt_proof_steps": 3,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.5021675
     },
     {
       "benchmark": "tlaplus_examples_PaxosHowToWinATuringAward/Voting_Invariance.tla",
@@ -3714,7 +4209,10 @@
       "output_tokens": 14784,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 3
+      "gt_proof_steps": 3,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.234266
     },
     {
       "benchmark": "tlaplus_examples_PaxosHowToWinATuringAward/Voting_proof_ShowsSafety_T.tla",
@@ -3736,7 +4234,10 @@
       "output_tokens": 6110,
       "sany_valid": true,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 38
+      "gt_proof_steps": 38,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.1010785
     },
     {
       "benchmark": "tlaplus_examples_ReadersWriters/ReadersWriters_proof_TypeCorrect.tla",
@@ -3758,7 +4259,10 @@
       "output_tokens": 14163,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 36
+      "gt_proof_steps": 36,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.220416
     },
     {
       "benchmark": "tlaplus_examples_spanning/spanning_proof_SntMsgStep.tla",
@@ -3780,7 +4284,10 @@
       "output_tokens": 15463,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 67
+      "gt_proof_steps": 67,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.2394635
     },
     {
       "benchmark": "tlaplus_examples_tcp/tcp_proof_IndInvInit.tla",
@@ -3802,7 +4309,10 @@
       "output_tokens": 5743,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 10
+      "gt_proof_steps": 10,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.1034885
     },
     {
       "benchmark": "tlaplus_examples_tcp/tcp_proof_IndInvReset.tla",
@@ -3824,7 +4334,10 @@
       "output_tokens": 30425,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 239
+      "gt_proof_steps": 239,
+      "cache_read_input_tokens": 5888,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.4731195
     },
     {
       "benchmark": "tlaplus_examples_tcp/tcp_proof_IndInvSystem.tla",
@@ -3846,7 +4359,10 @@
       "output_tokens": 20027,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 1433
+      "gt_proof_steps": 1433,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.3191435
     },
     {
       "benchmark": "tlaplus_examples_tcp/tcp_proof_IndInvUser.tla",
@@ -3868,7 +4384,10 @@
       "output_tokens": 27203,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 601
+      "gt_proof_steps": 601,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.4263385
     },
     {
       "benchmark": "tlaplus_examples_tcp/tcp_proof_PrefixTwoNonEmpty.tla",
@@ -3890,7 +4409,10 @@
       "output_tokens": 2540,
       "sany_valid": true,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 5
+      "gt_proof_steps": 5,
+      "cache_read_input_tokens": 5888,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.0502245
     },
     {
       "benchmark": "tlaplus_examples_tcp/tcp_proof_TypeOKInductive.tla",
@@ -3912,7 +4434,10 @@
       "output_tokens": 17684,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 116
+      "gt_proof_steps": 116,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.279761
     },
     {
       "benchmark": "tlaplus_examples_TeachingConcurrency/Simple_Correctness.tla",
@@ -3934,7 +4459,10 @@
       "output_tokens": 17215,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 10
+      "gt_proof_steps": 10,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.266731
     },
     {
       "benchmark": "tlaplus_examples_TeachingConcurrency/SimpleRegular_Correctness.tla",
@@ -3956,7 +4484,10 @@
       "output_tokens": 13958,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 15
+      "gt_proof_steps": 15,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.218791
     },
     {
       "benchmark": "tlaplus_examples_TencentPaxos/TPaxosWithProof_AcceptMsgInv.tla",
@@ -3978,7 +4509,10 @@
       "output_tokens": 34647,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 128
+      "gt_proof_steps": 128,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.5358185
     },
     {
       "benchmark": "tlaplus_examples_TencentPaxos/TPaxosWithProof_Consistent.tla",
@@ -4000,7 +4534,10 @@
       "output_tokens": 17539,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 11
+      "gt_proof_steps": 11,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.279641
     },
     {
       "benchmark": "tlaplus_examples_TencentPaxos/TPaxosWithProof_Invariant.tla",
@@ -4022,7 +4559,10 @@
       "output_tokens": 23398,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 105
+      "gt_proof_steps": 105,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.367466
     },
     {
       "benchmark": "tlaplus_examples_TencentPaxos/TPaxosWithProof_OnMessageAccInv.tla",
@@ -4044,7 +4584,10 @@
       "output_tokens": 17208,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 132
+      "gt_proof_steps": 132,
+      "cache_read_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.3490125
     },
     {
       "benchmark": "tlaplus_examples_TencentPaxos/TPaxosWithProof_OnMessageMsgInv.tla",
@@ -4066,7 +4609,10 @@
       "output_tokens": 26961,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 53
+      "gt_proof_steps": 53,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.4208185
     },
     {
       "benchmark": "tlaplus_examples_TencentPaxos/TPaxosWithProof_PrepareMsgInv.tla",
@@ -4088,7 +4634,10 @@
       "output_tokens": 37310,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 65
+      "gt_proof_steps": 65,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.5745935
     },
     {
       "benchmark": "tlaplus_examples_TencentPaxos/TPaxosWithProof_SafeAtStable.tla",
@@ -4110,7 +4659,10 @@
       "output_tokens": 21174,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 62
+      "gt_proof_steps": 62,
+      "cache_read_input_tokens": 5888,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.3301445
     },
     {
       "benchmark": "tlaplus_examples_TencentPaxos/TPaxosWithProof_UpdateStateMsgInv.tla",
@@ -4132,7 +4684,10 @@
       "output_tokens": 40277,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 157
+      "gt_proof_steps": 157,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.620471
     },
     {
       "benchmark": "tlaplus_examples_TencentPaxos/TPaxosWithProof_UpdateStateTypeOKProperty.tla",
@@ -4154,7 +4709,10 @@
       "output_tokens": 8770,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 6
+      "gt_proof_steps": 6,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.145731
     },
     {
       "benchmark": "tlaplus_examples_TencentPaxos/TPaxosWithProof_UpdateStateValue.tla",
@@ -4176,7 +4734,10 @@
       "output_tokens": 10331,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 24
+      "gt_proof_steps": 24,
+      "cache_read_input_tokens": 5888,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.1686095
     },
     {
       "benchmark": "tlaplus_examples_TencentPaxos/TPaxosWithProof_UpdateStateViewValue.tla",
@@ -4198,7 +4759,10 @@
       "output_tokens": 29151,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 49
+      "gt_proof_steps": 49,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.452731
     },
     {
       "benchmark": "tlaplus_examples_Termination/Termination_proof_Invariant2.tla",
@@ -4220,7 +4784,10 @@
       "output_tokens": 33418,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 57
+      "gt_proof_steps": 57,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.5090985
     },
     {
       "benchmark": "tlaplus_examples_transaction_commit/PaxosCommit_proof_MaximumProp.tla",
@@ -4242,7 +4809,10 @@
       "output_tokens": 23056,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 69
+      "gt_proof_steps": 69,
+      "cache_read_input_tokens": 8960,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.349445
     },
     {
       "benchmark": "tlaplus_examples_transaction_commit/PaxosCommit_proof_NextInv.tla",
@@ -4264,7 +4834,10 @@
       "output_tokens": 18861,
       "sany_valid": false,
       "source": "tlaplus/Examples",
-      "gt_proof_steps": 103
+      "gt_proof_steps": 103,
+      "cache_read_input_tokens": 4864,
+      "cache_write_input_tokens": 0,
+      "equivalent_cost_usd": 0.2961835
     }
   ]
 }
