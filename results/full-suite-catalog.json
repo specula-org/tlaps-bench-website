@@ -1,27 +1,27 @@
 {
   "suite": "full",
-  "specCount": 70,
-  "propertyCount": 710,
-  "completion": 483,
-  "scratch": 227,
+  "specCount": 71,
+  "propertyCount": 951,
+  "completion": 706,
+  "scratch": 245,
   "categories": [
     {
       "id": "libraries",
       "name": "Example libraries",
       "blurb": "Specifications and their proof properties from the official TLA+ Examples repository and the TLAPS distribution, ranging from teaching exercises to distributed algorithms.",
-      "specCount": 59,
-      "completion": 482,
-      "scratch": 183,
-      "total": 665
+      "specCount": 58,
+      "completion": 448,
+      "scratch": 201,
+      "total": 649
     },
     {
       "id": "systems",
       "name": "Systems specifications",
-      "blurb": "Proof properties from protocol and system specifications drawn from ZooKeeper, Ivy, etcd, OpenAddressing, and Anvil, emphasizing realistic verification targets.",
-      "specCount": 11,
-      "completion": 1,
+      "blurb": "Proof properties from protocol and system specifications drawn from ZooKeeper, Ivy, etcd, OpenAddressing, Anvil, and the Apalache examples corpus (Konnov).",
+      "specCount": 13,
+      "completion": 258,
       "scratch": 44,
-      "total": 45
+      "total": 302
     }
   ],
   "specs": [
@@ -52,6 +52,32 @@
       "total": 52
     },
     {
+      "id": "tlaps-distribution-examples--data",
+      "group": "Data",
+      "name": "Data",
+      "category": "libraries",
+      "sourceKey": "TLAPS distribution examples",
+      "sourceName": "TLAPS distribution examples",
+      "sourceUrl": "https://github.com/tlaplus/tlapm",
+      "url": "https://github.com/tlaplus/tlapm/tree/main/zenon/regression/examples/data",
+      "completion": 15,
+      "scratch": 9,
+      "total": 24
+    },
+    {
+      "id": "tlaps-distribution-examples--consensus",
+      "group": "Consensus",
+      "name": "Consensus",
+      "category": "libraries",
+      "sourceKey": "TLAPS distribution examples",
+      "sourceName": "TLAPS distribution examples",
+      "sourceUrl": "https://github.com/tlaplus/tlapm",
+      "url": "https://github.com/tlaplus/tlapm/tree/main/examples_draft/consensus",
+      "completion": 13,
+      "scratch": 10,
+      "total": 23
+    },
+    {
       "id": "tlaplus-examples--tlaplus-examples-lamport-mutex",
       "group": "tlaplus_examples_lamport_mutex",
       "name": "lamport_mutex",
@@ -78,19 +104,6 @@
       "total": 21
     },
     {
-      "id": "tlaplus-examples--tlaplus-examples-loopinvariance",
-      "group": "tlaplus_examples_LoopInvariance",
-      "name": "LoopInvariance",
-      "category": "libraries",
-      "sourceKey": "tlaplus/Examples",
-      "sourceName": "tlaplus/Examples",
-      "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/LoopInvariance",
-      "completion": 17,
-      "scratch": 3,
-      "total": 20
-    },
-    {
       "id": "tlaplus-examples--tlaplus-examples-allocator",
       "group": "tlaplus_examples_allocator",
       "name": "allocator",
@@ -104,19 +117,6 @@
       "total": 19
     },
     {
-      "id": "tlaplus-examples--tlaplus-examples-ewd687a",
-      "group": "tlaplus_examples_ewd687a",
-      "name": "ewd687a",
-      "category": "libraries",
-      "sourceKey": "tlaplus/Examples",
-      "sourceName": "tlaplus/Examples",
-      "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/ewd687a",
-      "completion": 16,
-      "scratch": 3,
-      "total": 19
-    },
-    {
       "id": "tlaplus-examples--tlaplus-examples-ewd840",
       "group": "tlaplus_examples_ewd840",
       "name": "ewd840",
@@ -127,6 +127,32 @@
       "url": "https://github.com/tlaplus/Examples/tree/master/specifications/ewd840",
       "completion": 14,
       "scratch": 5,
+      "total": 19
+    },
+    {
+      "id": "tlaplus-examples--tlaplus-examples-loopinvariance",
+      "group": "tlaplus_examples_LoopInvariance",
+      "name": "LoopInvariance",
+      "category": "libraries",
+      "sourceKey": "tlaplus/Examples",
+      "sourceName": "tlaplus/Examples",
+      "sourceUrl": "https://github.com/tlaplus/Examples",
+      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/LoopInvariance",
+      "completion": 16,
+      "scratch": 3,
+      "total": 19
+    },
+    {
+      "id": "tlaps-distribution-examples--paxos",
+      "group": "Paxos",
+      "name": "Paxos (TLAPS dist)",
+      "category": "libraries",
+      "sourceKey": "TLAPS distribution examples",
+      "sourceName": "TLAPS distribution examples",
+      "sourceUrl": "https://github.com/tlaplus/tlapm",
+      "url": "https://github.com/hengxin/tlaps-examples/tree/master/Paxos",
+      "completion": 13,
+      "scratch": 6,
       "total": 19
     },
     {
@@ -169,6 +195,19 @@
       "total": 17
     },
     {
+      "id": "tlaplus-examples--tlaplus-examples-flashprotocol",
+      "group": "tlaplus_examples_FlashProtocol",
+      "name": "FlashProtocol",
+      "category": "libraries",
+      "sourceKey": "tlaplus/Examples",
+      "sourceName": "tlaplus/Examples",
+      "sourceUrl": "https://github.com/tlaplus/Examples",
+      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/FlashProtocol",
+      "completion": 0,
+      "scratch": 17,
+      "total": 17
+    },
+    {
       "id": "tlaplus-examples--tlaplus-examples-barriers",
       "group": "tlaplus_examples_barriers",
       "name": "barriers",
@@ -177,6 +216,19 @@
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
       "url": "https://github.com/tlaplus/Examples/tree/master/specifications/barriers",
+      "completion": 11,
+      "scratch": 5,
+      "total": 16
+    },
+    {
+      "id": "tlaps-distribution-examples--cantor",
+      "group": "Cantor",
+      "name": "Cantor",
+      "category": "libraries",
+      "sourceKey": "TLAPS distribution examples",
+      "sourceName": "TLAPS distribution examples",
+      "sourceUrl": "https://github.com/tlaplus/tlapm",
+      "url": "https://github.com/tlaplus/tlapm/tree/main/examples/cantor",
       "completion": 11,
       "scratch": 5,
       "total": 16
@@ -221,6 +273,19 @@
       "total": 15
     },
     {
+      "id": "tlaps-distribution-examples--allocator",
+      "group": "Allocator",
+      "name": "Allocator",
+      "category": "libraries",
+      "sourceKey": "TLAPS distribution examples",
+      "sourceName": "TLAPS distribution examples",
+      "sourceUrl": "https://github.com/tlaplus/tlapm",
+      "url": "https://github.com/tlaplus/tlapm/blob/main/examples/Allocator.tla",
+      "completion": 10,
+      "scratch": 4,
+      "total": 14
+    },
+    {
       "id": "tlaplus-examples--tlaplus-examples-locks-auxiliary-vars",
       "group": "tlaplus_examples_locks_auxiliary_vars",
       "name": "locks_auxiliary_vars",
@@ -245,6 +310,32 @@
       "completion": 8,
       "scratch": 5,
       "total": 13
+    },
+    {
+      "id": "tlaps-distribution-examples--bubblesort",
+      "group": "BubbleSort",
+      "name": "BubbleSort",
+      "category": "libraries",
+      "sourceKey": "TLAPS distribution examples",
+      "sourceName": "TLAPS distribution examples",
+      "sourceUrl": "https://github.com/tlaplus/tlapm",
+      "url": "https://github.com/tlaplus/tlapm/blob/main/examples/BubbleSort.tla",
+      "completion": 8,
+      "scratch": 3,
+      "total": 11
+    },
+    {
+      "id": "tlaps-distribution-examples--euclid",
+      "group": "Euclid",
+      "name": "Euclid",
+      "category": "libraries",
+      "sourceKey": "TLAPS distribution examples",
+      "sourceName": "TLAPS distribution examples",
+      "sourceUrl": "https://github.com/tlaplus/tlapm",
+      "url": "https://github.com/hengxin/tlaps-examples/tree/master/Euclid",
+      "completion": 6,
+      "scratch": 5,
+      "total": 11
     },
     {
       "id": "tlaplus-examples--tlaplus-examples-learnproofs",
@@ -273,6 +364,19 @@
       "total": 11
     },
     {
+      "id": "tlaps-distribution-examples--atomicbakery",
+      "group": "AtomicBakery",
+      "name": "AtomicBakery",
+      "category": "libraries",
+      "sourceKey": "TLAPS distribution examples",
+      "sourceName": "TLAPS distribution examples",
+      "sourceUrl": "https://github.com/tlaplus/tlapm",
+      "url": "https://github.com/hengxin/tlaps-examples/tree/master/AtomicBakery",
+      "completion": 8,
+      "scratch": 2,
+      "total": 10
+    },
+    {
       "id": "tlaplus-examples--tlaplus-examples-cigarettesmokers",
       "group": "tlaplus_examples_CigaretteSmokers",
       "name": "CigaretteSmokers",
@@ -297,6 +401,19 @@
       "completion": 8,
       "scratch": 2,
       "total": 10
+    },
+    {
+      "id": "tlaplus-examples--tlaplus-examples-ewd687a",
+      "group": "tlaplus_examples_ewd687a",
+      "name": "ewd687a",
+      "category": "libraries",
+      "sourceKey": "tlaplus/Examples",
+      "sourceName": "tlaplus/Examples",
+      "sourceUrl": "https://github.com/tlaplus/Examples",
+      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/ewd687a",
+      "completion": 6,
+      "scratch": 3,
+      "total": 9
     },
     {
       "id": "tlaplus-examples--tlaplus-examples-glowingraccoon",
@@ -325,9 +442,22 @@
       "total": 9
     },
     {
+      "id": "tlaplus-examples--tlaplus-examples-germanprotocol",
+      "group": "tlaplus_examples_GermanProtocol",
+      "name": "GermanProtocol",
+      "category": "libraries",
+      "sourceKey": "tlaplus/Examples",
+      "sourceName": "tlaplus/Examples",
+      "sourceUrl": "https://github.com/tlaplus/Examples",
+      "url": "https://github.com/tlaplus/Examples/blob/aba0cef20ce694f97612ad36a873734a1314534a/specifications/GermanProtocol/GermanCoherence.tla",
+      "completion": 0,
+      "scratch": 7,
+      "total": 7
+    },
+    {
       "id": "tlaplus-examples--tlaplus-examples-paxos",
       "group": "tlaplus_examples_Paxos",
-      "name": "Paxos",
+      "name": "Paxos (tlaplus/Examples)",
       "category": "libraries",
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
@@ -335,6 +465,19 @@
       "url": "https://github.com/tlaplus/Examples/tree/master/specifications/Paxos",
       "completion": 3,
       "scratch": 4,
+      "total": 7
+    },
+    {
+      "id": "tlaps-distribution-examples--simplemutex",
+      "group": "SimpleMutex",
+      "name": "SimpleMutex",
+      "category": "libraries",
+      "sourceKey": "TLAPS distribution examples",
+      "sourceName": "TLAPS distribution examples",
+      "sourceUrl": "https://github.com/tlaplus/tlapm",
+      "url": "https://github.com/tlaplus/tlapm/blob/main/examples/SimpleMutex.tla",
+      "completion": 5,
+      "scratch": 2,
       "total": 7
     },
     {
@@ -361,19 +504,6 @@
       "url": "https://github.com/tlaplus/Examples/tree/master/specifications/ReadersWriters",
       "completion": 3,
       "scratch": 2,
-      "total": 5
-    },
-    {
-      "id": "tlaplus-examples--tlaplus-examples-specifyingsystems-composing",
-      "group": "tlaplus_examples_SpecifyingSystems_Composing",
-      "name": "SpecifyingSystems_Composing",
-      "category": "libraries",
-      "sourceKey": "tlaplus/Examples",
-      "sourceName": "tlaplus/Examples",
-      "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/SpecifyingSystems/Composing",
-      "completion": 4,
-      "scratch": 1,
       "total": 5
     },
     {
@@ -416,6 +546,19 @@
       "total": 3
     },
     {
+      "id": "tlaps-distribution-examples--ewd840",
+      "group": "EWD840",
+      "name": "EWD840",
+      "category": "libraries",
+      "sourceKey": "TLAPS distribution examples",
+      "sourceName": "TLAPS distribution examples",
+      "sourceUrl": "https://github.com/tlaplus/tlapm",
+      "url": "https://github.com/tlaplus/tlapm/blob/main/examples/EWD840.tla",
+      "completion": 2,
+      "scratch": 1,
+      "total": 3
+    },
+    {
       "id": "tlaplus-examples--tlaplus-examples-spanning",
       "group": "tlaplus_examples_spanning",
       "name": "spanning",
@@ -439,45 +582,6 @@
       "url": "https://github.com/tlaplus/Examples/tree/master/specifications/SpecifyingSystems/CachingMemory",
       "completion": 2,
       "scratch": 1,
-      "total": 3
-    },
-    {
-      "id": "tlaplus-examples--tlaplus-examples-specifyingsystems-fifo",
-      "group": "tlaplus_examples_SpecifyingSystems_FIFO",
-      "name": "SpecifyingSystems_FIFO",
-      "category": "libraries",
-      "sourceKey": "tlaplus/Examples",
-      "sourceName": "tlaplus/Examples",
-      "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/SpecifyingSystems/FIFO",
-      "completion": 2,
-      "scratch": 1,
-      "total": 3
-    },
-    {
-      "id": "tlaplus-examples--tlaplus-examples-specifyingsystems-liveness",
-      "group": "tlaplus_examples_SpecifyingSystems_Liveness",
-      "name": "SpecifyingSystems_Liveness",
-      "category": "libraries",
-      "sourceKey": "tlaplus/Examples",
-      "sourceName": "tlaplus/Examples",
-      "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/SpecifyingSystems/Liveness",
-      "completion": 3,
-      "scratch": 0,
-      "total": 3
-    },
-    {
-      "id": "tlaplus-examples--tlaplus-examples-specifyingsystems-realtime",
-      "group": "tlaplus_examples_SpecifyingSystems_RealTime",
-      "name": "SpecifyingSystems_RealTime",
-      "category": "libraries",
-      "sourceKey": "tlaplus/Examples",
-      "sourceName": "tlaplus/Examples",
-      "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/SpecifyingSystems/RealTime",
-      "completion": 3,
-      "scratch": 0,
       "total": 3
     },
     {
@@ -559,6 +663,19 @@
       "total": 2
     },
     {
+      "id": "tlaps-distribution-examples--peterson",
+      "group": "Peterson",
+      "name": "Peterson",
+      "category": "libraries",
+      "sourceKey": "TLAPS distribution examples",
+      "sourceName": "TLAPS distribution examples",
+      "sourceUrl": "https://github.com/tlaplus/tlapm",
+      "url": "https://github.com/tlaplus/tlapm/blob/main/examples/Peterson.tla",
+      "completion": 0,
+      "scratch": 2,
+      "total": 2
+    },
+    {
       "id": "tlaplus-examples--tlaplus-examples-spanningtree",
       "group": "tlaplus_examples_SpanningTree",
       "name": "SpanningTree",
@@ -567,6 +684,19 @@
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
       "url": "https://github.com/tlaplus/Examples/tree/master/specifications/SpanningTree",
+      "completion": 1,
+      "scratch": 1,
+      "total": 2
+    },
+    {
+      "id": "tlaplus-examples--tlaplus-examples-specifyingsystems-fifo",
+      "group": "tlaplus_examples_SpecifyingSystems_FIFO",
+      "name": "SpecifyingSystems_FIFO",
+      "category": "libraries",
+      "sourceKey": "tlaplus/Examples",
+      "sourceName": "tlaplus/Examples",
+      "sourceUrl": "https://github.com/tlaplus/Examples",
+      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/SpecifyingSystems/FIFO",
       "completion": 1,
       "scratch": 1,
       "total": 2
@@ -582,175 +712,6 @@
       "url": "https://github.com/tlaplus/Examples/tree/master/specifications/SpecifyingSystems/TLC",
       "completion": 1,
       "scratch": 1,
-      "total": 2
-    },
-    {
-      "id": "tlaplus-examples--tlaplus-examples-germanprotocol",
-      "group": "tlaplus_examples_GermanProtocol",
-      "name": "GermanProtocol",
-      "category": "libraries",
-      "sourceKey": "tlaplus/Examples",
-      "sourceName": "tlaplus/Examples",
-      "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/blob/aba0cef20ce694f97612ad36a873734a1314534a/specifications/GermanProtocol/GermanCoherence.tla",
-      "completion": 0,
-      "scratch": 1,
-      "total": 1
-    },
-    {
-      "id": "tlaplus-examples--tlaplus-examples-specifyingsystems-hourclock",
-      "group": "tlaplus_examples_SpecifyingSystems_HourClock",
-      "name": "SpecifyingSystems_HourClock",
-      "category": "libraries",
-      "sourceKey": "tlaplus/Examples",
-      "sourceName": "tlaplus/Examples",
-      "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/SpecifyingSystems/HourClock",
-      "completion": 1,
-      "scratch": 0,
-      "total": 1
-    },
-    {
-      "id": "tlaps-distribution-examples--consensus",
-      "group": "Consensus",
-      "name": "Consensus",
-      "category": "libraries",
-      "sourceKey": "TLAPS distribution examples",
-      "sourceName": "TLAPS distribution examples",
-      "sourceUrl": "https://github.com/tlaplus/tlapm",
-      "url": "https://github.com/tlaplus/tlapm/tree/main/examples_draft/consensus",
-      "completion": 25,
-      "scratch": 10,
-      "total": 35
-    },
-    {
-      "id": "tlaps-distribution-examples--data",
-      "group": "Data",
-      "name": "Data",
-      "category": "libraries",
-      "sourceKey": "TLAPS distribution examples",
-      "sourceName": "TLAPS distribution examples",
-      "sourceUrl": "https://github.com/tlaplus/tlapm",
-      "url": "https://github.com/tlaplus/tlapm/tree/main/zenon/regression/examples/data",
-      "completion": 15,
-      "scratch": 9,
-      "total": 24
-    },
-    {
-      "id": "tlaps-distribution-examples--cantor",
-      "group": "Cantor",
-      "name": "Cantor",
-      "category": "libraries",
-      "sourceKey": "TLAPS distribution examples",
-      "sourceName": "TLAPS distribution examples",
-      "sourceUrl": "https://github.com/tlaplus/tlapm",
-      "url": "https://github.com/tlaplus/tlapm/tree/main/examples/cantor",
-      "completion": 11,
-      "scratch": 10,
-      "total": 21
-    },
-    {
-      "id": "tlaps-distribution-examples--paxos",
-      "group": "Paxos",
-      "name": "Paxos",
-      "category": "libraries",
-      "sourceKey": "TLAPS distribution examples",
-      "sourceName": "TLAPS distribution examples",
-      "sourceUrl": "https://github.com/tlaplus/tlapm",
-      "url": "https://github.com/hengxin/tlaps-examples/tree/master/Paxos",
-      "completion": 13,
-      "scratch": 6,
-      "total": 19
-    },
-    {
-      "id": "tlaps-distribution-examples--allocator",
-      "group": "Allocator",
-      "name": "Allocator",
-      "category": "libraries",
-      "sourceKey": "TLAPS distribution examples",
-      "sourceName": "TLAPS distribution examples",
-      "sourceUrl": "https://github.com/tlaplus/tlapm",
-      "url": "https://github.com/tlaplus/tlapm/blob/main/examples/Allocator.tla",
-      "completion": 10,
-      "scratch": 4,
-      "total": 14
-    },
-    {
-      "id": "tlaps-distribution-examples--bubblesort",
-      "group": "BubbleSort",
-      "name": "BubbleSort",
-      "category": "libraries",
-      "sourceKey": "TLAPS distribution examples",
-      "sourceName": "TLAPS distribution examples",
-      "sourceUrl": "https://github.com/tlaplus/tlapm",
-      "url": "https://github.com/tlaplus/tlapm/blob/main/examples/BubbleSort.tla",
-      "completion": 8,
-      "scratch": 3,
-      "total": 11
-    },
-    {
-      "id": "tlaps-distribution-examples--euclid",
-      "group": "Euclid",
-      "name": "Euclid",
-      "category": "libraries",
-      "sourceKey": "TLAPS distribution examples",
-      "sourceName": "TLAPS distribution examples",
-      "sourceUrl": "https://github.com/tlaplus/tlapm",
-      "url": "https://github.com/hengxin/tlaps-examples/tree/master/Euclid",
-      "completion": 6,
-      "scratch": 5,
-      "total": 11
-    },
-    {
-      "id": "tlaps-distribution-examples--atomicbakery",
-      "group": "AtomicBakery",
-      "name": "AtomicBakery",
-      "category": "libraries",
-      "sourceKey": "TLAPS distribution examples",
-      "sourceName": "TLAPS distribution examples",
-      "sourceUrl": "https://github.com/tlaplus/tlapm",
-      "url": "https://github.com/hengxin/tlaps-examples/tree/master/AtomicBakery",
-      "completion": 8,
-      "scratch": 2,
-      "total": 10
-    },
-    {
-      "id": "tlaps-distribution-examples--simplemutex",
-      "group": "SimpleMutex",
-      "name": "SimpleMutex",
-      "category": "libraries",
-      "sourceKey": "TLAPS distribution examples",
-      "sourceName": "TLAPS distribution examples",
-      "sourceUrl": "https://github.com/tlaplus/tlapm",
-      "url": "https://github.com/tlaplus/tlapm/blob/main/examples/SimpleMutex.tla",
-      "completion": 5,
-      "scratch": 2,
-      "total": 7
-    },
-    {
-      "id": "tlaps-distribution-examples--ewd840",
-      "group": "EWD840",
-      "name": "EWD840",
-      "category": "libraries",
-      "sourceKey": "TLAPS distribution examples",
-      "sourceName": "TLAPS distribution examples",
-      "sourceUrl": "https://github.com/tlaplus/tlapm",
-      "url": "https://github.com/tlaplus/tlapm/blob/main/examples/EWD840.tla",
-      "completion": 2,
-      "scratch": 1,
-      "total": 3
-    },
-    {
-      "id": "tlaps-distribution-examples--peterson",
-      "group": "Peterson",
-      "name": "Peterson",
-      "category": "libraries",
-      "sourceKey": "TLAPS distribution examples",
-      "sourceName": "TLAPS distribution examples",
-      "sourceUrl": "https://github.com/tlaplus/tlapm",
-      "url": "https://github.com/tlaplus/tlapm/blob/main/examples/Peterson.tla",
-      "completion": 0,
-      "scratch": 2,
       "total": 2
     },
     {
@@ -780,6 +741,32 @@
       "total": 1
     },
     {
+      "id": "tlaplus-examples--tlaplus-examples-specifyingsystems-composing",
+      "group": "tlaplus_examples_SpecifyingSystems_Composing",
+      "name": "SpecifyingSystems_Composing",
+      "category": "libraries",
+      "sourceKey": "tlaplus/Examples",
+      "sourceName": "tlaplus/Examples",
+      "sourceUrl": "https://github.com/tlaplus/Examples",
+      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/SpecifyingSystems/Composing",
+      "completion": 0,
+      "scratch": 1,
+      "total": 1
+    },
+    {
+      "id": "tlaplus-examples--tlaplus-examples-specifyingsystems-hourclock",
+      "group": "tlaplus_examples_SpecifyingSystems_HourClock",
+      "name": "SpecifyingSystems_HourClock",
+      "category": "libraries",
+      "sourceKey": "tlaplus/Examples",
+      "sourceName": "tlaplus/Examples",
+      "sourceUrl": "https://github.com/tlaplus/Examples",
+      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/SpecifyingSystems/HourClock",
+      "completion": 1,
+      "scratch": 0,
+      "total": 1
+    },
+    {
       "id": "tlaps-distribution-examples--sumandmax",
       "group": "SumAndMax",
       "name": "SumAndMax",
@@ -791,6 +778,32 @@
       "completion": 0,
       "scratch": 1,
       "total": 1
+    },
+    {
+      "id": "apalache-examples-konnov--ben-or83",
+      "group": "apalache_examples_ben-or83",
+      "name": "ben-or83",
+      "category": "systems",
+      "sourceKey": "apalache-examples (Konnov)",
+      "sourceName": "apalache-examples (Konnov)",
+      "sourceUrl": "https://github.com/konnov/apalache-examples",
+      "url": "https://github.com/konnov/apalache-examples/tree/main/ben-or83",
+      "completion": 209,
+      "scratch": 0,
+      "total": 209
+    },
+    {
+      "id": "apalache-examples-konnov--tendermint",
+      "group": "apalache_examples_tendermint",
+      "name": "tendermint",
+      "category": "systems",
+      "sourceKey": "apalache-examples (Konnov)",
+      "sourceName": "apalache-examples (Konnov)",
+      "sourceUrl": "https://github.com/konnov/apalache-examples",
+      "url": "https://github.com/konnov/apalache-examples/tree/main/tendermint-accountability",
+      "completion": 48,
+      "scratch": 0,
+      "total": 48
     },
     {
       "id": "zookeeper-remix--zookeeper",
@@ -817,6 +830,32 @@
       "completion": 0,
       "scratch": 9,
       "total": 9
+    },
+    {
+      "id": "etcd-specula--etcd-raft",
+      "group": "etcd_raft",
+      "name": "etcd_raft",
+      "category": "systems",
+      "sourceKey": "etcd (Specula)",
+      "sourceName": "etcd (Specula)",
+      "sourceUrl": "https://github.com/specula-org",
+      "url": "https://github.com/specula-org/Specula/blob/main/skills/spec_generation/examples/etcdraft.tla",
+      "completion": 0,
+      "scratch": 8,
+      "total": 8
+    },
+    {
+      "id": "openaddressing-lemmy-examples--openaddressing",
+      "group": "OpenAddressing",
+      "name": "OpenAddressing",
+      "category": "systems",
+      "sourceKey": "OpenAddressing (lemmy/Examples)",
+      "sourceName": "OpenAddressing",
+      "sourceUrl": "https://github.com/lemmy/Examples",
+      "url": "https://github.com/lemmy/Examples/tree/mku-OA/specifications/TLC",
+      "completion": 1,
+      "scratch": 5,
+      "total": 6
     },
     {
       "id": "ivy-liveness--ivy-examples-hybrid-reliable-broadcast-cisa",
@@ -895,32 +934,6 @@
       "completion": 0,
       "scratch": 1,
       "total": 1
-    },
-    {
-      "id": "etcd-specula--etcd-raft",
-      "group": "etcd_raft",
-      "name": "etcd_raft",
-      "category": "systems",
-      "sourceKey": "etcd (Specula)",
-      "sourceName": "etcd (Specula)",
-      "sourceUrl": "https://github.com/specula-org",
-      "url": "https://github.com/specula-org/Specula/blob/main/skills/spec_generation/examples/etcdraft.tla",
-      "completion": 0,
-      "scratch": 8,
-      "total": 8
-    },
-    {
-      "id": "openaddressing-lemmy-examples--openaddressing",
-      "group": "OpenAddressing",
-      "name": "OpenAddressing",
-      "category": "systems",
-      "sourceKey": "OpenAddressing (lemmy/Examples)",
-      "sourceName": "OpenAddressing",
-      "sourceUrl": "https://github.com/lemmy/Examples",
-      "url": "https://github.com/lemmy/Examples/tree/mku-OA/specifications/TLC",
-      "completion": 1,
-      "scratch": 5,
-      "total": 6
     },
     {
       "id": "anvil--anvillock",

@@ -74,7 +74,7 @@ export const SITE = {
       id: "full",
       label: "Full",
       blurb:
-        "Full suite catalog: 710 properties across example libraries and systems specs. " +
+        "Full suite catalog: 951 properties across 71 specs. " +
         "Published leaderboard scores currently use the Proof Completion Core only.",
     },
   ],

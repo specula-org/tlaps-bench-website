@@ -54,6 +54,20 @@ const BACKEND_INFO = {
     logo: null,
     kind: "agent",
   },
+  "codex-gpt-5.6-terra": {
+    name: "GPT-5.6-Terra",
+    subname: "OpenAI Codex (xhigh)",
+    org: "OpenAI",
+    logo: null,
+    kind: "agent",
+  },
+  "codex-gpt-5.6-luna": {
+    name: "GPT-5.6-Luna",
+    subname: "OpenAI Codex (xhigh)",
+    org: "OpenAI",
+    logo: null,
+    kind: "agent",
+  },
   "codex-single-turn-gpt-5.6-sol": {
     name: "GPT-5.6-Sol",
     subname: "OpenAI Codex (medium)",
@@ -94,6 +108,8 @@ const BACKEND_INFO = {
 // Only these backends appear on the live site.
 const PUBLISHED_BACKENDS = new Set([
   "codex-gpt-5.6-sol",
+  "codex-gpt-5.6-terra",
+  "codex-gpt-5.6-luna",
   "codex-single-turn-gpt-5.6-sol",
   "codex-single-turn-gpt-5.6-sol-xhigh",
   "codex-single-turn-gpt-5.6-sol-max",
@@ -350,11 +366,25 @@ const models = bundles.map(({ f, meta, results, resultsVersion }) => {
     if (!Number.isFinite(r.time_secs) || r.time_secs <= 0) {
       throw new Error(`${f}: ${r.benchmark} has invalid time_secs ${r.time_secs}`);
     }
-    if (!Number.isInteger(r.input_tokens) || r.input_tokens <= 0) {
-      throw new Error(`${f}: ${r.benchmark} has invalid input_tokens ${r.input_tokens}`);
-    }
-    if (!Number.isInteger(r.output_tokens) || r.output_tokens <= 0) {
-      throw new Error(`${f}: ${r.benchmark} has invalid output_tokens ${r.output_tokens}`);
+    // TIMEOUT failures may have audited-unavailable usage (0 tokens / $0). Every other
+    // Core row still needs complete positive token and cost data.
+    const usageUnavailableTimeout =
+      r.termination_reason === "TIMEOUT" &&
+      r.check_verdict === "FAIL" &&
+      r.input_tokens === 0 &&
+      r.output_tokens === 0 &&
+      r.cache_read_input_tokens === 0 &&
+      r.cache_write_input_tokens === 0 &&
+      r.equivalent_cost_usd === 0;
+    if (!usageUnavailableTimeout) {
+      if (!Number.isInteger(r.input_tokens) || r.input_tokens <= 0) {
+        throw new Error(`${f}: ${r.benchmark} has invalid input_tokens ${r.input_tokens}`);
+      }
+      if (!Number.isInteger(r.output_tokens) || r.output_tokens <= 0) {
+        throw new Error(`${f}: ${r.benchmark} has invalid output_tokens ${r.output_tokens}`);
+      }
+    } else if (!Number.isInteger(r.input_tokens) || !Number.isInteger(r.output_tokens)) {
+      throw new Error(`${f}: ${r.benchmark} has non-integer timeout usage placeholders`);
     }
     if (!Number.isInteger(r.cache_read_input_tokens) || r.cache_read_input_tokens < 0 ||
         !Number.isInteger(r.cache_write_input_tokens) || r.cache_write_input_tokens < 0 ||
