@@ -8,7 +8,7 @@
     {
       "id": "libraries",
       "name": "Example libraries",
-      "blurb": "Specifications and their proof properties from the official TLA+ Examples repository and the TLAPS distribution, ranging from teaching exercises to distributed algorithms.",
+      "blurb": "Specs and proof properties from the TLA+ Examples repository, the TLAPS distribution, and related teaching and algorithm examples.",
       "specCount": 58,
       "completion": 448,
       "scratch": 201,
@@ -17,7 +17,7 @@
     {
       "id": "systems",
       "name": "Systems specifications",
-      "blurb": "Proof properties from protocol and system specifications drawn from ZooKeeper, Ivy, etcd, OpenAddressing, Anvil, and the Apalache examples corpus (Konnov).",
+      "blurb": "Protocol and systems specs drawn from sources such as ZooKeeper, Ivy, etcd, OpenAddressing, Anvil, and Apalache examples.",
       "specCount": 13,
       "completion": 258,
       "scratch": 44,

@@ -62,8 +62,9 @@ function PageHome({ go }) {
           <FadeIn>
             <div className="news-banner"><span className="dot" />{totalProperties} proof properties · {totalSpecs} specs · checked by tlapm</div>
             <h1>The TLAPS Benchmark</h1>
-            <p className="lead">A benchmark for evaluating AI's ability to write TLAPS (TLA+ Proof System) proofs, 
-                mechanically checked, accepted or rejected, with no partial credit.</p>
+            <p className="lead">
+              A benchmark for AI-written TLAPS proofs, checked by tlapm with no partial credit.
+            </p>
             <div style={{ display: "flex", gap: 10, justifyContent: "center", marginTop: 28, flexWrap: "wrap" }}>
               <button className="btn primary" onClick={() => go("leaderboard")}>View Leaderboard</button>
               <a className="btn ghost" href="https://github.com/specula-org/tlaps-bench" target="_blank">GitHub</a>
@@ -85,8 +86,8 @@ function PageHome({ go }) {
               {TLAPS_DATA.paper.overview}
             </p>
             <p style={{ fontFamily: "var(--serif)", fontSize: 18, lineHeight: 1.75, color: "var(--ink-2)", marginTop: 14, textWrap: "pretty" }}>
-              Every proof is first screened by a cheat-checker before tlapm runs, so a "pass"
-              means a genuine proof, not a weakened theorem or an admitted step.
+              Before tlapm runs, a cheat-checker screens each submission. A pass is a real proof,
+              not a weakened theorem or an admitted step.
             </p>
           </Reveal>
         </div>
@@ -143,9 +144,9 @@ function PageLeaderboard() {
           <span className="eyebrow accent">Results</span>
           <h1 style={{ fontSize: 44, marginTop: 10 }}>Leaderboard</h1>
           <p className="lead">
-            Every model is graded on the same Proof Completion Core. Models are ranked by
-            Spec-balanced pass rate, with each Core specification weighted equally. Expand a
-            row for the full breakdown.
+            All models are scored on the Proof Completion Core (190 tasks, 56 specs). Ranking uses
+            Spec-balanced pass rate, so each specification counts equally. Expand a row for the
+            full breakdown.
           </p>
         </FadeIn>
 
@@ -208,10 +209,9 @@ function PageBenchmark() {
             <span className="eyebrow accent">Benchmark</span>
             <h1 style={{ fontSize: 44, marginTop: 10 }}>Inside the benchmark</h1>
             <p className="lead">
-              The benchmark spans classic TLA+ example libraries and real systems
-              specifications. For every property, an AI must replace PROOF OBVIOUS with a proof
-              that tlapm mechanically accepts. Switch between the Proof Completion Core and the
-              Full suite below.
+              The benchmark covers TLA+ example libraries and systems specs. Each task asks the
+              model to replace PROOF OBVIOUS with a proof that tlapm accepts. Switch between the
+              Proof Completion Core and the Full catalog below.
             </p>
             <div className="cohort-switch" role="tablist" aria-label="Benchmark suite">
               {suites.map((s) => (
@@ -251,8 +251,8 @@ function PageBenchmark() {
             <h2 style={{ fontSize: 32 }}>Benchmark sources</h2>
             <p className="lead" style={{ fontSize: 17 }}>
               {suiteId === "core"
-                ? "The Core draws from established TLA+ proof corpora, including Apalache examples, so models are graded on mechanically checkable proof construction."
-                : "Two complementary kinds of source balance established proof corpora with protocols drawn from real systems. Both sets can grow as new specifications are added."}
+                ? "Core tasks come from TLA+ proof corpora, including Apalache examples (ben-or83, tendermint)."
+                : "Example libraries plus systems specs. Both sides can grow as new specifications are added."}
             </p>
           </Reveal>
           <Reveal delay={80}>
@@ -367,12 +367,10 @@ function PageBenchmark() {
           <Reveal>
             <h2 style={{ fontSize: 32 }}>How a proof is graded</h2>
             <p className="lead" style={{ fontSize: 17 }}>
-              Each candidate proof is graded inside a Docker sandbox as one merged check. The
-              cheat-checker runs first and fails fast: it screens for legitimacy — no admitted
-              steps, smuggled axioms, or weakened theorems — with no proving required. If a cheat
-              is caught, the verdict is CHEATING and tlapm is never run. Only a clean proof reaches
-              tlapm, which checks that the proof is correct. A proof that "passes" by cheating is
-              scored as a failure, not a pass.
+              Each candidate runs in a Docker sandbox. A cheat-checker goes first: no admitted
+              steps, smuggled axioms, or weakened theorems. If that fails, the verdict is CHEATING
+              and tlapm is skipped. Otherwise tlapm checks correctness. Cheating does not count as
+              a pass.
             </p>
           </Reveal>
           <Reveal delay={120}><div style={{ marginTop: 24 }}><PipelineBanner /></div></Reveal>

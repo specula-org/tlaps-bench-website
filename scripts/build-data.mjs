@@ -670,7 +670,7 @@ const categories = SITE.categories
       return {
         ...category,
         ...stats,
-        blurb: "Specifications and their proof properties from the official TLA+ Examples repository, the TLAPS distribution, and the Apalache examples corpus (Konnov).",
+        blurb: "Specs and proof properties from the TLA+ Examples repository, the TLAPS distribution, and the Apalache examples corpus (Konnov).",
       };
     }
     return { ...category, ...stats };

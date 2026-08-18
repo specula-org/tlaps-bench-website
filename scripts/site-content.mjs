@@ -8,11 +8,9 @@ export const SITE = {
     title: "TLAPS-Bench: Evaluating AI on Writing TLAPS Proofs",
     repo: "https://github.com/specula-org/tlaps-bench",
     overview:
-      "TLAPS proofs are checked mechanically by tlapm: a proof is either accepted or " +
-      "rejected, with no partial credit and no room for a plausible-but-wrong argument. " +
-      "Each property presents a TLA+ theorem whose proof body is replaced by PROOF OBVIOUS; " +
-      "the AI must replace it with a real proof that tlapm accepts. That makes proof " +
-      "construction a sharp test of an AI's formal reasoning.",
+      "TLAPS proofs are checked by tlapm: accepted or rejected, with no partial credit. " +
+      "Each task is a TLA+ theorem whose proof body has been replaced by PROOF OBVIOUS; " +
+      "the model must write a proof that tlapm accepts.",
   },
 
   modes: [
@@ -22,8 +20,8 @@ export const SITE = {
       full: "--mode proof-completion",
       cli: "--mode proof-completion",
       blurb:
-        "The full scaffolding is given, including inductive invariants, lemma decomposition, " +
-        "and preceding lemmas marked PROOF OMITTED, and the AI fills in one target proof.",
+        "Scaffolding is provided — inductive invariants, lemma structure, and earlier lemmas " +
+        "marked PROOF OMITTED — and the model fills in one target proof.",
     },
   ],
 
@@ -32,16 +30,15 @@ export const SITE = {
       id: "one-shot",
       label: "One-Shot",
       blurb:
-        "The model gets one response to write the proof. Core modules stay fixed; only the " +
-        "marked helper and proof regions in the task file may change. Ranked by Spec-balanced pass rate.",
+        "One response to write the proof. Core modules stay fixed; only the marked helper and " +
+        "proof regions in the task file may change.",
     },
     {
       id: "agentic",
       label: "Agentic",
       blurb:
-        "The model may use tools and take multiple steps to write the proof. Same rules as " +
-        "one-shot: Core modules are read-only, and edits stay in the marked task-file regions. " +
-        "Ranked by Spec-balanced pass rate.",
+        "The model can use tools and take multiple steps. Same edit rules as one-shot: Core " +
+        "modules are read-only, and changes stay inside the marked task-file regions.",
     },
   ],
 
@@ -50,15 +47,15 @@ export const SITE = {
       id: "libraries",
       name: "Example libraries",
       blurb:
-        "Specifications and their proof properties from the official TLA+ Examples repository " +
-        "and the TLAPS distribution, ranging from teaching exercises to distributed algorithms.",
+        "Specs and proof properties from the TLA+ Examples repository, the TLAPS distribution, " +
+        "and related teaching and algorithm examples.",
     },
     {
       id: "systems",
       name: "Systems specifications",
       blurb:
-        "Proof properties from protocol and system specifications drawn from ZooKeeper, Ivy, " +
-        "etcd, OpenAddressing, and Anvil, emphasizing realistic verification targets.",
+        "Protocol and systems specs drawn from sources such as ZooKeeper, Ivy, etcd, " +
+        "OpenAddressing, Anvil, and Apalache examples.",
     },
   ],
 
@@ -67,15 +64,15 @@ export const SITE = {
       id: "core",
       label: "Core",
       blurb:
-        "Proof Completion Core: 190 proof-completion properties across 56 specifications, " +
-        "including the Apalache examples (ben-or83, tendermint). Every published model is graded on this same task set.",
+        "Proof Completion Core: 190 tasks across 56 specs, including Apalache examples " +
+        "(ben-or83, tendermint). Every published model is graded on this set.",
     },
     {
       id: "full",
       label: "Full",
       blurb:
-        "Full suite catalog: 951 properties across 71 specs. " +
-        "Published leaderboard scores currently use the Proof Completion Core only.",
+        "Full catalog: 951 properties across 71 specs. Leaderboard scores use the Proof " +
+        "Completion Core only.",
     },
   ],
 
