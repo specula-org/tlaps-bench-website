@@ -499,9 +499,9 @@ hr.sep { border: none; border-top: 1px solid var(--line-soft); margin: 40px 0; }
   .stats { gap: 32px; flex-wrap: wrap; }
   .nav-inner { padding: 12px 20px; }
   .nav-toggle { display: inline-flex; }
-  .nav-links { position: absolute; top: 100%; left: 0; right: 0; flex-direction: column; align-items: stretch; gap: 4px; padding: 14px 20px 18px; background: var(--paper); border-bottom: 1px solid var(--line-soft); box-shadow: 0 8px 24px -12px rgba(20, 32, 43, 0.15); transform: translateY(-8px); opacity: 0; pointer-events: none; transition: transform 220ms, opacity 220ms; }
+  .nav-links { position: absolute; top: 100%; left: 0; right: 0; flex-direction: column; align-items: stretch; gap: 4px; padding: 14px 20px 18px; background: var(--paper); border-bottom: 1px solid var(--line-soft); box-shadow: 0 8px 24px -12px rgba(20, 32, 43, 0.15); transform: translateY(-8px); opacity: 0; visibility: hidden; pointer-events: none; transition: transform 220ms, opacity 220ms; }
   [data-theme="dark"] .nav-links { box-shadow: 0 8px 24px -12px rgba(0,0,0,0.6); }
-  .nav.open .nav-links { transform: translateY(0); opacity: 1; pointer-events: auto; }
+  .nav.open .nav-links { transform: translateY(0); opacity: 1; visibility: visible; pointer-events: auto; }
   .nav-link { padding: 10px 12px; font-size: 15px; }
   .nav-links .nav-cta { margin-left: 0; justify-content: center; }
   table.lb th, table.lb td { padding: 12px 14px; }

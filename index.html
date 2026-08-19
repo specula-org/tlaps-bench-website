@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="hub/hub.css?v=47" />
+<link rel="stylesheet" href="hub/hub.css?v=48" />
 <link rel="stylesheet" href="phases/tokens.css?v=1" />
 </head>
 <body>
@@ -31,7 +31,7 @@
   <script type="text/babel" data-presets="env,react">
     const { useState, useEffect } = React;
 
-    function Nav({ route, go, tweaks, update }) {
+    function Nav({ route, tweaks, update }) {
       const [navOpen, setNavOpen] = useState(false);
       const links = [
         { id: "home", label: "Home" },
@@ -39,12 +39,12 @@
         { id: "benchmark", label: "Benchmark" },
         { id: "cite", label: "Contribute" }
       ];
-      const navigate = (id) => { go(id); setNavOpen(false); };
+      const themeLabel = tweaks.dark ? "Switch to light" : "Switch to dark";
       useEffect(() => { setNavOpen(false); }, [route]);
       return (
         <div className={"nav" + (navOpen ? " open" : "")}>
           <div className="nav-inner">
-            <div className="nav-brand" onClick={() => navigate("home")}>
+            <a className="nav-brand" href="#/home" onClick={() => setNavOpen(false)}>
               <img
                 className="nav-brand-logo"
                 src="https://github.com/specula-org.png?size=80"
@@ -52,19 +52,25 @@
                 aria-hidden="true"
               />
               <span className="nav-brand-name">TLAPS-Bench</span>
-            </div>
+            </a>
             <div className="nav-right">
-              <div className="nav-links">
+              <div className="nav-links" id="site-navigation">
                 {links.map(l => (
-                  <a key={l.id} className={"nav-link" + (route === l.id ? " active" : "")} onClick={() => navigate(l.id)}>{l.label}</a>
+                  <a
+                    key={l.id}
+                    className={"nav-link" + (route === l.id ? " active" : "")}
+                    href={"#/" + l.id}
+                    aria-current={route === l.id ? "page" : undefined}
+                    onClick={() => setNavOpen(false)}
+                  >{l.label}</a>
                 ))}
                 <a className="nav-cta" href="https://github.com/specula-org/tlaps-bench" target="_blank" onClick={() => setNavOpen(false)}>GitHub</a>
               </div>
               <div className="nav-actions">
-                <button className="theme-toggle" title={tweaks.dark ? "Switch to light" : "Switch to dark"} onClick={() => update({ dark: !tweaks.dark })}>
+                <button className="theme-toggle" title={themeLabel} aria-label={themeLabel} onClick={() => update({ dark: !tweaks.dark })}>
                   {tweaks.dark ? "☀" : "☾"}
                 </button>
-                <button className="nav-toggle" aria-label="Toggle menu" aria-expanded={navOpen} onClick={() => setNavOpen(o => !o)}>
+                <button className="nav-toggle" aria-label="Toggle menu" aria-controls="site-navigation" aria-expanded={navOpen} onClick={() => setNavOpen(o => !o)}>
                   <span /><span /><span />
                 </button>
               </div>
@@ -115,7 +121,7 @@
 
       return (
         <div data-screen-label={route}>
-          <Nav route={route} go={go} tweaks={tweaks} update={update} />
+          <Nav route={route} tweaks={tweaks} update={update} />
           <main>{Page}</main>
           <footer className="site-foot">
             <div className="wrap">
