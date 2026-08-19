@@ -517,7 +517,32 @@ hr.sep { border: none; border-top: 1px solid var(--line-soft); margin: 40px 0; }
   .cohort-switch { width: 100%; display: flex; }
   .cohort-switch button { flex: 1; justify-content: center; padding: 10px 12px; }
   .usage-summary { flex-direction: column; gap: 12px; }
-  .lb-wrap-compact table.lb .scorecell .bar { width: 72px; }
+  .lb-wrap-compact { overflow-x: hidden; }
+  .lb-wrap-compact table.lb { min-width: 0; table-layout: fixed; }
+  .lb-wrap-compact table.lb th,
+  .lb-wrap-compact table.lb td { padding: 12px 6px; }
+  .lb-wrap-compact table.lb th.rank,
+  .lb-wrap-compact table.lb td.rank { width: 38px; }
+  .lb-wrap-compact table.lb th:nth-child(2),
+  .lb-wrap-compact table.lb tbody > tr:not(.expand-row) > td:nth-child(2) { width: auto; min-width: 0; }
+  .lb-wrap-compact col.lb-rank-col { width: 38px; }
+  .lb-wrap-compact col.lb-model-col { width: auto; }
+  .lb-wrap-compact col.lb-metric-col { width: 94px; }
+  .lb-wrap-compact col.lb-supporting-col,
+  .lb-wrap-compact col.lb-cost-col { visibility: collapse; width: 0; }
+  .lb-wrap-compact col.lb-expand-col { width: 32px; }
+  .lb-wrap-compact table.lb .lb-metric { width: 94px; }
+  .lb-wrap-compact table.lb th:last-child,
+  .lb-wrap-compact table.lb .expand-cell { width: 38px; }
+  .lb-wrap-compact table.lb thead th { font-size: 10px; letter-spacing: 0.05em; }
+  .lb-wrap-compact .scorecell { gap: 0; justify-content: flex-end; }
+  .lb-wrap-compact .scorecell .bar { display: none; }
+  .lb-wrap-compact .score-num { min-width: 0; font-size: 13.5px; }
+  .lb-wrap-compact .modelname { gap: 6px; font-size: 14px; }
+  .lb-wrap-compact .modelname-main,
+  .lb-wrap-compact .modelname-sub { overflow: hidden; text-overflow: ellipsis; }
+  .lb-wrap-compact .modelname-sub { font-size: 10.5px; }
+  .lb-wrap-compact .logo-dot { width: 22px; height: 22px; }
   .highlight-grid { grid-template-columns: 1fr; }
   .dataset-facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .dataset-fact { min-width: 0; padding: 12px 10px; }

@@ -492,6 +492,15 @@ function HubLeaderboard({ showFilters = true, fixedMode = null, fixedCohort = nu
       )}
       <div className="lb-wrap lb-wrap-compact">
         <table className="lb">
+          <colgroup>
+            <col className="lb-rank-col" />
+            <col className="lb-model-col" />
+            {visibleMetrics.map((metric) => <col key={metric.id} className="lb-metric-col" />)}
+            <col className="lb-supporting-col" />
+            <col className="lb-supporting-col" />
+            <col className="lb-cost-col" />
+            <col className="lb-expand-col" />
+          </colgroup>
           <thead>
             <tr>
               <th className="rank">#</th>
