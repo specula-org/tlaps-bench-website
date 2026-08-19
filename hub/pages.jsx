@@ -390,7 +390,7 @@ function PageCite() {
     <section className="section">
       <div className="wrap-narrow">
         <FadeIn>
-          <h2 style={{ fontSize: 28 }}>Contribute</h2>
+          <h1 style={{ fontSize: 28 }}>Contribute</h1>
           <p style={{ fontFamily: "var(--serif)", fontSize: 17, lineHeight: 1.7, color: "var(--ink-2)" }}>
             Want to see more models on the leaderboard? Open a pull request on the{" "}
             <a className="link" href="https://github.com/specula-org/tlaps-bench" target="_blank">tlaps-bench</a> repository.
@@ -398,7 +398,7 @@ function PageCite() {
             <a className="link" href="https://github.com/specula-org/tlaps-bench/blob/main/docs/USAGE.md" target="_blank">usage guide</a>.
           </p>
           <p style={{ fontFamily: "var(--serif)", fontSize: 17, lineHeight: 1.7, color: "var(--ink-2)", marginTop: 12 }}>
-            New benchmark sources, agents, and bug reports are welcome, open an issue to discuss.
+            Have a benchmark source, agent, or bug report to suggest? Open an issue to discuss it.
           </p>
           <div style={{ display: "flex", gap: 10, marginTop: 20 }}>
             <a className="btn primary" href="https://github.com/specula-org/tlaps-bench" target="_blank">Open a PR</a>
