@@ -29,16 +29,12 @@ export const SITE = {
     {
       id: "one-shot",
       label: "One-Shot",
-      blurb:
-        "One response to write the proof. Core modules stay fixed; only the marked helper and " +
-        "proof regions in the task file may change.",
+      blurb: "One response per task. The model may change only the target proof.",
     },
     {
       id: "agentic",
       label: "Agentic",
-      blurb:
-        "The model can use tools and take multiple steps. Same edit rules as one-shot: Core " +
-        "modules are read-only, and changes stay inside the marked task-file regions.",
+      blurb: "The model may use tools and iterate, but may change only the target proof.",
     },
   ],
 
