@@ -120,35 +120,36 @@ function PageLeaderboard() {
   };
 
   return (
-    <section className="section">
+    <section className="section leaderboard-page">
       <div className="wrap">
-        <FadeIn>
+        <header className="leaderboard-intro">
           <span className="eyebrow accent">Results</span>
-          <h1 style={{ fontSize: 44, marginTop: 10 }}>Leaderboard</h1>
-          <p className="lead">
-            All models are scored on the Proof Completion Core (190 tasks, 56 specs). Ranking uses
-            Spec-balanced pass rate, so each specification counts equally. Expand a row for the
-            full breakdown.
+          <h1>Leaderboard</h1>
+          <p>
+            Every model is evaluated on the same 190 proof-completion tasks from 56 specifications.
+            Scores are averaged by specification, so larger specifications do not carry more weight.
+            Open a model to see how it performed on each specification and task.
           </p>
-        </FadeIn>
+        </header>
 
-        <div className="cohort-switch" role="tablist" aria-label="Result cohort">
-          {cohorts.map((c) => (
-            <button
-              key={c.id}
-              type="button"
-              role="tab"
-              aria-selected={uiCohort === c.id}
-              className={uiCohort === c.id ? "active" : ""}
-              onClick={() => selectCohort(c.id)}
-            >
-              {c.label}
-            </button>
-          ))}
+        <div className="leaderboard-cohort-row">
+          <div className="cohort-switch" role="group" aria-label="Result cohort">
+            {cohorts.map((c) => (
+              <button
+                key={c.id}
+                type="button"
+                aria-pressed={uiCohort === c.id}
+                className={uiCohort === c.id ? "active" : ""}
+                onClick={() => selectCohort(c.id)}
+              >
+                {c.label}
+              </button>
+            ))}
+          </div>
+          {active?.blurb && <p className="cohort-blurb">{active.blurb}</p>}
         </div>
-        {active?.blurb && <p className="cohort-blurb">{active.blurb}</p>}
 
-        <div style={{ marginTop: 48 }}>
+        <div className="leaderboard-results">
           <HubLeaderboard fixedMode="completion" fixedCohort={cohort} />
         </div>
       </div>

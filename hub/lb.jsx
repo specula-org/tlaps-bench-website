@@ -20,13 +20,13 @@ function BreakdownCell({ v, isOpen }) {
   // its bar and value; only the not-applicable case collapses to a dash.
   if (v == null) {
     return (
-      <td className="bd-cell">
+      <td className="bd-cell" data-label="Pass rate">
         <span className="bd-na" title="Not applicable — this spec has no tasks in this mode">—</span>
       </td>
     );
   }
   return (
-    <td className="bd-cell">
+    <td className="bd-cell" data-label="Pass rate">
       <span className="bd-inner">
         <span className="bd-bar">
           {isOpen ? <AnimBar pct={v.rate} height={6} show />
@@ -48,8 +48,14 @@ function BreakdownCell({ v, isOpen }) {
 }
 
 function BreakdownUsageCell({ v, format }) {
+  const labels = {
+    duration: "Active time / task",
+    tokens: "Tokens / task",
+    cache: "Cache rate",
+    usd: "Price / task",
+  };
   if (v == null) {
-    return <td className="bd-usage-cell"><span className="bd-usage-na">—</span></td>;
+    return <td className={`bd-usage-cell bd-usage-${format}`} data-label={labels[format]}><span className="bd-usage-na">—</span></td>;
   }
   const values = {
     duration: [formatDuration(v.activeTimePerTask), `total ${formatDuration(v.activeTimeSecs, false)}`],
@@ -59,7 +65,7 @@ function BreakdownUsageCell({ v, format }) {
   };
   const [primary, secondary] = values[format];
   return (
-    <td className="bd-usage-cell">
+    <td className={`bd-usage-cell bd-usage-${format}`} data-label={labels[format]}>
       <span className="bd-usage-value">
         <span>{primary}</span>
         <small>{secondary}</small>
@@ -95,7 +101,7 @@ function PricingNote({ model }) {
   const pricing = model.pricing;
   return (
     <React.Fragment>
-      Recorded public-API-equivalent price as of {pricing.asOf}; not a subscription bill. {" "}
+      Recorded public-API-equivalent price as of {pricing.asOf}. This is not a subscription bill. {" "}
       <a href={pricing.source} target="_blank" rel="noopener">Pricing source</a>
     </React.Fragment>
   );
@@ -106,8 +112,9 @@ function ComplexityBreakdown({ model, selectedMode, isOpen }) {
   const meta = TLAPS_DATA.complexity;
   const byId = Object.fromEntries(meta.bands.map((band) => [band.id, band]));
   return (
-    <div className="bd-scroll">
-      <table className="breakdown dataset-score-table">
+    <div className="bd-scroll lb-breakdown-scroll">
+      <table className="breakdown lb-breakdown-table lb-complexity-table">
+        <caption className="sr-only">Pass rate and usage by reference-proof length</caption>
         <thead>
           <tr>
             <th>{meta.label}</th>
@@ -121,12 +128,12 @@ function ComplexityBreakdown({ model, selectedMode, isOpen }) {
         </thead>
         <tbody>
           {bands.map((band) => (
-            <tr className="bd-row dataset-score-spec-row" key={band.id}>
+            <tr className="bd-row lb-breakdown-row" key={band.id}>
               <td className="bd-name spec-name">
                 {byId[band.id].label}
                 {byId[band.id].note && <small className="band-note">{byId[band.id].note}</small>}
               </td>
-              <td className="dataset-score-source">{band.total}</td>
+              <td className="lb-breakdown-source lb-complexity-tasks" data-label="Tasks">{band.total}</td>
               <BreakdownCell v={band.rate == null ? null : band} isOpen={isOpen} />
               <BreakdownUsageCell v={band.rate == null ? null : band} format="duration" />
               <BreakdownUsageCell v={band.rate == null ? null : band} format="tokens" />
@@ -228,6 +235,10 @@ function TaskBreakdown({ model, selectedMode }) {
     key,
     dir: current.key === key && current.dir === "asc" ? "desc" : "asc",
   }));
+  const selectSort = (key) => setSort((current) => ({
+    key,
+    dir: current.key === key ? current.dir : "asc",
+  }));
   const sortClass = (key) => sort.key === key
     ? ` task-sorted${sort.dir === "asc" ? " task-sorted-asc" : ""}`
     : "";
@@ -251,12 +262,24 @@ function TaskBreakdown({ model, selectedMode }) {
           <span className="sr-only">Search tasks</span>
           <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search task, theorem, or source" />
         </label>
-        <select value={verdict} onChange={(e) => setVerdict(e.target.value)} aria-label="Filter by verdict">
+        <select className="task-verdict-filter" value={verdict} onChange={(e) => setVerdict(e.target.value)} aria-label="Filter by verdict">
           <option value="All">All verdicts</option>
           <option value="PASS">PASS</option>
           <option value="FAIL">FAIL</option>
           <option value="CHEATING">CHEATING</option>
         </select>
+        <label className="task-mobile-sort">
+          <span className="sr-only">Sort tasks by</span>
+          <select value={sort.key} onChange={(e) => selectSort(e.target.value)} aria-label="Sort tasks by">
+            {taskColumns.map(([key, label]) => <option key={key} value={key}>{label}</option>)}
+          </select>
+        </label>
+        <button type="button" className="task-mobile-sort-direction"
+          aria-label={`Sort ${sort.dir === "asc" ? "descending" : "ascending"}`}
+          title={`Sort ${sort.dir === "asc" ? "descending" : "ascending"}`}
+          onClick={() => onSort(sort.key)}>
+          <span aria-hidden="true">{sort.dir === "asc" ? "↑" : "↓"}</span>
+        </button>
         <span className="task-count" role="status" aria-live="polite">{taskStatus}</span>
       </div>
       <div className="task-pricing-note">
@@ -264,6 +287,7 @@ function TaskBreakdown({ model, selectedMode }) {
       </div>
       <div className="task-scroll">
         <table className="task-table">
+          <caption className="sr-only">Task verdicts and recorded usage for {model.name} {model.subname}</caption>
           <thead>
             <tr>
               {taskColumns.map(([key, label]) => (
@@ -278,25 +302,25 @@ function TaskBreakdown({ model, selectedMode }) {
           <tbody>
             {rows.map((row) => (
               <tr key={row.id}>
-                <td className="task-name">
+                <td className="task-name" data-label="Task">
                   <span>{row.theorem}</span>
                   <small>{row.benchmark}</small>
                 </td>
-                <td><span className={`task-verdict ${row.verdict.toLowerCase()}`}>{row.verdict}</span></td>
-                <td className="task-number">{formatDuration(row.timeSecs)}</td>
-                <td className="task-number">{formatTokens(row.totalTokens)}</td>
-                <td className="task-number">{formatPercent(row.cacheRatePct)}</td>
-                <td className="task-number">{formatCostUsd(row.equivalentCostUsd, 4)}</td>
+                <td className="task-verdict-cell" data-label="Verdict"><span className={`task-verdict ${row.verdict.toLowerCase()}`}>{row.verdict}</span></td>
+                <td className="task-number" data-label="Active time">{formatDuration(row.timeSecs)}</td>
+                <td className="task-number" data-label="Tokens">{formatTokens(row.totalTokens)}</td>
+                <td className="task-number" data-label="Cache rate">{formatPercent(row.cacheRatePct)}</td>
+                <td className="task-number" data-label="Price">{formatCostUsd(row.equivalentCostUsd, 4)}</td>
               </tr>
             ))}
             {!taskRows && !loadError && (
-              <tr><td className="task-no-results" colSpan="6">Loading task usage…</td></tr>
+              <tr className="task-status-row"><td className="task-no-results" colSpan="6">Loading task usage…</td></tr>
             )}
             {loadError && (
-              <tr><td className="task-no-results" colSpan="6">Could not load task usage: {loadError}</td></tr>
+              <tr className="task-status-row"><td className="task-no-results" colSpan="6">Could not load task usage: {loadError}</td></tr>
             )}
             {taskRows && rows.length === 0 && (
-              <tr><td className="task-no-results" colSpan="6">No tasks match these filters.</td></tr>
+              <tr className="task-status-row"><td className="task-no-results" colSpan="6">No tasks match these filters.</td></tr>
             )}
           </tbody>
         </table>
@@ -334,6 +358,129 @@ function ModelUsageSummary({ model, selectedMode }) {
   );
 }
 
+function ModelUsageDisclosure({ model, selectedMode }) {
+  const modeUsage = model.perMode?.[selectedMode];
+  if (!modeUsage) return null;
+  return (
+    <details className="lb-usage-disclosure">
+      <summary>
+        <span>Run usage</span>
+        <span className="lb-usage-price">
+          <small>Price</small>
+          <strong>{formatCostUsd(modeUsage.equivalentCostUsd, 2)}</strong>
+        </span>
+      </summary>
+      <ModelUsageSummary model={model} selectedMode={selectedMode} />
+    </details>
+  );
+}
+
+function SpecificationBreakdown({ model, selectedMode, isOpen }) {
+  const specs = (
+    (TLAPS_DATA.suites || []).find((suite) => suite.id === "core")?.specs
+    || TLAPS_DATA.specs
+  ).filter((spec) => model.perSpec?.[spec.id]?.[selectedMode]);
+  return (
+    <div className="bd-scroll lb-breakdown-scroll">
+      <table className="breakdown lb-breakdown-table lb-spec-table">
+        <caption className="sr-only">Pass rate and usage by specification</caption>
+        <thead>
+          <tr>
+            <th>Spec</th>
+            <th>Source</th>
+            <th className="bd-mode">Pass rate</th>
+            <th className="bd-usage-head bd-supporting">Active time / task</th>
+            <th className="bd-usage-head bd-supporting">Tokens / task</th>
+            <th className="bd-usage-head bd-supporting">Cache rate</th>
+            <th className="bd-usage-head bd-supporting">Price / task</th>
+          </tr>
+        </thead>
+        <tbody>
+          {specs.map((spec) => {
+            const score = model.perSpec[spec.id][selectedMode];
+            return (
+              <tr className="bd-row lb-breakdown-row" key={spec.id}>
+                <td className="bd-name spec-name" data-label="Spec">
+                  {spec.url ? (
+                    <a href={spec.url} target="_blank" rel="noopener"
+                      onClick={(event) => event.stopPropagation()}>{spec.name}</a>
+                  ) : spec.name}
+                </td>
+                <td className="lb-breakdown-source" data-label="Source">
+                  {spec.sourceUrl ? (
+                    <a href={spec.sourceUrl} target="_blank" rel="noopener"
+                      onClick={(event) => event.stopPropagation()}>{spec.sourceName}</a>
+                  ) : spec.sourceName}
+                </td>
+                <BreakdownCell v={score} isOpen={isOpen} />
+                <BreakdownUsageCell v={score} format="duration" />
+                <BreakdownUsageCell v={score} format="tokens" />
+                <BreakdownUsageCell v={score} format="cache" />
+                <BreakdownUsageCell v={score} format="usd" />
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function ModelDetail({ model, selectedMode, isOpen, detailView, setDetailView }) {
+  const hasComplexity = !!model.perComplexity?.[selectedMode];
+  const activeView = detailView === "complexity" && !hasComplexity ? "spec" : detailView;
+  const modeScore = model.perMode?.[selectedMode];
+  const descriptions = {
+    spec: "Pass rates for each specification. These values are averaged to produce the leaderboard score.",
+    complexity: "Pass rates grouped by the number of steps in the reference proof.",
+    task: "Verdicts and recorded usage for each task.",
+  };
+
+  return (
+    <div className="pad lb-detail">
+      <div className="lb-detail-summary" aria-label="Model result summary">
+        <span><strong>{modeScore?.pass ?? "—"}</strong> / {modeScore?.total ?? "—"} tasks</span>
+        <span><strong>{modeScore?.completeSpecifications ?? "—"}</strong> / {modeScore?.representedSpecifications ?? "—"} specs</span>
+      </div>
+      <div className="detail-header">
+        <div className="detail-tabs" role="group" aria-label="Leaderboard detail view">
+          <button className={activeView === "spec" ? "active" : ""} aria-pressed={activeView === "spec"}
+            onClick={() => setDetailView("spec")}>By spec</button>
+          {hasComplexity && (
+            <button className={activeView === "complexity" ? "active" : ""}
+              aria-pressed={activeView === "complexity"}
+              onClick={() => setDetailView("complexity")}>By complexity</button>
+          )}
+          <button className={activeView === "task" ? "active" : ""} aria-pressed={activeView === "task"}
+            onClick={() => setDetailView("task")}>By task</button>
+        </div>
+        <p className="detail-caption">{descriptions[activeView]}</p>
+      </div>
+      {modeScore?.partialScope && model.scope?.reason && (
+        <div className="scope-caption">{model.scope.reason}</div>
+      )}
+      {activeView === "complexity" && hasComplexity && (() => {
+        const covered = model.perComplexity[selectedMode].reduce((sum, band) => sum + (band.total || 0), 0);
+        const total = modeScore?.total ?? TLAPS_DATA.core?.taskCount;
+        if (!(total > 0) || covered >= total) return null;
+        return (
+          <div className="complexity-partial-note" role="status">
+            Partial only — by complexity covers {covered} of {total} Core tasks, not the full suite. Tasks without reference-proof step counts are omitted.
+          </div>
+        );
+      })()}
+      {activeView !== "task" && (
+        <ModelUsageDisclosure model={model} selectedMode={selectedMode} />
+      )}
+      {activeView === "complexity" && hasComplexity ? (
+        <ComplexityBreakdown model={model} selectedMode={selectedMode} isOpen={isOpen} />
+      ) : activeView === "spec" ? (
+        <SpecificationBreakdown model={model} selectedMode={selectedMode} isOpen={isOpen} />
+      ) : <TaskBreakdown model={model} selectedMode={selectedMode} />}
+    </div>
+  );
+}
+
 function HubLeaderboard({ showFilters = true, fixedMode = null, fixedCohort = null }) {
   const metricById = useM_lb(() => Object.fromEntries(TLAPS_DATA.metrics.map(m => [m.id, m])), []);
   const modeBlurb = useM_lb(() => Object.fromEntries(TLAPS_DATA.modes.map(m => [m.id, m.blurb])), []);
@@ -343,15 +490,18 @@ function HubLeaderboard({ showFilters = true, fixedMode = null, fixedCohort = nu
   const initialMode = fixedMode || "completion";
   const [selectedMode, setSelectedMode] = useS_lb(initialMode);
   const [sort, setSort] = useS_lb({ key: `metric:${initialMode}`, dir: "desc" });
-  const [expanded, setExpanded] = useS_lb({});
-  // Spec-level is the primary detail; task/cost live behind secondary tabs.
-  const [detailView, setDetailView] = useS_lb("spec");
+  // Each model keeps its own detail view. Hidden details do not mount until the
+  // first expansion, which keeps the initial leaderboard small and responsive.
+  const [detailState, setDetailState] = useS_lb({});
   const modeLabels = { completion: "Proof completion", scratch: "Proof from scratch" };
+  const modeDescriptions = {
+    ...modeBlurb,
+    completion: "The model receives the theorem and its supporting lemmas, then writes the target proof.",
+  };
   const cohortLabels = { "one-shot": "one-shot", agentic: "agentic" };
 
   useE_lb(() => {
-    setExpanded({});
-    setDetailView("spec");
+    setDetailState({});
     setSort({ key: `metric:${selectedMode}`, dir: "desc" });
   }, [fixedCohort]);
 
@@ -400,15 +550,23 @@ function HubLeaderboard({ showFilters = true, fixedMode = null, fixedCohort = nu
   const selectMode = (mode) => {
     if (mode === selectedMode) return;
     setSelectedMode(mode);
-    setExpanded({});
-    setDetailView("spec");
+    setDetailState({});
     setSort({ key: `metric:${mode}`, dir: "desc" });
   };
+
+  const closeOpenDetails = () => setDetailState((current) => {
+    let changed = false;
+    const next = Object.fromEntries(Object.entries(current).map(([id, detail]) => {
+      if (detail.open) changed = true;
+      return [id, { ...detail, open: false }];
+    }));
+    return changed ? next : current;
+  });
 
   const onSort = (key) => {
     // Only metric columns are sortable; Model stays in score order.
     if (!key.startsWith("metric:")) return;
-    setExpanded({});
+    closeOpenDetails();
     setSort(s => {
       if (s.key === key) return { key, dir: s.dir === "desc" ? "asc" : "desc" };
       // any lower-is-better column starts ascending; everything else descending.
@@ -417,11 +575,17 @@ function HubLeaderboard({ showFilters = true, fixedMode = null, fixedCohort = nu
   };
   const sortCls = (k) => sort.key === k ? "sorted" + (sort.dir === "asc" ? " sorted-asc" : "") : "";
   const sortAria = (key) => sort.key === key ? (sort.dir === "asc" ? "ascending" : "descending") : "none";
-  const toggleExpanded = (modelId) => setExpanded((current) => {
-    const next = { ...current };
-    if (next[modelId]) delete next[modelId];
-    else next[modelId] = true;
-    return next;
+  const toggleExpanded = (modelId) => setDetailState((current) => {
+    const detail = current[modelId] || { open: false, mounted: false, view: "spec" };
+    const open = !detail.open;
+    return {
+      ...current,
+      [modelId]: { ...detail, open, mounted: detail.mounted || open },
+    };
+  });
+  const setModelDetailView = (modelId, view) => setDetailState((current) => {
+    const detail = current[modelId] || { open: true, mounted: true, view: "spec" };
+    return { ...current, [modelId]: { ...detail, view } };
   });
   const metricMax = useM_lb(() => Object.fromEntries(visibleMetrics.map(mt => {
     if (mt.id === "completion" || mt.id === "scratch") return [mt.id, 100];
@@ -440,7 +604,8 @@ function HubLeaderboard({ showFilters = true, fixedMode = null, fixedCohort = nu
     Object.keys(refs).forEach(id => { const el = refs[id]; if (el) newPositions[id] = el.offsetTop; });
     const lk = lastKeyRef.current;
     const changed = lk.k !== sort.key || lk.d !== sort.dir || lk.mode !== selectedMode || lk.cohort !== fixedCohort;
-    if (changed && Object.keys(oldPositions).length > 0) {
+    const reduceMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    if (!reduceMotion && changed && Object.keys(oldPositions).length > 0) {
       Object.keys(refs).forEach(id => {
         const el = refs[id]; if (!el) return;
         const oldTop = oldPositions[id], newTop = newPositions[id];
@@ -475,7 +640,7 @@ function HubLeaderboard({ showFilters = true, fixedMode = null, fixedCohort = nu
               </span>
             </h2>
           </div>
-          {modeBlurb[fixedMode] && <p className="lb-section-sub">{modeBlurb[fixedMode]}</p>}
+          {modeDescriptions[fixedMode] && <p className="lb-section-sub">{modeDescriptions[fixedMode]}</p>}
         </div>
       ) : showFilters && (
         <div className="leaderboard-controls">
@@ -492,6 +657,7 @@ function HubLeaderboard({ showFilters = true, fixedMode = null, fixedCohort = nu
       )}
       <div className="lb-wrap lb-wrap-compact">
         <table className="lb">
+          <caption className="sr-only">{modeLabels[selectedMode]} leaderboard</caption>
           <colgroup>
             <col className="lb-rank-col" />
             <col className="lb-model-col" />
@@ -524,7 +690,7 @@ function HubLeaderboard({ showFilters = true, fixedMode = null, fixedCohort = nu
               <th className="lb-supporting-head" title="Specifications where every selected Core task passed.">
                 Specs completed
               </th>
-              <th className="lb-cost-head" title="Tokens, input cache rate, and recorded public-API-equivalent price.">Cost</th>
+              <th className="lb-cost-head" title="Recorded public-API-equivalent price.">Price</th>
               <th style={{ width: 32 }}></th>
             </tr>
           </thead>
@@ -537,7 +703,8 @@ function HubLeaderboard({ showFilters = true, fixedMode = null, fixedCohort = nu
               </tr>
             )}
             {rows.map((m) => {
-              const isOpen = !!expanded[m.id];
+              const detail = detailState[m.id] || { open: false, mounted: false, view: "spec" };
+              const isOpen = detail.open;
               const primaryRank = primaryRankById[m.id];
               const modeScore = m.perMode?.[selectedMode];
               return (
@@ -580,14 +747,8 @@ function HubLeaderboard({ showFilters = true, fixedMode = null, fixedCohort = nu
                         : "—"}
                     </td>
                     <td className="lb-cost-cell">
-                      <span className="lb-cost-item" title={`${formatTokens(m.usage.inputTokens)} input + ${formatTokens(m.usage.outputTokens)} output`}>
-                        <small>Tokens</small><strong>{formatCompactTokens(m.usage.totalTokens)}</strong>
-                      </span>
-                      <span className="lb-cost-item" title={`${formatTokens(m.usage.cacheReadInputTokens)} cached input / ${formatTokens(m.usage.inputTokens)} input`}>
-                        <small>Cache</small><strong>{formatPercent(m.usage.cacheRatePct)}</strong>
-                      </span>
                       <span className="lb-cost-item" title={`Public API equivalent as of ${m.pricing.asOf}`}>
-                        <small>Price</small><strong>{formatCostUsd(m.usage.equivalentCostUsd, 2)}</strong>
+                        <strong>{formatCostUsd(m.usage.equivalentCostUsd, 2)}</strong>
                       </span>
                     </td>
                     <td className="expand-cell">
@@ -603,98 +764,11 @@ function HubLeaderboard({ showFilters = true, fixedMode = null, fixedCohort = nu
                         role="region" aria-label={`${m.name} ${m.subname} details`} aria-hidden={!isOpen}
                         {...(!isOpen ? { inert: "" } : {})}>
                         <div className="inner">
-                          <div className="pad">
-                            <div className="detail-header">
-                              <div>
-                                <div className="detail-titleline">
-                                  <span className="eyebrow">{m.name} · {m.subname}</span>
-                                </div>
-                                <div className="detail-caption">
-                                  {detailView === "spec"
-                                    ? `${modeLabels[selectedMode]}: per-specification task pass rates used in the Spec-balanced pass rate.`
-                                    : detailView === "complexity"
-                                    ? `${modeLabels[selectedMode]}: pass rate by reference-proof step count.`
-                                    : `${modeLabels[selectedMode]}: per-task verdicts and usage.`}
-                                </div>
-                              </div>
-                              <div className="detail-tabs" role="group" aria-label="Leaderboard detail view">
-                                <button className={detailView === "spec" ? "active" : ""} aria-pressed={detailView === "spec"}
-                                  onClick={() => setDetailView("spec")}>By spec</button>
-                                {m.perComplexity?.[selectedMode] && (
-                                  <button className={detailView === "complexity" ? "active" : ""}
-                                    aria-pressed={detailView === "complexity"}
-                                    onClick={() => setDetailView("complexity")}>By complexity</button>
-                                )}
-                                <button className={detailView === "task" ? "active" : ""} aria-pressed={detailView === "task"}
-                                  onClick={() => setDetailView("task")}>By task</button>
-                              </div>
-                            </div>
-                            {m.perMode[selectedMode]?.partialScope && m.scope?.reason && (
-                              <div className="scope-caption">{m.scope.reason}</div>
-                            )}
-                            {detailView === "complexity" && m.perComplexity?.[selectedMode] && (() => {
-                              const covered = m.perComplexity[selectedMode].reduce((sum, band) => sum + (band.total || 0), 0);
-                              const total = m.perMode[selectedMode]?.total ?? TLAPS_DATA.core?.taskCount;
-                              if (!(total > 0) || covered >= total) return null;
-                              return (
-                                <div className="complexity-partial-note" role="status">
-                                  Partial only — by complexity covers {covered} of {total} Core tasks, not the full suite. Tasks without reference-proof step counts are omitted.
-                                </div>
-                              );
-                            })()}
-                            {detailView !== "task" && (
-                              <ModelUsageSummary model={m} selectedMode={selectedMode} />
-                            )}
-                            {detailView === "complexity" && m.perComplexity?.[selectedMode] ? (
-                              <ComplexityBreakdown model={m} selectedMode={selectedMode} isOpen={isOpen} />
-                            ) : detailView === "spec" ? (
-                              /* Spec-level is the primary expanded view. */
-                              <div className="bd-scroll">
-                                <table className="breakdown dataset-score-table">
-                                  <thead>
-                                    <tr>
-                                      <th>Spec</th>
-                                      <th>Source</th>
-                                      <th className="bd-mode">Pass rate</th>
-                                      <th className="bd-usage-head bd-supporting">Active time / task</th>
-                                      <th className="bd-usage-head bd-supporting">Tokens / task</th>
-                                      <th className="bd-usage-head bd-supporting">Cache rate</th>
-                                      <th className="bd-usage-head bd-supporting">Price / task</th>
-                                    </tr>
-                                  </thead>
-                                  <tbody>
-                                    {(
-                                      (TLAPS_DATA.suites || []).find((s) => s.id === "core")?.specs
-                                      || TLAPS_DATA.specs
-                                    ).filter((spec) => m.perSpec?.[spec.id]?.[selectedMode]).map((spec) => {
-                                      const score = m.perSpec[spec.id][selectedMode];
-                                      return (
-                                        <tr className="bd-row dataset-score-spec-row" key={spec.id}>
-                                          <td className="bd-name spec-name">
-                                            {spec.url ? (
-                                              <a href={spec.url} target="_blank" rel="noopener"
-                                                 onClick={(e) => e.stopPropagation()}>{spec.name}</a>
-                                            ) : spec.name}
-                                          </td>
-                                          <td className="dataset-score-source">
-                                            {spec.sourceUrl ? (
-                                              <a href={spec.sourceUrl} target="_blank" rel="noopener"
-                                                 onClick={(e) => e.stopPropagation()}>{spec.sourceName}</a>
-                                            ) : spec.sourceName}
-                                          </td>
-                                          <BreakdownCell v={score} isOpen={isOpen} />
-                                          <BreakdownUsageCell v={score} format="duration" />
-                                          <BreakdownUsageCell v={score} format="tokens" />
-                                          <BreakdownUsageCell v={score} format="cache" />
-                                          <BreakdownUsageCell v={score} format="usd" />
-                                        </tr>
-                                      );
-                                    })}
-                                  </tbody>
-                                </table>
-                              </div>
-                            ) : (isOpen ? <TaskBreakdown model={m} selectedMode={selectedMode} /> : null)}
-                          </div>
+                          {detail.mounted && (
+                            <ModelDetail model={m} selectedMode={selectedMode} isOpen={isOpen}
+                              detailView={detail.view}
+                              setDetailView={(view) => setModelDetailView(m.id, view)} />
+                          )}
                         </div>
                       </div>
                     </td>
