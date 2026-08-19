@@ -99,7 +99,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/ewd998",
+      "url": "https://github.com/tlaplus/Examples/blob/master/specifications/ewd998/EWD998PCal_proof.tla",
       "completion": 25,
       "scratch": 2,
       "total": 27
@@ -113,7 +113,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/ewd998",
+      "url": "https://github.com/tlaplus/Examples/blob/master/specifications/ewd998/EWD998_proof.tla",
       "completion": 22,
       "scratch": 2,
       "total": 24
@@ -127,7 +127,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/ewd998",
+      "url": "https://github.com/tlaplus/Examples/blob/master/specifications/ewd998/AsyncTerminationDetection_proof.tla",
       "completion": 5,
       "scratch": 3,
       "total": 8
@@ -141,7 +141,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/byzpaxos",
+      "url": "https://github.com/tlaplus/Examples/blob/master/specifications/byzpaxos/BPConProof.tla",
       "completion": 19,
       "scratch": 3,
       "total": 22
@@ -155,7 +155,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/byzpaxos",
+      "url": "https://github.com/tlaplus/Examples/blob/master/specifications/byzpaxos/VoteProof.tla",
       "completion": 16,
       "scratch": 4,
       "total": 20
@@ -169,7 +169,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/byzpaxos",
+      "url": "https://github.com/tlaplus/Examples/blob/master/specifications/byzpaxos/Consensus.tla",
       "completion": 5,
       "scratch": 3,
       "total": 8
@@ -183,7 +183,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/byzpaxos",
+      "url": "https://github.com/tlaplus/Examples/blob/master/specifications/byzpaxos/PConProof.tla",
       "completion": 1,
       "scratch": 1,
       "total": 2
@@ -197,7 +197,7 @@ window.TLAPS_DATA = {
       "sourceKey": "TLAPS distribution examples",
       "sourceName": "TLAPS distribution examples",
       "sourceUrl": "https://github.com/tlaplus/tlapm",
-      "url": "https://github.com/tlaplus/tlapm/tree/main/zenon/regression/examples/data",
+      "url": "https://github.com/tlaplus/tlapm/blob/main/zenon/regression/examples/data/Sets.tla",
       "completion": 12,
       "scratch": 7,
       "total": 19
@@ -211,7 +211,7 @@ window.TLAPS_DATA = {
       "sourceKey": "TLAPS distribution examples",
       "sourceName": "TLAPS distribution examples",
       "sourceUrl": "https://github.com/tlaplus/tlapm",
-      "url": "https://github.com/tlaplus/tlapm/tree/main/zenon/regression/examples/data",
+      "url": "https://github.com/tlaplus/tlapm/blob/main/zenon/regression/examples/data/GraphTheorem.tla",
       "completion": 2,
       "scratch": 1,
       "total": 3
@@ -225,7 +225,7 @@ window.TLAPS_DATA = {
       "sourceKey": "TLAPS distribution examples",
       "sourceName": "TLAPS distribution examples",
       "sourceUrl": "https://github.com/tlaplus/tlapm",
-      "url": "https://github.com/tlaplus/tlapm/tree/main/zenon/regression/examples/data",
+      "url": "https://github.com/tlaplus/tlapm/blob/main/zenon/regression/examples/data/SequencesTheorems.tla",
       "completion": 1,
       "scratch": 1,
       "total": 2
@@ -239,7 +239,7 @@ window.TLAPS_DATA = {
       "sourceKey": "TLAPS distribution examples",
       "sourceName": "TLAPS distribution examples",
       "sourceUrl": "https://github.com/tlaplus/tlapm",
-      "url": "https://github.com/tlaplus/tlapm/tree/main/examples_draft/consensus",
+      "url": "https://github.com/tlaplus/tlapm/blob/main/examples_draft/consensus/Voting.tla",
       "completion": 9,
       "scratch": 6,
       "total": 15
@@ -253,7 +253,7 @@ window.TLAPS_DATA = {
       "sourceKey": "TLAPS distribution examples",
       "sourceName": "TLAPS distribution examples",
       "sourceUrl": "https://github.com/tlaplus/tlapm",
-      "url": "https://github.com/tlaplus/tlapm/tree/main/examples_draft/consensus",
+      "url": "https://github.com/tlaplus/tlapm/blob/main/examples_draft/consensus/PaxosProof.tla",
       "completion": 3,
       "scratch": 3,
       "total": 6
@@ -267,7 +267,7 @@ window.TLAPS_DATA = {
       "sourceKey": "TLAPS distribution examples",
       "sourceName": "TLAPS distribution examples",
       "sourceUrl": "https://github.com/tlaplus/tlapm",
-      "url": "https://github.com/tlaplus/tlapm/tree/main/examples_draft/consensus",
+      "url": "https://github.com/tlaplus/tlapm/blob/main/examples_draft/consensus/Consensus.tla",
       "completion": 1,
       "scratch": 1,
       "total": 2
@@ -281,7 +281,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/lamport_mutex",
+      "url": "https://github.com/tlaplus/Examples/blob/master/specifications/lamport_mutex/LamportMutex_proofs.tla",
       "completion": 20,
       "scratch": 2,
       "total": 22
@@ -295,7 +295,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/TencentPaxos",
+      "url": "https://github.com/Starydark/Tencent-Paxos-TLA/blob/master/TPaxosWithProof.tla",
       "completion": 19,
       "scratch": 2,
       "total": 21
@@ -309,7 +309,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/allocator",
+      "url": "https://github.com/tlaplus/Examples/blob/master/specifications/allocator/SchedulingAllocator_proof.tla",
       "completion": 7,
       "scratch": 2,
       "total": 9
@@ -323,7 +323,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/allocator",
+      "url": "https://github.com/tlaplus/Examples/blob/master/specifications/allocator/AllocatorImplementation_proof.tla",
       "completion": 5,
       "scratch": 1,
       "total": 6
@@ -337,7 +337,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/allocator",
+      "url": "https://github.com/tlaplus/Examples/blob/master/specifications/allocator/SimpleAllocator_proof.tla",
       "completion": 2,
       "scratch": 2,
       "total": 4
@@ -351,7 +351,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/ewd840",
+      "url": "https://github.com/tlaplus/Examples/blob/master/specifications/ewd840/EWD840_proof.tla",
       "completion": 9,
       "scratch": 2,
       "total": 11
@@ -365,7 +365,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/ewd840",
+      "url": "https://github.com/tlaplus/Examples/blob/master/specifications/ewd840/SyncTerminationDetection_proof.tla",
       "completion": 5,
       "scratch": 3,
       "total": 8
@@ -379,7 +379,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/LoopInvariance",
+      "url": "https://github.com/tlaplus/Examples/blob/master/specifications/LoopInvariance/Quicksort.tla",
       "completion": 9,
       "scratch": 1,
       "total": 10
@@ -393,7 +393,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/LoopInvariance",
+      "url": "https://github.com/tlaplus/Examples/blob/master/specifications/LoopInvariance/SumSequence.tla",
       "completion": 6,
       "scratch": 1,
       "total": 7
@@ -407,7 +407,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/LoopInvariance",
+      "url": "https://github.com/tlaplus/Examples/blob/master/specifications/LoopInvariance/BinarySearch.tla",
       "completion": 1,
       "scratch": 1,
       "total": 2
@@ -421,7 +421,7 @@ window.TLAPS_DATA = {
       "sourceKey": "TLAPS distribution examples",
       "sourceName": "TLAPS distribution examples",
       "sourceUrl": "https://github.com/tlaplus/tlapm",
-      "url": "https://github.com/hengxin/tlaps-examples/tree/master/Paxos",
+      "url": "https://github.com/hengxin/tlaps-examples/blob/master/Paxos/Paxos.tla",
       "completion": 8,
       "scratch": 3,
       "total": 11
@@ -435,7 +435,7 @@ window.TLAPS_DATA = {
       "sourceKey": "TLAPS distribution examples",
       "sourceName": "TLAPS distribution examples",
       "sourceUrl": "https://github.com/tlaplus/tlapm",
-      "url": "https://github.com/hengxin/tlaps-examples/tree/master/Paxos",
+      "url": "https://github.com/hengxin/tlaps-examples/blob/master/Paxos/PaxosHistVar.tla",
       "completion": 5,
       "scratch": 2,
       "total": 7
@@ -449,7 +449,7 @@ window.TLAPS_DATA = {
       "sourceKey": "TLAPS distribution examples",
       "sourceName": "TLAPS distribution examples",
       "sourceUrl": "https://github.com/tlaplus/tlapm",
-      "url": "https://github.com/hengxin/tlaps-examples/tree/master/Paxos",
+      "url": "https://github.com/hengxin/tlaps-examples/blob/master/Paxos/Consensus.tla",
       "completion": 0,
       "scratch": 1,
       "total": 1
@@ -463,7 +463,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/tcp",
+      "url": "https://github.com/tlaplus/Examples/blob/master/specifications/tcp/tcp_proof.tla",
       "completion": 16,
       "scratch": 3,
       "total": 19
@@ -477,7 +477,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/bcastByz",
+      "url": "https://github.com/tlaplus/Examples/blob/master/specifications/bcastByz/bcastByz.tla",
       "completion": 13,
       "scratch": 5,
       "total": 18
@@ -491,7 +491,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/FiniteMonotonic",
+      "url": "https://github.com/tlaplus/Examples/blob/master/specifications/FiniteMonotonic/CRDT_proof.tla",
       "completion": 14,
       "scratch": 3,
       "total": 17
@@ -505,7 +505,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/FlashProtocol",
+      "url": "https://github.com/tlaplus/Examples/blob/352084b3e3b57b37b47973afdee224b5979f574d/specifications/FlashProtocol/FlashWithMutex.tla",
       "completion": 0,
       "scratch": 17,
       "total": 17
@@ -519,7 +519,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/barriers",
+      "url": "https://github.com/tlaplus/Examples/blob/master/specifications/barriers/Barriers.tla",
       "completion": 11,
       "scratch": 5,
       "total": 16
@@ -533,7 +533,7 @@ window.TLAPS_DATA = {
       "sourceKey": "TLAPS distribution examples",
       "sourceName": "TLAPS distribution examples",
       "sourceUrl": "https://github.com/tlaplus/tlapm",
-      "url": "https://github.com/tlaplus/tlapm/tree/main/examples/cantor",
+      "url": "https://github.com/tlaplus/tlapm/blob/main/examples/cantor/Cantor10.tla",
       "completion": 2,
       "scratch": 1,
       "total": 3
@@ -547,7 +547,7 @@ window.TLAPS_DATA = {
       "sourceKey": "TLAPS distribution examples",
       "sourceName": "TLAPS distribution examples",
       "sourceUrl": "https://github.com/tlaplus/tlapm",
-      "url": "https://github.com/tlaplus/tlapm/tree/main/examples/cantor",
+      "url": "https://github.com/tlaplus/tlapm/blob/main/examples/cantor/Cantor1.tla",
       "completion": 1,
       "scratch": 1,
       "total": 2
@@ -561,7 +561,7 @@ window.TLAPS_DATA = {
       "sourceKey": "TLAPS distribution examples",
       "sourceName": "TLAPS distribution examples",
       "sourceUrl": "https://github.com/tlaplus/tlapm",
-      "url": "https://github.com/tlaplus/tlapm/tree/main/examples/cantor",
+      "url": "https://github.com/tlaplus/tlapm/blob/main/examples/cantor/Cantor5.tla",
       "completion": 1,
       "scratch": 1,
       "total": 2
@@ -575,7 +575,7 @@ window.TLAPS_DATA = {
       "sourceKey": "TLAPS distribution examples",
       "sourceName": "TLAPS distribution examples",
       "sourceUrl": "https://github.com/tlaplus/tlapm",
-      "url": "https://github.com/tlaplus/tlapm/tree/main/examples/cantor",
+      "url": "https://github.com/tlaplus/tlapm/blob/main/examples/cantor/Cantor8.tla",
       "completion": 1,
       "scratch": 1,
       "total": 2
@@ -589,7 +589,7 @@ window.TLAPS_DATA = {
       "sourceKey": "TLAPS distribution examples",
       "sourceName": "TLAPS distribution examples",
       "sourceUrl": "https://github.com/tlaplus/tlapm",
-      "url": "https://github.com/tlaplus/tlapm/tree/main/examples/cantor",
+      "url": "https://github.com/tlaplus/tlapm/blob/main/examples/cantor/Cantor9.tla",
       "completion": 1,
       "scratch": 1,
       "total": 2
@@ -603,7 +603,7 @@ window.TLAPS_DATA = {
       "sourceKey": "TLAPS distribution examples",
       "sourceName": "TLAPS distribution examples",
       "sourceUrl": "https://github.com/tlaplus/tlapm",
-      "url": "https://github.com/tlaplus/tlapm/tree/main/examples/cantor",
+      "url": "https://github.com/tlaplus/tlapm/blob/main/examples/cantor/Cantor2.tla",
       "completion": 1,
       "scratch": 0,
       "total": 1
@@ -617,7 +617,7 @@ window.TLAPS_DATA = {
       "sourceKey": "TLAPS distribution examples",
       "sourceName": "TLAPS distribution examples",
       "sourceUrl": "https://github.com/tlaplus/tlapm",
-      "url": "https://github.com/tlaplus/tlapm/tree/main/examples/cantor",
+      "url": "https://github.com/tlaplus/tlapm/blob/main/examples/cantor/Cantor3.tla",
       "completion": 1,
       "scratch": 0,
       "total": 1
@@ -631,7 +631,7 @@ window.TLAPS_DATA = {
       "sourceKey": "TLAPS distribution examples",
       "sourceName": "TLAPS distribution examples",
       "sourceUrl": "https://github.com/tlaplus/tlapm",
-      "url": "https://github.com/tlaplus/tlapm/tree/main/examples/cantor",
+      "url": "https://github.com/tlaplus/tlapm/blob/main/examples/cantor/Cantor4.tla",
       "completion": 1,
       "scratch": 0,
       "total": 1
@@ -645,7 +645,7 @@ window.TLAPS_DATA = {
       "sourceKey": "TLAPS distribution examples",
       "sourceName": "TLAPS distribution examples",
       "sourceUrl": "https://github.com/tlaplus/tlapm",
-      "url": "https://github.com/tlaplus/tlapm/tree/main/examples/cantor",
+      "url": "https://github.com/tlaplus/tlapm/blob/main/examples/cantor/Cantor6.tla",
       "completion": 1,
       "scratch": 0,
       "total": 1
@@ -659,7 +659,7 @@ window.TLAPS_DATA = {
       "sourceKey": "TLAPS distribution examples",
       "sourceName": "TLAPS distribution examples",
       "sourceUrl": "https://github.com/tlaplus/tlapm",
-      "url": "https://github.com/tlaplus/tlapm/tree/main/examples/cantor",
+      "url": "https://github.com/tlaplus/tlapm/blob/main/examples/cantor/Cantor7.tla",
       "completion": 1,
       "scratch": 0,
       "total": 1
@@ -673,7 +673,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/TeachingConcurrency",
+      "url": "https://github.com/tlaplus/Examples/blob/master/specifications/TeachingConcurrency/Simple.tla",
       "completion": 2,
       "scratch": 2,
       "total": 4
@@ -687,7 +687,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/TeachingConcurrency",
+      "url": "https://github.com/tlaplus/Examples/blob/master/specifications/TeachingConcurrency/Simple_proof.tla",
       "completion": 2,
       "scratch": 2,
       "total": 4
@@ -701,7 +701,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/TeachingConcurrency",
+      "url": "https://github.com/tlaplus/Examples/blob/master/specifications/TeachingConcurrency/SimpleRegular.tla",
       "completion": 2,
       "scratch": 2,
       "total": 4
@@ -715,7 +715,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/TeachingConcurrency",
+      "url": "https://github.com/tlaplus/Examples/blob/master/specifications/TeachingConcurrency/SimpleRegular_proof.tla",
       "completion": 2,
       "scratch": 2,
       "total": 4
@@ -729,7 +729,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/transaction_commit",
+      "url": "https://github.com/tlaplus/Examples/blob/master/specifications/transaction_commit/PaxosCommit_proof.tla",
       "completion": 8,
       "scratch": 1,
       "total": 9
@@ -743,7 +743,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/transaction_commit",
+      "url": "https://github.com/tlaplus/Examples/blob/master/specifications/transaction_commit/TwoPhase_proof.tla",
       "completion": 3,
       "scratch": 2,
       "total": 5
@@ -757,7 +757,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/transaction_commit",
+      "url": "https://github.com/tlaplus/Examples/blob/master/specifications/transaction_commit/TCommit_proof.tla",
       "completion": 1,
       "scratch": 1,
       "total": 2
@@ -771,7 +771,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/PaxosHowToWinATuringAward",
+      "url": "https://github.com/tlaplus/Examples/blob/master/specifications/PaxosHowToWinATuringAward/Voting_proof.tla",
       "completion": 6,
       "scratch": 3,
       "total": 9
@@ -785,7 +785,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/PaxosHowToWinATuringAward",
+      "url": "https://github.com/tlaplus/Examples/blob/master/specifications/PaxosHowToWinATuringAward/Voting.tla",
       "completion": 2,
       "scratch": 2,
       "total": 4
@@ -799,7 +799,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/PaxosHowToWinATuringAward",
+      "url": "https://github.com/tlaplus/Examples/blob/master/specifications/PaxosHowToWinATuringAward/Consensus.tla",
       "completion": 1,
       "scratch": 1,
       "total": 2
@@ -827,7 +827,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/locks_auxiliary_vars",
+      "url": "https://github.com/tlaplus/Examples/blob/master/specifications/locks_auxiliary_vars/LockHS.tla",
       "completion": 4,
       "scratch": 2,
       "total": 6
@@ -841,7 +841,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/locks_auxiliary_vars",
+      "url": "https://github.com/tlaplus/Examples/blob/master/specifications/locks_auxiliary_vars/Peterson.tla",
       "completion": 3,
       "scratch": 2,
       "total": 5
@@ -855,7 +855,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/locks_auxiliary_vars",
+      "url": "https://github.com/tlaplus/Examples/blob/master/specifications/locks_auxiliary_vars/Lock.tla",
       "completion": 2,
       "scratch": 1,
       "total": 3
@@ -869,7 +869,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/lemmy/BlockingQueue",
+      "url": "https://github.com/lemmy/BlockingQueue/blob/main/BlockingQueueSplit_proofs.tla",
       "completion": 4,
       "scratch": 3,
       "total": 7
@@ -883,7 +883,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/lemmy/BlockingQueue",
+      "url": "https://github.com/lemmy/BlockingQueue/blob/main/BlockingQueue_proofs.tla",
       "completion": 2,
       "scratch": 1,
       "total": 3
@@ -897,7 +897,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/lemmy/BlockingQueue",
+      "url": "https://github.com/lemmy/BlockingQueue/blob/main/BlockingQueueFair_proofs.tla",
       "completion": 2,
       "scratch": 1,
       "total": 3
@@ -925,7 +925,7 @@ window.TLAPS_DATA = {
       "sourceKey": "TLAPS distribution examples",
       "sourceName": "TLAPS distribution examples",
       "sourceUrl": "https://github.com/tlaplus/tlapm",
-      "url": "https://github.com/hengxin/tlaps-examples/tree/master/Euclid",
+      "url": "https://github.com/hengxin/tlaps-examples/blob/master/Euclid/Euclid-Hyperbook/GCD.tla",
       "completion": 3,
       "scratch": 3,
       "total": 6
@@ -939,7 +939,7 @@ window.TLAPS_DATA = {
       "sourceKey": "TLAPS distribution examples",
       "sourceName": "TLAPS distribution examples",
       "sourceUrl": "https://github.com/tlaplus/tlapm",
-      "url": "https://github.com/hengxin/tlaps-examples/tree/master/Euclid",
+      "url": "https://github.com/hengxin/tlaps-examples/blob/master/Euclid/Euclid-TLAPS-Example/Euclid.tla",
       "completion": 3,
       "scratch": 1,
       "total": 4
@@ -953,7 +953,7 @@ window.TLAPS_DATA = {
       "sourceKey": "TLAPS distribution examples",
       "sourceName": "TLAPS distribution examples",
       "sourceUrl": "https://github.com/tlaplus/tlapm",
-      "url": "https://github.com/hengxin/tlaps-examples/tree/master/Euclid",
+      "url": "https://github.com/hengxin/tlaps-examples/blob/master/Euclid/Euclid-Hyperbook/EuclidEx.tla",
       "completion": 0,
       "scratch": 1,
       "total": 1
@@ -967,7 +967,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/LearnProofs",
+      "url": "https://github.com/tlaplus/Examples/blob/master/specifications/LearnProofs/FindHighest.tla",
       "completion": 4,
       "scratch": 4,
       "total": 8
@@ -981,7 +981,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/LearnProofs",
+      "url": "https://github.com/tlaplus/Examples/blob/master/specifications/LearnProofs/AddTwo.tla",
       "completion": 1,
       "scratch": 2,
       "total": 3
@@ -995,7 +995,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/MultiCarElevator",
+      "url": "https://github.com/tlaplus/Examples/blob/master/specifications/MultiCarElevator/Elevator_proof.tla",
       "completion": 9,
       "scratch": 2,
       "total": 11
@@ -1009,7 +1009,7 @@ window.TLAPS_DATA = {
       "sourceKey": "TLAPS distribution examples",
       "sourceName": "TLAPS distribution examples",
       "sourceUrl": "https://github.com/tlaplus/tlapm",
-      "url": "https://github.com/hengxin/tlaps-examples/tree/master/AtomicBakery",
+      "url": "https://github.com/hengxin/tlaps-examples/blob/master/AtomicBakery/AtomicBakeryWithoutSMT.tla",
       "completion": 8,
       "scratch": 1,
       "total": 9
@@ -1023,7 +1023,7 @@ window.TLAPS_DATA = {
       "sourceKey": "TLAPS distribution examples",
       "sourceName": "TLAPS distribution examples",
       "sourceUrl": "https://github.com/tlaplus/tlapm",
-      "url": "https://github.com/hengxin/tlaps-examples/tree/master/AtomicBakery",
+      "url": "https://github.com/hengxin/tlaps-examples/blob/master/AtomicBakery/AtomicBakery.tla",
       "completion": 0,
       "scratch": 1,
       "total": 1
@@ -1037,7 +1037,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/CigaretteSmokers",
+      "url": "https://github.com/tlaplus/Examples/blob/master/specifications/CigaretteSmokers/CigaretteSmokers_proof.tla",
       "completion": 8,
       "scratch": 2,
       "total": 10
@@ -1051,7 +1051,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/MisraReachability",
+      "url": "https://github.com/tlaplus/Examples/blob/master/specifications/MisraReachability/ReachabilityProofs.tla",
       "completion": 4,
       "scratch": 0,
       "total": 4
@@ -1065,7 +1065,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/MisraReachability",
+      "url": "https://github.com/tlaplus/Examples/blob/master/specifications/MisraReachability/ReachableProofs.tla",
       "completion": 3,
       "scratch": 1,
       "total": 4
@@ -1079,7 +1079,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/MisraReachability",
+      "url": "https://github.com/tlaplus/Examples/blob/master/specifications/MisraReachability/ParReachProofs.tla",
       "completion": 1,
       "scratch": 1,
       "total": 2
@@ -1093,7 +1093,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/ewd687a",
+      "url": "https://github.com/tlaplus/Examples/blob/91c22ea537853196ed1e03e9ad91693ec37642de/specifications/ewd687a/EWD687a_proof.tla",
       "completion": 6,
       "scratch": 3,
       "total": 9
@@ -1107,7 +1107,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/glowingRaccoon",
+      "url": "https://github.com/tlaplus/Examples/blob/master/specifications/glowingRaccoon/clean_proof.tla",
       "completion": 4,
       "scratch": 2,
       "total": 6
@@ -1121,7 +1121,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/glowingRaccoon",
+      "url": "https://github.com/tlaplus/Examples/blob/master/specifications/glowingRaccoon/stages_proof.tla",
       "completion": 2,
       "scratch": 1,
       "total": 3
@@ -1135,7 +1135,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/Majority",
+      "url": "https://github.com/tlaplus/Examples/blob/master/specifications/Majority/MajorityProof.tla",
       "completion": 9,
       "scratch": 0,
       "total": 9
@@ -1149,7 +1149,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/blob/aba0cef20ce694f97612ad36a873734a1314534a/specifications/GermanProtocol/GermanCoherence.tla",
+      "url": "https://github.com/tlaplus/Examples/blob/91c22ea537853196ed1e03e9ad91693ec37642de/specifications/GermanProtocol/GermanData.tla",
       "completion": 0,
       "scratch": 6,
       "total": 6
@@ -1163,7 +1163,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/blob/aba0cef20ce694f97612ad36a873734a1314534a/specifications/GermanProtocol/GermanCoherence.tla",
+      "url": "https://github.com/tlaplus/Examples/blob/91c22ea537853196ed1e03e9ad91693ec37642de/specifications/GermanProtocol/GermanControl.tla",
       "completion": 0,
       "scratch": 1,
       "total": 1
@@ -1177,7 +1177,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/Paxos",
+      "url": "https://github.com/tlaplus/Examples/blob/master/specifications/Paxos/Consensus.tla",
       "completion": 2,
       "scratch": 2,
       "total": 4
@@ -1191,7 +1191,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/Paxos",
+      "url": "https://github.com/tlaplus/Examples/blob/master/specifications/Paxos/Voting.tla",
       "completion": 1,
       "scratch": 2,
       "total": 3
@@ -1219,7 +1219,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/Bakery-Boulangerie",
+      "url": "https://github.com/tlaplus/Examples/blob/master/specifications/Bakery-Boulangerie/Bakery.tla",
       "completion": 1,
       "scratch": 2,
       "total": 3
@@ -1233,7 +1233,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/Bakery-Boulangerie",
+      "url": "https://github.com/tlaplus/Examples/blob/master/specifications/Bakery-Boulangerie/Boulanger.tla",
       "completion": 1,
       "scratch": 2,
       "total": 3
@@ -1247,7 +1247,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/ReadersWriters",
+      "url": "https://github.com/tlaplus/Examples/blob/master/specifications/ReadersWriters/ReadersWriters_proof.tla",
       "completion": 3,
       "scratch": 2,
       "total": 5
@@ -1261,7 +1261,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/Termination",
+      "url": "https://github.com/nano-o/Distributed-termination-detection/blob/main/Termination_proof.tla",
       "completion": 4,
       "scratch": 1,
       "total": 5
@@ -1275,7 +1275,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/SpecifyingSystems/AsynchronousInterface",
+      "url": "https://github.com/tlaplus/Examples/blob/master/specifications/SpecifyingSystems/AsynchronousInterface/AsynchInterface_proof.tla",
       "completion": 1,
       "scratch": 1,
       "total": 2
@@ -1289,7 +1289,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/SpecifyingSystems/AsynchronousInterface",
+      "url": "https://github.com/tlaplus/Examples/blob/master/specifications/SpecifyingSystems/AsynchronousInterface/Channel_proof.tla",
       "completion": 1,
       "scratch": 1,
       "total": 2
@@ -1303,7 +1303,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/DieHard",
+      "url": "https://github.com/tlaplus/Examples/blob/master/specifications/DieHard/DieHard_proof.tla",
       "completion": 2,
       "scratch": 1,
       "total": 3
@@ -1331,7 +1331,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/spanning",
+      "url": "https://github.com/tlaplus/Examples/blob/master/specifications/spanning/spanning_proof.tla",
       "completion": 2,
       "scratch": 1,
       "total": 3
@@ -1345,7 +1345,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/SpecifyingSystems/CachingMemory",
+      "url": "https://github.com/tlaplus/Examples/blob/master/specifications/SpecifyingSystems/CachingMemory/InternalMemory_proof.tla",
       "completion": 2,
       "scratch": 1,
       "total": 3
@@ -1359,7 +1359,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/sums_even",
+      "url": "https://github.com/tlaplus/Examples/blob/master/specifications/sums_even/sums_even.tla",
       "completion": 1,
       "scratch": 2,
       "total": 3
@@ -1373,7 +1373,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/TwoPhase",
+      "url": "https://github.com/tlaplus/Examples/blob/master/specifications/TwoPhase/TwoPhase.tla",
       "completion": 1,
       "scratch": 1,
       "total": 2
@@ -1387,7 +1387,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/TwoPhase",
+      "url": "https://github.com/tlaplus/Examples/blob/master/specifications/TwoPhase/TwoPhase_proof.tla",
       "completion": 0,
       "scratch": 1,
       "total": 1
@@ -1401,7 +1401,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/byihive",
+      "url": "https://github.com/tlaplus/Examples/blob/master/specifications/byihive/VoucherLifeCycle_proof.tla",
       "completion": 1,
       "scratch": 1,
       "total": 2
@@ -1415,7 +1415,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/CoffeeCan",
+      "url": "https://github.com/tlaplus/Examples/blob/master/specifications/CoffeeCan/CoffeeCan_proof.tla",
       "completion": 1,
       "scratch": 1,
       "total": 2
@@ -1429,7 +1429,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/KeyValueStore",
+      "url": "https://github.com/tlaplus/Examples/blob/master/specifications/KeyValueStore/KeyValueStore_proof.tla",
       "completion": 1,
       "scratch": 1,
       "total": 2
@@ -1443,7 +1443,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/MissionariesAndCannibals",
+      "url": "https://github.com/tlaplus/Examples/blob/master/specifications/MissionariesAndCannibals/MissionariesAndCannibals_proof.tla",
       "completion": 1,
       "scratch": 1,
       "total": 2
@@ -1471,7 +1471,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/SpanningTree",
+      "url": "https://github.com/tlaplus/Examples/blob/master/specifications/SpanningTree/SpanTree_proof.tla",
       "completion": 1,
       "scratch": 1,
       "total": 2
@@ -1485,7 +1485,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/SpecifyingSystems/FIFO",
+      "url": "https://github.com/tlaplus/Examples/blob/master/specifications/SpecifyingSystems/FIFO/InnerFIFO_proof.tla",
       "completion": 1,
       "scratch": 1,
       "total": 2
@@ -1499,7 +1499,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/SpecifyingSystems/TLC",
+      "url": "https://github.com/tlaplus/Examples/blob/master/specifications/SpecifyingSystems/TLC/AlternatingBit_proof.tla",
       "completion": 1,
       "scratch": 1,
       "total": 2
@@ -1527,7 +1527,7 @@ window.TLAPS_DATA = {
       "sourceKey": "TLAPS distribution examples",
       "sourceName": "TLAPS distribution examples",
       "sourceUrl": "https://github.com/tlaplus/tlapm",
-      "url": "https://github.com/hengxin/tlaps-examples/tree/master/Record",
+      "url": "https://github.com/hengxin/tlaps-examples/blob/master/Record/Record.tla",
       "completion": 0,
       "scratch": 1,
       "total": 1
@@ -1541,7 +1541,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/SpecifyingSystems/Composing",
+      "url": "https://github.com/tlaplus/Examples/blob/master/specifications/SpecifyingSystems/Composing/HourClock_proof.tla",
       "completion": 0,
       "scratch": 1,
       "total": 1
@@ -1555,7 +1555,7 @@ window.TLAPS_DATA = {
       "sourceKey": "tlaplus/Examples",
       "sourceName": "tlaplus/Examples",
       "sourceUrl": "https://github.com/tlaplus/Examples",
-      "url": "https://github.com/tlaplus/Examples/tree/master/specifications/SpecifyingSystems/HourClock",
+      "url": "https://github.com/tlaplus/Examples/blob/master/specifications/SpecifyingSystems/HourClock/HourClock_proof.tla",
       "completion": 1,
       "scratch": 0,
       "total": 1
@@ -1583,7 +1583,7 @@ window.TLAPS_DATA = {
       "sourceKey": "apalache-examples (Konnov)",
       "sourceName": "apalache-examples (Konnov)",
       "sourceUrl": "https://github.com/konnov/apalache-examples",
-      "url": "https://github.com/konnov/apalache-examples/tree/main/ben-or83",
+      "url": "https://github.com/konnov/apalache-examples/blob/af360379b7cbcd1e16c1a801ff8ac64eb9aca038/ben-or83/Ben_or83_proofs.tla",
       "completion": 209,
       "scratch": 0,
       "total": 209
@@ -1597,7 +1597,7 @@ window.TLAPS_DATA = {
       "sourceKey": "apalache-examples (Konnov)",
       "sourceName": "apalache-examples (Konnov)",
       "sourceUrl": "https://github.com/konnov/apalache-examples",
-      "url": "https://github.com/konnov/apalache-examples/tree/main/tendermint-accountability",
+      "url": "https://github.com/konnov/apalache-examples/blob/af360379b7cbcd1e16c1a801ff8ac64eb9aca038/tendermint/tendermint_single_indinv_proofs.tla",
       "completion": 48,
       "scratch": 0,
       "total": 48
@@ -1625,7 +1625,7 @@ window.TLAPS_DATA = {
       "sourceKey": "ZooKeeper (Remix)",
       "sourceName": "ZooKeeper (Remix)",
       "sourceUrl": "https://arxiv.org/abs/2409.14301",
-      "url": "https://github.com/Disalg-ICS-NJU/zookeeper-tla-spec/tree/main/low-level-spec/zk-3.7",
+      "url": "https://github.com/Disalg-ICS-NJU/zookeeper-tla-spec/blob/main/low-level-spec/zk-3.7/ZkV3_7_0.tla",
       "completion": 0,
       "scratch": 9,
       "total": 9
@@ -1653,7 +1653,7 @@ window.TLAPS_DATA = {
       "sourceKey": "OpenAddressing (lemmy/Examples)",
       "sourceName": "OpenAddressing",
       "sourceUrl": "https://github.com/lemmy/Examples",
-      "url": "https://github.com/lemmy/Examples/tree/mku-OA/specifications/TLC",
+      "url": "https://github.com/lemmy/Examples/blob/mku-OA/specifications/TLC/OpenAddressing.tla",
       "completion": 0,
       "scratch": 5,
       "total": 5
@@ -1667,7 +1667,7 @@ window.TLAPS_DATA = {
       "sourceKey": "OpenAddressing (lemmy/Examples)",
       "sourceName": "OpenAddressing",
       "sourceUrl": "https://github.com/lemmy/Examples",
-      "url": "https://github.com/lemmy/Examples/tree/mku-OA/specifications/TLC",
+      "url": "https://github.com/lemmy/Examples/blob/mku-OA/specifications/TLC/OpenAddressing_proof.tla",
       "completion": 1,
       "scratch": 0,
       "total": 1
@@ -1810,7 +1810,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/ewd998",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/ewd998/EWD998_proof.tla",
           "completion": 12,
           "scratch": 0,
           "total": 12
@@ -1824,7 +1824,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/TencentPaxos",
+          "url": "https://github.com/Starydark/Tencent-Paxos-TLA/blob/master/TPaxosWithProof.tla",
           "completion": 11,
           "scratch": 0,
           "total": 11
@@ -1838,7 +1838,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/FiniteMonotonic",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/FiniteMonotonic/CRDT_proof.tla",
           "completion": 10,
           "scratch": 0,
           "total": 10
@@ -1852,7 +1852,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/byzpaxos",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/byzpaxos/VoteProof.tla",
           "completion": 7,
           "scratch": 0,
           "total": 7
@@ -1866,7 +1866,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/tcp",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/tcp/tcp_proof.tla",
           "completion": 6,
           "scratch": 0,
           "total": 6
@@ -1880,7 +1880,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/byzpaxos",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/byzpaxos/BPConProof.tla",
           "completion": 4,
           "scratch": 0,
           "total": 4
@@ -1894,7 +1894,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/ewd840",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/ewd840/EWD840_proof.tla",
           "completion": 4,
           "scratch": 0,
           "total": 4
@@ -1908,7 +1908,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/ewd998",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/ewd998/AsyncTerminationDetection_proof.tla",
           "completion": 3,
           "scratch": 0,
           "total": 3
@@ -1922,7 +1922,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/bcastByz",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/bcastByz/bcastByz.tla",
           "completion": 3,
           "scratch": 0,
           "total": 3
@@ -1936,7 +1936,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/ewd687a",
+          "url": "https://github.com/tlaplus/Examples/blob/91c22ea537853196ed1e03e9ad91693ec37642de/specifications/ewd687a/EWD687a_proof.tla",
           "completion": 3,
           "scratch": 0,
           "total": 3
@@ -1950,7 +1950,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/lamport_mutex",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/lamport_mutex/LamportMutex_proofs.tla",
           "completion": 3,
           "scratch": 0,
           "total": 3
@@ -1964,7 +1964,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/Majority",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/Majority/MajorityProof.tla",
           "completion": 3,
           "scratch": 0,
           "total": 3
@@ -1978,7 +1978,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/LoopInvariance",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/LoopInvariance/SumSequence.tla",
           "completion": 3,
           "scratch": 0,
           "total": 3
@@ -1992,7 +1992,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/barriers",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/barriers/Barriers.tla",
           "completion": 2,
           "scratch": 0,
           "total": 2
@@ -2006,7 +2006,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/lemmy/BlockingQueue",
+          "url": "https://github.com/lemmy/BlockingQueue/blob/main/BlockingQueueSplit_proofs.tla",
           "completion": 2,
           "scratch": 0,
           "total": 2
@@ -2020,7 +2020,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/glowingRaccoon",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/glowingRaccoon/clean_proof.tla",
           "completion": 2,
           "scratch": 0,
           "total": 2
@@ -2034,7 +2034,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/ewd998",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/ewd998/EWD998PCal_proof.tla",
           "completion": 2,
           "scratch": 0,
           "total": 2
@@ -2048,7 +2048,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/transaction_commit",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/transaction_commit/PaxosCommit_proof.tla",
           "completion": 2,
           "scratch": 0,
           "total": 2
@@ -2062,7 +2062,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/MisraReachability",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/MisraReachability/ReachableProofs.tla",
           "completion": 2,
           "scratch": 0,
           "total": 2
@@ -2076,7 +2076,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/allocator",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/allocator/SchedulingAllocator_proof.tla",
           "completion": 2,
           "scratch": 0,
           "total": 2
@@ -2090,7 +2090,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/ewd840",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/ewd840/SyncTerminationDetection_proof.tla",
           "completion": 2,
           "scratch": 0,
           "total": 2
@@ -2104,7 +2104,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/PaxosHowToWinATuringAward",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/PaxosHowToWinATuringAward/Voting.tla",
           "completion": 2,
           "scratch": 0,
           "total": 2
@@ -2118,7 +2118,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/allocator",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/allocator/AllocatorImplementation_proof.tla",
           "completion": 1,
           "scratch": 0,
           "total": 1
@@ -2132,7 +2132,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/LoopInvariance",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/LoopInvariance/BinarySearch.tla",
           "completion": 1,
           "scratch": 0,
           "total": 1
@@ -2146,7 +2146,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/Bakery-Boulangerie",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/Bakery-Boulangerie/Boulanger.tla",
           "completion": 1,
           "scratch": 0,
           "total": 1
@@ -2160,7 +2160,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/CigaretteSmokers",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/CigaretteSmokers/CigaretteSmokers_proof.tla",
           "completion": 1,
           "scratch": 0,
           "total": 1
@@ -2174,7 +2174,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/CoffeeCan",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/CoffeeCan/CoffeeCan_proof.tla",
           "completion": 1,
           "scratch": 0,
           "total": 1
@@ -2188,7 +2188,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/Paxos",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/Paxos/Consensus.tla",
           "completion": 1,
           "scratch": 0,
           "total": 1
@@ -2202,7 +2202,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/MultiCarElevator",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/MultiCarElevator/Elevator_proof.tla",
           "completion": 1,
           "scratch": 0,
           "total": 1
@@ -2216,7 +2216,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/KeyValueStore",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/KeyValueStore/KeyValueStore_proof.tla",
           "completion": 1,
           "scratch": 0,
           "total": 1
@@ -2230,7 +2230,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/locks_auxiliary_vars",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/locks_auxiliary_vars/Lock.tla",
           "completion": 1,
           "scratch": 0,
           "total": 1
@@ -2244,7 +2244,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/locks_auxiliary_vars",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/locks_auxiliary_vars/LockHS.tla",
           "completion": 1,
           "scratch": 0,
           "total": 1
@@ -2258,7 +2258,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/MissionariesAndCannibals",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/MissionariesAndCannibals/MissionariesAndCannibals_proof.tla",
           "completion": 1,
           "scratch": 0,
           "total": 1
@@ -2272,7 +2272,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/MisraReachability",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/MisraReachability/ParReachProofs.tla",
           "completion": 1,
           "scratch": 0,
           "total": 1
@@ -2286,7 +2286,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/byzpaxos",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/byzpaxos/PConProof.tla",
           "completion": 1,
           "scratch": 0,
           "total": 1
@@ -2300,7 +2300,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/locks_auxiliary_vars",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/locks_auxiliary_vars/Peterson.tla",
           "completion": 1,
           "scratch": 0,
           "total": 1
@@ -2314,7 +2314,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/LoopInvariance",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/LoopInvariance/Quicksort.tla",
           "completion": 1,
           "scratch": 0,
           "total": 1
@@ -2328,7 +2328,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/MisraReachability",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/MisraReachability/ReachabilityProofs.tla",
           "completion": 1,
           "scratch": 0,
           "total": 1
@@ -2342,7 +2342,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/ReadersWriters",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/ReadersWriters/ReadersWriters_proof.tla",
           "completion": 1,
           "scratch": 0,
           "total": 1
@@ -2356,7 +2356,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/TeachingConcurrency",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/TeachingConcurrency/Simple.tla",
           "completion": 1,
           "scratch": 0,
           "total": 1
@@ -2370,7 +2370,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/TeachingConcurrency",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/TeachingConcurrency/SimpleRegular.tla",
           "completion": 1,
           "scratch": 0,
           "total": 1
@@ -2384,7 +2384,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/spanning",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/spanning/spanning_proof.tla",
           "completion": 1,
           "scratch": 0,
           "total": 1
@@ -2398,7 +2398,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/glowingRaccoon",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/glowingRaccoon/stages_proof.tla",
           "completion": 1,
           "scratch": 0,
           "total": 1
@@ -2412,7 +2412,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/Termination",
+          "url": "https://github.com/nano-o/Distributed-termination-detection/blob/main/Termination_proof.tla",
           "completion": 1,
           "scratch": 0,
           "total": 1
@@ -2426,7 +2426,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/PaxosHowToWinATuringAward",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/PaxosHowToWinATuringAward/Voting_proof.tla",
           "completion": 1,
           "scratch": 0,
           "total": 1
@@ -2440,7 +2440,7 @@ window.TLAPS_DATA = {
           "sourceKey": "TLAPS distribution examples",
           "sourceName": "TLAPS distribution examples",
           "sourceUrl": "https://github.com/tlaplus/tlapm",
-          "url": "https://github.com/hengxin/tlaps-examples/tree/master/AtomicBakery",
+          "url": "https://github.com/hengxin/tlaps-examples/blob/master/AtomicBakery/AtomicBakeryWithoutSMT.tla",
           "completion": 5,
           "scratch": 0,
           "total": 5
@@ -2454,7 +2454,7 @@ window.TLAPS_DATA = {
           "sourceKey": "TLAPS distribution examples",
           "sourceName": "TLAPS distribution examples",
           "sourceUrl": "https://github.com/tlaplus/tlapm",
-          "url": "https://github.com/hengxin/tlaps-examples/tree/master/Paxos",
+          "url": "https://github.com/hengxin/tlaps-examples/blob/master/Paxos/Paxos.tla",
           "completion": 4,
           "scratch": 0,
           "total": 4
@@ -2468,7 +2468,7 @@ window.TLAPS_DATA = {
           "sourceKey": "TLAPS distribution examples",
           "sourceName": "TLAPS distribution examples",
           "sourceUrl": "https://github.com/tlaplus/tlapm",
-          "url": "https://github.com/tlaplus/tlapm/tree/main/zenon/regression/examples/data",
+          "url": "https://github.com/tlaplus/tlapm/blob/main/zenon/regression/examples/data/Sets.tla",
           "completion": 4,
           "scratch": 0,
           "total": 4
@@ -2482,7 +2482,7 @@ window.TLAPS_DATA = {
           "sourceKey": "TLAPS distribution examples",
           "sourceName": "TLAPS distribution examples",
           "sourceUrl": "https://github.com/tlaplus/tlapm",
-          "url": "https://github.com/hengxin/tlaps-examples/tree/master/Euclid",
+          "url": "https://github.com/hengxin/tlaps-examples/blob/master/Euclid/Euclid-Hyperbook/GCD.tla",
           "completion": 2,
           "scratch": 0,
           "total": 2
@@ -2496,7 +2496,7 @@ window.TLAPS_DATA = {
           "sourceKey": "TLAPS distribution examples",
           "sourceName": "TLAPS distribution examples",
           "sourceUrl": "https://github.com/tlaplus/tlapm",
-          "url": "https://github.com/hengxin/tlaps-examples/tree/master/Paxos",
+          "url": "https://github.com/hengxin/tlaps-examples/blob/master/Paxos/PaxosHistVar.tla",
           "completion": 2,
           "scratch": 0,
           "total": 2
@@ -2524,7 +2524,7 @@ window.TLAPS_DATA = {
           "sourceKey": "TLAPS distribution examples",
           "sourceName": "TLAPS distribution examples",
           "sourceUrl": "https://github.com/tlaplus/tlapm",
-          "url": "https://github.com/tlaplus/tlapm/tree/main/examples_draft/consensus",
+          "url": "https://github.com/tlaplus/tlapm/blob/main/examples_draft/consensus/Consensus.tla",
           "completion": 1,
           "scratch": 0,
           "total": 1
@@ -2538,7 +2538,7 @@ window.TLAPS_DATA = {
           "sourceKey": "TLAPS distribution examples",
           "sourceName": "TLAPS distribution examples",
           "sourceUrl": "https://github.com/tlaplus/tlapm",
-          "url": "https://github.com/tlaplus/tlapm/tree/main/examples_draft/consensus",
+          "url": "https://github.com/tlaplus/tlapm/blob/main/examples_draft/consensus/PaxosProof.tla",
           "completion": 1,
           "scratch": 0,
           "total": 1
@@ -2566,7 +2566,7 @@ window.TLAPS_DATA = {
           "sourceKey": "apalache-examples (Konnov)",
           "sourceName": "apalache-examples (Konnov)",
           "sourceUrl": "https://github.com/konnov/apalache-examples",
-          "url": "https://github.com/konnov/apalache-examples/tree/main/ben-or83",
+          "url": "https://github.com/konnov/apalache-examples/blob/af360379b7cbcd1e16c1a801ff8ac64eb9aca038/ben-or83/Ben_or83_proofs.tla",
           "completion": 41,
           "scratch": 0,
           "total": 41
@@ -2580,7 +2580,7 @@ window.TLAPS_DATA = {
           "sourceKey": "apalache-examples (Konnov)",
           "sourceName": "apalache-examples (Konnov)",
           "sourceUrl": "https://github.com/konnov/apalache-examples",
-          "url": "https://github.com/konnov/apalache-examples/tree/main/tendermint-accountability",
+          "url": "https://github.com/konnov/apalache-examples/blob/af360379b7cbcd1e16c1a801ff8ac64eb9aca038/tendermint/tendermint_single_indinv_proofs.tla",
           "completion": 15,
           "scratch": 0,
           "total": 15
@@ -2627,7 +2627,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/ewd998",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/ewd998/EWD998PCal_proof.tla",
           "completion": 25,
           "scratch": 2,
           "total": 27
@@ -2641,7 +2641,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/ewd998",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/ewd998/EWD998_proof.tla",
           "completion": 22,
           "scratch": 2,
           "total": 24
@@ -2655,7 +2655,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/ewd998",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/ewd998/AsyncTerminationDetection_proof.tla",
           "completion": 5,
           "scratch": 3,
           "total": 8
@@ -2669,7 +2669,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/byzpaxos",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/byzpaxos/BPConProof.tla",
           "completion": 19,
           "scratch": 3,
           "total": 22
@@ -2683,7 +2683,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/byzpaxos",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/byzpaxos/VoteProof.tla",
           "completion": 16,
           "scratch": 4,
           "total": 20
@@ -2697,7 +2697,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/byzpaxos",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/byzpaxos/Consensus.tla",
           "completion": 5,
           "scratch": 3,
           "total": 8
@@ -2711,7 +2711,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/byzpaxos",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/byzpaxos/PConProof.tla",
           "completion": 1,
           "scratch": 1,
           "total": 2
@@ -2725,7 +2725,7 @@ window.TLAPS_DATA = {
           "sourceKey": "TLAPS distribution examples",
           "sourceName": "TLAPS distribution examples",
           "sourceUrl": "https://github.com/tlaplus/tlapm",
-          "url": "https://github.com/tlaplus/tlapm/tree/main/zenon/regression/examples/data",
+          "url": "https://github.com/tlaplus/tlapm/blob/main/zenon/regression/examples/data/Sets.tla",
           "completion": 12,
           "scratch": 7,
           "total": 19
@@ -2739,7 +2739,7 @@ window.TLAPS_DATA = {
           "sourceKey": "TLAPS distribution examples",
           "sourceName": "TLAPS distribution examples",
           "sourceUrl": "https://github.com/tlaplus/tlapm",
-          "url": "https://github.com/tlaplus/tlapm/tree/main/zenon/regression/examples/data",
+          "url": "https://github.com/tlaplus/tlapm/blob/main/zenon/regression/examples/data/GraphTheorem.tla",
           "completion": 2,
           "scratch": 1,
           "total": 3
@@ -2753,7 +2753,7 @@ window.TLAPS_DATA = {
           "sourceKey": "TLAPS distribution examples",
           "sourceName": "TLAPS distribution examples",
           "sourceUrl": "https://github.com/tlaplus/tlapm",
-          "url": "https://github.com/tlaplus/tlapm/tree/main/zenon/regression/examples/data",
+          "url": "https://github.com/tlaplus/tlapm/blob/main/zenon/regression/examples/data/SequencesTheorems.tla",
           "completion": 1,
           "scratch": 1,
           "total": 2
@@ -2767,7 +2767,7 @@ window.TLAPS_DATA = {
           "sourceKey": "TLAPS distribution examples",
           "sourceName": "TLAPS distribution examples",
           "sourceUrl": "https://github.com/tlaplus/tlapm",
-          "url": "https://github.com/tlaplus/tlapm/tree/main/examples_draft/consensus",
+          "url": "https://github.com/tlaplus/tlapm/blob/main/examples_draft/consensus/Voting.tla",
           "completion": 9,
           "scratch": 6,
           "total": 15
@@ -2781,7 +2781,7 @@ window.TLAPS_DATA = {
           "sourceKey": "TLAPS distribution examples",
           "sourceName": "TLAPS distribution examples",
           "sourceUrl": "https://github.com/tlaplus/tlapm",
-          "url": "https://github.com/tlaplus/tlapm/tree/main/examples_draft/consensus",
+          "url": "https://github.com/tlaplus/tlapm/blob/main/examples_draft/consensus/PaxosProof.tla",
           "completion": 3,
           "scratch": 3,
           "total": 6
@@ -2795,7 +2795,7 @@ window.TLAPS_DATA = {
           "sourceKey": "TLAPS distribution examples",
           "sourceName": "TLAPS distribution examples",
           "sourceUrl": "https://github.com/tlaplus/tlapm",
-          "url": "https://github.com/tlaplus/tlapm/tree/main/examples_draft/consensus",
+          "url": "https://github.com/tlaplus/tlapm/blob/main/examples_draft/consensus/Consensus.tla",
           "completion": 1,
           "scratch": 1,
           "total": 2
@@ -2809,7 +2809,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/lamport_mutex",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/lamport_mutex/LamportMutex_proofs.tla",
           "completion": 20,
           "scratch": 2,
           "total": 22
@@ -2823,7 +2823,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/TencentPaxos",
+          "url": "https://github.com/Starydark/Tencent-Paxos-TLA/blob/master/TPaxosWithProof.tla",
           "completion": 19,
           "scratch": 2,
           "total": 21
@@ -2837,7 +2837,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/allocator",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/allocator/SchedulingAllocator_proof.tla",
           "completion": 7,
           "scratch": 2,
           "total": 9
@@ -2851,7 +2851,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/allocator",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/allocator/AllocatorImplementation_proof.tla",
           "completion": 5,
           "scratch": 1,
           "total": 6
@@ -2865,7 +2865,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/allocator",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/allocator/SimpleAllocator_proof.tla",
           "completion": 2,
           "scratch": 2,
           "total": 4
@@ -2879,7 +2879,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/ewd840",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/ewd840/EWD840_proof.tla",
           "completion": 9,
           "scratch": 2,
           "total": 11
@@ -2893,7 +2893,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/ewd840",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/ewd840/SyncTerminationDetection_proof.tla",
           "completion": 5,
           "scratch": 3,
           "total": 8
@@ -2907,7 +2907,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/LoopInvariance",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/LoopInvariance/Quicksort.tla",
           "completion": 9,
           "scratch": 1,
           "total": 10
@@ -2921,7 +2921,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/LoopInvariance",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/LoopInvariance/SumSequence.tla",
           "completion": 6,
           "scratch": 1,
           "total": 7
@@ -2935,7 +2935,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/LoopInvariance",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/LoopInvariance/BinarySearch.tla",
           "completion": 1,
           "scratch": 1,
           "total": 2
@@ -2949,7 +2949,7 @@ window.TLAPS_DATA = {
           "sourceKey": "TLAPS distribution examples",
           "sourceName": "TLAPS distribution examples",
           "sourceUrl": "https://github.com/tlaplus/tlapm",
-          "url": "https://github.com/hengxin/tlaps-examples/tree/master/Paxos",
+          "url": "https://github.com/hengxin/tlaps-examples/blob/master/Paxos/Paxos.tla",
           "completion": 8,
           "scratch": 3,
           "total": 11
@@ -2963,7 +2963,7 @@ window.TLAPS_DATA = {
           "sourceKey": "TLAPS distribution examples",
           "sourceName": "TLAPS distribution examples",
           "sourceUrl": "https://github.com/tlaplus/tlapm",
-          "url": "https://github.com/hengxin/tlaps-examples/tree/master/Paxos",
+          "url": "https://github.com/hengxin/tlaps-examples/blob/master/Paxos/PaxosHistVar.tla",
           "completion": 5,
           "scratch": 2,
           "total": 7
@@ -2977,7 +2977,7 @@ window.TLAPS_DATA = {
           "sourceKey": "TLAPS distribution examples",
           "sourceName": "TLAPS distribution examples",
           "sourceUrl": "https://github.com/tlaplus/tlapm",
-          "url": "https://github.com/hengxin/tlaps-examples/tree/master/Paxos",
+          "url": "https://github.com/hengxin/tlaps-examples/blob/master/Paxos/Consensus.tla",
           "completion": 0,
           "scratch": 1,
           "total": 1
@@ -2991,7 +2991,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/tcp",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/tcp/tcp_proof.tla",
           "completion": 16,
           "scratch": 3,
           "total": 19
@@ -3005,7 +3005,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/bcastByz",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/bcastByz/bcastByz.tla",
           "completion": 13,
           "scratch": 5,
           "total": 18
@@ -3019,7 +3019,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/FiniteMonotonic",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/FiniteMonotonic/CRDT_proof.tla",
           "completion": 14,
           "scratch": 3,
           "total": 17
@@ -3033,7 +3033,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/FlashProtocol",
+          "url": "https://github.com/tlaplus/Examples/blob/352084b3e3b57b37b47973afdee224b5979f574d/specifications/FlashProtocol/FlashWithMutex.tla",
           "completion": 0,
           "scratch": 17,
           "total": 17
@@ -3047,7 +3047,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/barriers",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/barriers/Barriers.tla",
           "completion": 11,
           "scratch": 5,
           "total": 16
@@ -3061,7 +3061,7 @@ window.TLAPS_DATA = {
           "sourceKey": "TLAPS distribution examples",
           "sourceName": "TLAPS distribution examples",
           "sourceUrl": "https://github.com/tlaplus/tlapm",
-          "url": "https://github.com/tlaplus/tlapm/tree/main/examples/cantor",
+          "url": "https://github.com/tlaplus/tlapm/blob/main/examples/cantor/Cantor10.tla",
           "completion": 2,
           "scratch": 1,
           "total": 3
@@ -3075,7 +3075,7 @@ window.TLAPS_DATA = {
           "sourceKey": "TLAPS distribution examples",
           "sourceName": "TLAPS distribution examples",
           "sourceUrl": "https://github.com/tlaplus/tlapm",
-          "url": "https://github.com/tlaplus/tlapm/tree/main/examples/cantor",
+          "url": "https://github.com/tlaplus/tlapm/blob/main/examples/cantor/Cantor1.tla",
           "completion": 1,
           "scratch": 1,
           "total": 2
@@ -3089,7 +3089,7 @@ window.TLAPS_DATA = {
           "sourceKey": "TLAPS distribution examples",
           "sourceName": "TLAPS distribution examples",
           "sourceUrl": "https://github.com/tlaplus/tlapm",
-          "url": "https://github.com/tlaplus/tlapm/tree/main/examples/cantor",
+          "url": "https://github.com/tlaplus/tlapm/blob/main/examples/cantor/Cantor5.tla",
           "completion": 1,
           "scratch": 1,
           "total": 2
@@ -3103,7 +3103,7 @@ window.TLAPS_DATA = {
           "sourceKey": "TLAPS distribution examples",
           "sourceName": "TLAPS distribution examples",
           "sourceUrl": "https://github.com/tlaplus/tlapm",
-          "url": "https://github.com/tlaplus/tlapm/tree/main/examples/cantor",
+          "url": "https://github.com/tlaplus/tlapm/blob/main/examples/cantor/Cantor8.tla",
           "completion": 1,
           "scratch": 1,
           "total": 2
@@ -3117,7 +3117,7 @@ window.TLAPS_DATA = {
           "sourceKey": "TLAPS distribution examples",
           "sourceName": "TLAPS distribution examples",
           "sourceUrl": "https://github.com/tlaplus/tlapm",
-          "url": "https://github.com/tlaplus/tlapm/tree/main/examples/cantor",
+          "url": "https://github.com/tlaplus/tlapm/blob/main/examples/cantor/Cantor9.tla",
           "completion": 1,
           "scratch": 1,
           "total": 2
@@ -3131,7 +3131,7 @@ window.TLAPS_DATA = {
           "sourceKey": "TLAPS distribution examples",
           "sourceName": "TLAPS distribution examples",
           "sourceUrl": "https://github.com/tlaplus/tlapm",
-          "url": "https://github.com/tlaplus/tlapm/tree/main/examples/cantor",
+          "url": "https://github.com/tlaplus/tlapm/blob/main/examples/cantor/Cantor2.tla",
           "completion": 1,
           "scratch": 0,
           "total": 1
@@ -3145,7 +3145,7 @@ window.TLAPS_DATA = {
           "sourceKey": "TLAPS distribution examples",
           "sourceName": "TLAPS distribution examples",
           "sourceUrl": "https://github.com/tlaplus/tlapm",
-          "url": "https://github.com/tlaplus/tlapm/tree/main/examples/cantor",
+          "url": "https://github.com/tlaplus/tlapm/blob/main/examples/cantor/Cantor3.tla",
           "completion": 1,
           "scratch": 0,
           "total": 1
@@ -3159,7 +3159,7 @@ window.TLAPS_DATA = {
           "sourceKey": "TLAPS distribution examples",
           "sourceName": "TLAPS distribution examples",
           "sourceUrl": "https://github.com/tlaplus/tlapm",
-          "url": "https://github.com/tlaplus/tlapm/tree/main/examples/cantor",
+          "url": "https://github.com/tlaplus/tlapm/blob/main/examples/cantor/Cantor4.tla",
           "completion": 1,
           "scratch": 0,
           "total": 1
@@ -3173,7 +3173,7 @@ window.TLAPS_DATA = {
           "sourceKey": "TLAPS distribution examples",
           "sourceName": "TLAPS distribution examples",
           "sourceUrl": "https://github.com/tlaplus/tlapm",
-          "url": "https://github.com/tlaplus/tlapm/tree/main/examples/cantor",
+          "url": "https://github.com/tlaplus/tlapm/blob/main/examples/cantor/Cantor6.tla",
           "completion": 1,
           "scratch": 0,
           "total": 1
@@ -3187,7 +3187,7 @@ window.TLAPS_DATA = {
           "sourceKey": "TLAPS distribution examples",
           "sourceName": "TLAPS distribution examples",
           "sourceUrl": "https://github.com/tlaplus/tlapm",
-          "url": "https://github.com/tlaplus/tlapm/tree/main/examples/cantor",
+          "url": "https://github.com/tlaplus/tlapm/blob/main/examples/cantor/Cantor7.tla",
           "completion": 1,
           "scratch": 0,
           "total": 1
@@ -3201,7 +3201,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/TeachingConcurrency",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/TeachingConcurrency/Simple.tla",
           "completion": 2,
           "scratch": 2,
           "total": 4
@@ -3215,7 +3215,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/TeachingConcurrency",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/TeachingConcurrency/Simple_proof.tla",
           "completion": 2,
           "scratch": 2,
           "total": 4
@@ -3229,7 +3229,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/TeachingConcurrency",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/TeachingConcurrency/SimpleRegular.tla",
           "completion": 2,
           "scratch": 2,
           "total": 4
@@ -3243,7 +3243,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/TeachingConcurrency",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/TeachingConcurrency/SimpleRegular_proof.tla",
           "completion": 2,
           "scratch": 2,
           "total": 4
@@ -3257,7 +3257,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/transaction_commit",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/transaction_commit/PaxosCommit_proof.tla",
           "completion": 8,
           "scratch": 1,
           "total": 9
@@ -3271,7 +3271,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/transaction_commit",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/transaction_commit/TwoPhase_proof.tla",
           "completion": 3,
           "scratch": 2,
           "total": 5
@@ -3285,7 +3285,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/transaction_commit",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/transaction_commit/TCommit_proof.tla",
           "completion": 1,
           "scratch": 1,
           "total": 2
@@ -3299,7 +3299,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/PaxosHowToWinATuringAward",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/PaxosHowToWinATuringAward/Voting_proof.tla",
           "completion": 6,
           "scratch": 3,
           "total": 9
@@ -3313,7 +3313,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/PaxosHowToWinATuringAward",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/PaxosHowToWinATuringAward/Voting.tla",
           "completion": 2,
           "scratch": 2,
           "total": 4
@@ -3327,7 +3327,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/PaxosHowToWinATuringAward",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/PaxosHowToWinATuringAward/Consensus.tla",
           "completion": 1,
           "scratch": 1,
           "total": 2
@@ -3355,7 +3355,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/locks_auxiliary_vars",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/locks_auxiliary_vars/LockHS.tla",
           "completion": 4,
           "scratch": 2,
           "total": 6
@@ -3369,7 +3369,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/locks_auxiliary_vars",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/locks_auxiliary_vars/Peterson.tla",
           "completion": 3,
           "scratch": 2,
           "total": 5
@@ -3383,7 +3383,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/locks_auxiliary_vars",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/locks_auxiliary_vars/Lock.tla",
           "completion": 2,
           "scratch": 1,
           "total": 3
@@ -3397,7 +3397,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/lemmy/BlockingQueue",
+          "url": "https://github.com/lemmy/BlockingQueue/blob/main/BlockingQueueSplit_proofs.tla",
           "completion": 4,
           "scratch": 3,
           "total": 7
@@ -3411,7 +3411,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/lemmy/BlockingQueue",
+          "url": "https://github.com/lemmy/BlockingQueue/blob/main/BlockingQueue_proofs.tla",
           "completion": 2,
           "scratch": 1,
           "total": 3
@@ -3425,7 +3425,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/lemmy/BlockingQueue",
+          "url": "https://github.com/lemmy/BlockingQueue/blob/main/BlockingQueueFair_proofs.tla",
           "completion": 2,
           "scratch": 1,
           "total": 3
@@ -3453,7 +3453,7 @@ window.TLAPS_DATA = {
           "sourceKey": "TLAPS distribution examples",
           "sourceName": "TLAPS distribution examples",
           "sourceUrl": "https://github.com/tlaplus/tlapm",
-          "url": "https://github.com/hengxin/tlaps-examples/tree/master/Euclid",
+          "url": "https://github.com/hengxin/tlaps-examples/blob/master/Euclid/Euclid-Hyperbook/GCD.tla",
           "completion": 3,
           "scratch": 3,
           "total": 6
@@ -3467,7 +3467,7 @@ window.TLAPS_DATA = {
           "sourceKey": "TLAPS distribution examples",
           "sourceName": "TLAPS distribution examples",
           "sourceUrl": "https://github.com/tlaplus/tlapm",
-          "url": "https://github.com/hengxin/tlaps-examples/tree/master/Euclid",
+          "url": "https://github.com/hengxin/tlaps-examples/blob/master/Euclid/Euclid-TLAPS-Example/Euclid.tla",
           "completion": 3,
           "scratch": 1,
           "total": 4
@@ -3481,7 +3481,7 @@ window.TLAPS_DATA = {
           "sourceKey": "TLAPS distribution examples",
           "sourceName": "TLAPS distribution examples",
           "sourceUrl": "https://github.com/tlaplus/tlapm",
-          "url": "https://github.com/hengxin/tlaps-examples/tree/master/Euclid",
+          "url": "https://github.com/hengxin/tlaps-examples/blob/master/Euclid/Euclid-Hyperbook/EuclidEx.tla",
           "completion": 0,
           "scratch": 1,
           "total": 1
@@ -3495,7 +3495,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/LearnProofs",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/LearnProofs/FindHighest.tla",
           "completion": 4,
           "scratch": 4,
           "total": 8
@@ -3509,7 +3509,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/LearnProofs",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/LearnProofs/AddTwo.tla",
           "completion": 1,
           "scratch": 2,
           "total": 3
@@ -3523,7 +3523,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/MultiCarElevator",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/MultiCarElevator/Elevator_proof.tla",
           "completion": 9,
           "scratch": 2,
           "total": 11
@@ -3537,7 +3537,7 @@ window.TLAPS_DATA = {
           "sourceKey": "TLAPS distribution examples",
           "sourceName": "TLAPS distribution examples",
           "sourceUrl": "https://github.com/tlaplus/tlapm",
-          "url": "https://github.com/hengxin/tlaps-examples/tree/master/AtomicBakery",
+          "url": "https://github.com/hengxin/tlaps-examples/blob/master/AtomicBakery/AtomicBakeryWithoutSMT.tla",
           "completion": 8,
           "scratch": 1,
           "total": 9
@@ -3551,7 +3551,7 @@ window.TLAPS_DATA = {
           "sourceKey": "TLAPS distribution examples",
           "sourceName": "TLAPS distribution examples",
           "sourceUrl": "https://github.com/tlaplus/tlapm",
-          "url": "https://github.com/hengxin/tlaps-examples/tree/master/AtomicBakery",
+          "url": "https://github.com/hengxin/tlaps-examples/blob/master/AtomicBakery/AtomicBakery.tla",
           "completion": 0,
           "scratch": 1,
           "total": 1
@@ -3565,7 +3565,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/CigaretteSmokers",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/CigaretteSmokers/CigaretteSmokers_proof.tla",
           "completion": 8,
           "scratch": 2,
           "total": 10
@@ -3579,7 +3579,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/MisraReachability",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/MisraReachability/ReachabilityProofs.tla",
           "completion": 4,
           "scratch": 0,
           "total": 4
@@ -3593,7 +3593,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/MisraReachability",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/MisraReachability/ReachableProofs.tla",
           "completion": 3,
           "scratch": 1,
           "total": 4
@@ -3607,7 +3607,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/MisraReachability",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/MisraReachability/ParReachProofs.tla",
           "completion": 1,
           "scratch": 1,
           "total": 2
@@ -3621,7 +3621,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/ewd687a",
+          "url": "https://github.com/tlaplus/Examples/blob/91c22ea537853196ed1e03e9ad91693ec37642de/specifications/ewd687a/EWD687a_proof.tla",
           "completion": 6,
           "scratch": 3,
           "total": 9
@@ -3635,7 +3635,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/glowingRaccoon",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/glowingRaccoon/clean_proof.tla",
           "completion": 4,
           "scratch": 2,
           "total": 6
@@ -3649,7 +3649,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/glowingRaccoon",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/glowingRaccoon/stages_proof.tla",
           "completion": 2,
           "scratch": 1,
           "total": 3
@@ -3663,7 +3663,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/Majority",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/Majority/MajorityProof.tla",
           "completion": 9,
           "scratch": 0,
           "total": 9
@@ -3677,7 +3677,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/blob/aba0cef20ce694f97612ad36a873734a1314534a/specifications/GermanProtocol/GermanCoherence.tla",
+          "url": "https://github.com/tlaplus/Examples/blob/91c22ea537853196ed1e03e9ad91693ec37642de/specifications/GermanProtocol/GermanData.tla",
           "completion": 0,
           "scratch": 6,
           "total": 6
@@ -3691,7 +3691,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/blob/aba0cef20ce694f97612ad36a873734a1314534a/specifications/GermanProtocol/GermanCoherence.tla",
+          "url": "https://github.com/tlaplus/Examples/blob/91c22ea537853196ed1e03e9ad91693ec37642de/specifications/GermanProtocol/GermanControl.tla",
           "completion": 0,
           "scratch": 1,
           "total": 1
@@ -3705,7 +3705,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/Paxos",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/Paxos/Consensus.tla",
           "completion": 2,
           "scratch": 2,
           "total": 4
@@ -3719,7 +3719,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/Paxos",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/Paxos/Voting.tla",
           "completion": 1,
           "scratch": 2,
           "total": 3
@@ -3747,7 +3747,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/Bakery-Boulangerie",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/Bakery-Boulangerie/Bakery.tla",
           "completion": 1,
           "scratch": 2,
           "total": 3
@@ -3761,7 +3761,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/Bakery-Boulangerie",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/Bakery-Boulangerie/Boulanger.tla",
           "completion": 1,
           "scratch": 2,
           "total": 3
@@ -3775,7 +3775,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/ReadersWriters",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/ReadersWriters/ReadersWriters_proof.tla",
           "completion": 3,
           "scratch": 2,
           "total": 5
@@ -3789,7 +3789,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/Termination",
+          "url": "https://github.com/nano-o/Distributed-termination-detection/blob/main/Termination_proof.tla",
           "completion": 4,
           "scratch": 1,
           "total": 5
@@ -3803,7 +3803,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/SpecifyingSystems/AsynchronousInterface",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/SpecifyingSystems/AsynchronousInterface/AsynchInterface_proof.tla",
           "completion": 1,
           "scratch": 1,
           "total": 2
@@ -3817,7 +3817,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/SpecifyingSystems/AsynchronousInterface",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/SpecifyingSystems/AsynchronousInterface/Channel_proof.tla",
           "completion": 1,
           "scratch": 1,
           "total": 2
@@ -3831,7 +3831,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/DieHard",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/DieHard/DieHard_proof.tla",
           "completion": 2,
           "scratch": 1,
           "total": 3
@@ -3859,7 +3859,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/spanning",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/spanning/spanning_proof.tla",
           "completion": 2,
           "scratch": 1,
           "total": 3
@@ -3873,7 +3873,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/SpecifyingSystems/CachingMemory",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/SpecifyingSystems/CachingMemory/InternalMemory_proof.tla",
           "completion": 2,
           "scratch": 1,
           "total": 3
@@ -3887,7 +3887,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/sums_even",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/sums_even/sums_even.tla",
           "completion": 1,
           "scratch": 2,
           "total": 3
@@ -3901,7 +3901,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/TwoPhase",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/TwoPhase/TwoPhase.tla",
           "completion": 1,
           "scratch": 1,
           "total": 2
@@ -3915,7 +3915,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/TwoPhase",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/TwoPhase/TwoPhase_proof.tla",
           "completion": 0,
           "scratch": 1,
           "total": 1
@@ -3929,7 +3929,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/byihive",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/byihive/VoucherLifeCycle_proof.tla",
           "completion": 1,
           "scratch": 1,
           "total": 2
@@ -3943,7 +3943,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/CoffeeCan",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/CoffeeCan/CoffeeCan_proof.tla",
           "completion": 1,
           "scratch": 1,
           "total": 2
@@ -3957,7 +3957,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/KeyValueStore",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/KeyValueStore/KeyValueStore_proof.tla",
           "completion": 1,
           "scratch": 1,
           "total": 2
@@ -3971,7 +3971,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/MissionariesAndCannibals",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/MissionariesAndCannibals/MissionariesAndCannibals_proof.tla",
           "completion": 1,
           "scratch": 1,
           "total": 2
@@ -3999,7 +3999,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/SpanningTree",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/SpanningTree/SpanTree_proof.tla",
           "completion": 1,
           "scratch": 1,
           "total": 2
@@ -4013,7 +4013,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/SpecifyingSystems/FIFO",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/SpecifyingSystems/FIFO/InnerFIFO_proof.tla",
           "completion": 1,
           "scratch": 1,
           "total": 2
@@ -4027,7 +4027,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/SpecifyingSystems/TLC",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/SpecifyingSystems/TLC/AlternatingBit_proof.tla",
           "completion": 1,
           "scratch": 1,
           "total": 2
@@ -4055,7 +4055,7 @@ window.TLAPS_DATA = {
           "sourceKey": "TLAPS distribution examples",
           "sourceName": "TLAPS distribution examples",
           "sourceUrl": "https://github.com/tlaplus/tlapm",
-          "url": "https://github.com/hengxin/tlaps-examples/tree/master/Record",
+          "url": "https://github.com/hengxin/tlaps-examples/blob/master/Record/Record.tla",
           "completion": 0,
           "scratch": 1,
           "total": 1
@@ -4069,7 +4069,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/SpecifyingSystems/Composing",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/SpecifyingSystems/Composing/HourClock_proof.tla",
           "completion": 0,
           "scratch": 1,
           "total": 1
@@ -4083,7 +4083,7 @@ window.TLAPS_DATA = {
           "sourceKey": "tlaplus/Examples",
           "sourceName": "tlaplus/Examples",
           "sourceUrl": "https://github.com/tlaplus/Examples",
-          "url": "https://github.com/tlaplus/Examples/tree/master/specifications/SpecifyingSystems/HourClock",
+          "url": "https://github.com/tlaplus/Examples/blob/master/specifications/SpecifyingSystems/HourClock/HourClock_proof.tla",
           "completion": 1,
           "scratch": 0,
           "total": 1
@@ -4111,7 +4111,7 @@ window.TLAPS_DATA = {
           "sourceKey": "apalache-examples (Konnov)",
           "sourceName": "apalache-examples (Konnov)",
           "sourceUrl": "https://github.com/konnov/apalache-examples",
-          "url": "https://github.com/konnov/apalache-examples/tree/main/ben-or83",
+          "url": "https://github.com/konnov/apalache-examples/blob/af360379b7cbcd1e16c1a801ff8ac64eb9aca038/ben-or83/Ben_or83_proofs.tla",
           "completion": 209,
           "scratch": 0,
           "total": 209
@@ -4125,7 +4125,7 @@ window.TLAPS_DATA = {
           "sourceKey": "apalache-examples (Konnov)",
           "sourceName": "apalache-examples (Konnov)",
           "sourceUrl": "https://github.com/konnov/apalache-examples",
-          "url": "https://github.com/konnov/apalache-examples/tree/main/tendermint-accountability",
+          "url": "https://github.com/konnov/apalache-examples/blob/af360379b7cbcd1e16c1a801ff8ac64eb9aca038/tendermint/tendermint_single_indinv_proofs.tla",
           "completion": 48,
           "scratch": 0,
           "total": 48
@@ -4153,7 +4153,7 @@ window.TLAPS_DATA = {
           "sourceKey": "ZooKeeper (Remix)",
           "sourceName": "ZooKeeper (Remix)",
           "sourceUrl": "https://arxiv.org/abs/2409.14301",
-          "url": "https://github.com/Disalg-ICS-NJU/zookeeper-tla-spec/tree/main/low-level-spec/zk-3.7",
+          "url": "https://github.com/Disalg-ICS-NJU/zookeeper-tla-spec/blob/main/low-level-spec/zk-3.7/ZkV3_7_0.tla",
           "completion": 0,
           "scratch": 9,
           "total": 9
@@ -4181,7 +4181,7 @@ window.TLAPS_DATA = {
           "sourceKey": "OpenAddressing (lemmy/Examples)",
           "sourceName": "OpenAddressing",
           "sourceUrl": "https://github.com/lemmy/Examples",
-          "url": "https://github.com/lemmy/Examples/tree/mku-OA/specifications/TLC",
+          "url": "https://github.com/lemmy/Examples/blob/mku-OA/specifications/TLC/OpenAddressing.tla",
           "completion": 0,
           "scratch": 5,
           "total": 5
@@ -4195,7 +4195,7 @@ window.TLAPS_DATA = {
           "sourceKey": "OpenAddressing (lemmy/Examples)",
           "sourceName": "OpenAddressing",
           "sourceUrl": "https://github.com/lemmy/Examples",
-          "url": "https://github.com/lemmy/Examples/tree/mku-OA/specifications/TLC",
+          "url": "https://github.com/lemmy/Examples/blob/mku-OA/specifications/TLC/OpenAddressing_proof.tla",
           "completion": 1,
           "scratch": 0,
           "total": 1

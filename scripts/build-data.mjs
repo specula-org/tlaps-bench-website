@@ -10,6 +10,7 @@
 import { createHash } from "node:crypto";
 import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { SITE } from "./site-content.mjs";
+import { specSourceUrl } from "./spec-source-urls.mjs";
 
 const MODE = "proof-completion";
 const MODE_KEY = "completion";
@@ -157,24 +158,6 @@ const LIBRARY_SOURCES = new Set([
 const categoryFor = (source) => LIBRARY_SOURCES.has(source) ? "libraries" : "systems";
 const sourceSize = (source) => CANONICAL[source] ?? 0;
 
-const TLAPLUS_REPO = "https://github.com/tlaplus/Examples/tree/master/specifications";
-const TLAPM_REPO = "https://github.com/tlaplus/tlapm";
-const TLAPM_FILES = new Set([
-  "Allocator", "Bakery", "BubbleSort", "EWD840", "Peterson", "SimpleMutex", "SumAndMax",
-]);
-const TLAPM_DIRS = { Cantor: "examples/cantor" };
-
-const SPEC_URL = {
-  Consensus: "https://github.com/tlaplus/tlapm/tree/main/examples_draft/consensus",
-  Data: "https://github.com/tlaplus/tlapm/tree/main/zenon/regression/examples/data",
-  Paxos: "https://github.com/hengxin/tlaps-examples/tree/master/Paxos",
-  Euclid: "https://github.com/hengxin/tlaps-examples/tree/master/Euclid",
-  AtomicBakery: "https://github.com/hengxin/tlaps-examples/tree/master/AtomicBakery",
-  tlaplus_examples_BlockingQueue: "https://github.com/lemmy/BlockingQueue",
-  "apalache_examples_ben-or83": "https://github.com/konnov/apalache-examples/tree/main/ben-or83",
-  apalache_examples_tendermint: "https://github.com/konnov/apalache-examples/tree/main/tendermint-accountability",
-};
-
 const exampleDir = (benchmarkOrSpecId) => benchmarkOrSpecId.split("/")[0];
 const sourceSpecName = (specSourceId) =>
   specSourceId.split("/").pop().replace(/\.tla$/i, "");
@@ -184,21 +167,6 @@ const displayName = (group) => {
     if (group.startsWith(prefix)) return group.slice(prefix.length);
   }
   return group;
-};
-
-const specUrl = (group) => {
-  if (SPEC_URL[group]) return SPEC_URL[group];
-  if (group.startsWith("tlaplus_examples_")) {
-    const name = group.slice("tlaplus_examples_".length);
-    if (name.startsWith("SpecifyingSystems_")) {
-      const chapter = name.slice("SpecifyingSystems_".length);
-      return `${TLAPLUS_REPO}/SpecifyingSystems/${chapter}`;
-    }
-    return `${TLAPLUS_REPO}/${name}`;
-  }
-  if (TLAPM_FILES.has(group)) return `${TLAPM_REPO}/blob/main/examples/${group}.tla`;
-  if (TLAPM_DIRS[group]) return `${TLAPM_REPO}/tree/main/${TLAPM_DIRS[group]}`;
-  return null;
 };
 
 const slug = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
@@ -521,8 +489,8 @@ const models = bundles.map(({ f, meta, results, resultsVersion }) => {
   const rows = manifest.map(({ source, group, scoringKey, name, completion, scratch }) => {
     const sourceInfo = SOURCE_INFO[source];
     if (!sourceInfo) throw new Error(`${f}: missing display info for source "${source}"`);
-    const url = specUrl(group);
-    if (!url) throw new Error(`${f}: example "${group}" is missing an upstream URL`);
+    const url = specSourceUrl({ group, scoringKey });
+    if (!url) throw new Error(`${f}: spec "${scoringKey}" is missing an upstream URL`);
     return {
       id: specId(source, scoringKey),
       group,
@@ -699,6 +667,13 @@ for (const spec of fullCatalog.specs) {
     throw new Error(`results/full-suite-catalog.json: duplicate spec ${spec.scoringKey}`);
   }
   fullSpecKeys.add(spec.scoringKey);
+  const expectedUrl = specSourceUrl(spec);
+  if (!expectedUrl) {
+    throw new Error(`results/full-suite-catalog.json: spec ${spec.scoringKey} has no source URL`);
+  }
+  if (spec.url !== expectedUrl) {
+    throw new Error(`results/full-suite-catalog.json: stale source URL for ${spec.scoringKey}`);
+  }
   for (const field of ["completion", "scratch", "total"]) {
     if (!Number.isInteger(spec[field]) || spec[field] < 0) {
       throw new Error(`results/full-suite-catalog.json: spec ${spec.scoringKey} has invalid ${field}`);

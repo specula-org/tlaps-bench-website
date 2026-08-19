@@ -1,4 +1,5 @@
 import { readFileSync, writeFileSync } from "node:fs";
+import { specSourceUrl } from "./spec-source-urls.mjs";
 
 const CATALOG_PATH = "results/full-suite-catalog.json";
 const [completionPath, scratchPath] = process.argv.slice(2);
@@ -98,6 +99,10 @@ const exampleOrder = new Map(normalizedExamples.map((example, index) => [example
 const specs = [...specsById.values()]
   .map((spec) => {
     const example = exampleByGroup.get(spec.group);
+    const url = specSourceUrl({ group: spec.group, scoringKey: spec.specId });
+    if (!url) {
+      throw new Error(`${spec.specId}: missing exact upstream source URL`);
+    }
     return {
       id: `full--${slug(spec.specId)}`,
       group: spec.group,
@@ -107,7 +112,7 @@ const specs = [...specsById.values()]
       sourceKey: example.sourceKey,
       sourceName: example.sourceName,
       sourceUrl: example.sourceUrl,
-      url: example.url,
+      url,
       completion: spec.completion,
       scratch: spec.scratch,
       total: spec.completion + spec.scratch,
