@@ -172,16 +172,75 @@ function PageBenchmark() {
     },
   ];
   const [suiteId, setSuiteId] = useS_p(suites[0]?.id || "core");
+  const [specQuery, setSpecQuery] = useS_p("");
+  const [openSources, setOpenSources] = useS_p(() => new Set());
   const suite = suites.find((s) => s.id === suiteId) || suites[0];
   const specs = suite.specs || [];
   const categories = suite.categories || [];
   const totalSpecs = suite.specCount ?? specs.length;
   const totalTasks = suite.propertyCount ?? specs.reduce((sum, spec) => sum + spec.total, 0);
   const showScratch = false;
-  const colSpan = showScratch ? 5 : 4;
   const categoryGridStyle = categories.length === 1
     ? { gridTemplateColumns: "minmax(0, 1fr)" }
     : undefined;
+  const categoriesById = categories.reduce((lookup, category) => {
+    lookup[category.id] = category;
+    return lookup;
+  }, {});
+  const sourceGroups = [];
+  const sourceGroupsByKey = new Map();
+
+  specs.forEach((spec) => {
+    const sourceKey = spec.sourceKey || spec.sourceUrl || spec.sourceName || spec.category || "unknown-source";
+    let group = sourceGroupsByKey.get(sourceKey);
+
+    if (!group) {
+      group = {
+        key: sourceKey,
+        domId: `dataset-source-${suite.id}-${sourceGroups.length}`,
+        name: spec.sourceName || sourceKey,
+        url: spec.sourceUrl,
+        categoryIds: [],
+        specs: [],
+        total: 0,
+      };
+      sourceGroupsByKey.set(sourceKey, group);
+      sourceGroups.push(group);
+    }
+
+    if (!group.categoryIds.includes(spec.category)) group.categoryIds.push(spec.category);
+    group.specs.push(spec);
+    group.total += spec.total || 0;
+  });
+
+  const normalizedQuery = specQuery.trim().toLocaleLowerCase();
+  const filteredSourceGroups = sourceGroups.map((group) => {
+    const categoryNames = group.categoryIds.map((id) => categoriesById[id]?.name || id);
+    const groupMatches = `${group.name} ${categoryNames.join(" ")}`.toLocaleLowerCase().includes(normalizedQuery);
+    const filteredSpecs = !normalizedQuery || groupMatches
+      ? group.specs
+      : group.specs.filter((spec) => spec.name.toLocaleLowerCase().includes(normalizedQuery));
+    const filteredTasks = filteredSpecs.reduce((sum, spec) => sum + (spec.total || 0), 0);
+
+    return { ...group, categoryNames, filteredSpecs, filteredTasks };
+  }).filter((group) => group.filteredSpecs.length > 0);
+  const visibleSpecCount = filteredSourceGroups.reduce((sum, group) => sum + group.filteredSpecs.length, 0);
+
+  const selectSuite = (id) => {
+    if (id === suiteId) return;
+    setSuiteId(id);
+    setSpecQuery("");
+    setOpenSources(new Set());
+  };
+
+  const toggleSource = (key) => {
+    setOpenSources((current) => {
+      const next = new Set(current);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  };
 
   return (
     <>
@@ -203,7 +262,7 @@ function PageBenchmark() {
                   role="tab"
                   aria-selected={suiteId === s.id}
                   className={suiteId === s.id ? "active" : ""}
-                  onClick={() => setSuiteId(s.id)}
+                  onClick={() => selectSuite(s.id)}
                 >
                   {s.label}
                 </button>
@@ -269,57 +328,133 @@ function PageBenchmark() {
               </p>
             </div>
           </Reveal>
-          <div className="dataset-table-shell">
-            <table className={`dataset-table${showScratch ? " dataset-table-with-scratch" : ""}`}>
-                <thead>
-                  <tr>
-                    <th scope="col">Spec</th>
-                    <th scope="col">Source</th>
-                    <th scope="col" className="dataset-number">Completion tasks</th>
-                    {showScratch && (
-                      <th scope="col" className="dataset-number">From-scratch tasks</th>
-                    )}
-                    <th scope="col" className="dataset-number">Total tasks</th>
-                  </tr>
-                </thead>
-                {categories.map((category) => {
-                  const rows = specs.filter((spec) => spec.category === category.id);
-                  return (
-                    <tbody key={category.id} className="dataset-table-section">
-                      <tr className="dataset-table-group-row">
-                        <th colSpan={colSpan} scope="rowgroup">
-                          <span>{category.name}</span>
-                          <small>{category.specCount} specs · {category.total} tasks</small>
-                        </th>
-                      </tr>
-                      {rows.map((spec) => (
-                        <tr key={`${suite.id}:${category.id}:${spec.id}`}>
-                          <th scope="row" className="dataset-spec">
-                            {spec.url ? (
-                              <a href={spec.url} target="_blank" rel="noopener">{spec.name}<span aria-hidden="true">↗</span></a>
-                            ) : spec.name}
-                          </th>
-                          <td className="dataset-source" data-label="Source">
-                            {spec.sourceUrl ? (
-                              <a href={spec.sourceUrl} target="_blank" rel="noopener">{spec.sourceName}<span aria-hidden="true">↗</span></a>
-                            ) : spec.sourceName}
-                          </td>
-                          <td className="dataset-number" data-label="Completion tasks">
-                            {spec.completion || <span className="dataset-na" title="No proof-completion tasks">—</span>}
-                          </td>
-                          {showScratch && (
-                            <td className="dataset-number" data-label="From-scratch tasks">
-                              {spec.scratch || <span className="dataset-na" title="No proof-from-scratch tasks">—</span>}
-                            </td>
-                          )}
-                          <td className="dataset-number dataset-total" data-label="Total tasks">{spec.total}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  );
-                })}
-            </table>
+          <div className="dataset-index-toolbar">
+            <div className="dataset-search">
+              <label htmlFor={`dataset-search-${suite.id}`}>Search specs</label>
+              <div className="dataset-search-field">
+                <svg viewBox="0 0 20 20" aria-hidden="true">
+                  <circle cx="8.5" cy="8.5" r="5.5" />
+                  <path d="m12.5 12.5 4 4" />
+                </svg>
+                <input
+                  id={`dataset-search-${suite.id}`}
+                  type="search"
+                  value={specQuery}
+                  onChange={(event) => setSpecQuery(event.target.value)}
+                  placeholder="Spec, source, or category"
+                  autoComplete="off"
+                />
+                {specQuery && (
+                  <button type="button" onClick={() => setSpecQuery("")} aria-label="Clear spec search">Clear</button>
+                )}
+              </div>
+            </div>
+            <p className="dataset-result-count" aria-live="polite">
+              {normalizedQuery
+                ? `${visibleSpecCount} of ${totalSpecs} specs`
+                : `${totalSpecs} specs in ${sourceGroups.length} sources`}
+            </p>
           </div>
+
+          {filteredSourceGroups.length > 0 ? (
+            <div className="dataset-source-list">
+              {filteredSourceGroups.map((group) => {
+                const isOpen = Boolean(normalizedQuery) || openSources.has(group.key);
+                const toggleId = `${group.domId}-toggle`;
+                const panelId = `${group.domId}-panel`;
+
+                return (
+                  <section key={`${suite.id}:${group.key}`} className={`dataset-source-group${isOpen ? " is-open" : ""}`}>
+                    <div className="dataset-source-summary">
+                      <button
+                        id={toggleId}
+                        type="button"
+                        className="dataset-source-toggle"
+                        aria-expanded={isOpen}
+                        aria-controls={panelId}
+                        disabled={Boolean(normalizedQuery)}
+                        title={normalizedQuery ? "Clear search to collapse source groups" : undefined}
+                        onClick={() => toggleSource(group.key)}
+                      >
+                        <span className="dataset-source-chevron" aria-hidden="true">
+                          <svg viewBox="0 0 16 16"><path d="m5 6 3 3 3-3" /></svg>
+                        </span>
+                        <span className="dataset-source-identity">
+                          <span className="dataset-source-category">{group.categoryNames.join(" · ")}</span>
+                          <span className="dataset-source-name">{group.name}</span>
+                        </span>
+                      </button>
+
+                      <dl className="dataset-source-stats">
+                        <div><dt>{normalizedQuery ? "Matches" : "Specs"}</dt><dd>{normalizedQuery ? group.filteredSpecs.length : group.specs.length}</dd></div>
+                        <div><dt>Tasks</dt><dd>{normalizedQuery ? group.filteredTasks : group.total}</dd></div>
+                      </dl>
+
+                      {group.url && (
+                        <a
+                          className="dataset-source-repo"
+                          href={group.url}
+                          target="_blank"
+                          rel="noopener"
+                          aria-label={`Open ${group.name} source`}
+                          title={`Open ${group.name} source`}
+                        >
+                          <span aria-hidden="true">↗</span>
+                        </a>
+                      )}
+                    </div>
+
+                    <div
+                      id={panelId}
+                      className="dataset-source-panel"
+                      role="region"
+                      aria-labelledby={toggleId}
+                      hidden={!isOpen}
+                    >
+                      <table className={`dataset-table${showScratch ? " dataset-table-with-scratch" : ""}`}>
+                        <caption className="sr-only">{group.name} specs</caption>
+                        <thead>
+                          <tr>
+                            <th scope="col">Spec</th>
+                            <th scope="col" className="dataset-number">Completion tasks</th>
+                            {showScratch && (
+                              <th scope="col" className="dataset-number">From-scratch tasks</th>
+                            )}
+                            <th scope="col" className="dataset-number">Total tasks</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {group.filteredSpecs.map((spec) => (
+                            <tr key={`${suite.id}:${group.key}:${spec.id}`}>
+                              <th scope="row" className="dataset-spec">
+                                {spec.url ? (
+                                  <a href={spec.url} target="_blank" rel="noopener">{spec.name}<span aria-hidden="true">↗</span></a>
+                                ) : spec.name}
+                              </th>
+                              <td className="dataset-number" data-label="Completion tasks">
+                                {spec.completion || <span className="dataset-na" title="No proof-completion tasks">—</span>}
+                              </td>
+                              {showScratch && (
+                                <td className="dataset-number" data-label="From-scratch tasks">
+                                  {spec.scratch || <span className="dataset-na" title="No proof-from-scratch tasks">—</span>}
+                                </td>
+                              )}
+                              <td className="dataset-number dataset-total" data-label="Total tasks">{spec.total}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </section>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="dataset-no-results" role="status">
+              <strong>No specs match “{specQuery.trim()}”.</strong>
+              <button type="button" onClick={() => setSpecQuery("")}>Clear search</button>
+            </div>
+          )}
         </div>
       </section>
 
