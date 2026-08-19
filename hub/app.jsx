@@ -106,7 +106,7 @@ function App() {
           <div style={{display:"flex",alignItems:"center",gap:18}}>
             <a href="https://github.com/specula-org/tlaps-bench" target="_blank">GitHub</a>
             <span className="foot-sep" aria-hidden="true" />
-            <span>Released under MIT</span>
+            <span>Released under the MIT License.</span>
           </div>
         </div>
       </footer>
