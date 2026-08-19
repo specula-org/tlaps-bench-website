@@ -515,7 +515,7 @@ function PageCite() {
             Have a benchmark source, agent, or bug report to suggest? Open an issue to discuss it.
           </p>
           <div style={{ display: "flex", gap: 10, marginTop: 20 }}>
-            <a className="btn primary" href="https://github.com/specula-org/tlaps-bench" target="_blank">Open a PR</a>
+            <a className="btn primary" href="https://github.com/specula-org/tlaps-bench/compare" target="_blank" rel="noopener">Open a PR</a>
             <a className="btn ghost" href="https://github.com/specula-org/tlaps-bench/blob/main/docs/USAGE.md" target="_blank">Usage guide</a>
           </div>
         </FadeIn>
