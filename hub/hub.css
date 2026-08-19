@@ -33,6 +33,9 @@
 html, body { margin: 0; padding: 0; }
 html { scrollbar-gutter: stable; }
 body { background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 15px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+#root { min-height: 100vh; min-height: 100dvh; }
+#root > [data-screen-label] { min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; }
+#root > [data-screen-label] > main { flex: 1; }
 
 a { color: inherit; text-decoration: none; }
 a.link { color: var(--accent); }
