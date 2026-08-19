@@ -302,21 +302,21 @@ table.lb tr.expand-row > td { padding: 0; border-bottom: 1px solid var(--line-so
 .detail-tabs button { padding: 6px 11px; border: 0; border-radius: 5px; background: transparent; color: var(--ink-3); font-family: var(--mono); font-size: 13px; cursor: pointer; }
 .detail-tabs button:hover { color: var(--ink); }
 .detail-tabs button.active { background: var(--paper); color: var(--ink); box-shadow: 0 1px 3px rgba(20, 32, 43, 0.12); }
-/* Expanded model details: the full per-spec score table.
-   Fixed columns keep Spec / Source / Pass / usage metrics aligned across every row. */
+/* Expanded model details: fit the full table at desktop widths and retain a
+   horizontal scroller when the viewport is narrower than the table. */
 .bd-scroll { max-height: min(68vh, 680px); overflow: auto; border: 1px solid var(--line-soft); border-radius: 9px; background: var(--paper); -webkit-overflow-scrolling: touch; }
-table.breakdown { width: 100%; min-width: 1500px; table-layout: fixed; border-collapse: separate; border-spacing: 0; }
+table.breakdown { width: 100%; min-width: 1040px; table-layout: fixed; border-collapse: separate; border-spacing: 0; }
 table.breakdown thead th { position: sticky; top: 0; z-index: 3; text-align: left; font-family: var(--mono); font-size: 14px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-3); font-weight: 500; padding: 11px 14px; border-bottom: 1px solid var(--line); background: var(--paper); white-space: nowrap; }
 table.breakdown th:nth-child(1),
-table.breakdown td:nth-child(1) { width: 240px; }
+table.breakdown td:nth-child(1) { width: 18%; }
 table.breakdown th:nth-child(2),
-table.breakdown td:nth-child(2) { width: 200px; }
+table.breakdown td:nth-child(2) { width: 14%; }
 table.breakdown th:nth-child(3),
-table.breakdown td:nth-child(3) { width: 210px; }
+table.breakdown td:nth-child(3) { width: 20%; }
 table.breakdown th:nth-child(n+4),
-table.breakdown td:nth-child(n+4) { width: 200px; }
+table.breakdown td:nth-child(n+4) { width: 12%; }
 table.breakdown th.bd-mode { text-align: right; }
-table.breakdown th.bd-usage-head { text-align: right; }
+table.breakdown th.bd-usage-head { text-align: right; white-space: normal; font-size: 11px; line-height: 1.35; letter-spacing: 0.05em; }
 table.breakdown td { padding: 9px 14px; border-bottom: 1px solid var(--line-soft); vertical-align: middle; background: var(--paper); }
 table.breakdown tbody tr:last-child td { border-bottom: none; }
 .bd-name { font-family: var(--mono); font-size: 13px; color: var(--ink-2); padding-right: 24px !important; overflow: hidden; text-overflow: ellipsis; }
