@@ -200,7 +200,7 @@ function PageBenchmark() {
   const categories = suite.categories || [];
   const totalSpecs = suite.specCount ?? specs.length;
   const totalTasks = suite.propertyCount ?? specs.reduce((sum, spec) => sum + spec.total, 0);
-  const showScratch = false;
+  const showScratch = (suite.scratch ?? 0) > 0;
   const categoryGridStyle = categories.length === 1
     ? { gridTemplateColumns: "minmax(0, 1fr)" }
     : undefined;
@@ -271,9 +271,8 @@ function PageBenchmark() {
             <span className="eyebrow accent">Benchmark</span>
             <h1 style={{ fontSize: 44, marginTop: 10 }}>Inside the benchmark</h1>
             <p className="lead">
-              The benchmark covers TLA+ example libraries and systems specs. Each task asks the
-              model to replace PROOF OBVIOUS with a proof that tlapm accepts. Switch between the
-              Proof Completion Core and the Full catalog below.
+              The benchmark draws from TLA+ example libraries and systems specs. Core contains
+              proof-completion tasks, while Full also includes proofs written from scratch.
             </p>
             <div className="cohort-switch" role="tablist" aria-label="Benchmark suite">
               {suites.map((s) => (
