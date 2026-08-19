@@ -3,10 +3,11 @@ import "./lb.jsx";
 import "../phases/pipeline.jsx";
 import "./pages.jsx";
 
-const { useState, useEffect } = React;
+const { useState, useEffect, useRef } = React;
 
 function Nav({ route, tweaks, update }) {
   const [navOpen, setNavOpen] = useState(false);
+  const firstNavLink = useRef(null);
   const links = [
     { id: "home", label: "Home" },
     { id: "leaderboard", label: "Leaderboard" },
@@ -15,6 +16,9 @@ function Nav({ route, tweaks, update }) {
   ];
   const themeLabel = tweaks.dark ? "Switch to light" : "Switch to dark";
   useEffect(() => { setNavOpen(false); }, [route]);
+  useEffect(() => {
+    if (navOpen) firstNavLink.current?.focus();
+  }, [navOpen]);
   return (
     <div className={"nav" + (navOpen ? " open" : "")}>
       <div className="nav-inner">
@@ -29,9 +33,10 @@ function Nav({ route, tweaks, update }) {
         </a>
         <div className="nav-right">
           <div className="nav-links" id="site-navigation">
-            {links.map(l => (
+            {links.map((l, index) => (
               <a
                 key={l.id}
+                ref={index === 0 ? firstNavLink : undefined}
                 className={"nav-link" + (route === l.id ? " active" : "")}
                 href={"#/" + l.id}
                 aria-current={route === l.id ? "page" : undefined}
