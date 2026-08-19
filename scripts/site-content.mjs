@@ -19,8 +19,7 @@ export const SITE = {
       full: "--mode proof-completion",
       cli: "--mode proof-completion",
       blurb:
-        "Scaffolding is provided — inductive invariants, lemma structure, and earlier lemmas " +
-        "marked PROOF OMITTED — and the model fills in one target proof.",
+        "The model receives the theorem and its supporting lemmas, then writes the target proof.",
     },
   ],
 
