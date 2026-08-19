@@ -153,7 +153,6 @@ const SOURCE_INFO = {
 const LIBRARY_SOURCES = new Set([
   "tlaplus/Examples",
   "TLAPS distribution examples",
-  "apalache-examples (Konnov)",
 ]);
 const categoryFor = (source) => LIBRARY_SOURCES.has(source) ? "libraries" : "systems";
 const sourceSize = (source) => CANONICAL[source] ?? 0;
@@ -666,13 +665,6 @@ for (const spec of canonicalSpecs) {
 const categories = SITE.categories
   .map((category) => {
     const stats = categoryStats[category.id];
-    if (category.id === "libraries") {
-      return {
-        ...category,
-        ...stats,
-        blurb: "Specs and proof properties from the TLA+ Examples repository, the TLAPS distribution, and the Apalache examples corpus (Konnov).",
-      };
-    }
     return { ...category, ...stats };
   })
   .filter((category) => category.specCount > 0);

@@ -1791,11 +1791,20 @@ window.TLAPS_DATA = {
         {
           "id": "libraries",
           "name": "Example libraries",
-          "blurb": "Specs and proof properties from the TLA+ Examples repository, the TLAPS distribution, and the Apalache examples corpus (Konnov).",
-          "specCount": 56,
-          "completion": 190,
+          "blurb": "Specs and proof properties from the TLA+ Examples repository, the TLAPS distribution, and related teaching and algorithm examples.",
+          "specCount": 54,
+          "completion": 134,
           "scratch": 0,
-          "total": 190
+          "total": 134
+        },
+        {
+          "id": "systems",
+          "name": "Systems specifications",
+          "blurb": "Protocol and systems specs drawn from sources such as ZooKeeper, Ivy, etcd, OpenAddressing, Anvil, and Apalache examples.",
+          "specCount": 2,
+          "completion": 56,
+          "scratch": 0,
+          "total": 56
         }
       ],
       "specs": [
@@ -2430,34 +2439,6 @@ window.TLAPS_DATA = {
           "total": 1
         },
         {
-          "id": "apalache-examples-konnov--apalache-examples-ben-or83-ben-or83-proofs-tla",
-          "group": "apalache_examples_ben-or83",
-          "scoringKey": "apalache_examples_ben-or83/Ben_or83_proofs.tla",
-          "name": "Ben_or83_proofs",
-          "category": "libraries",
-          "sourceKey": "apalache-examples (Konnov)",
-          "sourceName": "apalache-examples (Konnov)",
-          "sourceUrl": "https://github.com/konnov/apalache-examples",
-          "url": "https://github.com/konnov/apalache-examples/tree/main/ben-or83",
-          "completion": 41,
-          "scratch": 0,
-          "total": 41
-        },
-        {
-          "id": "apalache-examples-konnov--apalache-examples-tendermint-tendermint-single-indinv-proofs-tla",
-          "group": "apalache_examples_tendermint",
-          "scoringKey": "apalache_examples_tendermint/tendermint_single_indinv_proofs.tla",
-          "name": "tendermint_single_indinv_proofs",
-          "category": "libraries",
-          "sourceKey": "apalache-examples (Konnov)",
-          "sourceName": "apalache-examples (Konnov)",
-          "sourceUrl": "https://github.com/konnov/apalache-examples",
-          "url": "https://github.com/konnov/apalache-examples/tree/main/tendermint-accountability",
-          "completion": 15,
-          "scratch": 0,
-          "total": 15
-        },
-        {
           "id": "tlaps-distribution-examples--atomicbakery-atomicbakerywithoutsmt-tla",
           "group": "AtomicBakery",
           "scoringKey": "AtomicBakery/AtomicBakeryWithoutSMT.tla",
@@ -2582,6 +2563,34 @@ window.TLAPS_DATA = {
           "completion": 1,
           "scratch": 0,
           "total": 1
+        },
+        {
+          "id": "apalache-examples-konnov--apalache-examples-ben-or83-ben-or83-proofs-tla",
+          "group": "apalache_examples_ben-or83",
+          "scoringKey": "apalache_examples_ben-or83/Ben_or83_proofs.tla",
+          "name": "Ben_or83_proofs",
+          "category": "systems",
+          "sourceKey": "apalache-examples (Konnov)",
+          "sourceName": "apalache-examples (Konnov)",
+          "sourceUrl": "https://github.com/konnov/apalache-examples",
+          "url": "https://github.com/konnov/apalache-examples/tree/main/ben-or83",
+          "completion": 41,
+          "scratch": 0,
+          "total": 41
+        },
+        {
+          "id": "apalache-examples-konnov--apalache-examples-tendermint-tendermint-single-indinv-proofs-tla",
+          "group": "apalache_examples_tendermint",
+          "scoringKey": "apalache_examples_tendermint/tendermint_single_indinv_proofs.tla",
+          "name": "tendermint_single_indinv_proofs",
+          "category": "systems",
+          "sourceKey": "apalache-examples (Konnov)",
+          "sourceName": "apalache-examples (Konnov)",
+          "sourceUrl": "https://github.com/konnov/apalache-examples",
+          "url": "https://github.com/konnov/apalache-examples/tree/main/tendermint-accountability",
+          "completion": 15,
+          "scratch": 0,
+          "total": 15
         }
       ]
     },
