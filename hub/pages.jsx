@@ -1,31 +1,10 @@
 /* global React, TLAPS_DATA, HubLeaderboard, Reveal, CountUp, FadeIn, AnimBar, APipeline */
-const { useState: useS_p, useEffect: useE_p, useRef: useR_p, useTransition: useT_p } = React;
-const PIPE_NATIVE_WIDTH = 1078;
-const PIPE_NATIVE_HEIGHT = 300;
+const { useState: useS_p, useTransition: useT_p } = React;
 
 function PipelineBanner() {
-  const wrapRef = useR_p(null);
-  const [scale, setScale] = useS_p(1);
   const Comp = (typeof window !== "undefined") && window.APipeline;
-  useE_p(() => {
-    if (!wrapRef.current) return undefined;
-    const update = () => { const w = wrapRef.current && wrapRef.current.clientWidth; if (w > 0) setScale(w / PIPE_NATIVE_WIDTH); };
-    update();
-    if (typeof ResizeObserver !== "undefined") { const ro = new ResizeObserver(update); ro.observe(wrapRef.current); return () => ro.disconnect(); }
-    window.addEventListener("resize", update);
-    return () => window.removeEventListener("resize", update);
-  }, []);
-  if (!Comp) return <div className="fig-placeholder" style={{ height: PIPE_NATIVE_HEIGHT }}>[ pipeline diagram loading… ]</div>;
-  return (
-    <div className="phase-host">
-      <div className="phase-desktop">
-        <div ref={wrapRef} className="phase-fit" style={{ height: PIPE_NATIVE_HEIGHT * scale }}>
-          <div className="phase-fit-inner" style={{ transform: `scale(${scale})` }}><Comp /></div>
-        </div>
-      </div>
-      <div className="phase-mobile"><Comp layout="mobile" /></div>
-    </div>
-  );
+  if (!Comp) return <div className="fig-placeholder">[ pipeline diagram loading… ]</div>;
+  return <div className="phase-host"><Comp /></div>;
 }
 
 function Mark({ size = 28 }) {
