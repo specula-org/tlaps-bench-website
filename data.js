@@ -12,13 +12,6 @@ window.TLAPS_DATA = {
     "tip": "Steps in the benchmark's own reference proof for each theorem - a measure of the task's structural complexity, independent of any model. Bands are identical for every model, so the columns are directly comparable. Tasks with no recorded reference proof are left out.",
     "bands": [
       {
-        "id": "d0",
-        "label": "0",
-        "min": 0,
-        "note": "reference proof is a single step",
-        "max": 0
-      },
-      {
         "id": "d1",
         "label": "1–4",
         "min": 1,
@@ -4360,12 +4353,6 @@ window.TLAPS_DATA = {
       "perComplexity": {
         "completion": [
           {
-            "id": "d0",
-            "rate": null,
-            "pass": 0,
-            "total": 0
-          },
-          {
             "id": "d1",
             "rate": 100,
             "pass": 34,
@@ -5789,12 +5776,6 @@ window.TLAPS_DATA = {
       },
       "perComplexity": {
         "completion": [
-          {
-            "id": "d0",
-            "rate": null,
-            "pass": 0,
-            "total": 0
-          },
           {
             "id": "d1",
             "rate": 94.1,
@@ -7220,12 +7201,6 @@ window.TLAPS_DATA = {
       "perComplexity": {
         "completion": [
           {
-            "id": "d0",
-            "rate": null,
-            "pass": 0,
-            "total": 0
-          },
-          {
             "id": "d1",
             "rate": 91.2,
             "pass": 31,
@@ -8649,12 +8624,6 @@ window.TLAPS_DATA = {
       },
       "perComplexity": {
         "completion": [
-          {
-            "id": "d0",
-            "rate": null,
-            "pass": 0,
-            "total": 0
-          },
           {
             "id": "d1",
             "rate": 55.9,
@@ -10080,12 +10049,6 @@ window.TLAPS_DATA = {
       "perComplexity": {
         "completion": [
           {
-            "id": "d0",
-            "rate": null,
-            "pass": 0,
-            "total": 0
-          },
-          {
             "id": "d1",
             "rate": 41.2,
             "pass": 14,
@@ -11509,12 +11472,6 @@ window.TLAPS_DATA = {
       },
       "perComplexity": {
         "completion": [
-          {
-            "id": "d0",
-            "rate": null,
-            "pass": 0,
-            "total": 0
-          },
           {
             "id": "d1",
             "rate": 38.2,
@@ -12940,12 +12897,6 @@ window.TLAPS_DATA = {
       "perComplexity": {
         "completion": [
           {
-            "id": "d0",
-            "rate": null,
-            "pass": 0,
-            "total": 0
-          },
-          {
             "id": "d1",
             "rate": 20.6,
             "pass": 7,
@@ -14369,12 +14320,6 @@ window.TLAPS_DATA = {
       },
       "perComplexity": {
         "completion": [
-          {
-            "id": "d0",
-            "rate": null,
-            "pass": 0,
-            "total": 0
-          },
           {
             "id": "d1",
             "rate": 8.8,

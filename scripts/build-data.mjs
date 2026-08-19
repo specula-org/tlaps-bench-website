@@ -251,7 +251,7 @@ const canonicalTaskManifest = serializeTaskManifest(CORE_TASKS);
 const complexityByTask = new Map();
 const complexityCatalog = JSON.parse(readFileSync("results/core-complexity.json", "utf8"));
 for (const [benchmark, steps] of Object.entries(complexityCatalog.steps ?? {})) {
-  if (!Number.isInteger(steps) || steps < 0) {
+  if (!Number.isInteger(steps) || steps < 1) {
     throw new Error(`results/core-complexity.json: invalid steps for ${benchmark}`);
   }
   if (!CORE_BY_BENCHMARK.has(benchmark)) {
@@ -261,7 +261,6 @@ for (const [benchmark, steps] of Object.entries(complexityCatalog.steps ?? {})) 
 }
 
 const COMPLEXITY_BANDS = [
-  { id: "d0", label: "0", min: 0, max: 0, note: "reference proof is a single step" },
   { id: "d1", label: "1–4", min: 1, max: 4 },
   { id: "d2", label: "5–12", min: 5, max: 12 },
   { id: "d3", label: "13–30", min: 13, max: 30 },
@@ -299,7 +298,7 @@ if (publishedMissing.length > 0) {
 for (const { f, results } of bundles) {
   for (const r of results) {
     if (!Number.isInteger(r.gt_proof_steps)) continue;
-    if (r.gt_proof_steps < 0) throw new Error(`${f}: ${r.benchmark} has negative gt_proof_steps`);
+    if (r.gt_proof_steps < 1) throw new Error(`${f}: ${r.benchmark} has non-positive gt_proof_steps`);
     const seen = complexityByTask.get(r.benchmark);
     if (seen !== undefined && seen !== r.gt_proof_steps) {
       throw new Error(`${f}: ${r.benchmark} reference-proof steps ${r.gt_proof_steps} != ${seen}`);
