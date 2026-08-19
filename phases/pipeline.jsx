@@ -28,9 +28,9 @@ function PArrow({ label, sub, w = 70, dashed = false }) {
 
 const P_WARN = 'var(--warn)';
 const P_VERDICTS = [
-  { color: P.ok,   bg: 'rgba(16,185,129,0.08)', label: '✅ PASS',     note: 'no cheating + tlapm accepts' },
-  { color: P.err,  bg: 'rgba(239,68,68,0.06)',  label: '❌ FAIL',     note: 'tlapm rejects (honest but incomplete)' },
-  { color: P_WARN, bg: 'rgba(245,158,11,0.08)', label: '🚨 CHEATING', note: 'cheat caught before tlapm ran (tlapm skipped)' },
+  { color: P.ok,   bg: 'rgba(16,185,129,0.08)', label: '✅ PASS',     note: 'Cheat-check passes and tlapm accepts' },
+  { color: P.err,  bg: 'rgba(239,68,68,0.06)',  label: '❌ FAIL',     note: 'Cheat-check passes and tlapm does not accept' },
+  { color: P_WARN, bg: 'rgba(245,158,11,0.08)', label: '🚨 CHEATING', note: 'Cheat-check finds a rule violation and tlapm is skipped' },
 ];
 
 function PMobilePipeline() {
@@ -42,7 +42,7 @@ function PMobilePipeline() {
       </li>
       <li className="phase-mobile-arrow" aria-hidden="true">↓</li>
       <li className="phase-mobile-stage">
-        <span className="phase-mobile-step">02 · Policy check</span>
+        <span className="phase-mobile-step">02 · Cheat-check</span>
         <strong>Cheat-checker</strong>
       </li>
       <li className="phase-mobile-arrow" aria-hidden="true">↓</li>
@@ -135,7 +135,7 @@ PROOF OBVIOUS`}
             </div>
           ))}
           <div style={{ fontFamily: 'var(--mono)', fontSize: 10.5, color: P.ink3, marginTop: 2 }}>
-            pass rate = PASS / scored properties
+            pass rate = PASS / scored tasks
           </div>
         </div>
       </div>

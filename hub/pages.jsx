@@ -89,7 +89,7 @@ function PageHome({ go }) {
               {TLAPS_DATA.paper.overview}
             </p>
             <p style={{ fontFamily: "var(--serif)", fontSize: 18, lineHeight: 1.75, color: "var(--ink-2)", marginTop: 14, textWrap: "pretty" }}>
-              Before verification, a policy checker rejects prohibited edits, including changes
+              Before verification, a cheat-checker rejects prohibited edits, including changes
               to the target theorem, new axioms, and model-added admitted steps.
             </p>
           </Reveal>
@@ -370,10 +370,10 @@ function PageBenchmark() {
           <Reveal>
             <h2 style={{ fontSize: 32 }}>How a proof is graded</h2>
             <p className="lead" style={{ fontSize: 17 }}>
-              Each candidate runs in a Docker sandbox. A cheat-checker goes first: no admitted
-              steps, smuggled axioms, or weakened theorems. If that fails, the verdict is CHEATING
-              and tlapm is skipped. Otherwise tlapm checks correctness. Cheating does not count as
-              a pass.
+              Each submission runs in a Docker sandbox. A cheat-checker first rejects prohibited
+              edits, including new axioms, model-added admitted steps, and changes to the target
+              theorem. Clean submissions are then checked by tlapm. Only accepted proofs receive
+              PASS.
             </p>
           </Reveal>
           <Reveal delay={120}><div style={{ marginTop: 24 }}><PipelineBanner /></div></Reveal>
