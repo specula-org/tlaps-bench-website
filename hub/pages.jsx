@@ -18,9 +18,12 @@ function PipelineBanner() {
   if (!Comp) return <div className="fig-placeholder" style={{ height: PIPE_NATIVE_HEIGHT }}>[ pipeline diagram loading… ]</div>;
   return (
     <div className="phase-host">
-      <div ref={wrapRef} className="phase-fit" style={{ height: PIPE_NATIVE_HEIGHT * scale }}>
-        <div className="phase-fit-inner" style={{ transform: `scale(${scale})` }}><Comp /></div>
+      <div className="phase-desktop">
+        <div ref={wrapRef} className="phase-fit" style={{ height: PIPE_NATIVE_HEIGHT * scale }}>
+          <div className="phase-fit-inner" style={{ transform: `scale(${scale})` }}><Comp /></div>
+        </div>
       </div>
+      <div className="phase-mobile"><Comp layout="mobile" /></div>
     </div>
   );
 }

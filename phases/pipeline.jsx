@@ -27,13 +27,45 @@ function PArrow({ label, sub, w = 70, dashed = false }) {
 }
 
 const P_WARN = 'var(--warn)';
+const P_VERDICTS = [
+  { color: P.ok,   bg: 'rgba(16,185,129,0.08)', label: '✅ PASS',     note: 'no cheating + tlapm accepts' },
+  { color: P.err,  bg: 'rgba(239,68,68,0.06)',  label: '❌ FAIL',     note: 'tlapm rejects (honest but incomplete)' },
+  { color: P_WARN, bg: 'rgba(245,158,11,0.08)', label: '🚨 CHEATING', note: 'cheat caught before tlapm ran (tlapm skipped)' },
+];
 
-function APipeline() {
-  const verdicts = [
-    { color: P.ok,   bg: 'rgba(16,185,129,0.08)', label: '✅ PASS',     note: 'no cheating + tlapm accepts' },
-    { color: P.err,  bg: 'rgba(239,68,68,0.06)',  label: '❌ FAIL',     note: 'tlapm rejects (honest but incomplete)' },
-    { color: P_WARN, bg: 'rgba(245,158,11,0.08)', label: '🚨 CHEATING', note: 'cheat caught before tlapm ran (tlapm skipped)' },
-  ];
+function PMobilePipeline() {
+  return (
+    <ol className="phase-mobile-flow" aria-label="Proof grading pipeline">
+      <li className="phase-mobile-stage">
+        <span className="phase-mobile-step">01 · Submission</span>
+        <strong>Model candidate proof</strong>
+      </li>
+      <li className="phase-mobile-arrow" aria-hidden="true">↓</li>
+      <li className="phase-mobile-stage">
+        <span className="phase-mobile-step">02 · Policy check</span>
+        <strong>Cheat-checker</strong>
+      </li>
+      <li className="phase-mobile-arrow" aria-hidden="true">↓</li>
+      <li className="phase-mobile-stage">
+        <span className="phase-mobile-step">03 · Verification</span>
+        <strong>tlapm</strong>
+      </li>
+      <li className="phase-mobile-arrow" aria-hidden="true">↓</li>
+      <li className="phase-mobile-stage phase-mobile-verdicts">
+        <span className="phase-mobile-step">04 · Verdict</span>
+        {P_VERDICTS.map((verdict) => (
+          <div className="phase-mobile-verdict" key={verdict.label} style={{ background: verdict.bg, borderColor: verdict.color }}>
+            <strong style={{ color: verdict.color }}>{verdict.label}</strong>
+            <small>{verdict.note}</small>
+          </div>
+        ))}
+      </li>
+    </ol>
+  );
+}
+
+function APipeline({ layout = 'desktop' }) {
+  if (layout === 'mobile') return <PMobilePipeline />;
   return (
     <div className="banner">
       <div style={{
@@ -92,7 +124,7 @@ PROOF OBVIOUS`}
           <div style={{ fontFamily: 'var(--mono)', fontSize: PFS.caption, color: P.ink3, letterSpacing: 0.8, fontWeight: 600, textTransform: 'uppercase' }}>
             Verdict (in Docker sandbox)
           </div>
-          {verdicts.map(v => (
+          {P_VERDICTS.map(v => (
             <div key={v.label} style={{
               display: 'flex', flexDirection: 'column', gap: 2, padding: '5px 11px',
               background: v.bg,
