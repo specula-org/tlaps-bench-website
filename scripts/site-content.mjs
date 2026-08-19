@@ -71,7 +71,7 @@ export const SITE = {
       id: "full",
       label: "Full",
       blurb:
-        "Full catalog: 951 properties across 71 specs. Leaderboard scores use the Proof " +
+        "Full catalog: 951 tasks across 120 specs. Leaderboard scores use the Proof " +
         "Completion Core only.",
     },
   ],

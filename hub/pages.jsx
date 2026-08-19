@@ -53,14 +53,15 @@ function CopyBibBtn() {
 
 // ============ HOME ============
 function PageHome({ go }) {
-  const totalProperties = TLAPS_DATA.specs.reduce((sum, spec) => sum + spec.total, 0);
-  const totalSpecs = TLAPS_DATA.specs.length;
+  const fullSuite = TLAPS_DATA.suites.find((suite) => suite.id === "full");
+  const totalTasks = fullSuite.propertyCount;
+  const totalSpecs = fullSuite.specCount;
   return (
     <div>
       <section className="hero">
         <div className="wrap-narrow">
           <FadeIn>
-            <div className="news-banner"><span className="dot" />{totalProperties} proof properties · {totalSpecs} specs · checked by tlapm</div>
+            <div className="news-banner"><span className="dot" />{totalTasks} tasks · {totalSpecs} specs</div>
             <h1>The TLAPS Benchmark</h1>
             <p className="lead">
               A benchmark for AI-written TLAPS proofs, checked by tlapm with no partial credit.
@@ -70,7 +71,7 @@ function PageHome({ go }) {
               <a className="btn ghost" href="https://github.com/specula-org/tlaps-bench" target="_blank">GitHub</a>
             </div>
             <div className="stats">
-              <div><span className="big"><CountUp to={totalProperties} /></span>proof properties</div>
+              <div><span className="big"><CountUp to={totalTasks} /></span>tasks</div>
               <div><span className="big"><CountUp to={totalSpecs} /></span>specs</div>
               <div><span className="big accent">tlapm</span><span className="sub-dim">accept / reject</span></div>
             </div>
@@ -194,7 +195,7 @@ function PageBenchmark() {
   const specs = suite.specs || [];
   const categories = suite.categories || [];
   const totalSpecs = suite.specCount ?? specs.length;
-  const totalProperties = suite.propertyCount ?? specs.reduce((sum, spec) => sum + spec.total, 0);
+  const totalTasks = suite.propertyCount ?? specs.reduce((sum, spec) => sum + spec.total, 0);
   const showScratch = false;
   const colSpan = showScratch ? 5 : 4;
   const categoryGridStyle = categories.length === 1
@@ -230,14 +231,14 @@ function PageBenchmark() {
             {suite.blurb && <p className="lead" style={{ fontSize: 17, marginTop: 14 }}>{suite.blurb}</p>}
             <div className="dataset-facts" aria-label="Benchmark size">
               <div className="dataset-fact"><strong>{totalSpecs}</strong><span>specs</span></div>
-              <div className="dataset-fact"><strong>{totalProperties}</strong><span>proof properties</span></div>
+              <div className="dataset-fact"><strong>{totalTasks}</strong><span>tasks</span></div>
               {showScratch ? (
                 <>
                   <div className="dataset-fact"><strong>{suite.completion}</strong><span>completion</span></div>
                   <div className="dataset-fact"><strong>{suite.scratch}</strong><span>from scratch</span></div>
                 </>
               ) : (
-                <div className="dataset-fact"><strong>{suite.completion ?? totalProperties}</strong><span>completion</span></div>
+                <div className="dataset-fact"><strong>{suite.completion ?? totalTasks}</strong><span>completion</span></div>
               )}
             </div>
           </FadeIn>
@@ -264,11 +265,11 @@ function PageBenchmark() {
                   <p>{category.blurb}</p>
                   <dl className={`dataset-category-stats${showScratch ? "" : " dataset-category-stats-compact"}`}>
                     <div><dt>Specs</dt><dd>{category.specCount}</dd></div>
-                    <div><dt>Completion properties</dt><dd>{category.completion || "—"}</dd></div>
+                    <div><dt>Completion tasks</dt><dd>{category.completion || "—"}</dd></div>
                     {showScratch && (
-                      <div><dt>From-scratch properties</dt><dd>{category.scratch || "—"}</dd></div>
+                      <div><dt>From-scratch tasks</dt><dd>{category.scratch || "—"}</dd></div>
                     )}
-                    <div><dt>Total properties</dt><dd>{category.total}</dd></div>
+                    <div><dt>Total tasks</dt><dd>{category.total}</dd></div>
                   </dl>
                 </article>
               ))}
@@ -282,8 +283,8 @@ function PageBenchmark() {
                 <h2>{suite.label} suite specs</h2>
               </div>
               <p>
-                Each row is one spec, and the numbers are its proof properties. A dash (—)
-                means that the spec has no properties for that mode.
+                Each row is one spec, and the numbers are its tasks. A dash (—)
+                means that the spec has no tasks for that mode.
               </p>
             </div>
           </Reveal>
@@ -293,11 +294,11 @@ function PageBenchmark() {
                   <tr>
                     <th scope="col">Spec</th>
                     <th scope="col">Source</th>
-                    <th scope="col" className="dataset-number">Completion properties</th>
+                    <th scope="col" className="dataset-number">Completion tasks</th>
                     {showScratch && (
-                      <th scope="col" className="dataset-number">From-scratch properties</th>
+                      <th scope="col" className="dataset-number">From-scratch tasks</th>
                     )}
-                    <th scope="col" className="dataset-number">Total properties</th>
+                    <th scope="col" className="dataset-number">Total tasks</th>
                   </tr>
                 </thead>
                 {categories.map((category) => {
@@ -307,7 +308,7 @@ function PageBenchmark() {
                       <tr className="dataset-table-group-row">
                         <th colSpan={colSpan} scope="rowgroup">
                           <span>{category.name}</span>
-                          <small>{category.specCount} specs · {category.total} properties</small>
+                          <small>{category.specCount} specs · {category.total} tasks</small>
                         </th>
                       </tr>
                       {rows.map((spec) => (
@@ -323,11 +324,11 @@ function PageBenchmark() {
                             ) : spec.sourceName}
                           </td>
                           <td className="dataset-number">
-                            {spec.completion || <span className="dataset-na" title="No proof-completion properties">—</span>}
+                            {spec.completion || <span className="dataset-na" title="No proof-completion tasks">—</span>}
                           </td>
                           {showScratch && (
                             <td className="dataset-number">
-                              {spec.scratch || <span className="dataset-na" title="No proof-from-scratch properties">—</span>}
+                              {spec.scratch || <span className="dataset-na" title="No proof-from-scratch tasks">—</span>}
                             </td>
                           )}
                           <td className="dataset-number dataset-total">{spec.total}</td>

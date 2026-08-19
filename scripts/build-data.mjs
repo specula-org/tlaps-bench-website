@@ -693,6 +693,38 @@ const fullCatalog = JSON.parse(readFileSync("results/full-suite-catalog.json", "
 if (!Array.isArray(fullCatalog.specs) || fullCatalog.specs.length === 0) {
   throw new Error("results/full-suite-catalog.json: missing specs");
 }
+if (fullCatalog.specCount !== fullCatalog.specs.length) {
+  throw new Error(
+    `results/full-suite-catalog.json: specCount ${fullCatalog.specCount} != ${fullCatalog.specs.length} specs`,
+  );
+}
+const fullSpecKeys = new Set();
+const fullCounts = { completion: 0, scratch: 0, total: 0 };
+for (const spec of fullCatalog.specs) {
+  if (typeof spec.scoringKey !== "string" || !spec.scoringKey.endsWith(".tla")) {
+    throw new Error(`results/full-suite-catalog.json: spec ${spec.id} missing scoringKey`);
+  }
+  if (fullSpecKeys.has(spec.scoringKey)) {
+    throw new Error(`results/full-suite-catalog.json: duplicate spec ${spec.scoringKey}`);
+  }
+  fullSpecKeys.add(spec.scoringKey);
+  for (const field of ["completion", "scratch", "total"]) {
+    if (!Number.isInteger(spec[field]) || spec[field] < 0) {
+      throw new Error(`results/full-suite-catalog.json: spec ${spec.scoringKey} has invalid ${field}`);
+    }
+  }
+  if (spec.total !== spec.completion + spec.scratch) {
+    throw new Error(`results/full-suite-catalog.json: spec ${spec.scoringKey} total does not add up`);
+  }
+  fullCounts.completion += spec.completion;
+  fullCounts.scratch += spec.scratch;
+  fullCounts.total += spec.total;
+}
+if (fullCatalog.completion !== fullCounts.completion ||
+    fullCatalog.scratch !== fullCounts.scratch ||
+    fullCatalog.propertyCount !== fullCounts.total) {
+  throw new Error("results/full-suite-catalog.json: declared task counts do not match its specs");
+}
 const suites = [
   {
     ...suiteInfo.core,
@@ -742,7 +774,7 @@ const data = {
       tip: "Mean active agent time per task. The secondary value is the sum of task time; parallel tasks overlap, so it is not experiment wall-clock time. Lower is better.",
     },
   ],
-  // Home uses the Full suite catalog; Benchmark page switches via suites[].
+  // Benchmark page switches between these Full-catalog defaults and suites[].
   categories: fullCatalog.categories,
   specs: fullCatalog.specs,
   suites,
