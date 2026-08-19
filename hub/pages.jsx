@@ -67,7 +67,7 @@ function PageHome({ go }) {
             <div className="news-banner"><span className="dot" />{totalTasks} tasks · {totalSpecs} specs</div>
             <h1>The TLAPS Benchmark</h1>
             <p className="lead">
-              A benchmark for AI-written TLAPS proofs, checked by tlapm with no partial credit.
+              A benchmark for evaluating AI systems on mechanically checked TLA+ proofs.
             </p>
             <div style={{ display: "flex", gap: 10, justifyContent: "center", marginTop: 28, flexWrap: "wrap" }}>
               <button className="btn primary" onClick={() => go("leaderboard")}>View Leaderboard</button>
@@ -76,7 +76,6 @@ function PageHome({ go }) {
             <div className="stats">
               <div><span className="big"><CountUp to={totalTasks} /></span>tasks</div>
               <div><span className="big"><CountUp to={totalSpecs} /></span>specs</div>
-              <div><span className="big accent">tlapm</span><span className="sub-dim">accept / reject</span></div>
             </div>
           </FadeIn>
         </div>
@@ -90,8 +89,8 @@ function PageHome({ go }) {
               {TLAPS_DATA.paper.overview}
             </p>
             <p style={{ fontFamily: "var(--serif)", fontSize: 18, lineHeight: 1.75, color: "var(--ink-2)", marginTop: 14, textWrap: "pretty" }}>
-              Before tlapm runs, a cheat-checker screens each submission. A pass is a real proof,
-              not a weakened theorem or an admitted step.
+              Before verification, a policy checker rejects prohibited edits, including changes
+              to the target theorem, new axioms, and model-added admitted steps.
             </p>
           </Reveal>
         </div>

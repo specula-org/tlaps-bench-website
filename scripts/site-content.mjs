@@ -8,9 +8,8 @@ export const SITE = {
     title: "TLAPS-Bench: Evaluating AI on Writing TLAPS Proofs",
     repo: "https://github.com/specula-org/tlaps-bench",
     overview:
-      "TLAPS proofs are checked by tlapm: accepted or rejected, with no partial credit. " +
-      "Each task is a TLA+ theorem whose proof body has been replaced by PROOF OBVIOUS; " +
-      "the model must write a proof that tlapm accepts.",
+      "Each proof-completion task presents a TLA+ theorem with one proof removed. " +
+      "The model must write a proof that tlapm accepts.",
   },
 
   modes: [
