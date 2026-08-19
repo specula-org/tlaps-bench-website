@@ -290,10 +290,10 @@ table.lb thead th { font-family: var(--mono); font-size: 11.5px; text-transform:
 table.lb thead th:hover { color: var(--ink); }
 .sort-button { display: inline-flex; width: 100%; align-items: center; gap: 2px; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; text-align: inherit; text-transform: inherit; letter-spacing: inherit; cursor: pointer; }
 .lb-metric .sort-button { justify-content: flex-end; }
-.sort-button:focus-visible, .task-sort-button:focus-visible, .expand-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 3px; }
-table.lb thead th .sort { opacity: 0.4; font-size: 15px; margin-left: 4px; display: inline-block; transform-origin: 50% 50%; transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1), opacity 200ms, color 200ms; }
-table.lb thead th.sorted .sort { opacity: 1; color: var(--accent-text); }
-table.lb thead th.sorted-asc .sort { transform: rotate(180deg); }
+.sort-button:focus-visible, .breakdown-sort-button:focus-visible, .task-sort-button:focus-visible, .expand-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 3px; }
+table.lb > thead > tr > th .sort { opacity: 0.4; font-size: 15px; margin-left: 4px; display: inline-block; transform-origin: 50% 50%; transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1), opacity 200ms, color 200ms; }
+table.lb > thead > tr > th.sorted .sort { opacity: 1; color: var(--accent-text); }
+table.lb > thead > tr > th.sorted-asc .sort { transform: rotate(180deg); }
 /* Separate the selected mode's pass rate from its usage columns. */
 table.lb th.lb-gap, table.lb td.lb-gap { padding-left: 44px; }
 /* mode-column tooltip: hover the header label for a concise explanation of the mode */
@@ -322,16 +322,16 @@ table.lb tr.lb-empty-row { cursor: default; }
 table.lb tr.lb-empty-row:hover { background: transparent; }
 table.lb tr.lb-empty-row td { border-bottom: none; }
 .lb-empty { padding: 48px 20px; text-align: center; color: var(--ink-3); font-family: var(--sans); font-size: 14px; }
-table.lb tbody tr { cursor: pointer; transition: background 180ms; }
-table.lb tbody > tr:not(.expand-row) { animation: lbRowEnter 280ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+table.lb > tbody > tr { cursor: pointer; transition: background 180ms; }
+table.lb > tbody > tr:not(.expand-row) { animation: lbRowEnter 280ms cubic-bezier(0.22, 1, 0.36, 1) both; }
 @keyframes lbRowEnter { from { opacity: 0; } to { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) {
-  table.lb tbody > tr { animation: none !important; transition: none !important; }
+  table.lb > tbody > tr { animation: none !important; transition: none !important; }
   .expand-body, .expand-body .pad, .expand-toggle,
-  .lb-usage-disclosure summary::before { transition: none !important; }
+  .lb-usage-disclosure summary::before, .breakdown-sort-button .sort { transition: none !important; }
 }
-table.lb tbody tr:hover { background: var(--paper-2); }
-table.lb tbody tr.expanded { background: var(--paper-2); }
+table.lb > tbody > tr:hover { background: var(--paper-2); }
+table.lb > tbody > tr.expanded { background: var(--paper-2); }
 table.lb tr.expand-row { cursor: default; background: var(--paper-2); }
 table.lb tr.expand-row > td { padding: 0; border-bottom: 1px solid var(--line-soft); }
 .expand-body { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 380ms cubic-bezier(.2,.7,.2,1); }
@@ -404,6 +404,14 @@ table.lb-complexity-table th:nth-child(n+4),
 table.lb-complexity-table td:nth-child(n+4) { width: 12.5%; }
 table.breakdown th.bd-mode { text-align: right; }
 table.breakdown th.bd-usage-head { text-align: right; white-space: normal; font-size: 11px; line-height: 1.35; letter-spacing: 0.05em; }
+.breakdown-sort-button { display: inline-flex; width: 100%; align-items: center; gap: 4px; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; letter-spacing: inherit; line-height: inherit; text-align: inherit; text-transform: inherit; cursor: pointer; }
+table.breakdown th:nth-child(n+3) .breakdown-sort-button { justify-content: flex-end; }
+.breakdown-sort-button .sort { display: inline-block; flex: 0 0 auto; margin-left: 2px; opacity: 0.32; font-size: 13px; transform-origin: center; transition: transform 160ms, opacity 160ms, color 160ms; }
+.breakdown-static-header { display: none; }
+table.breakdown th.breakdown-sorted { color: var(--ink); }
+table.breakdown th.breakdown-sorted .sort { opacity: 1; color: var(--accent-text); }
+table.breakdown th.breakdown-sorted-asc .sort { transform: rotate(180deg); }
+.breakdown-mobile-sort { display: none; }
 table.breakdown td { padding: 9px 14px; border-bottom: 1px solid var(--line-soft); vertical-align: middle; background: var(--paper); }
 table.breakdown tbody tr:last-child td { border-bottom: none; }
 .bd-name { font-family: var(--mono); font-size: 13px; color: var(--ink-2); padding-right: 24px !important; overflow: hidden; text-overflow: ellipsis; }
@@ -650,7 +658,18 @@ hr.sep { border: none; border-top: 1px solid var(--line-soft); margin: 40px 0; }
   .detail-caption { max-width: 680px; }
   .usage-summary { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 
+  .breakdown-mobile-sort { display: flex; align-items: center; justify-content: flex-end; gap: 8px; margin-bottom: 9px; }
+  .breakdown-mobile-sort label { width: min(240px, calc(100% - 42px)); min-width: 0; }
+  .breakdown-mobile-sort select { width: 100%; height: 34px; padding: 0 28px 0 10px; border: 1px solid var(--line); border-radius: 7px; outline: none; background: var(--paper); color: var(--ink); font-family: var(--mono); font-size: 12px; cursor: pointer; }
+  .breakdown-mobile-sort select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  .breakdown-sort-direction { display: inline-flex; width: 34px; height: 34px; flex: 0 0 34px; align-items: center; justify-content: center; border: 1px solid var(--line); border-radius: 7px; background: var(--paper); color: var(--ink); font-family: var(--mono); cursor: pointer; }
+  .breakdown-sort-direction:hover:not(:disabled) { border-color: var(--accent); color: var(--accent-text); }
+  .breakdown-sort-direction:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .breakdown-sort-direction:disabled { color: var(--ink-3); cursor: default; opacity: 0.45; }
+
   .lb-breakdown-scroll, .task-scroll { overflow-x: hidden; }
+  table.lb-breakdown-table .breakdown-sort-button { display: none; }
+  table.lb-breakdown-table .breakdown-static-header { display: inline; }
   table.lb-breakdown-table, table.task-table { display: block; min-width: 0; table-layout: auto; }
   table.lb-breakdown-table thead, table.lb-breakdown-table thead tr,
   table.task-table thead, table.task-table thead tr {

@@ -107,43 +107,138 @@ function PricingNote({ model }) {
   );
 }
 
-function ComplexityBreakdown({ model, selectedMode, isOpen }) {
-  const bands = model.perComplexity[selectedMode];
-  const meta = TLAPS_DATA.complexity;
-  const byId = Object.fromEntries(meta.bands.map((band) => [band.id, band]));
+const DEFAULT_BREAKDOWN_SORT = { key: "canonical", dir: "asc" };
+
+const SPEC_BREAKDOWN_COLUMNS = [
+  { key: "name", label: "Spec" },
+  { key: "source", label: "Source" },
+  { key: "rate", label: "Pass rate" },
+  { key: "activeTimePerTask", label: "Active time / task" },
+  { key: "totalTokensPerTask", label: "Tokens / task" },
+  { key: "cacheRatePct", label: "Cache rate" },
+  { key: "equivalentCostPerTask", label: "Price / task" },
+];
+
+const COMPLEXITY_BREAKDOWN_COLUMNS = [
+  { key: "complexity", label: "Reference proof steps" },
+  { key: "total", label: "Tasks" },
+  ...SPEC_BREAKDOWN_COLUMNS.slice(2),
+];
+
+function sortedBreakdownRows(rows, sort, valueFor) {
+  if (sort.key === "canonical") return rows;
+  return rows.map((row, canonicalIndex) => ({ row, canonicalIndex })).sort((a, b) => {
+    const av = valueFor(a.row, sort.key);
+    const bv = valueFor(b.row, sort.key);
+    const aMissing = av == null || (typeof av === "number" && Number.isNaN(av));
+    const bMissing = bv == null || (typeof bv === "number" && Number.isNaN(bv));
+    if (aMissing || bMissing) {
+      if (aMissing !== bMissing) return aMissing ? 1 : -1;
+      return a.canonicalIndex - b.canonicalIndex;
+    }
+    const comparison = typeof av === "string"
+      ? av.localeCompare(bv, undefined, { numeric: true, sensitivity: "base" })
+      : av - bv;
+    return (sort.dir === "asc" ? comparison : -comparison) || a.canonicalIndex - b.canonicalIndex;
+  }).map(({ row }) => row);
+}
+
+function nextBreakdownSort(current, key) {
+  if (key === "canonical") return DEFAULT_BREAKDOWN_SORT;
+  return {
+    key,
+    dir: current.key === key && current.dir === "asc" ? "desc" : "asc",
+  };
+}
+
+function BreakdownSortHeader({ column, sort, setSort, className = "" }) {
+  const active = sort.key === column.key;
   return (
-    <div className="bd-scroll lb-breakdown-scroll">
-      <table className="breakdown lb-breakdown-table lb-complexity-table">
-        <caption className="sr-only">Pass rate and usage by reference-proof length</caption>
-        <thead>
-          <tr>
-            <th>{meta.label}</th>
-            <th>Tasks</th>
-            <th className="bd-mode">Pass rate</th>
-            <th className="bd-usage-head bd-supporting">Active time / task</th>
-            <th className="bd-usage-head bd-supporting">Tokens / task</th>
-            <th className="bd-usage-head bd-supporting">Cache rate</th>
-            <th className="bd-usage-head bd-supporting">Price / task</th>
-          </tr>
-        </thead>
-        <tbody>
-          {bands.map((band) => (
-            <tr className="bd-row lb-breakdown-row" key={band.id}>
-              <td className="bd-name spec-name">
-                {byId[band.id].label}
-                {byId[band.id].note && <small className="band-note">{byId[band.id].note}</small>}
-              </td>
-              <td className="lb-breakdown-source lb-complexity-tasks" data-label="Tasks">{band.total}</td>
-              <BreakdownCell v={band.rate == null ? null : band} isOpen={isOpen} />
-              <BreakdownUsageCell v={band.rate == null ? null : band} format="duration" />
-              <BreakdownUsageCell v={band.rate == null ? null : band} format="tokens" />
-              <BreakdownUsageCell v={band.rate == null ? null : band} format="cache" />
-              <BreakdownUsageCell v={band.rate == null ? null : band} format="usd" />
-            </tr>
+    <th scope="col" className={`${className}${active ? " breakdown-sorted" : ""}${active && sort.dir === "asc" ? " breakdown-sorted-asc" : ""}`}
+      aria-sort={active ? (sort.dir === "asc" ? "ascending" : "descending") : undefined}>
+      <button type="button" className="breakdown-sort-button"
+        aria-label={`Sort by ${column.label}${active ? `, currently ${sort.dir === "asc" ? "ascending" : "descending"}` : ""}`}
+        onClick={() => setSort((current) => nextBreakdownSort(current, column.key))}>
+        {column.label} <span className="sort" aria-hidden="true">▾</span>
+      </button>
+      <span className="breakdown-static-header">{column.label}</span>
+    </th>
+  );
+}
+
+function BreakdownMobileSort({ label, columns, sort, setSort }) {
+  const canonical = sort.key === "canonical";
+  const selectSort = (key) => setSort((current) => {
+    if (key === "canonical") return DEFAULT_BREAKDOWN_SORT;
+    return { key, dir: current.key === key ? current.dir : "asc" };
+  });
+  return (
+    <div className="breakdown-mobile-sort" role="group" aria-label={`${label} sorting`}>
+      <label>
+        <span className="sr-only">Sort {label.toLowerCase()} by</span>
+        <select value={sort.key} onChange={(event) => selectSort(event.target.value)}
+          aria-label={`Sort ${label.toLowerCase()} by`}>
+          <option value="canonical">Canonical order</option>
+          {columns.map((column) => (
+            <option key={column.key} value={column.key}>{column.label}</option>
           ))}
-        </tbody>
-      </table>
+        </select>
+      </label>
+      <button type="button" className="breakdown-sort-direction" disabled={canonical}
+        aria-label={canonical ? "Canonical order has no direction" : `Sort ${sort.dir === "asc" ? "descending" : "ascending"}`}
+        title={canonical ? "Choose a column to set a direction" : `Sort ${sort.dir === "asc" ? "descending" : "ascending"}`}
+        onClick={() => setSort((current) => nextBreakdownSort(current, current.key))}>
+        <span aria-hidden="true">{sort.dir === "asc" ? "↑" : "↓"}</span>
+      </button>
     </div>
+  );
+}
+
+function ComplexityBreakdown({ model, selectedMode, isOpen, sort, setSort }) {
+  const meta = TLAPS_DATA.complexity;
+  const byId = Object.fromEntries(meta.bands.map((band, index) => [band.id, { ...band, canonicalIndex: index }]));
+  const bands = sortedBreakdownRows(
+    model.perComplexity[selectedMode],
+    sort,
+    (band, key) => key === "complexity" ? byId[band.id].canonicalIndex : band[key]
+  );
+  return (
+    <React.Fragment>
+      <BreakdownMobileSort label="Complexity bands" columns={COMPLEXITY_BREAKDOWN_COLUMNS}
+        sort={sort} setSort={setSort} />
+      <div className="bd-scroll lb-breakdown-scroll">
+        <table className="breakdown lb-breakdown-table lb-complexity-table">
+          <caption className="sr-only">Pass rate and usage by reference-proof length</caption>
+          <thead>
+            <tr>
+              <BreakdownSortHeader column={COMPLEXITY_BREAKDOWN_COLUMNS[0]} sort={sort} setSort={setSort} />
+              <BreakdownSortHeader column={COMPLEXITY_BREAKDOWN_COLUMNS[1]} sort={sort} setSort={setSort} />
+              <BreakdownSortHeader column={COMPLEXITY_BREAKDOWN_COLUMNS[2]} sort={sort} setSort={setSort} className="bd-mode" />
+              {COMPLEXITY_BREAKDOWN_COLUMNS.slice(3).map((column) => (
+                <BreakdownSortHeader key={column.key} column={column} sort={sort} setSort={setSort}
+                  className="bd-usage-head bd-supporting" />
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {bands.map((band) => (
+              <tr className="bd-row lb-breakdown-row" key={band.id}>
+                <td className="bd-name spec-name">
+                  {byId[band.id].label}
+                  {byId[band.id].note && <small className="band-note">{byId[band.id].note}</small>}
+                </td>
+                <td className="lb-breakdown-source lb-complexity-tasks" data-label="Tasks">{band.total}</td>
+                <BreakdownCell v={band.rate == null ? null : band} isOpen={isOpen} />
+                <BreakdownUsageCell v={band.rate == null ? null : band} format="duration" />
+                <BreakdownUsageCell v={band.rate == null ? null : band} format="tokens" />
+                <BreakdownUsageCell v={band.rate == null ? null : band} format="cache" />
+                <BreakdownUsageCell v={band.rate == null ? null : band} format="usd" />
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </React.Fragment>
   );
 }
 
@@ -375,54 +470,63 @@ function ModelUsageDisclosure({ model, selectedMode }) {
   );
 }
 
-function SpecificationBreakdown({ model, selectedMode, isOpen }) {
-  const specs = (
+function SpecificationBreakdown({ model, selectedMode, isOpen, sort, setSort }) {
+  const specs = sortedBreakdownRows((
     (TLAPS_DATA.suites || []).find((suite) => suite.id === "core")?.specs
     || TLAPS_DATA.specs
-  ).filter((spec) => model.perSpec?.[spec.id]?.[selectedMode]);
+  ).filter((spec) => model.perSpec?.[spec.id]?.[selectedMode]), sort, (spec, key) => {
+    if (key === "name") return spec.name;
+    if (key === "source") return spec.sourceName;
+    return model.perSpec[spec.id][selectedMode]?.[key];
+  });
   return (
-    <div className="bd-scroll lb-breakdown-scroll">
-      <table className="breakdown lb-breakdown-table lb-spec-table">
-        <caption className="sr-only">Pass rate and usage by specification</caption>
-        <thead>
-          <tr>
-            <th>Spec</th>
-            <th>Source</th>
-            <th className="bd-mode">Pass rate</th>
-            <th className="bd-usage-head bd-supporting">Active time / task</th>
-            <th className="bd-usage-head bd-supporting">Tokens / task</th>
-            <th className="bd-usage-head bd-supporting">Cache rate</th>
-            <th className="bd-usage-head bd-supporting">Price / task</th>
-          </tr>
-        </thead>
-        <tbody>
-          {specs.map((spec) => {
-            const score = model.perSpec[spec.id][selectedMode];
-            return (
-              <tr className="bd-row lb-breakdown-row" key={spec.id}>
-                <td className="bd-name spec-name" data-label="Spec">
-                  {spec.url ? (
-                    <a href={spec.url} target="_blank" rel="noopener"
-                      onClick={(event) => event.stopPropagation()}>{spec.name}</a>
-                  ) : spec.name}
-                </td>
-                <td className="lb-breakdown-source" data-label="Source">
-                  {spec.sourceUrl ? (
-                    <a href={spec.sourceUrl} target="_blank" rel="noopener"
-                      onClick={(event) => event.stopPropagation()}>{spec.sourceName}</a>
-                  ) : spec.sourceName}
-                </td>
-                <BreakdownCell v={score} isOpen={isOpen} />
-                <BreakdownUsageCell v={score} format="duration" />
-                <BreakdownUsageCell v={score} format="tokens" />
-                <BreakdownUsageCell v={score} format="cache" />
-                <BreakdownUsageCell v={score} format="usd" />
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    </div>
+    <React.Fragment>
+      <BreakdownMobileSort label="Specifications" columns={SPEC_BREAKDOWN_COLUMNS}
+        sort={sort} setSort={setSort} />
+      <div className="bd-scroll lb-breakdown-scroll">
+        <table className="breakdown lb-breakdown-table lb-spec-table">
+          <caption className="sr-only">Pass rate and usage by specification</caption>
+          <thead>
+            <tr>
+              {SPEC_BREAKDOWN_COLUMNS.slice(0, 2).map((column) => (
+                <BreakdownSortHeader key={column.key} column={column} sort={sort} setSort={setSort} />
+              ))}
+              <BreakdownSortHeader column={SPEC_BREAKDOWN_COLUMNS[2]} sort={sort} setSort={setSort} className="bd-mode" />
+              {SPEC_BREAKDOWN_COLUMNS.slice(3).map((column) => (
+                <BreakdownSortHeader key={column.key} column={column} sort={sort} setSort={setSort}
+                  className="bd-usage-head bd-supporting" />
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {specs.map((spec) => {
+              const score = model.perSpec[spec.id][selectedMode];
+              return (
+                <tr className="bd-row lb-breakdown-row" key={spec.id}>
+                  <td className="bd-name spec-name" data-label="Spec">
+                    {spec.url ? (
+                      <a href={spec.url} target="_blank" rel="noopener"
+                        onClick={(event) => event.stopPropagation()}>{spec.name}</a>
+                    ) : spec.name}
+                  </td>
+                  <td className="lb-breakdown-source" data-label="Source">
+                    {spec.sourceUrl ? (
+                      <a href={spec.sourceUrl} target="_blank" rel="noopener"
+                        onClick={(event) => event.stopPropagation()}>{spec.sourceName}</a>
+                    ) : spec.sourceName}
+                  </td>
+                  <BreakdownCell v={score} isOpen={isOpen} />
+                  <BreakdownUsageCell v={score} format="duration" />
+                  <BreakdownUsageCell v={score} format="tokens" />
+                  <BreakdownUsageCell v={score} format="cache" />
+                  <BreakdownUsageCell v={score} format="usd" />
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </React.Fragment>
   );
 }
 
@@ -430,6 +534,14 @@ function ModelDetail({ model, selectedMode, isOpen, detailView, setDetailView })
   const hasComplexity = !!model.perComplexity?.[selectedMode];
   const activeView = detailView === "complexity" && !hasComplexity ? "spec" : detailView;
   const modeScore = model.perMode?.[selectedMode];
+  const [breakdownSorts, setBreakdownSorts] = useS_lb({
+    spec: DEFAULT_BREAKDOWN_SORT,
+    complexity: DEFAULT_BREAKDOWN_SORT,
+  });
+  const setBreakdownSort = (view, update) => setBreakdownSorts((current) => ({
+    ...current,
+    [view]: typeof update === "function" ? update(current[view]) : update,
+  }));
   const descriptions = {
     spec: "Pass rates for each specification. These values are averaged to produce the leaderboard score.",
     complexity: "Pass rates grouped by the number of steps in the reference proof.",
@@ -473,9 +585,13 @@ function ModelDetail({ model, selectedMode, isOpen, detailView, setDetailView })
         <ModelUsageDisclosure model={model} selectedMode={selectedMode} />
       )}
       {activeView === "complexity" && hasComplexity ? (
-        <ComplexityBreakdown model={model} selectedMode={selectedMode} isOpen={isOpen} />
+        <ComplexityBreakdown model={model} selectedMode={selectedMode} isOpen={isOpen}
+          sort={breakdownSorts.complexity}
+          setSort={(update) => setBreakdownSort("complexity", update)} />
       ) : activeView === "spec" ? (
-        <SpecificationBreakdown model={model} selectedMode={selectedMode} isOpen={isOpen} />
+        <SpecificationBreakdown model={model} selectedMode={selectedMode} isOpen={isOpen}
+          sort={breakdownSorts.spec}
+          setSort={(update) => setBreakdownSort("spec", update)} />
       ) : <TaskBreakdown model={model} selectedMode={selectedMode} />}
     </div>
   );
