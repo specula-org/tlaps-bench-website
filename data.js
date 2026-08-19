@@ -5,7 +5,7 @@ window.TLAPS_DATA = {
   "paper": {
     "title": "TLAPS-Bench: Evaluating AI on Writing TLAPS Proofs",
     "repo": "https://github.com/specula-org/tlaps-bench",
-    "overview": "Each proof-completion task presents a TLA+ theorem with one proof removed. The model must write a proof that tlapm accepts."
+    "overview": "Tasks ask models to complete a missing proof or write one from scratch."
   },
   "complexity": {
     "label": "Reference proof steps",
