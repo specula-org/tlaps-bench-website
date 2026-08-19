@@ -55,7 +55,7 @@ function Nav({ route, tweaks, update }) {
 }
 
 function App() {
-  const [route, go] = useHashRoute("home");
+  const [route] = useHashRoute("home");
   const [tweaks, setTweaks] = useState(() => {
     try { const saved = localStorage.getItem("tlaps_tweaks"); if (saved) return JSON.parse(saved); } catch (e) {}
     const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
@@ -91,7 +91,7 @@ function App() {
   if (route === "leaderboard") Page = <PageLeaderboard />;
   else if (route === "benchmark") Page = <PageBenchmark />;
   else if (route === "cite") Page = <PageCite />;
-  else Page = <PageHome go={go} />;
+  else Page = <PageHome />;
 
   return (
     <div data-screen-label={route}>

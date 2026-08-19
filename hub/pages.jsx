@@ -1,4 +1,4 @@
-/* global React, TLAPS_DATA, HubLeaderboard, Reveal, CountUp, FadeIn, AnimBar, APipeline */
+/* global React, TLAPS_DATA, HubLeaderboard, Reveal, FadeIn, AnimBar, APipeline */
 const { useState: useS_p, useTransition: useT_p } = React;
 
 function PipelineBanner() {
@@ -34,44 +34,64 @@ function CopyBibBtn() {
 }
 
 // ============ HOME ============
-function PageHome({ go }) {
+function PageHome() {
   const fullSuite = TLAPS_DATA.suites.find((suite) => suite.id === "full");
   const totalTasks = fullSuite.propertyCount;
   const totalSpecs = fullSuite.specCount;
   return (
-    <div>
-      <section className="hero">
-        <div className="wrap-narrow">
-          <FadeIn>
-            <div className="news-banner"><span className="dot" />{totalTasks} tasks · {totalSpecs} specs</div>
-            <h1>The TLAPS Benchmark</h1>
-            <p className="lead">
-              A benchmark for evaluating AI systems on mechanically checked TLA+ proofs.
-            </p>
-            <div style={{ display: "flex", gap: 10, justifyContent: "center", marginTop: 28, flexWrap: "wrap" }}>
-              <button className="btn primary" onClick={() => go("leaderboard")}>View Leaderboard</button>
-              <a className="btn ghost" href="https://github.com/specula-org/tlaps-bench" target="_blank">GitHub</a>
+    <div className="home-page">
+      <section className="home-hero">
+        <div className="home-proof-fragment home-proof-fragment-left" aria-hidden="true">
+          THEOREM<br />&nbsp;&nbsp;ASSUME<br />&nbsp;&nbsp;PROVE
+        </div>
+        <div className="home-proof-fragment home-proof-fragment-right" aria-hidden="true">
+          &lt;1&gt;1.<br />&lt;1&gt;2.<br />&lt;1&gt; QED
+        </div>
+
+        <div className="home-hero-inner">
+          <div className="home-kicker"><span aria-hidden="true" />TLA+ proof benchmark</div>
+          <h1>
+            <span className="home-headline-line">Can LLMs <em>Prove</em></span>{" "}
+            <span className="home-headline-line home-headline-accent">TLA+ Theorems?</span>
+          </h1>
+          <p className="home-hero-lead">
+            TLAPS-Bench evaluates language models on writing TLA+ proofs. Every proof is
+            mechanically checked by tlapm.
+          </p>
+          <div className="home-actions">
+            <a className="btn accent" href="#/leaderboard">View Leaderboard</a>
+            <a className="btn" href="#/benchmark">Explore Benchmark</a>
+            <a className="btn ghost" href="https://github.com/specula-org/tlaps-bench" target="_blank" rel="noopener">GitHub</a>
+          </div>
+          <div className="home-metrics" aria-label="Benchmark summary">
+            <div className="home-metric">
+              <strong>{totalTasks}</strong>
+              <span>Tasks</span>
             </div>
-            <div className="stats">
-              <div><span className="big"><CountUp to={totalTasks} /></span>tasks</div>
-              <div><span className="big"><CountUp to={totalSpecs} /></span>specs</div>
+            <div className="home-metric">
+              <strong>{totalSpecs}</strong>
+              <span>Specs</span>
             </div>
-          </FadeIn>
+            <div className="home-metric home-metric-system">
+              <strong>TLAPS</strong>
+              <span>Proof system</span>
+            </div>
+          </div>
         </div>
       </section>
 
-      <section className="section-tight" style={{ paddingTop: 20 }}>
-        <div className="wrap-narrow" style={{ textAlign: "center" }}>
-          <Reveal delay={120}>
-            <span className="eyebrow">Overview</span>
-            <p style={{ fontFamily: "var(--serif)", fontSize: 18, lineHeight: 1.75, color: "var(--ink)", marginTop: 16, textWrap: "pretty" }}>
+      <section className="home-overview">
+        <div className="home-overview-inner">
+          <span className="eyebrow">Overview</span>
+          <div className="home-overview-copy">
+            <p>
               {TLAPS_DATA.paper.overview}
             </p>
-            <p style={{ fontFamily: "var(--serif)", fontSize: 18, lineHeight: 1.75, color: "var(--ink-2)", marginTop: 14, textWrap: "pretty" }}>
+            <p>
               Before verification, a cheat-checker rejects prohibited edits, including changes
               to the target theorem, new axioms, and model-added admitted steps.
             </p>
-          </Reveal>
+          </div>
         </div>
       </section>
 
