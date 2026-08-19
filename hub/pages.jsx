@@ -292,7 +292,7 @@ function PageBenchmark() {
             </div>
           </Reveal>
           <div className="dataset-table-shell">
-            <table className="dataset-table">
+            <table className={`dataset-table${showScratch ? " dataset-table-with-scratch" : ""}`}>
                 <thead>
                   <tr>
                     <th scope="col">Spec</th>
@@ -321,20 +321,20 @@ function PageBenchmark() {
                               <a href={spec.url} target="_blank" rel="noopener">{spec.name}<span aria-hidden="true">↗</span></a>
                             ) : spec.name}
                           </th>
-                          <td className="dataset-source">
+                          <td className="dataset-source" data-label="Source">
                             {spec.sourceUrl ? (
                               <a href={spec.sourceUrl} target="_blank" rel="noopener">{spec.sourceName}<span aria-hidden="true">↗</span></a>
                             ) : spec.sourceName}
                           </td>
-                          <td className="dataset-number">
+                          <td className="dataset-number" data-label="Completion tasks">
                             {spec.completion || <span className="dataset-na" title="No proof-completion tasks">—</span>}
                           </td>
                           {showScratch && (
-                            <td className="dataset-number">
+                            <td className="dataset-number" data-label="From-scratch tasks">
                               {spec.scratch || <span className="dataset-na" title="No proof-from-scratch tasks">—</span>}
                             </td>
                           )}
-                          <td className="dataset-number dataset-total">{spec.total}</td>
+                          <td className="dataset-number dataset-total" data-label="Total tasks">{spec.total}</td>
                         </tr>
                       ))}
                     </tbody>
