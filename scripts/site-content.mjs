@@ -43,7 +43,7 @@ export const SITE = {
       id: "libraries",
       name: "Example libraries",
       blurb:
-        "Specs and proof properties from the TLA+ Examples repository, the TLAPS distribution, " +
+        "Specs and proof tasks from the TLA+ Examples repository, the TLAPS distribution, " +
         "and related teaching and algorithm examples.",
     },
     {

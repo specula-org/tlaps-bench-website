@@ -1791,7 +1791,7 @@ window.TLAPS_DATA = {
         {
           "id": "libraries",
           "name": "Example libraries",
-          "blurb": "Specs and proof properties from the TLA+ Examples repository, the TLAPS distribution, and related teaching and algorithm examples.",
+          "blurb": "Specs and proof tasks from the TLA+ Examples repository, the TLAPS distribution, and related teaching and algorithm examples.",
           "specCount": 54,
           "completion": 134,
           "scratch": 0,

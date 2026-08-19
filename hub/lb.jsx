@@ -21,7 +21,7 @@ function BreakdownCell({ v, isOpen }) {
   if (v == null) {
     return (
       <td className="bd-cell">
-        <span className="bd-na" title="Not applicable — this spec has no properties in this mode">—</span>
+        <span className="bd-na" title="Not applicable — this spec has no tasks in this mode">—</span>
       </td>
     );
   }
@@ -37,7 +37,7 @@ function BreakdownCell({ v, isOpen }) {
           {v.pass}/{v.total}
           {v.partialScope && (
             <em className="scope-partial"
-                title={`This run covers ${v.total} of the ${v.canonicalTotal} canonical properties in this spec.`}>
+                title={`This run covers ${v.total} of the ${v.canonicalTotal} canonical tasks in this spec.`}>
               {" "}of {v.canonicalTotal}
             </em>
           )}
@@ -111,7 +111,7 @@ function ComplexityBreakdown({ model, selectedMode, isOpen }) {
         <thead>
           <tr>
             <th>{meta.label}</th>
-            <th>Properties</th>
+            <th>Tasks</th>
             <th className="bd-mode">Pass rate</th>
             <th className="bd-usage-head bd-supporting">Active time / task</th>
             <th className="bd-usage-head bd-supporting">Tokens / task</th>
@@ -471,7 +471,7 @@ function HubLeaderboard({ showFilters = true, fixedMode = null, fixedCohort = nu
             <h2 className="lb-section-title">
               <span className="lb-section-badge">{modeLabels[fixedMode]}</span>
               <span className="lb-section-count">
-                {modeTotal(fixedMode)} properties
+                {modeTotal(fixedMode)} tasks
               </span>
             </h2>
           </div>
