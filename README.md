@@ -24,13 +24,19 @@ Then open http://localhost:8000
 - The Core task list lives in `results/core-manifest.json`.
 - Page copy lives in `scripts/site-content.mjs`.
 
-After changing results or content, rebuild:
+Install the build dependencies once:
 
 ```bash
-node scripts/build-data.mjs
+npm install
 ```
 
-Use `--check` to validate without rewriting `data.js`.
+After changing results, content, or JSX, rebuild:
+
+```bash
+npm run build
+```
+
+Use `node scripts/build-data.mjs --check` to validate the generated data without rewriting `data.js`.
 
 ## Updating the Core
 

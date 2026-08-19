@@ -8,8 +8,9 @@
 //   node scripts/build-data.mjs
 //   node scripts/build-data.mjs --check
 import { createHash } from "node:crypto";
-import { readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { SITE } from "./site-content.mjs";
+import { specSourceUrl } from "./spec-source-urls.mjs";
 
 const MODE = "proof-completion";
 const MODE_KEY = "completion";
@@ -153,28 +154,9 @@ const SOURCE_INFO = {
 const LIBRARY_SOURCES = new Set([
   "tlaplus/Examples",
   "TLAPS distribution examples",
-  "apalache-examples (Konnov)",
 ]);
 const categoryFor = (source) => LIBRARY_SOURCES.has(source) ? "libraries" : "systems";
 const sourceSize = (source) => CANONICAL[source] ?? 0;
-
-const TLAPLUS_REPO = "https://github.com/tlaplus/Examples/tree/master/specifications";
-const TLAPM_REPO = "https://github.com/tlaplus/tlapm";
-const TLAPM_FILES = new Set([
-  "Allocator", "Bakery", "BubbleSort", "EWD840", "Peterson", "SimpleMutex", "SumAndMax",
-]);
-const TLAPM_DIRS = { Cantor: "examples/cantor" };
-
-const SPEC_URL = {
-  Consensus: "https://github.com/tlaplus/tlapm/tree/main/examples_draft/consensus",
-  Data: "https://github.com/tlaplus/tlapm/tree/main/zenon/regression/examples/data",
-  Paxos: "https://github.com/hengxin/tlaps-examples/tree/master/Paxos",
-  Euclid: "https://github.com/hengxin/tlaps-examples/tree/master/Euclid",
-  AtomicBakery: "https://github.com/hengxin/tlaps-examples/tree/master/AtomicBakery",
-  tlaplus_examples_BlockingQueue: "https://github.com/lemmy/BlockingQueue",
-  "apalache_examples_ben-or83": "https://github.com/konnov/apalache-examples/tree/main/ben-or83",
-  apalache_examples_tendermint: "https://github.com/konnov/apalache-examples/tree/main/tendermint-accountability",
-};
 
 const exampleDir = (benchmarkOrSpecId) => benchmarkOrSpecId.split("/")[0];
 const sourceSpecName = (specSourceId) =>
@@ -185,21 +167,6 @@ const displayName = (group) => {
     if (group.startsWith(prefix)) return group.slice(prefix.length);
   }
   return group;
-};
-
-const specUrl = (group) => {
-  if (SPEC_URL[group]) return SPEC_URL[group];
-  if (group.startsWith("tlaplus_examples_")) {
-    const name = group.slice("tlaplus_examples_".length);
-    if (name.startsWith("SpecifyingSystems_")) {
-      const chapter = name.slice("SpecifyingSystems_".length);
-      return `${TLAPLUS_REPO}/SpecifyingSystems/${chapter}`;
-    }
-    return `${TLAPLUS_REPO}/${name}`;
-  }
-  if (TLAPM_FILES.has(group)) return `${TLAPM_REPO}/blob/main/examples/${group}.tla`;
-  if (TLAPM_DIRS[group]) return `${TLAPM_REPO}/tree/main/${TLAPM_DIRS[group]}`;
-  return null;
 };
 
 const slug = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
@@ -252,7 +219,7 @@ const canonicalTaskManifest = serializeTaskManifest(CORE_TASKS);
 const complexityByTask = new Map();
 const complexityCatalog = JSON.parse(readFileSync("results/core-complexity.json", "utf8"));
 for (const [benchmark, steps] of Object.entries(complexityCatalog.steps ?? {})) {
-  if (!Number.isInteger(steps) || steps < 0) {
+  if (!Number.isInteger(steps) || steps < 1) {
     throw new Error(`results/core-complexity.json: invalid steps for ${benchmark}`);
   }
   if (!CORE_BY_BENCHMARK.has(benchmark)) {
@@ -262,7 +229,6 @@ for (const [benchmark, steps] of Object.entries(complexityCatalog.steps ?? {})) 
 }
 
 const COMPLEXITY_BANDS = [
-  { id: "d0", label: "0", min: 0, max: 0, note: "reference proof is a single step" },
   { id: "d1", label: "1–4", min: 1, max: 4 },
   { id: "d2", label: "5–12", min: 5, max: 12 },
   { id: "d3", label: "13–30", min: 13, max: 30 },
@@ -300,7 +266,7 @@ if (publishedMissing.length > 0) {
 for (const { f, results } of bundles) {
   for (const r of results) {
     if (!Number.isInteger(r.gt_proof_steps)) continue;
-    if (r.gt_proof_steps < 0) throw new Error(`${f}: ${r.benchmark} has negative gt_proof_steps`);
+    if (r.gt_proof_steps < 1) throw new Error(`${f}: ${r.benchmark} has non-positive gt_proof_steps`);
     const seen = complexityByTask.get(r.benchmark);
     if (seen !== undefined && seen !== r.gt_proof_steps) {
       throw new Error(`${f}: ${r.benchmark} reference-proof steps ${r.gt_proof_steps} != ${seen}`);
@@ -523,8 +489,8 @@ const models = bundles.map(({ f, meta, results, resultsVersion }) => {
   const rows = manifest.map(({ source, group, scoringKey, name, completion, scratch }) => {
     const sourceInfo = SOURCE_INFO[source];
     if (!sourceInfo) throw new Error(`${f}: missing display info for source "${source}"`);
-    const url = specUrl(group);
-    if (!url) throw new Error(`${f}: example "${group}" is missing an upstream URL`);
+    const url = specSourceUrl({ group, scoringKey });
+    if (!url) throw new Error(`${f}: spec "${scoringKey}" is missing an upstream URL`);
     return {
       id: specId(source, scoringKey),
       group,
@@ -666,13 +632,6 @@ for (const spec of canonicalSpecs) {
 const categories = SITE.categories
   .map((category) => {
     const stats = categoryStats[category.id];
-    if (category.id === "libraries") {
-      return {
-        ...category,
-        ...stats,
-        blurb: "Specs and proof properties from the TLA+ Examples repository, the TLAPS distribution, and the Apalache examples corpus (Konnov).",
-      };
-    }
     return { ...category, ...stats };
   })
   .filter((category) => category.specCount > 0);
@@ -692,6 +651,45 @@ if (!suiteInfo.core || !suiteInfo.full) {
 const fullCatalog = JSON.parse(readFileSync("results/full-suite-catalog.json", "utf8"));
 if (!Array.isArray(fullCatalog.specs) || fullCatalog.specs.length === 0) {
   throw new Error("results/full-suite-catalog.json: missing specs");
+}
+if (fullCatalog.specCount !== fullCatalog.specs.length) {
+  throw new Error(
+    `results/full-suite-catalog.json: specCount ${fullCatalog.specCount} != ${fullCatalog.specs.length} specs`,
+  );
+}
+const fullSpecKeys = new Set();
+const fullCounts = { completion: 0, scratch: 0, total: 0 };
+for (const spec of fullCatalog.specs) {
+  if (typeof spec.scoringKey !== "string" || !spec.scoringKey.endsWith(".tla")) {
+    throw new Error(`results/full-suite-catalog.json: spec ${spec.id} missing scoringKey`);
+  }
+  if (fullSpecKeys.has(spec.scoringKey)) {
+    throw new Error(`results/full-suite-catalog.json: duplicate spec ${spec.scoringKey}`);
+  }
+  fullSpecKeys.add(spec.scoringKey);
+  const expectedUrl = specSourceUrl(spec);
+  if (!expectedUrl) {
+    throw new Error(`results/full-suite-catalog.json: spec ${spec.scoringKey} has no source URL`);
+  }
+  if (spec.url !== expectedUrl) {
+    throw new Error(`results/full-suite-catalog.json: stale source URL for ${spec.scoringKey}`);
+  }
+  for (const field of ["completion", "scratch", "total"]) {
+    if (!Number.isInteger(spec[field]) || spec[field] < 0) {
+      throw new Error(`results/full-suite-catalog.json: spec ${spec.scoringKey} has invalid ${field}`);
+    }
+  }
+  if (spec.total !== spec.completion + spec.scratch) {
+    throw new Error(`results/full-suite-catalog.json: spec ${spec.scoringKey} total does not add up`);
+  }
+  fullCounts.completion += spec.completion;
+  fullCounts.scratch += spec.scratch;
+  fullCounts.total += spec.total;
+}
+if (fullCatalog.completion !== fullCounts.completion ||
+    fullCatalog.scratch !== fullCounts.scratch ||
+    fullCatalog.propertyCount !== fullCounts.total) {
+  throw new Error("results/full-suite-catalog.json: declared task counts do not match its specs");
 }
 const suites = [
   {
@@ -742,7 +740,7 @@ const data = {
       tip: "Mean active agent time per task. The secondary value is the sum of task time; parallel tasks overlap, so it is not experiment wall-clock time. Lower is better.",
     },
   ],
-  // Home uses the Full suite catalog; Benchmark page switches via suites[].
+  // Benchmark page switches between these Full-catalog defaults and suites[].
   categories: fullCatalog.categories,
   specs: fullCatalog.specs,
   suites,
@@ -758,13 +756,19 @@ const data = {
   },
 };
 
+const outputPath = "data.js";
+const generatedData =
+  "// GENERATED by scripts/build-data.mjs - do not edit by hand.\n" +
+  "// Leaderboard data is recomputed from results/*.json against results/core-manifest.json;\n" +
+  "// page content comes from scripts/site-content.mjs.\n" +
+  "window.TLAPS_DATA = " + JSON.stringify(data, null, 2) + ";\n";
+
 if (process.argv.includes("--check")) {
-  console.log(`Validated: ${models.length} model(s), ${canonicalSpecs.length} Core specs, ${CORE_COUNT} properties.`);
+  if (!existsSync(outputPath) || readFileSync(outputPath, "utf8") !== generatedData) {
+    throw new Error(`${outputPath} is stale; run npm run build:data`);
+  }
+  console.log(`Validated ${outputPath}: ${models.length} model(s), ${canonicalSpecs.length} Core specs, ${CORE_COUNT} properties.`);
 } else {
-  writeFileSync("data.js",
-    "// GENERATED by scripts/build-data.mjs - do not edit by hand.\n" +
-    "// Leaderboard data is recomputed from results/*.json against results/core-manifest.json;\n" +
-    "// page content comes from scripts/site-content.mjs.\n" +
-    "window.TLAPS_DATA = " + JSON.stringify(data, null, 2) + ";\n");
-  console.log(`Wrote data.js: ${models.length} model(s), ${canonicalSpecs.length} Core specs (${CORE_SPEC_COUNT} originating specifications), ${CORE_COUNT} properties.`);
+  writeFileSync(outputPath, generatedData);
+  console.log(`Wrote ${outputPath}: ${models.length} model(s), ${canonicalSpecs.length} Core specs (${CORE_SPEC_COUNT} originating specifications), ${CORE_COUNT} properties.`);
 }

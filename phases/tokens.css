@@ -1,38 +1,243 @@
-/* Tokens for the pipeline banner. Scoped under .phase-host. */
+/* Tokens and styles for the grading pipeline. Scoped under .phase-host. */
 .phase-host {
-  --accent-deep: #2f6690;
-  --accent-soft: rgba(79, 140, 255, 0.18);
-  --accent-softer: rgba(79, 140, 255, 0.08);
-  --ink-4: #94a3b8;
-  --line-2: #cbd5e1;
   --ok: #10b981;
   --err: #ef4444;
   --warn: #f59e0b;
+  --line-2: #cbd5e1;
 }
 [data-theme="dark"] .phase-host {
-  --accent-soft: rgba(79, 140, 255, 0.22);
-  --accent-softer: rgba(79, 140, 255, 0.10);
-  --ink-4: #6c7a88;
-  --line-2: rgba(236, 236, 236, 0.18);
+  --ok: #34d399;
+  --err: #f87171;
+  --warn: #fbbf24;
+  --line-2: rgba(236, 236, 236, 0.22);
 }
 .phase-host * { box-sizing: border-box; }
-.phase-host .banner {
-  width: 1078px;
-  height: 300px;
+
+/* Diagram frame — a single card that reflows across breakpoints. */
+.pl {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1.1fr) 52px minmax(0, 1fr) 88px minmax(0, 0.95fr) 88px minmax(0, 0.9fr);
+  grid-template-rows: auto 46px auto;
+  grid-template-areas:
+    "input e1 gate1 e2 gate2 e3 pass"
+    ".     .  b1    .  b2    .  ."
+    ".     .  cheat .  fail  .  .";
+  align-items: stretch;
+  margin: 0;
+  padding: 32px;
+  border: 1px solid var(--line-soft);
+  border-radius: 12px;
   background: var(--paper);
   font-family: var(--sans);
   color: var(--ink);
-  position: relative;
-  overflow: hidden;
 }
-.phase-fit {
-  width: 100%;
-  overflow: hidden;
-  border-radius: 12px;
-  border: 1px solid var(--line-soft);
+
+/* On desktop the branch wrappers dissolve, so their nodes and edges land
+   directly on the .pl grid by grid-area, keeping the flat horizontal layout. */
+.pl-group { display: contents; }
+
+/* Nodes */
+.pl-node {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  padding: 14px 16px;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 10px;
   background: var(--paper);
 }
-.phase-fit .phase-fit-inner {
-  width: 1078px;
-  transform-origin: 0 0;
+.pl-kind {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.pl-name {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.pl-role {
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--ink-2);
+}
+.pl-input { background: var(--paper-2); }
+.pl-verdict { border-color: var(--v); background: var(--v-bg); }
+.pl-verdict .pl-name { color: var(--v); }
+.pl-verdict-pass { --v: var(--ok); --v-bg: rgba(16, 185, 129, 0.08); }
+.pl-verdict-fail { --v: var(--err); --v-bg: rgba(239, 68, 68, 0.07); }
+.pl-verdict-cheat { --v: var(--warn); --v-bg: rgba(245, 158, 11, 0.09); }
+
+/* Edges — a connector line with an optional condition label */
+.pl-edge {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.pl-edge-h::before {
+  content: "";
+  position: absolute;
+  left: 4px;
+  right: 11px;
+  top: 50%;
+  height: 1.5px;
+  background: var(--line-2);
+}
+.pl-edge-h::after {
+  content: "";
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-left: 7px solid var(--line-2);
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+}
+.pl-edge-v::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 2px;
+  bottom: 11px;
+  width: 1.5px;
+  background: var(--line-2);
+}
+.pl-edge-v::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 2px;
+  border-top: 7px solid var(--line-2);
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+}
+.pl-edge-label {
+  position: relative;
+  z-index: 1;
+  padding: 2px 8px;
+  border-radius: 5px;
+  background: var(--paper);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  color: var(--ink-3);
+}
+
+/* Mobile — one vertical column of full-width sections. The Cheat-checker yields
+   two independent outcomes: a compact violation row that dead-ends at CHEATING
+   without touching the clean path, and a full-width clean branch. Inside the
+   clean branch tlapm forks down into a parallel two-column PASS / FAIL row, so
+   the two tlapm outcomes never read as a sequence. Every section lays out in
+   normal flow, so the figure always grows to contain its nodes. */
+@media (max-width: 880px) {
+  .pl {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 18px 14px;
+  }
+
+  /* Intro — candidate proof above the Cheat-checker, joined by a down arrow. */
+  .pl-group-intro {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2px;
+    grid-template-areas:
+      "input"
+      "e1"
+      "gate1";
+  }
+
+  /* Violation — a compact side offshoot. The connector points sideways into
+     CHEATING, which terminates the branch and stays clear of the clean path. */
+  .pl-group-cheat {
+    display: grid;
+    grid-template-columns: 84px 1fr;
+    align-items: center;
+    grid-template-areas: "b1 cheat";
+  }
+
+  /* Clean branch — a full-width card. tlapm spans the top, then accepted and
+     not accepted fork straight down into a two-column PASS / FAIL row. */
+  .pl-group-clean {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px 12px;
+    padding: 14px;
+    border: 1px solid var(--line-soft);
+    border-radius: 12px;
+    background: var(--paper-2);
+    grid-template-areas:
+      "e2    e2"
+      "gate2 gate2"
+      "e3    b2"
+      "pass  fail";
+  }
+
+  .pl-node { width: 100%; padding: 11px 13px; }
+  .pl-name { font-size: 15px; }
+  .pl-role { font-size: 12px; }
+
+  /* Every connector points straight down by default on mobile. */
+  .pl-edge-h,
+  .pl-edge-v { min-height: 24px; }
+  .pl-edge-h::before,
+  .pl-edge-v::before {
+    left: 50%;
+    right: auto;
+    top: 3px;
+    bottom: 9px;
+    width: 1.5px;
+    height: auto;
+    transform: translateX(-50%);
+  }
+  .pl-edge-h::after,
+  .pl-edge-v::after {
+    right: auto;
+    left: 50%;
+    top: auto;
+    bottom: 2px;
+    transform: translateX(-50%);
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 7px solid var(--line-2);
+    border-bottom: 0;
+  }
+
+  /* The violation connector is the lone exception — it runs sideways into
+     CHEATING so the offshoot reads as a short dead end, not part of the flow. */
+  .pl-group-cheat .pl-edge-v { min-height: 0; }
+  .pl-group-cheat .pl-edge-v::before {
+    left: 4px;
+    right: 12px;
+    top: 50%;
+    bottom: auto;
+    width: auto;
+    height: 1.5px;
+    transform: translateY(-50%);
+  }
+  .pl-group-cheat .pl-edge-v::after {
+    left: auto;
+    right: 4px;
+    top: 50%;
+    bottom: auto;
+    transform: translateY(-50%);
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+    border-left: 7px solid var(--line-2);
+    border-right: 0;
+  }
+
+  .pl-edge-label { background: var(--paper); }
+  .pl-group-clean .pl-edge-label { background: var(--paper-2); }
 }

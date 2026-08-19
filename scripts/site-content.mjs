@@ -7,10 +7,7 @@ export const SITE = {
   paper: {
     title: "TLAPS-Bench: Evaluating AI on Writing TLAPS Proofs",
     repo: "https://github.com/specula-org/tlaps-bench",
-    overview:
-      "TLAPS proofs are checked by tlapm: accepted or rejected, with no partial credit. " +
-      "Each task is a TLA+ theorem whose proof body has been replaced by PROOF OBVIOUS; " +
-      "the model must write a proof that tlapm accepts.",
+    overview: "Tasks ask models to complete a missing proof or write one from scratch.",
   },
 
   modes: [
@@ -20,8 +17,7 @@ export const SITE = {
       full: "--mode proof-completion",
       cli: "--mode proof-completion",
       blurb:
-        "Scaffolding is provided: inductive invariants, lemma structure, and earlier lemmas " +
-        "marked PROOF OMITTED, and the model fills in one target proof.",
+        "The model receives the theorem and its supporting lemmas, then writes the target proof.",
     },
   ],
 
@@ -29,16 +25,12 @@ export const SITE = {
     {
       id: "one-shot",
       label: "One-Shot",
-      blurb:
-        "One response to write the proof. Core modules stay fixed; only the marked helper and " +
-        "proof regions in the task file may change.",
+      blurb: "One response per task. The model may change only the target proof.",
     },
     {
       id: "agentic",
       label: "Agentic",
-      blurb:
-        "The model can use tools and take multiple steps. Same edit rules as one-shot: Core " +
-        "modules are read-only, and changes stay inside the marked task-file regions.",
+      blurb: "The model may use tools and iterate, but may change only the target proof.",
     },
   ],
 
@@ -47,7 +39,7 @@ export const SITE = {
       id: "libraries",
       name: "Example libraries",
       blurb:
-        "Specs and proof properties from the TLA+ Examples repository, the TLAPS distribution, " +
+        "Specs and proof tasks from the TLA+ Examples repository, the TLAPS distribution, " +
         "and related teaching and algorithm examples.",
     },
     {
@@ -71,7 +63,7 @@ export const SITE = {
       id: "full",
       label: "Full",
       blurb:
-        "Full catalog: 951 properties across 71 specs. Leaderboard scores use the Proof " +
+        "Full catalog: 951 tasks across 120 specs. Leaderboard scores use the Proof " +
         "Completion Core only.",
     },
   ],

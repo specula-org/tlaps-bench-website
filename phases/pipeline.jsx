@@ -1,113 +1,65 @@
 /* global React */
-const P = {
-  ink: 'var(--ink)', ink2: 'var(--ink-2)', ink3: 'var(--ink-2)', ink4: 'var(--ink-3)',
-  line: 'var(--line)', ok: 'var(--ok)', err: 'var(--err)', accentDeep: 'var(--accent-deep)',
-};
-const PFS = { caption: 11, body: 12.5, icon: 14, num: 20, hero: 28 };
 
-function PCode({ title, children }) {
+// One responsive branching diagram of the grading flow. The desktop layout
+// places nodes and edges onto a CSS grid, mobile stacks the same DOM in order.
+
+function PLNode({ area, kind, name, role, variant = '' }) {
   return (
-    <div style={{ width: '100%', background: '#fbfcfe', border: `1px solid ${P.line}`, borderRadius: 6, overflow: 'hidden' }}>
-      <div style={{ padding: '6px 12px', fontFamily: 'var(--mono)', fontSize: PFS.caption, color: P.ink3, borderBottom: `1px solid ${P.line}`, background: '#f5f7fb' }}>{title}</div>
-      <pre style={{ margin: 0, padding: '12px 14px', fontFamily: 'var(--mono)', fontSize: PFS.body, lineHeight: 1.55, color: P.ink2, whiteSpace: 'pre' }}>{children}</pre>
-    </div>
-  );
-}
-function PArrow({ label, sub, w = 70, dashed = false }) {
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: w, flexShrink: 0 }}>
-      {label && <div style={{ fontSize: PFS.caption, color: P.ink3, fontFamily: 'var(--mono)', marginBottom: 4 }}>{label}</div>}
-      <svg width={w} height={20} viewBox={`0 0 ${w} 20`}>
-        <line x1={2} y1={10} x2={w - 10} y2={10} stroke={P.ink3} strokeWidth={1.5} strokeDasharray={dashed ? "4 3" : undefined} />
-        <path d={`M${w - 10} 5 L${w - 3} 10 L${w - 10} 15`} fill="none" stroke={P.ink3} strokeWidth={1.5} strokeLinejoin="round" strokeLinecap="round" />
-      </svg>
-      {sub && <div style={{ fontSize: 10, color: P.ink3, fontFamily: 'var(--mono)', fontStyle: 'italic', marginTop: 4 }}>{sub}</div>}
+    <div className={`pl-node${variant ? ` ${variant}` : ''}`} style={{ gridArea: area }}>
+      <span className="pl-kind">{kind}</span>
+      <strong className="pl-name">{name}</strong>
+      {role && <span className="pl-role">{role}</span>}
     </div>
   );
 }
 
-const P_WARN = 'var(--warn)';
+function PLEdge({ area, dir, label }) {
+  return (
+    <div className={`pl-edge pl-edge-${dir}`} style={{ gridArea: area }}>
+      {label && <span className="pl-edge-label">{label}</span>}
+    </div>
+  );
+}
+
+// Groups wrap each branch so mobile shows two visibly separate sections. On
+// desktop the group is display:contents, so its nodes join the .pl grid flat.
+function PLGroup({ variant, children }) {
+  return <div className={`pl-group ${variant}`}>{children}</div>;
+}
 
 function APipeline() {
-  const verdicts = [
-    { color: P.ok,   bg: 'rgba(16,185,129,0.08)', label: '✅ PASS',     note: 'no cheating + tlapm accepts' },
-    { color: P.err,  bg: 'rgba(239,68,68,0.06)',  label: '❌ FAIL',     note: 'tlapm rejects (honest but incomplete)' },
-    { color: P_WARN, bg: 'rgba(245,158,11,0.08)', label: '🚨 CHEATING', note: 'cheat caught before tlapm ran (tlapm skipped)' },
-  ];
   return (
-    <div className="banner">
-      <div style={{
-        padding: '18px 20px',
-        display: 'grid',
-        gridTemplateColumns: '212px 72px 234px 92px 100px 58px 1fr',
-        gridTemplateRows: '1fr',
-        alignItems: 'center',
-        height: '100%',
-        boxSizing: 'border-box',
-      }}>
-        <div style={{ gridColumn: '1' }}>
-          <PCode title="Euclid/GCD_GCD3.tla">
-{`THEOREM GCD3 ==
-  ASSUME NEW m \\in Nat,
-         NEW n \\in Nat
-  PROVE  GCD(m, n) = GCD(n, m)
-PROOF OBVIOUS`}
-          </PCode>
-        </div>
+    <figure className="pl" aria-label="How a candidate proof is graded">
+      <figcaption className="sr-only">
+        A candidate proof goes to the Cheat-checker. This produces one of two
+        separate outcomes. On one branch, the Cheat-checker finds a rule
+        violation, the verdict is CHEATING, and tlapm is skipped. On the other
+        branch, the submission is clean and goes to tlapm. If tlapm accepts the
+        proof the verdict is PASS, otherwise the verdict is FAIL.
+      </figcaption>
 
-        <div style={{ gridColumn: '2', display: 'flex', justifyContent: 'center' }}>
-          <PArrow label="AI / agent" w={72} dashed />
-        </div>
+      <PLGroup variant="pl-group-intro">
+        <PLNode area="input" variant="pl-input" kind="Submission" name="Candidate proof" />
+        <PLEdge area="e1" dir="h" />
+        <PLNode area="gate1" variant="pl-gate" kind="Check" name="Cheat-checker" role="Checks for prohibited edits" />
+      </PLGroup>
 
-        <div style={{ gridColumn: '3' }}>
-          <PCode title="candidate proof">
-{`<1>1. m | GCD(m, n)  BY DEF GCD
-<1>2. n | GCD(m, n)  BY DEF GCD
-<1> QED
-  BY <1>1, <1>2`}
-          </PCode>
-        </div>
+      <PLGroup variant="pl-group-cheat">
+        <PLEdge area="b1" dir="v" label="violation" />
+        <PLNode area="cheat" variant="pl-verdict pl-verdict-cheat" kind="Verdict" name="CHEATING" role="A rule was broken, so tlapm never runs" />
+      </PLGroup>
 
-        <div style={{ gridColumn: '4', display: 'flex', justifyContent: 'center' }}>
-          <PArrow label="cheat-checker" sub="legitimate?" w={92} />
-        </div>
+      <PLGroup variant="pl-group-clean">
+        <PLEdge area="e2" dir="h" label="clean" />
+        <PLNode area="gate2" variant="pl-gate" kind="Check" name="tlapm" role="Verifies the proof" />
 
-        <div style={{ gridColumn: '5', display: 'flex', justifyContent: 'center' }}>
-          <div style={{
-            width: '100%', boxSizing: 'border-box',
-            border: `1px solid ${P.line}`, borderRadius: 6, background: '#fbfcfe',
-            padding: '8px 10px', display: 'flex', flexDirection: 'column', gap: 3,
-          }}>
-            <span style={{ fontFamily: 'var(--mono)', fontSize: 9.5, color: P.ink3, textTransform: 'uppercase', letterSpacing: 0.5 }}>cheat-check</span>
-            <span style={{ fontFamily: 'var(--mono)', fontSize: PFS.body, color: P.ok, fontWeight: 700 }}>✓ clean</span>
-            <span style={{ fontFamily: 'var(--mono)', fontSize: 9.5, color: P.ink3, lineHeight: 1.3 }}>no tamper — tlapm runs next</span>
-          </div>
-        </div>
+        <PLEdge area="e3" dir="h" label="accepted" />
+        <PLNode area="pass" variant="pl-verdict pl-verdict-pass" kind="Verdict" name="PASS" role="tlapm accepts the proof" />
 
-        <div style={{ gridColumn: '6', display: 'flex', justifyContent: 'center' }}>
-          <PArrow label="tlapm" sub="correct?" w={58} />
-        </div>
-
-        <div style={{ gridColumn: '7', display: 'flex', flexDirection: 'column', gap: 8, paddingLeft: 12 }}>
-          <div style={{ fontFamily: 'var(--mono)', fontSize: PFS.caption, color: P.ink3, letterSpacing: 0.8, fontWeight: 600, textTransform: 'uppercase' }}>
-            Verdict (in Docker sandbox)
-          </div>
-          {verdicts.map(v => (
-            <div key={v.label} style={{
-              display: 'flex', flexDirection: 'column', gap: 2, padding: '5px 11px',
-              background: v.bg,
-              border: `1.5px solid ${v.color}`, borderRadius: 6,
-            }}>
-              <span style={{ fontFamily: 'var(--mono)', fontSize: PFS.body, color: v.color, fontWeight: 700 }}>{v.label}</span>
-              <span style={{ fontFamily: 'var(--mono)', fontSize: 10, color: P.ink3 }}>{v.note}</span>
-            </div>
-          ))}
-          <div style={{ fontFamily: 'var(--mono)', fontSize: 10.5, color: P.ink3, marginTop: 2 }}>
-            pass rate = PASS / scored properties
-          </div>
-        </div>
-      </div>
-    </div>
+        <PLEdge area="b2" dir="v" label="not accepted" />
+        <PLNode area="fail" variant="pl-verdict pl-verdict-fail" kind="Verdict" name="FAIL" role="tlapm does not accept the proof" />
+      </PLGroup>
+    </figure>
   );
 }
 

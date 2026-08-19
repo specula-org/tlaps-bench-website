@@ -1,28 +1,10 @@
-/* global React, TLAPS_DATA, HubLeaderboard, Reveal, CountUp, FadeIn, AnimBar, APipeline */
-const { useState: useS_p, useEffect: useE_p, useRef: useR_p, useTransition: useT_p } = React;
-const PIPE_NATIVE_WIDTH = 1078;
-const PIPE_NATIVE_HEIGHT = 300;
+/* global React, TLAPS_DATA, HubLeaderboard, Reveal, FadeIn, AnimBar, APipeline */
+const { useState: useS_p, useTransition: useT_p } = React;
 
 function PipelineBanner() {
-  const wrapRef = useR_p(null);
-  const [scale, setScale] = useS_p(1);
   const Comp = (typeof window !== "undefined") && window.APipeline;
-  useE_p(() => {
-    if (!wrapRef.current) return undefined;
-    const update = () => { const w = wrapRef.current && wrapRef.current.clientWidth; if (w > 0) setScale(w / PIPE_NATIVE_WIDTH); };
-    update();
-    if (typeof ResizeObserver !== "undefined") { const ro = new ResizeObserver(update); ro.observe(wrapRef.current); return () => ro.disconnect(); }
-    window.addEventListener("resize", update);
-    return () => window.removeEventListener("resize", update);
-  }, []);
-  if (!Comp) return <div className="fig-placeholder" style={{ height: PIPE_NATIVE_HEIGHT }}>[ pipeline diagram loading… ]</div>;
-  return (
-    <div className="phase-host">
-      <div ref={wrapRef} className="phase-fit" style={{ height: PIPE_NATIVE_HEIGHT * scale }}>
-        <div className="phase-fit-inner" style={{ transform: `scale(${scale})` }}><Comp /></div>
-      </div>
-    </div>
-  );
+  if (!Comp) return <div className="fig-placeholder">[ pipeline diagram loading… ]</div>;
+  return <div className="phase-host"><Comp /></div>;
 }
 
 function Mark({ size = 28 }) {
@@ -52,44 +34,64 @@ function CopyBibBtn() {
 }
 
 // ============ HOME ============
-function PageHome({ go }) {
-  const totalProperties = TLAPS_DATA.specs.reduce((sum, spec) => sum + spec.total, 0);
-  const totalSpecs = TLAPS_DATA.specs.length;
+function PageHome() {
+  const fullSuite = TLAPS_DATA.suites.find((suite) => suite.id === "full");
+  const totalTasks = fullSuite.propertyCount;
+  const totalSpecs = fullSuite.specCount;
   return (
-    <div>
-      <section className="hero">
-        <div className="wrap-narrow">
-          <FadeIn>
-            <div className="news-banner"><span className="dot" />{totalProperties} proof properties · {totalSpecs} specs · checked by tlapm</div>
-            <h1>The TLAPS Benchmark</h1>
-            <p className="lead">
-              A benchmark for AI-written TLAPS proofs, checked by tlapm with no partial credit.
-            </p>
-            <div style={{ display: "flex", gap: 10, justifyContent: "center", marginTop: 28, flexWrap: "wrap" }}>
-              <button className="btn primary" onClick={() => go("leaderboard")}>View Leaderboard</button>
-              <a className="btn ghost" href="https://github.com/specula-org/tlaps-bench" target="_blank">GitHub</a>
+    <div className="home-page">
+      <section className="home-hero">
+        <div className="home-proof-fragment home-proof-fragment-left" aria-hidden="true">
+          THEOREM<br />&nbsp;&nbsp;ASSUME<br />&nbsp;&nbsp;PROVE
+        </div>
+        <div className="home-proof-fragment home-proof-fragment-right" aria-hidden="true">
+          &lt;1&gt;1.<br />&lt;1&gt;2.<br />&lt;1&gt; QED
+        </div>
+
+        <div className="home-hero-inner">
+          <div className="home-kicker"><span aria-hidden="true" />TLA+ proof benchmark</div>
+          <h1>
+            <span className="home-headline-line">Can LLMs <em>Prove</em></span>{" "}
+            <span className="home-headline-line home-headline-accent">TLA+ Theorems?</span>
+          </h1>
+          <p className="home-hero-lead">
+            TLAPS-Bench evaluates language models on writing TLA+ proofs. Every proof is
+            mechanically checked by tlapm.
+          </p>
+          <div className="home-actions">
+            <a className="btn accent" href="#/leaderboard">View Leaderboard</a>
+            <a className="btn" href="#/benchmark">Explore Benchmark</a>
+            <a className="btn ghost" href="https://github.com/specula-org/tlaps-bench" target="_blank" rel="noopener">GitHub</a>
+          </div>
+          <div className="home-metrics" aria-label="Benchmark summary">
+            <div className="home-metric">
+              <strong>{totalTasks}</strong>
+              <span>Tasks</span>
             </div>
-            <div className="stats">
-              <div><span className="big"><CountUp to={totalProperties} /></span>proof properties</div>
-              <div><span className="big"><CountUp to={totalSpecs} /></span>specs</div>
-              <div><span className="big accent">tlapm</span><span className="sub-dim">accept / reject</span></div>
+            <div className="home-metric">
+              <strong>{totalSpecs}</strong>
+              <span>Specs</span>
             </div>
-          </FadeIn>
+            <div className="home-metric home-metric-system">
+              <strong>TLAPS</strong>
+              <span>Proof system</span>
+            </div>
+          </div>
         </div>
       </section>
 
-      <section className="section-tight" style={{ paddingTop: 20 }}>
-        <div className="wrap-narrow" style={{ textAlign: "center" }}>
-          <Reveal delay={120}>
-            <span className="eyebrow">Overview</span>
-            <p style={{ fontFamily: "var(--serif)", fontSize: 18, lineHeight: 1.75, color: "var(--ink)", marginTop: 16, textWrap: "pretty" }}>
+      <section className="home-overview">
+        <div className="home-overview-inner">
+          <span className="eyebrow">Overview</span>
+          <div className="home-overview-copy">
+            <p>
               {TLAPS_DATA.paper.overview}
             </p>
-            <p style={{ fontFamily: "var(--serif)", fontSize: 18, lineHeight: 1.75, color: "var(--ink-2)", marginTop: 14, textWrap: "pretty" }}>
-              Before tlapm runs, a cheat-checker screens each submission. A pass is a real proof,
-              not a weakened theorem or an admitted step.
+            <p>
+              Before verification, a cheat-checker rejects prohibited edits, including changes
+              to the target theorem, new axioms, and model-added admitted steps.
             </p>
-          </Reveal>
+          </div>
         </div>
       </section>
 
@@ -138,35 +140,36 @@ function PageLeaderboard() {
   };
 
   return (
-    <section className="section">
+    <section className="section leaderboard-page">
       <div className="wrap">
-        <FadeIn>
+        <header className="leaderboard-intro">
           <span className="eyebrow accent">Results</span>
-          <h1 style={{ fontSize: 44, marginTop: 10 }}>Leaderboard</h1>
-          <p className="lead">
-            All models are scored on the Proof Completion Core (190 tasks, 56 specs). Ranking uses
-            Spec-balanced pass rate, so each specification counts equally. Expand a row for the
-            full breakdown.
+          <h1>Leaderboard</h1>
+          <p>
+            Every model is evaluated on the same 190 proof-completion tasks from 56 specifications.
+            Scores are averaged by specification, so larger specifications do not carry more weight.
+            Open a model to see how it performed on each specification and task.
           </p>
-        </FadeIn>
+        </header>
 
-        <div className="cohort-switch" role="tablist" aria-label="Result cohort">
-          {cohorts.map((c) => (
-            <button
-              key={c.id}
-              type="button"
-              role="tab"
-              aria-selected={uiCohort === c.id}
-              className={uiCohort === c.id ? "active" : ""}
-              onClick={() => selectCohort(c.id)}
-            >
-              {c.label}
-            </button>
-          ))}
+        <div className="leaderboard-cohort-row">
+          <div className="cohort-switch" role="group" aria-label="Result cohort">
+            {cohorts.map((c) => (
+              <button
+                key={c.id}
+                type="button"
+                aria-pressed={uiCohort === c.id}
+                className={uiCohort === c.id ? "active" : ""}
+                onClick={() => selectCohort(c.id)}
+              >
+                {c.label}
+              </button>
+            ))}
+          </div>
+          {active?.blurb && <p className="cohort-blurb">{active.blurb}</p>}
         </div>
-        {active?.blurb && <p className="cohort-blurb">{active.blurb}</p>}
 
-        <div style={{ marginTop: 48 }}>
+        <div className="leaderboard-results">
           <HubLeaderboard fixedMode="completion" fixedCohort={cohort} />
         </div>
       </div>
@@ -190,16 +193,75 @@ function PageBenchmark() {
     },
   ];
   const [suiteId, setSuiteId] = useS_p(suites[0]?.id || "core");
+  const [specQuery, setSpecQuery] = useS_p("");
+  const [openSources, setOpenSources] = useS_p(() => new Set());
   const suite = suites.find((s) => s.id === suiteId) || suites[0];
   const specs = suite.specs || [];
   const categories = suite.categories || [];
   const totalSpecs = suite.specCount ?? specs.length;
-  const totalProperties = suite.propertyCount ?? specs.reduce((sum, spec) => sum + spec.total, 0);
-  const showScratch = false;
-  const colSpan = showScratch ? 5 : 4;
+  const totalTasks = suite.propertyCount ?? specs.reduce((sum, spec) => sum + spec.total, 0);
+  const showScratch = (suite.scratch ?? 0) > 0;
   const categoryGridStyle = categories.length === 1
     ? { gridTemplateColumns: "minmax(0, 1fr)" }
     : undefined;
+  const categoriesById = categories.reduce((lookup, category) => {
+    lookup[category.id] = category;
+    return lookup;
+  }, {});
+  const sourceGroups = [];
+  const sourceGroupsByKey = new Map();
+
+  specs.forEach((spec) => {
+    const sourceKey = spec.sourceKey || spec.sourceUrl || spec.sourceName || spec.category || "unknown-source";
+    let group = sourceGroupsByKey.get(sourceKey);
+
+    if (!group) {
+      group = {
+        key: sourceKey,
+        domId: `dataset-source-${suite.id}-${sourceGroups.length}`,
+        name: spec.sourceName || sourceKey,
+        url: spec.sourceUrl,
+        categoryIds: [],
+        specs: [],
+        total: 0,
+      };
+      sourceGroupsByKey.set(sourceKey, group);
+      sourceGroups.push(group);
+    }
+
+    if (!group.categoryIds.includes(spec.category)) group.categoryIds.push(spec.category);
+    group.specs.push(spec);
+    group.total += spec.total || 0;
+  });
+
+  const normalizedQuery = specQuery.trim().toLocaleLowerCase();
+  const filteredSourceGroups = sourceGroups.map((group) => {
+    const categoryNames = group.categoryIds.map((id) => categoriesById[id]?.name || id);
+    const groupMatches = `${group.name} ${categoryNames.join(" ")}`.toLocaleLowerCase().includes(normalizedQuery);
+    const filteredSpecs = !normalizedQuery || groupMatches
+      ? group.specs
+      : group.specs.filter((spec) => spec.name.toLocaleLowerCase().includes(normalizedQuery));
+    const filteredTasks = filteredSpecs.reduce((sum, spec) => sum + (spec.total || 0), 0);
+
+    return { ...group, categoryNames, filteredSpecs, filteredTasks };
+  }).filter((group) => group.filteredSpecs.length > 0);
+  const visibleSpecCount = filteredSourceGroups.reduce((sum, group) => sum + group.filteredSpecs.length, 0);
+
+  const selectSuite = (id) => {
+    if (id === suiteId) return;
+    setSuiteId(id);
+    setSpecQuery("");
+    setOpenSources(new Set());
+  };
+
+  const toggleSource = (key) => {
+    setOpenSources((current) => {
+      const next = new Set(current);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  };
 
   return (
     <>
@@ -209,9 +271,8 @@ function PageBenchmark() {
             <span className="eyebrow accent">Benchmark</span>
             <h1 style={{ fontSize: 44, marginTop: 10 }}>Inside the benchmark</h1>
             <p className="lead">
-              The benchmark covers TLA+ example libraries and systems specs. Each task asks the
-              model to replace PROOF OBVIOUS with a proof that tlapm accepts. Switch between the
-              Proof Completion Core and the Full catalog below.
+              The benchmark draws from TLA+ example libraries and systems specs. Core contains
+              proof-completion tasks, while Full also includes proofs written from scratch.
             </p>
             <div className="cohort-switch" role="tablist" aria-label="Benchmark suite">
               {suites.map((s) => (
@@ -221,7 +282,7 @@ function PageBenchmark() {
                   role="tab"
                   aria-selected={suiteId === s.id}
                   className={suiteId === s.id ? "active" : ""}
-                  onClick={() => setSuiteId(s.id)}
+                  onClick={() => selectSuite(s.id)}
                 >
                   {s.label}
                 </button>
@@ -230,14 +291,14 @@ function PageBenchmark() {
             {suite.blurb && <p className="lead" style={{ fontSize: 17, marginTop: 14 }}>{suite.blurb}</p>}
             <div className="dataset-facts" aria-label="Benchmark size">
               <div className="dataset-fact"><strong>{totalSpecs}</strong><span>specs</span></div>
-              <div className="dataset-fact"><strong>{totalProperties}</strong><span>proof properties</span></div>
+              <div className="dataset-fact"><strong>{totalTasks}</strong><span>tasks</span></div>
               {showScratch ? (
                 <>
                   <div className="dataset-fact"><strong>{suite.completion}</strong><span>completion</span></div>
                   <div className="dataset-fact"><strong>{suite.scratch}</strong><span>from scratch</span></div>
                 </>
               ) : (
-                <div className="dataset-fact"><strong>{suite.completion ?? totalProperties}</strong><span>completion</span></div>
+                <div className="dataset-fact"><strong>{suite.completion ?? totalTasks}</strong><span>completion</span></div>
               )}
             </div>
           </FadeIn>
@@ -264,11 +325,11 @@ function PageBenchmark() {
                   <p>{category.blurb}</p>
                   <dl className={`dataset-category-stats${showScratch ? "" : " dataset-category-stats-compact"}`}>
                     <div><dt>Specs</dt><dd>{category.specCount}</dd></div>
-                    <div><dt>Completion properties</dt><dd>{category.completion || "—"}</dd></div>
+                    <div><dt>Completion tasks</dt><dd>{category.completion || "—"}</dd></div>
                     {showScratch && (
-                      <div><dt>From-scratch properties</dt><dd>{category.scratch || "—"}</dd></div>
+                      <div><dt>From-scratch tasks</dt><dd>{category.scratch || "—"}</dd></div>
                     )}
-                    <div><dt>Total properties</dt><dd>{category.total}</dd></div>
+                    <div><dt>Total tasks</dt><dd>{category.total}</dd></div>
                   </dl>
                 </article>
               ))}
@@ -282,62 +343,138 @@ function PageBenchmark() {
                 <h2>{suite.label} suite specs</h2>
               </div>
               <p>
-                Each row is one spec, and the numbers are its proof properties. A dash (—)
-                means that the spec has no properties for that mode.
+                Each row is one spec, and the numbers are its tasks. A dash (—)
+                means that the spec has no tasks for that mode.
               </p>
             </div>
           </Reveal>
-          <div className="dataset-table-shell">
-            <table className="dataset-table">
-                <thead>
-                  <tr>
-                    <th scope="col">Spec</th>
-                    <th scope="col">Source</th>
-                    <th scope="col" className="dataset-number">Completion properties</th>
-                    {showScratch && (
-                      <th scope="col" className="dataset-number">From-scratch properties</th>
-                    )}
-                    <th scope="col" className="dataset-number">Total properties</th>
-                  </tr>
-                </thead>
-                {categories.map((category) => {
-                  const rows = specs.filter((spec) => spec.category === category.id);
-                  return (
-                    <tbody key={category.id} className="dataset-table-section">
-                      <tr className="dataset-table-group-row">
-                        <th colSpan={colSpan} scope="rowgroup">
-                          <span>{category.name}</span>
-                          <small>{category.specCount} specs · {category.total} properties</small>
-                        </th>
-                      </tr>
-                      {rows.map((spec) => (
-                        <tr key={`${suite.id}:${category.id}:${spec.id}`}>
-                          <th scope="row" className="dataset-spec">
-                            {spec.url ? (
-                              <a href={spec.url} target="_blank" rel="noopener">{spec.name}<span aria-hidden="true">↗</span></a>
-                            ) : spec.name}
-                          </th>
-                          <td className="dataset-source">
-                            {spec.sourceUrl ? (
-                              <a href={spec.sourceUrl} target="_blank" rel="noopener">{spec.sourceName}<span aria-hidden="true">↗</span></a>
-                            ) : spec.sourceName}
-                          </td>
-                          <td className="dataset-number">
-                            {spec.completion || <span className="dataset-na" title="No proof-completion properties">—</span>}
-                          </td>
-                          {showScratch && (
-                            <td className="dataset-number">
-                              {spec.scratch || <span className="dataset-na" title="No proof-from-scratch properties">—</span>}
-                            </td>
-                          )}
-                          <td className="dataset-number dataset-total">{spec.total}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  );
-                })}
-            </table>
+          <div className="dataset-index-toolbar">
+            <div className="dataset-search">
+              <label htmlFor={`dataset-search-${suite.id}`}>Search specs</label>
+              <div className="dataset-search-field">
+                <svg viewBox="0 0 20 20" aria-hidden="true">
+                  <circle cx="8.5" cy="8.5" r="5.5" />
+                  <path d="m12.5 12.5 4 4" />
+                </svg>
+                <input
+                  id={`dataset-search-${suite.id}`}
+                  type="search"
+                  value={specQuery}
+                  onChange={(event) => setSpecQuery(event.target.value)}
+                  placeholder="Spec, source, or category"
+                  autoComplete="off"
+                />
+                {specQuery && (
+                  <button type="button" onClick={() => setSpecQuery("")} aria-label="Clear spec search">Clear</button>
+                )}
+              </div>
+            </div>
+            <p className="dataset-result-count" aria-live="polite">
+              {normalizedQuery
+                ? `${visibleSpecCount} of ${totalSpecs} specs`
+                : `${totalSpecs} specs in ${sourceGroups.length} sources`}
+            </p>
           </div>
+
+          {filteredSourceGroups.length > 0 ? (
+            <div className="dataset-source-list">
+              {filteredSourceGroups.map((group) => {
+                const isOpen = Boolean(normalizedQuery) || openSources.has(group.key);
+                const toggleId = `${group.domId}-toggle`;
+                const panelId = `${group.domId}-panel`;
+
+                return (
+                  <section key={`${suite.id}:${group.key}`} className={`dataset-source-group${isOpen ? " is-open" : ""}`}>
+                    <div className="dataset-source-summary">
+                      <button
+                        id={toggleId}
+                        type="button"
+                        className="dataset-source-toggle"
+                        aria-expanded={isOpen}
+                        aria-controls={panelId}
+                        disabled={Boolean(normalizedQuery)}
+                        title={normalizedQuery ? "Clear search to collapse source groups" : undefined}
+                        onClick={() => toggleSource(group.key)}
+                      >
+                        <span className="dataset-source-chevron" aria-hidden="true">
+                          <svg viewBox="0 0 16 16"><path d="m5 6 3 3 3-3" /></svg>
+                        </span>
+                        <span className="dataset-source-identity">
+                          <span className="dataset-source-category">{group.categoryNames.join(" · ")}</span>
+                          <span className="dataset-source-name">{group.name}</span>
+                        </span>
+                      </button>
+
+                      <dl className="dataset-source-stats">
+                        <div><dt>{normalizedQuery ? "Matches" : "Specs"}</dt><dd>{normalizedQuery ? group.filteredSpecs.length : group.specs.length}</dd></div>
+                        <div><dt>Tasks</dt><dd>{normalizedQuery ? group.filteredTasks : group.total}</dd></div>
+                      </dl>
+
+                      {group.url && (
+                        <a
+                          className="dataset-source-repo"
+                          href={group.url}
+                          target="_blank"
+                          rel="noopener"
+                          aria-label={`Open ${group.name} source`}
+                          title={`Open ${group.name} source`}
+                        >
+                          <span aria-hidden="true">↗</span>
+                        </a>
+                      )}
+                    </div>
+
+                    <div
+                      id={panelId}
+                      className="dataset-source-panel"
+                      role="region"
+                      aria-labelledby={toggleId}
+                      hidden={!isOpen}
+                    >
+                      <table className={`dataset-table${showScratch ? " dataset-table-with-scratch" : ""}`}>
+                        <caption className="sr-only">{group.name} specs</caption>
+                        <thead>
+                          <tr>
+                            <th scope="col">Spec</th>
+                            <th scope="col" className="dataset-number">Completion tasks</th>
+                            {showScratch && (
+                              <th scope="col" className="dataset-number">From-scratch tasks</th>
+                            )}
+                            <th scope="col" className="dataset-number">Total tasks</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {group.filteredSpecs.map((spec) => (
+                            <tr key={`${suite.id}:${group.key}:${spec.id}`}>
+                              <th scope="row" className="dataset-spec">
+                                {spec.url ? (
+                                  <a href={spec.url} target="_blank" rel="noopener">{spec.name}<span aria-hidden="true">↗</span></a>
+                                ) : spec.name}
+                              </th>
+                              <td className="dataset-number" data-label="Completion tasks">
+                                {spec.completion || <span className="dataset-na" title="No proof-completion tasks">—</span>}
+                              </td>
+                              {showScratch && (
+                                <td className="dataset-number" data-label="From-scratch tasks">
+                                  {spec.scratch || <span className="dataset-na" title="No proof-from-scratch tasks">—</span>}
+                                </td>
+                              )}
+                              <td className="dataset-number dataset-total" data-label="Total tasks">{spec.total}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </section>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="dataset-no-results" role="status">
+              <strong>No specs match “{specQuery.trim()}”.</strong>
+              <button type="button" onClick={() => setSpecQuery("")}>Clear search</button>
+            </div>
+          )}
         </div>
       </section>
 
@@ -367,10 +504,10 @@ function PageBenchmark() {
           <Reveal>
             <h2 style={{ fontSize: 32 }}>How a proof is graded</h2>
             <p className="lead" style={{ fontSize: 17 }}>
-              Each candidate runs in a Docker sandbox. A cheat-checker goes first: no admitted
-              steps, smuggled axioms, or weakened theorems. If that fails, the verdict is CHEATING
-              and tlapm is skipped. Otherwise tlapm checks correctness. Cheating does not count as
-              a pass.
+              Each submission runs in a Docker sandbox. A cheat-checker first rejects prohibited
+              edits, including new axioms, model-added admitted steps, and changes to the target
+              theorem. Clean submissions are then checked by tlapm. Only accepted proofs receive
+              PASS.
             </p>
           </Reveal>
           <Reveal delay={120}><div style={{ marginTop: 24 }}><PipelineBanner /></div></Reveal>
@@ -386,7 +523,7 @@ function PageCite() {
     <section className="section">
       <div className="wrap-narrow">
         <FadeIn>
-          <h2 style={{ fontSize: 28 }}>Contribute</h2>
+          <h1 style={{ fontSize: 28 }}>Contribute</h1>
           <p style={{ fontFamily: "var(--serif)", fontSize: 17, lineHeight: 1.7, color: "var(--ink-2)" }}>
             Want to see more models on the leaderboard? Open a pull request on the{" "}
             <a className="link" href="https://github.com/specula-org/tlaps-bench" target="_blank">tlaps-bench</a> repository.
@@ -394,10 +531,10 @@ function PageCite() {
             <a className="link" href="https://github.com/specula-org/tlaps-bench/blob/main/docs/USAGE.md" target="_blank">usage guide</a>.
           </p>
           <p style={{ fontFamily: "var(--serif)", fontSize: 17, lineHeight: 1.7, color: "var(--ink-2)", marginTop: 12 }}>
-            New benchmark sources, agents, and bug reports are welcome, open an issue to discuss.
+            Have a benchmark source, agent, or bug report to suggest? Open an issue to discuss it.
           </p>
           <div style={{ display: "flex", gap: 10, marginTop: 20 }}>
-            <a className="btn primary" href="https://github.com/specula-org/tlaps-bench" target="_blank">Open a PR</a>
+            <a className="btn primary" href="https://github.com/specula-org/tlaps-bench/compare" target="_blank" rel="noopener">Open a PR</a>
             <a className="btn ghost" href="https://github.com/specula-org/tlaps-bench/blob/main/docs/USAGE.md" target="_blank">Usage guide</a>
           </div>
         </FadeIn>

@@ -1,0 +1,16 @@
+{
+  "name": "tlaps-bench-website",
+  "private": true,
+  "scripts": {
+    "build": "npm run build:data && npm run build:app",
+    "build:app": "node scripts/build-app.mjs",
+    "build:data": "node scripts/build-data.mjs"
+  },
+  "dependencies": {
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2"
+  }
+}
