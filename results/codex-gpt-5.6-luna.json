@@ -6,42 +6,20 @@
     "approach": "agentic",
     "result_set": "codex_agentic_gpt-5.6-luna-xhigh-core",
     "run_id": "codex-agentic-gpt56luna-xhigh-core-20260809_xhigh_core_319",
-    "generated": "2026-08-19",
-    "note": "Codex CLI agentic GPT-5.6-Luna (xhigh) on Proof Completion Core (190 tasks). Three TIMEOUT failures have audited-unavailable token usage recorded as zeros; costs for a few incomplete audits were filled from public Luna token rates.",
+    "generated": "2026-08-20",
+    "note": "Codex CLI agentic GPT-5.6-Luna (xhigh) on Proof Completion Core (190 tasks). TCP and BPCon passed after exact-session continuation. Vote Liveness retains final_disposition=TIMEOUT and a final 6/2902 checker failure; because the website accepts only terminal checker verdicts, it is displayed and scored as FAIL. Long-continuation token totals are audited session-level lower bounds; equivalent costs preserve the website's previously published Luna rate convention.",
     "summary_by_mode": {
       "proof-completion": {
         "total": 190,
-        "PASS": 175,
-        "FAIL": 15,
+        "PASS": 177,
+        "FAIL": 13,
         "CHEATING": 0,
         "ERROR": 0,
         "TIMEOUT": 0,
-        "pass_rate": 92.1
+        "pass_rate": 93.2
       }
     },
     "summary_by_source": {
-      "apalache-examples (Konnov)": {
-        "proof-completion": {
-          "total": 56,
-          "PASS": 56,
-          "FAIL": 0,
-          "CHEATING": 0,
-          "ERROR": 0,
-          "TIMEOUT": 0,
-          "pass_rate": 100
-        }
-      },
-      "tlaplus/Examples": {
-        "proof-completion": {
-          "total": 113,
-          "PASS": 98,
-          "FAIL": 15,
-          "CHEATING": 0,
-          "ERROR": 0,
-          "TIMEOUT": 0,
-          "pass_rate": 86.7
-        }
-      },
       "TLAPS distribution examples": {
         "proof-completion": {
           "total": 21,
@@ -50,7 +28,29 @@
           "CHEATING": 0,
           "ERROR": 0,
           "TIMEOUT": 0,
-          "pass_rate": 100
+          "pass_rate": 100.0
+        }
+      },
+      "apalache-examples (Konnov)": {
+        "proof-completion": {
+          "total": 56,
+          "PASS": 56,
+          "FAIL": 0,
+          "CHEATING": 0,
+          "ERROR": 0,
+          "TIMEOUT": 0,
+          "pass_rate": 100.0
+        }
+      },
+      "tlaplus/Examples": {
+        "proof-completion": {
+          "total": 113,
+          "PASS": 100,
+          "FAIL": 13,
+          "CHEATING": 0,
+          "ERROR": 0,
+          "TIMEOUT": 0,
+          "pass_rate": 88.5
         }
       }
     },
@@ -63,29 +63,29 @@
       "task_count": 190,
       "complete_for_all_tasks": true,
       "active_time_complete": true,
-      "input_tokens": 7895724118,
-      "output_tokens": 19821706,
-      "cache_read_input_tokens": 7756007936,
+      "input_tokens": 16331857362,
+      "output_tokens": 34307682,
+      "cache_read_input_tokens": 16069839872,
       "cache_write_input_tokens": 0,
-      "equivalent_cost_usd": 1034.2472116,
+      "equivalent_cost_usd": 2074.8475692,
       "output_tokens_positive_for_all_tasks": true,
-      "usage_unavailable_timeout_tasks": 3
+      "usage_lower_bound_continuation_tasks": 3
     },
     "cohort": "agentic",
     "reasoning_effort": "xhigh",
     "scoring": {
       "primary": "spec-balanced-pass-rate",
       "task_micro": {
-        "passed": 175,
+        "passed": 177,
         "total": 190,
-        "pct": 92.10526315789474
+        "pct": 93.15789473684211
       },
       "all_leaves_complete": {
-        "passed": 44,
+        "passed": 45,
         "total": 56,
-        "pct": 78.57142857142857
+        "pct": 80.35714285714286
       },
-      "spec_balanced_pass_rate_pct": 92.26113172541743
+      "spec_balanced_pass_rate_pct": 93.00517934446506
     },
     "suite": "proof-completion-core"
   },
@@ -2388,18 +2388,20 @@
       "run_id": "codex-agentic-gpt56luna-xhigh-core-20260809_xhigh_core_319",
       "mode": "proof-completion",
       "agent_exit": 124,
-      "check_verdict": "FAIL",
-      "time_secs": 115194.22262410121,
-      "error": "agent continuation exhausted its additional 24h limit; final 12h checker completed with FAIL",
+      "check_verdict": "PASS",
+      "time_secs": 201594.2226241012,
+      "error": "",
       "termination_reason": "TIMEOUT",
-      "input_tokens": 0,
-      "output_tokens": 0,
+      "input_tokens": 2195504455,
+      "output_tokens": 3267141,
       "sany_valid": true,
       "source": "tlaplus/Examples",
       "gt_proof_steps": 145,
-      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens": 2169752832,
       "cache_write_input_tokens": 0,
-      "equivalent_cost_usd": 0
+      "equivalent_cost_usd": 262.32975220000003,
+      "final_disposition": "PASS",
+      "obligations": 2674
     },
     {
       "benchmark": "tlaplus_examples_byzpaxos/BPConProof_MaxBallotLemma2.tla",
@@ -2544,17 +2546,20 @@
       "mode": "proof-completion",
       "agent_exit": 124,
       "check_verdict": "FAIL",
-      "time_secs": 115194.557593734,
-      "error": "agent continuation exhausted its additional 24h limit; final 12h checker completed with FAIL",
+      "time_secs": 375731.861629734,
+      "error": "bounded same-session continuations exhausted; final checker completed with 6/2902 obligations failed; reporting disposition remains TIMEOUT",
       "termination_reason": "TIMEOUT",
-      "input_tokens": 0,
-      "output_tokens": 0,
+      "input_tokens": 4205073561,
+      "output_tokens": 8778675,
       "sany_valid": true,
       "source": "tlaplus/Examples",
       "gt_proof_steps": 149,
-      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens": 4129534464,
       "cache_write_input_tokens": 0,
-      "equivalent_cost_usd": 0
+      "equivalent_cost_usd": 541.1645934000001,
+      "final_disposition": "TIMEOUT",
+      "obligations_failed": 6,
+      "obligations_total": 2902
     },
     {
       "benchmark": "tlaplus_examples_byzpaxos/VoteProof_SafeAtProp.tla",
@@ -4534,19 +4539,21 @@
       "result_set": "codex_agentic_gpt-5.6-luna-xhigh-core",
       "run_id": "codex-agentic-gpt56luna-xhigh-core-20260809_xhigh_core_319",
       "mode": "proof-completion",
-      "agent_exit": 124,
-      "check_verdict": "FAIL",
-      "time_secs": 115193.9703046754,
-      "error": "agent continuation exhausted its additional 24h limit; final 12h checker completed with FAIL",
-      "termination_reason": "TIMEOUT",
-      "input_tokens": 0,
-      "output_tokens": 0,
+      "agent_exit": 0,
+      "check_verdict": "PASS",
+      "time_secs": 191566.34622767539,
+      "error": "",
+      "termination_reason": "OK",
+      "input_tokens": 2035555228,
+      "output_tokens": 2440160,
       "sany_valid": true,
       "source": "tlaplus/Examples",
       "gt_proof_steps": 601,
-      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens": 2014544640,
       "cache_write_input_tokens": 0,
-      "equivalent_cost_usd": 0
+      "equivalent_cost_usd": 237.106012,
+      "final_disposition": "PASS",
+      "obligations": 2169
     },
     {
       "benchmark": "tlaplus_examples_tcp/tcp_proof_PrefixTwoNonEmpty.tla",
