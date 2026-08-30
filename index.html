@@ -4,6 +4,27 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>TLAPS-Bench</title>
+<script>
+  window.TWEAK_DEFAULTS = { "accent": "#4f8cff", "dark": false };
+
+  (() => {
+    let savedTweaks;
+    try {
+      savedTweaks = JSON.parse(localStorage.getItem("tlaps_tweaks"));
+    } catch (e) {}
+
+    const tweaks = savedTweaks
+      ? { ...window.TWEAK_DEFAULTS, ...savedTweaks }
+      : {
+          ...window.TWEAK_DEFAULTS,
+          dark: Boolean(window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches),
+        };
+
+    window.INITIAL_TWEAKS = tweaks;
+    document.documentElement.style.setProperty("--accent", tweaks.accent);
+    document.documentElement.setAttribute("data-theme", tweaks.dark ? "dark" : "light");
+  })();
+</script>
 <link rel="icon" href="favicon.svg" type="image/svg+xml" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,11 +35,7 @@
 <body>
   <div id="root"></div>
 
-  <script>
-    window.TWEAK_DEFAULTS = { "accent": "#4f8cff", "dark": false };
-  </script>
-
   <script src="data.js?v=64" defer></script>
-  <script src="app.js?v=13" defer></script>
+  <script src="app.js?v=14" defer></script>
 </body>
 </html>

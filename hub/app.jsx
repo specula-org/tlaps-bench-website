@@ -61,11 +61,7 @@ function Nav({ route, tweaks, update }) {
 
 function App() {
   const [route] = useHashRoute("home");
-  const [tweaks, setTweaks] = useState(() => {
-    try { const saved = localStorage.getItem("tlaps_tweaks"); if (saved) return JSON.parse(saved); } catch (e) {}
-    const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
-    return { ...window.TWEAK_DEFAULTS, dark: prefersDark };
-  });
+  const [tweaks, setTweaks] = useState(window.INITIAL_TWEAKS);
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
