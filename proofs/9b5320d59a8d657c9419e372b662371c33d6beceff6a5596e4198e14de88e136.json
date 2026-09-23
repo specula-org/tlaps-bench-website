@@ -1,0 +1,122 @@
+{
+  "schemaVersion": 1,
+  "specId": "etcd_raft/etcd_raft.tla",
+  "sourceName": "etcd_raft.tla",
+  "sourceSha256": "cc027602836dfbe693f97c3c2fc7bfae38686537c96026231ba7f96961c60331",
+  "resultSha256": "630340c85ff4b6716b9907e5136b6dd0e0ddb532df6fbf1f5f81dcfdf5f42066",
+  "source": "---- MODULE etcd_raft ----\nEXTENDS etcd_raftDefs\n\n\\* BEGIN AGENT HELPERS\n\\* END AGENT HELPERS\n\nTHEOREM Spec => []LogInv\n\\* BEGIN AGENT PROOF etcd_raft/etcd_raft_LogInv.tla\nPROOF OMITTED\n\\* END AGENT PROOF etcd_raft/etcd_raft_LogInv.tla\n\nTHEOREM CommittedIsDurable == Spec => []CommittedIsDurableInv\n\\* BEGIN AGENT PROOF etcd_raft/etcd_raft_CommittedIsDurable.tla\nPROOF OMITTED\n\\* END AGENT PROOF etcd_raft/etcd_raft_CommittedIsDurable.tla\n\nTHEOREM ElectionSafety == Spec => []ElectionSafetyInv\n\\* BEGIN AGENT PROOF etcd_raft/etcd_raft_ElectionSafety.tla\nPROOF OMITTED\n\\* END AGENT PROOF etcd_raft/etcd_raft_ElectionSafety.tla\n\nTHEOREM LeaderCompleteness == Spec => []LeaderCompletenessInv\n\\* BEGIN AGENT PROOF etcd_raft/etcd_raft_LeaderCompleteness.tla\nPROOF OMITTED\n\\* END AGENT PROOF etcd_raft/etcd_raft_LeaderCompleteness.tla\n\nTHEOREM LogMatching == Spec => []LogMatchingInv\n\\* BEGIN AGENT PROOF etcd_raft/etcd_raft_LogMatching.tla\nPROOF OMITTED\n\\* END AGENT PROOF etcd_raft/etcd_raft_LogMatching.tla\n\nTHEOREM MoreThanOneLeader == Spec => []MoreThanOneLeaderInv\n\\* BEGIN AGENT PROOF etcd_raft/etcd_raft_MoreThanOneLeader.tla\nPROOF OMITTED\n\\* END AGENT PROOF etcd_raft/etcd_raft_MoreThanOneLeader.tla\n\nTHEOREM MoreUpToDate == Spec => []MoreUpToDateCorrectInv\n\\* BEGIN AGENT PROOF etcd_raft/etcd_raft_MoreUpToDate.tla\nPROOF OMITTED\n\\* END AGENT PROOF etcd_raft/etcd_raft_MoreUpToDate.tla\n\nTHEOREM QuorumLog == Spec => []QuorumLogInv\n\\* BEGIN AGENT PROOF etcd_raft/etcd_raft_QuorumLog.tla\nPROOF OMITTED\n\\* END AGENT PROOF etcd_raft/etcd_raft_QuorumLog.tla\n====\n",
+  "units": {
+    "etcd_raft/etcd_raft_LogInv.tla": {
+      "id": "etcd_raft/etcd_raft_LogInv.tla",
+      "name": "etcd_raft_LogInv",
+      "kind": "target",
+      "lineStart": 7,
+      "lineEnd": 9,
+      "proofLines": [],
+      "proofRange": [
+        9,
+        9
+      ],
+      "proofOmitted": true,
+      "dependencies": []
+    },
+    "etcd_raft/etcd_raft_CommittedIsDurable.tla": {
+      "id": "etcd_raft/etcd_raft_CommittedIsDurable.tla",
+      "name": "CommittedIsDurable",
+      "kind": "target",
+      "lineStart": 12,
+      "lineEnd": 14,
+      "proofLines": [],
+      "proofRange": [
+        14,
+        14
+      ],
+      "proofOmitted": true,
+      "dependencies": []
+    },
+    "etcd_raft/etcd_raft_ElectionSafety.tla": {
+      "id": "etcd_raft/etcd_raft_ElectionSafety.tla",
+      "name": "ElectionSafety",
+      "kind": "target",
+      "lineStart": 17,
+      "lineEnd": 19,
+      "proofLines": [],
+      "proofRange": [
+        19,
+        19
+      ],
+      "proofOmitted": true,
+      "dependencies": []
+    },
+    "etcd_raft/etcd_raft_LeaderCompleteness.tla": {
+      "id": "etcd_raft/etcd_raft_LeaderCompleteness.tla",
+      "name": "LeaderCompleteness",
+      "kind": "target",
+      "lineStart": 22,
+      "lineEnd": 24,
+      "proofLines": [],
+      "proofRange": [
+        24,
+        24
+      ],
+      "proofOmitted": true,
+      "dependencies": []
+    },
+    "etcd_raft/etcd_raft_LogMatching.tla": {
+      "id": "etcd_raft/etcd_raft_LogMatching.tla",
+      "name": "LogMatching",
+      "kind": "target",
+      "lineStart": 27,
+      "lineEnd": 29,
+      "proofLines": [],
+      "proofRange": [
+        29,
+        29
+      ],
+      "proofOmitted": true,
+      "dependencies": []
+    },
+    "etcd_raft/etcd_raft_MoreThanOneLeader.tla": {
+      "id": "etcd_raft/etcd_raft_MoreThanOneLeader.tla",
+      "name": "MoreThanOneLeader",
+      "kind": "target",
+      "lineStart": 32,
+      "lineEnd": 34,
+      "proofLines": [],
+      "proofRange": [
+        34,
+        34
+      ],
+      "proofOmitted": true,
+      "dependencies": []
+    },
+    "etcd_raft/etcd_raft_MoreUpToDate.tla": {
+      "id": "etcd_raft/etcd_raft_MoreUpToDate.tla",
+      "name": "MoreUpToDate",
+      "kind": "target",
+      "lineStart": 37,
+      "lineEnd": 39,
+      "proofLines": [],
+      "proofRange": [
+        39,
+        39
+      ],
+      "proofOmitted": true,
+      "dependencies": []
+    },
+    "etcd_raft/etcd_raft_QuorumLog.tla": {
+      "id": "etcd_raft/etcd_raft_QuorumLog.tla",
+      "name": "QuorumLog",
+      "kind": "target",
+      "lineStart": 42,
+      "lineEnd": 44,
+      "proofLines": [],
+      "proofRange": [
+        44,
+        44
+      ],
+      "proofOmitted": true,
+      "dependencies": []
+    }
+  }
+}

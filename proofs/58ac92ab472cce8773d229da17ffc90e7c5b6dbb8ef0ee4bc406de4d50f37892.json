@@ -1,0 +1,808 @@
+{
+  "schemaVersion": 1,
+  "specId": "tlaplus_examples_btree/btree.tla",
+  "sourceName": "btree.tla",
+  "sourceSha256": "73b80c968556ee679a1b8e8dd176c84912ae831f7825c923039ea2e1d48d2a27",
+  "resultSha256": "de8181ab8eed33833935ff5c6162cc6974a6878781a79af71671147285387014",
+  "source": "---- MODULE btree ----\nEXTENDS btreeDefs\n\n\\* BEGIN AGENT HELPERS\nLOCAL TL == INSTANCE TLAPS\n\\* Fresh helper: NIL is outside Nodes (needs existence of outside value).\nLEMMA HelperNilNotInNodes == NIL \\notin Nodes\nPROOF BY TL!NoSetContainsEverything DEF NIL\n\\* Fresh helper: MISSING outside Vals.\nLEMMA HelperMissingNotInVals == MISSING \\notin Vals\nPROOF BY TL!NoSetContainsEverything DEF MISSING\n\\* Fresh helper: free-node choice yields a node in Nodes with IsFree.\nLEMMA HelperChooseFree == ASSUME HasFreeNode PROVE ChooseFreeNode \\in Nodes /\\ IsFree(ChooseFreeNode)\nPROOF\n<1>1 PICK n0 \\in Nodes : IsFree(n0) BY TL!SMTT(\"r10\") DEF HasFreeNode\n<1>2 QED BY <1>1 DEF ChooseFreeNode\n\\* Fresh helper: two free nodes give distinct free choice for new root.\nLEMMA HelperNewRoot == ASSUME HasTwoFreeNodes PROVE ChooseFreeNode \\in Nodes /\\ IsFree(ChooseFreeNode) /\\ (\\E n \\in Nodes : IsFree(n) /\\ n # ChooseFreeNode)\nPROOF\n<1>1 PICK a \\in Nodes : \\E b \\in Nodes : a # b /\\ IsFree(a) /\\ IsFree(b) BY TL!SMTT(\"r10\") DEF HasTwoFreeNodes\n<1>2 PICK b0 \\in Nodes : a # b0 /\\ IsFree(a) /\\ IsFree(b0) BY <1>1\n<1>3 HasFreeNode BY <1>1, <1>2 DEF HasFreeNode\n<1>4 ChooseFreeNode \\in Nodes /\\ IsFree(ChooseFreeNode) BY <1>3, HelperChooseFree\n<1>5 (IsFree(a) /\\ a # ChooseFreeNode) \\/ (IsFree(b0) /\\ b0 # ChooseFreeNode) BY <1>2, <1>4 DEF IsFree\n<1>6 QED BY <1>4, <1>5, TL!SMTT(\"r10\")\n\\* Fresh tree typing needed for Inners/Leaves splits (root/isLeaf/lastOf only).\nHelperTreeTypingWeak == /\\ root \\in Nodes\n                        /\\ isLeaf \\in [Nodes -> BOOLEAN]\n                        /\\ lastOf \\in [Nodes -> Nodes \\union {NIL}]\n\\* Fresh op/args typing (control only, no tree, provable without FindLeafNode).\nHelperOpArgsOk == /\\ (op = NIL => args = NIL)\n                  /\\ (op = \"get\" => \\E k \\in Keys : args = <<k>>)\n                  /\\ (op = \"insert\" => \\E k \\in Keys, v \\in Vals : args = <<k, v>>)\n                  /\\ (op = \"update\" => \\E k \\in Keys, v \\in Vals : args = <<k, v>>)\n\\* Fresh state/op correlation (control only).\nHelperStateOpOk == /\\ (state = GET_VALUE => op = \"get\")\n                   /\\ ((state = FIND_LEAF_TO_ADD \\/ state = WHICH_TO_SPLIT \\/ state = ADD_TO_LEAF \\/ state = SPLIT_LEAF \\/ state = SPLIT_INNER \\/ state = SPLIT_ROOT_LEAF \\/ state = SPLIT_ROOT_INNER) => op = \"insert\")\n                   /\\ (state = UPDATE_LEAF => op = \"update\")\n\\* Fresh toSplit at-max (all toSplit nodes full, provable without FindLeafNode via IF).\nHelperToSplitAtMax == \\A i \\in DOMAIN toSplit : AtMaxOccupancy(toSplit[i])\n\\* Fresh child non-nil for inners (all inner children non-NIL).\nHelperChildNonNil == \\A n \\in Inners : \\A k \\in keysOf[n] : childOf[n, k] # NIL\n\\* Fresh pivot in keys for full nodes.\nHelperPivotInKeys == \\A n \\in Nodes : AtMaxOccupancy(n) => PivotOf(keysOf[n]) \\in keysOf[n]\n\\* Fresh toSplit head is root for root splits.\nHelperToSplitHeadRoot == (state = SPLIT_ROOT_LEAF \\/ state = SPLIT_ROOT_INNER) => Head(toSplit) = root\n\\* Fresh joint invariant for Inners (tree typing + Inners, no focus/toSplit/keysOf/childOf for SplitLeaf/RootLeaf; RootInner needs ChildNonNil/Pivot).\nHelperJointInners == /\\ HelperTreeTypingWeak\n                     /\\ InnersMustHaveLast\n\\* Fresh joint invariant for Leaves.\nHelperJointLeaves == /\\ HelperTreeTypingWeak\n                     /\\ LeavesCantHaveLast\n\\* Fresh full type invariant (all TypeOk conjuncts).\nHelperFullTypeOk == TypeOk\n\\* Init lemmas: every target invariant holds initially (all nodes free leaves).\nLEMMA HelperInitInners == Init => InnersMustHaveLast\nPROOF BY TL!SMTT(\"r20\") DEF Init, InnersMustHaveLast, Inners\nLEMMA HelperInitLeaves == Init => LeavesCantHaveLast\nPROOF BY TL!SMTT(\"r20\") DEF Init, LeavesCantHaveLast, Leaves\nLEMMA HelperInitKeyOrder == Init => KeyOrderPreserved\nPROOF BY TL!SMTT(\"r20\") DEF Init, KeyOrderPreserved, Inners\nLEMMA HelperInitUnique == Init => KeysInLeavesAreUnique\nPROOF BY TL!SMTT(\"r20\") DEF Init, KeysInLeavesAreUnique, Leaves\nLEMMA HelperInitTypeOk == Init => TypeOk\nPROOF\n<1>1 ASSUME Init PROVE TypeOk\n<2>1 PICK n0 \\in Nodes : TRUE BY NodePoolIsNonEmpty, TL!SMTT(\"r10\")\n<2>2 HasFreeNode BY Init, <2>1, TL!SMTT(\"r10\") DEF Init, IsFree, HasFreeNode\n<2>3 root \\in Nodes BY Init, <2>2, TL!SMTT(\"r10\") DEF Init, ChooseFreeNode, IsFree, HasFreeNode\n<2>4 isLeaf \\in [Nodes -> BOOLEAN] BY Init, TL!SMTT(\"r10\") DEF Init\n<2>5 keysOf \\in [Nodes -> SUBSET Keys] BY Init, TL!SMTT(\"r10\") DEF Init\n<2>6 childOf \\in [Nodes \\X Keys -> Nodes \\union {NIL}] BY Init, TL!SMTT(\"r10\") DEF Init\n<2>7 lastOf \\in [Nodes -> Nodes \\union {NIL}] BY Init, TL!SMTT(\"r10\") DEF Init\n<2>8 valOf \\in [Nodes \\X Keys -> Vals \\union {NIL}] BY Init, TL!SMTT(\"r10\") DEF Init\n<2>9 focus \\in Nodes \\union {NIL} BY Init, TL!SMTT(\"r10\") DEF Init\n<2>10 toSplit \\in Seq(Nodes) BY Init, TL!SMTT(\"r10\") DEF Init\n<2>11 op \\in {\"get\", \"insert\", \"update\", NIL} BY Init, TL!SMTT(\"r10\") DEF Init\n<2>12 ret \\in Vals \\union {\"ok\", \"error\", MISSING, NIL} BY Init, TL!SMTT(\"r10\") DEF Init\n<2>13 state \\in States BY Init, TL!SMTT(\"r10\") DEF Init, States\n<2>14 QED BY <2>3, <2>4, <2>5, <2>6, <2>7, <2>8, <2>9, <2>10, <2>11, <2>12, <2>13 DEF TypeOk\n<1>2 QED BY <1>1\n\\* Per-action cells for InnersMustHaveLast (isLeaf/lastOf unchanged by non-split actions).\nLEMMA HelperInnersGetReq == InnersMustHaveLast /\\ (\\E k \\in Keys : GetReq(k)) => InnersMustHaveLast'\nPROOF BY TL!SMTT(\"r10\") DEF InnersMustHaveLast, Inners, GetReq\nLEMMA HelperInnersGetValue == InnersMustHaveLast /\\ GetValue => InnersMustHaveLast'\nPROOF BY TL!SMTT(\"r10\") DEF InnersMustHaveLast, Inners, GetValue\nLEMMA HelperInnersInsertReq == InnersMustHaveLast /\\ (\\E k \\in Keys, v \\in Vals : InsertReq(k, v)) => InnersMustHaveLast'\nPROOF BY TL!SMTT(\"r10\") DEF InnersMustHaveLast, Inners, InsertReq\nLEMMA HelperInnersUpdateReq == InnersMustHaveLast /\\ (\\E k \\in Keys, v \\in Vals : UpdateReq(k, v)) => InnersMustHaveLast'\nPROOF BY TL!SMTT(\"r10\") DEF InnersMustHaveLast, Inners, UpdateReq\nLEMMA HelperInnersUpdateLeaf == InnersMustHaveLast /\\ UpdateLeaf => InnersMustHaveLast'\nPROOF BY TL!SMTT(\"r10\") DEF InnersMustHaveLast, Inners, UpdateLeaf\nLEMMA HelperInnersFindLeafToAdd == InnersMustHaveLast /\\ FindLeafToAdd => InnersMustHaveLast'\nPROOF BY TL!SMTT(\"r10\") DEF InnersMustHaveLast, Inners, FindLeafToAdd\nLEMMA HelperInnersWhichToSplit == InnersMustHaveLast /\\ WhichToSplit => InnersMustHaveLast'\nPROOF BY TL!SMTT(\"r10\") DEF InnersMustHaveLast, Inners, WhichToSplit\nLEMMA HelperInnersAddToLeaf == InnersMustHaveLast /\\ AddToLeaf => InnersMustHaveLast'\nPROOF BY TL!SMTT(\"r10\") DEF InnersMustHaveLast, Inners, AddToLeaf\nLEMMA HelperInnersSplitLeaf == InnersMustHaveLast /\\ HelperTreeTypingWeak /\\ SplitLeaf /\\ ChooseFreeNode \\in Nodes /\\ IsFree(ChooseFreeNode) /\\ ChooseFreeNode # NIL => InnersMustHaveLast'\nPROOF BY TL!SMTT(\"r20\") DEF HelperTreeTypingWeak, InnersMustHaveLast, Inners, SplitLeaf, IsLastOfParent, ParentOf, IsFree, ChooseFreeNode\nLEMMA HelperInnersSplitRootLeaf == InnersMustHaveLast /\\ HelperTreeTypingWeak /\\ SplitRootLeaf /\\ ChooseFreeNode \\in Nodes /\\ IsFree(ChooseFreeNode) /\\ ChooseFreeNode # NIL => InnersMustHaveLast'\nPROOF BY TL!SMTT(\"r20\") DEF HelperTreeTypingWeak, InnersMustHaveLast, Inners, SplitRootLeaf, IsFree, ChooseFreeNode\nLEMMA HelperInnersUnchanged == InnersMustHaveLast /\\ UNCHANGED vars => InnersMustHaveLast'\nPROOF BY TL!SMTT(\"r10\") DEF InnersMustHaveLast, Inners, vars\n\\* Per-action cells for LeavesCantHaveLast.\nLEMMA HelperLeavesGetReq == LeavesCantHaveLast /\\ (\\E k \\in Keys : GetReq(k)) => LeavesCantHaveLast'\nPROOF BY TL!SMTT(\"r10\") DEF LeavesCantHaveLast, Leaves, GetReq\nLEMMA HelperLeavesInsertReq == LeavesCantHaveLast /\\ (\\E k \\in Keys, v \\in Vals : InsertReq(k, v)) => LeavesCantHaveLast'\nPROOF BY TL!SMTT(\"r10\") DEF LeavesCantHaveLast, Leaves, InsertReq\nLEMMA HelperLeavesUpdateReq == LeavesCantHaveLast /\\ (\\E k \\in Keys, v \\in Vals : UpdateReq(k, v)) => LeavesCantHaveLast'\nPROOF BY TL!SMTT(\"r10\") DEF LeavesCantHaveLast, Leaves, UpdateReq\nLEMMA HelperLeavesGetValue == LeavesCantHaveLast /\\ GetValue => LeavesCantHaveLast'\nPROOF BY TL!SMTT(\"r10\") DEF LeavesCantHaveLast, Leaves, GetValue\nLEMMA HelperLeavesUpdateLeaf == LeavesCantHaveLast /\\ UpdateLeaf => LeavesCantHaveLast'\nPROOF BY TL!SMTT(\"r10\") DEF LeavesCantHaveLast, Leaves, UpdateLeaf\nLEMMA HelperLeavesFindLeafToAdd == LeavesCantHaveLast /\\ FindLeafToAdd => LeavesCantHaveLast'\nPROOF BY TL!SMTT(\"r10\") DEF LeavesCantHaveLast, Leaves, FindLeafToAdd\nLEMMA HelperLeavesWhichToSplit == LeavesCantHaveLast /\\ WhichToSplit => LeavesCantHaveLast'\nPROOF BY TL!SMTT(\"r10\") DEF LeavesCantHaveLast, Leaves, WhichToSplit\nLEMMA HelperLeavesAddToLeaf == LeavesCantHaveLast /\\ AddToLeaf => LeavesCantHaveLast'\nPROOF BY TL!SMTT(\"r10\") DEF LeavesCantHaveLast, Leaves, AddToLeaf\nLEMMA HelperLeavesUnchanged == LeavesCantHaveLast /\\ UNCHANGED vars => LeavesCantHaveLast'\nPROOF BY TL!SMTT(\"r10\") DEF LeavesCantHaveLast, Leaves, vars\n\\* KeyOrder cells: substitution plus per-action equalities.\nLEMMA HelperKeyOrderSubst == KeyOrderPreserved /\\ isLeaf' = isLeaf /\\ keysOf' = keysOf /\\ childOf' = childOf => KeyOrderPreserved'\nPROOF BY TL!SMTT(\"r10\") DEF KeyOrderPreserved, Inners\nLEMMA HelperKeyOrderGetReqEq == GetReq(1) => isLeaf' = isLeaf /\\ keysOf' = keysOf /\\ childOf' = childOf\nPROOF BY TL!SMTT(\"r10\") DEF GetReq\n\\* TypeOk cells for request actions (tree variables untouched).\nLEMMA HelperTypeOkGetReq == TypeOk /\\ (\\E k \\in Keys : GetReq(k)) => TypeOk'\nPROOF BY TL!SMTT(\"r10\") DEF TypeOk, States, GetReq\nLEMMA HelperTypeOkInsertReq == TypeOk /\\ (\\E k \\in Keys, v \\in Vals : InsertReq(k, v)) => TypeOk'\nPROOF BY TL!SMTT(\"r10\") DEF TypeOk, States, InsertReq\n\\* Uniqueness cells (keysOf/isLeaf unchanged by non-add actions).\nLEMMA HelperUniqueSubst == KeysInLeavesAreUnique /\\ isLeaf' = isLeaf /\\ keysOf' = keysOf => KeysInLeavesAreUnique'\nPROOF BY TL!SMTT(\"r10\") DEF KeysInLeavesAreUnique, Leaves\nLEMMA HelperUniqueGetReq == KeysInLeavesAreUnique /\\ GetReq(1) => KeysInLeavesAreUnique'\nPROOF BY TL!SMTT(\"r10\") DEF KeysInLeavesAreUnique, Leaves, GetReq\nLEMMA HelperUniqueGetValue == KeysInLeavesAreUnique /\\ GetValue => KeysInLeavesAreUnique'\nPROOF BY TL!SMTT(\"r10\") DEF KeysInLeavesAreUnique, Leaves, GetValue\nLEMMA HelperUniqueInsertReq == KeysInLeavesAreUnique /\\ InsertReq(1, \"v1\") => KeysInLeavesAreUnique'\nPROOF BY TL!SMTT(\"r10\") DEF KeysInLeavesAreUnique, Leaves, InsertReq\nLEMMA HelperUniqueUpdateReq == KeysInLeavesAreUnique /\\ UpdateReq(1, \"v1\") => KeysInLeavesAreUnique'\nPROOF BY TL!SMTT(\"r10\") DEF KeysInLeavesAreUnique, Leaves, UpdateReq\nLEMMA HelperUniqueUpdateLeaf == KeysInLeavesAreUnique /\\ UpdateLeaf => KeysInLeavesAreUnique'\nPROOF BY TL!SMTT(\"r10\") DEF KeysInLeavesAreUnique, Leaves, UpdateLeaf\nLEMMA HelperUniqueFindLeafToAdd == KeysInLeavesAreUnique /\\ FindLeafToAdd => KeysInLeavesAreUnique'\nPROOF BY TL!SMTT(\"r10\") DEF KeysInLeavesAreUnique, Leaves, FindLeafToAdd\nLEMMA HelperUniqueWhichToSplit == KeysInLeavesAreUnique /\\ WhichToSplit => KeysInLeavesAreUnique'\nPROOF BY TL!SMTT(\"r10\") DEF KeysInLeavesAreUnique, Leaves, WhichToSplit\nLEMMA HelperUniqueUnchanged == KeysInLeavesAreUnique /\\ UNCHANGED vars => KeysInLeavesAreUnique'\nPROOF BY TL!SMTT(\"r10\") DEF KeysInLeavesAreUnique, Leaves, vars\n\\* END AGENT HELPERS\n\nTHEOREM TypeOkCorrect == Spec => []TypeOk\n\\* BEGIN AGENT PROOF tlaplus_examples_btree/btree_TypeOkCorrect.tla\nPROOF\n<1>1 Init => TypeOk BY HelperInitTypeOk\n<1>2 TypeOk /\\ [Next]_vars => TypeOk' BY HelperTypeOkGetReq, HelperTypeOkInsertReq, TL!SMTT(\"r30\") DEF TypeOk, States, Next, vars, GetReq, GetValue, InsertReq, UpdateReq, UpdateLeaf, FindLeafToAdd, WhichToSplit, AddToLeaf, SplitLeaf, SplitRootLeaf, SplitRootInner\n<1> QED BY <1>1, <1>2, TL!PTL DEF Spec\n\\* END AGENT PROOF tlaplus_examples_btree/btree_TypeOkCorrect.tla\n\nTHEOREM InnersMustHaveLastCorrect == Spec => []InnersMustHaveLast\n\\* BEGIN AGENT PROOF tlaplus_examples_btree/btree_InnersMustHaveLastCorrect.tla\nPROOF\n<1>1 Init => InnersMustHaveLast BY HelperInitInners\n<1>2 InnersMustHaveLast /\\ [Next]_vars => InnersMustHaveLast' BY HelperInnersGetReq, HelperInnersGetValue, HelperInnersInsertReq, HelperInnersUpdateReq, HelperInnersUpdateLeaf, HelperInnersFindLeafToAdd, HelperInnersWhichToSplit, HelperInnersAddToLeaf, HelperInnersSplitLeaf, HelperInnersSplitRootLeaf, HelperInnersUnchanged, HelperChooseFree, HelperNilNotInNodes, TL!SMTT(\"r30\") DEF InnersMustHaveLast, Inners, HelperTreeTypingWeak, Next, vars, GetReq, GetValue, InsertReq, UpdateReq, UpdateLeaf, FindLeafToAdd, WhichToSplit, AddToLeaf, SplitLeaf, SplitRootLeaf, SplitRootInner, IsLastOfParent, ParentOf, IsFree, ChooseFreeNode\n<1> QED BY <1>1, <1>2, TL!PTL DEF Spec\n\\* END AGENT PROOF tlaplus_examples_btree/btree_InnersMustHaveLastCorrect.tla\n\nTHEOREM LeavesCantHaveLastCorrect == Spec => []LeavesCantHaveLast\n\\* BEGIN AGENT PROOF tlaplus_examples_btree/btree_LeavesCantHaveLastCorrect.tla\nPROOF\n<1>1 Init => LeavesCantHaveLast BY HelperInitLeaves\n<1>2 LeavesCantHaveLast /\\ [Next]_vars => LeavesCantHaveLast' BY HelperLeavesGetReq, HelperLeavesInsertReq, HelperLeavesUpdateReq, HelperLeavesGetValue, HelperLeavesUpdateLeaf, HelperLeavesFindLeafToAdd, HelperLeavesWhichToSplit, HelperLeavesAddToLeaf, HelperLeavesUnchanged, TL!SMTT(\"r30\") DEF LeavesCantHaveLast, Leaves, Next, vars, GetReq, GetValue, InsertReq, UpdateReq, UpdateLeaf, FindLeafToAdd, WhichToSplit, AddToLeaf, SplitLeaf, SplitRootLeaf, SplitRootInner\n<1> QED BY <1>1, <1>2, TL!PTL DEF Spec\n\\* END AGENT PROOF tlaplus_examples_btree/btree_LeavesCantHaveLastCorrect.tla\n\nTHEOREM KeyOrderPreservedCorrect == Spec => []KeyOrderPreserved\n\\* BEGIN AGENT PROOF tlaplus_examples_btree/btree_KeyOrderPreservedCorrect.tla\nPROOF\n<1>1 Init => KeyOrderPreserved BY HelperInitKeyOrder\n<1>2 KeyOrderPreserved /\\ [Next]_vars => KeyOrderPreserved' BY HelperKeyOrderSubst, HelperKeyOrderGetReqEq, TL!SMTT(\"r30\") DEF KeyOrderPreserved, Inners, Next, vars, GetReq, GetValue, InsertReq, UpdateReq, UpdateLeaf, FindLeafToAdd, WhichToSplit, AddToLeaf, SplitLeaf, SplitRootLeaf, SplitRootInner\n<1> QED BY <1>1, <1>2, TL!PTL DEF Spec\n\\* END AGENT PROOF tlaplus_examples_btree/btree_KeyOrderPreservedCorrect.tla\n\nTHEOREM KeysInLeavesAreUniqueCorrect == Spec => []KeysInLeavesAreUnique\n\\* BEGIN AGENT PROOF tlaplus_examples_btree/btree_KeysInLeavesAreUniqueCorrect.tla\nPROOF\n<1>1 Init => KeysInLeavesAreUnique BY HelperInitUnique\n<1>2 KeysInLeavesAreUnique /\\ [Next]_vars => KeysInLeavesAreUnique' BY HelperUniqueSubst, HelperUniqueGetReq, HelperUniqueGetValue, HelperUniqueInsertReq, HelperUniqueUpdateReq, HelperUniqueUpdateLeaf, HelperUniqueFindLeafToAdd, HelperUniqueWhichToSplit, HelperUniqueUnchanged, TL!SMTT(\"r30\") DEF KeysInLeavesAreUnique, Leaves, Next, vars, GetReq, GetValue, InsertReq, UpdateReq, UpdateLeaf, FindLeafToAdd, WhichToSplit, AddToLeaf, SplitLeaf, SplitRootLeaf, SplitRootInner\n<1> QED BY <1>1, <1>2, TL!PTL DEF Spec\n\\* END AGENT PROOF tlaplus_examples_btree/btree_KeysInLeavesAreUniqueCorrect.tla\n====\n",
+  "units": {
+    "tlaplus_examples_btree/btree_TypeOkCorrect.tla": {
+      "id": "tlaplus_examples_btree/btree_TypeOkCorrect.tla",
+      "name": "TypeOkCorrect",
+      "kind": "target",
+      "lineStart": 155,
+      "lineEnd": 160,
+      "proofLines": [
+        157,
+        158,
+        159,
+        160
+      ],
+      "proofRange": [
+        157,
+        160
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:HelperInitTypeOk",
+        "helper:HelperTypeOkGetReq",
+        "helper:HelperTypeOkInsertReq"
+      ]
+    },
+    "tlaplus_examples_btree/btree_InnersMustHaveLastCorrect.tla": {
+      "id": "tlaplus_examples_btree/btree_InnersMustHaveLastCorrect.tla",
+      "name": "InnersMustHaveLastCorrect",
+      "kind": "target",
+      "lineStart": 163,
+      "lineEnd": 168,
+      "proofLines": [
+        165,
+        166,
+        167,
+        168
+      ],
+      "proofRange": [
+        165,
+        168
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:HelperChooseFree",
+        "helper:HelperInitInners",
+        "helper:HelperInnersAddToLeaf",
+        "helper:HelperInnersFindLeafToAdd",
+        "helper:HelperInnersGetReq",
+        "helper:HelperInnersGetValue",
+        "helper:HelperInnersInsertReq",
+        "helper:HelperInnersSplitLeaf",
+        "helper:HelperInnersSplitRootLeaf",
+        "helper:HelperInnersUnchanged",
+        "helper:HelperInnersUpdateLeaf",
+        "helper:HelperInnersUpdateReq",
+        "helper:HelperInnersWhichToSplit",
+        "helper:HelperNilNotInNodes"
+      ]
+    },
+    "tlaplus_examples_btree/btree_LeavesCantHaveLastCorrect.tla": {
+      "id": "tlaplus_examples_btree/btree_LeavesCantHaveLastCorrect.tla",
+      "name": "LeavesCantHaveLastCorrect",
+      "kind": "target",
+      "lineStart": 171,
+      "lineEnd": 176,
+      "proofLines": [
+        173,
+        174,
+        175,
+        176
+      ],
+      "proofRange": [
+        173,
+        176
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:HelperInitLeaves",
+        "helper:HelperLeavesAddToLeaf",
+        "helper:HelperLeavesFindLeafToAdd",
+        "helper:HelperLeavesGetReq",
+        "helper:HelperLeavesGetValue",
+        "helper:HelperLeavesInsertReq",
+        "helper:HelperLeavesUnchanged",
+        "helper:HelperLeavesUpdateLeaf",
+        "helper:HelperLeavesUpdateReq",
+        "helper:HelperLeavesWhichToSplit"
+      ]
+    },
+    "tlaplus_examples_btree/btree_KeyOrderPreservedCorrect.tla": {
+      "id": "tlaplus_examples_btree/btree_KeyOrderPreservedCorrect.tla",
+      "name": "KeyOrderPreservedCorrect",
+      "kind": "target",
+      "lineStart": 179,
+      "lineEnd": 184,
+      "proofLines": [
+        181,
+        182,
+        183,
+        184
+      ],
+      "proofRange": [
+        181,
+        184
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:HelperInitKeyOrder",
+        "helper:HelperKeyOrderGetReqEq",
+        "helper:HelperKeyOrderSubst"
+      ]
+    },
+    "tlaplus_examples_btree/btree_KeysInLeavesAreUniqueCorrect.tla": {
+      "id": "tlaplus_examples_btree/btree_KeysInLeavesAreUniqueCorrect.tla",
+      "name": "KeysInLeavesAreUniqueCorrect",
+      "kind": "target",
+      "lineStart": 187,
+      "lineEnd": 192,
+      "proofLines": [
+        189,
+        190,
+        191,
+        192
+      ],
+      "proofRange": [
+        189,
+        192
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:HelperInitUnique",
+        "helper:HelperUniqueFindLeafToAdd",
+        "helper:HelperUniqueGetReq",
+        "helper:HelperUniqueGetValue",
+        "helper:HelperUniqueInsertReq",
+        "helper:HelperUniqueSubst",
+        "helper:HelperUniqueUnchanged",
+        "helper:HelperUniqueUpdateLeaf",
+        "helper:HelperUniqueUpdateReq",
+        "helper:HelperUniqueWhichToSplit"
+      ]
+    },
+    "helper:HelperNilNotInNodes": {
+      "id": "helper:HelperNilNotInNodes",
+      "name": "HelperNilNotInNodes",
+      "kind": "helper",
+      "lineStart": 7,
+      "lineEnd": 8,
+      "proofLines": [
+        8
+      ],
+      "proofRange": [
+        8,
+        8
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HelperChooseFree": {
+      "id": "helper:HelperChooseFree",
+      "name": "HelperChooseFree",
+      "kind": "helper",
+      "lineStart": 13,
+      "lineEnd": 16,
+      "proofLines": [
+        14,
+        15,
+        16
+      ],
+      "proofRange": [
+        14,
+        16
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HelperInitInners": {
+      "id": "helper:HelperInitInners",
+      "name": "HelperInitInners",
+      "kind": "helper",
+      "lineStart": 56,
+      "lineEnd": 57,
+      "proofLines": [
+        57
+      ],
+      "proofRange": [
+        57,
+        57
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HelperInitLeaves": {
+      "id": "helper:HelperInitLeaves",
+      "name": "HelperInitLeaves",
+      "kind": "helper",
+      "lineStart": 58,
+      "lineEnd": 59,
+      "proofLines": [
+        59
+      ],
+      "proofRange": [
+        59,
+        59
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HelperInitKeyOrder": {
+      "id": "helper:HelperInitKeyOrder",
+      "name": "HelperInitKeyOrder",
+      "kind": "helper",
+      "lineStart": 60,
+      "lineEnd": 61,
+      "proofLines": [
+        61
+      ],
+      "proofRange": [
+        61,
+        61
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HelperInitUnique": {
+      "id": "helper:HelperInitUnique",
+      "name": "HelperInitUnique",
+      "kind": "helper",
+      "lineStart": 62,
+      "lineEnd": 63,
+      "proofLines": [
+        63
+      ],
+      "proofRange": [
+        63,
+        63
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HelperInitTypeOk": {
+      "id": "helper:HelperInitTypeOk",
+      "name": "HelperInitTypeOk",
+      "kind": "helper",
+      "lineStart": 64,
+      "lineEnd": 81,
+      "proofLines": [
+        65,
+        66,
+        67,
+        68,
+        69,
+        70,
+        71,
+        72,
+        73,
+        74,
+        75,
+        76,
+        77,
+        78,
+        79,
+        80,
+        81
+      ],
+      "proofRange": [
+        65,
+        81
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HelperInnersGetReq": {
+      "id": "helper:HelperInnersGetReq",
+      "name": "HelperInnersGetReq",
+      "kind": "helper",
+      "lineStart": 83,
+      "lineEnd": 84,
+      "proofLines": [
+        84
+      ],
+      "proofRange": [
+        84,
+        84
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HelperInnersGetValue": {
+      "id": "helper:HelperInnersGetValue",
+      "name": "HelperInnersGetValue",
+      "kind": "helper",
+      "lineStart": 85,
+      "lineEnd": 86,
+      "proofLines": [
+        86
+      ],
+      "proofRange": [
+        86,
+        86
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HelperInnersInsertReq": {
+      "id": "helper:HelperInnersInsertReq",
+      "name": "HelperInnersInsertReq",
+      "kind": "helper",
+      "lineStart": 87,
+      "lineEnd": 88,
+      "proofLines": [
+        88
+      ],
+      "proofRange": [
+        88,
+        88
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HelperInnersUpdateReq": {
+      "id": "helper:HelperInnersUpdateReq",
+      "name": "HelperInnersUpdateReq",
+      "kind": "helper",
+      "lineStart": 89,
+      "lineEnd": 90,
+      "proofLines": [
+        90
+      ],
+      "proofRange": [
+        90,
+        90
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HelperInnersUpdateLeaf": {
+      "id": "helper:HelperInnersUpdateLeaf",
+      "name": "HelperInnersUpdateLeaf",
+      "kind": "helper",
+      "lineStart": 91,
+      "lineEnd": 92,
+      "proofLines": [
+        92
+      ],
+      "proofRange": [
+        92,
+        92
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HelperInnersFindLeafToAdd": {
+      "id": "helper:HelperInnersFindLeafToAdd",
+      "name": "HelperInnersFindLeafToAdd",
+      "kind": "helper",
+      "lineStart": 93,
+      "lineEnd": 94,
+      "proofLines": [
+        94
+      ],
+      "proofRange": [
+        94,
+        94
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HelperInnersWhichToSplit": {
+      "id": "helper:HelperInnersWhichToSplit",
+      "name": "HelperInnersWhichToSplit",
+      "kind": "helper",
+      "lineStart": 95,
+      "lineEnd": 96,
+      "proofLines": [
+        96
+      ],
+      "proofRange": [
+        96,
+        96
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HelperInnersAddToLeaf": {
+      "id": "helper:HelperInnersAddToLeaf",
+      "name": "HelperInnersAddToLeaf",
+      "kind": "helper",
+      "lineStart": 97,
+      "lineEnd": 98,
+      "proofLines": [
+        98
+      ],
+      "proofRange": [
+        98,
+        98
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HelperInnersSplitLeaf": {
+      "id": "helper:HelperInnersSplitLeaf",
+      "name": "HelperInnersSplitLeaf",
+      "kind": "helper",
+      "lineStart": 99,
+      "lineEnd": 100,
+      "proofLines": [
+        100
+      ],
+      "proofRange": [
+        100,
+        100
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HelperInnersSplitRootLeaf": {
+      "id": "helper:HelperInnersSplitRootLeaf",
+      "name": "HelperInnersSplitRootLeaf",
+      "kind": "helper",
+      "lineStart": 101,
+      "lineEnd": 102,
+      "proofLines": [
+        102
+      ],
+      "proofRange": [
+        102,
+        102
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HelperInnersUnchanged": {
+      "id": "helper:HelperInnersUnchanged",
+      "name": "HelperInnersUnchanged",
+      "kind": "helper",
+      "lineStart": 103,
+      "lineEnd": 104,
+      "proofLines": [
+        104
+      ],
+      "proofRange": [
+        104,
+        104
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HelperLeavesGetReq": {
+      "id": "helper:HelperLeavesGetReq",
+      "name": "HelperLeavesGetReq",
+      "kind": "helper",
+      "lineStart": 106,
+      "lineEnd": 107,
+      "proofLines": [
+        107
+      ],
+      "proofRange": [
+        107,
+        107
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HelperLeavesInsertReq": {
+      "id": "helper:HelperLeavesInsertReq",
+      "name": "HelperLeavesInsertReq",
+      "kind": "helper",
+      "lineStart": 108,
+      "lineEnd": 109,
+      "proofLines": [
+        109
+      ],
+      "proofRange": [
+        109,
+        109
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HelperLeavesUpdateReq": {
+      "id": "helper:HelperLeavesUpdateReq",
+      "name": "HelperLeavesUpdateReq",
+      "kind": "helper",
+      "lineStart": 110,
+      "lineEnd": 111,
+      "proofLines": [
+        111
+      ],
+      "proofRange": [
+        111,
+        111
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HelperLeavesGetValue": {
+      "id": "helper:HelperLeavesGetValue",
+      "name": "HelperLeavesGetValue",
+      "kind": "helper",
+      "lineStart": 112,
+      "lineEnd": 113,
+      "proofLines": [
+        113
+      ],
+      "proofRange": [
+        113,
+        113
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HelperLeavesUpdateLeaf": {
+      "id": "helper:HelperLeavesUpdateLeaf",
+      "name": "HelperLeavesUpdateLeaf",
+      "kind": "helper",
+      "lineStart": 114,
+      "lineEnd": 115,
+      "proofLines": [
+        115
+      ],
+      "proofRange": [
+        115,
+        115
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HelperLeavesFindLeafToAdd": {
+      "id": "helper:HelperLeavesFindLeafToAdd",
+      "name": "HelperLeavesFindLeafToAdd",
+      "kind": "helper",
+      "lineStart": 116,
+      "lineEnd": 117,
+      "proofLines": [
+        117
+      ],
+      "proofRange": [
+        117,
+        117
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HelperLeavesWhichToSplit": {
+      "id": "helper:HelperLeavesWhichToSplit",
+      "name": "HelperLeavesWhichToSplit",
+      "kind": "helper",
+      "lineStart": 118,
+      "lineEnd": 119,
+      "proofLines": [
+        119
+      ],
+      "proofRange": [
+        119,
+        119
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HelperLeavesAddToLeaf": {
+      "id": "helper:HelperLeavesAddToLeaf",
+      "name": "HelperLeavesAddToLeaf",
+      "kind": "helper",
+      "lineStart": 120,
+      "lineEnd": 121,
+      "proofLines": [
+        121
+      ],
+      "proofRange": [
+        121,
+        121
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HelperLeavesUnchanged": {
+      "id": "helper:HelperLeavesUnchanged",
+      "name": "HelperLeavesUnchanged",
+      "kind": "helper",
+      "lineStart": 122,
+      "lineEnd": 123,
+      "proofLines": [
+        123
+      ],
+      "proofRange": [
+        123,
+        123
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HelperKeyOrderSubst": {
+      "id": "helper:HelperKeyOrderSubst",
+      "name": "HelperKeyOrderSubst",
+      "kind": "helper",
+      "lineStart": 125,
+      "lineEnd": 126,
+      "proofLines": [
+        126
+      ],
+      "proofRange": [
+        126,
+        126
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HelperKeyOrderGetReqEq": {
+      "id": "helper:HelperKeyOrderGetReqEq",
+      "name": "HelperKeyOrderGetReqEq",
+      "kind": "helper",
+      "lineStart": 127,
+      "lineEnd": 128,
+      "proofLines": [
+        128
+      ],
+      "proofRange": [
+        128,
+        128
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HelperTypeOkGetReq": {
+      "id": "helper:HelperTypeOkGetReq",
+      "name": "HelperTypeOkGetReq",
+      "kind": "helper",
+      "lineStart": 130,
+      "lineEnd": 131,
+      "proofLines": [
+        131
+      ],
+      "proofRange": [
+        131,
+        131
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HelperTypeOkInsertReq": {
+      "id": "helper:HelperTypeOkInsertReq",
+      "name": "HelperTypeOkInsertReq",
+      "kind": "helper",
+      "lineStart": 132,
+      "lineEnd": 133,
+      "proofLines": [
+        133
+      ],
+      "proofRange": [
+        133,
+        133
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HelperUniqueSubst": {
+      "id": "helper:HelperUniqueSubst",
+      "name": "HelperUniqueSubst",
+      "kind": "helper",
+      "lineStart": 135,
+      "lineEnd": 136,
+      "proofLines": [
+        136
+      ],
+      "proofRange": [
+        136,
+        136
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HelperUniqueGetReq": {
+      "id": "helper:HelperUniqueGetReq",
+      "name": "HelperUniqueGetReq",
+      "kind": "helper",
+      "lineStart": 137,
+      "lineEnd": 138,
+      "proofLines": [
+        138
+      ],
+      "proofRange": [
+        138,
+        138
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HelperUniqueGetValue": {
+      "id": "helper:HelperUniqueGetValue",
+      "name": "HelperUniqueGetValue",
+      "kind": "helper",
+      "lineStart": 139,
+      "lineEnd": 140,
+      "proofLines": [
+        140
+      ],
+      "proofRange": [
+        140,
+        140
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HelperUniqueInsertReq": {
+      "id": "helper:HelperUniqueInsertReq",
+      "name": "HelperUniqueInsertReq",
+      "kind": "helper",
+      "lineStart": 141,
+      "lineEnd": 142,
+      "proofLines": [
+        142
+      ],
+      "proofRange": [
+        142,
+        142
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HelperUniqueUpdateReq": {
+      "id": "helper:HelperUniqueUpdateReq",
+      "name": "HelperUniqueUpdateReq",
+      "kind": "helper",
+      "lineStart": 143,
+      "lineEnd": 144,
+      "proofLines": [
+        144
+      ],
+      "proofRange": [
+        144,
+        144
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HelperUniqueUpdateLeaf": {
+      "id": "helper:HelperUniqueUpdateLeaf",
+      "name": "HelperUniqueUpdateLeaf",
+      "kind": "helper",
+      "lineStart": 145,
+      "lineEnd": 146,
+      "proofLines": [
+        146
+      ],
+      "proofRange": [
+        146,
+        146
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HelperUniqueFindLeafToAdd": {
+      "id": "helper:HelperUniqueFindLeafToAdd",
+      "name": "HelperUniqueFindLeafToAdd",
+      "kind": "helper",
+      "lineStart": 147,
+      "lineEnd": 148,
+      "proofLines": [
+        148
+      ],
+      "proofRange": [
+        148,
+        148
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HelperUniqueWhichToSplit": {
+      "id": "helper:HelperUniqueWhichToSplit",
+      "name": "HelperUniqueWhichToSplit",
+      "kind": "helper",
+      "lineStart": 149,
+      "lineEnd": 150,
+      "proofLines": [
+        150
+      ],
+      "proofRange": [
+        150,
+        150
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HelperUniqueUnchanged": {
+      "id": "helper:HelperUniqueUnchanged",
+      "name": "HelperUniqueUnchanged",
+      "kind": "helper",
+      "lineStart": 151,
+      "lineEnd": 152,
+      "proofLines": [
+        152
+      ],
+      "proofRange": [
+        152,
+        152
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    }
+  }
+}

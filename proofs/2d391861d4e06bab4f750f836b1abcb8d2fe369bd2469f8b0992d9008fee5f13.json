@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "specId": "tlaplus_examples_GermanProtocol/GermanControlBenchmarks.tla",
+  "sourceName": "GermanControlBenchmarks.tla",
+  "sourceSha256": "8b7370cdc47334ed7d90e7ed60b39caf24949f3a67c2d936e5b9daf975a1dbf7",
+  "resultSha256": "44ea23139e8197b3681ce3be7575f3565951d3cab6ba9b21f758fc376e145ad8",
+  "source": "---- MODULE GermanControlBenchmarks ----\nEXTENDS GermanControlBenchmarksDefs\n\n\\* BEGIN AGENT HELPERS\nLOCAL MyTLAPS == INSTANCE TLAPS\n\nGermanTypeOK ==\n    /\\ cache \\in [NODE -> {\"I\", \"S\", \"E\"}]\n    /\\ chan1 \\in [NODE -> {\"Empty\", \"ReqS\", \"ReqE\"}]\n    /\\ chan2 \\in [NODE -> {\"Empty\", \"Inv\", \"GntS\", \"GntE\"}]\n    /\\ chan3 \\in [NODE -> {\"Empty\", \"InvAck\"}]\n    /\\ invSet \\subseteq NODE\n    /\\ shrSet \\subseteq NODE\n    /\\ exGntd \\in BOOLEAN\n    /\\ curCmd \\in {\"Empty\", \"ReqS\", \"ReqE\"}\n    /\\ curPtr \\in (NODE \\cup {NoNode})\n\nGermanC1 == \\A i \\in NODE : cache[i] = \"E\" => shrSet = {i}\nGermanC2 == \\A i \\in NODE : cache[i] = \"S\" => i \\in shrSet\nGermanC3 == \\A i \\in NODE : cache[i] = \"E\" => exGntd = TRUE\nGermanC4 == exGntd = TRUE => \\E i \\in NODE : shrSet = {i}\nGermanC5 == invSet \\subseteq shrSet\nGermanC8 == \\A i \\in NODE : chan2[i] = \"GntS\" => i \\in shrSet\nGermanC9 == \\A i \\in NODE : chan2[i] = \"GntE\" => shrSet = {i}\nGermanC10 == \\A i \\in NODE : chan2[i] = \"GntE\" => exGntd = TRUE\nGermanC13 == \\A i \\in NODE : chan2[i] = \"Inv\" => i \\notin invSet\nGermanC15 == \\A i \\in NODE : chan3[i] = \"InvAck\" => i \\in shrSet\nGermanC17 == \\A i \\in NODE : chan3[i] = \"InvAck\" => cache[i] = \"I\"\nGermanC20 == \\A i \\in NODE : chan2[i] \\in {\"GntS\", \"GntE\"} => chan3[i] = \"Empty\"\nGermanC27 == \\A i \\in NODE : chan2[i] = \"Inv\" => cache[i] \\in {\"S\", \"E\"}\nGermanD1 == \\A i \\in NODE : chan2[i] = \"Inv\" => (curCmd = \"ReqE\" \\/ (curCmd = \"ReqS\" /\\ exGntd = TRUE))\nGermanD1b == \\A i \\in NODE : chan3[i] = \"InvAck\" => (curCmd = \"ReqE\" \\/ (curCmd = \"ReqS\" /\\ exGntd = TRUE))\nGermanD3 == \\A i \\in NODE : i \\notin shrSet => cache[i] = \"I\"\nGermanF1 == \\A i \\in NODE : i \\in shrSet /\\ cache[i] = \"I\" => chan2[i] \\in {\"GntS\", \"GntE\"} \\/ chan3[i] = \"InvAck\"\nGermanF3 == \\A i \\in NODE : i \\in invSet => chan3[i] = \"Empty\"\n\nGermanInd == GermanTypeOK /\\ GermanC1 /\\ GermanC2 /\\ GermanC3 /\\ GermanC4 /\\ GermanC5 /\\ GermanC8 /\\ GermanC9 /\\ GermanC10 /\\ GermanC13 /\\ GermanC15 /\\ GermanC17 /\\ GermanC20 /\\ GermanC27 /\\ GermanD1 /\\ GermanD1b /\\ GermanD3 /\\ GermanF1 /\\ GermanF3\n\nLEMMA GermanInitImpliesInd == Init => GermanInd\nPROOF BY MyTLAPS!SMTT(\"r30\") DEF Init, GermanInd, GermanTypeOK, GermanC1, GermanC2, GermanC3, GermanC4, GermanC5, GermanC8, GermanC9, GermanC10, GermanC13, GermanC15, GermanC17, GermanC20, GermanC27, GermanD1, GermanD1b, GermanD3, GermanF1, GermanF3\n\nLEMMA GermanIndPreserved == GermanInd /\\ [Next]_vars => GermanInd'\nPROOF BY MyTLAPS!SMTT(\"r30\") DEF GermanInd, GermanTypeOK, GermanC1, GermanC2, GermanC3, GermanC4, GermanC5, GermanC8, GermanC9, GermanC10, GermanC13, GermanC15, GermanC17, GermanC20, GermanC27, GermanD1, GermanD1b, GermanD3, GermanF1, GermanF3, Next, SendReq, RecvReq, SendInv, SendInvAck, RecvInvAck, SendGnt, RecvGnt, vars\n\nLEMMA GermanIndImpliesCoherence == GermanInd => Coherence\nPROOF BY MyTLAPS!SMTT(\"r30\") DEF GermanInd, GermanTypeOK, GermanC1, GermanC2, GermanC3, GermanC4, GermanC5, GermanC8, GermanC9, GermanC10, GermanC13, GermanC15, GermanC17, GermanC20, GermanC27, GermanD1, GermanD1b, GermanD3, GermanF1, GermanF3, Coherence\n\\* END AGENT HELPERS\n\nTHEOREM Spec => []Coherence\n\\* BEGIN AGENT PROOF tlaplus_examples_GermanProtocol/GermanControlBenchmarks_Coherence.tla\nPROOF\n<1>1. Init => GermanInd BY GermanInitImpliesInd\n<1>2. GermanInd /\\ [Next]_vars => GermanInd' BY GermanIndPreserved\n<1>3. GermanInd => Coherence BY GermanIndImpliesCoherence\n<1>4. Spec => []GermanInd BY <1>1, <1>2, MyTLAPS!PTL DEF Spec, GermanInd, Next, vars\n<1>5. QED BY <1>3, <1>4, MyTLAPS!PTL DEF Spec, Coherence\n\\* END AGENT PROOF tlaplus_examples_GermanProtocol/GermanControlBenchmarks_Coherence.tla\n====\n",
+  "units": {
+    "tlaplus_examples_GermanProtocol/GermanControlBenchmarks_Coherence.tla": {
+      "id": "tlaplus_examples_GermanProtocol/GermanControlBenchmarks_Coherence.tla",
+      "name": "GermanControlBenchmarks_Coherence",
+      "kind": "target",
+      "lineStart": 49,
+      "lineEnd": 56,
+      "proofLines": [
+        51,
+        52,
+        53,
+        54,
+        55,
+        56
+      ],
+      "proofRange": [
+        51,
+        56
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:GermanIndImpliesCoherence",
+        "helper:GermanIndPreserved",
+        "helper:GermanInitImpliesInd"
+      ]
+    },
+    "helper:GermanInitImpliesInd": {
+      "id": "helper:GermanInitImpliesInd",
+      "name": "GermanInitImpliesInd",
+      "kind": "helper",
+      "lineStart": 39,
+      "lineEnd": 40,
+      "proofLines": [
+        40
+      ],
+      "proofRange": [
+        40,
+        40
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:GermanIndPreserved": {
+      "id": "helper:GermanIndPreserved",
+      "name": "GermanIndPreserved",
+      "kind": "helper",
+      "lineStart": 42,
+      "lineEnd": 43,
+      "proofLines": [
+        43
+      ],
+      "proofRange": [
+        43,
+        43
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:GermanIndImpliesCoherence": {
+      "id": "helper:GermanIndImpliesCoherence",
+      "name": "GermanIndImpliesCoherence",
+      "kind": "helper",
+      "lineStart": 45,
+      "lineEnd": 46,
+      "proofLines": [
+        46
+      ],
+      "proofRange": [
+        46,
+        46
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    }
+  }
+}

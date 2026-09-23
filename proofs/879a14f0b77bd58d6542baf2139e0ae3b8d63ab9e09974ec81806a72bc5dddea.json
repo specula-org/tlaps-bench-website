@@ -1,0 +1,354 @@
+{
+  "schemaVersion": 1,
+  "specId": "tlaplus_examples_GermanProtocol/GermanData.tla",
+  "sourceName": "GermanData.tla",
+  "sourceSha256": "bcd44a7bdfc31a6de7439a6478eb117868d0bf28f055e32ed47268f098e42cb5",
+  "resultSha256": "fd45ed2890c9a2e700eb5a0048360d758cfef59f144094e1f227f27ce95b18a8",
+  "source": "---- MODULE GermanData ----\nEXTENDS GermanDataDefs\n\n\\* BEGIN AGENT HELPERS\nLOCAL AgTps == INSTANCE TLAPS\n\nAgDataOpt == DATA \\cup {NoData}\n\nAgTypeInv ==\n    /\\ cache  \\in [NODE -> [state : {\"I\",\"S\",\"E\"},               data : AgDataOpt]]\n    /\\ chan1  \\in [NODE -> [cmd : {\"Empty\",\"ReqS\",\"ReqE\"},       data : AgDataOpt]]\n    /\\ chan2  \\in [NODE -> [cmd : {\"Empty\",\"Inv\",\"GntS\",\"GntE\"}, data : AgDataOpt]]\n    /\\ chan3  \\in [NODE -> [cmd : {\"Empty\",\"InvAck\"},            data : AgDataOpt]]\n    /\\ invSet \\in SUBSET NODE\n    /\\ shrSet \\in SUBSET NODE\n    /\\ exGntd \\in BOOLEAN\n    /\\ curCmd \\in {\"Empty\",\"ReqS\",\"ReqE\"}\n    /\\ curPtr \\in NODE \\cup {NoNode}\n    /\\ memData \\in DATA\n    /\\ auxData \\in DATA\n\nAgCtrlInv ==\n    /\\ ((curCmd = \"Empty\") <=> (curPtr = NoNode))\n    /\\ invSet \\subseteq shrSet\n    /\\ \\A i \\in NODE :\n         /\\ (cache[i].state \\in {\"S\",\"E\"} => i \\in shrSet)\n         /\\ (chan2[i].cmd \\in {\"GntS\",\"GntE\",\"Inv\"} => i \\in shrSet)\n         /\\ (chan3[i].cmd = \"InvAck\" => i \\in shrSet)\n         /\\ (chan3[i].cmd = \"InvAck\" => cache[i].state = \"I\")\n         /\\ (chan3[i].cmd = \"InvAck\" => chan2[i].cmd = \"Empty\")\n         /\\ (chan3[i].cmd = \"InvAck\" => i \\notin invSet)\n         /\\ (chan2[i].cmd = \"Inv\" => i \\notin invSet)\n         /\\ ((chan2[i].cmd = \"Inv\" \\/ chan3[i].cmd = \"InvAck\") => curCmd # \"Empty\")\n         /\\ ((chan2[i].cmd = \"Inv\" \\/ chan3[i].cmd = \"InvAck\")\n               => (curCmd = \"ReqE\" \\/ exGntd = TRUE))\n         /\\ (chan2[i].cmd = \"GntS\" => exGntd = FALSE)\n         /\\ (chan2[i].cmd = \"GntE\" => exGntd = TRUE)\n         /\\ (chan2[i].cmd = \"GntE\" => cache[i].state = \"I\")\n         /\\ (chan2[i].cmd = \"GntE\" => chan3[i].cmd = \"Empty\")\n         /\\ (cache[i].state = \"E\" => exGntd = TRUE)\n    /\\ (exGntd = TRUE =>\n          \\A i \\in NODE, j \\in NODE : (i \\in shrSet /\\ j \\in shrSet) => i = j)\n    /\\ (exGntd = TRUE =>\n          \\A i \\in NODE : i \\in shrSet =>\n             \\/ chan2[i].cmd = \"GntE\"\n             \\/ cache[i].state = \"E\"\n             \\/ chan3[i].cmd = \"InvAck\")\n\nAgDataInv ==\n    /\\ (exGntd = FALSE => memData = auxData)\n    /\\ \\A i \\in NODE :\n         /\\ (cache[i].state # \"I\" => cache[i].data = auxData)\n         /\\ (chan2[i].cmd \\in {\"GntS\",\"GntE\"} => chan2[i].data = auxData)\n         /\\ ((chan3[i].cmd = \"InvAck\" /\\ exGntd = TRUE) => chan3[i].data = auxData)\n\nAgIndInv == AgTypeInv /\\ AgCtrlInv /\\ AgDataInv\n\nLEMMA AgInitInv == Init => AgIndInv\nBY NoNodeNotInNODE, AgTps!SMTT(\"r30\")\n   DEF Init, AgIndInv, AgTypeInv, AgCtrlInv, AgDataInv, AgDataOpt\n\nLEMMA AgStepInv == AgIndInv /\\ [Next]_vars => AgIndInv'\n<1> USE NoNodeNotInNODE, NoDataNotInDATA\n     DEF AgIndInv, AgTypeInv, AgCtrlInv, AgDataInv, AgDataOpt\n<1> SUFFICES ASSUME AgIndInv, [Next]_vars PROVE AgIndInv' OBVIOUS\n<1>1. CASE UNCHANGED vars\n  BY <1>1, AgTps!SMTT(\"r30\") DEF vars\n<1>2. ASSUME NEW i \\in NODE, NEW d \\in DATA, Store(i, d) PROVE AgIndInv'\n  BY <1>2, AgTps!SMTT(\"r30\") DEF Store\n<1>3. ASSUME NEW i \\in NODE, SendReq(i) PROVE AgIndInv'\n  BY <1>3, AgTps!SMTT(\"r30\") DEF SendReq\n<1>4. ASSUME NEW i \\in NODE, RecvReq(i) PROVE AgIndInv'\n  BY <1>4, AgTps!SMTT(\"r30\") DEF RecvReq\n<1>5. ASSUME NEW i \\in NODE, SendInv(i) PROVE AgIndInv'\n  BY <1>5, AgTps!SMTT(\"r30\") DEF SendInv\n<1>6. ASSUME NEW i \\in NODE, SendInvAck(i) PROVE AgIndInv'\n  BY <1>6, AgTps!SMTT(\"r30\") DEF SendInvAck\n<1>7. ASSUME NEW i \\in NODE, RecvInvAck(i) PROVE AgIndInv'\n  BY <1>7, AgTps!SMTT(\"r30\") DEF RecvInvAck\n<1>8. ASSUME NEW i \\in NODE, SendGnt(i) PROVE AgIndInv'\n  BY <1>8, AgTps!SMTT(\"r30\") DEF SendGnt\n<1>9. ASSUME NEW i \\in NODE, RecvGnt(i) PROVE AgIndInv'\n  BY <1>9, AgTps!SMTT(\"r30\") DEF RecvGnt\n<1> QED\n  BY <1>1, <1>2, <1>3, <1>4, <1>5, <1>6, <1>7, <1>8, <1>9 DEF Next\n\nLEMMA AgInvariance == Spec => []AgIndInv\n<1>1. Init => AgIndInv BY AgInitInv\n<1>2. AgIndInv /\\ [Next]_vars => AgIndInv' BY AgStepInv\n<1> QED BY <1>1, <1>2, AgTps!PTL DEF Spec\n\nLEMMA AgInvDataProp == AgIndInv => DataProp\nBY AgTps!SMTT(\"r30\") DEF AgIndInv, AgDataInv, DataProp\n\nLEMMA AgInvTransactionConsistency == AgIndInv => TransactionConsistency\nBY AgTps!SMTT(\"r30\") DEF AgIndInv, AgCtrlInv, TransactionConsistency\n\nLEMMA AgInvDirectoryAccurate == AgIndInv => DirectoryAccurate\nBY AgTps!SMTT(\"r30\") DEF AgIndInv, AgCtrlInv, DirectoryAccurate\n\nLEMMA AgInvExclusiveIsolation == AgIndInv => ExclusiveIsolation\nBY AgTps!SMTT(\"r30\")\n   DEF AgIndInv, AgTypeInv, AgCtrlInv, AgDataOpt, ExclusiveIsolation\n\nLEMMA AgInvWritebackCarriesLatest == AgIndInv => WritebackCarriesLatest\nBY AgTps!SMTT(\"r30\")\n   DEF AgIndInv, AgTypeInv, AgCtrlInv, AgDataInv, AgDataOpt,\n       WritebackCarriesLatest\n\nLEMMA AgRefineInit == Init => Abstract!Init\nBY AgTps!SMTT(\"r30\") DEF Init, Abstract!Init\n\nLEMMA AgRefineStep == AgIndInv /\\ [Next]_vars => [Abstract!Next]_Abstract!vars\n<1> USE DEF AgIndInv, AgTypeInv, AgCtrlInv, AgDataInv, AgDataOpt\n<1> SUFFICES ASSUME AgIndInv, [Next]_vars\n             PROVE  [Abstract!Next]_Abstract!vars\n    OBVIOUS\n<1>1. CASE UNCHANGED vars\n  BY <1>1, AgTps!SMTT(\"r30\") DEF vars, Abstract!vars\n<1>2. ASSUME NEW i \\in NODE, NEW d \\in DATA, Store(i, d)\n      PROVE  UNCHANGED Abstract!vars\n  BY <1>2, AgTps!SMTT(\"r30\") DEF Store, Abstract!vars\n<1>3. ASSUME NEW i \\in NODE, SendReq(i) PROVE Abstract!SendReq(i)\n  BY <1>3, AgTps!SMTT(\"r30\") DEF SendReq, Abstract!SendReq\n<1>4. ASSUME NEW i \\in NODE, RecvReq(i) PROVE Abstract!RecvReq(i)\n  BY <1>4, AgTps!SMTT(\"r30\") DEF RecvReq, Abstract!RecvReq\n<1>5. ASSUME NEW i \\in NODE, SendInv(i) PROVE Abstract!SendInv(i)\n  BY <1>5, AgTps!SMTT(\"r30\") DEF SendInv, Abstract!SendInv\n<1>6. ASSUME NEW i \\in NODE, SendInvAck(i) PROVE Abstract!SendInvAck(i)\n  BY <1>6, AgTps!SMTT(\"r30\") DEF SendInvAck, Abstract!SendInvAck\n<1>7. ASSUME NEW i \\in NODE, RecvInvAck(i) PROVE Abstract!RecvInvAck(i)\n  BY <1>7, AgTps!SMTT(\"r30\") DEF RecvInvAck, Abstract!RecvInvAck\n<1>8. ASSUME NEW i \\in NODE, SendGnt(i) PROVE Abstract!SendGnt(i)\n  BY <1>8, AgTps!SMTT(\"r30\") DEF SendGnt, Abstract!SendGnt\n<1>9. ASSUME NEW i \\in NODE, RecvGnt(i) PROVE Abstract!RecvGnt(i)\n  BY <1>9, AgTps!SMTT(\"r30\") DEF RecvGnt, Abstract!RecvGnt\n<1> QED\n  BY <1>1, <1>2, <1>3, <1>4, <1>5, <1>6, <1>7, <1>8, <1>9\n     DEF Next, Abstract!Next\n\\* END AGENT HELPERS\n\nTHEOREM Spec => []DataProp\n\\* BEGIN AGENT PROOF tlaplus_examples_GermanProtocol/GermanData_DataProp.tla\n<1>1. Spec => []AgIndInv BY AgInvariance\n<1>2. AgIndInv => DataProp BY AgInvDataProp\n<1> QED BY <1>1, <1>2, AgTps!PTL\n\\* END AGENT PROOF tlaplus_examples_GermanProtocol/GermanData_DataProp.tla\n\nTHEOREM Spec => []TransactionConsistency\n\\* BEGIN AGENT PROOF tlaplus_examples_GermanProtocol/GermanData_TransactionConsistency.tla\n<1>1. Spec => []AgIndInv BY AgInvariance\n<1>2. AgIndInv => TransactionConsistency BY AgInvTransactionConsistency\n<1> QED BY <1>1, <1>2, AgTps!PTL\n\\* END AGENT PROOF tlaplus_examples_GermanProtocol/GermanData_TransactionConsistency.tla\n\nTHEOREM Spec => []DirectoryAccurate\n\\* BEGIN AGENT PROOF tlaplus_examples_GermanProtocol/GermanData_DirectoryAccurate.tla\n<1>1. Spec => []AgIndInv BY AgInvariance\n<1>2. AgIndInv => DirectoryAccurate BY AgInvDirectoryAccurate\n<1> QED BY <1>1, <1>2, AgTps!PTL\n\\* END AGENT PROOF tlaplus_examples_GermanProtocol/GermanData_DirectoryAccurate.tla\n\nTHEOREM Spec => []ExclusiveIsolation\n\\* BEGIN AGENT PROOF tlaplus_examples_GermanProtocol/GermanData_ExclusiveIsolation.tla\n<1>1. Spec => []AgIndInv BY AgInvariance\n<1>2. AgIndInv => ExclusiveIsolation BY AgInvExclusiveIsolation\n<1> QED BY <1>1, <1>2, AgTps!PTL\n\\* END AGENT PROOF tlaplus_examples_GermanProtocol/GermanData_ExclusiveIsolation.tla\n\nTHEOREM Spec => []WritebackCarriesLatest\n\\* BEGIN AGENT PROOF tlaplus_examples_GermanProtocol/GermanData_WritebackCarriesLatest.tla\n<1>1. Spec => []AgIndInv BY AgInvariance\n<1>2. AgIndInv => WritebackCarriesLatest BY AgInvWritebackCarriesLatest\n<1> QED BY <1>1, <1>2, AgTps!PTL\n\\* END AGENT PROOF tlaplus_examples_GermanProtocol/GermanData_WritebackCarriesLatest.tla\n\nTHEOREM Spec => Refinement\n\\* BEGIN AGENT PROOF tlaplus_examples_GermanProtocol/GermanData_Refinement.tla\n<1>1. Spec => []AgIndInv BY AgInvariance\n<1>2. Init => Abstract!Init BY AgRefineInit\n<1>3. AgIndInv /\\ [Next]_vars => [Abstract!Next]_Abstract!vars BY AgRefineStep\n<1> QED BY <1>1, <1>2, <1>3, AgTps!PTL DEF Spec, Refinement, Abstract!Spec\n\\* END AGENT PROOF tlaplus_examples_GermanProtocol/GermanData_Refinement.tla\n====\n",
+  "units": {
+    "tlaplus_examples_GermanProtocol/GermanData_DataProp.tla": {
+      "id": "tlaplus_examples_GermanProtocol/GermanData_DataProp.tla",
+      "name": "GermanData_DataProp",
+      "kind": "target",
+      "lineStart": 142,
+      "lineEnd": 146,
+      "proofLines": [
+        144,
+        145,
+        146
+      ],
+      "proofRange": [
+        144,
+        146
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgInvDataProp",
+        "helper:AgInvariance"
+      ]
+    },
+    "tlaplus_examples_GermanProtocol/GermanData_TransactionConsistency.tla": {
+      "id": "tlaplus_examples_GermanProtocol/GermanData_TransactionConsistency.tla",
+      "name": "GermanData_TransactionConsistency",
+      "kind": "target",
+      "lineStart": 149,
+      "lineEnd": 153,
+      "proofLines": [
+        151,
+        152,
+        153
+      ],
+      "proofRange": [
+        151,
+        153
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgInvTransactionConsistency",
+        "helper:AgInvariance"
+      ]
+    },
+    "tlaplus_examples_GermanProtocol/GermanData_DirectoryAccurate.tla": {
+      "id": "tlaplus_examples_GermanProtocol/GermanData_DirectoryAccurate.tla",
+      "name": "GermanData_DirectoryAccurate",
+      "kind": "target",
+      "lineStart": 156,
+      "lineEnd": 160,
+      "proofLines": [
+        158,
+        159,
+        160
+      ],
+      "proofRange": [
+        158,
+        160
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgInvDirectoryAccurate",
+        "helper:AgInvariance"
+      ]
+    },
+    "tlaplus_examples_GermanProtocol/GermanData_ExclusiveIsolation.tla": {
+      "id": "tlaplus_examples_GermanProtocol/GermanData_ExclusiveIsolation.tla",
+      "name": "GermanData_ExclusiveIsolation",
+      "kind": "target",
+      "lineStart": 163,
+      "lineEnd": 167,
+      "proofLines": [
+        165,
+        166,
+        167
+      ],
+      "proofRange": [
+        165,
+        167
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgInvExclusiveIsolation",
+        "helper:AgInvariance"
+      ]
+    },
+    "tlaplus_examples_GermanProtocol/GermanData_WritebackCarriesLatest.tla": {
+      "id": "tlaplus_examples_GermanProtocol/GermanData_WritebackCarriesLatest.tla",
+      "name": "GermanData_WritebackCarriesLatest",
+      "kind": "target",
+      "lineStart": 170,
+      "lineEnd": 174,
+      "proofLines": [
+        172,
+        173,
+        174
+      ],
+      "proofRange": [
+        172,
+        174
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgInvWritebackCarriesLatest",
+        "helper:AgInvariance"
+      ]
+    },
+    "tlaplus_examples_GermanProtocol/GermanData_Refinement.tla": {
+      "id": "tlaplus_examples_GermanProtocol/GermanData_Refinement.tla",
+      "name": "GermanData_Refinement",
+      "kind": "target",
+      "lineStart": 177,
+      "lineEnd": 182,
+      "proofLines": [
+        179,
+        180,
+        181,
+        182
+      ],
+      "proofRange": [
+        179,
+        182
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgInvariance",
+        "helper:AgRefineInit",
+        "helper:AgRefineStep"
+      ]
+    },
+    "helper:AgInitInv": {
+      "id": "helper:AgInitInv",
+      "name": "AgInitInv",
+      "kind": "helper",
+      "lineStart": 58,
+      "lineEnd": 60,
+      "proofLines": [
+        59,
+        60
+      ],
+      "proofRange": [
+        59,
+        60
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgStepInv": {
+      "id": "helper:AgStepInv",
+      "name": "AgStepInv",
+      "kind": "helper",
+      "lineStart": 62,
+      "lineEnd": 85,
+      "proofLines": [
+        63,
+        64,
+        65,
+        66,
+        67,
+        68,
+        69,
+        70,
+        71,
+        72,
+        73,
+        74,
+        75,
+        76,
+        77,
+        78,
+        79,
+        80,
+        81,
+        82,
+        83,
+        84,
+        85
+      ],
+      "proofRange": [
+        63,
+        85
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgInvariance": {
+      "id": "helper:AgInvariance",
+      "name": "AgInvariance",
+      "kind": "helper",
+      "lineStart": 87,
+      "lineEnd": 90,
+      "proofLines": [
+        88,
+        89,
+        90
+      ],
+      "proofRange": [
+        88,
+        90
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgInitInv",
+        "helper:AgStepInv"
+      ]
+    },
+    "helper:AgInvDataProp": {
+      "id": "helper:AgInvDataProp",
+      "name": "AgInvDataProp",
+      "kind": "helper",
+      "lineStart": 92,
+      "lineEnd": 93,
+      "proofLines": [
+        93
+      ],
+      "proofRange": [
+        93,
+        93
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgInvTransactionConsistency": {
+      "id": "helper:AgInvTransactionConsistency",
+      "name": "AgInvTransactionConsistency",
+      "kind": "helper",
+      "lineStart": 95,
+      "lineEnd": 96,
+      "proofLines": [
+        96
+      ],
+      "proofRange": [
+        96,
+        96
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgInvDirectoryAccurate": {
+      "id": "helper:AgInvDirectoryAccurate",
+      "name": "AgInvDirectoryAccurate",
+      "kind": "helper",
+      "lineStart": 98,
+      "lineEnd": 99,
+      "proofLines": [
+        99
+      ],
+      "proofRange": [
+        99,
+        99
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgInvExclusiveIsolation": {
+      "id": "helper:AgInvExclusiveIsolation",
+      "name": "AgInvExclusiveIsolation",
+      "kind": "helper",
+      "lineStart": 101,
+      "lineEnd": 103,
+      "proofLines": [
+        102,
+        103
+      ],
+      "proofRange": [
+        102,
+        103
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgInvWritebackCarriesLatest": {
+      "id": "helper:AgInvWritebackCarriesLatest",
+      "name": "AgInvWritebackCarriesLatest",
+      "kind": "helper",
+      "lineStart": 105,
+      "lineEnd": 108,
+      "proofLines": [
+        106,
+        107,
+        108
+      ],
+      "proofRange": [
+        106,
+        108
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgRefineInit": {
+      "id": "helper:AgRefineInit",
+      "name": "AgRefineInit",
+      "kind": "helper",
+      "lineStart": 110,
+      "lineEnd": 111,
+      "proofLines": [
+        111
+      ],
+      "proofRange": [
+        111,
+        111
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgRefineStep": {
+      "id": "helper:AgRefineStep",
+      "name": "AgRefineStep",
+      "kind": "helper",
+      "lineStart": 113,
+      "lineEnd": 139,
+      "proofLines": [
+        114,
+        115,
+        116,
+        117,
+        118,
+        119,
+        120,
+        121,
+        122,
+        123,
+        124,
+        125,
+        126,
+        127,
+        128,
+        129,
+        130,
+        131,
+        132,
+        133,
+        134,
+        135,
+        136,
+        137,
+        138,
+        139
+      ],
+      "proofRange": [
+        114,
+        139
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    }
+  }
+}

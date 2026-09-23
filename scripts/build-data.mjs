@@ -1,6 +1,8 @@
 // Build the single-page leaderboard from the reported proof-from-scratch summary.
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { createHash } from "node:crypto";
 import { SITE } from "./site-content.mjs";
+import { dependencyClosure, maskComments, proofLines } from "./proof-metrics.mjs";
 
 const inputPath = "results/proof-from-scratch-summary.json";
 const summary = JSON.parse(readFileSync(inputPath, "utf8"));
@@ -75,6 +77,24 @@ for (const model of cohort.models) {
     }
     specIds.add(spec.id);
     if (!/^[a-f0-9]{64}$/.test(spec.resultSha256)) fail(`missing result hash: ${spec.id}`);
+    const bundleMatch = /^proofs\/([a-f0-9]{64})\.json$/.exec(spec.proofBundle || "");
+    if (!bundleMatch) fail(`invalid proof bundle path: ${spec.id}`);
+    const bundleBytes = readFileSync(spec.proofBundle);
+    if (createHash("sha256").update(bundleBytes).digest("hex") !== bundleMatch[1]) fail(`changed proof bundle: ${spec.id}`);
+    const bundle = JSON.parse(bundleBytes);
+    if (bundle.schemaVersion !== 1 || bundle.specId !== spec.id || bundle.resultSha256 !== spec.resultSha256 ||
+        bundle.sourceSha256 !== spec.proofSourceSha256 ||
+        createHash("sha256").update(bundle.source).digest("hex") !== bundle.sourceSha256) fail(`proof provenance mismatch: ${spec.id}`);
+    const cleanLines = maskComments(bundle.source).split(/\r?\n/);
+    for (const [id, unit] of Object.entries(bundle.units)) {
+      if (unit.id !== id || !Number.isInteger(unit.lineStart) || !Number.isInteger(unit.lineEnd) ||
+          unit.lineStart < 1 || unit.lineEnd < unit.lineStart || unit.lineEnd > cleanLines.length) fail(`invalid proof source range: ${id}`);
+      if (!Array.isArray(unit.dependencies) || unit.dependencies.some((dependency) => !bundle.units[dependency])) fail(`invalid proof dependencies: ${id}`);
+      if (unit.proofRange && (!Array.isArray(unit.proofRange) || unit.proofRange.length !== 2 ||
+          !unit.proofRange.every(Number.isInteger) || unit.proofRange[0] < unit.lineStart ||
+          unit.proofRange[1] < unit.proofRange[0] || unit.proofRange[1] > unit.lineEnd)) fail(`invalid proof body range: ${id}`);
+      if (JSON.stringify(unit.proofLines) !== JSON.stringify(proofLines(cleanLines, unit))) fail(`proof line count mismatch: ${id}`);
+    }
     if (!Array.isArray(spec.tasks) || spec.tasks.length !== spec.total) fail(`invalid task coverage: ${spec.id}`);
     for (const task of spec.tasks) {
       if (!task.id || !task.name || taskIds.has(task.id)) fail(`invalid task: ${model.id}/${task.id}`);
@@ -85,6 +105,21 @@ for (const model of cohort.models) {
       for (const field of ["obligations", "helperCount"]) {
         if (task[field] != null) count(task[field], `${task.id}/${field}`);
       }
+      const closure = dependencyClosure(bundle.units, task.id);
+      if (JSON.stringify(closure) !== JSON.stringify(task.proofUnitIds) ||
+          new Set(closure.flatMap((id) => bundle.units[id].proofLines)).size !== task.proofSize) fail(`proof size mismatch: ${task.id}`);
+      if (task.obligationsProved != null) {
+        count(task.obligationsProved, `${task.id}/proved obligations`);
+        if (!(task.obligations > 0) || task.obligationsProved > task.obligations) fail(`invalid obligation progress: ${task.id}`);
+      }
+      if (task.checkTimeSecs != null) {
+        const evidence = task.checkTimeEvidence;
+        if (!Number.isFinite(task.checkTimeSecs) || task.checkTimeSecs < 0 || !task.checkTimeApproximate ||
+            !evidence || !Number.isFinite(evidence.start) || !Number.isFinite(evidence.end) ||
+            !close(evidence.end - evidence.start, task.checkTimeSecs) ||
+            !/^[a-f0-9]{64}$/.test(evidence.sha256) ||
+            !["tlapm_launch_and_receipt_timestamp", "consecutive_tlapm_launch_timestamps"].includes(evidence.basis)) fail(`invalid check-time evidence: ${task.id}`);
+      } else if (task.checkTimeEvidence != null || task.checkTimeApproximate) fail(`unexpected timing evidence: ${task.id}`);
     }
     if (spec.tasks.filter((task) => task.verdict === "PASS").length !== spec.passed) {
       fail(`task verdicts disagree with specification score: ${spec.id}`);

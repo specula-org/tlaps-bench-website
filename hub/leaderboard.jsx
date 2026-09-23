@@ -1,6 +1,7 @@
 import { formatTokens, sortedBreakdownRows, nextBreakdownSort } from "./leaderboard-utils.js";
+import { ProofViewer } from "./proof-viewer.jsx";
 
-const { useState } = React;
+const { useEffect, useState } = React;
 const FAMILY_INFO = Object.fromEntries(TLAPS_DATA.suite.families.map((family) => [family.id, family]));
 const toggleSet = (current, id) => {
   const next = new Set(current);
@@ -11,6 +12,15 @@ const rowClick = (event, action) => {
   if (!event.target.closest("button, a, input, select")) action();
 };
 const fmt = (value, formatter) => value == null ? "—" : formatter(value);
+const checkTime = (value) => value == null ? "—" : `≈${Math.max(1, Math.round(value))}`;
+
+function Collapse({ open, children }) {
+  const [visited, setVisited] = useState(open);
+  useEffect(() => { if (open) setVisited(true); }, [open]);
+  return <div className={"collapse" + (open ? " is-open" : "")} aria-hidden={!open} inert={open ? undefined : ""}>
+    <div className="collapse-inner">{(open || visited) && children}</div>
+  </div>;
+}
 
 const RESOURCE_COLUMNS = [
   { key: "totalHours", label: "Total hours" },
@@ -78,6 +88,9 @@ const HEADER_LINES = {
   tokensInOutPerInvM: ["Tokens in / out", "per inv (M)"],
   costPerInvUsd: ["Cost / inv", "(USD)"],
   costUsd: ["Cost", "(USD)"],
+  proofSize: ["Proof size", "lines"],
+  obligationsProved: ["Obligations", "proved / total"],
+  checkTimeSecs: ["Check time", "seconds"],
 };
 
 function SortHeader({ column, sort, setSort, numeric = false }) {
@@ -85,7 +98,7 @@ function SortHeader({ column, sort, setSort, numeric = false }) {
   const [label, unit] = HEADER_LINES[column.key] || [column.label];
   return <th scope="col" className={numeric ? "numeric" : ""}
     aria-sort={active ? (sort.dir === "asc" ? "ascending" : "descending") : undefined}>
-    <button type="button" className="sort-button" onClick={() => setSort((s) => nextBreakdownSort(s, column.key))}>
+    <button type="button" className="sort-button" title={column.description} onClick={() => setSort((s) => nextBreakdownSort(s, column.key))}>
       <span className="column-label">{label}{unit && <> <span className="column-unit">{unit}</span></>}</span>
       <span className={active ? "sort-arrow active" : "sort-arrow"} aria-hidden="true">{active && sort.dir === "asc" ? "↑" : "↓"}</span>
     </button>
@@ -112,15 +125,19 @@ function SortSelect({ label, columns, sort, setSort }) {
 
 const UNIT_COLUMNS = [
   { key: "name", label: "Invariant / property" }, { key: "verdict", label: "Result" },
-  { key: "obligations", label: "Obligations" }, { key: "helperCount", label: "Helpers used" },
+  { key: "proofSize", label: "Proof size", description: "Code lines in the target proof and its local proof dependencies, counted once; blank lines and comments excluded." },
+  { key: "obligationsProved", label: "Obligations proved / total", description: "Obligations proved in this target proof. The final Result also requires its dependencies to be proved." },
+  { key: "helperCount", label: "Helpers used", description: "Direct helper theorem dependencies." },
+  { key: "checkTimeSecs", label: "Check time", description: "Approximate wall time of this target's TLAPM invocation, recovered from archived start and completion timestamps. Shared helper checks are separate." },
 ];
 
 function Invariants({ model, group }) {
   const [verdict, setVerdict] = useState("All");
   const [sort, setSort] = useState({ key: "canonical", dir: "asc" });
+  const [proofTask, setProofTask] = useState(null);
   const rows = sortedBreakdownRows(group.tasks.filter((task) =>
     verdict === "All" || task.verdict === verdict
-  ), sort, (row, key) => row[key]);
+  ), sort, (row, key) => key === "obligationsProved" ? (row.obligationsProved != null && row.obligations > 0 ? row.obligationsProved / row.obligations : null) : row[key]);
   const verdicts = [...new Set(group.tasks.map((task) => task.verdict))].sort();
   return <div className="inv-panel">
     <div className="inv-heading"><h4><TaskFamilyName name={group.name} /></h4><span>{group.total} invariants / properties</span></div>
@@ -135,15 +152,19 @@ function Invariants({ model, group }) {
     </div>
     <table className="inv-table">
       <caption className="sr-only">{model.name}: {group.name} invariant results</caption>
-      <thead><tr>{UNIT_COLUMNS.map((column, i) => <SortHeader key={column.key} column={column} sort={sort} setSort={setSort} numeric={i > 1} />)}</tr></thead>
+      <thead><tr>{UNIT_COLUMNS.map((column, i) => <SortHeader key={column.key} column={column} sort={sort} setSort={setSort} numeric={i > 1} />)}<th scope="col" className="proof-cell">Proof</th></tr></thead>
       <tbody>{rows.map((task) => <tr key={task.id}>
         <th scope="row" className="inv-name" data-label="Invariant / property" title={task.id}>{task.name}{group.specCount > 1 && <small className="inv-spec-name">{task.specName}</small>}</th>
         <td data-label="Result"><span className={`verdict verdict-${task.verdict.toLowerCase()}`}>{task.verdict}</span></td>
-        <td className="numeric" data-label="Obligations">{fmt(task.obligations, formatTokens)}</td>
+        <td className="numeric" data-label="Proof size (lines)" title={UNIT_COLUMNS[2].description}>{formatTokens(task.proofSize)}</td>
+        <td className="numeric" data-label="Obligations proved / total" title={UNIT_COLUMNS[3].description}>{task.obligationsProved == null ? "—" : `${formatTokens(task.obligationsProved)} / ${formatTokens(task.obligations)}`}</td>
         <td className="numeric" data-label="Helpers used">{fmt(task.helperCount, formatTokens)}</td>
+        <td className="numeric" data-label="Check time (s)" title={UNIT_COLUMNS[5].description}>{checkTime(task.checkTimeSecs)}</td>
+        <td className="proof-cell"><button type="button" className="view-proof" aria-label={`View ${task.name} proof`} onClick={() => setProofTask(task)}>View proof</button></td>
       </tr>)}</tbody>
     </table>
     {rows.length === 0 && <p className="empty-results" role="status">No matching invariants.</p>}
+    {proofTask && <ProofViewer modelName={model.name} task={proofTask} onClose={() => setProofTask(null)} />}
   </div>;
 }
 
@@ -160,7 +181,7 @@ function ModelDetails({ model }) {
     name: FAMILY_INFO[result.family].displayName || FAMILY_INFO[result.family].name,
     metrics: model.documentMetrics[result.family],
     tasks: model.specs.filter((spec) => spec.family === result.family)
-      .flatMap((spec) => spec.tasks.map((task) => ({ ...task, specName: spec.name }))),
+      .flatMap((spec) => spec.tasks.map((task) => ({ ...task, specName: spec.name, proofBundle: spec.proofBundle, proofSourceSha256: spec.proofSourceSha256 }))),
   })), sort, metricValue);
   const toggle = (id) => setExpanded((current) => toggleSet(current, id));
   return <div className="model-detail">
@@ -182,7 +203,7 @@ function ModelDetails({ model }) {
             <td className="numeric spec-score" data-label={model.name}><PassScore passed={group.passed} total={group.total} /></td>
             <MetricCells metrics={group.metrics} />
           </tr>
-          <tr id={panelId} className="inv-expand-row" hidden={!open}><td colSpan={10}>{open && <Invariants model={model} group={group} />}</td></tr>
+          <tr id={panelId} className="inv-expand-row" aria-hidden={!open}><td colSpan={10}><Collapse open={open}><Invariants model={model} group={group} /></Collapse></td></tr>
         </React.Fragment>;
       })}</tbody>
       <tfoot><tr className="group-total">
@@ -228,7 +249,7 @@ export function ResultsTable({ models }) {
               <td className="rate-cell" data-label="Score"><PassScore passed={model.passed} total={model.total} overall /></td>
               <MetricCells metrics={model.metrics} />
             </tr>
-            <tr id={`details-${model.id}`} className="detail-row" hidden={!open}><td colSpan={10}>{open && <ModelDetails model={model} />}</td></tr>
+            <tr id={`details-${model.id}`} className="detail-row" aria-hidden={!open}><td colSpan={10}><Collapse open={open}><ModelDetails model={model} /></Collapse></td></tr>
           </React.Fragment>;
         })}</tbody>
       </table>

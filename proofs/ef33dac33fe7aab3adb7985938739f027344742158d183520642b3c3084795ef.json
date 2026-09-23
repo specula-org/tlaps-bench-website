@@ -1,0 +1,446 @@
+{
+  "schemaVersion": 1,
+  "specId": "ivy_examples_split_queue_2_new/ivy_examples_split_queue_2_new.tla",
+  "sourceName": "ivy_examples_split_queue_2_new.tla",
+  "sourceSha256": "4c8411336a8eb96f5e36fd7366c7e8eeb5b264d9c3337281382f1aeab1c3663e",
+  "resultSha256": "e5c9d1efa2e52677457cf4b7c26f49ecd1a60c3425092d5eaad0c24b6fb87725",
+  "source": "---- MODULE ivy_examples_split_queue_2_new ----\nEXTENDS ivy_examples_split_queue_2_newDefs\n\n\\* BEGIN AGENT HELPERS\nLOCAL NI == INSTANCE NaturalsInduction\nAgentTypeOK == /\\ begun \\in [Nat -> BOOLEAN]\n               /\\ done \\in [Nat -> BOOLEAN]\n               /\\ queue \\in [Nat -> BOOLEAN]\n               /\\ firstq \\in Nat\nAgentAllDoneBelow(k) == \\A y \\in Nat : (y < k /\\ begun[y]) => done[y]\nAgentP1(k) == /\\ k \\in Nat\n              /\\ begun[k]\n              /\\ ~done[k]\n              /\\ AgentAllDoneBelow(k)\n              /\\ queue[k]\n              /\\ AgentTypeOK\nAgentP2(k) == /\\ k \\in Nat\n              /\\ begun[k]\n              /\\ ~done[k]\n              /\\ AgentAllDoneBelow(k)\n              /\\ ~queue[k]\n              /\\ AgentTypeOK\nAgentP(k) == /\\ k \\in Nat\n             /\\ begun[k]\n             /\\ ~done[k]\n             /\\ AgentAllDoneBelow(k)\n             /\\ AgentTypeOK\nAgentUndonePost(k, n) == begun[n] /\\ ~[done EXCEPT ![k] = TRUE][n]\nAgentT(m, k) == /\\ m \\in Nat\n                /\\ k \\in Nat\n                /\\ m <= k\n                /\\ AgentTypeOK\n                /\\ (AgentAllDoneBelow(m) \\/ done[k])\nAgentS(m, k) == /\\ m \\in Nat\n                /\\ k \\in Nat\n                /\\ m < k\n                /\\ AgentTypeOK\n                /\\ (done[m] \\/ ~begun[m] \\/ done[k])\nAgentQ(n) == Spec => (begun[n] ~> done[n])\nTHEOREM AgentInitType == ASSUME Init PROVE AgentTypeOK\nBY DEF Init, AgentTypeOK\nTHEOREM AgentNextType == ASSUME AgentTypeOK, [Next]_vars PROVE AgentTypeOK'\nBY DEF AgentTypeOK, Next, Send, Recv1, Recv2, vars, HasUndoneFrom, FirstUndoneFrom, UpdateFirstq\nTHEOREM AgentTypeInv == Spec => []AgentTypeOK\nBY AgentInitType, AgentNextType, PTL DEF Spec, SafetySpec, Init, Next, vars, AgentTypeOK\nTHEOREM AgentBegunStable == ASSUME NEW k \\in Nat, AgentTypeOK, begun[k], [Next]_vars PROVE begun[k]'\nBY DEF AgentTypeOK, Next, Send, Recv1, Recv2, vars, HasUndoneFrom, FirstUndoneFrom, UpdateFirstq\nTHEOREM AgentDoneStable == ASSUME NEW k \\in Nat, AgentTypeOK, done[k], [Next]_vars PROVE done[k]'\nBY DEF AgentTypeOK, Next, Send, Recv1, Recv2, vars, HasUndoneFrom, FirstUndoneFrom, UpdateFirstq\nTHEOREM AgentNotBegunStable == ASSUME NEW k \\in Nat, NEW j \\in Nat, j < k, AgentTypeOK, begun[k], ~begun[j], [Next]_vars PROVE ~begun[j]'\nBY DEF AgentTypeOK, Next, Send, Recv1, Recv2, vars, HasUndoneFrom, FirstUndoneFrom, UpdateFirstq\nTHEOREM AgentTStable == ASSUME NEW m \\in Nat, NEW k \\in Nat, m <= k, begun[k], AgentT(m, k), [Next]_vars PROVE AgentT(m, k)'\nBY DEF AgentT, AgentAllDoneBelow, AgentTypeOK, Next, Send, Recv1, Recv2, vars, HasUndoneFrom, FirstUndoneFrom, UpdateFirstq\nTHEOREM AgentSStable == ASSUME NEW m \\in Nat, NEW k \\in Nat, m < k, begun[k], AgentS(m, k), [Next]_vars PROVE AgentS(m, k)'\nBY DEF AgentS, AgentTypeOK, Next, Send, Recv1, Recv2, vars, HasUndoneFrom, FirstUndoneFrom, UpdateFirstq\nTHEOREM AgentPostExists == ASSUME NEW k \\in Nat, HasUndoneFrom(begun, [done EXCEPT ![k] = TRUE]) PROVE \\E x \\in Nat : FirstUndoneFrom(x, begun, [done EXCEPT ![k] = TRUE])\n<1>1. PICK x \\in Nat : AgentUndonePost(k, x) BY DEF AgentUndonePost, HasUndoneFrom\n<1>2. AgentUndonePost(k, x) BY <1>1 DEF AgentUndonePost\n<1>3. HIDE DEF AgentUndonePost\n<1>4. \\E m \\in Nat : AgentUndonePost(k, m) /\\ \\A j \\in 0..(m-1) : ~AgentUndonePost(k, j) BY <1>2, NI!SmallestNatural\n<1>5. PICK m \\in Nat : AgentUndonePost(k, m) /\\ \\A j \\in 0..(m-1) : ~AgentUndonePost(k, j) BY <1>4\n<1>6. USE DEF AgentUndonePost\n<1>7. FirstUndoneFrom(m, begun, [done EXCEPT ![k] = TRUE]) BY <1>5 DEF FirstUndoneFrom, AgentUndonePost\n<1>8. QED BY <1>7\nTHEOREM AgentP1St == ASSUME NEW k \\in Nat, AgentP1(k), [Next]_vars PROVE AgentP1(k)' \\/ done[k]'\nBY DEF AgentP1, AgentAllDoneBelow, AgentTypeOK, Next, Send, Recv1, Recv2, vars, HasUndoneFrom, FirstUndoneFrom, UpdateFirstq\nTHEOREM AgentP1Recv == ASSUME NEW k \\in Nat, AgentP1(k), <<Next /\\ Recv1>>_vars PROVE done[k]'\nBY DEF AgentP1, AgentAllDoneBelow, AgentTypeOK, Next, Send, Recv1, Recv2, vars, HasUndoneFrom, FirstUndoneFrom, UpdateFirstq\nTHEOREM AgentP1EnNoUndone == ASSUME NEW k \\in Nat, AgentP1(k), ~HasUndoneFrom(begun, [done EXCEPT ![k] = TRUE]) PROVE ENABLED <<Recv1>>_vars\n<1>1. FirstUndoneFrom(k, begun, done) BY DEF AgentP1, AgentAllDoneBelow, FirstUndoneFrom\n<1>2. QED BY <1>1, ExpandENABLED, ENABLEDaxioms DEF AgentP1, AgentAllDoneBelow, AgentTypeOK, Recv1, FirstUndoneFrom, HasUndoneFrom, UpdateFirstq, vars\nTHEOREM AgentP1EnUndone == ASSUME NEW k \\in Nat, AgentP1(k), HasUndoneFrom(begun, [done EXCEPT ![k] = TRUE]) PROVE ENABLED <<Recv1>>_vars\n<1>1. FirstUndoneFrom(k, begun, done) BY DEF AgentP1, AgentAllDoneBelow, FirstUndoneFrom\n<1>2. \\E m \\in Nat : FirstUndoneFrom(m, begun, [done EXCEPT ![k] = TRUE]) BY AgentPostExists DEF HasUndoneFrom\n<1>3. PICK m \\in Nat : FirstUndoneFrom(m, begun, [done EXCEPT ![k] = TRUE]) BY <1>2\n<1>4. QED BY <1>1, <1>3, ExpandENABLED, ENABLEDaxioms DEF AgentP1, AgentAllDoneBelow, AgentTypeOK, Recv1, FirstUndoneFrom, HasUndoneFrom, UpdateFirstq, vars\nTHEOREM AgentP1En == ASSUME NEW k \\in Nat, AgentP1(k) PROVE ENABLED <<Recv1>>_vars\nBY AgentP1EnNoUndone, AgentP1EnUndone DEF AgentP1\nTHEOREM AgentP1Lead == ASSUME NEW k \\in Nat PROVE Spec => (AgentP1(k) ~> done[k])\nBY AgentP1St, AgentP1Recv, AgentP1En, PTL DEF Spec, SafetySpec, Next, Recv1, Recv2, vars, AgentP1, AgentAllDoneBelow, AgentTypeOK\nTHEOREM AgentWit2 == ASSUME NEW k \\in Nat, NEW m \\in Nat, AgentP2(k), FirstUndoneFrom(m, begun, [done EXCEPT ![k] = TRUE]), done' = [done EXCEPT ![k] = TRUE], firstq' = m, begun' = begun, queue' = queue PROVE Recv2\nBY DEF AgentP2, AgentAllDoneBelow, AgentTypeOK, Recv1, Recv2, FirstUndoneFrom, HasUndoneFrom, UpdateFirstq, vars\nTHEOREM AgentP2St == ASSUME NEW k \\in Nat, AgentP2(k), [Next]_vars PROVE AgentP2(k)' \\/ done[k]'\nBY DEF AgentP2, AgentAllDoneBelow, AgentTypeOK, Next, Send, Recv1, Recv2, vars, HasUndoneFrom, FirstUndoneFrom, UpdateFirstq\nTHEOREM AgentP2Recv == ASSUME NEW k \\in Nat, AgentP2(k), <<Next /\\ Recv2>>_vars PROVE done[k]'\nBY DEF AgentP2, AgentAllDoneBelow, AgentTypeOK, Next, Send, Recv1, Recv2, vars, HasUndoneFrom, FirstUndoneFrom, UpdateFirstq\nTHEOREM AgentP2EnNoUndone == ASSUME NEW k \\in Nat, AgentP2(k), ~HasUndoneFrom(begun, [done EXCEPT ![k] = TRUE]) PROVE ENABLED <<Recv2>>_vars\n<1>1. FirstUndoneFrom(k, begun, done) BY DEF AgentP2, AgentAllDoneBelow, FirstUndoneFrom\n<1>2. QED BY <1>1, ExpandENABLED, ENABLEDaxioms DEF AgentP2, AgentAllDoneBelow, AgentTypeOK, Recv2, FirstUndoneFrom, HasUndoneFrom, UpdateFirstq, vars\nTHEOREM AgentP2EnUndone == ASSUME NEW k \\in Nat, AgentP2(k), HasUndoneFrom(begun, [done EXCEPT ![k] = TRUE]) PROVE ENABLED <<Recv2>>_vars\n<1>1. FirstUndoneFrom(k, begun, done) BY DEF AgentP2, AgentAllDoneBelow, FirstUndoneFrom\n<1>2. \\E m \\in Nat : FirstUndoneFrom(m, begun, [done EXCEPT ![k] = TRUE]) BY AgentPostExists DEF HasUndoneFrom\n<1>3. PICK m \\in Nat : FirstUndoneFrom(m, begun, [done EXCEPT ![k] = TRUE]) BY <1>2\n<1>4. QED BY <1>1, <1>3, AgentWit2, ExpandENABLED, ENABLEDaxioms DEF AgentP2, AgentAllDoneBelow, AgentTypeOK, Recv1, Recv2, FirstUndoneFrom, HasUndoneFrom, UpdateFirstq, vars\nTHEOREM AgentP2En == ASSUME NEW k \\in Nat, AgentP2(k) PROVE ENABLED <<Recv2>>_vars\nBY AgentP2EnNoUndone, AgentP2EnUndone DEF AgentP2\nTHEOREM AgentP2Lead == ASSUME NEW k \\in Nat PROVE Spec => (AgentP2(k) ~> done[k])\nBY AgentP2St, AgentP2Recv, AgentP2En, PTL DEF Spec, SafetySpec, Next, Recv1, Recv2, vars, AgentP2, AgentAllDoneBelow, AgentTypeOK\nTHEOREM AgentPLead == ASSUME NEW k \\in Nat PROVE Spec => (AgentP(k) ~> done[k])\nBY AgentP1Lead, AgentP2Lead, PTL DEF Spec, AgentP, AgentP1, AgentP2, AgentAllDoneBelow, AgentTypeOK\n\\* END AGENT HELPERS\n\nTHEOREM Liveness == Spec => WorkCompletion\n\\* BEGIN AGENT PROOF ivy_examples_split_queue_2_new/ivy_examples_split_queue_2_new_Liveness.tla\n<1>1. \\A n \\in Nat : (\\A m \\in 0..(n-1) : AgentQ(m)) => AgentQ(n)\nBY AgentPLead, AgentTypeInv, AgentTStable, AgentSStable, AgentBegunStable, AgentDoneStable, AgentNotBegunStable, PTL DEF Spec, WorkCompletion, AgentQ, AgentP, AgentAllDoneBelow, AgentTypeOK, AgentT, AgentS\n<1>2. HIDE DEF AgentQ\n<1>3. \\A n \\in Nat : AgentQ(n) BY <1>1, NI!GeneralNatInduction DEF AgentQ\n<1>4. QED BY <1>3, PTL DEF Spec, WorkCompletion, AgentQ\n\\* END AGENT PROOF ivy_examples_split_queue_2_new/ivy_examples_split_queue_2_new_Liveness.tla\n====\n",
+  "units": {
+    "ivy_examples_split_queue_2_new/ivy_examples_split_queue_2_new_Liveness.tla": {
+      "id": "ivy_examples_split_queue_2_new/ivy_examples_split_queue_2_new_Liveness.tla",
+      "name": "Liveness",
+      "kind": "target",
+      "lineStart": 103,
+      "lineEnd": 109,
+      "proofLines": [
+        105,
+        106,
+        107,
+        108,
+        109
+      ],
+      "proofRange": [
+        105,
+        109
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgentBegunStable",
+        "helper:AgentDoneStable",
+        "helper:AgentNotBegunStable",
+        "helper:AgentPLead",
+        "helper:AgentSStable",
+        "helper:AgentTStable",
+        "helper:AgentTypeInv"
+      ]
+    },
+    "helper:AgentInitType": {
+      "id": "helper:AgentInitType",
+      "name": "AgentInitType",
+      "kind": "helper",
+      "lineStart": 40,
+      "lineEnd": 41,
+      "proofLines": [
+        41
+      ],
+      "proofRange": [
+        41,
+        41
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgentNextType": {
+      "id": "helper:AgentNextType",
+      "name": "AgentNextType",
+      "kind": "helper",
+      "lineStart": 42,
+      "lineEnd": 43,
+      "proofLines": [
+        43
+      ],
+      "proofRange": [
+        43,
+        43
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgentTypeInv": {
+      "id": "helper:AgentTypeInv",
+      "name": "AgentTypeInv",
+      "kind": "helper",
+      "lineStart": 44,
+      "lineEnd": 45,
+      "proofLines": [
+        45
+      ],
+      "proofRange": [
+        45,
+        45
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgentInitType",
+        "helper:AgentNextType"
+      ]
+    },
+    "helper:AgentBegunStable": {
+      "id": "helper:AgentBegunStable",
+      "name": "AgentBegunStable",
+      "kind": "helper",
+      "lineStart": 46,
+      "lineEnd": 47,
+      "proofLines": [
+        47
+      ],
+      "proofRange": [
+        47,
+        47
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgentDoneStable": {
+      "id": "helper:AgentDoneStable",
+      "name": "AgentDoneStable",
+      "kind": "helper",
+      "lineStart": 48,
+      "lineEnd": 49,
+      "proofLines": [
+        49
+      ],
+      "proofRange": [
+        49,
+        49
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgentNotBegunStable": {
+      "id": "helper:AgentNotBegunStable",
+      "name": "AgentNotBegunStable",
+      "kind": "helper",
+      "lineStart": 50,
+      "lineEnd": 51,
+      "proofLines": [
+        51
+      ],
+      "proofRange": [
+        51,
+        51
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgentTStable": {
+      "id": "helper:AgentTStable",
+      "name": "AgentTStable",
+      "kind": "helper",
+      "lineStart": 52,
+      "lineEnd": 53,
+      "proofLines": [
+        53
+      ],
+      "proofRange": [
+        53,
+        53
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgentSStable": {
+      "id": "helper:AgentSStable",
+      "name": "AgentSStable",
+      "kind": "helper",
+      "lineStart": 54,
+      "lineEnd": 55,
+      "proofLines": [
+        55
+      ],
+      "proofRange": [
+        55,
+        55
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgentPostExists": {
+      "id": "helper:AgentPostExists",
+      "name": "AgentPostExists",
+      "kind": "helper",
+      "lineStart": 56,
+      "lineEnd": 64,
+      "proofLines": [
+        57,
+        58,
+        59,
+        60,
+        61,
+        62,
+        63,
+        64
+      ],
+      "proofRange": [
+        57,
+        64
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgentP1St": {
+      "id": "helper:AgentP1St",
+      "name": "AgentP1St",
+      "kind": "helper",
+      "lineStart": 65,
+      "lineEnd": 66,
+      "proofLines": [
+        66
+      ],
+      "proofRange": [
+        66,
+        66
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgentP1Recv": {
+      "id": "helper:AgentP1Recv",
+      "name": "AgentP1Recv",
+      "kind": "helper",
+      "lineStart": 67,
+      "lineEnd": 68,
+      "proofLines": [
+        68
+      ],
+      "proofRange": [
+        68,
+        68
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgentP1EnNoUndone": {
+      "id": "helper:AgentP1EnNoUndone",
+      "name": "AgentP1EnNoUndone",
+      "kind": "helper",
+      "lineStart": 69,
+      "lineEnd": 71,
+      "proofLines": [
+        70,
+        71
+      ],
+      "proofRange": [
+        70,
+        71
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgentP1EnUndone": {
+      "id": "helper:AgentP1EnUndone",
+      "name": "AgentP1EnUndone",
+      "kind": "helper",
+      "lineStart": 72,
+      "lineEnd": 76,
+      "proofLines": [
+        73,
+        74,
+        75,
+        76
+      ],
+      "proofRange": [
+        73,
+        76
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgentPostExists"
+      ]
+    },
+    "helper:AgentP1En": {
+      "id": "helper:AgentP1En",
+      "name": "AgentP1En",
+      "kind": "helper",
+      "lineStart": 77,
+      "lineEnd": 78,
+      "proofLines": [
+        78
+      ],
+      "proofRange": [
+        78,
+        78
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgentP1EnNoUndone",
+        "helper:AgentP1EnUndone"
+      ]
+    },
+    "helper:AgentP1Lead": {
+      "id": "helper:AgentP1Lead",
+      "name": "AgentP1Lead",
+      "kind": "helper",
+      "lineStart": 79,
+      "lineEnd": 80,
+      "proofLines": [
+        80
+      ],
+      "proofRange": [
+        80,
+        80
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgentP1En",
+        "helper:AgentP1Recv",
+        "helper:AgentP1St"
+      ]
+    },
+    "helper:AgentWit2": {
+      "id": "helper:AgentWit2",
+      "name": "AgentWit2",
+      "kind": "helper",
+      "lineStart": 81,
+      "lineEnd": 82,
+      "proofLines": [
+        82
+      ],
+      "proofRange": [
+        82,
+        82
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgentP2St": {
+      "id": "helper:AgentP2St",
+      "name": "AgentP2St",
+      "kind": "helper",
+      "lineStart": 83,
+      "lineEnd": 84,
+      "proofLines": [
+        84
+      ],
+      "proofRange": [
+        84,
+        84
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgentP2Recv": {
+      "id": "helper:AgentP2Recv",
+      "name": "AgentP2Recv",
+      "kind": "helper",
+      "lineStart": 85,
+      "lineEnd": 86,
+      "proofLines": [
+        86
+      ],
+      "proofRange": [
+        86,
+        86
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgentP2EnNoUndone": {
+      "id": "helper:AgentP2EnNoUndone",
+      "name": "AgentP2EnNoUndone",
+      "kind": "helper",
+      "lineStart": 87,
+      "lineEnd": 89,
+      "proofLines": [
+        88,
+        89
+      ],
+      "proofRange": [
+        88,
+        89
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgentP2EnUndone": {
+      "id": "helper:AgentP2EnUndone",
+      "name": "AgentP2EnUndone",
+      "kind": "helper",
+      "lineStart": 90,
+      "lineEnd": 94,
+      "proofLines": [
+        91,
+        92,
+        93,
+        94
+      ],
+      "proofRange": [
+        91,
+        94
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgentPostExists",
+        "helper:AgentWit2"
+      ]
+    },
+    "helper:AgentP2En": {
+      "id": "helper:AgentP2En",
+      "name": "AgentP2En",
+      "kind": "helper",
+      "lineStart": 95,
+      "lineEnd": 96,
+      "proofLines": [
+        96
+      ],
+      "proofRange": [
+        96,
+        96
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgentP2EnNoUndone",
+        "helper:AgentP2EnUndone"
+      ]
+    },
+    "helper:AgentP2Lead": {
+      "id": "helper:AgentP2Lead",
+      "name": "AgentP2Lead",
+      "kind": "helper",
+      "lineStart": 97,
+      "lineEnd": 98,
+      "proofLines": [
+        98
+      ],
+      "proofRange": [
+        98,
+        98
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgentP2En",
+        "helper:AgentP2Recv",
+        "helper:AgentP2St"
+      ]
+    },
+    "helper:AgentPLead": {
+      "id": "helper:AgentPLead",
+      "name": "AgentPLead",
+      "kind": "helper",
+      "lineStart": 99,
+      "lineEnd": 100,
+      "proofLines": [
+        100
+      ],
+      "proofRange": [
+        100,
+        100
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgentP1Lead",
+        "helper:AgentP2Lead"
+      ]
+    }
+  }
+}

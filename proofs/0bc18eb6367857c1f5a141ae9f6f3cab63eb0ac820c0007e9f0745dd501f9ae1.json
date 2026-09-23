@@ -1,0 +1,534 @@
+{
+  "schemaVersion": 1,
+  "specId": "MongoDB/MultiShardTxnSnapshot.tla",
+  "sourceName": "MultiShardTxnSnapshot.tla",
+  "sourceSha256": "75cb3cff553fc85582b049dc88316f55b1c2c2ba8404a77a712a9026516ac226",
+  "resultSha256": "63475eed5fed644c5a0ccc7d10947a5cf35980cb3dc7caf818650f75a3c2adac",
+  "source": "---- MODULE MultiShardTxnSnapshot ----\nEXTENDS MultiShardTxnSnapshotDefs\n\n\\* BEGIN AGENT HELPERS\nLOCAL AuxTL == INSTANCE TLAPS\nLEMMA AuxHelperUnchangedOps == ops' = ops => (SnapshotIsolation <=> SnapshotIsolation')\n  PROOF BY AuxTL!Isa DEF SnapshotIsolation\nLEMMA AuxHelperRouterStart == \\A r \\in Router, t \\in TxId, ts \\in Timestamps : RouterTxnStart(r, t, ts) => (SnapshotIsolation => SnapshotIsolation')\n  PROOF BY AuxTL!Isa DEF RouterTxnStart, SnapshotIsolation\nLEMMA AuxHelperRouterOp == \\A r \\in Router, s \\in Shard, t \\in TxId, k \\in Keys, op \\in Ops : RouterTxnOp(r, s, t, k, op) => (SnapshotIsolation => SnapshotIsolation')\n  PROOF BY AuxTL!Isa DEF RouterTxnOp, SnapshotIsolation\nLEMMA AuxHelperRouterCoordCommit == \\A r \\in Router, s \\in Shard, t \\in TxId, op \\in Ops : RouterTxnCoordinateCommit(r, s, t, op) => (SnapshotIsolation => SnapshotIsolation')\n  PROOF BY AuxTL!Isa DEF RouterTxnCoordinateCommit, SnapshotIsolation\nLEMMA AuxHelperRouterReadOnly == \\A r \\in Router, s \\in Shard, t \\in TxId : RouterTxnCommitReadOnly(r, s, t) => (SnapshotIsolation => SnapshotIsolation')\n  PROOF BY AuxTL!Isa DEF RouterTxnCommitReadOnly, SnapshotIsolation\nLEMMA AuxHelperRouterSingle == \\A r \\in Router, s \\in Shard, t \\in TxId : RouterTxnCommitSingleShard(r, s, t) => (SnapshotIsolation => SnapshotIsolation')\n  PROOF BY AuxTL!Isa DEF RouterTxnCommitSingleShard, SnapshotIsolation\nLEMMA AuxHelperShardStart == \\A s \\in Shard, tid \\in TxId : ShardTxnStart(s, tid) => (SnapshotIsolation => SnapshotIsolation')\n  PROOF BY AuxTL!Isa DEF ShardTxnStart, SnapshotIsolation\nLEMMA AuxHelperShardRead == \\A s \\in Shard, tid \\in TxId, k \\in Keys, v \\in TxId \\cup {NoValue} : ShardTxnRead(s, tid, k, v) => (SnapshotIsolation => SnapshotIsolation')\n  PROOF BY AuxTL!Isa DEF ShardTxnRead, SnapshotIsolation\nLEMMA AuxHelperShardWrite == \\A s \\in Shard, tid \\in TxId, k \\in Keys : ShardTxnWrite(s, tid, k) => (SnapshotIsolation => SnapshotIsolation')\n  PROOF BY AuxTL!Isa DEF ShardTxnWrite, SnapshotIsolation\nLEMMA AuxHelperShardCoordCommit == \\A s \\in Shard, tid \\in TxId : ShardTxnCoordinateCommit(s, tid) => (SnapshotIsolation => SnapshotIsolation')\n  PROOF BY AuxTL!Isa DEF ShardTxnCoordinateCommit, SnapshotIsolation\nLEMMA AuxHelperShardRecvVote == \\A s, from \\in Shard, tid \\in TxId : ShardTxnCoordinatorRecvCommitVote(s, tid, from) => (SnapshotIsolation => SnapshotIsolation')\n  PROOF BY AuxTL!Isa DEF ShardTxnCoordinatorRecvCommitVote, SnapshotIsolation\nLEMMA AuxHelperShardDecide == \\A s \\in Shard, tid \\in TxId : ShardTxnCoordinatorDecideCommit(s, tid) => (SnapshotIsolation => SnapshotIsolation')\n  PROOF BY AuxTL!Isa DEF ShardTxnCoordinatorDecideCommit, SnapshotIsolation\nLEMMA AuxHelperShardPrepare == \\A s \\in Shard, tid \\in TxId : ShardTxnPrepare(s, tid) => (SnapshotIsolation => SnapshotIsolation')\n  PROOF BY AuxTL!Isa DEF ShardTxnPrepare, SnapshotIsolation\nLEMMA AuxHelperShardAbort == \\A s \\in Shard, tid \\in TxId : ShardTxnAbort(s, tid) => (SnapshotIsolation => SnapshotIsolation')\n  PROOF BY AuxTL!Isa DEF ShardTxnAbort, SnapshotIsolation\nAuxMyFSingle == [ss \\in SUBSET {<<>>} |-> IF ss = {} THEN {<<>>} ELSE {<< <<>> >>}]\nAuxMyRHSSingle == [ss \\in SUBSET {<<>>} |-> IF ss = {} THEN {<<>>} ELSE LET ps == [x \\in ss |-> {Append(sq, x) : sq \\in AuxMyFSingle[ss \\ {x}]}] IN UNION {ps[x] : x \\in ss}]\nLEMMA AuxHelperMyFSatSingle == AuxMyFSingle = AuxMyRHSSingle\n  <1>1 DOMAIN AuxMyFSingle = SUBSET {<<>>} BY AuxTL!Isa DEF AuxMyFSingle\n  <1>2 DOMAIN AuxMyRHSSingle = SUBSET {<<>>} BY AuxTL!Isa DEF AuxMyRHSSingle\n  <1>3 AuxMyFSingle[{}] = AuxMyRHSSingle[{}] BY AuxTL!Isa DEF AuxMyFSingle, AuxMyRHSSingle\n  <1>4 AuxMyFSingle[{<<>>}] = AuxMyRHSSingle[{<<>>}] BY AuxTL!Isa DEF AuxMyFSingle, AuxMyRHSSingle\n  <1>5 SUBSET {<<>>} = {{}, {<<>>}} BY AuxTL!Isa\n  <1>6 QED BY <1>1, <1>2, <1>3, <1>4, <1>5 DEF AuxMyFSingle, AuxMyRHSSingle\nLEMMA AuxHelperExistsSingle == \\E p : p = [ss \\in SUBSET {<<>>} |-> IF ss = {} THEN {<<>>} ELSE LET ps == [x \\in ss |-> {Append(sq, x) : sq \\in p[ss \\ {x}]}] IN UNION {ps[x] : x \\in ss}]\n  <1>1 AuxMyFSingle = [ss \\in SUBSET {<<>>} |-> IF ss = {} THEN {<<>>} ELSE LET ps == [x \\in ss |-> {Append(sq, x) : sq \\in AuxMyFSingle[ss \\ {x}]}] IN UNION {ps[x] : x \\in ss}] BY AuxHelperMyFSatSingle DEF AuxMyRHSSingle\n  <1>2 QED BY <1>1\nLEMMA AuxHelperUniqueSingle == \\A p : (p = [ss \\in SUBSET {<<>>} |-> IF ss = {} THEN {<<>>} ELSE LET ps == [x \\in ss |-> {Append(sq, x) : sq \\in p[ss \\ {x}]}] IN UNION {ps[x] : x \\in ss}]) => p[{<<>>}] = {<< <<>> >>}\n  <1>1 \\A p : (p = [ss \\in SUBSET {<<>>} |-> IF ss = {} THEN {<<>>} ELSE LET ps == [x \\in ss |-> {Append(sq, x) : sq \\in p[ss \\ {x}]}] IN UNION {ps[x] : x \\in ss}]) => p[{}] = {<<>>}\n    <2>1 TAKE p\n    <2>2 HAVE p = [ss \\in SUBSET {<<>>} |-> IF ss = {} THEN {<<>>} ELSE LET ps == [x \\in ss |-> {Append(sq, x) : sq \\in p[ss \\ {x}]}] IN UNION {ps[x] : x \\in ss}]\n    <2>3 {} \\in SUBSET {<<>>} BY AuxTL!Isa\n    <2>4 QED BY <2>2, <2>3\n  <1>2 QED BY <1>1\nLEMMA AuxHelperPermSingle == PermSeqs({<<>>}) = {<< <<>> >>}\n  <1>1 \\E p : p = [ss \\in SUBSET {<<>>} |-> IF ss = {} THEN {<<>>} ELSE LET ps == [x \\in ss |-> {Append(sq, x) : sq \\in p[ss \\ {x}]}] IN UNION {ps[x] : x \\in ss}] BY AuxHelperExistsSingle\n  <1>2 \\A p : (p = [ss \\in SUBSET {<<>>} |-> IF ss = {} THEN {<<>>} ELSE LET ps == [x \\in ss |-> {Append(sq, x) : sq \\in p[ss \\ {x}]}] IN UNION {ps[x] : x \\in ss}]) => p[{<<>>}] = {<< <<>> >>} BY AuxHelperUniqueSingle\n  <1>3 QED BY <1>1, <1>2 DEF PermSeqs, AuxMyFSingle\nLEMMA AuxHelperRangeEmpty == TxId = {} => (LET o == [s \\in TxId |-> <<>>] IN Range(o) = {}) \n  PROOF BY AuxTL!Isa DEF Range\nLEMMA AuxHelperRangeSingle == TxId # {} => (LET o == [s \\in TxId |-> <<>>] IN Range(o) = {<<>>})\n  PROOF BY AuxTL!Isa DEF Range\nAuxMyFEmpty == [ss \\in SUBSET {} |-> {<<>>}]\nLEMMA AuxHelperMyFEmptyDom == DOMAIN AuxMyFEmpty = SUBSET {} BY AuxTL!Isa DEF AuxMyFEmpty\nLEMMA AuxHelperMyFEmptyVal == AuxMyFEmpty[{}] = {<<>>} BY AuxTL!Isa DEF AuxMyFEmpty\nLEMMA AuxHelperSubEmpty == SUBSET {} = {{}} BY AuxTL!Isa\nLEMMA AuxHelperPermEmpty == PermSeqs({}) = {<<>>}\n  <1>1 SUBSET {} = {{}} BY AuxTL!Isa\n  <1>2 AuxMyFEmpty[{}] = {<<>>} BY AuxTL!Isa DEF AuxMyFEmpty\n  <1>3 QED BY <1>1, <1>2 DEF PermSeqs, AuxMyFEmpty\nAuxMyIterEmpty(base) == [s \\in SUBSET {} |-> base]\nLEMMA AuxHelperFoldEmpty == ASSUME NEW op2(_, _), NEW base2, NEW fun2 PROVE FoldFunctionOnSet(op2, base2, fun2, {}) = base2\n  <1>1 DOMAIN AuxMyIterEmpty(base2) = SUBSET {} BY AuxTL!Isa DEF AuxMyIterEmpty\n  <1>2 AuxMyIterEmpty(base2)[{}] = base2 BY AuxTL!Isa DEF AuxMyIterEmpty\n  <1>3 SUBSET {} = {{}} BY AuxTL!Isa\n  <1>4 AuxMyIterEmpty(base2) = [s \\in SUBSET {} |-> IF s = {} THEN base2 ELSE LET x == (CHOOSE x \\in s : TRUE) IN op2(fun2[x], AuxMyIterEmpty(base2)[s \\ {x}])] BY AuxTL!Isa DEF AuxMyIterEmpty\n  <1>5 QED BY <1>1, <1>2, <1>3, <1>4 DEF FoldFunctionOnSet, MapThenFoldSet\nLEMMA AuxHelperReduceEmpty == ASSUME NEW op3(_, _), NEW base3 PROVE ReduceSeq(op3, <<>>, base3) = base3\n  <1>1 DOMAIN <<>> = {} BY AuxTL!Isa\n  <1>2 QED BY <1>1, AuxHelperFoldEmpty, AuxTL!Isa DEF ReduceSeq, FoldFunction\nLEMMA AuxHelperDomainEmptySeq == DOMAIN <<>> = {} BY AuxTL!Isa\nLEMMA AuxHelperSeqToSetEmpty == SeqToSet(<<>>) = {} BY AuxTL!Isa DEF SeqToSet\n\\* END AGENT HELPERS\n\nTHEOREM SnapshotIsolationCorrect ==\n    (Spec /\\ []SingleWritePerKey) => []SnapshotIsolation\n\\* BEGIN AGENT PROOF MongoDB/MultiShardTxnSnapshot_SnapshotIsolationCorrect.tla\nPROOF\n  <1>1 Init /\\ SingleWritePerKey => SnapshotIsolation BY AuxHelperPermSingle, AuxHelperRangeEmpty, AuxHelperRangeSingle, AuxHelperMyFSatSingle, AuxHelperExistsSingle, AuxHelperUniqueSingle, AuxHelperMyFEmptyDom, AuxHelperMyFEmptyVal, AuxHelperSubEmpty, AuxHelperPermEmpty, AuxHelperFoldEmpty, AuxHelperReduceEmpty, AuxHelperDomainEmptySeq, AuxHelperSeqToSetEmpty, AuxTL!Isa DEF Init, SnapshotIsolation, SingleWritePerKey, WritesEachKeyAtMostOnce\n  <1>2 SnapshotIsolation /\\ SingleWritePerKey /\\ SingleWritePerKey' /\\ [Next]_vars => SnapshotIsolation'\n    BY AuxHelperUnchangedOps, AuxHelperRouterStart, AuxHelperRouterOp, AuxHelperRouterCoordCommit, AuxHelperRouterReadOnly, AuxHelperRouterSingle, AuxHelperShardStart, AuxHelperShardRead, AuxHelperShardWrite, AuxHelperShardCoordCommit, AuxHelperShardRecvVote, AuxHelperShardDecide, AuxHelperShardPrepare, AuxHelperShardAbort, AuxHelperPermSingle, AuxHelperRangeEmpty, AuxHelperRangeSingle, AuxHelperMyFEmptyDom, AuxHelperPermEmpty, AuxHelperFoldEmpty, AuxHelperReduceEmpty, AuxHelperDomainEmptySeq, AuxHelperSeqToSetEmpty, AuxTL!Isa DEF Next, vars, SnapshotIsolation, SingleWritePerKey, WritesEachKeyAtMostOnce\n  <1>3 QED BY <1>1, <1>2, AuxTL!PTL DEF Spec\n\\* END AGENT PROOF MongoDB/MultiShardTxnSnapshot_SnapshotIsolationCorrect.tla\n====\n",
+  "units": {
+    "MongoDB/MultiShardTxnSnapshot_SnapshotIsolationCorrect.tla": {
+      "id": "MongoDB/MultiShardTxnSnapshot_SnapshotIsolationCorrect.tla",
+      "name": "SnapshotIsolationCorrect",
+      "kind": "target",
+      "lineStart": 83,
+      "lineEnd": 90,
+      "proofLines": [
+        86,
+        87,
+        88,
+        89,
+        90
+      ],
+      "proofRange": [
+        86,
+        90
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AuxHelperDomainEmptySeq",
+        "helper:AuxHelperExistsSingle",
+        "helper:AuxHelperFoldEmpty",
+        "helper:AuxHelperMyFEmptyDom",
+        "helper:AuxHelperMyFEmptyVal",
+        "helper:AuxHelperMyFSatSingle",
+        "helper:AuxHelperPermEmpty",
+        "helper:AuxHelperPermSingle",
+        "helper:AuxHelperRangeEmpty",
+        "helper:AuxHelperRangeSingle",
+        "helper:AuxHelperReduceEmpty",
+        "helper:AuxHelperRouterCoordCommit",
+        "helper:AuxHelperRouterOp",
+        "helper:AuxHelperRouterReadOnly",
+        "helper:AuxHelperRouterSingle",
+        "helper:AuxHelperRouterStart",
+        "helper:AuxHelperSeqToSetEmpty",
+        "helper:AuxHelperShardAbort",
+        "helper:AuxHelperShardCoordCommit",
+        "helper:AuxHelperShardDecide",
+        "helper:AuxHelperShardPrepare",
+        "helper:AuxHelperShardRead",
+        "helper:AuxHelperShardRecvVote",
+        "helper:AuxHelperShardStart",
+        "helper:AuxHelperShardWrite",
+        "helper:AuxHelperSubEmpty",
+        "helper:AuxHelperUnchangedOps",
+        "helper:AuxHelperUniqueSingle"
+      ]
+    },
+    "helper:AuxHelperUnchangedOps": {
+      "id": "helper:AuxHelperUnchangedOps",
+      "name": "AuxHelperUnchangedOps",
+      "kind": "helper",
+      "lineStart": 6,
+      "lineEnd": 7,
+      "proofLines": [
+        7
+      ],
+      "proofRange": [
+        7,
+        7
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AuxHelperRouterStart": {
+      "id": "helper:AuxHelperRouterStart",
+      "name": "AuxHelperRouterStart",
+      "kind": "helper",
+      "lineStart": 8,
+      "lineEnd": 9,
+      "proofLines": [
+        9
+      ],
+      "proofRange": [
+        9,
+        9
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AuxHelperRouterOp": {
+      "id": "helper:AuxHelperRouterOp",
+      "name": "AuxHelperRouterOp",
+      "kind": "helper",
+      "lineStart": 10,
+      "lineEnd": 11,
+      "proofLines": [
+        11
+      ],
+      "proofRange": [
+        11,
+        11
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AuxHelperRouterCoordCommit": {
+      "id": "helper:AuxHelperRouterCoordCommit",
+      "name": "AuxHelperRouterCoordCommit",
+      "kind": "helper",
+      "lineStart": 12,
+      "lineEnd": 13,
+      "proofLines": [
+        13
+      ],
+      "proofRange": [
+        13,
+        13
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AuxHelperRouterReadOnly": {
+      "id": "helper:AuxHelperRouterReadOnly",
+      "name": "AuxHelperRouterReadOnly",
+      "kind": "helper",
+      "lineStart": 14,
+      "lineEnd": 15,
+      "proofLines": [
+        15
+      ],
+      "proofRange": [
+        15,
+        15
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AuxHelperRouterSingle": {
+      "id": "helper:AuxHelperRouterSingle",
+      "name": "AuxHelperRouterSingle",
+      "kind": "helper",
+      "lineStart": 16,
+      "lineEnd": 17,
+      "proofLines": [
+        17
+      ],
+      "proofRange": [
+        17,
+        17
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AuxHelperShardStart": {
+      "id": "helper:AuxHelperShardStart",
+      "name": "AuxHelperShardStart",
+      "kind": "helper",
+      "lineStart": 18,
+      "lineEnd": 19,
+      "proofLines": [
+        19
+      ],
+      "proofRange": [
+        19,
+        19
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AuxHelperShardRead": {
+      "id": "helper:AuxHelperShardRead",
+      "name": "AuxHelperShardRead",
+      "kind": "helper",
+      "lineStart": 20,
+      "lineEnd": 21,
+      "proofLines": [
+        21
+      ],
+      "proofRange": [
+        21,
+        21
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AuxHelperShardWrite": {
+      "id": "helper:AuxHelperShardWrite",
+      "name": "AuxHelperShardWrite",
+      "kind": "helper",
+      "lineStart": 22,
+      "lineEnd": 23,
+      "proofLines": [
+        23
+      ],
+      "proofRange": [
+        23,
+        23
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AuxHelperShardCoordCommit": {
+      "id": "helper:AuxHelperShardCoordCommit",
+      "name": "AuxHelperShardCoordCommit",
+      "kind": "helper",
+      "lineStart": 24,
+      "lineEnd": 25,
+      "proofLines": [
+        25
+      ],
+      "proofRange": [
+        25,
+        25
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AuxHelperShardRecvVote": {
+      "id": "helper:AuxHelperShardRecvVote",
+      "name": "AuxHelperShardRecvVote",
+      "kind": "helper",
+      "lineStart": 26,
+      "lineEnd": 27,
+      "proofLines": [
+        27
+      ],
+      "proofRange": [
+        27,
+        27
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AuxHelperShardDecide": {
+      "id": "helper:AuxHelperShardDecide",
+      "name": "AuxHelperShardDecide",
+      "kind": "helper",
+      "lineStart": 28,
+      "lineEnd": 29,
+      "proofLines": [
+        29
+      ],
+      "proofRange": [
+        29,
+        29
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AuxHelperShardPrepare": {
+      "id": "helper:AuxHelperShardPrepare",
+      "name": "AuxHelperShardPrepare",
+      "kind": "helper",
+      "lineStart": 30,
+      "lineEnd": 31,
+      "proofLines": [
+        31
+      ],
+      "proofRange": [
+        31,
+        31
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AuxHelperShardAbort": {
+      "id": "helper:AuxHelperShardAbort",
+      "name": "AuxHelperShardAbort",
+      "kind": "helper",
+      "lineStart": 32,
+      "lineEnd": 33,
+      "proofLines": [
+        33
+      ],
+      "proofRange": [
+        33,
+        33
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AuxHelperMyFSatSingle": {
+      "id": "helper:AuxHelperMyFSatSingle",
+      "name": "AuxHelperMyFSatSingle",
+      "kind": "helper",
+      "lineStart": 36,
+      "lineEnd": 42,
+      "proofLines": [
+        37,
+        38,
+        39,
+        40,
+        41,
+        42
+      ],
+      "proofRange": [
+        37,
+        42
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AuxHelperExistsSingle": {
+      "id": "helper:AuxHelperExistsSingle",
+      "name": "AuxHelperExistsSingle",
+      "kind": "helper",
+      "lineStart": 43,
+      "lineEnd": 45,
+      "proofLines": [
+        44,
+        45
+      ],
+      "proofRange": [
+        44,
+        45
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AuxHelperMyFSatSingle"
+      ]
+    },
+    "helper:AuxHelperUniqueSingle": {
+      "id": "helper:AuxHelperUniqueSingle",
+      "name": "AuxHelperUniqueSingle",
+      "kind": "helper",
+      "lineStart": 46,
+      "lineEnd": 52,
+      "proofLines": [
+        47,
+        48,
+        49,
+        50,
+        51,
+        52
+      ],
+      "proofRange": [
+        47,
+        52
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AuxHelperPermSingle": {
+      "id": "helper:AuxHelperPermSingle",
+      "name": "AuxHelperPermSingle",
+      "kind": "helper",
+      "lineStart": 53,
+      "lineEnd": 56,
+      "proofLines": [
+        54,
+        55,
+        56
+      ],
+      "proofRange": [
+        54,
+        56
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AuxHelperExistsSingle",
+        "helper:AuxHelperUniqueSingle"
+      ]
+    },
+    "helper:AuxHelperRangeEmpty": {
+      "id": "helper:AuxHelperRangeEmpty",
+      "name": "AuxHelperRangeEmpty",
+      "kind": "helper",
+      "lineStart": 57,
+      "lineEnd": 58,
+      "proofLines": [
+        58
+      ],
+      "proofRange": [
+        58,
+        58
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AuxHelperRangeSingle": {
+      "id": "helper:AuxHelperRangeSingle",
+      "name": "AuxHelperRangeSingle",
+      "kind": "helper",
+      "lineStart": 59,
+      "lineEnd": 60,
+      "proofLines": [
+        60
+      ],
+      "proofRange": [
+        60,
+        60
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AuxHelperMyFEmptyDom": {
+      "id": "helper:AuxHelperMyFEmptyDom",
+      "name": "AuxHelperMyFEmptyDom",
+      "kind": "helper",
+      "lineStart": 62,
+      "lineEnd": 62,
+      "proofLines": [
+        62
+      ],
+      "proofRange": [
+        62,
+        62
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AuxHelperMyFEmptyVal": {
+      "id": "helper:AuxHelperMyFEmptyVal",
+      "name": "AuxHelperMyFEmptyVal",
+      "kind": "helper",
+      "lineStart": 63,
+      "lineEnd": 63,
+      "proofLines": [
+        63
+      ],
+      "proofRange": [
+        63,
+        63
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AuxHelperSubEmpty": {
+      "id": "helper:AuxHelperSubEmpty",
+      "name": "AuxHelperSubEmpty",
+      "kind": "helper",
+      "lineStart": 64,
+      "lineEnd": 64,
+      "proofLines": [
+        64
+      ],
+      "proofRange": [
+        64,
+        64
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AuxHelperPermEmpty": {
+      "id": "helper:AuxHelperPermEmpty",
+      "name": "AuxHelperPermEmpty",
+      "kind": "helper",
+      "lineStart": 65,
+      "lineEnd": 68,
+      "proofLines": [
+        66,
+        67,
+        68
+      ],
+      "proofRange": [
+        66,
+        68
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AuxHelperFoldEmpty": {
+      "id": "helper:AuxHelperFoldEmpty",
+      "name": "AuxHelperFoldEmpty",
+      "kind": "helper",
+      "lineStart": 70,
+      "lineEnd": 75,
+      "proofLines": [
+        71,
+        72,
+        73,
+        74,
+        75
+      ],
+      "proofRange": [
+        71,
+        75
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AuxHelperReduceEmpty": {
+      "id": "helper:AuxHelperReduceEmpty",
+      "name": "AuxHelperReduceEmpty",
+      "kind": "helper",
+      "lineStart": 76,
+      "lineEnd": 78,
+      "proofLines": [
+        77,
+        78
+      ],
+      "proofRange": [
+        77,
+        78
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AuxHelperFoldEmpty"
+      ]
+    },
+    "helper:AuxHelperDomainEmptySeq": {
+      "id": "helper:AuxHelperDomainEmptySeq",
+      "name": "AuxHelperDomainEmptySeq",
+      "kind": "helper",
+      "lineStart": 79,
+      "lineEnd": 79,
+      "proofLines": [
+        79
+      ],
+      "proofRange": [
+        79,
+        79
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AuxHelperSeqToSetEmpty": {
+      "id": "helper:AuxHelperSeqToSetEmpty",
+      "name": "AuxHelperSeqToSetEmpty",
+      "kind": "helper",
+      "lineStart": 80,
+      "lineEnd": 80,
+      "proofLines": [
+        80
+      ],
+      "proofRange": [
+        80,
+        80
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    }
+  }
+}

@@ -1,0 +1,732 @@
+{
+  "schemaVersion": 1,
+  "specId": "ivy_examples_split_queue_2_new/ivy_examples_split_queue_2_new.tla",
+  "sourceName": "ivy_examples_split_queue_2_new.tla",
+  "sourceSha256": "229deafb5211ce9ab9af5ad1678c1e339ed2ca479aa4f4d20da65e2b373479c4",
+  "resultSha256": "d27accbaf21acfedafffd0b71064eba0c1efa703c56bac90292b1d4b99fcc769",
+  "source": "---- MODULE ivy_examples_split_queue_2_new ----\nEXTENDS ivy_examples_split_queue_2_newDefs\n\n\\* BEGIN AGENT HELPERS\nLOCAL AgNatLib == INSTANCE NaturalsInduction\n\nAgInv ==\n  /\\ begun \\in [Nat -> BOOLEAN]\n  /\\ done \\in [Nat -> BOOLEAN]\n  /\\ queue \\in [Nat -> BOOLEAN]\n  /\\ firstq \\in Nat\n  /\\ (HasUndoneFrom(begun, done) => FirstUndoneFrom(firstq, begun, done))\n\nAgAt(c, k)  == AgInv /\\ begun[c] /\\ ~done[c] /\\ k <= firstq\nAgUp(c, k)  == AgInv /\\ begun[c] /\\ ~done[c] /\\ k + 1 <= firstq\nAgAtT(c, k) == AgAt(c, k) /\\ queue[firstq]\nAgAtF(c, k) == AgAt(c, k) /\\ ~queue[firstq]\n\nAgWC(x) == Spec => (begun[x] ~> done[x])\n\nLEMMA AgUniq ==\n  ASSUME NEW b, NEW d, NEW u, NEW v,\n         FirstUndoneFrom(u, b, d), FirstUndoneFrom(v, b, d)\n  PROVE  u = v\nBY SMTT(\"r10\") DEF FirstUndoneFrom\n\nLEMMA AgExists ==\n  ASSUME NEW b, NEW d, HasUndoneFrom(b, d)\n  PROVE  \\E z \\in Nat : FirstUndoneFrom(z, b, d)\n<1>1. PICK x \\in Nat : b[x] /\\ ~d[x]\n  BY DEF HasUndoneFrom\n<1> DEFINE Pk(k) == b[k] /\\ ~d[k]\n<1>2. \\E m \\in Nat : Pk(m) /\\ \\A i \\in 0 .. m-1 : ~Pk(i)\n  <2>1. Pk(x)\n    BY <1>1\n  <2> HIDE DEF Pk\n  <2> QED\n    BY <2>1, AgNatLib!SmallestNatural\n<1>3. PICK m \\in Nat : Pk(m) /\\ \\A i \\in 0 .. m-1 : ~Pk(i)\n  BY <1>2\n<1>4. \\A y \\in Nat : (b[y] /\\ ~d[y]) => m <= y\n  BY <1>3, SMTT(\"r20\")\n<1> QED\n  BY <1>3, <1>4 DEF FirstUndoneFrom\n\nLEMMA AgUnchAll ==\n  ASSUME UNCHANGED vars\n  PROVE  begun' = begun /\\ done' = done /\\ queue' = queue /\\ firstq' = firstq\nBY DEF vars\n\nLEMMA AgUnchBQ ==\n  ASSUME UNCHANGED << begun, queue >>\n  PROVE  begun' = begun /\\ queue' = queue\nOBVIOUS\n\nLEMMA AgInvInit ==\n  ASSUME Init\n  PROVE  AgInv\nBY SMTT(\"r20\") DEF Init, AgInv, HasUndoneFrom, FirstUndoneFrom\n\nLEMMA AgInvNext ==\n  ASSUME AgInv, [Next]_vars\n  PROVE  AgInv'\n<1>1. CASE UNCHANGED vars\n  <2>1. begun' = begun /\\ done' = done /\\ queue' = queue /\\ firstq' = firstq\n    BY <1>1, AgUnchAll\n  <2> QED\n    BY <2>1, SMTT(\"r20\") DEF AgInv, HasUndoneFrom, FirstUndoneFrom\n<1>2. ASSUME NEW lt \\in Nat, NEW kind \\in BOOLEAN, Send(lt, kind)\n      PROVE  AgInv'\n  BY <1>2, SMTT(\"r30\")\n     DEF AgInv, Send, UpdateFirstq, HasUndoneFrom, FirstUndoneFrom\n<1>3. CASE Recv1\n  <2>1. PICK x \\in Nat :\n          /\\ FirstUndoneFrom(x, begun, done)\n          /\\ queue[x]\n          /\\ done' = [done EXCEPT ![x] = TRUE]\n          /\\ UpdateFirstq(begun, done')\n          /\\ UNCHANGED << begun, queue >>\n    BY <1>3 DEF Recv1\n  <2>2. begun' = begun /\\ queue' = queue\n    BY <2>1, AgUnchBQ\n  <2> QED\n    BY <2>1, <2>2, SMTT(\"r30\")\n       DEF AgInv, UpdateFirstq, HasUndoneFrom, FirstUndoneFrom\n<1>4. CASE Recv2\n  <2>1. PICK x \\in Nat :\n          /\\ FirstUndoneFrom(x, begun, done)\n          /\\ ~queue[x]\n          /\\ done' = [done EXCEPT ![x] = TRUE]\n          /\\ UpdateFirstq(begun, done')\n          /\\ UNCHANGED << begun, queue >>\n    BY <1>4 DEF Recv2\n  <2>2. begun' = begun /\\ queue' = queue\n    BY <2>1, AgUnchBQ\n  <2> QED\n    BY <2>1, <2>2, SMTT(\"r30\")\n       DEF AgInv, UpdateFirstq, HasUndoneFrom, FirstUndoneFrom\n<1> QED\n  BY <1>1, <1>2, <1>3, <1>4 DEF Next\n\nLEMMA AgFirstLe ==\n  ASSUME AgInv, NEW c \\in Nat, begun[c], ~done[c]\n  PROVE  FirstUndoneFrom(firstq, begun, done) /\\ firstq <= c\nBY SMTT(\"r20\") DEF AgInv, HasUndoneFrom, FirstUndoneFrom\n\nLEMMA AgSendKeep ==\n  ASSUME AgInv, NEW c \\in Nat, begun[c], ~done[c],\n         NEW lt \\in Nat, NEW kind \\in BOOLEAN, Send(lt, kind)\n  PROVE  /\\ firstq' = firstq\n         /\\ begun'[c]\n         /\\ ~done'[c]\n         /\\ queue'[firstq] = queue[firstq]\n<1>1. FirstUndoneFrom(firstq, begun, done) /\\ firstq <= c\n  BY AgFirstLe\n<1>2. c < lt /\\ firstq < lt\n  BY <1>1, SMTT(\"r20\") DEF Send, FirstUndoneFrom\n<1>3. done' = done\n  BY DEF Send\n<1>4. begun'[c] /\\ ~done'[c] /\\ queue'[firstq] = queue[firstq]\n  BY <1>1, <1>2, <1>3, SMTT(\"r20\") DEF Send, AgInv, FirstUndoneFrom\n<1>5. HasUndoneFrom(begun', done')\n  BY <1>4 DEF HasUndoneFrom\n<1>6. FirstUndoneFrom(firstq', begun', done')\n  BY <1>3, <1>5 DEF Send, UpdateFirstq\n<1>7. FirstUndoneFrom(firstq, begun', done')\n  BY <1>1, <1>2, <1>3, SMTT(\"r30\") DEF Send, AgInv, FirstUndoneFrom\n<1> QED\n  BY <1>4, <1>6, <1>7, AgUniq\n\nLEMMA AgRecvGain ==\n  ASSUME AgInv, NEW c \\in Nat, begun[c], ~done[c],\n         NEW x \\in Nat,\n         FirstUndoneFrom(x, begun, done),\n         done' = [done EXCEPT ![x] = TRUE],\n         UpdateFirstq(begun, done'),\n         UNCHANGED << begun, queue >>\n  PROVE  done'[c] \\/ (begun'[c] /\\ ~done'[c] /\\ firstq + 1 <= firstq')\n<1>1. begun' = begun /\\ queue' = queue\n  BY AgUnchBQ\n<1>2. FirstUndoneFrom(firstq, begun, done) /\\ firstq <= c\n  BY AgFirstLe\n<1>3. x = firstq\n  BY <1>2, AgUniq\n<1>4. CASE x = c\n  BY <1>4, SMTT(\"r20\") DEF AgInv\n<1>5. CASE x # c\n  <2>1. begun'[c] /\\ ~done'[c]\n    BY <1>1, <1>5, SMTT(\"r20\") DEF AgInv\n  <2>2. HasUndoneFrom(begun, done')\n    BY <2>1, <1>1 DEF HasUndoneFrom\n  <2>3. FirstUndoneFrom(firstq', begun, done')\n    BY <2>2 DEF UpdateFirstq\n  <2>4. firstq + 1 <= firstq'\n    BY <1>2, <1>3, <2>3, SMTT(\"r30\") DEF AgInv, FirstUndoneFrom\n  <2> QED\n    BY <2>1, <2>4\n<1> QED\n  BY <1>4, <1>5\n\nLEMMA AgSplit ==\n  ASSUME NEW c \\in Nat, NEW k \\in Nat, AgAt(c, k)\n  PROVE  AgAtT(c, k) \\/ AgAtF(c, k)\nBY SMTT(\"r20\") DEF AgAt, AgAtT, AgAtF, AgInv\n\nLEMMA AgStart ==\n  ASSUME NEW c \\in Nat, AgInv, begun[c]\n  PROVE  done[c] \\/ AgAt(c, 0)\nBY SMTT(\"r20\") DEF AgInv, AgAt\n\nLEMMA AgUpFalse ==\n  ASSUME NEW c \\in Nat, AgUp(c, c)\n  PROVE  done[c]\n<1>1. FirstUndoneFrom(firstq, begun, done) /\\ firstq <= c\n  BY AgFirstLe DEF AgUp\n<1> QED\n  BY <1>1, SMTT(\"r20\") DEF AgUp, AgInv\n\nLEMMA AgUpNext ==\n  ASSUME NEW c \\in Nat, NEW j \\in 1 .. c, AgUp(c, j-1)\n  PROVE  AgAt(c, j)\nBY SMTT(\"r20\") DEF AgUp, AgAt\n\nLEMMA AgStepT ==\n  ASSUME NEW c \\in Nat, NEW k \\in Nat, AgAtT(c, k), [Next]_vars\n  PROVE  AgAtT(c, k)' \\/ done'[c] \\/ AgUp(c, k)'\n<1> USE DEF AgAtT, AgAt, AgUp, AgInv\n<1>0. AgInv'\n  BY AgInvNext\n<1>1. CASE UNCHANGED vars\n  <2>1. begun' = begun /\\ done' = done /\\ queue' = queue /\\ firstq' = firstq\n    BY <1>1, AgUnchAll\n  <2> QED\n    BY <2>1, <1>0, SMTT(\"r20\")\n<1>2. ASSUME NEW lt \\in Nat, NEW kind \\in BOOLEAN, Send(lt, kind)\n      PROVE  AgAtT(c, k)'\n  <2>1. /\\ firstq' = firstq\n        /\\ begun'[c]\n        /\\ ~done'[c]\n        /\\ queue'[firstq] = queue[firstq]\n    BY <1>2, AgSendKeep\n  <2> QED\n    BY <2>1, <1>0, SMTT(\"r20\")\n<1>3. CASE Recv1\n  <2>1. PICK x \\in Nat :\n          /\\ FirstUndoneFrom(x, begun, done)\n          /\\ queue[x]\n          /\\ done' = [done EXCEPT ![x] = TRUE]\n          /\\ UpdateFirstq(begun, done')\n          /\\ UNCHANGED << begun, queue >>\n    BY <1>3 DEF Recv1\n  <2>2. done'[c] \\/ (begun'[c] /\\ ~done'[c] /\\ firstq + 1 <= firstq')\n    BY <2>1, AgRecvGain\n  <2> QED\n    BY <2>2, <1>0, SMTT(\"r20\")\n<1>4. CASE Recv2\n  <2>1. PICK x \\in Nat :\n          /\\ FirstUndoneFrom(x, begun, done)\n          /\\ ~queue[x]\n          /\\ done' = [done EXCEPT ![x] = TRUE]\n          /\\ UpdateFirstq(begun, done')\n          /\\ UNCHANGED << begun, queue >>\n    BY <1>4 DEF Recv2\n  <2>2. done'[c] \\/ (begun'[c] /\\ ~done'[c] /\\ firstq + 1 <= firstq')\n    BY <2>1, AgRecvGain\n  <2> QED\n    BY <2>2, <1>0, SMTT(\"r20\")\n<1> QED\n  BY <1>1, <1>2, <1>3, <1>4 DEF Next\n\nLEMMA AgStepF ==\n  ASSUME NEW c \\in Nat, NEW k \\in Nat, AgAtF(c, k), [Next]_vars\n  PROVE  AgAtF(c, k)' \\/ done'[c] \\/ AgUp(c, k)'\n<1> USE DEF AgAtF, AgAt, AgUp, AgInv\n<1>0. AgInv'\n  BY AgInvNext\n<1>1. CASE UNCHANGED vars\n  <2>1. begun' = begun /\\ done' = done /\\ queue' = queue /\\ firstq' = firstq\n    BY <1>1, AgUnchAll\n  <2> QED\n    BY <2>1, <1>0, SMTT(\"r20\")\n<1>2. ASSUME NEW lt \\in Nat, NEW kind \\in BOOLEAN, Send(lt, kind)\n      PROVE  AgAtF(c, k)'\n  <2>1. /\\ firstq' = firstq\n        /\\ begun'[c]\n        /\\ ~done'[c]\n        /\\ queue'[firstq] = queue[firstq]\n    BY <1>2, AgSendKeep\n  <2> QED\n    BY <2>1, <1>0, SMTT(\"r20\")\n<1>3. CASE Recv1\n  <2>1. PICK x \\in Nat :\n          /\\ FirstUndoneFrom(x, begun, done)\n          /\\ queue[x]\n          /\\ done' = [done EXCEPT ![x] = TRUE]\n          /\\ UpdateFirstq(begun, done')\n          /\\ UNCHANGED << begun, queue >>\n    BY <1>3 DEF Recv1\n  <2>2. done'[c] \\/ (begun'[c] /\\ ~done'[c] /\\ firstq + 1 <= firstq')\n    BY <2>1, AgRecvGain\n  <2> QED\n    BY <2>2, <1>0, SMTT(\"r20\")\n<1>4. CASE Recv2\n  <2>1. PICK x \\in Nat :\n          /\\ FirstUndoneFrom(x, begun, done)\n          /\\ ~queue[x]\n          /\\ done' = [done EXCEPT ![x] = TRUE]\n          /\\ UpdateFirstq(begun, done')\n          /\\ UNCHANGED << begun, queue >>\n    BY <1>4 DEF Recv2\n  <2>2. done'[c] \\/ (begun'[c] /\\ ~done'[c] /\\ firstq + 1 <= firstq')\n    BY <2>1, AgRecvGain\n  <2> QED\n    BY <2>2, <1>0, SMTT(\"r20\")\n<1> QED\n  BY <1>1, <1>2, <1>3, <1>4 DEF Next\n\nLEMMA AgFireT ==\n  ASSUME NEW c \\in Nat, NEW k \\in Nat, AgAtT(c, k), Recv1\n  PROVE  done'[c] \\/ AgUp(c, k)'\n<1> USE DEF AgAtT, AgAt, AgUp, AgInv\n<1>0. [Next]_vars\n  BY DEF Next\n<1>1. AgInv'\n  BY <1>0, AgInvNext\n<1>2. PICK x \\in Nat :\n        /\\ FirstUndoneFrom(x, begun, done)\n        /\\ queue[x]\n        /\\ done' = [done EXCEPT ![x] = TRUE]\n        /\\ UpdateFirstq(begun, done')\n        /\\ UNCHANGED << begun, queue >>\n  BY DEF Recv1\n<1>3. done'[c] \\/ (begun'[c] /\\ ~done'[c] /\\ firstq + 1 <= firstq')\n  BY <1>2, AgRecvGain\n<1> QED\n  BY <1>3, <1>1, SMTT(\"r20\")\n\nLEMMA AgFireF ==\n  ASSUME NEW c \\in Nat, NEW k \\in Nat, AgAtF(c, k), Recv2\n  PROVE  done'[c] \\/ AgUp(c, k)'\n<1> USE DEF AgAtF, AgAt, AgUp, AgInv\n<1>0. [Next]_vars\n  BY DEF Next\n<1>1. AgInv'\n  BY <1>0, AgInvNext\n<1>2. PICK x \\in Nat :\n        /\\ FirstUndoneFrom(x, begun, done)\n        /\\ ~queue[x]\n        /\\ done' = [done EXCEPT ![x] = TRUE]\n        /\\ UpdateFirstq(begun, done')\n        /\\ UNCHANGED << begun, queue >>\n  BY DEF Recv2\n<1>3. done'[c] \\/ (begun'[c] /\\ ~done'[c] /\\ firstq + 1 <= firstq')\n  BY <1>2, AgRecvGain\n<1> QED\n  BY <1>3, <1>1, SMTT(\"r20\")\n\nLEMMA AgEnabT ==\n  ASSUME NEW c \\in Nat, NEW k \\in Nat, AgAtT(c, k)\n  PROVE  ENABLED <<Recv1>>_vars\n<1>0. /\\ done \\in [Nat -> BOOLEAN]\n      /\\ firstq \\in Nat\n      /\\ queue[firstq]\n  BY DEF AgAtT, AgAt, AgInv\n<1>1. FirstUndoneFrom(firstq, begun, done)\n  BY AgFirstLe DEF AgAtT, AgAt\n<1>2. PICK f2 :\n        IF HasUndoneFrom(begun, [done EXCEPT ![firstq] = TRUE])\n          THEN FirstUndoneFrom(f2, begun, [done EXCEPT ![firstq] = TRUE])\n          ELSE f2 = firstq\n  <2>1. CASE HasUndoneFrom(begun, [done EXCEPT ![firstq] = TRUE])\n    <3>1. \\E z \\in Nat : FirstUndoneFrom(z, begun, [done EXCEPT ![firstq] = TRUE])\n      BY <2>1, AgExists\n    <3> QED\n      BY <2>1, <3>1\n  <2>2. CASE ~HasUndoneFrom(begun, [done EXCEPT ![firstq] = TRUE])\n    BY <2>2\n  <2> QED\n    BY <2>1, <2>2\n<1>3. \\E fpp, bpp, qpp, dpp :\n        /\\ (\\E z \\in Nat :\n              /\\ FirstUndoneFrom(z, begun, done)\n              /\\ queue[z]\n              /\\ dpp = [done EXCEPT ![z] = TRUE]\n              /\\ (IF HasUndoneFrom(begun, dpp)\n                    THEN FirstUndoneFrom(fpp, begun, dpp)\n                    ELSE fpp = firstq)\n              /\\ bpp = begun\n              /\\ qpp = queue)\n        /\\ ~(bpp = begun /\\ dpp = done /\\ qpp = queue /\\ fpp = firstq)\n  <2>1. [done EXCEPT ![firstq] = TRUE] # done\n    BY <1>0, <1>1, SMTT(\"r20\") DEF FirstUndoneFrom\n  <2> QED\n    BY <1>0, <1>1, <1>2, <2>1\n<1> QED\n  BY <1>3, ExpandENABLED, Zenon\n     DEF Recv1, vars, UpdateFirstq, FirstUndoneFrom, HasUndoneFrom\n\nLEMMA AgEnabF ==\n  ASSUME NEW c \\in Nat, NEW k \\in Nat, AgAtF(c, k)\n  PROVE  ENABLED <<Recv2>>_vars\n<1>0. /\\ done \\in [Nat -> BOOLEAN]\n      /\\ firstq \\in Nat\n      /\\ ~queue[firstq]\n  BY DEF AgAtF, AgAt, AgInv\n<1>1. FirstUndoneFrom(firstq, begun, done)\n  BY AgFirstLe DEF AgAtF, AgAt\n<1>2. PICK f2 :\n        IF HasUndoneFrom(begun, [done EXCEPT ![firstq] = TRUE])\n          THEN FirstUndoneFrom(f2, begun, [done EXCEPT ![firstq] = TRUE])\n          ELSE f2 = firstq\n  <2>1. CASE HasUndoneFrom(begun, [done EXCEPT ![firstq] = TRUE])\n    <3>1. \\E z \\in Nat : FirstUndoneFrom(z, begun, [done EXCEPT ![firstq] = TRUE])\n      BY <2>1, AgExists\n    <3> QED\n      BY <2>1, <3>1\n  <2>2. CASE ~HasUndoneFrom(begun, [done EXCEPT ![firstq] = TRUE])\n    BY <2>2\n  <2> QED\n    BY <2>1, <2>2\n<1>3. \\E fpp, bpp, qpp, dpp :\n        /\\ (\\E z \\in Nat :\n              /\\ FirstUndoneFrom(z, begun, done)\n              /\\ ~queue[z]\n              /\\ dpp = [done EXCEPT ![z] = TRUE]\n              /\\ (IF HasUndoneFrom(begun, dpp)\n                    THEN FirstUndoneFrom(fpp, begun, dpp)\n                    ELSE fpp = firstq)\n              /\\ bpp = begun\n              /\\ qpp = queue)\n        /\\ ~(bpp = begun /\\ dpp = done /\\ qpp = queue /\\ fpp = firstq)\n  <2>1. [done EXCEPT ![firstq] = TRUE] # done\n    BY <1>0, <1>1, SMTT(\"r20\") DEF FirstUndoneFrom\n  <2> QED\n    BY <1>0, <1>1, <1>2, <2>1\n<1> QED\n  BY <1>3, ExpandENABLED, Zenon\n     DEF Recv2, vars, UpdateFirstq, FirstUndoneFrom, HasUndoneFrom\n\\* END AGENT HELPERS\n\nTHEOREM Liveness == Spec => WorkCompletion\n\\* BEGIN AGENT PROOF ivy_examples_split_queue_2_new/ivy_examples_split_queue_2_new_Liveness.tla\n<1>1. \\A x \\in Nat : AgWC(x)\n  <2> SUFFICES ASSUME NEW c \\in Nat\n               PROVE  AgWC(c)\n    OBVIOUS\n  <2> USE DEF AgWC\n  <2>0. Spec => []AgInv\n    <3>1. Init => AgInv\n      BY AgInvInit\n    <3>2. AgInv /\\ [Next]_vars => AgInv'\n      BY AgInvNext\n    <3> QED\n      BY <3>1, <3>2, PTL DEF Spec, SafetySpec\n  <2> DEFINE Op(j) == Spec => (AgAt(c, j) ~> done[c])\n  <2>1. Op(c)\n    <3> USE DEF Op\n    <3>1. AgAtT(c, c) /\\ [Next]_vars\n            => (AgAtT(c, c)' \\/ (done[c] \\/ AgUp(c, c))')\n      BY AgStepT\n    <3>2. AgAtT(c, c) /\\ <<Next /\\ Recv1>>_vars => (done[c] \\/ AgUp(c, c))'\n      BY AgFireT\n    <3>3. AgAtT(c, c) => ENABLED <<Recv1>>_vars\n      BY AgEnabT\n    <3>4. AgAtF(c, c) /\\ [Next]_vars\n            => (AgAtF(c, c)' \\/ (done[c] \\/ AgUp(c, c))')\n      BY AgStepF\n    <3>5. AgAtF(c, c) /\\ <<Next /\\ Recv2>>_vars => (done[c] \\/ AgUp(c, c))'\n      BY AgFireF\n    <3>6. AgAtF(c, c) => ENABLED <<Recv2>>_vars\n      BY AgEnabF\n    <3>7. AgAt(c, c) => (AgAtT(c, c) \\/ AgAtF(c, c))\n      BY AgSplit\n    <3>8. AgUp(c, c) => done[c]\n      BY AgUpFalse\n    <3>9. Spec => (AgAtT(c, c) ~> (done[c] \\/ AgUp(c, c)))\n      BY <3>1, <3>2, <3>3, PTL DEF Spec, SafetySpec\n    <3>10. Spec => (AgAtF(c, c) ~> (done[c] \\/ AgUp(c, c)))\n      BY <3>4, <3>5, <3>6, PTL DEF Spec, SafetySpec\n    <3> QED\n      BY <3>7, <3>8, <3>9, <3>10, PTL\n  <2>2. \\A j \\in 1 .. c : Op(j) => Op(j-1)\n    <3> SUFFICES ASSUME NEW j \\in 1 .. c\n                 PROVE  Op(j) => Op(j-1)\n      OBVIOUS\n    <3> USE DEF Op\n    <3>0. j - 1 \\in Nat\n      BY SMTT(\"r10\")\n    <3>1. AgAtT(c, j-1) /\\ [Next]_vars\n            => (AgAtT(c, j-1)' \\/ (done[c] \\/ AgUp(c, j-1))')\n      BY <3>0, AgStepT\n    <3>2. AgAtT(c, j-1) /\\ <<Next /\\ Recv1>>_vars\n            => (done[c] \\/ AgUp(c, j-1))'\n      BY <3>0, AgFireT\n    <3>3. AgAtT(c, j-1) => ENABLED <<Recv1>>_vars\n      BY <3>0, AgEnabT\n    <3>4. AgAtF(c, j-1) /\\ [Next]_vars\n            => (AgAtF(c, j-1)' \\/ (done[c] \\/ AgUp(c, j-1))')\n      BY <3>0, AgStepF\n    <3>5. AgAtF(c, j-1) /\\ <<Next /\\ Recv2>>_vars\n            => (done[c] \\/ AgUp(c, j-1))'\n      BY <3>0, AgFireF\n    <3>6. AgAtF(c, j-1) => ENABLED <<Recv2>>_vars\n      BY <3>0, AgEnabF\n    <3>7. AgAt(c, j-1) => (AgAtT(c, j-1) \\/ AgAtF(c, j-1))\n      BY <3>0, AgSplit\n    <3>8. AgUp(c, j-1) => AgAt(c, j)\n      BY AgUpNext\n    <3>9. Spec => (AgAtT(c, j-1) ~> (done[c] \\/ AgUp(c, j-1)))\n      BY <3>1, <3>2, <3>3, PTL DEF Spec, SafetySpec\n    <3>10. Spec => (AgAtF(c, j-1) ~> (done[c] \\/ AgUp(c, j-1)))\n      BY <3>4, <3>5, <3>6, PTL DEF Spec, SafetySpec\n    <3> QED\n      BY <3>7, <3>8, <3>9, <3>10, PTL\n  <2>3. Op(0)\n    <3> HIDE DEF Op\n    <3> QED\n      BY <2>1, <2>2, AgNatLib!DownwardNatInduction\n  <2>4. AgInv /\\ begun[c] => (done[c] \\/ AgAt(c, 0))\n    BY AgStart\n  <2> QED\n    BY <2>0, <2>3, <2>4, PTL DEF Op\n<1> QED\n  BY <1>1 DEF AgWC, WorkCompletion\n\\* END AGENT PROOF ivy_examples_split_queue_2_new/ivy_examples_split_queue_2_new_Liveness.tla\n====\n",
+  "units": {
+    "ivy_examples_split_queue_2_new/ivy_examples_split_queue_2_new_Liveness.tla": {
+      "id": "ivy_examples_split_queue_2_new/ivy_examples_split_queue_2_new_Liveness.tla",
+      "name": "Liveness",
+      "kind": "target",
+      "lineStart": 401,
+      "lineEnd": 484,
+      "proofLines": [
+        403,
+        404,
+        405,
+        406,
+        407,
+        408,
+        409,
+        410,
+        411,
+        412,
+        413,
+        414,
+        415,
+        416,
+        417,
+        418,
+        419,
+        420,
+        421,
+        422,
+        423,
+        424,
+        425,
+        426,
+        427,
+        428,
+        429,
+        430,
+        431,
+        432,
+        433,
+        434,
+        435,
+        436,
+        437,
+        438,
+        439,
+        440,
+        441,
+        442,
+        443,
+        444,
+        445,
+        446,
+        447,
+        448,
+        449,
+        450,
+        451,
+        452,
+        453,
+        454,
+        455,
+        456,
+        457,
+        458,
+        459,
+        460,
+        461,
+        462,
+        463,
+        464,
+        465,
+        466,
+        467,
+        468,
+        469,
+        470,
+        471,
+        472,
+        473,
+        474,
+        475,
+        476,
+        477,
+        478,
+        479,
+        480,
+        481,
+        482,
+        483,
+        484
+      ],
+      "proofRange": [
+        403,
+        484
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgEnabF",
+        "helper:AgEnabT",
+        "helper:AgFireF",
+        "helper:AgFireT",
+        "helper:AgInvInit",
+        "helper:AgInvNext",
+        "helper:AgSplit",
+        "helper:AgStart",
+        "helper:AgStepF",
+        "helper:AgStepT",
+        "helper:AgUpFalse",
+        "helper:AgUpNext"
+      ]
+    },
+    "helper:AgUniq": {
+      "id": "helper:AgUniq",
+      "name": "AgUniq",
+      "kind": "helper",
+      "lineStart": 21,
+      "lineEnd": 25,
+      "proofLines": [
+        25
+      ],
+      "proofRange": [
+        25,
+        25
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgExists": {
+      "id": "helper:AgExists",
+      "name": "AgExists",
+      "kind": "helper",
+      "lineStart": 27,
+      "lineEnd": 44,
+      "proofLines": [
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44
+      ],
+      "proofRange": [
+        30,
+        44
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgUnchAll": {
+      "id": "helper:AgUnchAll",
+      "name": "AgUnchAll",
+      "kind": "helper",
+      "lineStart": 46,
+      "lineEnd": 49,
+      "proofLines": [
+        49
+      ],
+      "proofRange": [
+        49,
+        49
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgUnchBQ": {
+      "id": "helper:AgUnchBQ",
+      "name": "AgUnchBQ",
+      "kind": "helper",
+      "lineStart": 51,
+      "lineEnd": 54,
+      "proofLines": [
+        54
+      ],
+      "proofRange": [
+        54,
+        54
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgInvInit": {
+      "id": "helper:AgInvInit",
+      "name": "AgInvInit",
+      "kind": "helper",
+      "lineStart": 56,
+      "lineEnd": 59,
+      "proofLines": [
+        59
+      ],
+      "proofRange": [
+        59,
+        59
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgInvNext": {
+      "id": "helper:AgInvNext",
+      "name": "AgInvNext",
+      "kind": "helper",
+      "lineStart": 61,
+      "lineEnd": 100,
+      "proofLines": [
+        64,
+        65,
+        66,
+        67,
+        68,
+        69,
+        70,
+        71,
+        72,
+        73,
+        74,
+        75,
+        76,
+        77,
+        78,
+        79,
+        80,
+        81,
+        82,
+        83,
+        84,
+        85,
+        86,
+        87,
+        88,
+        89,
+        90,
+        91,
+        92,
+        93,
+        94,
+        95,
+        96,
+        97,
+        98,
+        99,
+        100
+      ],
+      "proofRange": [
+        64,
+        100
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgUnchAll",
+        "helper:AgUnchBQ"
+      ]
+    },
+    "helper:AgFirstLe": {
+      "id": "helper:AgFirstLe",
+      "name": "AgFirstLe",
+      "kind": "helper",
+      "lineStart": 102,
+      "lineEnd": 105,
+      "proofLines": [
+        105
+      ],
+      "proofRange": [
+        105,
+        105
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgSendKeep": {
+      "id": "helper:AgSendKeep",
+      "name": "AgSendKeep",
+      "kind": "helper",
+      "lineStart": 107,
+      "lineEnd": 129,
+      "proofLines": [
+        114,
+        115,
+        116,
+        117,
+        118,
+        119,
+        120,
+        121,
+        122,
+        123,
+        124,
+        125,
+        126,
+        127,
+        128,
+        129
+      ],
+      "proofRange": [
+        114,
+        129
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgFirstLe",
+        "helper:AgUniq"
+      ]
+    },
+    "helper:AgRecvGain": {
+      "id": "helper:AgRecvGain",
+      "name": "AgRecvGain",
+      "kind": "helper",
+      "lineStart": 131,
+      "lineEnd": 159,
+      "proofLines": [
+        139,
+        140,
+        141,
+        142,
+        143,
+        144,
+        145,
+        146,
+        147,
+        148,
+        149,
+        150,
+        151,
+        152,
+        153,
+        154,
+        155,
+        156,
+        157,
+        158,
+        159
+      ],
+      "proofRange": [
+        139,
+        159
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgFirstLe",
+        "helper:AgUnchBQ",
+        "helper:AgUniq"
+      ]
+    },
+    "helper:AgSplit": {
+      "id": "helper:AgSplit",
+      "name": "AgSplit",
+      "kind": "helper",
+      "lineStart": 161,
+      "lineEnd": 164,
+      "proofLines": [
+        164
+      ],
+      "proofRange": [
+        164,
+        164
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgStart": {
+      "id": "helper:AgStart",
+      "name": "AgStart",
+      "kind": "helper",
+      "lineStart": 166,
+      "lineEnd": 169,
+      "proofLines": [
+        169
+      ],
+      "proofRange": [
+        169,
+        169
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgUpFalse": {
+      "id": "helper:AgUpFalse",
+      "name": "AgUpFalse",
+      "kind": "helper",
+      "lineStart": 171,
+      "lineEnd": 177,
+      "proofLines": [
+        174,
+        175,
+        176,
+        177
+      ],
+      "proofRange": [
+        174,
+        177
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgFirstLe"
+      ]
+    },
+    "helper:AgUpNext": {
+      "id": "helper:AgUpNext",
+      "name": "AgUpNext",
+      "kind": "helper",
+      "lineStart": 179,
+      "lineEnd": 182,
+      "proofLines": [
+        182
+      ],
+      "proofRange": [
+        182,
+        182
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgStepT": {
+      "id": "helper:AgStepT",
+      "name": "AgStepT",
+      "kind": "helper",
+      "lineStart": 184,
+      "lineEnd": 229,
+      "proofLines": [
+        187,
+        188,
+        189,
+        190,
+        191,
+        192,
+        193,
+        194,
+        195,
+        196,
+        197,
+        198,
+        199,
+        200,
+        201,
+        202,
+        203,
+        204,
+        205,
+        206,
+        207,
+        208,
+        209,
+        210,
+        211,
+        212,
+        213,
+        214,
+        215,
+        216,
+        217,
+        218,
+        219,
+        220,
+        221,
+        222,
+        223,
+        224,
+        225,
+        226,
+        227,
+        228,
+        229
+      ],
+      "proofRange": [
+        187,
+        229
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgInvNext",
+        "helper:AgRecvGain",
+        "helper:AgSendKeep",
+        "helper:AgUnchAll"
+      ]
+    },
+    "helper:AgStepF": {
+      "id": "helper:AgStepF",
+      "name": "AgStepF",
+      "kind": "helper",
+      "lineStart": 231,
+      "lineEnd": 276,
+      "proofLines": [
+        234,
+        235,
+        236,
+        237,
+        238,
+        239,
+        240,
+        241,
+        242,
+        243,
+        244,
+        245,
+        246,
+        247,
+        248,
+        249,
+        250,
+        251,
+        252,
+        253,
+        254,
+        255,
+        256,
+        257,
+        258,
+        259,
+        260,
+        261,
+        262,
+        263,
+        264,
+        265,
+        266,
+        267,
+        268,
+        269,
+        270,
+        271,
+        272,
+        273,
+        274,
+        275,
+        276
+      ],
+      "proofRange": [
+        234,
+        276
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgInvNext",
+        "helper:AgRecvGain",
+        "helper:AgSendKeep",
+        "helper:AgUnchAll"
+      ]
+    },
+    "helper:AgFireT": {
+      "id": "helper:AgFireT",
+      "name": "AgFireT",
+      "kind": "helper",
+      "lineStart": 278,
+      "lineEnd": 296,
+      "proofLines": [
+        281,
+        282,
+        283,
+        284,
+        285,
+        286,
+        287,
+        288,
+        289,
+        290,
+        291,
+        292,
+        293,
+        294,
+        295,
+        296
+      ],
+      "proofRange": [
+        281,
+        296
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgInvNext",
+        "helper:AgRecvGain"
+      ]
+    },
+    "helper:AgFireF": {
+      "id": "helper:AgFireF",
+      "name": "AgFireF",
+      "kind": "helper",
+      "lineStart": 298,
+      "lineEnd": 316,
+      "proofLines": [
+        301,
+        302,
+        303,
+        304,
+        305,
+        306,
+        307,
+        308,
+        309,
+        310,
+        311,
+        312,
+        313,
+        314,
+        315,
+        316
+      ],
+      "proofRange": [
+        301,
+        316
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgInvNext",
+        "helper:AgRecvGain"
+      ]
+    },
+    "helper:AgEnabT": {
+      "id": "helper:AgEnabT",
+      "name": "AgEnabT",
+      "kind": "helper",
+      "lineStart": 318,
+      "lineEnd": 357,
+      "proofLines": [
+        321,
+        322,
+        323,
+        324,
+        325,
+        326,
+        327,
+        328,
+        329,
+        330,
+        331,
+        332,
+        333,
+        334,
+        335,
+        336,
+        337,
+        338,
+        339,
+        340,
+        341,
+        342,
+        343,
+        344,
+        345,
+        346,
+        347,
+        348,
+        349,
+        350,
+        351,
+        352,
+        353,
+        354,
+        355,
+        356,
+        357
+      ],
+      "proofRange": [
+        321,
+        357
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgExists",
+        "helper:AgFirstLe"
+      ]
+    },
+    "helper:AgEnabF": {
+      "id": "helper:AgEnabF",
+      "name": "AgEnabF",
+      "kind": "helper",
+      "lineStart": 359,
+      "lineEnd": 398,
+      "proofLines": [
+        362,
+        363,
+        364,
+        365,
+        366,
+        367,
+        368,
+        369,
+        370,
+        371,
+        372,
+        373,
+        374,
+        375,
+        376,
+        377,
+        378,
+        379,
+        380,
+        381,
+        382,
+        383,
+        384,
+        385,
+        386,
+        387,
+        388,
+        389,
+        390,
+        391,
+        392,
+        393,
+        394,
+        395,
+        396,
+        397,
+        398
+      ],
+      "proofRange": [
+        362,
+        398
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgExists",
+        "helper:AgFirstLe"
+      ]
+    }
+  }
+}

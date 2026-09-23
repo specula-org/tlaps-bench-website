@@ -1,0 +1,572 @@
+{
+  "schemaVersion": 1,
+  "specId": "ivy_examples_ticket/ivy_examples_ticket.tla",
+  "sourceName": "ivy_examples_ticket.tla",
+  "sourceSha256": "7dd818c21d42fc1b3868718f3d70900e7ad77cdbcb420f80d3436447a7bb63e0",
+  "resultSha256": "93c03e58e8ad6ae36f6a69c5907e4bd282eb782f43d133dbc49cb13c186d9634",
+  "source": "---- MODULE ivy_examples_ticket ----\nEXTENDS ivy_examples_ticketDefs\n\n\\* BEGIN AGENT HELPERS\nLOCAL TkNI == INSTANCE NaturalsInduction\n\nTkTypeOK ==\n  /\\ pc \\in [Thread -> {\"Idle\", \"Waiting\", \"Critical\"}]\n  /\\ service \\in Nat\n  /\\ next_ticket \\in Nat\n  /\\ m \\in [Thread -> Nat]\n\nTkInv ==\n  /\\ TkTypeOK\n  /\\ service <= next_ticket\n  /\\ \\A u \\in Thread : pc[u] # \"Idle\" => (service <= m[u] /\\ m[u] < next_ticket)\n  /\\ \\A u1, u2 \\in Thread :\n        (pc[u1] # \"Idle\" /\\ pc[u2] # \"Idle\" /\\ m[u1] = m[u2]) => u1 = u2\n  /\\ \\A u \\in Thread : pc[u] = \"Critical\" => m[u] = service\n  /\\ \\A j \\in Nat : (service <= j /\\ j < next_ticket)\n                       => (\\E u \\in Thread : pc[u] # \"Idle\" /\\ m[u] = j)\n\nTkStp(u) ==\n  \\/ TakeTicket(u)\n  \\/ \\E k \\in Nat : EnterCritical(u, k)\n  \\/ LeaveCritical(u)\n\nTkWt(u, k) == pc[u] = \"Waiting\" /\\ m[u] = k /\\ service = k\nTkCr(u, k) == pc[u] = \"Critical\" /\\ m[u] = k /\\ service = k\nTkWq(u, c) == pc[u] = \"Waiting\" /\\ m[u] = c\nTkAt(u, j, n) == pc[u] = \"Waiting\" /\\ service = j /\\ m[u] = j + n\n\nTkHyp(u) == []TkInv /\\ [][Next]_vars /\\ WF_vars(Step(u))\nTkLive == []TkInv /\\ [][Next]_vars /\\ (\\A u \\in Thread : WF_vars(Step(u)))\n\nTkFW2C(u, k) == TkWt(u, k) ~> TkCr(u, k)\nTkFC2S(u, k) == TkCr(u, k) ~> (service = k + 1)\nTkFHold(u, k) == (pc[u] # \"Idle\" /\\ m[u] = k /\\ service = k) ~> (service = k + 1)\nTkFAdv(k) == (service = k /\\ k < next_ticket) ~> (service = k + 1)\nTkEvS(k) == <>(service = k + 1)\nTkFEv(t, j, n) == TkAt(t, j, n) ~> (pc[t] = \"Critical\")\nTkFGoal(t) == (pc[t] = \"Waiting\") ~> (pc[t] = \"Critical\")\nTkKey(t) == TkLive /\\ pc[t] = \"Waiting\" => <>(pc[t] = \"Critical\")\nTkReachP(t, n) == TkLive => (\\A j \\in Nat : TkFEv(t, j, n))\n\n(***************************************************************************)\n(* The inductive invariant.                                                *)\n(***************************************************************************)\nLEMMA TkInitInv == Init => TkInv\n  BY SMTT(\"r10\") DEF Init, TkInv, TkTypeOK\n\nLEMMA TkNextInv == TkInv /\\ [Next]_vars => TkInv'\n  BY SMTT(\"r30\")\n     DEF TkInv, TkTypeOK, Next, Step, TakeTicket, EnterCritical, LeaveCritical, vars\n\nLEMMA TkInvMutex == TkInv => MutualExclusion\n  BY SMTT(\"r10\") DEF TkInv, TkTypeOK, MutualExclusion\n\nLEMMA TkSafeBox == SafetySpec => []TkInv\n  BY TkInitInv, TkNextInv, PTL DEF SafetySpec\n\n(***************************************************************************)\n(* Enabledness of Step(u).                                                 *)\n(***************************************************************************)\nLEMMA TkEnStepC ==\n  ASSUME NEW u \\in Thread, TkTypeOK, pc[u] = \"Critical\"\n  PROVE  ENABLED <<Step(u)>>_vars\n  <1>1. ENABLED <<LeaveCritical(u)>>_vars\n    BY ExpandENABLED, SMTT(\"r10\") DEF LeaveCritical, vars, TkTypeOK\n  <1>2. ENABLED <<TkStp(u)>>_vars\n    BY <1>1, ExpandENABLED, SMTT(\"r10\")\n       DEF TkStp, TakeTicket, EnterCritical, LeaveCritical, vars\n  <1>3. QED BY <1>2, Zenon DEF TkStp, Step\n\nLEMMA TkEnStepW ==\n  ASSUME NEW u \\in Thread, TkTypeOK, pc[u] = \"Waiting\", m[u] <= service\n  PROVE  ENABLED <<Step(u)>>_vars\n  <1>1. ENABLED <<EnterCritical(u, m[u])>>_vars\n    BY ExpandENABLED, SMTT(\"r10\") DEF EnterCritical, vars, TkTypeOK\n  <1>2. ENABLED <<TkStp(u)>>_vars\n    BY <1>1, ExpandENABLED, SMTT(\"r10\")\n       DEF TkStp, TakeTicket, EnterCritical, LeaveCritical, vars\n  <1>3. QED BY <1>2, Zenon DEF TkStp, Step\n\n(***************************************************************************)\n(* State-level and action-level facts.                                     *)\n(***************************************************************************)\nLEMMA TkClass ==\n  ASSUME NEW u \\in Thread, NEW k \\in Nat,\n         TkInv, pc[u] # \"Idle\", m[u] = k, service = k\n  PROVE  TkWt(u, k) \\/ TkCr(u, k)\n  BY SMTT(\"r10\") DEF TkInv, TkTypeOK, TkWt, TkCr\n\nLEMMA TkHolder ==\n  ASSUME NEW k \\in Nat, TkInv, service = k, k < next_ticket\n  PROVE  \\E u \\in Thread : pc[u] # \"Idle\" /\\ m[u] = k\n  BY SMTT(\"r10\") DEF TkInv, TkTypeOK\n\nLEMMA TkSplit ==\n  ASSUME NEW t \\in Thread, TkInv, pc[t] = \"Waiting\"\n  PROVE  \\E j \\in Nat, n \\in Nat : TkAt(t, j, n)\n  <1>1. service \\in Nat /\\ m[t] \\in Nat /\\ service <= m[t]\n    BY SMTT(\"r10\") DEF TkInv, TkTypeOK\n  <1>2. (m[t] - service) \\in Nat /\\ m[t] = service + (m[t] - service)\n    BY <1>1, SMTT(\"r10\")\n  <1>3. TkAt(t, service, m[t] - service)\n    BY <1>2, Zenon DEF TkAt\n  <1>4. QED BY <1>1, <1>2, <1>3, Zenon\n\nLEMMA TkWqStb ==\n  ASSUME NEW t \\in Thread, NEW c, TkInv\n  PROVE  TkWq(t, c) /\\ [Next]_vars => (TkWq(t, c)' \\/ (pc[t] = \"Critical\")')\n  BY SMTT(\"r30\")\n     DEF TkInv, TkTypeOK, TkWq, Next, Step,\n         TakeTicket, EnterCritical, LeaveCritical, vars\n\n(***************************************************************************)\n(* The two WF1 steps: a waiting thread whose ticket is being served enters *)\n(* the critical section, and a critical thread leaves it, bumping service. *)\n(***************************************************************************)\nLEMMA TkW2C ==\n  ASSUME NEW u \\in Thread, NEW k \\in Nat\n  PROVE  TkHyp(u) => TkFW2C(u, k)\n  <1>1. TkInv /\\ TkWt(u, k) /\\ [Next]_vars => (TkWt(u, k)' \\/ TkCr(u, k)')\n    BY SMTT(\"r30\")\n       DEF TkInv, TkTypeOK, TkWt, TkCr, Next, Step,\n           TakeTicket, EnterCritical, LeaveCritical, vars\n  <1>2. TkInv /\\ TkWt(u, k) /\\ <<Step(u)>>_vars => TkCr(u, k)'\n    BY SMTT(\"r30\")\n       DEF TkInv, TkTypeOK, TkWt, TkCr, Step,\n           TakeTicket, EnterCritical, LeaveCritical, vars\n  <1>3. TkInv /\\ TkWt(u, k) => ENABLED <<Step(u)>>_vars\n    BY TkEnStepW, SMTT(\"r10\") DEF TkInv, TkTypeOK, TkWt\n  <1>4. QED BY <1>1, <1>2, <1>3, PTL DEF TkHyp, TkFW2C\n\nLEMMA TkC2S ==\n  ASSUME NEW u \\in Thread, NEW k \\in Nat\n  PROVE  TkHyp(u) => TkFC2S(u, k)\n  <1>1. TkInv /\\ TkCr(u, k) /\\ [Next]_vars => (TkCr(u, k)' \\/ (service = k + 1)')\n    BY SMTT(\"r30\")\n       DEF TkInv, TkTypeOK, TkCr, Next, Step,\n           TakeTicket, EnterCritical, LeaveCritical, vars\n  <1>2. TkInv /\\ TkCr(u, k) /\\ <<Step(u)>>_vars => (service = k + 1)'\n    BY SMTT(\"r30\")\n       DEF TkInv, TkTypeOK, TkCr, Step,\n           TakeTicket, EnterCritical, LeaveCritical, vars\n  <1>3. TkInv /\\ TkCr(u, k) => ENABLED <<Step(u)>>_vars\n    BY TkEnStepC, SMTT(\"r10\") DEF TkInv, TkTypeOK, TkCr\n  <1>4. QED BY <1>1, <1>2, <1>3, PTL DEF TkHyp, TkFC2S\n\nLEMMA TkHold ==\n  ASSUME NEW u \\in Thread, NEW k \\in Nat\n  PROVE  TkHyp(u) => TkFHold(u, k)\n  <1>1. TkInv /\\ pc[u] # \"Idle\" /\\ m[u] = k /\\ service = k\n          => (TkWt(u, k) \\/ TkCr(u, k))\n    BY TkClass, SMTT(\"r10\")\n  <1>2. TkHyp(u) => TkFW2C(u, k)\n    BY TkW2C, SMTT(\"r10\")\n  <1>3. TkHyp(u) => TkFC2S(u, k)\n    BY TkC2S, SMTT(\"r10\")\n  <1>4. QED BY <1>1, <1>2, <1>3, PTL DEF TkHyp, TkFW2C, TkFC2S, TkFHold\n\n(***************************************************************************)\n(* The liveness hypotheses are stable.                                     *)\n(***************************************************************************)\nLEMMA TkFairBox ==\n  (\\A u \\in Thread : WF_vars(Step(u))) => [](\\A u \\in Thread : WF_vars(Step(u)))\n  <1> SUFFICES ASSUME \\A u \\in Thread : WF_vars(Step(u))\n               PROVE  [](\\A u \\in Thread : WF_vars(Step(u)))\n    BY Isa\n  <1>1. \\A u \\in Thread : []WF_vars(Step(u))\n    <2> SUFFICES ASSUME NEW u \\in Thread PROVE []WF_vars(Step(u))\n      BY Zenon\n    <2>1. WF_vars(Step(u))\n      BY Isa\n    <2>2. QED BY <2>1, PTL\n  <1>2. QED BY <1>1, Zenon\n\nLEMMA TkLiveStable == TkLive => []TkLive\n  BY TkFairBox, PTL DEF TkLive\n\nLEMMA TkLiveHyp ==\n  ASSUME NEW u \\in Thread\n  PROVE  TkLive => TkHyp(u)\n  BY Isa DEF TkLive, TkHyp\n\n(***************************************************************************)\n(* service keeps advancing as long as some ticket is outstanding.          *)\n(***************************************************************************)\nLEMMA TkAdv ==\n  ASSUME NEW k \\in Nat\n  PROVE  TkLive /\\ service = k /\\ k < next_ticket => TkEvS(k)\n  <1> SUFFICES ASSUME TkLive, service = k, k < next_ticket\n               PROVE  TkEvS(k)\n    BY Isa DEF TkEvS\n  <1>1. TkInv\n    BY PTL DEF TkLive\n  <1>2. PICK u \\in Thread : pc[u] # \"Idle\" /\\ m[u] = k\n    BY <1>1, TkHolder, Isa\n  <1>3. TkHyp(u)\n    BY <1>2, TkLiveHyp, Isa\n  <1>4. TkFHold(u, k)\n    BY <1>2, <1>3, TkHold, Isa\n  <1>5. QED BY <1>2, <1>4, PTL DEF TkFHold, TkEvS\n\nLEMMA TkAdvLT ==\n  ASSUME NEW k \\in Nat\n  PROVE  TkLive => TkFAdv(k)\n  <1>1. TkLive /\\ service = k /\\ k < next_ticket => TkEvS(k)\n    BY TkAdv, SMTT(\"r10\")\n  <1>2. TkLive => []TkLive\n    BY TkLiveStable, SMTT(\"r10\")\n  <1>3. QED BY <1>1, <1>2, PTL DEF TkFAdv, TkEvS\n\n(***************************************************************************)\n(* By induction on the distance between the thread's ticket and service,   *)\n(* a waiting thread eventually reaches the critical section.               *)\n(***************************************************************************)\nLEMMA TkReachLem ==\n  ASSUME NEW t \\in Thread, NEW n \\in Nat\n  PROVE  TkReachP(t, n)\n  <1> DEFINE Prop(i) == TkReachP(t, i)\n  <1>1. Prop(0)\n    <2> SUFFICES ASSUME NEW j \\in Nat\n                 PROVE  TkLive => TkFEv(t, j, 0)\n      BY Isa DEF Prop, TkReachP\n    <2>1. TkLive => TkHyp(t)\n      BY TkLiveHyp, SMTT(\"r10\")\n    <2>2. TkHyp(t) => TkFW2C(t, j)\n      BY TkW2C, SMTT(\"r10\")\n    <2>3. TkAt(t, j, 0) => TkWt(t, j)\n      BY SMTT(\"r10\") DEF TkAt, TkWt\n    <2>4. TkCr(t, j) => (pc[t] = \"Critical\")\n      BY SMTT(\"r10\") DEF TkCr\n    <2>5. QED BY <2>1, <2>2, <2>3, <2>4, PTL DEF TkFW2C, TkFEv\n  <1>2. \\A i \\in Nat : Prop(i) => Prop(i + 1)\n    <2> SUFFICES ASSUME NEW i \\in Nat, NEW j \\in Nat\n                 PROVE  Prop(i) /\\ TkLive => TkFEv(t, j, i + 1)\n      BY Isa DEF Prop, TkReachP\n    <2>0. j + 1 \\in Nat\n      BY SMTT(\"r10\")\n    <2>1. Prop(i) /\\ TkLive => TkFEv(t, j + 1, i)\n      BY <2>0, Isa DEF Prop, TkReachP\n    <2>2. TkLive => TkFAdv(j)\n      BY TkAdvLT, SMTT(\"r10\")\n    <2>3. TkInv /\\ TkWq(t, j + i + 1) /\\ [Next]_vars\n            => (TkWq(t, j + i + 1)' \\/ (pc[t] = \"Critical\")')\n      BY TkWqStb, SMTT(\"r10\")\n    <2>4. TkInv /\\ TkAt(t, j, i + 1) => j < next_ticket\n      BY SMTT(\"r10\") DEF TkInv, TkTypeOK, TkAt\n    <2>5. TkAt(t, j, i + 1) => (TkWq(t, j + i + 1) /\\ service = j)\n      BY SMTT(\"r10\") DEF TkAt, TkWq\n    <2>6. TkWq(t, j + i + 1) /\\ service = j + 1 => TkAt(t, j + 1, i)\n      BY SMTT(\"r10\") DEF TkAt, TkWq\n    <2>7. TkLive => ([]TkInv /\\ [][Next]_vars)\n      BY Isa DEF TkLive\n    <2>8. QED BY <2>1, <2>2, <2>3, <2>4, <2>5, <2>6, <2>7, PTL\n             DEF TkFEv, TkFAdv\n  <1>3. \\A i \\in Nat : Prop(i)\n    BY <1>1, <1>2, TkNI!NatInduction\n  <1>4. QED BY <1>3, SMTT(\"r10\")\n\nLEMMA TkKeyInit ==\n  ASSUME NEW t \\in Thread\n  PROVE  TkKey(t)\n  <1> SUFFICES ASSUME TkLive, pc[t] = \"Waiting\"\n               PROVE  <>(pc[t] = \"Critical\")\n    BY Isa DEF TkKey\n  <1>1. TkInv\n    BY PTL DEF TkLive\n  <1>2. PICK j \\in Nat, n \\in Nat : TkAt(t, j, n)\n    BY <1>1, TkSplit, Isa\n  <1>3. TkLive => TkFEv(t, j, n)\n    BY TkReachLem, Isa DEF TkReachP\n  <1>4. QED BY <1>2, <1>3, PTL DEF TkFEv\n\nLEMMA TkGoalLem ==\n  ASSUME NEW t \\in Thread\n  PROVE  TkLive => TkFGoal(t)\n  <1>1. TkKey(t)\n    BY TkKeyInit, SMTT(\"r10\")\n  <1>2. TkLive => []TkLive\n    BY TkLiveStable, SMTT(\"r10\")\n  <1>3. QED BY <1>1, <1>2, PTL DEF TkKey, TkFGoal\n\nLEMMA TkSpecLive == Spec => TkLive\n  <1>1. Spec => SafetySpec\n    BY Isa DEF Spec\n  <1>2. SafetySpec => []TkInv\n    BY TkSafeBox, SMTT(\"r10\")\n  <1>3. Spec => [][Next]_vars\n    BY Isa DEF Spec, SafetySpec\n  <1>4. Spec => (\\A u \\in Thread : WF_vars(Step(u)))\n    BY Isa DEF Spec\n  <1>5. QED BY <1>1, <1>2, <1>3, <1>4, Isa DEF TkLive\n\\* END AGENT HELPERS\n\nTHEOREM Safety == SafetySpec => []MutualExclusion\n\\* BEGIN AGENT PROOF ivy_examples_ticket/ivy_examples_ticket_Safety.tla\nPROOF\nBY TkSafeBox, TkInvMutex, PTL\n\\* END AGENT PROOF ivy_examples_ticket/ivy_examples_ticket_Safety.tla\n\nTHEOREM Liveness == Spec => NonStarvation\n\\* BEGIN AGENT PROOF ivy_examples_ticket/ivy_examples_ticket_Liveness.tla\nPROOF\n<1>1. ASSUME NEW t \\in Thread\n      PROVE  Spec => TkFGoal(t)\n  <2>1. Spec => TkLive\n    BY TkSpecLive, SMTT(\"r10\")\n  <2>2. TkLive => TkFGoal(t)\n    BY TkGoalLem, SMTT(\"r10\")\n  <2>3. QED BY <2>1, <2>2, Isa\n<1>2. QED BY <1>1, Isa DEF NonStarvation, TkFGoal\n\\* END AGENT PROOF ivy_examples_ticket/ivy_examples_ticket_Liveness.tla\n====\n",
+  "units": {
+    "ivy_examples_ticket/ivy_examples_ticket_Safety.tla": {
+      "id": "ivy_examples_ticket/ivy_examples_ticket_Safety.tla",
+      "name": "Safety",
+      "kind": "target",
+      "lineStart": 298,
+      "lineEnd": 301,
+      "proofLines": [
+        300,
+        301
+      ],
+      "proofRange": [
+        300,
+        301
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:TkInvMutex",
+        "helper:TkSafeBox"
+      ]
+    },
+    "ivy_examples_ticket/ivy_examples_ticket_Liveness.tla": {
+      "id": "ivy_examples_ticket/ivy_examples_ticket_Liveness.tla",
+      "name": "Liveness",
+      "kind": "target",
+      "lineStart": 304,
+      "lineEnd": 314,
+      "proofLines": [
+        306,
+        307,
+        308,
+        309,
+        310,
+        311,
+        312,
+        313,
+        314
+      ],
+      "proofRange": [
+        306,
+        314
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:TkGoalLem",
+        "helper:TkSpecLive"
+      ]
+    },
+    "helper:TkInitInv": {
+      "id": "helper:TkInitInv",
+      "name": "TkInitInv",
+      "kind": "helper",
+      "lineStart": 49,
+      "lineEnd": 50,
+      "proofLines": [
+        50
+      ],
+      "proofRange": [
+        50,
+        50
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:TkNextInv": {
+      "id": "helper:TkNextInv",
+      "name": "TkNextInv",
+      "kind": "helper",
+      "lineStart": 52,
+      "lineEnd": 54,
+      "proofLines": [
+        53,
+        54
+      ],
+      "proofRange": [
+        53,
+        54
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:TkInvMutex": {
+      "id": "helper:TkInvMutex",
+      "name": "TkInvMutex",
+      "kind": "helper",
+      "lineStart": 56,
+      "lineEnd": 57,
+      "proofLines": [
+        57
+      ],
+      "proofRange": [
+        57,
+        57
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:TkSafeBox": {
+      "id": "helper:TkSafeBox",
+      "name": "TkSafeBox",
+      "kind": "helper",
+      "lineStart": 59,
+      "lineEnd": 60,
+      "proofLines": [
+        60
+      ],
+      "proofRange": [
+        60,
+        60
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:TkInitInv",
+        "helper:TkNextInv"
+      ]
+    },
+    "helper:TkEnStepC": {
+      "id": "helper:TkEnStepC",
+      "name": "TkEnStepC",
+      "kind": "helper",
+      "lineStart": 65,
+      "lineEnd": 73,
+      "proofLines": [
+        68,
+        69,
+        70,
+        71,
+        72,
+        73
+      ],
+      "proofRange": [
+        68,
+        73
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:TkEnStepW": {
+      "id": "helper:TkEnStepW",
+      "name": "TkEnStepW",
+      "kind": "helper",
+      "lineStart": 75,
+      "lineEnd": 83,
+      "proofLines": [
+        78,
+        79,
+        80,
+        81,
+        82,
+        83
+      ],
+      "proofRange": [
+        78,
+        83
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:TkClass": {
+      "id": "helper:TkClass",
+      "name": "TkClass",
+      "kind": "helper",
+      "lineStart": 88,
+      "lineEnd": 92,
+      "proofLines": [
+        92
+      ],
+      "proofRange": [
+        92,
+        92
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:TkHolder": {
+      "id": "helper:TkHolder",
+      "name": "TkHolder",
+      "kind": "helper",
+      "lineStart": 94,
+      "lineEnd": 97,
+      "proofLines": [
+        97
+      ],
+      "proofRange": [
+        97,
+        97
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:TkSplit": {
+      "id": "helper:TkSplit",
+      "name": "TkSplit",
+      "kind": "helper",
+      "lineStart": 99,
+      "lineEnd": 108,
+      "proofLines": [
+        102,
+        103,
+        104,
+        105,
+        106,
+        107,
+        108
+      ],
+      "proofRange": [
+        102,
+        108
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:TkWqStb": {
+      "id": "helper:TkWqStb",
+      "name": "TkWqStb",
+      "kind": "helper",
+      "lineStart": 110,
+      "lineEnd": 115,
+      "proofLines": [
+        113,
+        114,
+        115
+      ],
+      "proofRange": [
+        113,
+        115
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:TkW2C": {
+      "id": "helper:TkW2C",
+      "name": "TkW2C",
+      "kind": "helper",
+      "lineStart": 121,
+      "lineEnd": 134,
+      "proofLines": [
+        124,
+        125,
+        126,
+        127,
+        128,
+        129,
+        130,
+        131,
+        132,
+        133,
+        134
+      ],
+      "proofRange": [
+        124,
+        134
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:TkEnStepW"
+      ]
+    },
+    "helper:TkC2S": {
+      "id": "helper:TkC2S",
+      "name": "TkC2S",
+      "kind": "helper",
+      "lineStart": 136,
+      "lineEnd": 149,
+      "proofLines": [
+        139,
+        140,
+        141,
+        142,
+        143,
+        144,
+        145,
+        146,
+        147,
+        148,
+        149
+      ],
+      "proofRange": [
+        139,
+        149
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:TkEnStepC"
+      ]
+    },
+    "helper:TkHold": {
+      "id": "helper:TkHold",
+      "name": "TkHold",
+      "kind": "helper",
+      "lineStart": 151,
+      "lineEnd": 161,
+      "proofLines": [
+        154,
+        155,
+        156,
+        157,
+        158,
+        159,
+        160,
+        161
+      ],
+      "proofRange": [
+        154,
+        161
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:TkC2S",
+        "helper:TkClass",
+        "helper:TkW2C"
+      ]
+    },
+    "helper:TkFairBox": {
+      "id": "helper:TkFairBox",
+      "name": "TkFairBox",
+      "kind": "helper",
+      "lineStart": 166,
+      "lineEnd": 177,
+      "proofLines": [
+        168,
+        169,
+        170,
+        171,
+        172,
+        173,
+        174,
+        175,
+        176,
+        177
+      ],
+      "proofRange": [
+        168,
+        177
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:TkLiveStable": {
+      "id": "helper:TkLiveStable",
+      "name": "TkLiveStable",
+      "kind": "helper",
+      "lineStart": 179,
+      "lineEnd": 180,
+      "proofLines": [
+        180
+      ],
+      "proofRange": [
+        180,
+        180
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:TkFairBox"
+      ]
+    },
+    "helper:TkLiveHyp": {
+      "id": "helper:TkLiveHyp",
+      "name": "TkLiveHyp",
+      "kind": "helper",
+      "lineStart": 182,
+      "lineEnd": 185,
+      "proofLines": [
+        185
+      ],
+      "proofRange": [
+        185,
+        185
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:TkAdv": {
+      "id": "helper:TkAdv",
+      "name": "TkAdv",
+      "kind": "helper",
+      "lineStart": 190,
+      "lineEnd": 204,
+      "proofLines": [
+        193,
+        194,
+        195,
+        196,
+        197,
+        198,
+        199,
+        200,
+        201,
+        202,
+        203,
+        204
+      ],
+      "proofRange": [
+        193,
+        204
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:TkHold",
+        "helper:TkHolder",
+        "helper:TkLiveHyp"
+      ]
+    },
+    "helper:TkAdvLT": {
+      "id": "helper:TkAdvLT",
+      "name": "TkAdvLT",
+      "kind": "helper",
+      "lineStart": 206,
+      "lineEnd": 213,
+      "proofLines": [
+        209,
+        210,
+        211,
+        212,
+        213
+      ],
+      "proofRange": [
+        209,
+        213
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:TkAdv",
+        "helper:TkLiveStable"
+      ]
+    },
+    "helper:TkReachLem": {
+      "id": "helper:TkReachLem",
+      "name": "TkReachLem",
+      "kind": "helper",
+      "lineStart": 219,
+      "lineEnd": 261,
+      "proofLines": [
+        222,
+        223,
+        224,
+        225,
+        226,
+        227,
+        228,
+        229,
+        230,
+        231,
+        232,
+        233,
+        234,
+        235,
+        236,
+        237,
+        238,
+        239,
+        240,
+        241,
+        242,
+        243,
+        244,
+        245,
+        246,
+        247,
+        248,
+        249,
+        250,
+        251,
+        252,
+        253,
+        254,
+        255,
+        256,
+        257,
+        258,
+        259,
+        260,
+        261
+      ],
+      "proofRange": [
+        222,
+        261
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:TkAdvLT",
+        "helper:TkLiveHyp",
+        "helper:TkW2C",
+        "helper:TkWqStb"
+      ]
+    },
+    "helper:TkKeyInit": {
+      "id": "helper:TkKeyInit",
+      "name": "TkKeyInit",
+      "kind": "helper",
+      "lineStart": 263,
+      "lineEnd": 275,
+      "proofLines": [
+        266,
+        267,
+        268,
+        269,
+        270,
+        271,
+        272,
+        273,
+        274,
+        275
+      ],
+      "proofRange": [
+        266,
+        275
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:TkReachLem",
+        "helper:TkSplit"
+      ]
+    },
+    "helper:TkGoalLem": {
+      "id": "helper:TkGoalLem",
+      "name": "TkGoalLem",
+      "kind": "helper",
+      "lineStart": 277,
+      "lineEnd": 284,
+      "proofLines": [
+        280,
+        281,
+        282,
+        283,
+        284
+      ],
+      "proofRange": [
+        280,
+        284
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:TkKeyInit",
+        "helper:TkLiveStable"
+      ]
+    },
+    "helper:TkSpecLive": {
+      "id": "helper:TkSpecLive",
+      "name": "TkSpecLive",
+      "kind": "helper",
+      "lineStart": 286,
+      "lineEnd": 295,
+      "proofLines": [
+        287,
+        288,
+        289,
+        290,
+        291,
+        292,
+        293,
+        294,
+        295
+      ],
+      "proofRange": [
+        287,
+        295
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:TkSafeBox"
+      ]
+    }
+  }
+}

@@ -14,6 +14,15 @@ The metric columns follow the last two Google Doc tables exactly: Level, Specs /
 
 Source: sections 3 (task collection), 5 (Opus 5), and 6 (Muse Spark 1.3) of the [experiment summary](https://docs.google.com/document/d/1TpcKAx2Cm5Ft23n6nTTfskS1mbhPcB8DbcTdPtyZjWM/edit), retrieved 2026-09-23. The input records the source URL, retrieval date, and exported-text SHA-256. Only the current 72-task results are published in `data.js`.
 
+## Invariant details
+
+- **Proof size:** effective source lines in the target proof and its transitive local proof dependencies. Blank lines and TLA+ comments are excluded; shared lines are counted once. SANY proof locations define the counted regions.
+- **Obligations proved / total:** final `proved` or `trivial` statuses for this target's obligations. The overall Result still uses dependency-closed grading. An omitted/unexamined proof has no progress value.
+- **Check time:** approximate wall time for this target's TLAPM invocation, shown with `≈`. It is recovered from the archived second-resolution launch timestamp and the unit receipt's completion timestamp. Older sequential logs use the next invocation timestamp as the boundary. It excludes separate helper checks and model generation. The current snapshot has 125 timings; 19 omitted proofs display `—`. No new verification run is represented by these values.
+- **View proof:** opens the recorded target and its supporting proof units, with a full-module download. The 32 content-addressed bundles preserve the original submitted source; the viewer checks its SHA-256 before display.
+
+Both model and task-family details animate open and closed. Reduced-motion preferences disable these transitions.
+
 ## Build and preview
 
 ```bash
@@ -31,11 +40,14 @@ Open http://localhost:8000. Existing `#/home`, `#/leaderboard`, `#/benchmark`, a
 - `results/proof-from-scratch-summary.json`: task collection and detailed model results.
 - `results/document-metrics.json`: exact metric headings and displayed cells from the final two document tables.
 - `hub/pages.jsx`: concise introduction and leaderboard heading.
-- `hub/leaderboard.jsx`: model, task-family, and invariant tables.
+- `hub/leaderboard.jsx`: model, task-family, and invariant tables, including animated disclosures.
+- `hub/proof-viewer.jsx`: read-only proof viewer.
+- `proofs/*.json`: source modules and local proof-dependency metadata.
+- `scripts/proof-metrics.mjs`: comment-aware proof-line counting and dependency traversal.
 - `hub/leaderboard-utils.js`: formatting and stable sorting reused from the original leaderboard.
 - `hub/hub.css`: responsive light/dark presentation.
 - `hub/app.jsx`: single-page shell and theme handling.
 
-The data builder checks matching task identities, family/spec coverage, task verdicts, pass totals, usage sums, rounded summary values, all source-table cells, and result hashes before writing `data.js`. It does not independently certify the source document's results. Existing proof-completion source archives and maintenance scripts remain in the repository but are not inputs to the current build.
+The data builder checks matching task identities, family/spec coverage, task verdicts, pass totals, usage sums, rounded summary values, all source-table cells, result/source/bundle hashes, proof-line counts, dependency closures, and timing evidence before writing `data.js`. It does not independently certify the source document's results. Existing proof-completion source archives and maintenance scripts remain in the repository but are not inputs to the current build.
 
 After editing, rebuild and bump the relevant `?v=` asset versions in `index.html`.

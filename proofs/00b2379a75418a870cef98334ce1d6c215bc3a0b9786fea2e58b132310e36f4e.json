@@ -1,0 +1,1132 @@
+{
+  "schemaVersion": 1,
+  "specId": "ivy_examples_hybrid_reliable_broadcast_cisa/ivy_examples_hybrid_reliable_broadcast_cisa.tla",
+  "sourceName": "ivy_examples_hybrid_reliable_broadcast_cisa.tla",
+  "sourceSha256": "f9dbc0879c8de125992a7d0f26757bcd82d465b022ee2251c01e1d352884a59f",
+  "resultSha256": "89e898caf1c388bdaec29d0c0f82353581ca3e8ee641f38581af4d7134fa0fa2",
+  "source": "---- MODULE ivy_examples_hybrid_reliable_broadcast_cisa ----\nEXTENDS ivy_examples_hybrid_reliable_broadcast_cisaDefs\n\n\\* BEGIN AGENT HELPERS\nHlpTypeOK == /\\ accept \\in [Node -> BOOLEAN]\n             /\\ sentMsg \\in [Node -> [Node -> BOOLEAN]]\n             /\\ rcvMsg \\in [Node -> [Node -> BOOLEAN]]\nHlpNoObedInit == \\A m \\in Node : Obedient(m) => m \\notin RcvInit\nHlpNoObedSend == \\A nn, dst \\in Node : Obedient(nn) => ~sentMsg[nn][dst]\nHlpNoObedRcv == \\A ss, nn \\in Node : (Obedient(ss) /\\ Obedient(nn)) => ~rcvMsg[ss][nn]\nHlpNoObedAccept == \\A nn \\in Node : Obedient(nn) => ~accept[nn]\nHlpInv == HlpNoObedInit => (HlpNoObedSend /\\ HlpNoObedRcv /\\ HlpNoObedAccept)\nHlpConj == HlpTypeOK /\\ HlpInv\nLEMMA HlpTypeOKInit == Init => HlpTypeOK\nPROOF BY Zenon DEF Init, HlpTypeOK\nLEMMA HlpTypeOK_RI == ASSUME NEW nA1 \\in Node PROVE HlpTypeOK /\\ ReceiveInit(nA1) => HlpTypeOK'\nPROOF BY SMTT(\"r10\") DEF HlpTypeOK, ReceiveInit, SendAllFrom\nLEMMA HlpTypeOK_RM == ASSUME NEW nA2 \\in Node, NEW sA2 \\in Node PROVE HlpTypeOK /\\ ReceiveMsg(nA2, sA2) => HlpTypeOK'\nPROOF BY SMTT(\"r10\") DEF HlpTypeOK, ReceiveMsg, HasAQuorumRcv, HasBQuorumRcv, SendAllFrom\nLEMMA HlpTypeOK_RMC == ASSUME NEW nA3 \\in Node, NEW sA3 \\in Node PROVE HlpTypeOK /\\ ReceiveMsgC(nA3, sA3) => HlpTypeOK'\nPROOF BY SMTT(\"r10\") DEF HlpTypeOK, ReceiveMsgC, HasAQuorumRcv, HasBQuorumRcv, SendAllFrom\nLEMMA HlpTypeOK_RII == ASSUME NEW nA4 \\in Node PROVE HlpTypeOK /\\ ReceiveInitI(nA4) => HlpTypeOK'\nPROOF BY SMTT(\"r10\") DEF HlpTypeOK, ReceiveInitI\nLEMMA HlpTypeOK_RMI == ASSUME NEW nA5 \\in Node, NEW sA5 \\in Node PROVE HlpTypeOK /\\ ReceiveMsgI(nA5, sA5) => HlpTypeOK'\nPROOF BY SMTT(\"r10\") DEF HlpTypeOK, ReceiveMsgI, HasAQuorumRcv, HasBQuorumRcv\nLEMMA HlpTypeOK_FSS == ASSUME NEW nA6 \\in Node PROVE HlpTypeOK /\\ FaultySendS(nA6) => HlpTypeOK'\nPROOF BY SMTT(\"r10\") DEF HlpTypeOK, FaultySendS, SendAllFrom\nLEMMA HlpTypeOK_FSA == ASSUME NEW nA7 \\in Node PROVE HlpTypeOK /\\ FaultyStateSA(nA7) => HlpTypeOK'\nPROOF BY SMTT(\"r10\") DEF HlpTypeOK, FaultyStateSA, SetReceiveColumn\nLEMMA HlpTypeOK_FAA == ASSUME NEW nA8 \\in Node PROVE HlpTypeOK /\\ FaultySendA(nA8) => HlpTypeOK'\nPROOF BY SMTT(\"r10\") DEF HlpTypeOK, FaultySendA\nLEMMA HlpTypeOKStut == HlpTypeOK /\\ UNCHANGED vars => HlpTypeOK'\nPROOF BY Zenon DEF HlpTypeOK, vars\nLEMMA HlpTypeOKPresAux == ASSUME HlpTypeOK, Next PROVE HlpTypeOK'\nPROOF BY Zenon, HlpTypeOK_RI, HlpTypeOK_RM, HlpTypeOK_RMC, HlpTypeOK_RII, HlpTypeOK_RMI, HlpTypeOK_FSS, HlpTypeOK_FSA, HlpTypeOK_FAA DEF Next, ReceiveInit, ReceiveMsg, ReceiveMsgC, ReceiveInitI, ReceiveMsgI, FaultySendS, FaultyStateSA, FaultySendA\nLEMMA HlpInvInit == Init => HlpInv\nPROOF BY Zenon DEF Init, HlpInv, HlpNoObedInit, HlpNoObedSend, HlpNoObedRcv, HlpNoObedAccept\nLEMMA HlpSNonObed == ASSUME NEW sB1 \\in Node, NEW nB1 \\in Node, HlpNoObedSend, sentMsg[sB1][nB1] PROVE ~Obedient(sB1)\nPROOF BY Zenon DEF HlpNoObedSend, Obedient\nLEMMA HlpANew == ASSUME NEW nB2 \\in Node, NEW sB2 \\in Node, Obedient(nB2), ~Obedient(sB2), HlpNoObedRcv, HlpTypeOK PROVE ~HasAQuorumRcv(nB2, [rcvMsg EXCEPT ![sB2][nB2] = TRUE])\nPROOF\n<1>1. ASSUME HasAQuorumRcv(nB2, [rcvMsg EXCEPT ![sB2][nB2] = TRUE]) PROVE FALSE\n  <2>1. PICK aB1 \\in QuorumA : \\A srcB1 \\in Node : InA(srcB1, aB1) => ([rcvMsg EXCEPT ![sB2][nB2] = TRUE])[srcB1][nB2]\n    BY Zenon, <1>1 DEF HasAQuorumRcv\n  <2>2. PICK mB1 \\in Node : InA(mB1, aB1) /\\ Obedient(mB1)\n    BY Zenon, <2>1, QuorumAssumption DEF InA, Obedient, QuorumAssumption\n  <2>3. mB1 # sB2\n    BY Zenon, <2>2 DEF Obedient\n  <2>4. ([rcvMsg EXCEPT ![sB2][nB2] = TRUE])[mB1][nB2] = rcvMsg[mB1][nB2]\n    BY Zenon, <2>3 DEF HlpTypeOK\n  <2>5. ([rcvMsg EXCEPT ![sB2][nB2] = TRUE])[mB1][nB2]\n    BY Zenon, <2>1, <2>2 DEF InA\n  <2>6. ~rcvMsg[mB1][nB2]\n    BY Zenon, <2>2 DEF HlpNoObedRcv, Obedient\n  <2>7. QED BY Zenon, <2>4, <2>5, <2>6\n<1>2. QED BY PTL, <1>1\nLEMMA HlpBNew == ASSUME NEW nB3 \\in Node, NEW sB3 \\in Node, Obedient(nB3), ~Obedient(sB3), HlpNoObedRcv, HlpTypeOK PROVE ~HasBQuorumRcv(nB3, [rcvMsg EXCEPT ![sB3][nB3] = TRUE])\nPROOF\n<1>1. ASSUME HasBQuorumRcv(nB3, [rcvMsg EXCEPT ![sB3][nB3] = TRUE]) PROVE FALSE\n  <2>1. PICK bB1 \\in QuorumB : \\A srcB2 \\in Node : InB(srcB2, bB1) => ([rcvMsg EXCEPT ![sB3][nB3] = TRUE])[srcB2][nB3]\n    BY Zenon, <1>1 DEF HasBQuorumRcv\n  <2>2. PICK aB2 \\in QuorumA : \\A nnB1 \\in Node : InA(nnB1, aB2) => InB(nnB1, bB1) /\\ Symmetric(nnB1)\n    BY Zenon, <2>1, QuorumAssumption DEF QuorumAssumption, InA, InB, Symmetric\n  <2>3. PICK mB2 \\in Node : InA(mB2, aB2) /\\ Obedient(mB2)\n    BY Zenon, <2>2, QuorumAssumption DEF QuorumAssumption, InA, Obedient\n  <2>4. InB(mB2, bB1)\n    BY Zenon, <2>2, <2>3 DEF InA, InB\n  <2>5. ([rcvMsg EXCEPT ![sB3][nB3] = TRUE])[mB2][nB3]\n    BY Zenon, <2>1, <2>4 DEF InB\n  <2>6. mB2 # sB3\n    BY Zenon, <2>3 DEF Obedient\n  <2>7. ([rcvMsg EXCEPT ![sB3][nB3] = TRUE])[mB2][nB3] = rcvMsg[mB2][nB3]\n    BY Zenon, <2>6 DEF HlpTypeOK\n  <2>8. ~rcvMsg[mB2][nB3]\n    BY Zenon, <2>3 DEF HlpNoObedRcv, Obedient\n  <2>9. QED BY Zenon, <2>5, <2>7, <2>8\n<1>2. QED BY PTL, <1>1\nLEMMA HlpSendRMNNe == ASSUME NEW nC1 \\in Node, NEW sC1 \\in Node, NEW nnC1 \\in Node, NEW dstC1 \\in Node, HlpTypeOK, HlpNoObedSend, ReceiveMsg(nC1, sC1), nnC1 # nC1, Obedient(nnC1) PROVE ~sentMsg'[nnC1][dstC1]\nPROOF BY SMTT(\"r10\") DEF ReceiveMsg, SendAllFrom, HlpNoObedSend, HlpTypeOK\nLEMMA HlpSendRMEqA == ASSUME NEW nC2 \\in Node, NEW sC2 \\in Node, NEW dstC2 \\in Node, HlpTypeOK, HlpNoObedSend, ReceiveMsg(nC2, sC2), Obedient(nC2), ~HasAQuorumRcv(nC2, [rcvMsg EXCEPT ![sC2][nC2] = TRUE]) PROVE ~sentMsg'[nC2][dstC2]\nPROOF BY SMTT(\"r10\") DEF ReceiveMsg, SendAllFrom, HlpNoObedSend, HlpTypeOK\nLEMMA HlpSendRM == ASSUME NEW nC3 \\in Node, NEW sC3 \\in Node, HlpTypeOK, HlpNoObedSend, HlpNoObedRcv, ReceiveMsg(nC3, sC3) PROVE HlpNoObedSend'\nPROOF BY Zenon, HlpSendRMNNe, HlpSendRMEqA, HlpSNonObed, HlpANew DEF HlpNoObedSend, ReceiveMsg\nLEMMA HlpRcvRMMin == ASSUME NEW nC4 \\in Node, NEW sC4 \\in Node, NEW ssC4 \\in Node, NEW nnC4 \\in Node, HlpTypeOK, HlpNoObedRcv, ReceiveMsg(nC4, sC4), Obedient(ssC4), Obedient(nnC4), ssC4 # sC4 PROVE ~rcvMsg'[ssC4][nnC4]\nPROOF BY SMTT(\"r10\") DEF ReceiveMsg, HlpNoObedRcv, HlpTypeOK\nLEMMA HlpRcvRM == ASSUME NEW nC5 \\in Node, NEW sC5 \\in Node, HlpTypeOK, HlpNoObedSend, HlpNoObedRcv, ReceiveMsg(nC5, sC5) PROVE HlpNoObedRcv'\nPROOF BY Zenon, HlpRcvRMMin, HlpSNonObed DEF HlpNoObedRcv, ReceiveMsg, Obedient\nLEMMA HlpAcceptRMNNe == ASSUME NEW nC6 \\in Node, NEW sC6 \\in Node, NEW nnC6 \\in Node, HlpTypeOK, HlpNoObedAccept, ReceiveMsg(nC6, sC6), nnC6 # nC6, Obedient(nnC6) PROVE ~accept'[nnC6]\nPROOF BY SMTT(\"r10\") DEF ReceiveMsg, HlpNoObedAccept, HlpTypeOK, HasBQuorumRcv\nLEMMA HlpAcceptRMEqA == ASSUME NEW nC7 \\in Node, NEW sC7 \\in Node, HlpTypeOK, HlpNoObedAccept, ReceiveMsg(nC7, sC7), Obedient(nC7), ~HasBQuorumRcv(nC7, [rcvMsg EXCEPT ![sC7][nC7] = TRUE]) PROVE ~accept'[nC7]\nPROOF BY SMTT(\"r10\") DEF ReceiveMsg, HlpNoObedAccept, HlpTypeOK\nLEMMA HlpAcceptRM == ASSUME NEW nC8 \\in Node, NEW sC8 \\in Node, HlpTypeOK, HlpNoObedSend, HlpNoObedRcv, HlpNoObedAccept, ReceiveMsg(nC8, sC8) PROVE HlpNoObedAccept'\nPROOF BY Zenon, HlpAcceptRMNNe, HlpAcceptRMEqA, HlpSNonObed, HlpBNew DEF HlpNoObedAccept, ReceiveMsg, Obedient\nLEMMA HlpInvRM == ASSUME NEW nC9 \\in Node, NEW sC9 \\in Node PROVE HlpTypeOK /\\ HlpInv /\\ ReceiveMsg(nC9, sC9) => HlpInv'\nPROOF BY Zenon, HlpSendRM, HlpRcvRM, HlpAcceptRM DEF HlpInv, HlpNoObedInit, HlpNoObedSend, HlpNoObedRcv, HlpNoObedAccept\nLEMMA HlpSendRMCNNe == ASSUME NEW nD1 \\in Node, NEW sD1 \\in Node, NEW nnD1 \\in Node, NEW dstD1 \\in Node, HlpTypeOK, HlpNoObedSend, ReceiveMsgC(nD1, sD1), nnD1 # nD1, Obedient(nnD1) PROVE ~sentMsg'[nnD1][dstD1]\nPROOF BY SMTT(\"r10\") DEF ReceiveMsgC, SendAllFrom, HlpNoObedSend, HlpTypeOK\nLEMMA HlpSendRMCEqA == ASSUME NEW nD2 \\in Node, NEW sD2 \\in Node, NEW dstD2 \\in Node, HlpTypeOK, HlpNoObedSend, ReceiveMsgC(nD2, sD2), Obedient(nD2), ~HasAQuorumRcv(nD2, [rcvMsg EXCEPT ![sD2][nD2] = TRUE]) PROVE ~sentMsg'[nD2][dstD2]\nPROOF BY SMTT(\"r10\") DEF ReceiveMsgC, SendAllFrom, HlpNoObedSend, HlpTypeOK\nLEMMA HlpSendRMC == ASSUME NEW nD3 \\in Node, NEW sD3 \\in Node, HlpTypeOK, HlpNoObedSend, HlpNoObedRcv, ReceiveMsgC(nD3, sD3) PROVE HlpNoObedSend'\nPROOF BY Zenon, HlpSendRMCNNe, HlpSendRMCEqA, HlpSNonObed, HlpANew DEF HlpNoObedSend, ReceiveMsgC\nLEMMA HlpRcvRMCMin == ASSUME NEW nD4 \\in Node, NEW sD4 \\in Node, NEW ssD4 \\in Node, NEW nnD4 \\in Node, HlpTypeOK, HlpNoObedRcv, ReceiveMsgC(nD4, sD4), Obedient(ssD4), Obedient(nnD4), ssD4 # sD4 PROVE ~rcvMsg'[ssD4][nnD4]\nPROOF BY SMTT(\"r10\") DEF ReceiveMsgC, HlpNoObedRcv, HlpTypeOK\nLEMMA HlpRcvRMC == ASSUME NEW nD5 \\in Node, NEW sD5 \\in Node, HlpTypeOK, HlpNoObedSend, HlpNoObedRcv, ReceiveMsgC(nD5, sD5) PROVE HlpNoObedRcv'\nPROOF BY Zenon, HlpRcvRMCMin, HlpSNonObed DEF HlpNoObedRcv, ReceiveMsgC, Obedient\nLEMMA HlpAcceptRMCNNe == ASSUME NEW nD6 \\in Node, NEW sD6 \\in Node, NEW nnD6 \\in Node, HlpTypeOK, HlpNoObedAccept, ReceiveMsgC(nD6, sD6), nnD6 # nD6, Obedient(nnD6) PROVE ~accept'[nnD6]\nPROOF BY SMTT(\"r10\") DEF ReceiveMsgC, HlpNoObedAccept, HlpTypeOK, HasBQuorumRcv\nLEMMA HlpAcceptRMCEqA == ASSUME NEW nD7 \\in Node, NEW sD7 \\in Node, HlpTypeOK, HlpNoObedAccept, ReceiveMsgC(nD7, sD7), Obedient(nD7), ~HasBQuorumRcv(nD7, [rcvMsg EXCEPT ![sD7][nD7] = TRUE]) PROVE ~accept'[nD7]\nPROOF BY SMTT(\"r10\") DEF ReceiveMsgC, HlpNoObedAccept, HlpTypeOK\nLEMMA HlpAcceptRMC == ASSUME NEW nD8 \\in Node, NEW sD8 \\in Node, HlpTypeOK, HlpNoObedSend, HlpNoObedRcv, HlpNoObedAccept, ReceiveMsgC(nD8, sD8) PROVE HlpNoObedAccept'\nPROOF BY Zenon, HlpAcceptRMCNNe, HlpAcceptRMCEqA, HlpSNonObed, HlpBNew DEF HlpNoObedAccept, ReceiveMsgC, Obedient\nLEMMA HlpInvRMC == ASSUME NEW nD9 \\in Node, NEW sD9 \\in Node PROVE HlpTypeOK /\\ HlpInv /\\ ReceiveMsgC(nD9, sD9) => HlpInv'\nPROOF BY Zenon, HlpSendRMC, HlpRcvRMC, HlpAcceptRMC DEF HlpInv, HlpNoObedInit, HlpNoObedSend, HlpNoObedRcv, HlpNoObedAccept\nLEMMA HlpSendRMINNe == ASSUME NEW nE1 \\in Node, NEW sE1 \\in Node, NEW nnE1 \\in Node, NEW dstE1 \\in Node, HlpTypeOK, HlpNoObedSend, ReceiveMsgI(nE1, sE1), nnE1 # nE1, Obedient(nnE1) PROVE ~sentMsg'[nnE1][dstE1]\nPROOF BY SMTT(\"r10\") DEF ReceiveMsgI, HlpNoObedSend, HlpTypeOK\nLEMMA HlpSendRMIEqA == ASSUME NEW nE2 \\in Node, NEW sE2 \\in Node, NEW dstE2 \\in Node, HlpTypeOK, HlpNoObedSend, ReceiveMsgI(nE2, sE2), Obedient(nE2), ~HasAQuorumRcv(nE2, [rcvMsg EXCEPT ![sE2][nE2] = TRUE]) PROVE ~sentMsg'[nE2][dstE2]\nPROOF BY SMTT(\"r10\") DEF ReceiveMsgI, HlpNoObedSend, HlpTypeOK\nLEMMA HlpSendRMI == ASSUME NEW nE3 \\in Node, NEW sE3 \\in Node, HlpTypeOK, HlpNoObedSend, HlpNoObedRcv, ReceiveMsgI(nE3, sE3) PROVE HlpNoObedSend'\nPROOF BY Zenon, HlpSendRMINNe, HlpSendRMIEqA, HlpSNonObed, HlpANew DEF HlpNoObedSend, ReceiveMsgI\nLEMMA HlpRcvRMIMin == ASSUME NEW nE4 \\in Node, NEW sE4 \\in Node, NEW ssE4 \\in Node, NEW nnE4 \\in Node, HlpTypeOK, HlpNoObedRcv, ReceiveMsgI(nE4, sE4), Obedient(ssE4), Obedient(nnE4), ssE4 # sE4 PROVE ~rcvMsg'[ssE4][nnE4]\nPROOF BY SMTT(\"r10\") DEF ReceiveMsgI, HlpNoObedRcv, HlpTypeOK\nLEMMA HlpRcvRMI == ASSUME NEW nE5 \\in Node, NEW sE5 \\in Node, HlpTypeOK, HlpNoObedSend, HlpNoObedRcv, ReceiveMsgI(nE5, sE5) PROVE HlpNoObedRcv'\nPROOF BY Zenon, HlpRcvRMIMin, HlpSNonObed DEF HlpNoObedRcv, ReceiveMsgI, Obedient\nLEMMA HlpAcceptRMINNe == ASSUME NEW nE6 \\in Node, NEW sE6 \\in Node, NEW nnE6 \\in Node, HlpTypeOK, HlpNoObedAccept, ReceiveMsgI(nE6, sE6), nnE6 # nE6, Obedient(nnE6) PROVE ~accept'[nnE6]\nPROOF BY SMTT(\"r10\") DEF ReceiveMsgI, HlpNoObedAccept, HlpTypeOK, HasBQuorumRcv\nLEMMA HlpAcceptRMIEqA == ASSUME NEW nE7 \\in Node, NEW sE7 \\in Node, HlpTypeOK, HlpNoObedAccept, ReceiveMsgI(nE7, sE7), Obedient(nE7), ~HasBQuorumRcv(nE7, [rcvMsg EXCEPT ![sE7][nE7] = TRUE]) PROVE ~accept'[nE7]\nPROOF BY SMTT(\"r10\") DEF ReceiveMsgI, HlpNoObedAccept, HlpTypeOK\nLEMMA HlpAcceptRMI == ASSUME NEW nE8 \\in Node, NEW sE8 \\in Node, HlpTypeOK, HlpNoObedSend, HlpNoObedRcv, HlpNoObedAccept, ReceiveMsgI(nE8, sE8) PROVE HlpNoObedAccept'\nPROOF BY Zenon, HlpAcceptRMINNe, HlpAcceptRMIEqA, HlpSNonObed, HlpBNew DEF HlpNoObedAccept, ReceiveMsgI, Obedient\nLEMMA HlpInvRMI == ASSUME NEW nE9 \\in Node, NEW sE9 \\in Node PROVE HlpTypeOK /\\ HlpInv /\\ ReceiveMsgI(nE9, sE9) => HlpInv'\nPROOF BY Zenon, HlpSendRMI, HlpRcvRMI, HlpAcceptRMI DEF HlpInv, HlpNoObedInit, HlpNoObedSend, HlpNoObedRcv, HlpNoObedAccept\nLEMMA HlpInvRI == ASSUME NEW nF1 \\in Node PROVE HlpTypeOK /\\ HlpInv /\\ ReceiveInit(nF1) => HlpInv'\nPROOF BY SMTT(\"r10\") DEF HlpTypeOK, HlpInv, HlpNoObedInit, HlpNoObedSend, HlpNoObedRcv, HlpNoObedAccept, ReceiveInit, SendAllFrom, Obedient\nLEMMA HlpInvRII == ASSUME NEW nF2 \\in Node PROVE HlpTypeOK /\\ HlpInv /\\ ReceiveInitI(nF2) => HlpInv'\nPROOF BY SMTT(\"r10\") DEF HlpTypeOK, HlpInv, HlpNoObedInit, HlpNoObedSend, HlpNoObedRcv, HlpNoObedAccept, ReceiveInitI, Obedient\nLEMMA HlpInvFSS == ASSUME NEW nF3 \\in Node PROVE HlpTypeOK /\\ HlpInv /\\ FaultySendS(nF3) => HlpInv'\nPROOF BY SMTT(\"r10\") DEF HlpTypeOK, HlpInv, HlpNoObedInit, HlpNoObedSend, HlpNoObedRcv, HlpNoObedAccept, FaultySendS, SendAllFrom, Obedient\nLEMMA HlpInvFSA == ASSUME NEW nF4 \\in Node PROVE HlpTypeOK /\\ HlpInv /\\ FaultyStateSA(nF4) => HlpInv'\nPROOF BY SMTT(\"r10\") DEF HlpTypeOK, HlpInv, HlpNoObedInit, HlpNoObedSend, HlpNoObedRcv, HlpNoObedAccept, FaultyStateSA, SetReceiveColumn, Obedient\nLEMMA HlpInvFAA == ASSUME NEW nF5 \\in Node PROVE HlpTypeOK /\\ HlpInv /\\ FaultySendA(nF5) => HlpInv'\nPROOF BY SMTT(\"r10\") DEF HlpTypeOK, HlpInv, HlpNoObedInit, HlpNoObedSend, HlpNoObedRcv, HlpNoObedAccept, FaultySendA, Obedient\nLEMMA HlpInvPresAux == ASSUME HlpTypeOK, HlpInv, Next PROVE HlpInv'\nPROOF BY Zenon, HlpInvRI, HlpInvRM, HlpInvRMC, HlpInvRMI, HlpInvRII, HlpInvFSS, HlpInvFSA, HlpInvFAA DEF Next, ReceiveInit, ReceiveMsg, ReceiveMsgC, ReceiveInitI, ReceiveMsgI, FaultySendS, FaultyStateSA, FaultySendA\nLEMMA HlpInvStut == HlpInv /\\ UNCHANGED vars => HlpInv'\nPROOF BY Zenon DEF HlpInv, HlpNoObedInit, HlpNoObedSend, HlpNoObedRcv, HlpNoObedAccept, vars\nLEMMA HlpConjInit == Init => HlpConj\nPROOF BY Zenon, HlpTypeOKInit, HlpInvInit DEF HlpConj\nLEMMA HlpConjPresAux == ASSUME HlpConj, Next PROVE HlpConj'\nPROOF BY Zenon, HlpTypeOKPresAux, HlpInvPresAux DEF HlpConj\nLEMMA HlpConjStut == HlpConj /\\ UNCHANGED vars => HlpConj'\nPROOF BY Zenon, HlpTypeOKStut, HlpInvStut DEF HlpConj, vars\nLEMMA HlpConjPres == HlpConj /\\ [Next]_vars => HlpConj'\nPROOF BY Zenon, HlpConjPresAux, HlpConjStut\nLEMMA HlpConjBox == SafetySpec => []HlpConj\nPROOF\n<1>1. Init => HlpConj\n  BY Zenon, HlpConjInit DEF Init\n<1>2. HlpConj /\\ [Next]_vars => HlpConj'\n  BY Zenon, HlpConjPres DEF HlpConj\n<1>3. QED\n  BY <1>1, <1>2, PTL DEF SafetySpec, HlpConj\nLEMMA HlpConjImpliesInv == HlpConj => HlpInv\nPROOF BY Zenon DEF HlpConj, HlpInv\nLEMMA HlpBoxConjImp == [](HlpConj => HlpInv)\nPROOF BY HlpConjImpliesInv, PTL DEF HlpConj, HlpInv\nLEMMA HlpBoxInv == SafetySpec => []HlpInv\nPROOF BY HlpConjBox, HlpBoxConjImp, PTL DEF SafetySpec, HlpConj, HlpInv\nLEMMA HlpInvImpliesUnforge == HlpInv => Unforgeability\nPROOF BY Zenon DEF HlpInv, Unforgeability, HlpNoObedInit, HlpNoObedSend, HlpNoObedRcv, HlpNoObedAccept, Obedient\nLEMMA HlpBoxImp == [](HlpInv => Unforgeability)\nPROOF BY HlpInvImpliesUnforge, PTL DEF HlpInv, Unforgeability\n\\* END AGENT HELPERS\n\nTHEOREM Safety == SafetySpec => []Unforgeability\n\\* BEGIN AGENT PROOF ivy_examples_hybrid_reliable_broadcast_cisa/ivy_examples_hybrid_reliable_broadcast_cisa_Safety.tla\nPROOF BY HlpBoxInv, HlpBoxImp, PTL DEF SafetySpec, HlpInv, Unforgeability\n\\* END AGENT PROOF ivy_examples_hybrid_reliable_broadcast_cisa/ivy_examples_hybrid_reliable_broadcast_cisa_Safety.tla\n\nTHEOREM CorrectnessLiveness == Spec => Correctness\n\\* BEGIN AGENT PROOF ivy_examples_hybrid_reliable_broadcast_cisa/ivy_examples_hybrid_reliable_broadcast_cisa_CorrectnessLiveness.tla\nPROOF OMITTED\n\\* END AGENT PROOF ivy_examples_hybrid_reliable_broadcast_cisa/ivy_examples_hybrid_reliable_broadcast_cisa_CorrectnessLiveness.tla\n\nTHEOREM RelayLiveness == Spec => Relay\n\\* BEGIN AGENT PROOF ivy_examples_hybrid_reliable_broadcast_cisa/ivy_examples_hybrid_reliable_broadcast_cisa_RelayLiveness.tla\nPROOF OMITTED\n\\* END AGENT PROOF ivy_examples_hybrid_reliable_broadcast_cisa/ivy_examples_hybrid_reliable_broadcast_cisa_RelayLiveness.tla\n====\n",
+  "units": {
+    "ivy_examples_hybrid_reliable_broadcast_cisa/ivy_examples_hybrid_reliable_broadcast_cisa_Safety.tla": {
+      "id": "ivy_examples_hybrid_reliable_broadcast_cisa/ivy_examples_hybrid_reliable_broadcast_cisa_Safety.tla",
+      "name": "Safety",
+      "kind": "target",
+      "lineStart": 174,
+      "lineEnd": 176,
+      "proofLines": [
+        176
+      ],
+      "proofRange": [
+        176,
+        176
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:HlpBoxImp",
+        "helper:HlpBoxInv"
+      ]
+    },
+    "ivy_examples_hybrid_reliable_broadcast_cisa/ivy_examples_hybrid_reliable_broadcast_cisa_CorrectnessLiveness.tla": {
+      "id": "ivy_examples_hybrid_reliable_broadcast_cisa/ivy_examples_hybrid_reliable_broadcast_cisa_CorrectnessLiveness.tla",
+      "name": "CorrectnessLiveness",
+      "kind": "target",
+      "lineStart": 179,
+      "lineEnd": 181,
+      "proofLines": [],
+      "proofRange": [
+        181,
+        181
+      ],
+      "proofOmitted": true,
+      "dependencies": []
+    },
+    "ivy_examples_hybrid_reliable_broadcast_cisa/ivy_examples_hybrid_reliable_broadcast_cisa_RelayLiveness.tla": {
+      "id": "ivy_examples_hybrid_reliable_broadcast_cisa/ivy_examples_hybrid_reliable_broadcast_cisa_RelayLiveness.tla",
+      "name": "RelayLiveness",
+      "kind": "target",
+      "lineStart": 184,
+      "lineEnd": 186,
+      "proofLines": [],
+      "proofRange": [
+        186,
+        186
+      ],
+      "proofOmitted": true,
+      "dependencies": []
+    },
+    "helper:HlpTypeOKInit": {
+      "id": "helper:HlpTypeOKInit",
+      "name": "HlpTypeOKInit",
+      "kind": "helper",
+      "lineStart": 14,
+      "lineEnd": 15,
+      "proofLines": [
+        15
+      ],
+      "proofRange": [
+        15,
+        15
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HlpTypeOK_RI": {
+      "id": "helper:HlpTypeOK_RI",
+      "name": "HlpTypeOK_RI",
+      "kind": "helper",
+      "lineStart": 16,
+      "lineEnd": 17,
+      "proofLines": [
+        17
+      ],
+      "proofRange": [
+        17,
+        17
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HlpTypeOK_RM": {
+      "id": "helper:HlpTypeOK_RM",
+      "name": "HlpTypeOK_RM",
+      "kind": "helper",
+      "lineStart": 18,
+      "lineEnd": 19,
+      "proofLines": [
+        19
+      ],
+      "proofRange": [
+        19,
+        19
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HlpTypeOK_RMC": {
+      "id": "helper:HlpTypeOK_RMC",
+      "name": "HlpTypeOK_RMC",
+      "kind": "helper",
+      "lineStart": 20,
+      "lineEnd": 21,
+      "proofLines": [
+        21
+      ],
+      "proofRange": [
+        21,
+        21
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HlpTypeOK_RII": {
+      "id": "helper:HlpTypeOK_RII",
+      "name": "HlpTypeOK_RII",
+      "kind": "helper",
+      "lineStart": 22,
+      "lineEnd": 23,
+      "proofLines": [
+        23
+      ],
+      "proofRange": [
+        23,
+        23
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HlpTypeOK_RMI": {
+      "id": "helper:HlpTypeOK_RMI",
+      "name": "HlpTypeOK_RMI",
+      "kind": "helper",
+      "lineStart": 24,
+      "lineEnd": 25,
+      "proofLines": [
+        25
+      ],
+      "proofRange": [
+        25,
+        25
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HlpTypeOK_FSS": {
+      "id": "helper:HlpTypeOK_FSS",
+      "name": "HlpTypeOK_FSS",
+      "kind": "helper",
+      "lineStart": 26,
+      "lineEnd": 27,
+      "proofLines": [
+        27
+      ],
+      "proofRange": [
+        27,
+        27
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HlpTypeOK_FSA": {
+      "id": "helper:HlpTypeOK_FSA",
+      "name": "HlpTypeOK_FSA",
+      "kind": "helper",
+      "lineStart": 28,
+      "lineEnd": 29,
+      "proofLines": [
+        29
+      ],
+      "proofRange": [
+        29,
+        29
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HlpTypeOK_FAA": {
+      "id": "helper:HlpTypeOK_FAA",
+      "name": "HlpTypeOK_FAA",
+      "kind": "helper",
+      "lineStart": 30,
+      "lineEnd": 31,
+      "proofLines": [
+        31
+      ],
+      "proofRange": [
+        31,
+        31
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HlpTypeOKStut": {
+      "id": "helper:HlpTypeOKStut",
+      "name": "HlpTypeOKStut",
+      "kind": "helper",
+      "lineStart": 32,
+      "lineEnd": 33,
+      "proofLines": [
+        33
+      ],
+      "proofRange": [
+        33,
+        33
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HlpTypeOKPresAux": {
+      "id": "helper:HlpTypeOKPresAux",
+      "name": "HlpTypeOKPresAux",
+      "kind": "helper",
+      "lineStart": 34,
+      "lineEnd": 35,
+      "proofLines": [
+        35
+      ],
+      "proofRange": [
+        35,
+        35
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:HlpTypeOK_FAA",
+        "helper:HlpTypeOK_FSA",
+        "helper:HlpTypeOK_FSS",
+        "helper:HlpTypeOK_RI",
+        "helper:HlpTypeOK_RII",
+        "helper:HlpTypeOK_RM",
+        "helper:HlpTypeOK_RMC",
+        "helper:HlpTypeOK_RMI"
+      ]
+    },
+    "helper:HlpInvInit": {
+      "id": "helper:HlpInvInit",
+      "name": "HlpInvInit",
+      "kind": "helper",
+      "lineStart": 36,
+      "lineEnd": 37,
+      "proofLines": [
+        37
+      ],
+      "proofRange": [
+        37,
+        37
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HlpSNonObed": {
+      "id": "helper:HlpSNonObed",
+      "name": "HlpSNonObed",
+      "kind": "helper",
+      "lineStart": 38,
+      "lineEnd": 39,
+      "proofLines": [
+        39
+      ],
+      "proofRange": [
+        39,
+        39
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HlpANew": {
+      "id": "helper:HlpANew",
+      "name": "HlpANew",
+      "kind": "helper",
+      "lineStart": 40,
+      "lineEnd": 56,
+      "proofLines": [
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56
+      ],
+      "proofRange": [
+        41,
+        56
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HlpBNew": {
+      "id": "helper:HlpBNew",
+      "name": "HlpBNew",
+      "kind": "helper",
+      "lineStart": 57,
+      "lineEnd": 77,
+      "proofLines": [
+        58,
+        59,
+        60,
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68,
+        69,
+        70,
+        71,
+        72,
+        73,
+        74,
+        75,
+        76,
+        77
+      ],
+      "proofRange": [
+        58,
+        77
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HlpSendRMNNe": {
+      "id": "helper:HlpSendRMNNe",
+      "name": "HlpSendRMNNe",
+      "kind": "helper",
+      "lineStart": 78,
+      "lineEnd": 79,
+      "proofLines": [
+        79
+      ],
+      "proofRange": [
+        79,
+        79
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HlpSendRMEqA": {
+      "id": "helper:HlpSendRMEqA",
+      "name": "HlpSendRMEqA",
+      "kind": "helper",
+      "lineStart": 80,
+      "lineEnd": 81,
+      "proofLines": [
+        81
+      ],
+      "proofRange": [
+        81,
+        81
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HlpSendRM": {
+      "id": "helper:HlpSendRM",
+      "name": "HlpSendRM",
+      "kind": "helper",
+      "lineStart": 82,
+      "lineEnd": 83,
+      "proofLines": [
+        83
+      ],
+      "proofRange": [
+        83,
+        83
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:HlpANew",
+        "helper:HlpSNonObed",
+        "helper:HlpSendRMEqA",
+        "helper:HlpSendRMNNe"
+      ]
+    },
+    "helper:HlpRcvRMMin": {
+      "id": "helper:HlpRcvRMMin",
+      "name": "HlpRcvRMMin",
+      "kind": "helper",
+      "lineStart": 84,
+      "lineEnd": 85,
+      "proofLines": [
+        85
+      ],
+      "proofRange": [
+        85,
+        85
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HlpRcvRM": {
+      "id": "helper:HlpRcvRM",
+      "name": "HlpRcvRM",
+      "kind": "helper",
+      "lineStart": 86,
+      "lineEnd": 87,
+      "proofLines": [
+        87
+      ],
+      "proofRange": [
+        87,
+        87
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:HlpRcvRMMin",
+        "helper:HlpSNonObed"
+      ]
+    },
+    "helper:HlpAcceptRMNNe": {
+      "id": "helper:HlpAcceptRMNNe",
+      "name": "HlpAcceptRMNNe",
+      "kind": "helper",
+      "lineStart": 88,
+      "lineEnd": 89,
+      "proofLines": [
+        89
+      ],
+      "proofRange": [
+        89,
+        89
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HlpAcceptRMEqA": {
+      "id": "helper:HlpAcceptRMEqA",
+      "name": "HlpAcceptRMEqA",
+      "kind": "helper",
+      "lineStart": 90,
+      "lineEnd": 91,
+      "proofLines": [
+        91
+      ],
+      "proofRange": [
+        91,
+        91
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HlpAcceptRM": {
+      "id": "helper:HlpAcceptRM",
+      "name": "HlpAcceptRM",
+      "kind": "helper",
+      "lineStart": 92,
+      "lineEnd": 93,
+      "proofLines": [
+        93
+      ],
+      "proofRange": [
+        93,
+        93
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:HlpAcceptRMEqA",
+        "helper:HlpAcceptRMNNe",
+        "helper:HlpBNew",
+        "helper:HlpSNonObed"
+      ]
+    },
+    "helper:HlpInvRM": {
+      "id": "helper:HlpInvRM",
+      "name": "HlpInvRM",
+      "kind": "helper",
+      "lineStart": 94,
+      "lineEnd": 95,
+      "proofLines": [
+        95
+      ],
+      "proofRange": [
+        95,
+        95
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:HlpAcceptRM",
+        "helper:HlpRcvRM",
+        "helper:HlpSendRM"
+      ]
+    },
+    "helper:HlpSendRMCNNe": {
+      "id": "helper:HlpSendRMCNNe",
+      "name": "HlpSendRMCNNe",
+      "kind": "helper",
+      "lineStart": 96,
+      "lineEnd": 97,
+      "proofLines": [
+        97
+      ],
+      "proofRange": [
+        97,
+        97
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HlpSendRMCEqA": {
+      "id": "helper:HlpSendRMCEqA",
+      "name": "HlpSendRMCEqA",
+      "kind": "helper",
+      "lineStart": 98,
+      "lineEnd": 99,
+      "proofLines": [
+        99
+      ],
+      "proofRange": [
+        99,
+        99
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HlpSendRMC": {
+      "id": "helper:HlpSendRMC",
+      "name": "HlpSendRMC",
+      "kind": "helper",
+      "lineStart": 100,
+      "lineEnd": 101,
+      "proofLines": [
+        101
+      ],
+      "proofRange": [
+        101,
+        101
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:HlpANew",
+        "helper:HlpSNonObed",
+        "helper:HlpSendRMCEqA",
+        "helper:HlpSendRMCNNe"
+      ]
+    },
+    "helper:HlpRcvRMCMin": {
+      "id": "helper:HlpRcvRMCMin",
+      "name": "HlpRcvRMCMin",
+      "kind": "helper",
+      "lineStart": 102,
+      "lineEnd": 103,
+      "proofLines": [
+        103
+      ],
+      "proofRange": [
+        103,
+        103
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HlpRcvRMC": {
+      "id": "helper:HlpRcvRMC",
+      "name": "HlpRcvRMC",
+      "kind": "helper",
+      "lineStart": 104,
+      "lineEnd": 105,
+      "proofLines": [
+        105
+      ],
+      "proofRange": [
+        105,
+        105
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:HlpRcvRMCMin",
+        "helper:HlpSNonObed"
+      ]
+    },
+    "helper:HlpAcceptRMCNNe": {
+      "id": "helper:HlpAcceptRMCNNe",
+      "name": "HlpAcceptRMCNNe",
+      "kind": "helper",
+      "lineStart": 106,
+      "lineEnd": 107,
+      "proofLines": [
+        107
+      ],
+      "proofRange": [
+        107,
+        107
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HlpAcceptRMCEqA": {
+      "id": "helper:HlpAcceptRMCEqA",
+      "name": "HlpAcceptRMCEqA",
+      "kind": "helper",
+      "lineStart": 108,
+      "lineEnd": 109,
+      "proofLines": [
+        109
+      ],
+      "proofRange": [
+        109,
+        109
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HlpAcceptRMC": {
+      "id": "helper:HlpAcceptRMC",
+      "name": "HlpAcceptRMC",
+      "kind": "helper",
+      "lineStart": 110,
+      "lineEnd": 111,
+      "proofLines": [
+        111
+      ],
+      "proofRange": [
+        111,
+        111
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:HlpAcceptRMCEqA",
+        "helper:HlpAcceptRMCNNe",
+        "helper:HlpBNew",
+        "helper:HlpSNonObed"
+      ]
+    },
+    "helper:HlpInvRMC": {
+      "id": "helper:HlpInvRMC",
+      "name": "HlpInvRMC",
+      "kind": "helper",
+      "lineStart": 112,
+      "lineEnd": 113,
+      "proofLines": [
+        113
+      ],
+      "proofRange": [
+        113,
+        113
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:HlpAcceptRMC",
+        "helper:HlpRcvRMC",
+        "helper:HlpSendRMC"
+      ]
+    },
+    "helper:HlpSendRMINNe": {
+      "id": "helper:HlpSendRMINNe",
+      "name": "HlpSendRMINNe",
+      "kind": "helper",
+      "lineStart": 114,
+      "lineEnd": 115,
+      "proofLines": [
+        115
+      ],
+      "proofRange": [
+        115,
+        115
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HlpSendRMIEqA": {
+      "id": "helper:HlpSendRMIEqA",
+      "name": "HlpSendRMIEqA",
+      "kind": "helper",
+      "lineStart": 116,
+      "lineEnd": 117,
+      "proofLines": [
+        117
+      ],
+      "proofRange": [
+        117,
+        117
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HlpSendRMI": {
+      "id": "helper:HlpSendRMI",
+      "name": "HlpSendRMI",
+      "kind": "helper",
+      "lineStart": 118,
+      "lineEnd": 119,
+      "proofLines": [
+        119
+      ],
+      "proofRange": [
+        119,
+        119
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:HlpANew",
+        "helper:HlpSNonObed",
+        "helper:HlpSendRMIEqA",
+        "helper:HlpSendRMINNe"
+      ]
+    },
+    "helper:HlpRcvRMIMin": {
+      "id": "helper:HlpRcvRMIMin",
+      "name": "HlpRcvRMIMin",
+      "kind": "helper",
+      "lineStart": 120,
+      "lineEnd": 121,
+      "proofLines": [
+        121
+      ],
+      "proofRange": [
+        121,
+        121
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HlpRcvRMI": {
+      "id": "helper:HlpRcvRMI",
+      "name": "HlpRcvRMI",
+      "kind": "helper",
+      "lineStart": 122,
+      "lineEnd": 123,
+      "proofLines": [
+        123
+      ],
+      "proofRange": [
+        123,
+        123
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:HlpRcvRMIMin",
+        "helper:HlpSNonObed"
+      ]
+    },
+    "helper:HlpAcceptRMINNe": {
+      "id": "helper:HlpAcceptRMINNe",
+      "name": "HlpAcceptRMINNe",
+      "kind": "helper",
+      "lineStart": 124,
+      "lineEnd": 125,
+      "proofLines": [
+        125
+      ],
+      "proofRange": [
+        125,
+        125
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HlpAcceptRMIEqA": {
+      "id": "helper:HlpAcceptRMIEqA",
+      "name": "HlpAcceptRMIEqA",
+      "kind": "helper",
+      "lineStart": 126,
+      "lineEnd": 127,
+      "proofLines": [
+        127
+      ],
+      "proofRange": [
+        127,
+        127
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HlpAcceptRMI": {
+      "id": "helper:HlpAcceptRMI",
+      "name": "HlpAcceptRMI",
+      "kind": "helper",
+      "lineStart": 128,
+      "lineEnd": 129,
+      "proofLines": [
+        129
+      ],
+      "proofRange": [
+        129,
+        129
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:HlpAcceptRMIEqA",
+        "helper:HlpAcceptRMINNe",
+        "helper:HlpBNew",
+        "helper:HlpSNonObed"
+      ]
+    },
+    "helper:HlpInvRMI": {
+      "id": "helper:HlpInvRMI",
+      "name": "HlpInvRMI",
+      "kind": "helper",
+      "lineStart": 130,
+      "lineEnd": 131,
+      "proofLines": [
+        131
+      ],
+      "proofRange": [
+        131,
+        131
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:HlpAcceptRMI",
+        "helper:HlpRcvRMI",
+        "helper:HlpSendRMI"
+      ]
+    },
+    "helper:HlpInvRI": {
+      "id": "helper:HlpInvRI",
+      "name": "HlpInvRI",
+      "kind": "helper",
+      "lineStart": 132,
+      "lineEnd": 133,
+      "proofLines": [
+        133
+      ],
+      "proofRange": [
+        133,
+        133
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HlpInvRII": {
+      "id": "helper:HlpInvRII",
+      "name": "HlpInvRII",
+      "kind": "helper",
+      "lineStart": 134,
+      "lineEnd": 135,
+      "proofLines": [
+        135
+      ],
+      "proofRange": [
+        135,
+        135
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HlpInvFSS": {
+      "id": "helper:HlpInvFSS",
+      "name": "HlpInvFSS",
+      "kind": "helper",
+      "lineStart": 136,
+      "lineEnd": 137,
+      "proofLines": [
+        137
+      ],
+      "proofRange": [
+        137,
+        137
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HlpInvFSA": {
+      "id": "helper:HlpInvFSA",
+      "name": "HlpInvFSA",
+      "kind": "helper",
+      "lineStart": 138,
+      "lineEnd": 139,
+      "proofLines": [
+        139
+      ],
+      "proofRange": [
+        139,
+        139
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HlpInvFAA": {
+      "id": "helper:HlpInvFAA",
+      "name": "HlpInvFAA",
+      "kind": "helper",
+      "lineStart": 140,
+      "lineEnd": 141,
+      "proofLines": [
+        141
+      ],
+      "proofRange": [
+        141,
+        141
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HlpInvPresAux": {
+      "id": "helper:HlpInvPresAux",
+      "name": "HlpInvPresAux",
+      "kind": "helper",
+      "lineStart": 142,
+      "lineEnd": 143,
+      "proofLines": [
+        143
+      ],
+      "proofRange": [
+        143,
+        143
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:HlpInvFAA",
+        "helper:HlpInvFSA",
+        "helper:HlpInvFSS",
+        "helper:HlpInvRI",
+        "helper:HlpInvRII",
+        "helper:HlpInvRM",
+        "helper:HlpInvRMC",
+        "helper:HlpInvRMI"
+      ]
+    },
+    "helper:HlpInvStut": {
+      "id": "helper:HlpInvStut",
+      "name": "HlpInvStut",
+      "kind": "helper",
+      "lineStart": 144,
+      "lineEnd": 145,
+      "proofLines": [
+        145
+      ],
+      "proofRange": [
+        145,
+        145
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HlpConjInit": {
+      "id": "helper:HlpConjInit",
+      "name": "HlpConjInit",
+      "kind": "helper",
+      "lineStart": 146,
+      "lineEnd": 147,
+      "proofLines": [
+        147
+      ],
+      "proofRange": [
+        147,
+        147
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:HlpInvInit",
+        "helper:HlpTypeOKInit"
+      ]
+    },
+    "helper:HlpConjPresAux": {
+      "id": "helper:HlpConjPresAux",
+      "name": "HlpConjPresAux",
+      "kind": "helper",
+      "lineStart": 148,
+      "lineEnd": 149,
+      "proofLines": [
+        149
+      ],
+      "proofRange": [
+        149,
+        149
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:HlpInvPresAux",
+        "helper:HlpTypeOKPresAux"
+      ]
+    },
+    "helper:HlpConjStut": {
+      "id": "helper:HlpConjStut",
+      "name": "HlpConjStut",
+      "kind": "helper",
+      "lineStart": 150,
+      "lineEnd": 151,
+      "proofLines": [
+        151
+      ],
+      "proofRange": [
+        151,
+        151
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:HlpInvStut",
+        "helper:HlpTypeOKStut"
+      ]
+    },
+    "helper:HlpConjPres": {
+      "id": "helper:HlpConjPres",
+      "name": "HlpConjPres",
+      "kind": "helper",
+      "lineStart": 152,
+      "lineEnd": 153,
+      "proofLines": [
+        153
+      ],
+      "proofRange": [
+        153,
+        153
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:HlpConjPresAux",
+        "helper:HlpConjStut"
+      ]
+    },
+    "helper:HlpConjBox": {
+      "id": "helper:HlpConjBox",
+      "name": "HlpConjBox",
+      "kind": "helper",
+      "lineStart": 154,
+      "lineEnd": 161,
+      "proofLines": [
+        155,
+        156,
+        157,
+        158,
+        159,
+        160,
+        161
+      ],
+      "proofRange": [
+        155,
+        161
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:HlpConjInit",
+        "helper:HlpConjPres"
+      ]
+    },
+    "helper:HlpConjImpliesInv": {
+      "id": "helper:HlpConjImpliesInv",
+      "name": "HlpConjImpliesInv",
+      "kind": "helper",
+      "lineStart": 162,
+      "lineEnd": 163,
+      "proofLines": [
+        163
+      ],
+      "proofRange": [
+        163,
+        163
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HlpBoxConjImp": {
+      "id": "helper:HlpBoxConjImp",
+      "name": "HlpBoxConjImp",
+      "kind": "helper",
+      "lineStart": 164,
+      "lineEnd": 165,
+      "proofLines": [
+        165
+      ],
+      "proofRange": [
+        165,
+        165
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:HlpConjImpliesInv"
+      ]
+    },
+    "helper:HlpBoxInv": {
+      "id": "helper:HlpBoxInv",
+      "name": "HlpBoxInv",
+      "kind": "helper",
+      "lineStart": 166,
+      "lineEnd": 167,
+      "proofLines": [
+        167
+      ],
+      "proofRange": [
+        167,
+        167
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:HlpBoxConjImp",
+        "helper:HlpConjBox"
+      ]
+    },
+    "helper:HlpInvImpliesUnforge": {
+      "id": "helper:HlpInvImpliesUnforge",
+      "name": "HlpInvImpliesUnforge",
+      "kind": "helper",
+      "lineStart": 168,
+      "lineEnd": 169,
+      "proofLines": [
+        169
+      ],
+      "proofRange": [
+        169,
+        169
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HlpBoxImp": {
+      "id": "helper:HlpBoxImp",
+      "name": "HlpBoxImp",
+      "kind": "helper",
+      "lineStart": 170,
+      "lineEnd": 171,
+      "proofLines": [
+        171
+      ],
+      "proofRange": [
+        171,
+        171
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:HlpInvImpliesUnforge"
+      ]
+    }
+  }
+}

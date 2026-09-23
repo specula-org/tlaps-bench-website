@@ -1,0 +1,136 @@
+{
+  "schemaVersion": 1,
+  "specId": "tlaplus_examples_GermanProtocol/GermanControlBenchmarks.tla",
+  "sourceName": "GermanControlBenchmarks.tla",
+  "sourceSha256": "fa5887327d552f43089621da28949a08088a96104b0d3924fcbd8c2bbc059660",
+  "resultSha256": "2c8d4e488da4f9315dce4360836e0e4a14db1fddf685394e95fc88aefa13e0cf",
+  "source": "---- MODULE GermanControlBenchmarks ----\nEXTENDS GermanControlBenchmarksDefs\n\n\\* BEGIN AGENT HELPERS\nLOCAL AgtPf == INSTANCE TLAPS\n\nAgtTypeOK ==\n    /\\ cache  \\in [NODE -> {\"I\", \"S\", \"E\"}]\n    /\\ chan1  \\in [NODE -> {\"Empty\", \"ReqS\", \"ReqE\"}]\n    /\\ chan2  \\in [NODE -> {\"Empty\", \"Inv\", \"GntS\", \"GntE\"}]\n    /\\ chan3  \\in [NODE -> {\"Empty\", \"InvAck\"}]\n    /\\ invSet \\subseteq NODE\n    /\\ shrSet \\subseteq NODE\n    /\\ exGntd \\in BOOLEAN\n    /\\ curCmd \\in {\"Empty\", \"ReqS\", \"ReqE\"}\n    /\\ curPtr \\in NODE \\cup {NoNode}\n\n\\* Every node holding a copy is registered as a sharer.\nAgtInvA == \\A i \\in NODE : cache[i] # \"I\" => i \\in shrSet\n\\* Exclusive copies exist only while exclusive access is granted.\nAgtInvB == exGntd = FALSE => \\A i \\in NODE : cache[i] # \"E\"\n\\* While exclusive access is granted there is at most one sharer.\nAgtInvC == exGntd = TRUE => \\A i, j \\in NODE : (i \\in shrSet /\\ j \\in shrSet) => i = j\n\\* A grant in flight is accounted for in the sharer set.\nAgtInvD == \\A i \\in NODE : chan2[i] \\in {\"GntS\", \"GntE\"} => i \\in shrSet\n\\* A node that has acknowledged an invalidation holds no copy, ...\nAgtInvE == \\A i \\in NODE : chan3[i] = \"InvAck\" => cache[i] = \"I\"\n\\* ... has an empty inbound channel, ...\nAgtInvF == \\A i \\in NODE : chan3[i] = \"InvAck\" => chan2[i] = \"Empty\"\n\\* ... and is still registered as a sharer.\nAgtInvH == \\A i \\in NODE : chan3[i] = \"InvAck\" => i \\in shrSet\n\\* An invalidation in flight also belongs to a registered sharer.\nAgtInvG == \\A i \\in NODE : chan2[i] = \"Inv\" => i \\in shrSet\n\\* Invalidations already sent are no longer pending in invSet.\nAgtInvJ == \\A i \\in NODE : chan2[i] = \"Inv\" => i \\notin invSet\nAgtInvK == \\A i \\in NODE : chan3[i] = \"InvAck\" => i \\notin invSet\nAgtInvL == invSet \\subseteq shrSet\n\\* Invalidation traffic occurs only when exclusive access must be revoked\n\\* or the pending request is an exclusive one, ...\nAgtInvM == \\A i \\in NODE : (chan2[i] = \"Inv\" \\/ chan3[i] = \"InvAck\")\n                              => (curCmd = \"ReqE\" \\/ exGntd = TRUE)\n\\* ... and only while a request is being served.\nAgtInvN == \\A i \\in NODE : (chan2[i] = \"Inv\" \\/ chan3[i] = \"InvAck\") => curCmd # \"Empty\"\n\\* An exclusive grant in flight implies exclusive access is granted.\nAgtInvP == \\A i \\in NODE : chan2[i] = \"GntE\" => exGntd = TRUE\n\nAgtInv ==\n    /\\ AgtTypeOK\n    /\\ AgtInvA /\\ AgtInvB /\\ AgtInvC /\\ AgtInvD /\\ AgtInvE\n    /\\ AgtInvF /\\ AgtInvG /\\ AgtInvH /\\ AgtInvJ /\\ AgtInvK\n    /\\ AgtInvL /\\ AgtInvM /\\ AgtInvN /\\ AgtInvP\n\nLEMMA AgtInitInv == Init => AgtInv\n  BY AgtPf!SMTT(\"r30\")\n  DEF Init, AgtInv, AgtTypeOK, AgtInvA, AgtInvB, AgtInvC, AgtInvD, AgtInvE,\n      AgtInvF, AgtInvG, AgtInvH, AgtInvJ, AgtInvK, AgtInvL, AgtInvM, AgtInvN,\n      AgtInvP\n\nLEMMA AgtInvCoherence == AgtInv => Coherence\n  BY AgtPf!SMTT(\"r30\")\n  DEF AgtInv, AgtTypeOK, AgtInvA, AgtInvB, AgtInvC, Coherence\n\nLEMMA AgtNextInv == AgtInv /\\ [Next]_vars => AgtInv'\n  <1> SUFFICES ASSUME AgtInv, [Next]_vars\n               PROVE  AgtInv'\n    OBVIOUS\n  <1>1. CASE UNCHANGED vars\n    BY <1>1, AgtPf!SMTT(\"r30\")\n    DEF vars, AgtInv, AgtTypeOK, AgtInvA, AgtInvB, AgtInvC, AgtInvD, AgtInvE,\n        AgtInvF, AgtInvG, AgtInvH, AgtInvJ, AgtInvK, AgtInvL, AgtInvM, AgtInvN,\n        AgtInvP\n  <1>2. CASE Next\n    <2>1. PICK i \\in NODE :\n                \\/ SendReq(i)\n                \\/ RecvReq(i)\n                \\/ SendInv(i) \\/ SendInvAck(i) \\/ RecvInvAck(i)\n                \\/ SendGnt(i)\n                \\/ RecvGnt(i)\n      BY <1>2 DEF Next\n    <2>2. CASE SendReq(i)\n      BY <2>2, AgtPf!SMTT(\"r30\")\n      DEF SendReq, AgtInv, AgtTypeOK, AgtInvA, AgtInvB, AgtInvC, AgtInvD,\n          AgtInvE, AgtInvF, AgtInvG, AgtInvH, AgtInvJ, AgtInvK, AgtInvL,\n          AgtInvM, AgtInvN, AgtInvP\n    <2>3. CASE RecvReq(i)\n      BY <2>3, AgtPf!SMTT(\"r30\")\n      DEF RecvReq, AgtInv, AgtTypeOK, AgtInvA, AgtInvB, AgtInvC, AgtInvD,\n          AgtInvE, AgtInvF, AgtInvG, AgtInvH, AgtInvJ, AgtInvK, AgtInvL,\n          AgtInvM, AgtInvN, AgtInvP\n    <2>4. CASE SendInv(i)\n      BY <2>4, AgtPf!SMTT(\"r30\")\n      DEF SendInv, AgtInv, AgtTypeOK, AgtInvA, AgtInvB, AgtInvC, AgtInvD,\n          AgtInvE, AgtInvF, AgtInvG, AgtInvH, AgtInvJ, AgtInvK, AgtInvL,\n          AgtInvM, AgtInvN, AgtInvP\n    <2>5. CASE SendInvAck(i)\n      BY <2>5, AgtPf!SMTT(\"r30\")\n      DEF SendInvAck, AgtInv, AgtTypeOK, AgtInvA, AgtInvB, AgtInvC, AgtInvD,\n          AgtInvE, AgtInvF, AgtInvG, AgtInvH, AgtInvJ, AgtInvK, AgtInvL,\n          AgtInvM, AgtInvN, AgtInvP\n    <2>6. CASE RecvInvAck(i)\n      BY <2>6, AgtPf!SMTT(\"r30\")\n      DEF RecvInvAck, AgtInv, AgtTypeOK, AgtInvA, AgtInvB, AgtInvC, AgtInvD,\n          AgtInvE, AgtInvF, AgtInvG, AgtInvH, AgtInvJ, AgtInvK, AgtInvL,\n          AgtInvM, AgtInvN, AgtInvP\n    <2>7. CASE SendGnt(i)\n      BY <2>7, AgtPf!SMTT(\"r30\")\n      DEF SendGnt, AgtInv, AgtTypeOK, AgtInvA, AgtInvB, AgtInvC, AgtInvD,\n          AgtInvE, AgtInvF, AgtInvG, AgtInvH, AgtInvJ, AgtInvK, AgtInvL,\n          AgtInvM, AgtInvN, AgtInvP\n    <2>8. CASE RecvGnt(i)\n      BY <2>8, AgtPf!SMTT(\"r30\")\n      DEF RecvGnt, AgtInv, AgtTypeOK, AgtInvA, AgtInvB, AgtInvC, AgtInvD,\n          AgtInvE, AgtInvF, AgtInvG, AgtInvH, AgtInvJ, AgtInvK, AgtInvL,\n          AgtInvM, AgtInvN, AgtInvP\n    <2>9. QED\n      BY <2>1, <2>2, <2>3, <2>4, <2>5, <2>6, <2>7, <2>8\n  <1>3. QED\n    BY <1>1, <1>2\n\\* END AGENT HELPERS\n\nTHEOREM Spec => []Coherence\n\\* BEGIN AGENT PROOF tlaplus_examples_GermanProtocol/GermanControlBenchmarks_Coherence.tla\n  BY AgtInitInv, AgtNextInv, AgtInvCoherence, AgtPf!PTL DEF Spec\n\\* END AGENT PROOF tlaplus_examples_GermanProtocol/GermanControlBenchmarks_Coherence.tla\n====\n",
+  "units": {
+    "tlaplus_examples_GermanProtocol/GermanControlBenchmarks_Coherence.tla": {
+      "id": "tlaplus_examples_GermanProtocol/GermanControlBenchmarks_Coherence.tla",
+      "name": "GermanControlBenchmarks_Coherence",
+      "kind": "target",
+      "lineStart": 121,
+      "lineEnd": 123,
+      "proofLines": [
+        123
+      ],
+      "proofRange": [
+        123,
+        123
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgtInitInv",
+        "helper:AgtInvCoherence",
+        "helper:AgtNextInv"
+      ]
+    },
+    "helper:AgtInitInv": {
+      "id": "helper:AgtInitInv",
+      "name": "AgtInitInv",
+      "kind": "helper",
+      "lineStart": 53,
+      "lineEnd": 57,
+      "proofLines": [
+        54,
+        55,
+        56,
+        57
+      ],
+      "proofRange": [
+        54,
+        57
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgtInvCoherence": {
+      "id": "helper:AgtInvCoherence",
+      "name": "AgtInvCoherence",
+      "kind": "helper",
+      "lineStart": 59,
+      "lineEnd": 61,
+      "proofLines": [
+        60,
+        61
+      ],
+      "proofRange": [
+        60,
+        61
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgtNextInv": {
+      "id": "helper:AgtNextInv",
+      "name": "AgtNextInv",
+      "kind": "helper",
+      "lineStart": 63,
+      "lineEnd": 118,
+      "proofLines": [
+        64,
+        65,
+        66,
+        67,
+        68,
+        69,
+        70,
+        71,
+        72,
+        73,
+        74,
+        75,
+        76,
+        77,
+        78,
+        79,
+        80,
+        81,
+        82,
+        83,
+        84,
+        85,
+        86,
+        87,
+        88,
+        89,
+        90,
+        91,
+        92,
+        93,
+        94,
+        95,
+        96,
+        97,
+        98,
+        99,
+        100,
+        101,
+        102,
+        103,
+        104,
+        105,
+        106,
+        107,
+        108,
+        109,
+        110,
+        111,
+        112,
+        113,
+        114,
+        115,
+        116,
+        117,
+        118
+      ],
+      "proofRange": [
+        64,
+        118
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    }
+  }
+}

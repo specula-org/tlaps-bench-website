@@ -1,0 +1,721 @@
+{
+  "schemaVersion": 1,
+  "specId": "ivy_examples_ticket_nested/ivy_examples_ticket_nested.tla",
+  "sourceName": "ivy_examples_ticket_nested.tla",
+  "sourceSha256": "e1c1cf612f964d2f99f91bdef8c71637fd563885b8d13808530b220fe2e96d72",
+  "resultSha256": "f4bfe9d481bbb6d6dd35655484301078d052779467b60c6d383ab1a81c806cfb",
+  "source": "---- MODULE ivy_examples_ticket_nested ----\nEXTENDS ivy_examples_ticket_nestedDefs\n\n\\* BEGIN AGENT HELPERS\nLOCAL TN_NI == INSTANCE NaturalsInduction\n\n(***************************************************************************)\n(* The inductive invariant.  Besides typing it records that `service' never *)\n(* overtakes `next_ticket', that an active thread holds a ticket in         *)\n(* service .. next_ticket-1, that a thread in the critical section holds    *)\n(* exactly the ticket being served, that distinct active threads hold       *)\n(* distinct tickets, and that every ticket in service .. next_ticket-1 is   *)\n(* held by some active thread.                                             *)\n(***************************************************************************)\nTN_Inv ==\n  /\\ pc \\in [Thread -> {\"Idle\", \"Waiting\", \"Critical\"}]\n  /\\ service \\in Nat\n  /\\ next_ticket \\in Nat\n  /\\ m \\in [Thread -> Nat]\n  /\\ c \\in [Thread -> Nat]\n  /\\ service <= next_ticket\n  /\\ \\A u \\in Thread : pc[u] # \"Idle\" => (service <= m[u] /\\ m[u] < next_ticket)\n  /\\ \\A u \\in Thread : pc[u] = \"Critical\" => m[u] = service\n  /\\ \\A u1, u2 \\in Thread :\n        (pc[u1] # \"Idle\" /\\ pc[u2] # \"Idle\" /\\ m[u1] = m[u2]) => u1 = u2\n  /\\ \\A j \\in Nat :\n        (service <= j /\\ j < next_ticket) =>\n          (\\E u \\in Thread : pc[u] # \"Idle\" /\\ m[u] = j)\n\n(***************************************************************************)\n(* Formulas that have to be instantiated at several arguments are wrapped   *)\n(* in operators, so that the instantiation happens on first-order           *)\n(* obligations with the temporal operators hidden inside the definition.    *)\n(***************************************************************************)\nTN_En(u) == ENABLED <<Step(u)>>_vars\nTN_Fair(u) == WF_vars(Step(u))\nTN_FairA == \\A t \\in Thread : TN_Fair(t)\nTN_BN == [][Next]_vars\nTN_BI == []TN_Inv\n\nTN_Crit(t) == pc[t] = \"Critical\"\nTN_Src(t, d) == TN_Inv /\\ pc[t] = \"Waiting\" /\\ m[t] <= service + d\nTN_HW(t, u, d) == /\\ TN_Inv /\\ pc[t] = \"Waiting\" /\\ m[t] = service + d + 1\n                  /\\ pc[u] = \"Waiting\" /\\ m[u] = service\nTN_HC(t, u, d) == /\\ TN_Inv /\\ pc[t] = \"Waiting\" /\\ m[t] = service + d + 1\n                  /\\ pc[u] = \"Critical\" /\\ m[u] = service\nTN_HCj(t, u, d, j) == TN_HC(t, u, d) /\\ c[u] <= j\nTN_H(t, u, d) == /\\ TN_Inv /\\ pc[t] = \"Waiting\" /\\ m[t] = service + d + 1\n                 /\\ pc[u] # \"Idle\" /\\ m[u] = service\n\nTN_PJ(t, u, d, j) == [](TN_HCj(t, u, d, j) => <>TN_Src(t, d))\nTN_QJS(t, u, d, j) ==\n  [](TN_HCj(t, u, d, j+1) => <>(TN_HCj(t, u, d, j) \\/ TN_Src(t, d)))\nTN_QW(t, u, d) == [](TN_HW(t, u, d) => <>TN_HC(t, u, d))\nTN_QC(t, u, d) == [](TN_HC(t, u, d) => <>TN_Src(t, d))\nTN_PU(t, u, d) == [](TN_H(t, u, d) => <>TN_Src(t, d))\nTN_PS(t, d) == [](TN_Src(t, d+1) => <>TN_Src(t, d))\nTN_PD(t, d) == [](TN_Src(t, d) => <>TN_Crit(t))\nTN_PW(t) == (pc[t] = \"Waiting\") ~> (pc[t] = \"Critical\")\n\nTN_C1(t) == TN_BN /\\ TN_Fair(t) => TN_PD(t, 0)\nTN_C2(t, u, d) == TN_BN /\\ TN_Fair(u) => TN_QW(t, u, d)\nTN_C3(t, u, d) == TN_BN /\\ TN_Fair(u) => TN_PJ(t, u, d, 0)\nTN_C4(t, u, d, j) == TN_BN /\\ TN_Fair(u) => TN_QJS(t, u, d, j)\n\nTN_B5(t, u, d) ==\n  []((\\A j \\in Nat : (TN_HCj(t, u, d, j) => <>TN_Src(t, d))) /\\ TN_HC(t, u, d)\n       => <>TN_Src(t, d))\nTN_B6(t, u, d) == [](TN_H(t, u, d) => (TN_HW(t, u, d) \\/ TN_HC(t, u, d)))\nTN_B7(t, d) ==\n  []((\\A u \\in Thread : (TN_H(t, u, d) => <>TN_Src(t, d))) /\\ TN_Src(t, d+1)\n       => (TN_Src(t, d) \\/ <>TN_Src(t, d)))\nTN_B8(t) ==\n  []((\\A d \\in Nat : (TN_Src(t, d) => <>TN_Crit(t)))\n       /\\ TN_Inv /\\ pc[t] = \"Waiting\" => <>TN_Crit(t))\n\n(***************************************************************************)\n(* TN_Inv is an inductive invariant, and it implies mutual exclusion.       *)\n(***************************************************************************)\nLEMMA TN_InitInv == Init => TN_Inv\n  BY SMTT(\"r30\") DEF Init, TN_Inv\n\nLEMMA TN_NextInv == TN_Inv /\\ [Next]_vars => TN_Inv'\n  BY SMTT(\"r30\") DEF TN_Inv, vars, Next, Step, TakeTicket, EnterCritical,\n                     RunNestedTask, LeaveCritical\n\nLEMMA TN_BoxInv == SafetySpec => []TN_Inv\n  BY TN_InitInv, TN_NextInv, PTL DEF SafetySpec\n\nLEMMA TN_InvMutex == TN_Inv => MutualExclusion\n  BY SMTT(\"r30\") DEF TN_Inv, MutualExclusion\n\n(***************************************************************************)\n(* What Spec provides.                                                     *)\n(***************************************************************************)\nLEMMA TN_SpecBN == Spec => TN_BN\n  BY DEF Spec, SafetySpec, TN_BN\n\nLEMMA TN_SpecFairA == Spec => TN_FairA\n  BY DEF Spec, TN_FairA, TN_Fair\n\nLEMMA TN_SpecBI == Spec => TN_BI\n  BY TN_BoxInv DEF Spec, TN_BI\n\n(***************************************************************************)\n(* A thread's own step is enabled while it waits for a ticket that is       *)\n(* already being served, and while it sits in the critical section.        *)\n(***************************************************************************)\nLEMMA TN_EnW ==\n  ASSUME NEW u \\in Thread, TN_Inv, pc[u] = \"Waiting\", m[u] <= service\n  PROVE  TN_En(u)\n<1>1. ENABLED <<EnterCritical(u, m[u])>>_vars\n  BY ExpandENABLED, SMTT(\"r30\") DEF TN_Inv, EnterCritical, vars\n<1>2. QED\n  BY <1>1, ExpandENABLED, SMTT(\"r30\")\n     DEF TN_En, Step, TakeTicket, EnterCritical, RunNestedTask, LeaveCritical,\n         vars\n\nLEMMA TN_EnC ==\n  ASSUME NEW u \\in Thread, TN_Inv, pc[u] = \"Critical\"\n  PROVE  TN_En(u)\n<1>1. CASE c[u] = 0\n  <2>1. ENABLED <<LeaveCritical(u)>>_vars\n    BY <1>1, ExpandENABLED, SMTT(\"r30\") DEF TN_Inv, LeaveCritical, vars\n  <2>2. QED\n    BY <2>1, ExpandENABLED, SMTT(\"r30\")\n       DEF TN_En, Step, TakeTicket, EnterCritical, RunNestedTask,\n           LeaveCritical, vars\n<1>2. CASE c[u] # 0\n  <2>1. c[u] - 1 \\in Nat /\\ c[u] = (c[u] - 1) + 1\n    BY <1>2, SMTT(\"r30\") DEF TN_Inv\n  <2>2. PICK k \\in Nat : c[u] = k + 1\n    BY <2>1, Zenon\n  <2>3. ENABLED <<RunNestedTask(u, k)>>_vars\n    BY <2>2, ExpandENABLED, SMTT(\"r30\") DEF TN_Inv, RunNestedTask, vars\n  <2>4. QED\n    BY <2>2, <2>3, ExpandENABLED, SMTT(\"r30\")\n       DEF TN_En, Step, TakeTicket, EnterCritical, RunNestedTask,\n           LeaveCritical, vars\n<1>3. QED BY <1>1, <1>2\n\n(***************************************************************************)\n(* Weak fairness of the waiting thread's own step: if its ticket is already *)\n(* being served, it enters the critical section.                           *)\n(***************************************************************************)\nLEMMA TN_LW1 == ASSUME NEW t \\in Thread PROVE TN_C1(t)\n<1>1. TN_Src(t, 0) /\\ [Next]_vars => (TN_Src(t, 0)' \\/ TN_Crit(t)')\n  BY TN_NextInv, SMTT(\"r30\")\n     DEF TN_Src, TN_Crit, TN_Inv, vars, Next, Step, TakeTicket, EnterCritical,\n         RunNestedTask, LeaveCritical\n<1>2. TN_Src(t, 0) /\\ <<Step(t)>>_vars => TN_Crit(t)'\n  BY SMTT(\"r30\")\n     DEF TN_Src, TN_Crit, TN_Inv, vars, Step, TakeTicket, EnterCritical,\n         RunNestedTask, LeaveCritical\n<1>3. TN_Src(t, 0) => ENABLED <<Step(t)>>_vars\n  <2> SUFFICES ASSUME TN_Src(t, 0) PROVE ENABLED <<Step(t)>>_vars\n    OBVIOUS\n  <2>1. TN_Inv /\\ pc[t] = \"Waiting\" /\\ m[t] <= service\n    BY SMTT(\"r30\") DEF TN_Src, TN_Inv\n  <2>2. TN_En(t)  BY <2>1, TN_EnW\n  <2>3. QED BY <2>2 DEF TN_En\n<1>4. QED BY <1>1, <1>2, <1>3, PTL DEF TN_C1, TN_BN, TN_Fair, TN_PD\n\n(***************************************************************************)\n(* Weak fairness of the ticket holder's step: from `Waiting' it enters the  *)\n(* critical section.                                                        *)\n(***************************************************************************)\nLEMMA TN_LW2 ==\n  ASSUME NEW t \\in Thread, NEW u \\in Thread, NEW d \\in Nat\n  PROVE  TN_C2(t, u, d)\n<1>1. TN_HW(t, u, d) /\\ [Next]_vars => (TN_HW(t, u, d)' \\/ TN_HC(t, u, d)')\n  BY TN_NextInv, SMTT(\"r30\")\n     DEF TN_HW, TN_HC, TN_Inv, vars, Next, Step, TakeTicket, EnterCritical,\n         RunNestedTask, LeaveCritical\n<1>2. TN_HW(t, u, d) /\\ <<Step(u)>>_vars => TN_HC(t, u, d)'\n  BY TN_NextInv, SMTT(\"r30\")\n     DEF TN_HW, TN_HC, TN_Inv, vars, Next, Step, TakeTicket, EnterCritical,\n         RunNestedTask, LeaveCritical\n<1>3. TN_HW(t, u, d) => ENABLED <<Step(u)>>_vars\n  <2> SUFFICES ASSUME TN_HW(t, u, d) PROVE ENABLED <<Step(u)>>_vars\n    OBVIOUS\n  <2>1. TN_Inv /\\ pc[u] = \"Waiting\" /\\ m[u] <= service\n    BY SMTT(\"r30\") DEF TN_HW, TN_Inv\n  <2>2. TN_En(u)  BY <2>1, TN_EnW\n  <2>3. QED BY <2>2 DEF TN_En\n<1>4. QED BY <1>1, <1>2, <1>3, PTL DEF TN_C2, TN_BN, TN_Fair, TN_QW\n\n(***************************************************************************)\n(* Weak fairness of the ticket holder's step: with an exhausted nested      *)\n(* counter it leaves the critical section, which advances `service'.        *)\n(***************************************************************************)\nLEMMA TN_LW3 ==\n  ASSUME NEW t \\in Thread, NEW u \\in Thread, NEW d \\in Nat\n  PROVE  TN_C3(t, u, d)\n<1>1. TN_HCj(t, u, d, 0) /\\ [Next]_vars\n        => (TN_HCj(t, u, d, 0)' \\/ TN_Src(t, d)')\n  BY TN_NextInv, SMTT(\"r30\")\n     DEF TN_HCj, TN_HC, TN_Src, TN_Inv, vars, Next, Step, TakeTicket,\n         EnterCritical, RunNestedTask, LeaveCritical\n<1>2. TN_HCj(t, u, d, 0) /\\ <<Step(u)>>_vars => TN_Src(t, d)'\n  BY TN_NextInv, SMTT(\"r30\")\n     DEF TN_HCj, TN_HC, TN_Src, TN_Inv, vars, Next, Step, TakeTicket,\n         EnterCritical, RunNestedTask, LeaveCritical\n<1>3. TN_HCj(t, u, d, 0) => ENABLED <<Step(u)>>_vars\n  <2> SUFFICES ASSUME TN_HCj(t, u, d, 0) PROVE ENABLED <<Step(u)>>_vars\n    OBVIOUS\n  <2>1. TN_Inv /\\ pc[u] = \"Critical\"\n    BY SMTT(\"r30\") DEF TN_HCj, TN_HC\n  <2>2. TN_En(u)  BY <2>1, TN_EnC\n  <2>3. QED BY <2>2 DEF TN_En\n<1>4. QED BY <1>1, <1>2, <1>3, PTL DEF TN_C3, TN_BN, TN_Fair, TN_PJ\n\n(***************************************************************************)\n(* Weak fairness of the ticket holder's step: one nested task is run, so    *)\n(* its counter goes down by one.                                            *)\n(***************************************************************************)\nLEMMA TN_LW4 ==\n  ASSUME NEW t \\in Thread, NEW u \\in Thread, NEW d \\in Nat, NEW j \\in Nat\n  PROVE  TN_C4(t, u, d, j)\n<1>1. TN_HCj(t, u, d, j+1) /\\ [Next]_vars\n        => (TN_HCj(t, u, d, j+1)' \\/ (TN_HCj(t, u, d, j) \\/ TN_Src(t, d))')\n  BY TN_NextInv, SMTT(\"r30\")\n     DEF TN_HCj, TN_HC, TN_Src, TN_Inv, vars, Next, Step, TakeTicket,\n         EnterCritical, RunNestedTask, LeaveCritical\n<1>2. TN_HCj(t, u, d, j+1) /\\ <<Step(u)>>_vars\n        => (TN_HCj(t, u, d, j) \\/ TN_Src(t, d))'\n  BY TN_NextInv, SMTT(\"r30\")\n     DEF TN_HCj, TN_HC, TN_Src, TN_Inv, vars, Next, Step, TakeTicket,\n         EnterCritical, RunNestedTask, LeaveCritical\n<1>3. TN_HCj(t, u, d, j+1) => ENABLED <<Step(u)>>_vars\n  <2> SUFFICES ASSUME TN_HCj(t, u, d, j+1) PROVE ENABLED <<Step(u)>>_vars\n    OBVIOUS\n  <2>1. TN_Inv /\\ pc[u] = \"Critical\"\n    BY SMTT(\"r30\") DEF TN_HCj, TN_HC\n  <2>2. TN_En(u)  BY <2>1, TN_EnC\n  <2>3. QED BY <2>2 DEF TN_En\n<1>4. QED BY <1>1, <1>2, <1>3, PTL DEF TN_C4, TN_BN, TN_Fair, TN_QJS\n\n(***************************************************************************)\n(* The state level facts used to eliminate the quantified indices, stated   *)\n(* in already boxed form.                                                  *)\n(***************************************************************************)\nLEMMA TN_LB5 ==\n  ASSUME NEW t \\in Thread, NEW u \\in Thread, NEW d \\in Nat\n  PROVE  TN_B5(t, u, d)\n<1>1. (\\A j \\in Nat : (TN_HCj(t, u, d, j) => <>TN_Src(t, d))) /\\ TN_HC(t, u, d)\n        => <>TN_Src(t, d)\n  BY SMTT(\"r30\") DEF TN_HCj, TN_HC, TN_Inv\n<1>2. QED BY <1>1, PTL DEF TN_B5\n\nLEMMA TN_LB6 ==\n  ASSUME NEW t \\in Thread, NEW u \\in Thread, NEW d \\in Nat\n  PROVE  TN_B6(t, u, d)\n<1>1. TN_H(t, u, d) => (TN_HW(t, u, d) \\/ TN_HC(t, u, d))\n  BY SMTT(\"r30\") DEF TN_H, TN_HW, TN_HC, TN_Inv\n<1>2. QED BY <1>1, PTL DEF TN_B6\n\nLEMMA TN_LB7 ==\n  ASSUME NEW t \\in Thread, NEW d \\in Nat\n  PROVE  TN_B7(t, d)\n<1>1. (\\A u \\in Thread : (TN_H(t, u, d) => <>TN_Src(t, d))) /\\ TN_Src(t, d+1)\n        => (TN_Src(t, d) \\/ <>TN_Src(t, d))\n  BY SMTT(\"r30\") DEF TN_H, TN_Src, TN_Inv\n<1>2. QED BY <1>1, PTL DEF TN_B7\n\nLEMMA TN_LB8 == ASSUME NEW t \\in Thread PROVE TN_B8(t)\n<1>1. (\\A d \\in Nat : (TN_Src(t, d) => <>TN_Crit(t)))\n        /\\ TN_Inv /\\ pc[t] = \"Waiting\" => <>TN_Crit(t)\n  BY SMTT(\"r30\") DEF TN_Src, TN_Inv\n<1>2. QED BY <1>1, PTL DEF TN_B8\n\n(***************************************************************************)\n(* Assembling the leads-to chain.                                          *)\n(***************************************************************************)\nLEMMA TN_LtBase ==\n  ASSUME NEW t \\in Thread, TN_BN, TN_FairA\n  PROVE  TN_PD(t, 0)\n<1>1. TN_C1(t)    BY TN_LW1\n<1>2. TN_Fair(t)  BY DEF TN_FairA\n<1>3. QED BY <1>1, <1>2 DEF TN_C1\n\nLEMMA TN_LtHW ==\n  ASSUME NEW t \\in Thread, NEW u \\in Thread, NEW d \\in Nat, TN_BN, TN_FairA\n  PROVE  TN_QW(t, u, d)\n<1>1. TN_C2(t, u, d)  BY TN_LW2\n<1>2. TN_Fair(u)      BY DEF TN_FairA\n<1>3. QED BY <1>1, <1>2 DEF TN_C2\n\nLEMMA TN_LtHCj0 ==\n  ASSUME NEW t \\in Thread, NEW u \\in Thread, NEW d \\in Nat, TN_BN, TN_FairA\n  PROVE  TN_PJ(t, u, d, 0)\n<1>1. TN_C3(t, u, d)  BY TN_LW3\n<1>2. TN_Fair(u)      BY DEF TN_FairA\n<1>3. QED BY <1>1, <1>2 DEF TN_C3\n\nLEMMA TN_LtHCjS ==\n  ASSUME NEW t \\in Thread, NEW u \\in Thread, NEW d \\in Nat, NEW j \\in Nat,\n         TN_BN, TN_FairA\n  PROVE  TN_QJS(t, u, d, j)\n<1>1. TN_C4(t, u, d, j)  BY TN_LW4\n<1>2. TN_Fair(u)         BY DEF TN_FairA\n<1>3. QED BY <1>1, <1>2 DEF TN_C4\n\nLEMMA TN_LtHCjAll ==\n  ASSUME NEW t \\in Thread, NEW u \\in Thread, NEW d \\in Nat, TN_BN, TN_FairA\n  PROVE  \\A j \\in Nat : TN_PJ(t, u, d, j)\n<1>1. TN_PJ(t, u, d, 0)  BY TN_LtHCj0\n<1>2. ASSUME NEW j \\in Nat PROVE TN_PJ(t, u, d, j) => TN_PJ(t, u, d, j+1)\n  <2>1. TN_QJS(t, u, d, j)  BY TN_LtHCjS\n  <2>2. QED BY <2>1, PTL DEF TN_PJ, TN_QJS\n<1>3. QED BY <1>1, <1>2, TN_NI!NatInduction\n\nLEMMA TN_LtHC ==\n  ASSUME NEW t \\in Thread, NEW u \\in Thread, NEW d \\in Nat,\n         \\A j \\in Nat : TN_PJ(t, u, d, j)\n  PROVE  TN_QC(t, u, d)\n<1>1. \\A j \\in Nat : [](TN_HCj(t, u, d, j) => <>TN_Src(t, d))\n  BY DEF TN_PJ\n<1>2. [](\\A j \\in Nat : (TN_HCj(t, u, d, j) => <>TN_Src(t, d)))\n  BY <1>1\n<1>3. TN_B5(t, u, d)  BY TN_LB5\n<1>4. QED BY <1>2, <1>3, PTL DEF TN_QC, TN_B5\n\nLEMMA TN_LtH ==\n  ASSUME NEW t \\in Thread, NEW u \\in Thread, NEW d \\in Nat,\n         TN_QW(t, u, d), TN_QC(t, u, d)\n  PROVE  TN_PU(t, u, d)\n<1>1. TN_B6(t, u, d)  BY TN_LB6\n<1>2. QED BY <1>1, PTL DEF TN_PU, TN_QW, TN_QC, TN_B6\n\nLEMMA TN_LtHall ==\n  ASSUME NEW t \\in Thread, NEW u \\in Thread, NEW d \\in Nat, TN_BN, TN_FairA\n  PROVE  TN_PU(t, u, d)\n<1>1. \\A j \\in Nat : TN_PJ(t, u, d, j)  BY TN_LtHCjAll\n<1>2. TN_QC(t, u, d)  BY <1>1, TN_LtHC\n<1>3. TN_QW(t, u, d)  BY TN_LtHW\n<1>4. QED BY <1>2, <1>3, TN_LtH\n\nLEMMA TN_LtSrcStep ==\n  ASSUME NEW t \\in Thread, NEW d \\in Nat,\n         \\A u \\in Thread : TN_PU(t, u, d)\n  PROVE  TN_PS(t, d)\n<1>1. \\A u \\in Thread : [](TN_H(t, u, d) => <>TN_Src(t, d))\n  BY DEF TN_PU\n<1>2. [](\\A u \\in Thread : (TN_H(t, u, d) => <>TN_Src(t, d)))\n  BY <1>1\n<1>3. TN_B7(t, d)  BY TN_LB7\n<1>4. QED BY <1>2, <1>3, PTL DEF TN_PS, TN_B7\n\nLEMMA TN_LtSrcS2 ==\n  ASSUME NEW t \\in Thread, NEW d \\in Nat, TN_BN, TN_FairA\n  PROVE  TN_PS(t, d)\n<1>1. \\A u \\in Thread : TN_PU(t, u, d)  BY TN_LtHall\n<1>2. QED BY <1>1, TN_LtSrcStep\n\nLEMMA TN_LtSrcAll ==\n  ASSUME NEW t \\in Thread, TN_BN, TN_FairA\n  PROVE  \\A d \\in Nat : TN_PD(t, d)\n<1>1. TN_PD(t, 0)  BY TN_LtBase\n<1>2. ASSUME NEW d \\in Nat PROVE TN_PD(t, d) => TN_PD(t, d+1)\n  <2>1. TN_PS(t, d)  BY TN_LtSrcS2\n  <2>2. QED BY <2>1, PTL DEF TN_PD, TN_PS\n<1>3. QED BY <1>1, <1>2, TN_NI!NatInduction\n\nLEMMA TN_LtWait ==\n  ASSUME NEW t \\in Thread, TN_BI, \\A d \\in Nat : TN_PD(t, d)\n  PROVE  TN_PW(t)\n<1>1. \\A d \\in Nat : [](TN_Src(t, d) => <>TN_Crit(t))\n  BY DEF TN_PD\n<1>2. [](\\A d \\in Nat : (TN_Src(t, d) => <>TN_Crit(t)))\n  BY <1>1\n<1>3. TN_B8(t)  BY TN_LB8\n<1>4. QED BY <1>2, <1>3, PTL DEF TN_PW, TN_Crit, TN_B8, TN_BI\n\nLEMMA TN_LtWaitAll ==\n  ASSUME NEW t \\in Thread, TN_BN, TN_FairA, TN_BI\n  PROVE  TN_PW(t)\n<1>1. \\A d \\in Nat : TN_PD(t, d)  BY TN_LtSrcAll\n<1>2. QED BY <1>1, TN_LtWait\n\\* END AGENT HELPERS\n\nTHEOREM Safety == SafetySpec => []MutualExclusion\n\\* BEGIN AGENT PROOF ivy_examples_ticket_nested/ivy_examples_ticket_nested_Safety.tla\n  BY TN_BoxInv, TN_InvMutex, PTL\n\\* END AGENT PROOF ivy_examples_ticket_nested/ivy_examples_ticket_nested_Safety.tla\n\nTHEOREM Liveness == Spec => NonStarvation\n\\* BEGIN AGENT PROOF ivy_examples_ticket_nested/ivy_examples_ticket_nested_Liveness.tla\n<1> SUFFICES ASSUME Spec PROVE NonStarvation\n  OBVIOUS\n<1>1. TN_BN     BY TN_SpecBN\n<1>2. TN_FairA  BY TN_SpecFairA\n<1>3. TN_BI     BY TN_SpecBI\n<1>4. \\A t \\in Thread : TN_PW(t)  BY <1>1, <1>2, <1>3, TN_LtWaitAll\n<1>5. QED BY <1>4 DEF NonStarvation, TN_PW\n\\* END AGENT PROOF ivy_examples_ticket_nested/ivy_examples_ticket_nested_Liveness.tla\n====\n",
+  "units": {
+    "ivy_examples_ticket_nested/ivy_examples_ticket_nested_Safety.tla": {
+      "id": "ivy_examples_ticket_nested/ivy_examples_ticket_nested_Safety.tla",
+      "name": "Safety",
+      "kind": "target",
+      "lineStart": 382,
+      "lineEnd": 384,
+      "proofLines": [
+        384
+      ],
+      "proofRange": [
+        384,
+        384
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:TN_BoxInv",
+        "helper:TN_InvMutex"
+      ]
+    },
+    "ivy_examples_ticket_nested/ivy_examples_ticket_nested_Liveness.tla": {
+      "id": "ivy_examples_ticket_nested/ivy_examples_ticket_nested_Liveness.tla",
+      "name": "Liveness",
+      "kind": "target",
+      "lineStart": 387,
+      "lineEnd": 395,
+      "proofLines": [
+        389,
+        390,
+        391,
+        392,
+        393,
+        394,
+        395
+      ],
+      "proofRange": [
+        389,
+        395
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:TN_LtWaitAll",
+        "helper:TN_SpecBI",
+        "helper:TN_SpecBN",
+        "helper:TN_SpecFairA"
+      ]
+    },
+    "helper:TN_InitInv": {
+      "id": "helper:TN_InitInv",
+      "name": "TN_InitInv",
+      "kind": "helper",
+      "lineStart": 80,
+      "lineEnd": 81,
+      "proofLines": [
+        81
+      ],
+      "proofRange": [
+        81,
+        81
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:TN_NextInv": {
+      "id": "helper:TN_NextInv",
+      "name": "TN_NextInv",
+      "kind": "helper",
+      "lineStart": 83,
+      "lineEnd": 85,
+      "proofLines": [
+        84,
+        85
+      ],
+      "proofRange": [
+        84,
+        85
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:TN_BoxInv": {
+      "id": "helper:TN_BoxInv",
+      "name": "TN_BoxInv",
+      "kind": "helper",
+      "lineStart": 87,
+      "lineEnd": 88,
+      "proofLines": [
+        88
+      ],
+      "proofRange": [
+        88,
+        88
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:TN_InitInv",
+        "helper:TN_NextInv"
+      ]
+    },
+    "helper:TN_InvMutex": {
+      "id": "helper:TN_InvMutex",
+      "name": "TN_InvMutex",
+      "kind": "helper",
+      "lineStart": 90,
+      "lineEnd": 91,
+      "proofLines": [
+        91
+      ],
+      "proofRange": [
+        91,
+        91
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:TN_SpecBN": {
+      "id": "helper:TN_SpecBN",
+      "name": "TN_SpecBN",
+      "kind": "helper",
+      "lineStart": 96,
+      "lineEnd": 97,
+      "proofLines": [
+        97
+      ],
+      "proofRange": [
+        97,
+        97
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:TN_SpecFairA": {
+      "id": "helper:TN_SpecFairA",
+      "name": "TN_SpecFairA",
+      "kind": "helper",
+      "lineStart": 99,
+      "lineEnd": 100,
+      "proofLines": [
+        100
+      ],
+      "proofRange": [
+        100,
+        100
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:TN_SpecBI": {
+      "id": "helper:TN_SpecBI",
+      "name": "TN_SpecBI",
+      "kind": "helper",
+      "lineStart": 102,
+      "lineEnd": 103,
+      "proofLines": [
+        103
+      ],
+      "proofRange": [
+        103,
+        103
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:TN_BoxInv"
+      ]
+    },
+    "helper:TN_EnW": {
+      "id": "helper:TN_EnW",
+      "name": "TN_EnW",
+      "kind": "helper",
+      "lineStart": 109,
+      "lineEnd": 117,
+      "proofLines": [
+        112,
+        113,
+        114,
+        115,
+        116,
+        117
+      ],
+      "proofRange": [
+        112,
+        117
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:TN_EnC": {
+      "id": "helper:TN_EnC",
+      "name": "TN_EnC",
+      "kind": "helper",
+      "lineStart": 119,
+      "lineEnd": 140,
+      "proofLines": [
+        122,
+        123,
+        124,
+        125,
+        126,
+        127,
+        128,
+        129,
+        130,
+        131,
+        132,
+        133,
+        134,
+        135,
+        136,
+        137,
+        138,
+        139,
+        140
+      ],
+      "proofRange": [
+        122,
+        140
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:TN_LW1": {
+      "id": "helper:TN_LW1",
+      "name": "TN_LW1",
+      "kind": "helper",
+      "lineStart": 146,
+      "lineEnd": 162,
+      "proofLines": [
+        147,
+        148,
+        149,
+        150,
+        151,
+        152,
+        153,
+        154,
+        155,
+        156,
+        157,
+        158,
+        159,
+        160,
+        161,
+        162
+      ],
+      "proofRange": [
+        147,
+        162
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:TN_EnW",
+        "helper:TN_NextInv"
+      ]
+    },
+    "helper:TN_LW2": {
+      "id": "helper:TN_LW2",
+      "name": "TN_LW2",
+      "kind": "helper",
+      "lineStart": 168,
+      "lineEnd": 186,
+      "proofLines": [
+        171,
+        172,
+        173,
+        174,
+        175,
+        176,
+        177,
+        178,
+        179,
+        180,
+        181,
+        182,
+        183,
+        184,
+        185,
+        186
+      ],
+      "proofRange": [
+        171,
+        186
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:TN_EnW",
+        "helper:TN_NextInv"
+      ]
+    },
+    "helper:TN_LW3": {
+      "id": "helper:TN_LW3",
+      "name": "TN_LW3",
+      "kind": "helper",
+      "lineStart": 192,
+      "lineEnd": 211,
+      "proofLines": [
+        195,
+        196,
+        197,
+        198,
+        199,
+        200,
+        201,
+        202,
+        203,
+        204,
+        205,
+        206,
+        207,
+        208,
+        209,
+        210,
+        211
+      ],
+      "proofRange": [
+        195,
+        211
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:TN_EnC",
+        "helper:TN_NextInv"
+      ]
+    },
+    "helper:TN_LW4": {
+      "id": "helper:TN_LW4",
+      "name": "TN_LW4",
+      "kind": "helper",
+      "lineStart": 217,
+      "lineEnd": 237,
+      "proofLines": [
+        220,
+        221,
+        222,
+        223,
+        224,
+        225,
+        226,
+        227,
+        228,
+        229,
+        230,
+        231,
+        232,
+        233,
+        234,
+        235,
+        236,
+        237
+      ],
+      "proofRange": [
+        220,
+        237
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:TN_EnC",
+        "helper:TN_NextInv"
+      ]
+    },
+    "helper:TN_LB5": {
+      "id": "helper:TN_LB5",
+      "name": "TN_LB5",
+      "kind": "helper",
+      "lineStart": 243,
+      "lineEnd": 249,
+      "proofLines": [
+        246,
+        247,
+        248,
+        249
+      ],
+      "proofRange": [
+        246,
+        249
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:TN_LB6": {
+      "id": "helper:TN_LB6",
+      "name": "TN_LB6",
+      "kind": "helper",
+      "lineStart": 251,
+      "lineEnd": 256,
+      "proofLines": [
+        254,
+        255,
+        256
+      ],
+      "proofRange": [
+        254,
+        256
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:TN_LB7": {
+      "id": "helper:TN_LB7",
+      "name": "TN_LB7",
+      "kind": "helper",
+      "lineStart": 258,
+      "lineEnd": 264,
+      "proofLines": [
+        261,
+        262,
+        263,
+        264
+      ],
+      "proofRange": [
+        261,
+        264
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:TN_LB8": {
+      "id": "helper:TN_LB8",
+      "name": "TN_LB8",
+      "kind": "helper",
+      "lineStart": 266,
+      "lineEnd": 270,
+      "proofLines": [
+        267,
+        268,
+        269,
+        270
+      ],
+      "proofRange": [
+        267,
+        270
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:TN_LtBase": {
+      "id": "helper:TN_LtBase",
+      "name": "TN_LtBase",
+      "kind": "helper",
+      "lineStart": 275,
+      "lineEnd": 280,
+      "proofLines": [
+        278,
+        279,
+        280
+      ],
+      "proofRange": [
+        278,
+        280
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:TN_LW1"
+      ]
+    },
+    "helper:TN_LtHW": {
+      "id": "helper:TN_LtHW",
+      "name": "TN_LtHW",
+      "kind": "helper",
+      "lineStart": 282,
+      "lineEnd": 287,
+      "proofLines": [
+        285,
+        286,
+        287
+      ],
+      "proofRange": [
+        285,
+        287
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:TN_LW2"
+      ]
+    },
+    "helper:TN_LtHCj0": {
+      "id": "helper:TN_LtHCj0",
+      "name": "TN_LtHCj0",
+      "kind": "helper",
+      "lineStart": 289,
+      "lineEnd": 294,
+      "proofLines": [
+        292,
+        293,
+        294
+      ],
+      "proofRange": [
+        292,
+        294
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:TN_LW3"
+      ]
+    },
+    "helper:TN_LtHCjS": {
+      "id": "helper:TN_LtHCjS",
+      "name": "TN_LtHCjS",
+      "kind": "helper",
+      "lineStart": 296,
+      "lineEnd": 302,
+      "proofLines": [
+        300,
+        301,
+        302
+      ],
+      "proofRange": [
+        300,
+        302
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:TN_LW4"
+      ]
+    },
+    "helper:TN_LtHCjAll": {
+      "id": "helper:TN_LtHCjAll",
+      "name": "TN_LtHCjAll",
+      "kind": "helper",
+      "lineStart": 304,
+      "lineEnd": 311,
+      "proofLines": [
+        307,
+        308,
+        309,
+        310,
+        311
+      ],
+      "proofRange": [
+        307,
+        311
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:TN_LtHCj0",
+        "helper:TN_LtHCjS"
+      ]
+    },
+    "helper:TN_LtHC": {
+      "id": "helper:TN_LtHC",
+      "name": "TN_LtHC",
+      "kind": "helper",
+      "lineStart": 313,
+      "lineEnd": 322,
+      "proofLines": [
+        317,
+        318,
+        319,
+        320,
+        321,
+        322
+      ],
+      "proofRange": [
+        317,
+        322
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:TN_LB5"
+      ]
+    },
+    "helper:TN_LtH": {
+      "id": "helper:TN_LtH",
+      "name": "TN_LtH",
+      "kind": "helper",
+      "lineStart": 324,
+      "lineEnd": 329,
+      "proofLines": [
+        328,
+        329
+      ],
+      "proofRange": [
+        328,
+        329
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:TN_LB6"
+      ]
+    },
+    "helper:TN_LtHall": {
+      "id": "helper:TN_LtHall",
+      "name": "TN_LtHall",
+      "kind": "helper",
+      "lineStart": 331,
+      "lineEnd": 337,
+      "proofLines": [
+        334,
+        335,
+        336,
+        337
+      ],
+      "proofRange": [
+        334,
+        337
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:TN_LtH",
+        "helper:TN_LtHC",
+        "helper:TN_LtHCjAll",
+        "helper:TN_LtHW"
+      ]
+    },
+    "helper:TN_LtSrcStep": {
+      "id": "helper:TN_LtSrcStep",
+      "name": "TN_LtSrcStep",
+      "kind": "helper",
+      "lineStart": 339,
+      "lineEnd": 348,
+      "proofLines": [
+        343,
+        344,
+        345,
+        346,
+        347,
+        348
+      ],
+      "proofRange": [
+        343,
+        348
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:TN_LB7"
+      ]
+    },
+    "helper:TN_LtSrcS2": {
+      "id": "helper:TN_LtSrcS2",
+      "name": "TN_LtSrcS2",
+      "kind": "helper",
+      "lineStart": 350,
+      "lineEnd": 354,
+      "proofLines": [
+        353,
+        354
+      ],
+      "proofRange": [
+        353,
+        354
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:TN_LtHall",
+        "helper:TN_LtSrcStep"
+      ]
+    },
+    "helper:TN_LtSrcAll": {
+      "id": "helper:TN_LtSrcAll",
+      "name": "TN_LtSrcAll",
+      "kind": "helper",
+      "lineStart": 356,
+      "lineEnd": 363,
+      "proofLines": [
+        359,
+        360,
+        361,
+        362,
+        363
+      ],
+      "proofRange": [
+        359,
+        363
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:TN_LtBase",
+        "helper:TN_LtSrcS2"
+      ]
+    },
+    "helper:TN_LtWait": {
+      "id": "helper:TN_LtWait",
+      "name": "TN_LtWait",
+      "kind": "helper",
+      "lineStart": 365,
+      "lineEnd": 373,
+      "proofLines": [
+        368,
+        369,
+        370,
+        371,
+        372,
+        373
+      ],
+      "proofRange": [
+        368,
+        373
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:TN_LB8"
+      ]
+    },
+    "helper:TN_LtWaitAll": {
+      "id": "helper:TN_LtWaitAll",
+      "name": "TN_LtWaitAll",
+      "kind": "helper",
+      "lineStart": 375,
+      "lineEnd": 379,
+      "proofLines": [
+        378,
+        379
+      ],
+      "proofRange": [
+        378,
+        379
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:TN_LtSrcAll",
+        "helper:TN_LtWait"
+      ]
+    }
+  }
+}

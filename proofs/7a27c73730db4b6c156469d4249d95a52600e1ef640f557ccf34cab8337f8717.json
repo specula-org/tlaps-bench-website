@@ -1,0 +1,315 @@
+{
+  "schemaVersion": 1,
+  "specId": "ivy_examples_ticket/ivy_examples_ticket.tla",
+  "sourceName": "ivy_examples_ticket.tla",
+  "sourceSha256": "4887f684a52fc900f26bd6f68f82d97ed9ca3caa41a9ebb25babc912d5a639df",
+  "resultSha256": "a24cda2c6683e7d191706766e7788ec66446e09d320242d3fa7c0fe2fc29f331",
+  "source": "---- MODULE ivy_examples_ticket ----\nEXTENDS ivy_examples_ticketDefs\n\n\\* BEGIN AGENT HELPERS\nAgTypeOK ==\n    /\\ pc \\in [Thread -> {\"Idle\", \"Waiting\", \"Critical\"}]\n    /\\ service \\in Nat\n    /\\ next_ticket \\in Nat\n    /\\ m \\in [Thread -> Nat]\n\nAgInv ==\n    /\\ AgTypeOK\n    /\\ service <= next_ticket\n    /\\ \\A t \\in Thread : (pc[t] = \"Waiting\" \\/ pc[t] = \"Critical\") => m[t] < next_ticket\n    /\\ \\A t1, t2 \\in Thread : ((pc[t1] = \"Waiting\" \\/ pc[t1] = \"Critical\") /\\ (pc[t2] = \"Waiting\" \\/ pc[t2] = \"Critical\") /\\ t1 # t2) => m[t1] # m[t2]\n    /\\ \\A t \\in Thread : pc[t] = \"Critical\" => m[t] <= service\n    /\\ \\A t \\in Thread : (pc[t] = \"Waiting\" \\/ pc[t] = \"Critical\") => service <= m[t]\n\nAgCover ==\n    \\A k \\in Nat : (service <= k /\\ k < next_ticket) => (\\E t \\in Thread : (pc[t] = \"Waiting\" \\/ pc[t] = \"Critical\") /\\ m[t] = k)\n\nLEMMA AgInit == Init => AgInv\nBY Isa, SMTT(\"r10\") DEF Init, AgInv, AgTypeOK\n\nLEMMA AgTake == ASSUME NEW t \\in Thread, AgInv, TakeTicket(t) PROVE AgInv'\nBY Zenon, SMTT(\"r10\") DEF AgInv, AgTypeOK, TakeTicket, vars\n\nLEMMA AgEnter == ASSUME NEW t \\in Thread, NEW k \\in Nat, AgInv, EnterCritical(t, k) PROVE AgInv'\nBY Zenon, SMTT(\"r10\") DEF AgInv, AgTypeOK, EnterCritical, vars\n\nLEMMA AgLeave == ASSUME NEW t \\in Thread, AgInv, LeaveCritical(t) PROVE AgInv'\nBY Zenon, SMTT(\"r10\") DEF AgInv, AgTypeOK, LeaveCritical, vars\n\nLEMMA AgStep == ASSUME NEW t \\in Thread, AgInv, Step(t) PROVE AgInv'\nBY AgTake, AgEnter, AgLeave, Zenon DEF Step\n\nLEMMA AgNext == AgInv /\\ [Next]_vars => AgInv'\nBY AgStep, Zenon, SMTT(\"r10\") DEF Next, Step, AgInv, AgTypeOK, vars, TakeTicket, EnterCritical, LeaveCritical\n\nLEMMA AgImpliesME == AgInv => MutualExclusion\nBY Zenon, SMTT(\"r10\") DEF AgInv, AgTypeOK, MutualExclusion\n\nLEMMA AgCoverInit == Init => AgCover\nBY Zenon, SMTT(\"r10\") DEF Init, AgCover\n\nLEMMA AgCoverTake == ASSUME NEW t \\in Thread, AgInv, AgCover, TakeTicket(t) PROVE AgCover'\nBY Zenon, SMTT(\"r10\") DEF AgInv, AgTypeOK, AgCover, TakeTicket, vars\n\nLEMMA AgCoverEnter == ASSUME NEW t \\in Thread, NEW k \\in Nat, AgInv, AgCover, EnterCritical(t, k) PROVE AgCover'\nBY Zenon, SMTT(\"r10\") DEF AgInv, AgTypeOK, AgCover, EnterCritical, vars\n\nLEMMA AgCoverLeave == ASSUME NEW t \\in Thread, AgInv, AgCover, LeaveCritical(t) PROVE AgCover'\nBY Zenon, SMTT(\"r10\") DEF AgInv, AgTypeOK, AgCover, LeaveCritical, vars\n\nAgPEnter(w, k) == /\\ pc[w] = \"Waiting\"\n                  /\\ m[w] = k\n                  /\\ k <= service\n                  /\\ AgInv\nAgQEnter(w) == pc[w] = \"Critical\"\n\nLEMMA AgB1Enter == ASSUME NEW w \\in Thread, NEW k \\in Nat PROVE AgPEnter(w, k) /\\ [Next]_vars => (AgPEnter(w, k)' \\/ AgQEnter(w)')\nBY Zenon, SMTT(\"r10\") DEF AgPEnter, AgQEnter, AgInv, AgTypeOK, Next, Step, TakeTicket, EnterCritical, LeaveCritical, vars\n\nLEMMA AgB2Enter == ASSUME NEW w \\in Thread, NEW k \\in Nat PROVE AgPEnter(w, k) /\\ <<Next /\\ Step(w)>>_vars => AgQEnter(w)'\nBY Zenon, SMTT(\"r10\") DEF AgPEnter, AgQEnter, AgInv, AgTypeOK, Next, Step, TakeTicket, EnterCritical, LeaveCritical, vars\n\nLEMMA AgB3Enter == ASSUME NEW w \\in Thread, NEW k \\in Nat PROVE AgPEnter(w, k) => ENABLED <<Step(w)>>_vars\nBY ExpandENABLED, Zenon, Isa, SMTT(\"r10\") DEF AgPEnter, AgQEnter, AgInv, AgTypeOK, Next, Step, TakeTicket, EnterCritical, LeaveCritical, vars\n\nAgPLeave(w, s) == /\\ pc[w] = \"Critical\"\n                  /\\ m[w] = s\n                  /\\ service = s\n                  /\\ AgInv\nAgQLeave(s) == service = s + 1\n\nLEMMA AgB1Leave == ASSUME NEW w \\in Thread, NEW s \\in Nat PROVE AgPLeave(w, s) /\\ [Next]_vars => (AgPLeave(w, s)' \\/ AgQLeave(s)')\nBY Zenon, SMTT(\"r10\") DEF AgPLeave, AgQLeave, AgInv, AgTypeOK, Next, Step, TakeTicket, EnterCritical, LeaveCritical, vars\n\nLEMMA AgB2Leave == ASSUME NEW w \\in Thread, NEW s \\in Nat PROVE AgPLeave(w, s) /\\ <<Next /\\ Step(w)>>_vars => AgQLeave(s)'\nBY Zenon, SMTT(\"r10\") DEF AgPLeave, AgQLeave, AgInv, AgTypeOK, Next, Step, TakeTicket, EnterCritical, LeaveCritical, vars\n\nLEMMA AgB3Leave == ASSUME NEW w \\in Thread, NEW s \\in Nat PROVE AgPLeave(w, s) => ENABLED <<Step(w)>>_vars\nBY ExpandENABLED, Zenon, Isa, SMTT(\"r10\") DEF AgPLeave, AgQLeave, AgInv, AgTypeOK, Next, Step, TakeTicket, EnterCritical, LeaveCritical, vars\n\nLEMMA AgTransLeadsto == ASSUME NEW P, NEW Q, NEW R, P ~> Q, Q ~> R PROVE P ~> R\nBY PTL\n\nLEMMA AgReflLeadsto == ASSUME NEW P PROVE P ~> P\nBY PTL\n\\* END AGENT HELPERS\n\nTHEOREM Safety == SafetySpec => []MutualExclusion\n\\* BEGIN AGENT PROOF ivy_examples_ticket/ivy_examples_ticket_Safety.tla\n<1>1. SafetySpec => []AgInv\n  BY AgInit, AgNext, PTL DEF SafetySpec\n<1>2. []AgInv => []MutualExclusion\n  BY AgImpliesME, PTL\n<1>3. QED\n  BY <1>1, <1>2, PTL\n\\* END AGENT PROOF ivy_examples_ticket/ivy_examples_ticket_Safety.tla\n\nTHEOREM Liveness == Spec => NonStarvation\n\\* BEGIN AGENT PROOF ivy_examples_ticket/ivy_examples_ticket_Liveness.tla\n<1>1. Spec => []AgInv\n  BY AgInit, AgNext, PTL DEF Spec, SafetySpec\n<1>2. ASSUME NEW w \\in Thread, NEW k \\in Nat PROVE Spec => (AgPEnter(w, k) ~> AgQEnter(w))\n  BY AgB1Enter, AgB2Enter, AgB3Enter, PTL DEF Spec, SafetySpec, AgPEnter, AgQEnter, Next, vars\n<1>3. ASSUME NEW w \\in Thread, NEW s \\in Nat PROVE Spec => (AgPLeave(w, s) ~> AgQLeave(s))\n  BY AgB1Leave, AgB2Leave, AgB3Leave, PTL DEF Spec, SafetySpec, AgPLeave, AgQLeave, Next, vars\n<1>4. QED\n  BY <1>1, <1>2, <1>3, AgTransLeadsto, AgReflLeadsto, PTL DEF Spec, NonStarvation, AgPEnter, AgQEnter, AgPLeave, AgQLeave\n\\* END AGENT PROOF ivy_examples_ticket/ivy_examples_ticket_Liveness.tla\n====\n",
+  "units": {
+    "ivy_examples_ticket/ivy_examples_ticket_Safety.tla": {
+      "id": "ivy_examples_ticket/ivy_examples_ticket_Safety.tla",
+      "name": "Safety",
+      "kind": "target",
+      "lineStart": 92,
+      "lineEnd": 99,
+      "proofLines": [
+        94,
+        95,
+        96,
+        97,
+        98,
+        99
+      ],
+      "proofRange": [
+        94,
+        99
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgImpliesME",
+        "helper:AgInit",
+        "helper:AgNext"
+      ]
+    },
+    "ivy_examples_ticket/ivy_examples_ticket_Liveness.tla": {
+      "id": "ivy_examples_ticket/ivy_examples_ticket_Liveness.tla",
+      "name": "Liveness",
+      "kind": "target",
+      "lineStart": 102,
+      "lineEnd": 111,
+      "proofLines": [
+        104,
+        105,
+        106,
+        107,
+        108,
+        109,
+        110,
+        111
+      ],
+      "proofRange": [
+        104,
+        111
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgB1Enter",
+        "helper:AgB1Leave",
+        "helper:AgB2Enter",
+        "helper:AgB2Leave",
+        "helper:AgB3Enter",
+        "helper:AgB3Leave",
+        "helper:AgInit",
+        "helper:AgNext",
+        "helper:AgReflLeadsto",
+        "helper:AgTransLeadsto"
+      ]
+    },
+    "helper:AgInit": {
+      "id": "helper:AgInit",
+      "name": "AgInit",
+      "kind": "helper",
+      "lineStart": 22,
+      "lineEnd": 23,
+      "proofLines": [
+        23
+      ],
+      "proofRange": [
+        23,
+        23
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgTake": {
+      "id": "helper:AgTake",
+      "name": "AgTake",
+      "kind": "helper",
+      "lineStart": 25,
+      "lineEnd": 26,
+      "proofLines": [
+        26
+      ],
+      "proofRange": [
+        26,
+        26
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgEnter": {
+      "id": "helper:AgEnter",
+      "name": "AgEnter",
+      "kind": "helper",
+      "lineStart": 28,
+      "lineEnd": 29,
+      "proofLines": [
+        29
+      ],
+      "proofRange": [
+        29,
+        29
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgLeave": {
+      "id": "helper:AgLeave",
+      "name": "AgLeave",
+      "kind": "helper",
+      "lineStart": 31,
+      "lineEnd": 32,
+      "proofLines": [
+        32
+      ],
+      "proofRange": [
+        32,
+        32
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgStep": {
+      "id": "helper:AgStep",
+      "name": "AgStep",
+      "kind": "helper",
+      "lineStart": 34,
+      "lineEnd": 35,
+      "proofLines": [
+        35
+      ],
+      "proofRange": [
+        35,
+        35
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgEnter",
+        "helper:AgLeave",
+        "helper:AgTake"
+      ]
+    },
+    "helper:AgNext": {
+      "id": "helper:AgNext",
+      "name": "AgNext",
+      "kind": "helper",
+      "lineStart": 37,
+      "lineEnd": 38,
+      "proofLines": [
+        38
+      ],
+      "proofRange": [
+        38,
+        38
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgStep"
+      ]
+    },
+    "helper:AgImpliesME": {
+      "id": "helper:AgImpliesME",
+      "name": "AgImpliesME",
+      "kind": "helper",
+      "lineStart": 40,
+      "lineEnd": 41,
+      "proofLines": [
+        41
+      ],
+      "proofRange": [
+        41,
+        41
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgB1Enter": {
+      "id": "helper:AgB1Enter",
+      "name": "AgB1Enter",
+      "kind": "helper",
+      "lineStart": 61,
+      "lineEnd": 62,
+      "proofLines": [
+        62
+      ],
+      "proofRange": [
+        62,
+        62
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgB2Enter": {
+      "id": "helper:AgB2Enter",
+      "name": "AgB2Enter",
+      "kind": "helper",
+      "lineStart": 64,
+      "lineEnd": 65,
+      "proofLines": [
+        65
+      ],
+      "proofRange": [
+        65,
+        65
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgB3Enter": {
+      "id": "helper:AgB3Enter",
+      "name": "AgB3Enter",
+      "kind": "helper",
+      "lineStart": 67,
+      "lineEnd": 68,
+      "proofLines": [
+        68
+      ],
+      "proofRange": [
+        68,
+        68
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgB1Leave": {
+      "id": "helper:AgB1Leave",
+      "name": "AgB1Leave",
+      "kind": "helper",
+      "lineStart": 76,
+      "lineEnd": 77,
+      "proofLines": [
+        77
+      ],
+      "proofRange": [
+        77,
+        77
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgB2Leave": {
+      "id": "helper:AgB2Leave",
+      "name": "AgB2Leave",
+      "kind": "helper",
+      "lineStart": 79,
+      "lineEnd": 80,
+      "proofLines": [
+        80
+      ],
+      "proofRange": [
+        80,
+        80
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgB3Leave": {
+      "id": "helper:AgB3Leave",
+      "name": "AgB3Leave",
+      "kind": "helper",
+      "lineStart": 82,
+      "lineEnd": 83,
+      "proofLines": [
+        83
+      ],
+      "proofRange": [
+        83,
+        83
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgTransLeadsto": {
+      "id": "helper:AgTransLeadsto",
+      "name": "AgTransLeadsto",
+      "kind": "helper",
+      "lineStart": 85,
+      "lineEnd": 86,
+      "proofLines": [
+        86
+      ],
+      "proofRange": [
+        86,
+        86
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgReflLeadsto": {
+      "id": "helper:AgReflLeadsto",
+      "name": "AgReflLeadsto",
+      "kind": "helper",
+      "lineStart": 88,
+      "lineEnd": 89,
+      "proofLines": [
+        89
+      ],
+      "proofRange": [
+        89,
+        89
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    }
+  }
+}

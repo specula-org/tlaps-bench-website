@@ -1,0 +1,1894 @@
+{
+  "schemaVersion": 1,
+  "specId": "tlaplus_examples_FlashProtocol/FlashWithMutex.tla",
+  "sourceName": "FlashWithMutex.tla",
+  "sourceSha256": "fc36e82b93d0d4786f395c00395380d7c0e23d584beafe261da44e60c403656b",
+  "resultSha256": "2c47940933401850be3190c6db58d0a87d449327252798cc59729213c53e5ba7",
+  "source": "---- MODULE FlashWithMutex ----\nEXTENDS FlashWithMutexDefs\n\n\\* BEGIN AGENT HELPERS\n\nLOCAL AgtT == INSTANCE TLAPS\n\nAgtTrk(p) ==\n  \\/ (Dir.ShrVld /\\ p \\in Dir.ShrSet)\n  \\/ (Dir.HeadVld /\\ Dir.HeadPtr = p)\n  \\/ p \\in Dir.InvSet\n  \\/ (ShWbMsg.Cmd = \"SHWB_ShWb\" /\\ ShWbMsg.Proc = p)\n\nAgtTrkD(p) == (Dir.ShrVld /\\ p \\in Dir.ShrSet) \\/ (Dir.HeadVld /\\ Dir.HeadPtr = p)\n\nAgtTrkH(p) == (Dir.HeadVld /\\ Dir.HeadPtr = p) \\/ (ShWbMsg.Cmd = \"SHWB_ShWb\" /\\ ShWbMsg.Proc = p)\n\nAgtFwd == \\E s \\in NODE : (UniMsg[s].Cmd \\in {\"UNI_Get\",\"UNI_GetX\"} /\\ UniMsg[s].Proc # Home)\n\nAgtHomePut == UniMsg[Home].Cmd \\in {\"UNI_Put\",\"UNI_PutX\"}\n\nAgtGTy ==\n  /\\ TypeOK\n  /\\ \\A p \\in NODE : Proc[p].CacheState \\in {\"CACHE_S\",\"CACHE_E\"} => Proc[p].CacheData \\in DATA\n  /\\ \\A n \\in NODE : UniMsg[n].Cmd \\in {\"UNI_Put\",\"UNI_PutX\"} => UniMsg[n].Data \\in DATA\n  /\\ (WbMsg.Cmd = \"WB_Wb\" => WbMsg.Proc \\in NODE /\\ WbMsg.Data \\in DATA)\n  /\\ (ShWbMsg.Cmd = \"SHWB_ShWb\" => ShWbMsg.Data \\in DATA)\n  /\\ (ShWbMsg.Cmd # \"SHWB_None\" => ShWbMsg.Proc \\in NODE /\\ ShWbMsg.Proc # Home)\n\nAgtGDir ==\n  /\\ (Dir.HeadVld => Dir.HeadPtr \\in NODE)\n  /\\ (~Dir.HeadVld => Dir.ShrSet = {})\n  /\\ (~Dir.ShrVld => Dir.ShrSet = {})\n  /\\ (Dir.ShrVld => Dir.HeadVld)\n  /\\ (~Dir.HeadVld => ~Dir.ShrVld)\n  /\\ ((Dir.Dirty /\\ Dir.Local) => Proc[Home].CacheState = \"CACHE_E\")\n  /\\ (Dir.Dirty => (Dir.Local \\/ Dir.HeadVld))\n  /\\ (Proc[Home].CacheState = \"CACHE_E\" => (Dir.Dirty /\\ Dir.Local))\n  /\\ ((Dir.Dirty /\\ ~Dir.Local) => (Dir.HeadVld /\\ Dir.HeadPtr # Home))\n  /\\ (Dir.HeadVld => Dir.HeadPtr # Home)\n  /\\ Home \\notin Dir.ShrSet\n  /\\ Home \\notin Dir.InvSet\n  /\\ (Dir.Dirty => Dir.ShrSet = {})\n  /\\ (Dir.Dirty => ~Dir.ShrVld)\n  /\\ (Proc[Home].CacheState \\in {\"CACHE_S\",\"CACHE_E\"} => Dir.Local)\n\nAgtGCol ==\n  /\\ InvMsg[Home].Cmd = \"INV_None\"\n  /\\ \\A p \\in NODE : InvMsg[p].Cmd # \"INV_None\" => (Collecting /\\ Dir.Pending /\\ p \\in Dir.InvSet)\n  /\\ (Collecting => Dir.Pending)\n  /\\ (Collecting => ~Dir.ShrVld)\n  /\\ (Collecting => (\\A p \\in NODE : (p \\in Dir.InvSet) <=> (InvMsg[p].Cmd # \"INV_None\")))\n  /\\ (Collecting => Dir.InvSet # {})\n  /\\ (~Collecting => Dir.InvSet \\subseteq Dir.ShrSet)\n  /\\ \\A p \\in NODE : InvMsg[p].Cmd = \"INV_InvAck\" => Proc[p].CacheState = \"CACHE_I\"\n  /\\ \\A p \\in NODE : (InvMsg[p].Cmd = \"INV_InvAck\" /\\ UniMsg[p].Cmd = \"UNI_Put\") => Proc[p].InvMarked\n  /\\ \\A p \\in NODE : UniMsg[p].Cmd = \"UNI_PutX\" => InvMsg[p].Cmd = \"INV_None\"\n  /\\ (Collecting => \\A q \\in NODE : UniMsg[q].Cmd = \"UNI_PutX\" => (UniMsg[q].Proc = Home /\\ PendReqSrc = q))\n  /\\ (Collecting => \\A p \\in NODE :\n        (Proc[p].CacheState = \"CACHE_S\" \\/ (p # Home /\\ UniMsg[p].Cmd = \"UNI_Put\" /\\ ~Proc[p].InvMarked))\n          => p \\in Dir.InvSet)\n\nAgtGMsg ==\n  /\\ \\A p \\in NODE : (Proc[p].ProcCmd # \"NODE_None\") <=> (UniMsg[p].Cmd # \"UNI_None\")\n  /\\ \\A p \\in NODE : (p # Home /\\ UniMsg[p].Cmd = \"UNI_PutX\") => Proc[p].ProcCmd = \"NODE_GetX\"\n  /\\ \\A p \\in NODE :\n       /\\ (UniMsg[p].Cmd \\in {\"UNI_Get\",\"UNI_Put\"} => Proc[p].ProcCmd = \"NODE_Get\")\n       /\\ (UniMsg[p].Cmd \\in {\"UNI_GetX\",\"UNI_PutX\"} => Proc[p].ProcCmd = \"NODE_GetX\")\n  /\\ \\A p \\in NODE : UniMsg[p].Cmd \\in {\"UNI_Get\",\"UNI_GetX\"} => (UniMsg[p].Proc \\in NODE /\\ UniMsg[p].Proc # p)\n  /\\ \\A p \\in NODE : (p # Home /\\ UniMsg[p].Cmd \\in {\"UNI_Get\",\"UNI_GetX\"}) => Proc[p].CacheState = \"CACHE_I\"\n  /\\ RpMsg[Home].Cmd = \"RP_None\"\n  /\\ \\A p \\in NODE : RpMsg[p].Cmd = \"RP_Replace\" => UniMsg[p].Cmd # \"UNI_Put\"\n  /\\ \\A p \\in NODE : (RpMsg[p].Cmd = \"RP_Replace\" /\\ UniMsg[p].Cmd = \"UNI_Get\") => UniMsg[p].Proc = Home\n\nAgtGTok ==\n  /\\ ((Dir.Pending /\\ ~Collecting) =>\n        (NakcMsg.Cmd = \"NAKC_Nakc\" \\/ ShWbMsg.Cmd # \"SHWB_None\" \\/ AgtHomePut \\/ AgtFwd))\n  /\\ (~Dir.Pending => (NakcMsg.Cmd = \"NAKC_None\" /\\ ShWbMsg.Cmd = \"SHWB_None\"))\n  /\\ ((Dir.Pending /\\ ~Collecting) => PendReqSrc \\in NODE)\n  /\\ \\A s \\in NODE : (UniMsg[s].Cmd \\in {\"UNI_Get\",\"UNI_GetX\"} /\\ UniMsg[s].Proc # Home)\n        => (~Collecting /\\ Dir.Pending /\\ PendReqSrc = s)\n  /\\ (NakcMsg.Cmd = \"NAKC_Nakc\" => (Dir.Pending /\\ ~Collecting))\n  /\\ (ShWbMsg.Cmd # \"SHWB_None\" => (Dir.Pending /\\ ~Collecting))\n  /\\ (AgtHomePut => Dir.Pending)\n  /\\ (NakcMsg.Cmd = \"NAKC_Nakc\" => (ShWbMsg.Cmd = \"SHWB_None\" /\\ ~AgtHomePut /\\ ~AgtFwd))\n  /\\ (ShWbMsg.Cmd # \"SHWB_None\" => (NakcMsg.Cmd = \"NAKC_None\" /\\ ~AgtHomePut /\\ ~AgtFwd))\n  /\\ (AgtHomePut => (NakcMsg.Cmd = \"NAKC_None\" /\\ ShWbMsg.Cmd = \"SHWB_None\" /\\ ~AgtFwd))\n  /\\ (Collecting => ~AgtHomePut)\n\nAgtGExc ==\n  /\\ \\A p \\in NODE : UniMsg[p].Cmd = \"UNI_PutX\" =>\n       /\\ Dir.Dirty\n       /\\ UniMsg[p].Data = CurrData\n       /\\ WbMsg.Cmd # \"WB_Wb\"\n       /\\ ShWbMsg.Cmd # \"SHWB_ShWb\"\n       /\\ UniMsg[Home].Cmd # \"UNI_Put\"\n       /\\ \\A q \\in NODE : Proc[q].CacheState # \"CACHE_E\"\n       /\\ \\A q \\in NODE : q # p => UniMsg[q].Cmd # \"UNI_PutX\"\n       /\\ (p # Home => ((Dir.HeadVld /\\ Dir.HeadPtr = p) \\/ (ShWbMsg.Cmd = \"SHWB_FAck\" /\\ ShWbMsg.Proc = p)))\n  /\\ (WbMsg.Cmd = \"WB_Wb\" =>\n       /\\ Dir.Dirty\n       /\\ WbMsg.Data = CurrData\n       /\\ ShWbMsg.Cmd # \"SHWB_ShWb\"\n       /\\ UniMsg[Home].Cmd # \"UNI_Put\"\n       /\\ \\A q \\in NODE : Proc[q].CacheState # \"CACHE_E\"\n       /\\ \\A q \\in NODE : UniMsg[q].Cmd # \"UNI_PutX\")\n  /\\ (ShWbMsg.Cmd = \"SHWB_ShWb\" =>\n       /\\ Dir.Dirty\n       /\\ ShWbMsg.Data = CurrData\n       /\\ WbMsg.Cmd # \"WB_Wb\"\n       /\\ UniMsg[Home].Cmd # \"UNI_Put\"\n       /\\ \\A q \\in NODE : Proc[q].CacheState # \"CACHE_E\"\n       /\\ \\A q \\in NODE : UniMsg[q].Cmd # \"UNI_PutX\")\n  /\\ (UniMsg[Home].Cmd = \"UNI_Put\" =>\n       /\\ Dir.Dirty\n       /\\ UniMsg[Home].Data = CurrData\n       /\\ WbMsg.Cmd # \"WB_Wb\"\n       /\\ ShWbMsg.Cmd # \"SHWB_ShWb\"\n       /\\ \\A q \\in NODE : Proc[q].CacheState # \"CACHE_E\"\n       /\\ \\A q \\in NODE : UniMsg[q].Cmd # \"UNI_PutX\")\n  /\\ (ShWbMsg.Cmd = \"SHWB_FAck\" =>\n       /\\ \\A q \\in NODE : Proc[q].CacheState = \"CACHE_E\" => q = ShWbMsg.Proc\n       /\\ \\A q \\in NODE : UniMsg[q].Cmd = \"UNI_PutX\" => q = ShWbMsg.Proc)\n  /\\ \\A p \\in NODE : (p # Home /\\ Proc[p].CacheState = \"CACHE_E\") =>\n       ((Dir.HeadVld /\\ Dir.HeadPtr = p) \\/ (ShWbMsg.Cmd = \"SHWB_FAck\" /\\ ShWbMsg.Proc = p))\n  /\\ \\A p, q \\in NODE : (p # q /\\ Proc[p].CacheState = \"CACHE_E\" /\\ Proc[q].CacheState = \"CACHE_S\") => Collecting\n  /\\ \\A p, q \\in NODE :\n       (UniMsg[p].Cmd = \"UNI_Put\" /\\ ~Proc[p].InvMarked /\\ Proc[q].CacheState = \"CACHE_E\") => Collecting\n  /\\ \\A p \\in NODE : (UniMsg[p].Cmd = \"UNI_Put\" /\\ ~Proc[p].InvMarked) =>\n       UniMsg[p].Data = (IF Collecting THEN PrevData ELSE CurrData)\n\nAgtGShr ==\n  /\\ \\A p \\in NODE : (p # Home /\\ Proc[p].CacheState = \"CACHE_S\") => AgtTrk(p)\n  /\\ (~Dir.Pending => \\A p \\in NODE : (p # Home /\\ Proc[p].CacheState = \"CACHE_S\") => AgtTrkD(p))\n  /\\ \\A p \\in NODE : (p # Home /\\ UniMsg[p].Cmd = \"UNI_Put\" /\\ ~Proc[p].InvMarked) => AgtTrk(p)\n  /\\ (~Dir.Pending => \\A p \\in NODE :\n        (p # Home /\\ UniMsg[p].Cmd = \"UNI_Put\" /\\ ~Proc[p].InvMarked) => AgtTrkD(p))\n  /\\ \\A p \\in NODE :\n       (/\\ p # Home /\\ Dir.Dirty /\\ p \\notin Dir.InvSet\n        /\\ (Proc[p].CacheState = \"CACHE_S\" \\/ (UniMsg[p].Cmd = \"UNI_Put\" /\\ ~Proc[p].InvMarked)))\n       => (ShWbMsg.Cmd = \"SHWB_ShWb\" \\/ UniMsg[Home].Cmd = \"UNI_Put\")\n  /\\ \\A p \\in NODE :\n       (/\\ RpMsg[p].Cmd = \"RP_Replace\" /\\ Dir.ShrVld\n        /\\ (Proc[p].CacheState = \"CACHE_S\" \\/ (UniMsg[p].Cmd = \"UNI_Put\" /\\ ~Proc[p].InvMarked)))\n       => AgtTrkH(p)\n  /\\ ((ShWbMsg.Cmd = \"SHWB_ShWb\" /\\ RpMsg[ShWbMsg.Proc].Cmd = \"RP_Replace\")\n        => Proc[ShWbMsg.Proc].CacheState # \"CACHE_S\")\n\nAgtGPrp ==\n  /\\ CacheDataProp\n  /\\ MemDataProp\n  /\\ Lemma_1\n  /\\ Lemma_2\n  /\\ Lemma_3\n  /\\ Lemma_4\n\nAgtInv ==\n  /\\ AgtGTy\n  /\\ AgtGDir\n  /\\ AgtGCol\n  /\\ AgtGMsg\n  /\\ AgtGTok\n  /\\ AgtGExc\n  /\\ AgtGShr\n  /\\ AgtGPrp\n\nLEMMA AgtInvInit == Init => AgtInv\n  BY AgtT!SMTT(\"r30\") DEF Init, AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars\n\nLEMMA AgtNxa01 == ASSUME AgtInv, NEW src \\in NODE, NEW data \\in DATA, Store(src, data) PROVE AgtInv'\n  BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, Store\n\nLEMMA AgtNxa02 == ASSUME AgtInv, NEW src \\in NODE, NEW c \\in ReqCmd, PI_Remote(src, c) PROVE AgtInv'\n  BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Remote, ReqCmd\n\nLEMMA AgtNxa03 == ASSUME AgtInv, NEW src \\in NODE, PI_Remote_Replace(src) PROVE AgtInv'\n  BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Remote_Replace\n\nLEMMA AgtNxa04 == ASSUME AgtInv, NEW src \\in NODE, NI_Local_Get_Nak(src) PROVE AgtInv'\n  BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_Get_Nak\n\nLEMMA AgtNxa05 == ASSUME AgtInv, NEW src \\in NODE, NI_Local_Get_Get(src) PROVE AgtInv'\n  BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_Get_Get\n\nLEMMA AgtNxa06 == ASSUME AgtInv, NEW src \\in NODE, NI_Local_Get_Put(src) PROVE AgtInv'\n  <1>t00. (Home \\in NODE)'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_Get_Put\n  <1>t01. (Proc \\in [NODE -> [ProcCmd : NODE_CMD, InvMarked : BOOLEAN, CacheState : CACHE_STATE, CacheData : DataU]])'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_Get_Put\n  <1>t02. (Dir \\in [Pending : BOOLEAN, Local : BOOLEAN, Dirty : BOOLEAN, HeadVld : BOOLEAN, HeadPtr : NodeU, ShrVld : BOOLEAN, ShrSet : SUBSET NODE, InvSet : SUBSET NODE])'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_Get_Put\n  <1>t03. (MemData \\in DATA)'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_Get_Put\n  <1>t04. (UniMsg \\in [NODE -> [Cmd : UNI_CMD, Proc : NodeU, Data : DataU]])'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_Get_Put\n  <1>t05. (InvMsg \\in [NODE -> [Cmd : INV_CMD]])'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_Get_Put\n  <1>t06. (RpMsg \\in [NODE -> [Cmd : RP_CMD]])'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_Get_Put\n  <1>t07. (WbMsg \\in [Cmd : WB_CMD, Proc : NodeU, Data : DataU])'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_Get_Put\n  <1>t08. (ShWbMsg \\in [Cmd : SHWB_CMD, Proc : NodeU, Data : DataU])'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_Get_Put\n  <1>t09. (NakcMsg \\in [Cmd : NAKC_CMD])'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_Get_Put\n  <1>t10. (CurrData \\in DATA)'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_Get_Put\n  <1>t11. (PrevData \\in DATA)'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_Get_Put\n  <1>t12. (PendReqSrc \\in NodeU)'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_Get_Put\n  <1>t13. (PendReqCmd \\in UniU)'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_Get_Put\n  <1>t14. (Collecting \\in BOOLEAN)'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_Get_Put\n  <1>t15. (FwdCmd \\in UNI_CMD)'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_Get_Put\n  <1>t16. (FwdSrc \\in NodeU)'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_Get_Put\n  <1>ty. TypeOK'\n    BY <1>t00, <1>t01, <1>t02, <1>t03, <1>t04, <1>t05, <1>t06, <1>t07, <1>t08, <1>t09, <1>t10, <1>t11, <1>t12, <1>t13, <1>t14, <1>t15, <1>t16 DEF TypeOK\n  <1>r00. (\\A p \\in NODE : Proc[p].CacheState \\in {\"CACHE_S\",\"CACHE_E\"} => Proc[p].CacheData \\in DATA)'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_Get_Put\n  <1>r01. (\\A n \\in NODE : UniMsg[n].Cmd \\in {\"UNI_Put\",\"UNI_PutX\"} => UniMsg[n].Data \\in DATA)'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_Get_Put\n  <1>r02. (WbMsg.Cmd = \"WB_Wb\" => WbMsg.Proc \\in NODE /\\ WbMsg.Data \\in DATA)'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_Get_Put\n  <1>r03. (ShWbMsg.Cmd = \"SHWB_ShWb\" => ShWbMsg.Data \\in DATA)'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_Get_Put\n  <1>r04. (ShWbMsg.Cmd # \"SHWB_None\" => ShWbMsg.Proc \\in NODE /\\ ShWbMsg.Proc # Home)'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_Get_Put\n  <1>tq. AgtGTy'\n    BY <1>ty, <1>r00, <1>r01, <1>r02, <1>r03, <1>r04 DEF AgtGTy\n  <1>g2. AgtGDir'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_Get_Put\n  <1>g3. AgtGCol'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_Get_Put\n  <1>g4. AgtGMsg'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_Get_Put\n  <1>g5. AgtGTok'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_Get_Put\n  <1>g6. AgtGExc'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_Get_Put\n  <1>g7. AgtGShr'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_Get_Put\n  <1>g8. AgtGPrp'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_Get_Put\n  <1>qq. QED BY <1>tq, <1>g2, <1>g3, <1>g4, <1>g5, <1>g6, <1>g7, <1>g8 DEF AgtInv\n\nLEMMA AgtNxa07 == ASSUME AgtInv, NEW src \\in NODE, NI_Local_GetX_Nak(src) PROVE AgtInv'\n  BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_GetX_Nak\n\nLEMMA AgtNxa08 == ASSUME AgtInv, NEW src \\in NODE, NI_Local_GetX_GetX(src) PROVE AgtInv'\n  BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_GetX_GetX\n\nLEMMA AgtNxa09 == ASSUME AgtInv, NEW src \\in NODE, NI_Local_GetX_PutX(src) PROVE AgtInv'\n  <1>b1. CASE NI_Local_GetX_PutX_Dirty(src)\n    <2>g1. AgtGTy'\n      BY <1>b1, AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_GetX_PutX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, ProcHomeInvalid, ProcHomeInvalidMarked, NoOtherSharers, InvNodes\n    <2>g2. AgtGDir'\n      BY <1>b1, AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_GetX_PutX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, ProcHomeInvalid, ProcHomeInvalidMarked, NoOtherSharers, InvNodes\n    <2>g3. AgtGCol'\n      BY <1>b1, AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_GetX_PutX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, ProcHomeInvalid, ProcHomeInvalidMarked, NoOtherSharers, InvNodes\n    <2>g4. AgtGMsg'\n      BY <1>b1, AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_GetX_PutX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, ProcHomeInvalid, ProcHomeInvalidMarked, NoOtherSharers, InvNodes\n    <2>g5. AgtGTok'\n      BY <1>b1, AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_GetX_PutX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, ProcHomeInvalid, ProcHomeInvalidMarked, NoOtherSharers, InvNodes\n    <2>g6. AgtGExc'\n      BY <1>b1, AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_GetX_PutX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, ProcHomeInvalid, ProcHomeInvalidMarked, NoOtherSharers, InvNodes\n    <2>g7. AgtGShr'\n      BY <1>b1, AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_GetX_PutX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, ProcHomeInvalid, ProcHomeInvalidMarked, NoOtherSharers, InvNodes\n    <2>g8. AgtGPrp'\n      BY <1>b1, AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_GetX_PutX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, ProcHomeInvalid, ProcHomeInvalidMarked, NoOtherSharers, InvNodes\n    <2>qq. QED BY <2>g1, <2>g2, <2>g3, <2>g4, <2>g5, <2>g6, <2>g7, <2>g8 DEF AgtInv\n  <1>b2. CASE NI_Local_GetX_PutX_Grant(src)\n    <2>g1. AgtGTy'\n      BY <1>b2, AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_GetX_PutX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, ProcHomeInvalid, ProcHomeInvalidMarked, NoOtherSharers, InvNodes\n    <2>g2. AgtGDir'\n      BY <1>b2, AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_GetX_PutX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, ProcHomeInvalid, ProcHomeInvalidMarked, NoOtherSharers, InvNodes\n    <2>g3. AgtGCol'\n      BY <1>b2, AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_GetX_PutX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, ProcHomeInvalid, ProcHomeInvalidMarked, NoOtherSharers, InvNodes\n    <2>g4. AgtGMsg'\n      BY <1>b2, AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_GetX_PutX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, ProcHomeInvalid, ProcHomeInvalidMarked, NoOtherSharers, InvNodes\n    <2>g5. AgtGTok'\n      BY <1>b2, AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_GetX_PutX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, ProcHomeInvalid, ProcHomeInvalidMarked, NoOtherSharers, InvNodes\n    <2>g6. AgtGExc'\n      BY <1>b2, AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_GetX_PutX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, ProcHomeInvalid, ProcHomeInvalidMarked, NoOtherSharers, InvNodes\n    <2>g7. AgtGShr'\n      BY <1>b2, AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_GetX_PutX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, ProcHomeInvalid, ProcHomeInvalidMarked, NoOtherSharers, InvNodes\n    <2>g8. AgtGPrp'\n      BY <1>b2, AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_GetX_PutX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, ProcHomeInvalid, ProcHomeInvalidMarked, NoOtherSharers, InvNodes\n    <2>qq. QED BY <2>g1, <2>g2, <2>g3, <2>g4, <2>g5, <2>g6, <2>g7, <2>g8 DEF AgtInv\n  <1>b3. CASE NI_Local_GetX_PutX_Inv(src)\n    <2>t00. (Home \\in NODE)'\n      BY <1>b3, AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_GetX_PutX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, ProcHomeInvalid, ProcHomeInvalidMarked, NoOtherSharers, InvNodes\n    <2>t01. (Proc \\in [NODE -> [ProcCmd : NODE_CMD, InvMarked : BOOLEAN, CacheState : CACHE_STATE, CacheData : DataU]])'\n      BY <1>b3, AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_GetX_PutX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, ProcHomeInvalid, ProcHomeInvalidMarked, NoOtherSharers, InvNodes\n    <2>t02. (Dir \\in [Pending : BOOLEAN, Local : BOOLEAN, Dirty : BOOLEAN, HeadVld : BOOLEAN, HeadPtr : NodeU, ShrVld : BOOLEAN, ShrSet : SUBSET NODE, InvSet : SUBSET NODE])'\n      BY <1>b3, AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_GetX_PutX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, ProcHomeInvalid, ProcHomeInvalidMarked, NoOtherSharers, InvNodes\n    <2>t03. (MemData \\in DATA)'\n      BY <1>b3, AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_GetX_PutX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, ProcHomeInvalid, ProcHomeInvalidMarked, NoOtherSharers, InvNodes\n    <2>t04. (UniMsg \\in [NODE -> [Cmd : UNI_CMD, Proc : NodeU, Data : DataU]])'\n      BY <1>b3, AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_GetX_PutX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, ProcHomeInvalid, ProcHomeInvalidMarked, NoOtherSharers, InvNodes\n    <2>t05. (InvMsg \\in [NODE -> [Cmd : INV_CMD]])'\n      BY <1>b3, AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_GetX_PutX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, ProcHomeInvalid, ProcHomeInvalidMarked, NoOtherSharers, InvNodes\n    <2>t06. (RpMsg \\in [NODE -> [Cmd : RP_CMD]])'\n      BY <1>b3, AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_GetX_PutX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, ProcHomeInvalid, ProcHomeInvalidMarked, NoOtherSharers, InvNodes\n    <2>t07. (WbMsg \\in [Cmd : WB_CMD, Proc : NodeU, Data : DataU])'\n      BY <1>b3, AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_GetX_PutX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, ProcHomeInvalid, ProcHomeInvalidMarked, NoOtherSharers, InvNodes\n    <2>t08. (ShWbMsg \\in [Cmd : SHWB_CMD, Proc : NodeU, Data : DataU])'\n      BY <1>b3, AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_GetX_PutX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, ProcHomeInvalid, ProcHomeInvalidMarked, NoOtherSharers, InvNodes\n    <2>t09. (NakcMsg \\in [Cmd : NAKC_CMD])'\n      BY <1>b3, AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_GetX_PutX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, ProcHomeInvalid, ProcHomeInvalidMarked, NoOtherSharers, InvNodes\n    <2>t10. (CurrData \\in DATA)'\n      BY <1>b3, AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_GetX_PutX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, ProcHomeInvalid, ProcHomeInvalidMarked, NoOtherSharers, InvNodes\n    <2>t11. (PrevData \\in DATA)'\n      BY <1>b3, AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_GetX_PutX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, ProcHomeInvalid, ProcHomeInvalidMarked, NoOtherSharers, InvNodes\n    <2>t12. (PendReqSrc \\in NodeU)'\n      BY <1>b3, AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_GetX_PutX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, ProcHomeInvalid, ProcHomeInvalidMarked, NoOtherSharers, InvNodes\n    <2>t13. (PendReqCmd \\in UniU)'\n      BY <1>b3, AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_GetX_PutX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, ProcHomeInvalid, ProcHomeInvalidMarked, NoOtherSharers, InvNodes\n    <2>t14. (Collecting \\in BOOLEAN)'\n      BY <1>b3, AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_GetX_PutX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, ProcHomeInvalid, ProcHomeInvalidMarked, NoOtherSharers, InvNodes\n    <2>t15. (FwdCmd \\in UNI_CMD)'\n      BY <1>b3, AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_GetX_PutX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, ProcHomeInvalid, ProcHomeInvalidMarked, NoOtherSharers, InvNodes\n    <2>t16. (FwdSrc \\in NodeU)'\n      BY <1>b3, AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_GetX_PutX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, ProcHomeInvalid, ProcHomeInvalidMarked, NoOtherSharers, InvNodes\n    <2>ty. TypeOK'\n      BY <2>t00, <2>t01, <2>t02, <2>t03, <2>t04, <2>t05, <2>t06, <2>t07, <2>t08, <2>t09, <2>t10, <2>t11, <2>t12, <2>t13, <2>t14, <2>t15, <2>t16 DEF TypeOK\n    <2>r00. (\\A p \\in NODE : Proc[p].CacheState \\in {\"CACHE_S\",\"CACHE_E\"} => Proc[p].CacheData \\in DATA)'\n      BY <1>b3, AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_GetX_PutX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, ProcHomeInvalid, ProcHomeInvalidMarked, NoOtherSharers, InvNodes\n    <2>r01. (\\A n \\in NODE : UniMsg[n].Cmd \\in {\"UNI_Put\",\"UNI_PutX\"} => UniMsg[n].Data \\in DATA)'\n      BY <1>b3, AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_GetX_PutX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, ProcHomeInvalid, ProcHomeInvalidMarked, NoOtherSharers, InvNodes\n    <2>r02. (WbMsg.Cmd = \"WB_Wb\" => WbMsg.Proc \\in NODE /\\ WbMsg.Data \\in DATA)'\n      BY <1>b3, AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_GetX_PutX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, ProcHomeInvalid, ProcHomeInvalidMarked, NoOtherSharers, InvNodes\n    <2>r03. (ShWbMsg.Cmd = \"SHWB_ShWb\" => ShWbMsg.Data \\in DATA)'\n      BY <1>b3, AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_GetX_PutX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, ProcHomeInvalid, ProcHomeInvalidMarked, NoOtherSharers, InvNodes\n    <2>r04. (ShWbMsg.Cmd # \"SHWB_None\" => ShWbMsg.Proc \\in NODE /\\ ShWbMsg.Proc # Home)'\n      BY <1>b3, AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_GetX_PutX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, ProcHomeInvalid, ProcHomeInvalidMarked, NoOtherSharers, InvNodes\n    <2>tq. AgtGTy'\n      BY <2>ty, <2>r00, <2>r01, <2>r02, <2>r03, <2>r04 DEF AgtGTy\n    <2>g2. AgtGDir'\n      BY <1>b3, AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_GetX_PutX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, ProcHomeInvalid, ProcHomeInvalidMarked, NoOtherSharers, InvNodes\n    <2>c300. (InvMsg[Home].Cmd = \"INV_None\")'\n      BY <1>b3, AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_GetX_PutX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, ProcHomeInvalid, ProcHomeInvalidMarked, NoOtherSharers, InvNodes\n    <2>c301. (\\A p \\in NODE : InvMsg[p].Cmd # \"INV_None\" => (Collecting /\\ Dir.Pending /\\ p \\in Dir.InvSet))'\n      BY <1>b3, AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_GetX_PutX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, ProcHomeInvalid, ProcHomeInvalidMarked, NoOtherSharers, InvNodes\n    <2>c302. ((Collecting => Dir.Pending))'\n      BY <1>b3, AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_GetX_PutX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, ProcHomeInvalid, ProcHomeInvalidMarked, NoOtherSharers, InvNodes\n    <2>c303. ((Collecting => ~Dir.ShrVld))'\n      BY <1>b3, AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_GetX_PutX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, ProcHomeInvalid, ProcHomeInvalidMarked, NoOtherSharers, InvNodes\n    <2>c304. ((Collecting => (\\A p \\in NODE : (p \\in Dir.InvSet) <=> (InvMsg[p].Cmd # \"INV_None\"))))'\n      BY <1>b3, AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_GetX_PutX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, ProcHomeInvalid, ProcHomeInvalidMarked, NoOtherSharers, InvNodes\n    <2>c305. ((Collecting => Dir.InvSet # {}))'\n      BY <1>b3, AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_GetX_PutX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, ProcHomeInvalid, ProcHomeInvalidMarked, NoOtherSharers, InvNodes\n    <2>c306. ((~Collecting => Dir.InvSet \\subseteq Dir.ShrSet))'\n      BY <1>b3, AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_GetX_PutX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, ProcHomeInvalid, ProcHomeInvalidMarked, NoOtherSharers, InvNodes\n    <2>c307. (\\A p \\in NODE : InvMsg[p].Cmd = \"INV_InvAck\" => Proc[p].CacheState = \"CACHE_I\")'\n      BY <1>b3, AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_GetX_PutX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, ProcHomeInvalid, ProcHomeInvalidMarked, NoOtherSharers, InvNodes\n    <2>c308. (\\A p \\in NODE : (InvMsg[p].Cmd = \"INV_InvAck\" /\\ UniMsg[p].Cmd = \"UNI_Put\") => Proc[p].InvMarked)'\n      BY <1>b3, AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_GetX_PutX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, ProcHomeInvalid, ProcHomeInvalidMarked, NoOtherSharers, InvNodes\n    <2>c309. (\\A p \\in NODE : UniMsg[p].Cmd = \"UNI_PutX\" => InvMsg[p].Cmd = \"INV_None\")'\n      BY <1>b3, AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_GetX_PutX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, ProcHomeInvalid, ProcHomeInvalidMarked, NoOtherSharers, InvNodes\n    <2>c310. ((Collecting => \\A q \\in NODE : UniMsg[q].Cmd = \"UNI_PutX\" => (UniMsg[q].Proc = Home /\\ PendReqSrc = q)))'\n      BY <1>b3, AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_GetX_PutX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, ProcHomeInvalid, ProcHomeInvalidMarked, NoOtherSharers, InvNodes\n    <2>c311. ((Collecting => \\A p \\in NODE :\n        (Proc[p].CacheState = \"CACHE_S\" \\/ (p # Home /\\ UniMsg[p].Cmd = \"UNI_Put\" /\\ ~Proc[p].InvMarked))\n          => p \\in Dir.InvSet))'\n      BY <1>b3, AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_GetX_PutX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, ProcHomeInvalid, ProcHomeInvalidMarked, NoOtherSharers, InvNodes\n    <2>cq3. AgtGCol'\n      BY <2>c300, <2>c301, <2>c302, <2>c303, <2>c304, <2>c305, <2>c306, <2>c307, <2>c308, <2>c309, <2>c310, <2>c311 DEF AgtGCol\n    <2>g4. AgtGMsg'\n      BY <1>b3, AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_GetX_PutX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, ProcHomeInvalid, ProcHomeInvalidMarked, NoOtherSharers, InvNodes\n    <2>g5. AgtGTok'\n      BY <1>b3, AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_GetX_PutX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, ProcHomeInvalid, ProcHomeInvalidMarked, NoOtherSharers, InvNodes\n    <2>g6. AgtGExc'\n      BY <1>b3, AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_GetX_PutX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, ProcHomeInvalid, ProcHomeInvalidMarked, NoOtherSharers, InvNodes\n    <2>g7. AgtGShr'\n      BY <1>b3, AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_GetX_PutX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, ProcHomeInvalid, ProcHomeInvalidMarked, NoOtherSharers, InvNodes\n    <2>g8. AgtGPrp'\n      BY <1>b3, AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_GetX_PutX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, ProcHomeInvalid, ProcHomeInvalidMarked, NoOtherSharers, InvNodes\n    <2>qq. QED BY <2>tq, <2>g2, <2>cq3, <2>g4, <2>g5, <2>g6, <2>g7, <2>g8 DEF AgtInv\n  <1>qz. QED BY <1>b1, <1>b2, <1>b3 DEF NI_Local_GetX_PutX\n\nLEMMA AgtNxa10 == ASSUME AgtInv, NEW src \\in NODE, NI_InvAck(src) PROVE AgtInv'\n  BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_InvAck, NI_InvAck_More, NI_InvAck_Last\n\nLEMMA AgtNxa11 == ASSUME AgtInv, NEW src \\in NODE, NI_Replace(src) PROVE AgtInv'\n  BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Replace\n\nLEMMA AgtNxa12 == ASSUME AgtInv, NEW dst \\in NODE, PI_Remote_PutX(dst) PROVE AgtInv'\n  <1>t00. (Home \\in NODE)'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Remote_PutX\n  <1>t01. (Proc \\in [NODE -> [ProcCmd : NODE_CMD, InvMarked : BOOLEAN, CacheState : CACHE_STATE, CacheData : DataU]])'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Remote_PutX\n  <1>t02. (Dir \\in [Pending : BOOLEAN, Local : BOOLEAN, Dirty : BOOLEAN, HeadVld : BOOLEAN, HeadPtr : NodeU, ShrVld : BOOLEAN, ShrSet : SUBSET NODE, InvSet : SUBSET NODE])'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Remote_PutX\n  <1>t03. (MemData \\in DATA)'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Remote_PutX\n  <1>t04. (UniMsg \\in [NODE -> [Cmd : UNI_CMD, Proc : NodeU, Data : DataU]])'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Remote_PutX\n  <1>t05. (InvMsg \\in [NODE -> [Cmd : INV_CMD]])'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Remote_PutX\n  <1>t06. (RpMsg \\in [NODE -> [Cmd : RP_CMD]])'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Remote_PutX\n  <1>t07. (WbMsg \\in [Cmd : WB_CMD, Proc : NodeU, Data : DataU])'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Remote_PutX\n  <1>t08. (ShWbMsg \\in [Cmd : SHWB_CMD, Proc : NodeU, Data : DataU])'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Remote_PutX\n  <1>t09. (NakcMsg \\in [Cmd : NAKC_CMD])'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Remote_PutX\n  <1>t10. (CurrData \\in DATA)'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Remote_PutX\n  <1>t11. (PrevData \\in DATA)'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Remote_PutX\n  <1>t12. (PendReqSrc \\in NodeU)'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Remote_PutX\n  <1>t13. (PendReqCmd \\in UniU)'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Remote_PutX\n  <1>t14. (Collecting \\in BOOLEAN)'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Remote_PutX\n  <1>t15. (FwdCmd \\in UNI_CMD)'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Remote_PutX\n  <1>t16. (FwdSrc \\in NodeU)'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Remote_PutX\n  <1>ty. TypeOK'\n    BY <1>t00, <1>t01, <1>t02, <1>t03, <1>t04, <1>t05, <1>t06, <1>t07, <1>t08, <1>t09, <1>t10, <1>t11, <1>t12, <1>t13, <1>t14, <1>t15, <1>t16 DEF TypeOK\n  <1>r00. (\\A p \\in NODE : Proc[p].CacheState \\in {\"CACHE_S\",\"CACHE_E\"} => Proc[p].CacheData \\in DATA)'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Remote_PutX\n  <1>r01. (\\A n \\in NODE : UniMsg[n].Cmd \\in {\"UNI_Put\",\"UNI_PutX\"} => UniMsg[n].Data \\in DATA)'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Remote_PutX\n  <1>r02. (WbMsg.Cmd = \"WB_Wb\" => WbMsg.Proc \\in NODE /\\ WbMsg.Data \\in DATA)'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Remote_PutX\n  <1>r03. (ShWbMsg.Cmd = \"SHWB_ShWb\" => ShWbMsg.Data \\in DATA)'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Remote_PutX\n  <1>r04. (ShWbMsg.Cmd # \"SHWB_None\" => ShWbMsg.Proc \\in NODE /\\ ShWbMsg.Proc # Home)'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Remote_PutX\n  <1>tq. AgtGTy'\n    BY <1>ty, <1>r00, <1>r01, <1>r02, <1>r03, <1>r04 DEF AgtGTy\n  <1>g2. AgtGDir'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Remote_PutX\n  <1>g3. AgtGCol'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Remote_PutX\n  <1>g4. AgtGMsg'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Remote_PutX\n  <1>g5. AgtGTok'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Remote_PutX\n  <1>g6. AgtGExc'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Remote_PutX\n  <1>g7. AgtGShr'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Remote_PutX\n  <1>g8. AgtGPrp'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Remote_PutX\n  <1>qq. QED BY <1>tq, <1>g2, <1>g3, <1>g4, <1>g5, <1>g6, <1>g7, <1>g8 DEF AgtInv\n\nLEMMA AgtNxa13 == ASSUME AgtInv, NEW dst \\in NODE, NI_Nak(dst) PROVE AgtInv'\n  BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Nak\n\nLEMMA AgtNxa14 == ASSUME AgtInv, NEW dst \\in NODE, NI_Remote_Put(dst) PROVE AgtInv'\n  BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Remote_Put\n\nLEMMA AgtNxa15 == ASSUME AgtInv, NEW dst \\in NODE, NI_Remote_PutX(dst) PROVE AgtInv'\n  <1>g1. AgtGTy'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Remote_PutX\n  <1>g2. AgtGDir'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Remote_PutX\n  <1>g3. AgtGCol'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Remote_PutX\n  <1>g4. AgtGMsg'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Remote_PutX\n  <1>g5. AgtGTok'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Remote_PutX\n  <1>g6. AgtGExc'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Remote_PutX\n  <1>g7. AgtGShr'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Remote_PutX\n  <1>g8. AgtGPrp'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Remote_PutX\n  <1>qq. QED BY <1>g1, <1>g2, <1>g3, <1>g4, <1>g5, <1>g6, <1>g7, <1>g8 DEF AgtInv\n\nLEMMA AgtNxa16 == ASSUME AgtInv, NEW dst \\in NODE, NI_Inv(dst) PROVE AgtInv'\n  <1>g1. AgtGTy'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Inv\n  <1>g2. AgtGDir'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Inv\n  <1>g3. AgtGCol'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Inv\n  <1>g4. AgtGMsg'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Inv\n  <1>g5. AgtGTok'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Inv\n  <1>g6. AgtGExc'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Inv\n  <1>g7. AgtGShr'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Inv\n  <1>g8. AgtGPrp'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Inv\n  <1>qq. QED BY <1>g1, <1>g2, <1>g3, <1>g4, <1>g5, <1>g6, <1>g7, <1>g8 DEF AgtInv\n\nLEMMA AgtNxa17 == ASSUME AgtInv, NEW src \\in NODE, NEW dst \\in NODE, NI_Remote_Nak(src, dst) PROVE AgtInv'\n  BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Remote_Nak\n\nLEMMA AgtNxa18 == ASSUME AgtInv, NEW src \\in NODE, NEW dst \\in NODE, NI_Remote_Get_Put(src, dst) PROVE AgtInv'\n  BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Remote_Get_Put\n\nLEMMA AgtNxa19 == ASSUME AgtInv, NEW src \\in NODE, NEW dst \\in NODE, NI_Remote_GetX_PutX(src, dst) PROVE AgtInv'\n  <1>g1. AgtGTy'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Remote_GetX_PutX\n  <1>g2. AgtGDir'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Remote_GetX_PutX\n  <1>g3. AgtGCol'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Remote_GetX_PutX\n  <1>g4. AgtGMsg'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Remote_GetX_PutX\n  <1>g5. AgtGTok'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Remote_GetX_PutX\n  <1>g6. AgtGExc'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Remote_GetX_PutX\n  <1>g7. AgtGShr'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Remote_GetX_PutX\n  <1>g8. AgtGPrp'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Remote_GetX_PutX\n  <1>qq. QED BY <1>g1, <1>g2, <1>g3, <1>g4, <1>g5, <1>g6, <1>g7, <1>g8 DEF AgtInv\n\nLEMMA AgtNxa20 == ASSUME AgtInv, PI_Local_Get_Get PROVE AgtInv'\n  <1>t00. (Home \\in NODE)'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Local_Get_Get\n  <1>t01. (Proc \\in [NODE -> [ProcCmd : NODE_CMD, InvMarked : BOOLEAN, CacheState : CACHE_STATE, CacheData : DataU]])'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Local_Get_Get\n  <1>t02. (Dir \\in [Pending : BOOLEAN, Local : BOOLEAN, Dirty : BOOLEAN, HeadVld : BOOLEAN, HeadPtr : NodeU, ShrVld : BOOLEAN, ShrSet : SUBSET NODE, InvSet : SUBSET NODE])'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Local_Get_Get\n  <1>t03. (MemData \\in DATA)'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Local_Get_Get\n  <1>t04. (UniMsg \\in [NODE -> [Cmd : UNI_CMD, Proc : NodeU, Data : DataU]])'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Local_Get_Get\n  <1>t05. (InvMsg \\in [NODE -> [Cmd : INV_CMD]])'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Local_Get_Get\n  <1>t06. (RpMsg \\in [NODE -> [Cmd : RP_CMD]])'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Local_Get_Get\n  <1>t07. (WbMsg \\in [Cmd : WB_CMD, Proc : NodeU, Data : DataU])'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Local_Get_Get\n  <1>t08. (ShWbMsg \\in [Cmd : SHWB_CMD, Proc : NodeU, Data : DataU])'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Local_Get_Get\n  <1>t09. (NakcMsg \\in [Cmd : NAKC_CMD])'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Local_Get_Get\n  <1>t10. (CurrData \\in DATA)'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Local_Get_Get\n  <1>t11. (PrevData \\in DATA)'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Local_Get_Get\n  <1>t12. (PendReqSrc \\in NodeU)'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Local_Get_Get\n  <1>t13. (PendReqCmd \\in UniU)'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Local_Get_Get\n  <1>t14. (Collecting \\in BOOLEAN)'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Local_Get_Get\n  <1>t15. (FwdCmd \\in UNI_CMD)'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Local_Get_Get\n  <1>t16. (FwdSrc \\in NodeU)'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Local_Get_Get\n  <1>ty. TypeOK'\n    BY <1>t00, <1>t01, <1>t02, <1>t03, <1>t04, <1>t05, <1>t06, <1>t07, <1>t08, <1>t09, <1>t10, <1>t11, <1>t12, <1>t13, <1>t14, <1>t15, <1>t16 DEF TypeOK\n  <1>r00. (\\A p \\in NODE : Proc[p].CacheState \\in {\"CACHE_S\",\"CACHE_E\"} => Proc[p].CacheData \\in DATA)'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Local_Get_Get\n  <1>r01. (\\A n \\in NODE : UniMsg[n].Cmd \\in {\"UNI_Put\",\"UNI_PutX\"} => UniMsg[n].Data \\in DATA)'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Local_Get_Get\n  <1>r02. (WbMsg.Cmd = \"WB_Wb\" => WbMsg.Proc \\in NODE /\\ WbMsg.Data \\in DATA)'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Local_Get_Get\n  <1>r03. (ShWbMsg.Cmd = \"SHWB_ShWb\" => ShWbMsg.Data \\in DATA)'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Local_Get_Get\n  <1>r04. (ShWbMsg.Cmd # \"SHWB_None\" => ShWbMsg.Proc \\in NODE /\\ ShWbMsg.Proc # Home)'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Local_Get_Get\n  <1>tq. AgtGTy'\n    BY <1>ty, <1>r00, <1>r01, <1>r02, <1>r03, <1>r04 DEF AgtGTy\n  <1>g2. AgtGDir'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Local_Get_Get\n  <1>g3. AgtGCol'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Local_Get_Get\n  <1>g4. AgtGMsg'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Local_Get_Get\n  <1>g5. AgtGTok'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Local_Get_Get\n  <1>g6. AgtGExc'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Local_Get_Get\n  <1>g7. AgtGShr'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Local_Get_Get\n  <1>g8. AgtGPrp'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Local_Get_Get\n  <1>qq. QED BY <1>tq, <1>g2, <1>g3, <1>g4, <1>g5, <1>g6, <1>g7, <1>g8 DEF AgtInv\n\nLEMMA AgtNxa21 == ASSUME AgtInv, PI_Local_Get_Put PROVE AgtInv'\n  BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Local_Get_Put\n\nLEMMA AgtNxa22 == ASSUME AgtInv, PI_Local_GetX_GetX PROVE AgtInv'\n  <1>g1. AgtGTy'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Local_GetX_GetX\n  <1>g2. AgtGDir'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Local_GetX_GetX\n  <1>g3. AgtGCol'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Local_GetX_GetX\n  <1>g4. AgtGMsg'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Local_GetX_GetX\n  <1>g5. AgtGTok'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Local_GetX_GetX\n  <1>g6. AgtGExc'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Local_GetX_GetX\n  <1>g7. AgtGShr'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Local_GetX_GetX\n  <1>g8. AgtGPrp'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Local_GetX_GetX\n  <1>qq. QED BY <1>g1, <1>g2, <1>g3, <1>g4, <1>g5, <1>g6, <1>g7, <1>g8 DEF AgtInv\n\nLEMMA AgtNxa23 == ASSUME AgtInv, PI_Local_GetX_PutX PROVE AgtInv'\n  BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Local_GetX_PutX, PI_Local_GetX_PutX_Inv, PI_Local_GetX_PutX_Grant, InvNodes\n\nLEMMA AgtNxa24 == ASSUME AgtInv, PI_Local_PutX PROVE AgtInv'\n  <1>g1. AgtGTy'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Local_PutX\n  <1>g2. AgtGDir'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Local_PutX\n  <1>g3. AgtGCol'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Local_PutX\n  <1>g4. AgtGMsg'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Local_PutX\n  <1>g5. AgtGTok'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Local_PutX\n  <1>g6. AgtGExc'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Local_PutX\n  <1>g7. AgtGShr'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Local_PutX\n  <1>g8. AgtGPrp'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Local_PutX\n  <1>qq. QED BY <1>g1, <1>g2, <1>g3, <1>g4, <1>g5, <1>g6, <1>g7, <1>g8 DEF AgtInv\n\nLEMMA AgtNxa25 == ASSUME AgtInv, PI_Local_Replace PROVE AgtInv'\n  <1>g1. AgtGTy'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Local_Replace\n  <1>g2. AgtGDir'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Local_Replace\n  <1>g3. AgtGCol'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Local_Replace\n  <1>g4. AgtGMsg'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Local_Replace\n  <1>g5. AgtGTok'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Local_Replace\n  <1>g6. AgtGExc'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Local_Replace\n  <1>g7. AgtGShr'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Local_Replace\n  <1>g8. AgtGPrp'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, PI_Local_Replace\n  <1>qq. QED BY <1>g1, <1>g2, <1>g3, <1>g4, <1>g5, <1>g6, <1>g7, <1>g8 DEF AgtInv\n\nLEMMA AgtNxa26 == ASSUME AgtInv, NI_Nak_Clear PROVE AgtInv'\n  BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Nak_Clear\n\nLEMMA AgtNxa27 == ASSUME AgtInv, NI_Local_Put PROVE AgtInv'\n  <1>t00. (Home \\in NODE)'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_Put\n  <1>t01. (Proc \\in [NODE -> [ProcCmd : NODE_CMD, InvMarked : BOOLEAN, CacheState : CACHE_STATE, CacheData : DataU]])'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_Put\n  <1>t02. (Dir \\in [Pending : BOOLEAN, Local : BOOLEAN, Dirty : BOOLEAN, HeadVld : BOOLEAN, HeadPtr : NodeU, ShrVld : BOOLEAN, ShrSet : SUBSET NODE, InvSet : SUBSET NODE])'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_Put\n  <1>t03. (MemData \\in DATA)'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_Put\n  <1>t04. (UniMsg \\in [NODE -> [Cmd : UNI_CMD, Proc : NodeU, Data : DataU]])'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_Put\n  <1>t05. (InvMsg \\in [NODE -> [Cmd : INV_CMD]])'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_Put\n  <1>t06. (RpMsg \\in [NODE -> [Cmd : RP_CMD]])'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_Put\n  <1>t07. (WbMsg \\in [Cmd : WB_CMD, Proc : NodeU, Data : DataU])'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_Put\n  <1>t08. (ShWbMsg \\in [Cmd : SHWB_CMD, Proc : NodeU, Data : DataU])'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_Put\n  <1>t09. (NakcMsg \\in [Cmd : NAKC_CMD])'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_Put\n  <1>t10. (CurrData \\in DATA)'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_Put\n  <1>t11. (PrevData \\in DATA)'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_Put\n  <1>t12. (PendReqSrc \\in NodeU)'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_Put\n  <1>t13. (PendReqCmd \\in UniU)'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_Put\n  <1>t14. (Collecting \\in BOOLEAN)'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_Put\n  <1>t15. (FwdCmd \\in UNI_CMD)'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_Put\n  <1>t16. (FwdSrc \\in NodeU)'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_Put\n  <1>ty. TypeOK'\n    BY <1>t00, <1>t01, <1>t02, <1>t03, <1>t04, <1>t05, <1>t06, <1>t07, <1>t08, <1>t09, <1>t10, <1>t11, <1>t12, <1>t13, <1>t14, <1>t15, <1>t16 DEF TypeOK\n  <1>r00. (\\A p \\in NODE : Proc[p].CacheState \\in {\"CACHE_S\",\"CACHE_E\"} => Proc[p].CacheData \\in DATA)'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_Put\n  <1>r01. (\\A n \\in NODE : UniMsg[n].Cmd \\in {\"UNI_Put\",\"UNI_PutX\"} => UniMsg[n].Data \\in DATA)'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_Put\n  <1>r02. (WbMsg.Cmd = \"WB_Wb\" => WbMsg.Proc \\in NODE /\\ WbMsg.Data \\in DATA)'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_Put\n  <1>r03. (ShWbMsg.Cmd = \"SHWB_ShWb\" => ShWbMsg.Data \\in DATA)'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_Put\n  <1>r04. (ShWbMsg.Cmd # \"SHWB_None\" => ShWbMsg.Proc \\in NODE /\\ ShWbMsg.Proc # Home)'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_Put\n  <1>tq. AgtGTy'\n    BY <1>ty, <1>r00, <1>r01, <1>r02, <1>r03, <1>r04 DEF AgtGTy\n  <1>g2. AgtGDir'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_Put\n  <1>g3. AgtGCol'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_Put\n  <1>g4. AgtGMsg'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_Put\n  <1>g5. AgtGTok'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_Put\n  <1>g6. AgtGExc'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_Put\n  <1>g7. AgtGShr'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_Put\n  <1>g8. AgtGPrp'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_Put\n  <1>qq. QED BY <1>tq, <1>g2, <1>g3, <1>g4, <1>g5, <1>g6, <1>g7, <1>g8 DEF AgtInv\n\nLEMMA AgtNxa28 == ASSUME AgtInv, NI_Local_PutXAcksDone PROVE AgtInv'\n  <1>g1. AgtGTy'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_PutXAcksDone\n  <1>g2. AgtGDir'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_PutXAcksDone\n  <1>g3. AgtGCol'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_PutXAcksDone\n  <1>g4. AgtGMsg'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_PutXAcksDone\n  <1>g5. AgtGTok'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_PutXAcksDone\n  <1>g6. AgtGExc'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_PutXAcksDone\n  <1>g7. AgtGShr'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_PutXAcksDone\n  <1>g8. AgtGPrp'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Local_PutXAcksDone\n  <1>qq. QED BY <1>g1, <1>g2, <1>g3, <1>g4, <1>g5, <1>g6, <1>g7, <1>g8 DEF AgtInv\n\nLEMMA AgtNxa29 == ASSUME AgtInv, NI_Wb PROVE AgtInv'\n  BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Wb\n\nLEMMA AgtNxa30 == ASSUME AgtInv, NI_FAck PROVE AgtInv'\n  BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_FAck\n\nLEMMA AgtNxa31 == ASSUME AgtInv, NI_ShWb PROVE AgtInv'\n  BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_ShWb\n\nLEMMA AgtInvNext == AgtInv /\\ [Next]_vars => AgtInv'\n  <1> SUFFICES ASSUME AgtInv, [Next]_vars PROVE AgtInv'\n    OBVIOUS\n  <1>0. CASE UNCHANGED vars\n    BY <1>0, AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars\n  <1>c01. CASE \\E src \\in NODE, data \\in DATA : Store(src, data)\n    BY <1>c01, AgtNxa01\n  <1>c02. CASE \\E src \\in NODE :\n         \\/ \\E c \\in ReqCmd : PI_Remote(src, c)\n         \\/ PI_Remote_Replace(src)\n         \\/ NI_Local_Get_Nak(src) \\/ NI_Local_Get_Get(src) \\/ NI_Local_Get_Put(src)\n         \\/ NI_Local_GetX_Nak(src) \\/ NI_Local_GetX_GetX(src) \\/ NI_Local_GetX_PutX(src)\n         \\/ NI_InvAck(src) \\/ NI_Replace(src)\n    BY <1>c02, AgtNxa02, AgtNxa03, AgtNxa04, AgtNxa05, AgtNxa06, AgtNxa07, AgtNxa08, AgtNxa09, AgtNxa10, AgtNxa11\n  <1>c03. CASE \\E dst \\in NODE :\n         \\/ PI_Remote_PutX(dst)\n         \\/ NI_Nak(dst) \\/ NI_Remote_Put(dst) \\/ NI_Remote_PutX(dst) \\/ NI_Inv(dst)\n    BY <1>c03, AgtNxa12, AgtNxa13, AgtNxa14, AgtNxa15, AgtNxa16\n  <1>c04. CASE \\E src \\in NODE, dst \\in NODE :\n         \\/ NI_Remote_Nak(src, dst) \\/ NI_Remote_Get_Put(src, dst)\n         \\/ NI_Remote_GetX_PutX(src, dst)\n    BY <1>c04, AgtNxa17, AgtNxa18, AgtNxa19\n  <1>c05. CASE PI_Local_Get_Get\n    BY <1>c05, AgtNxa20\n  <1>c06. CASE PI_Local_Get_Put\n    BY <1>c06, AgtNxa21\n  <1>c07. CASE PI_Local_GetX_GetX\n    BY <1>c07, AgtNxa22\n  <1>c08. CASE PI_Local_GetX_PutX\n    BY <1>c08, AgtNxa23\n  <1>c09. CASE PI_Local_PutX\n    BY <1>c09, AgtNxa24\n  <1>c10. CASE PI_Local_Replace\n    BY <1>c10, AgtNxa25\n  <1>c11. CASE NI_Nak_Clear\n    BY <1>c11, AgtNxa26\n  <1>c12. CASE NI_Local_Put\n    BY <1>c12, AgtNxa27\n  <1>c13. CASE NI_Local_PutXAcksDone\n    BY <1>c13, AgtNxa28\n  <1>c14. CASE NI_Wb\n    BY <1>c14, AgtNxa29\n  <1>c15. CASE NI_FAck\n    BY <1>c15, AgtNxa30\n  <1>c16. CASE NI_ShWb\n    BY <1>c16, AgtNxa31\n  <1>z. QED\n    BY <1>0, <1>c01, <1>c02, <1>c03, <1>c04, <1>c05, <1>c06, <1>c07, <1>c08, <1>c09, <1>c10, <1>c11, <1>c12, <1>c13, <1>c14, <1>c15, <1>c16 DEF Next\n\nLEMMA AgtSpecInv == Spec => []AgtInv\n  BY AgtInvInit, AgtInvNext, AgtT!PTL DEF Spec\n\nLEMMA AgtFairInv == FairSpec => []AgtInv\n  BY AgtInvInit, AgtInvNext, AgtT!PTL DEF FairSpec\n\nAgtLtRp(n) == (RpMsg[n].Cmd = \"RP_Replace\") ~> (RpMsg[n].Cmd = \"RP_None\")\nAgtLtWb == (WbMsg.Cmd = \"WB_Wb\") ~> (WbMsg.Cmd = \"WB_None\")\nAgtLtNakc == (NakcMsg.Cmd = \"NAKC_Nakc\") ~> (NakcMsg.Cmd = \"NAKC_None\")\nAgtLtShWb == (ShWbMsg.Cmd # \"SHWB_None\") ~> (ShWbMsg.Cmd = \"SHWB_None\")\nAgtLtIv1(n) == (InvMsg[n].Cmd = \"INV_Inv\") ~> (InvMsg[n].Cmd = \"INV_InvAck\")\nAgtLtIv2(n) == (InvMsg[n].Cmd = \"INV_InvAck\") ~> (InvMsg[n].Cmd = \"INV_None\")\nAgtLtIv(n) == (InvMsg[n].Cmd # \"INV_None\") ~> (InvMsg[n].Cmd = \"INV_None\")\n\nLEMMA AgtEnShWbA == ASSUME ShWbMsg.Cmd = \"SHWB_FAck\" PROVE ENABLED <<HandleShWb>>_vars\n  BY AgtT!ExpandENABLED, AgtT!Isa DEF HandleShWb, NI_FAck, NI_ShWb, vars, pendVars, fwdVars\n\nLEMMA AgtEnShWbB == ASSUME ShWbMsg.Cmd = \"SHWB_ShWb\" PROVE ENABLED <<HandleShWb>>_vars\n  BY AgtT!ExpandENABLED, AgtT!Isa DEF HandleShWb, NI_FAck, NI_ShWb, vars, pendVars, fwdVars\n\nLEMMA AgtEnInvA == ASSUME TypeOK, NEW n \\in NODE, n # Home, InvMsg[n].Cmd = \"INV_Inv\"\n                   PROVE ENABLED <<HandleInv(n)>>_vars\n  BY AgtT!ExpandENABLED, AgtT!Isa DEF HandleInv, NI_Inv, NI_InvAck, NI_InvAck_More,\n     NI_InvAck_Last, TypeOK, vars, pendVars, fwdVars\n\nLEMMA AgtEnInvB == ASSUME TypeOK, NEW n \\in NODE, n # Home, InvMsg[n].Cmd = \"INV_InvAck\",\n                          Dir.Pending, n \\in Dir.InvSet\n                   PROVE ENABLED <<HandleInv(n)>>_vars\n  <1>1. CASE Dir.InvSet \\ {n} = {}\n    BY <1>1, AgtT!ExpandENABLED, AgtT!Isa DEF HandleInv, NI_Inv, NI_InvAck, NI_InvAck_More,\n       NI_InvAck_Last, TypeOK, vars, pendVars, fwdVars\n  <1>2. CASE Dir.InvSet \\ {n} # {}\n    BY <1>2, AgtT!ExpandENABLED, AgtT!Isa DEF HandleInv, NI_Inv, NI_InvAck, NI_InvAck_More,\n       NI_InvAck_Last, TypeOK, vars, pendVars, fwdVars\n  <1>. QED BY <1>1, <1>2\n\nLEMMA AgtLiveRp == ASSUME NEW n \\in NODE PROVE FairSpec => AgtLtRp(n)\n  <1>1. AgtInv /\\ (RpMsg[n].Cmd = \"RP_Replace\") /\\ [Next]_vars => ((RpMsg[n].Cmd = \"RP_Replace\")' \\/ (RpMsg[n].Cmd = \"RP_None\")')\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, Next, Store, PI_Remote, PI_Remote_Replace, NI_Local_Get_Nak,\n     NI_Local_Get_Get, NI_Local_Get_Put, NI_Local_GetX_Nak, NI_Local_GetX_GetX, NI_Local_GetX_PutX,\n     NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, NI_InvAck,\n     NI_InvAck_More, NI_InvAck_Last, NI_Replace, PI_Remote_PutX, NI_Nak, NI_Remote_Put,\n     NI_Remote_PutX, NI_Inv, NI_Remote_Nak, NI_Remote_Get_Put, NI_Remote_GetX_PutX,\n     PI_Local_Get_Get, PI_Local_Get_Put, PI_Local_GetX_GetX, PI_Local_GetX_PutX,\n     PI_Local_GetX_PutX_Inv, PI_Local_GetX_PutX_Grant, PI_Local_PutX, PI_Local_Replace,\n     NI_Nak_Clear, NI_Local_Put, NI_Local_PutXAcksDone, NI_Wb, NI_FAck, NI_ShWb,\n     ProcHomeInvalid, ProcHomeInvalidMarked, NoOtherSharers, InvNodes, ReqCmd,\n     HandleUni, HandleInv, HandleShWb\n  <1>2. AgtInv /\\ (RpMsg[n].Cmd = \"RP_Replace\") /\\ <<Next /\\ (NI_Replace(n))>>_vars => (RpMsg[n].Cmd = \"RP_None\")'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, Next, Store, PI_Remote, PI_Remote_Replace, NI_Local_Get_Nak,\n     NI_Local_Get_Get, NI_Local_Get_Put, NI_Local_GetX_Nak, NI_Local_GetX_GetX, NI_Local_GetX_PutX,\n     NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, NI_InvAck,\n     NI_InvAck_More, NI_InvAck_Last, NI_Replace, PI_Remote_PutX, NI_Nak, NI_Remote_Put,\n     NI_Remote_PutX, NI_Inv, NI_Remote_Nak, NI_Remote_Get_Put, NI_Remote_GetX_PutX,\n     PI_Local_Get_Get, PI_Local_Get_Put, PI_Local_GetX_GetX, PI_Local_GetX_PutX,\n     PI_Local_GetX_PutX_Inv, PI_Local_GetX_PutX_Grant, PI_Local_PutX, PI_Local_Replace,\n     NI_Nak_Clear, NI_Local_Put, NI_Local_PutXAcksDone, NI_Wb, NI_FAck, NI_ShWb,\n     ProcHomeInvalid, ProcHomeInvalidMarked, NoOtherSharers, InvNodes, ReqCmd,\n     HandleUni, HandleInv, HandleShWb\n  <1>3. AgtInv /\\ (RpMsg[n].Cmd = \"RP_Replace\") => ENABLED <<NI_Replace(n)>>_vars\n    BY AgtT!ExpandENABLED, AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Replace\n  <1>4. FairSpec => []AgtInv\n    BY AgtFairInv\n  <1>5. FairSpec => [][Next]_vars /\\ WF_vars(NI_Replace(n))\n    BY DEF FairSpec, Fairness\n  <1>6. FairSpec => ((RpMsg[n].Cmd = \"RP_Replace\") ~> (RpMsg[n].Cmd = \"RP_None\"))\n    BY <1>1, <1>2, <1>3, <1>4, <1>5, AgtT!PTL\n  <1>. QED\n    BY <1>6 DEF AgtLtRp\n\nLEMMA AgtLiveWb == FairSpec => AgtLtWb\n  <1>1. AgtInv /\\ (WbMsg.Cmd = \"WB_Wb\") /\\ [Next]_vars => ((WbMsg.Cmd = \"WB_Wb\")' \\/ (WbMsg.Cmd = \"WB_None\")')\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, Next, Store, PI_Remote, PI_Remote_Replace, NI_Local_Get_Nak,\n     NI_Local_Get_Get, NI_Local_Get_Put, NI_Local_GetX_Nak, NI_Local_GetX_GetX, NI_Local_GetX_PutX,\n     NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, NI_InvAck,\n     NI_InvAck_More, NI_InvAck_Last, NI_Replace, PI_Remote_PutX, NI_Nak, NI_Remote_Put,\n     NI_Remote_PutX, NI_Inv, NI_Remote_Nak, NI_Remote_Get_Put, NI_Remote_GetX_PutX,\n     PI_Local_Get_Get, PI_Local_Get_Put, PI_Local_GetX_GetX, PI_Local_GetX_PutX,\n     PI_Local_GetX_PutX_Inv, PI_Local_GetX_PutX_Grant, PI_Local_PutX, PI_Local_Replace,\n     NI_Nak_Clear, NI_Local_Put, NI_Local_PutXAcksDone, NI_Wb, NI_FAck, NI_ShWb,\n     ProcHomeInvalid, ProcHomeInvalidMarked, NoOtherSharers, InvNodes, ReqCmd,\n     HandleUni, HandleInv, HandleShWb\n  <1>2. AgtInv /\\ (WbMsg.Cmd = \"WB_Wb\") /\\ <<Next /\\ (NI_Wb)>>_vars => (WbMsg.Cmd = \"WB_None\")'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, Next, Store, PI_Remote, PI_Remote_Replace, NI_Local_Get_Nak,\n     NI_Local_Get_Get, NI_Local_Get_Put, NI_Local_GetX_Nak, NI_Local_GetX_GetX, NI_Local_GetX_PutX,\n     NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, NI_InvAck,\n     NI_InvAck_More, NI_InvAck_Last, NI_Replace, PI_Remote_PutX, NI_Nak, NI_Remote_Put,\n     NI_Remote_PutX, NI_Inv, NI_Remote_Nak, NI_Remote_Get_Put, NI_Remote_GetX_PutX,\n     PI_Local_Get_Get, PI_Local_Get_Put, PI_Local_GetX_GetX, PI_Local_GetX_PutX,\n     PI_Local_GetX_PutX_Inv, PI_Local_GetX_PutX_Grant, PI_Local_PutX, PI_Local_Replace,\n     NI_Nak_Clear, NI_Local_Put, NI_Local_PutXAcksDone, NI_Wb, NI_FAck, NI_ShWb,\n     ProcHomeInvalid, ProcHomeInvalidMarked, NoOtherSharers, InvNodes, ReqCmd,\n     HandleUni, HandleInv, HandleShWb\n  <1>3. AgtInv /\\ (WbMsg.Cmd = \"WB_Wb\") => ENABLED <<NI_Wb>>_vars\n    BY AgtT!ExpandENABLED, AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Wb\n  <1>4. FairSpec => []AgtInv\n    BY AgtFairInv\n  <1>5. FairSpec => [][Next]_vars /\\ WF_vars(NI_Wb)\n    BY DEF FairSpec, Fairness\n  <1>6. FairSpec => ((WbMsg.Cmd = \"WB_Wb\") ~> (WbMsg.Cmd = \"WB_None\"))\n    BY <1>1, <1>2, <1>3, <1>4, <1>5, AgtT!PTL\n  <1>. QED\n    BY <1>6 DEF AgtLtWb\n\nLEMMA AgtLiveNakc == FairSpec => AgtLtNakc\n  <1>1. AgtInv /\\ (NakcMsg.Cmd = \"NAKC_Nakc\") /\\ [Next]_vars => ((NakcMsg.Cmd = \"NAKC_Nakc\")' \\/ (NakcMsg.Cmd = \"NAKC_None\")')\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, Next, Store, PI_Remote, PI_Remote_Replace, NI_Local_Get_Nak,\n     NI_Local_Get_Get, NI_Local_Get_Put, NI_Local_GetX_Nak, NI_Local_GetX_GetX, NI_Local_GetX_PutX,\n     NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, NI_InvAck,\n     NI_InvAck_More, NI_InvAck_Last, NI_Replace, PI_Remote_PutX, NI_Nak, NI_Remote_Put,\n     NI_Remote_PutX, NI_Inv, NI_Remote_Nak, NI_Remote_Get_Put, NI_Remote_GetX_PutX,\n     PI_Local_Get_Get, PI_Local_Get_Put, PI_Local_GetX_GetX, PI_Local_GetX_PutX,\n     PI_Local_GetX_PutX_Inv, PI_Local_GetX_PutX_Grant, PI_Local_PutX, PI_Local_Replace,\n     NI_Nak_Clear, NI_Local_Put, NI_Local_PutXAcksDone, NI_Wb, NI_FAck, NI_ShWb,\n     ProcHomeInvalid, ProcHomeInvalidMarked, NoOtherSharers, InvNodes, ReqCmd,\n     HandleUni, HandleInv, HandleShWb\n  <1>2. AgtInv /\\ (NakcMsg.Cmd = \"NAKC_Nakc\") /\\ <<Next /\\ (NI_Nak_Clear)>>_vars => (NakcMsg.Cmd = \"NAKC_None\")'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, Next, Store, PI_Remote, PI_Remote_Replace, NI_Local_Get_Nak,\n     NI_Local_Get_Get, NI_Local_Get_Put, NI_Local_GetX_Nak, NI_Local_GetX_GetX, NI_Local_GetX_PutX,\n     NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, NI_InvAck,\n     NI_InvAck_More, NI_InvAck_Last, NI_Replace, PI_Remote_PutX, NI_Nak, NI_Remote_Put,\n     NI_Remote_PutX, NI_Inv, NI_Remote_Nak, NI_Remote_Get_Put, NI_Remote_GetX_PutX,\n     PI_Local_Get_Get, PI_Local_Get_Put, PI_Local_GetX_GetX, PI_Local_GetX_PutX,\n     PI_Local_GetX_PutX_Inv, PI_Local_GetX_PutX_Grant, PI_Local_PutX, PI_Local_Replace,\n     NI_Nak_Clear, NI_Local_Put, NI_Local_PutXAcksDone, NI_Wb, NI_FAck, NI_ShWb,\n     ProcHomeInvalid, ProcHomeInvalidMarked, NoOtherSharers, InvNodes, ReqCmd,\n     HandleUni, HandleInv, HandleShWb\n  <1>3. AgtInv /\\ (NakcMsg.Cmd = \"NAKC_Nakc\") => ENABLED <<NI_Nak_Clear>>_vars\n    BY AgtT!ExpandENABLED, AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, NI_Nak_Clear\n  <1>4. FairSpec => []AgtInv\n    BY AgtFairInv\n  <1>5. FairSpec => [][Next]_vars /\\ WF_vars(NI_Nak_Clear)\n    BY DEF FairSpec, Fairness\n  <1>6. FairSpec => ((NakcMsg.Cmd = \"NAKC_Nakc\") ~> (NakcMsg.Cmd = \"NAKC_None\"))\n    BY <1>1, <1>2, <1>3, <1>4, <1>5, AgtT!PTL\n  <1>. QED\n    BY <1>6 DEF AgtLtNakc\n\nLEMMA AgtLiveShWb == FairSpec => AgtLtShWb\n  <1>1. AgtInv /\\ (ShWbMsg.Cmd # \"SHWB_None\") /\\ [Next]_vars => ((ShWbMsg.Cmd # \"SHWB_None\")' \\/ (ShWbMsg.Cmd = \"SHWB_None\")')\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, Next, Store, PI_Remote, PI_Remote_Replace, NI_Local_Get_Nak,\n     NI_Local_Get_Get, NI_Local_Get_Put, NI_Local_GetX_Nak, NI_Local_GetX_GetX, NI_Local_GetX_PutX,\n     NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, NI_InvAck,\n     NI_InvAck_More, NI_InvAck_Last, NI_Replace, PI_Remote_PutX, NI_Nak, NI_Remote_Put,\n     NI_Remote_PutX, NI_Inv, NI_Remote_Nak, NI_Remote_Get_Put, NI_Remote_GetX_PutX,\n     PI_Local_Get_Get, PI_Local_Get_Put, PI_Local_GetX_GetX, PI_Local_GetX_PutX,\n     PI_Local_GetX_PutX_Inv, PI_Local_GetX_PutX_Grant, PI_Local_PutX, PI_Local_Replace,\n     NI_Nak_Clear, NI_Local_Put, NI_Local_PutXAcksDone, NI_Wb, NI_FAck, NI_ShWb,\n     ProcHomeInvalid, ProcHomeInvalidMarked, NoOtherSharers, InvNodes, ReqCmd,\n     HandleUni, HandleInv, HandleShWb\n  <1>2. AgtInv /\\ (ShWbMsg.Cmd # \"SHWB_None\") /\\ <<Next /\\ (HandleShWb)>>_vars => (ShWbMsg.Cmd = \"SHWB_None\")'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, Next, Store, PI_Remote, PI_Remote_Replace, NI_Local_Get_Nak,\n     NI_Local_Get_Get, NI_Local_Get_Put, NI_Local_GetX_Nak, NI_Local_GetX_GetX, NI_Local_GetX_PutX,\n     NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, NI_InvAck,\n     NI_InvAck_More, NI_InvAck_Last, NI_Replace, PI_Remote_PutX, NI_Nak, NI_Remote_Put,\n     NI_Remote_PutX, NI_Inv, NI_Remote_Nak, NI_Remote_Get_Put, NI_Remote_GetX_PutX,\n     PI_Local_Get_Get, PI_Local_Get_Put, PI_Local_GetX_GetX, PI_Local_GetX_PutX,\n     PI_Local_GetX_PutX_Inv, PI_Local_GetX_PutX_Grant, PI_Local_PutX, PI_Local_Replace,\n     NI_Nak_Clear, NI_Local_Put, NI_Local_PutXAcksDone, NI_Wb, NI_FAck, NI_ShWb,\n     ProcHomeInvalid, ProcHomeInvalidMarked, NoOtherSharers, InvNodes, ReqCmd,\n     HandleUni, HandleInv, HandleShWb\n  <1>3. AgtInv /\\ (ShWbMsg.Cmd # \"SHWB_None\") => ENABLED <<HandleShWb>>_vars\n    <2> SUFFICES ASSUME AgtInv, ShWbMsg.Cmd # \"SHWB_None\"\n                 PROVE ENABLED <<HandleShWb>>_vars\n      OBVIOUS\n    <2>1. ShWbMsg.Cmd = \"SHWB_FAck\" \\/ ShWbMsg.Cmd = \"SHWB_ShWb\"\n      BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars\n    <2>2. CASE ShWbMsg.Cmd = \"SHWB_FAck\"\n      BY <2>2, AgtEnShWbA\n    <2>3. CASE ShWbMsg.Cmd = \"SHWB_ShWb\"\n      BY <2>3, AgtEnShWbB\n    <2>. QED\n      BY <2>1, <2>2, <2>3\n  <1>4. FairSpec => []AgtInv\n    BY AgtFairInv\n  <1>5. FairSpec => [][Next]_vars /\\ WF_vars(HandleShWb)\n    BY DEF FairSpec, Fairness\n  <1>6. FairSpec => ((ShWbMsg.Cmd # \"SHWB_None\") ~> (ShWbMsg.Cmd = \"SHWB_None\"))\n    BY <1>1, <1>2, <1>3, <1>4, <1>5, AgtT!PTL\n  <1>. QED\n    BY <1>6 DEF AgtLtShWb\n\nLEMMA AgtLiveIv1 == ASSUME NEW n \\in NODE PROVE FairSpec => AgtLtIv1(n)\n  <1>1. AgtInv /\\ (InvMsg[n].Cmd = \"INV_Inv\") /\\ [Next]_vars => ((InvMsg[n].Cmd = \"INV_Inv\")' \\/ (InvMsg[n].Cmd = \"INV_InvAck\")')\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, Next, Store, PI_Remote, PI_Remote_Replace, NI_Local_Get_Nak,\n     NI_Local_Get_Get, NI_Local_Get_Put, NI_Local_GetX_Nak, NI_Local_GetX_GetX, NI_Local_GetX_PutX,\n     NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, NI_InvAck,\n     NI_InvAck_More, NI_InvAck_Last, NI_Replace, PI_Remote_PutX, NI_Nak, NI_Remote_Put,\n     NI_Remote_PutX, NI_Inv, NI_Remote_Nak, NI_Remote_Get_Put, NI_Remote_GetX_PutX,\n     PI_Local_Get_Get, PI_Local_Get_Put, PI_Local_GetX_GetX, PI_Local_GetX_PutX,\n     PI_Local_GetX_PutX_Inv, PI_Local_GetX_PutX_Grant, PI_Local_PutX, PI_Local_Replace,\n     NI_Nak_Clear, NI_Local_Put, NI_Local_PutXAcksDone, NI_Wb, NI_FAck, NI_ShWb,\n     ProcHomeInvalid, ProcHomeInvalidMarked, NoOtherSharers, InvNodes, ReqCmd,\n     HandleUni, HandleInv, HandleShWb\n  <1>2. AgtInv /\\ (InvMsg[n].Cmd = \"INV_Inv\") /\\ <<Next /\\ (HandleInv(n))>>_vars => (InvMsg[n].Cmd = \"INV_InvAck\")'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, Next, Store, PI_Remote, PI_Remote_Replace, NI_Local_Get_Nak,\n     NI_Local_Get_Get, NI_Local_Get_Put, NI_Local_GetX_Nak, NI_Local_GetX_GetX, NI_Local_GetX_PutX,\n     NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, NI_InvAck,\n     NI_InvAck_More, NI_InvAck_Last, NI_Replace, PI_Remote_PutX, NI_Nak, NI_Remote_Put,\n     NI_Remote_PutX, NI_Inv, NI_Remote_Nak, NI_Remote_Get_Put, NI_Remote_GetX_PutX,\n     PI_Local_Get_Get, PI_Local_Get_Put, PI_Local_GetX_GetX, PI_Local_GetX_PutX,\n     PI_Local_GetX_PutX_Inv, PI_Local_GetX_PutX_Grant, PI_Local_PutX, PI_Local_Replace,\n     NI_Nak_Clear, NI_Local_Put, NI_Local_PutXAcksDone, NI_Wb, NI_FAck, NI_ShWb,\n     ProcHomeInvalid, ProcHomeInvalidMarked, NoOtherSharers, InvNodes, ReqCmd,\n     HandleUni, HandleInv, HandleShWb\n  <1>3. AgtInv /\\ (InvMsg[n].Cmd = \"INV_Inv\") => ENABLED <<HandleInv(n)>>_vars\n    <2> SUFFICES ASSUME AgtInv, InvMsg[n].Cmd = \"INV_Inv\"\n                 PROVE ENABLED <<HandleInv(n)>>_vars\n      OBVIOUS\n    <2>1. TypeOK /\\ n # Home\n      BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars\n    <2>. QED\n      BY <2>1, AgtEnInvA\n  <1>4. FairSpec => []AgtInv\n    BY AgtFairInv\n  <1>5. FairSpec => [][Next]_vars /\\ WF_vars(HandleInv(n))\n    BY DEF FairSpec, Fairness\n  <1>6. FairSpec => ((InvMsg[n].Cmd = \"INV_Inv\") ~> (InvMsg[n].Cmd = \"INV_InvAck\"))\n    BY <1>1, <1>2, <1>3, <1>4, <1>5, AgtT!PTL\n  <1>. QED\n    BY <1>6 DEF AgtLtIv1\n\nLEMMA AgtLiveIv2 == ASSUME NEW n \\in NODE PROVE FairSpec => AgtLtIv2(n)\n  <1>1. AgtInv /\\ (InvMsg[n].Cmd = \"INV_InvAck\") /\\ [Next]_vars => ((InvMsg[n].Cmd = \"INV_InvAck\")' \\/ (InvMsg[n].Cmd = \"INV_None\")')\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, Next, Store, PI_Remote, PI_Remote_Replace, NI_Local_Get_Nak,\n     NI_Local_Get_Get, NI_Local_Get_Put, NI_Local_GetX_Nak, NI_Local_GetX_GetX, NI_Local_GetX_PutX,\n     NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, NI_InvAck,\n     NI_InvAck_More, NI_InvAck_Last, NI_Replace, PI_Remote_PutX, NI_Nak, NI_Remote_Put,\n     NI_Remote_PutX, NI_Inv, NI_Remote_Nak, NI_Remote_Get_Put, NI_Remote_GetX_PutX,\n     PI_Local_Get_Get, PI_Local_Get_Put, PI_Local_GetX_GetX, PI_Local_GetX_PutX,\n     PI_Local_GetX_PutX_Inv, PI_Local_GetX_PutX_Grant, PI_Local_PutX, PI_Local_Replace,\n     NI_Nak_Clear, NI_Local_Put, NI_Local_PutXAcksDone, NI_Wb, NI_FAck, NI_ShWb,\n     ProcHomeInvalid, ProcHomeInvalidMarked, NoOtherSharers, InvNodes, ReqCmd,\n     HandleUni, HandleInv, HandleShWb\n  <1>2. AgtInv /\\ (InvMsg[n].Cmd = \"INV_InvAck\") /\\ <<Next /\\ (HandleInv(n))>>_vars => (InvMsg[n].Cmd = \"INV_None\")'\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars, Next, Store, PI_Remote, PI_Remote_Replace, NI_Local_Get_Nak,\n     NI_Local_Get_Get, NI_Local_Get_Put, NI_Local_GetX_Nak, NI_Local_GetX_GetX, NI_Local_GetX_PutX,\n     NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, NI_InvAck,\n     NI_InvAck_More, NI_InvAck_Last, NI_Replace, PI_Remote_PutX, NI_Nak, NI_Remote_Put,\n     NI_Remote_PutX, NI_Inv, NI_Remote_Nak, NI_Remote_Get_Put, NI_Remote_GetX_PutX,\n     PI_Local_Get_Get, PI_Local_Get_Put, PI_Local_GetX_GetX, PI_Local_GetX_PutX,\n     PI_Local_GetX_PutX_Inv, PI_Local_GetX_PutX_Grant, PI_Local_PutX, PI_Local_Replace,\n     NI_Nak_Clear, NI_Local_Put, NI_Local_PutXAcksDone, NI_Wb, NI_FAck, NI_ShWb,\n     ProcHomeInvalid, ProcHomeInvalidMarked, NoOtherSharers, InvNodes, ReqCmd,\n     HandleUni, HandleInv, HandleShWb\n  <1>3. AgtInv /\\ (InvMsg[n].Cmd = \"INV_InvAck\") => ENABLED <<HandleInv(n)>>_vars\n    <2> SUFFICES ASSUME AgtInv, InvMsg[n].Cmd = \"INV_InvAck\"\n                 PROVE ENABLED <<HandleInv(n)>>_vars\n      OBVIOUS\n    <2>1. TypeOK /\\ n # Home /\\ Dir.Pending /\\ n \\in Dir.InvSet\n      BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars\n    <2>. QED\n      BY <2>1, AgtEnInvB\n  <1>4. FairSpec => []AgtInv\n    BY AgtFairInv\n  <1>5. FairSpec => [][Next]_vars /\\ WF_vars(HandleInv(n))\n    BY DEF FairSpec, Fairness\n  <1>6. FairSpec => ((InvMsg[n].Cmd = \"INV_InvAck\") ~> (InvMsg[n].Cmd = \"INV_None\"))\n    BY <1>1, <1>2, <1>3, <1>4, <1>5, AgtT!PTL\n  <1>. QED\n    BY <1>6 DEF AgtLtIv2\n\nLEMMA AgtLiveIv == ASSUME NEW n \\in NODE PROVE FairSpec => AgtLtIv(n)\n  <1>1. FairSpec => ((InvMsg[n].Cmd = \"INV_Inv\") ~> (InvMsg[n].Cmd = \"INV_InvAck\"))\n    <2>1. FairSpec => AgtLtIv1(n)\n      BY AgtLiveIv1\n    <2>. QED\n      BY <2>1 DEF AgtLtIv1\n  <1>2. FairSpec => ((InvMsg[n].Cmd = \"INV_InvAck\") ~> (InvMsg[n].Cmd = \"INV_None\"))\n    <2>1. FairSpec => AgtLtIv2(n)\n      BY AgtLiveIv2\n    <2>. QED\n      BY <2>1 DEF AgtLtIv2\n  <1>3. AgtInv => ((InvMsg[n].Cmd # \"INV_None\")\n                     => (InvMsg[n].Cmd = \"INV_Inv\" \\/ InvMsg[n].Cmd = \"INV_InvAck\"))\n    BY AgtT!SMTT(\"r30\") DEF AgtInv, AgtGTy, AgtGDir, AgtGCol, AgtGMsg, AgtGTok, AgtGExc, AgtGShr, AgtGPrp, AgtTrk, AgtTrkD, AgtTrkH, AgtFwd, AgtHomePut, TypeOK, CacheDataProp, MemDataProp, Lemma_1, Lemma_2, Lemma_3, Lemma_4, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, vars, pendVars, fwdVars\n  <1>4. FairSpec => []AgtInv\n    BY AgtFairInv\n  <1>5. FairSpec => ((InvMsg[n].Cmd # \"INV_None\") ~> (InvMsg[n].Cmd = \"INV_None\"))\n    BY <1>1, <1>2, <1>3, <1>4, AgtT!PTL\n  <1>. QED\n    BY <1>5 DEF AgtLtIv\n\n\n\\* END AGENT HELPERS\n\nTHEOREM TypeCorrect == Spec => []TypeOK\n\\* BEGIN AGENT PROOF tlaplus_examples_FlashProtocol/FlashWithMutex_TypeCorrect.tla\n<1>1. AgtInv => TypeOK\n  BY DEF AgtInv, AgtGTy\n<1>. QED\n  BY <1>1, AgtSpecInv, AgtT!PTL\n\\* END AGENT PROOF tlaplus_examples_FlashProtocol/FlashWithMutex_TypeCorrect.tla\n\nTHEOREM ReqProgressCorrect == FairSpec => ReqProgress\n\\* BEGIN AGENT PROOF tlaplus_examples_FlashProtocol/FlashWithMutex_ReqProgressCorrect.tla\n<1>1. FairSpec => []AgtInv\n  BY AgtFairInv\n<1>. QED\n  BY <1>1, AgtT!PTL DEF ReqProgress\n\\* END AGENT PROOF tlaplus_examples_FlashProtocol/FlashWithMutex_ReqProgressCorrect.tla\n\nTHEOREM DirProgressCorrect == FairSpec => DirProgress\n\\* BEGIN AGENT PROOF tlaplus_examples_FlashProtocol/FlashWithMutex_DirProgressCorrect.tla\n<1>1. FairSpec => []AgtInv\n  BY AgtFairInv\n<1>. QED\n  BY <1>1, AgtT!PTL DEF DirProgress\n\\* END AGENT PROOF tlaplus_examples_FlashProtocol/FlashWithMutex_DirProgressCorrect.tla\n\nTHEOREM UniProgressCorrect == FairSpec => UniProgress\n\\* BEGIN AGENT PROOF tlaplus_examples_FlashProtocol/FlashWithMutex_UniProgressCorrect.tla\n<1>1. FairSpec => []AgtInv\n  BY AgtFairInv\n<1>. QED\n  BY <1>1, AgtT!PTL DEF UniProgress\n\\* END AGENT PROOF tlaplus_examples_FlashProtocol/FlashWithMutex_UniProgressCorrect.tla\n\nTHEOREM InvProgressCorrect == FairSpec => InvProgress\n\\* BEGIN AGENT PROOF tlaplus_examples_FlashProtocol/FlashWithMutex_InvProgressCorrect.tla\n<1> SUFFICES ASSUME FairSpec PROVE InvProgress\n  OBVIOUS\n<1>1. \\A n \\in NODE : AgtLtIv(n)\n  <2>1. ASSUME NEW n \\in NODE PROVE AgtLtIv(n)\n    BY AgtLiveIv\n  <2>. QED\n    BY <2>1\n<1>. QED\n  BY <1>1 DEF InvProgress, AgtLtIv\n\\* END AGENT PROOF tlaplus_examples_FlashProtocol/FlashWithMutex_InvProgressCorrect.tla\n\nTHEOREM RpProgressCorrect == FairSpec => RpProgress\n\\* BEGIN AGENT PROOF tlaplus_examples_FlashProtocol/FlashWithMutex_RpProgressCorrect.tla\n<1> SUFFICES ASSUME FairSpec PROVE RpProgress\n  OBVIOUS\n<1>1. \\A n \\in NODE : AgtLtRp(n)\n  <2>1. ASSUME NEW n \\in NODE PROVE AgtLtRp(n)\n    BY AgtLiveRp\n  <2>. QED\n    BY <2>1\n<1>. QED\n  BY <1>1 DEF RpProgress, AgtLtRp\n\\* END AGENT PROOF tlaplus_examples_FlashProtocol/FlashWithMutex_RpProgressCorrect.tla\n\nTHEOREM WbProgressCorrect == FairSpec => WbProgress\n\\* BEGIN AGENT PROOF tlaplus_examples_FlashProtocol/FlashWithMutex_WbProgressCorrect.tla\n<1>1. FairSpec => AgtLtWb\n  BY AgtLiveWb\n<1>. QED\n  BY <1>1 DEF AgtLtWb, WbProgress\n\\* END AGENT PROOF tlaplus_examples_FlashProtocol/FlashWithMutex_WbProgressCorrect.tla\n\nTHEOREM ShWbProgressCorrect == FairSpec => ShWbProgress\n\\* BEGIN AGENT PROOF tlaplus_examples_FlashProtocol/FlashWithMutex_ShWbProgressCorrect.tla\n<1>1. FairSpec => AgtLtShWb\n  BY AgtLiveShWb\n<1>. QED\n  BY <1>1 DEF AgtLtShWb, ShWbProgress\n\\* END AGENT PROOF tlaplus_examples_FlashProtocol/FlashWithMutex_ShWbProgressCorrect.tla\n\nTHEOREM NakcProgressCorrect == FairSpec => NakcProgress\n\\* BEGIN AGENT PROOF tlaplus_examples_FlashProtocol/FlashWithMutex_NakcProgressCorrect.tla\n<1>1. FairSpec => AgtLtNakc\n  BY AgtLiveNakc\n<1>. QED\n  BY <1>1 DEF AgtLtNakc, NakcProgress\n\\* END AGENT PROOF tlaplus_examples_FlashProtocol/FlashWithMutex_NakcProgressCorrect.tla\n\nTHEOREM CacheDataCorrect == Spec => []CacheDataProp\n\\* BEGIN AGENT PROOF tlaplus_examples_FlashProtocol/FlashWithMutex_CacheDataCorrect.tla\n<1>1. AgtInv => CacheDataProp\n  BY DEF AgtInv, AgtGPrp\n<1>. QED\n  BY <1>1, AgtSpecInv, AgtT!PTL\n\\* END AGENT PROOF tlaplus_examples_FlashProtocol/FlashWithMutex_CacheDataCorrect.tla\n\nTHEOREM MemDataCorrect == Spec => []MemDataProp\n\\* BEGIN AGENT PROOF tlaplus_examples_FlashProtocol/FlashWithMutex_MemDataCorrect.tla\n<1>1. AgtInv => MemDataProp\n  BY DEF AgtInv, AgtGPrp\n<1>. QED\n  BY <1>1, AgtSpecInv, AgtT!PTL\n\\* END AGENT PROOF tlaplus_examples_FlashProtocol/FlashWithMutex_MemDataCorrect.tla\n\nTHEOREM Lemma_1_Correct == Spec => []Lemma_1\n\\* BEGIN AGENT PROOF tlaplus_examples_FlashProtocol/FlashWithMutex_Lemma_1_Correct.tla\n<1>1. AgtInv => Lemma_1\n  BY DEF AgtInv, AgtGPrp\n<1>. QED\n  BY <1>1, AgtSpecInv, AgtT!PTL\n\\* END AGENT PROOF tlaplus_examples_FlashProtocol/FlashWithMutex_Lemma_1_Correct.tla\n\nTHEOREM Lemma_2_Correct == Spec => []Lemma_2\n\\* BEGIN AGENT PROOF tlaplus_examples_FlashProtocol/FlashWithMutex_Lemma_2_Correct.tla\n<1>1. AgtInv => Lemma_2\n  BY DEF AgtInv, AgtGPrp\n<1>. QED\n  BY <1>1, AgtSpecInv, AgtT!PTL\n\\* END AGENT PROOF tlaplus_examples_FlashProtocol/FlashWithMutex_Lemma_2_Correct.tla\n\nTHEOREM Lemma_3_Correct == Spec => []Lemma_3\n\\* BEGIN AGENT PROOF tlaplus_examples_FlashProtocol/FlashWithMutex_Lemma_3_Correct.tla\n<1>1. AgtInv => Lemma_3\n  BY DEF AgtInv, AgtGPrp\n<1>. QED\n  BY <1>1, AgtSpecInv, AgtT!PTL\n\\* END AGENT PROOF tlaplus_examples_FlashProtocol/FlashWithMutex_Lemma_3_Correct.tla\n\nTHEOREM Lemma_4_Correct == Spec => []Lemma_4\n\\* BEGIN AGENT PROOF tlaplus_examples_FlashProtocol/FlashWithMutex_Lemma_4_Correct.tla\n<1>1. AgtInv => Lemma_4\n  BY DEF AgtInv, AgtGPrp\n<1>. QED\n  BY <1>1, AgtSpecInv, AgtT!PTL\n\\* END AGENT PROOF tlaplus_examples_FlashProtocol/FlashWithMutex_Lemma_4_Correct.tla\n====\n",
+  "units": {
+    "tlaplus_examples_FlashProtocol/FlashWithMutex_TypeCorrect.tla": {
+      "id": "tlaplus_examples_FlashProtocol/FlashWithMutex_TypeCorrect.tla",
+      "name": "TypeCorrect",
+      "kind": "target",
+      "lineStart": 1084,
+      "lineEnd": 1089,
+      "proofLines": [
+        1086,
+        1087,
+        1088,
+        1089
+      ],
+      "proofRange": [
+        1086,
+        1089
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgtSpecInv"
+      ]
+    },
+    "tlaplus_examples_FlashProtocol/FlashWithMutex_ReqProgressCorrect.tla": {
+      "id": "tlaplus_examples_FlashProtocol/FlashWithMutex_ReqProgressCorrect.tla",
+      "name": "ReqProgressCorrect",
+      "kind": "target",
+      "lineStart": 1092,
+      "lineEnd": 1097,
+      "proofLines": [
+        1094,
+        1095,
+        1096,
+        1097
+      ],
+      "proofRange": [
+        1094,
+        1097
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgtFairInv"
+      ]
+    },
+    "tlaplus_examples_FlashProtocol/FlashWithMutex_DirProgressCorrect.tla": {
+      "id": "tlaplus_examples_FlashProtocol/FlashWithMutex_DirProgressCorrect.tla",
+      "name": "DirProgressCorrect",
+      "kind": "target",
+      "lineStart": 1100,
+      "lineEnd": 1105,
+      "proofLines": [
+        1102,
+        1103,
+        1104,
+        1105
+      ],
+      "proofRange": [
+        1102,
+        1105
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgtFairInv"
+      ]
+    },
+    "tlaplus_examples_FlashProtocol/FlashWithMutex_UniProgressCorrect.tla": {
+      "id": "tlaplus_examples_FlashProtocol/FlashWithMutex_UniProgressCorrect.tla",
+      "name": "UniProgressCorrect",
+      "kind": "target",
+      "lineStart": 1108,
+      "lineEnd": 1113,
+      "proofLines": [
+        1110,
+        1111,
+        1112,
+        1113
+      ],
+      "proofRange": [
+        1110,
+        1113
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgtFairInv"
+      ]
+    },
+    "tlaplus_examples_FlashProtocol/FlashWithMutex_InvProgressCorrect.tla": {
+      "id": "tlaplus_examples_FlashProtocol/FlashWithMutex_InvProgressCorrect.tla",
+      "name": "InvProgressCorrect",
+      "kind": "target",
+      "lineStart": 1116,
+      "lineEnd": 1126,
+      "proofLines": [
+        1118,
+        1119,
+        1120,
+        1121,
+        1122,
+        1123,
+        1124,
+        1125,
+        1126
+      ],
+      "proofRange": [
+        1118,
+        1126
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgtLiveIv"
+      ]
+    },
+    "tlaplus_examples_FlashProtocol/FlashWithMutex_RpProgressCorrect.tla": {
+      "id": "tlaplus_examples_FlashProtocol/FlashWithMutex_RpProgressCorrect.tla",
+      "name": "RpProgressCorrect",
+      "kind": "target",
+      "lineStart": 1129,
+      "lineEnd": 1139,
+      "proofLines": [
+        1131,
+        1132,
+        1133,
+        1134,
+        1135,
+        1136,
+        1137,
+        1138,
+        1139
+      ],
+      "proofRange": [
+        1131,
+        1139
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgtLiveRp"
+      ]
+    },
+    "tlaplus_examples_FlashProtocol/FlashWithMutex_WbProgressCorrect.tla": {
+      "id": "tlaplus_examples_FlashProtocol/FlashWithMutex_WbProgressCorrect.tla",
+      "name": "WbProgressCorrect",
+      "kind": "target",
+      "lineStart": 1142,
+      "lineEnd": 1147,
+      "proofLines": [
+        1144,
+        1145,
+        1146,
+        1147
+      ],
+      "proofRange": [
+        1144,
+        1147
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgtLiveWb"
+      ]
+    },
+    "tlaplus_examples_FlashProtocol/FlashWithMutex_ShWbProgressCorrect.tla": {
+      "id": "tlaplus_examples_FlashProtocol/FlashWithMutex_ShWbProgressCorrect.tla",
+      "name": "ShWbProgressCorrect",
+      "kind": "target",
+      "lineStart": 1150,
+      "lineEnd": 1155,
+      "proofLines": [
+        1152,
+        1153,
+        1154,
+        1155
+      ],
+      "proofRange": [
+        1152,
+        1155
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgtLiveShWb"
+      ]
+    },
+    "tlaplus_examples_FlashProtocol/FlashWithMutex_NakcProgressCorrect.tla": {
+      "id": "tlaplus_examples_FlashProtocol/FlashWithMutex_NakcProgressCorrect.tla",
+      "name": "NakcProgressCorrect",
+      "kind": "target",
+      "lineStart": 1158,
+      "lineEnd": 1163,
+      "proofLines": [
+        1160,
+        1161,
+        1162,
+        1163
+      ],
+      "proofRange": [
+        1160,
+        1163
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgtLiveNakc"
+      ]
+    },
+    "tlaplus_examples_FlashProtocol/FlashWithMutex_CacheDataCorrect.tla": {
+      "id": "tlaplus_examples_FlashProtocol/FlashWithMutex_CacheDataCorrect.tla",
+      "name": "CacheDataCorrect",
+      "kind": "target",
+      "lineStart": 1166,
+      "lineEnd": 1171,
+      "proofLines": [
+        1168,
+        1169,
+        1170,
+        1171
+      ],
+      "proofRange": [
+        1168,
+        1171
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgtSpecInv"
+      ]
+    },
+    "tlaplus_examples_FlashProtocol/FlashWithMutex_MemDataCorrect.tla": {
+      "id": "tlaplus_examples_FlashProtocol/FlashWithMutex_MemDataCorrect.tla",
+      "name": "MemDataCorrect",
+      "kind": "target",
+      "lineStart": 1174,
+      "lineEnd": 1179,
+      "proofLines": [
+        1176,
+        1177,
+        1178,
+        1179
+      ],
+      "proofRange": [
+        1176,
+        1179
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgtSpecInv"
+      ]
+    },
+    "tlaplus_examples_FlashProtocol/FlashWithMutex_Lemma_1_Correct.tla": {
+      "id": "tlaplus_examples_FlashProtocol/FlashWithMutex_Lemma_1_Correct.tla",
+      "name": "Lemma_1_Correct",
+      "kind": "target",
+      "lineStart": 1182,
+      "lineEnd": 1187,
+      "proofLines": [
+        1184,
+        1185,
+        1186,
+        1187
+      ],
+      "proofRange": [
+        1184,
+        1187
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgtSpecInv"
+      ]
+    },
+    "tlaplus_examples_FlashProtocol/FlashWithMutex_Lemma_2_Correct.tla": {
+      "id": "tlaplus_examples_FlashProtocol/FlashWithMutex_Lemma_2_Correct.tla",
+      "name": "Lemma_2_Correct",
+      "kind": "target",
+      "lineStart": 1190,
+      "lineEnd": 1195,
+      "proofLines": [
+        1192,
+        1193,
+        1194,
+        1195
+      ],
+      "proofRange": [
+        1192,
+        1195
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgtSpecInv"
+      ]
+    },
+    "tlaplus_examples_FlashProtocol/FlashWithMutex_Lemma_3_Correct.tla": {
+      "id": "tlaplus_examples_FlashProtocol/FlashWithMutex_Lemma_3_Correct.tla",
+      "name": "Lemma_3_Correct",
+      "kind": "target",
+      "lineStart": 1198,
+      "lineEnd": 1203,
+      "proofLines": [
+        1200,
+        1201,
+        1202,
+        1203
+      ],
+      "proofRange": [
+        1200,
+        1203
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgtSpecInv"
+      ]
+    },
+    "tlaplus_examples_FlashProtocol/FlashWithMutex_Lemma_4_Correct.tla": {
+      "id": "tlaplus_examples_FlashProtocol/FlashWithMutex_Lemma_4_Correct.tla",
+      "name": "Lemma_4_Correct",
+      "kind": "target",
+      "lineStart": 1206,
+      "lineEnd": 1211,
+      "proofLines": [
+        1208,
+        1209,
+        1210,
+        1211
+      ],
+      "proofRange": [
+        1208,
+        1211
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgtSpecInv"
+      ]
+    },
+    "helper:AgtInvInit": {
+      "id": "helper:AgtInvInit",
+      "name": "AgtInvInit",
+      "kind": "helper",
+      "lineStart": 167,
+      "lineEnd": 168,
+      "proofLines": [
+        168
+      ],
+      "proofRange": [
+        168,
+        168
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgtNxa01": {
+      "id": "helper:AgtNxa01",
+      "name": "AgtNxa01",
+      "kind": "helper",
+      "lineStart": 170,
+      "lineEnd": 171,
+      "proofLines": [
+        171
+      ],
+      "proofRange": [
+        171,
+        171
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgtNxa02": {
+      "id": "helper:AgtNxa02",
+      "name": "AgtNxa02",
+      "kind": "helper",
+      "lineStart": 173,
+      "lineEnd": 174,
+      "proofLines": [
+        174
+      ],
+      "proofRange": [
+        174,
+        174
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgtNxa03": {
+      "id": "helper:AgtNxa03",
+      "name": "AgtNxa03",
+      "kind": "helper",
+      "lineStart": 176,
+      "lineEnd": 177,
+      "proofLines": [
+        177
+      ],
+      "proofRange": [
+        177,
+        177
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgtNxa04": {
+      "id": "helper:AgtNxa04",
+      "name": "AgtNxa04",
+      "kind": "helper",
+      "lineStart": 179,
+      "lineEnd": 180,
+      "proofLines": [
+        180
+      ],
+      "proofRange": [
+        180,
+        180
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgtNxa05": {
+      "id": "helper:AgtNxa05",
+      "name": "AgtNxa05",
+      "kind": "helper",
+      "lineStart": 182,
+      "lineEnd": 183,
+      "proofLines": [
+        183
+      ],
+      "proofRange": [
+        183,
+        183
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgtNxa06": {
+      "id": "helper:AgtNxa06",
+      "name": "AgtNxa06",
+      "kind": "helper",
+      "lineStart": 185,
+      "lineEnd": 248,
+      "proofLines": [
+        186,
+        187,
+        188,
+        189,
+        190,
+        191,
+        192,
+        193,
+        194,
+        195,
+        196,
+        197,
+        198,
+        199,
+        200,
+        201,
+        202,
+        203,
+        204,
+        205,
+        206,
+        207,
+        208,
+        209,
+        210,
+        211,
+        212,
+        213,
+        214,
+        215,
+        216,
+        217,
+        218,
+        219,
+        220,
+        221,
+        222,
+        223,
+        224,
+        225,
+        226,
+        227,
+        228,
+        229,
+        230,
+        231,
+        232,
+        233,
+        234,
+        235,
+        236,
+        237,
+        238,
+        239,
+        240,
+        241,
+        242,
+        243,
+        244,
+        245,
+        246,
+        247,
+        248
+      ],
+      "proofRange": [
+        186,
+        248
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgtNxa07": {
+      "id": "helper:AgtNxa07",
+      "name": "AgtNxa07",
+      "kind": "helper",
+      "lineStart": 250,
+      "lineEnd": 251,
+      "proofLines": [
+        251
+      ],
+      "proofRange": [
+        251,
+        251
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgtNxa08": {
+      "id": "helper:AgtNxa08",
+      "name": "AgtNxa08",
+      "kind": "helper",
+      "lineStart": 253,
+      "lineEnd": 254,
+      "proofLines": [
+        254
+      ],
+      "proofRange": [
+        254,
+        254
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgtNxa09": {
+      "id": "helper:AgtNxa09",
+      "name": "AgtNxa09",
+      "kind": "helper",
+      "lineStart": 256,
+      "lineEnd": 383,
+      "proofLines": [
+        257,
+        258,
+        259,
+        260,
+        261,
+        262,
+        263,
+        264,
+        265,
+        266,
+        267,
+        268,
+        269,
+        270,
+        271,
+        272,
+        273,
+        274,
+        275,
+        276,
+        277,
+        278,
+        279,
+        280,
+        281,
+        282,
+        283,
+        284,
+        285,
+        286,
+        287,
+        288,
+        289,
+        290,
+        291,
+        292,
+        293,
+        294,
+        295,
+        296,
+        297,
+        298,
+        299,
+        300,
+        301,
+        302,
+        303,
+        304,
+        305,
+        306,
+        307,
+        308,
+        309,
+        310,
+        311,
+        312,
+        313,
+        314,
+        315,
+        316,
+        317,
+        318,
+        319,
+        320,
+        321,
+        322,
+        323,
+        324,
+        325,
+        326,
+        327,
+        328,
+        329,
+        330,
+        331,
+        332,
+        333,
+        334,
+        335,
+        336,
+        337,
+        338,
+        339,
+        340,
+        341,
+        342,
+        343,
+        344,
+        345,
+        346,
+        347,
+        348,
+        349,
+        350,
+        351,
+        352,
+        353,
+        354,
+        355,
+        356,
+        357,
+        358,
+        359,
+        360,
+        361,
+        362,
+        363,
+        364,
+        365,
+        366,
+        367,
+        368,
+        369,
+        370,
+        371,
+        372,
+        373,
+        374,
+        375,
+        376,
+        377,
+        378,
+        379,
+        380,
+        381,
+        382,
+        383
+      ],
+      "proofRange": [
+        257,
+        383
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgtNxa10": {
+      "id": "helper:AgtNxa10",
+      "name": "AgtNxa10",
+      "kind": "helper",
+      "lineStart": 385,
+      "lineEnd": 386,
+      "proofLines": [
+        386
+      ],
+      "proofRange": [
+        386,
+        386
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgtNxa11": {
+      "id": "helper:AgtNxa11",
+      "name": "AgtNxa11",
+      "kind": "helper",
+      "lineStart": 388,
+      "lineEnd": 389,
+      "proofLines": [
+        389
+      ],
+      "proofRange": [
+        389,
+        389
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgtNxa12": {
+      "id": "helper:AgtNxa12",
+      "name": "AgtNxa12",
+      "kind": "helper",
+      "lineStart": 391,
+      "lineEnd": 454,
+      "proofLines": [
+        392,
+        393,
+        394,
+        395,
+        396,
+        397,
+        398,
+        399,
+        400,
+        401,
+        402,
+        403,
+        404,
+        405,
+        406,
+        407,
+        408,
+        409,
+        410,
+        411,
+        412,
+        413,
+        414,
+        415,
+        416,
+        417,
+        418,
+        419,
+        420,
+        421,
+        422,
+        423,
+        424,
+        425,
+        426,
+        427,
+        428,
+        429,
+        430,
+        431,
+        432,
+        433,
+        434,
+        435,
+        436,
+        437,
+        438,
+        439,
+        440,
+        441,
+        442,
+        443,
+        444,
+        445,
+        446,
+        447,
+        448,
+        449,
+        450,
+        451,
+        452,
+        453,
+        454
+      ],
+      "proofRange": [
+        392,
+        454
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgtNxa13": {
+      "id": "helper:AgtNxa13",
+      "name": "AgtNxa13",
+      "kind": "helper",
+      "lineStart": 456,
+      "lineEnd": 457,
+      "proofLines": [
+        457
+      ],
+      "proofRange": [
+        457,
+        457
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgtNxa14": {
+      "id": "helper:AgtNxa14",
+      "name": "AgtNxa14",
+      "kind": "helper",
+      "lineStart": 459,
+      "lineEnd": 460,
+      "proofLines": [
+        460
+      ],
+      "proofRange": [
+        460,
+        460
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgtNxa15": {
+      "id": "helper:AgtNxa15",
+      "name": "AgtNxa15",
+      "kind": "helper",
+      "lineStart": 462,
+      "lineEnd": 479,
+      "proofLines": [
+        463,
+        464,
+        465,
+        466,
+        467,
+        468,
+        469,
+        470,
+        471,
+        472,
+        473,
+        474,
+        475,
+        476,
+        477,
+        478,
+        479
+      ],
+      "proofRange": [
+        463,
+        479
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgtNxa16": {
+      "id": "helper:AgtNxa16",
+      "name": "AgtNxa16",
+      "kind": "helper",
+      "lineStart": 481,
+      "lineEnd": 498,
+      "proofLines": [
+        482,
+        483,
+        484,
+        485,
+        486,
+        487,
+        488,
+        489,
+        490,
+        491,
+        492,
+        493,
+        494,
+        495,
+        496,
+        497,
+        498
+      ],
+      "proofRange": [
+        482,
+        498
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgtNxa17": {
+      "id": "helper:AgtNxa17",
+      "name": "AgtNxa17",
+      "kind": "helper",
+      "lineStart": 500,
+      "lineEnd": 501,
+      "proofLines": [
+        501
+      ],
+      "proofRange": [
+        501,
+        501
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgtNxa18": {
+      "id": "helper:AgtNxa18",
+      "name": "AgtNxa18",
+      "kind": "helper",
+      "lineStart": 503,
+      "lineEnd": 504,
+      "proofLines": [
+        504
+      ],
+      "proofRange": [
+        504,
+        504
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgtNxa19": {
+      "id": "helper:AgtNxa19",
+      "name": "AgtNxa19",
+      "kind": "helper",
+      "lineStart": 506,
+      "lineEnd": 523,
+      "proofLines": [
+        507,
+        508,
+        509,
+        510,
+        511,
+        512,
+        513,
+        514,
+        515,
+        516,
+        517,
+        518,
+        519,
+        520,
+        521,
+        522,
+        523
+      ],
+      "proofRange": [
+        507,
+        523
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgtNxa20": {
+      "id": "helper:AgtNxa20",
+      "name": "AgtNxa20",
+      "kind": "helper",
+      "lineStart": 525,
+      "lineEnd": 588,
+      "proofLines": [
+        526,
+        527,
+        528,
+        529,
+        530,
+        531,
+        532,
+        533,
+        534,
+        535,
+        536,
+        537,
+        538,
+        539,
+        540,
+        541,
+        542,
+        543,
+        544,
+        545,
+        546,
+        547,
+        548,
+        549,
+        550,
+        551,
+        552,
+        553,
+        554,
+        555,
+        556,
+        557,
+        558,
+        559,
+        560,
+        561,
+        562,
+        563,
+        564,
+        565,
+        566,
+        567,
+        568,
+        569,
+        570,
+        571,
+        572,
+        573,
+        574,
+        575,
+        576,
+        577,
+        578,
+        579,
+        580,
+        581,
+        582,
+        583,
+        584,
+        585,
+        586,
+        587,
+        588
+      ],
+      "proofRange": [
+        526,
+        588
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgtNxa21": {
+      "id": "helper:AgtNxa21",
+      "name": "AgtNxa21",
+      "kind": "helper",
+      "lineStart": 590,
+      "lineEnd": 591,
+      "proofLines": [
+        591
+      ],
+      "proofRange": [
+        591,
+        591
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgtNxa22": {
+      "id": "helper:AgtNxa22",
+      "name": "AgtNxa22",
+      "kind": "helper",
+      "lineStart": 593,
+      "lineEnd": 610,
+      "proofLines": [
+        594,
+        595,
+        596,
+        597,
+        598,
+        599,
+        600,
+        601,
+        602,
+        603,
+        604,
+        605,
+        606,
+        607,
+        608,
+        609,
+        610
+      ],
+      "proofRange": [
+        594,
+        610
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgtNxa23": {
+      "id": "helper:AgtNxa23",
+      "name": "AgtNxa23",
+      "kind": "helper",
+      "lineStart": 612,
+      "lineEnd": 613,
+      "proofLines": [
+        613
+      ],
+      "proofRange": [
+        613,
+        613
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgtNxa24": {
+      "id": "helper:AgtNxa24",
+      "name": "AgtNxa24",
+      "kind": "helper",
+      "lineStart": 615,
+      "lineEnd": 632,
+      "proofLines": [
+        616,
+        617,
+        618,
+        619,
+        620,
+        621,
+        622,
+        623,
+        624,
+        625,
+        626,
+        627,
+        628,
+        629,
+        630,
+        631,
+        632
+      ],
+      "proofRange": [
+        616,
+        632
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgtNxa25": {
+      "id": "helper:AgtNxa25",
+      "name": "AgtNxa25",
+      "kind": "helper",
+      "lineStart": 634,
+      "lineEnd": 651,
+      "proofLines": [
+        635,
+        636,
+        637,
+        638,
+        639,
+        640,
+        641,
+        642,
+        643,
+        644,
+        645,
+        646,
+        647,
+        648,
+        649,
+        650,
+        651
+      ],
+      "proofRange": [
+        635,
+        651
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgtNxa26": {
+      "id": "helper:AgtNxa26",
+      "name": "AgtNxa26",
+      "kind": "helper",
+      "lineStart": 653,
+      "lineEnd": 654,
+      "proofLines": [
+        654
+      ],
+      "proofRange": [
+        654,
+        654
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgtNxa27": {
+      "id": "helper:AgtNxa27",
+      "name": "AgtNxa27",
+      "kind": "helper",
+      "lineStart": 656,
+      "lineEnd": 719,
+      "proofLines": [
+        657,
+        658,
+        659,
+        660,
+        661,
+        662,
+        663,
+        664,
+        665,
+        666,
+        667,
+        668,
+        669,
+        670,
+        671,
+        672,
+        673,
+        674,
+        675,
+        676,
+        677,
+        678,
+        679,
+        680,
+        681,
+        682,
+        683,
+        684,
+        685,
+        686,
+        687,
+        688,
+        689,
+        690,
+        691,
+        692,
+        693,
+        694,
+        695,
+        696,
+        697,
+        698,
+        699,
+        700,
+        701,
+        702,
+        703,
+        704,
+        705,
+        706,
+        707,
+        708,
+        709,
+        710,
+        711,
+        712,
+        713,
+        714,
+        715,
+        716,
+        717,
+        718,
+        719
+      ],
+      "proofRange": [
+        657,
+        719
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgtNxa28": {
+      "id": "helper:AgtNxa28",
+      "name": "AgtNxa28",
+      "kind": "helper",
+      "lineStart": 721,
+      "lineEnd": 738,
+      "proofLines": [
+        722,
+        723,
+        724,
+        725,
+        726,
+        727,
+        728,
+        729,
+        730,
+        731,
+        732,
+        733,
+        734,
+        735,
+        736,
+        737,
+        738
+      ],
+      "proofRange": [
+        722,
+        738
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgtNxa29": {
+      "id": "helper:AgtNxa29",
+      "name": "AgtNxa29",
+      "kind": "helper",
+      "lineStart": 740,
+      "lineEnd": 741,
+      "proofLines": [
+        741
+      ],
+      "proofRange": [
+        741,
+        741
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgtNxa30": {
+      "id": "helper:AgtNxa30",
+      "name": "AgtNxa30",
+      "kind": "helper",
+      "lineStart": 743,
+      "lineEnd": 744,
+      "proofLines": [
+        744
+      ],
+      "proofRange": [
+        744,
+        744
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgtNxa31": {
+      "id": "helper:AgtNxa31",
+      "name": "AgtNxa31",
+      "kind": "helper",
+      "lineStart": 746,
+      "lineEnd": 747,
+      "proofLines": [
+        747
+      ],
+      "proofRange": [
+        747,
+        747
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgtInvNext": {
+      "id": "helper:AgtInvNext",
+      "name": "AgtInvNext",
+      "kind": "helper",
+      "lineStart": 749,
+      "lineEnd": 796,
+      "proofLines": [
+        750,
+        751,
+        752,
+        753,
+        754,
+        755,
+        756,
+        757,
+        758,
+        759,
+        760,
+        761,
+        762,
+        763,
+        764,
+        765,
+        766,
+        767,
+        768,
+        769,
+        770,
+        771,
+        772,
+        773,
+        774,
+        775,
+        776,
+        777,
+        778,
+        779,
+        780,
+        781,
+        782,
+        783,
+        784,
+        785,
+        786,
+        787,
+        788,
+        789,
+        790,
+        791,
+        792,
+        793,
+        794,
+        795,
+        796
+      ],
+      "proofRange": [
+        750,
+        796
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgtNxa01",
+        "helper:AgtNxa02",
+        "helper:AgtNxa03",
+        "helper:AgtNxa04",
+        "helper:AgtNxa05",
+        "helper:AgtNxa06",
+        "helper:AgtNxa07",
+        "helper:AgtNxa08",
+        "helper:AgtNxa09",
+        "helper:AgtNxa10",
+        "helper:AgtNxa11",
+        "helper:AgtNxa12",
+        "helper:AgtNxa13",
+        "helper:AgtNxa14",
+        "helper:AgtNxa15",
+        "helper:AgtNxa16",
+        "helper:AgtNxa17",
+        "helper:AgtNxa18",
+        "helper:AgtNxa19",
+        "helper:AgtNxa20",
+        "helper:AgtNxa21",
+        "helper:AgtNxa22",
+        "helper:AgtNxa23",
+        "helper:AgtNxa24",
+        "helper:AgtNxa25",
+        "helper:AgtNxa26",
+        "helper:AgtNxa27",
+        "helper:AgtNxa28",
+        "helper:AgtNxa29",
+        "helper:AgtNxa30",
+        "helper:AgtNxa31"
+      ]
+    },
+    "helper:AgtSpecInv": {
+      "id": "helper:AgtSpecInv",
+      "name": "AgtSpecInv",
+      "kind": "helper",
+      "lineStart": 798,
+      "lineEnd": 799,
+      "proofLines": [
+        799
+      ],
+      "proofRange": [
+        799,
+        799
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgtInvInit",
+        "helper:AgtInvNext"
+      ]
+    },
+    "helper:AgtFairInv": {
+      "id": "helper:AgtFairInv",
+      "name": "AgtFairInv",
+      "kind": "helper",
+      "lineStart": 801,
+      "lineEnd": 802,
+      "proofLines": [
+        802
+      ],
+      "proofRange": [
+        802,
+        802
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgtInvInit",
+        "helper:AgtInvNext"
+      ]
+    },
+    "helper:AgtEnShWbA": {
+      "id": "helper:AgtEnShWbA",
+      "name": "AgtEnShWbA",
+      "kind": "helper",
+      "lineStart": 812,
+      "lineEnd": 813,
+      "proofLines": [
+        813
+      ],
+      "proofRange": [
+        813,
+        813
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgtEnShWbB": {
+      "id": "helper:AgtEnShWbB",
+      "name": "AgtEnShWbB",
+      "kind": "helper",
+      "lineStart": 815,
+      "lineEnd": 816,
+      "proofLines": [
+        816
+      ],
+      "proofRange": [
+        816,
+        816
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgtEnInvA": {
+      "id": "helper:AgtEnInvA",
+      "name": "AgtEnInvA",
+      "kind": "helper",
+      "lineStart": 818,
+      "lineEnd": 821,
+      "proofLines": [
+        820,
+        821
+      ],
+      "proofRange": [
+        820,
+        821
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgtEnInvB": {
+      "id": "helper:AgtEnInvB",
+      "name": "AgtEnInvB",
+      "kind": "helper",
+      "lineStart": 823,
+      "lineEnd": 832,
+      "proofLines": [
+        826,
+        827,
+        828,
+        829,
+        830,
+        831,
+        832
+      ],
+      "proofRange": [
+        826,
+        832
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgtLiveRp": {
+      "id": "helper:AgtLiveRp",
+      "name": "AgtLiveRp",
+      "kind": "helper",
+      "lineStart": 834,
+      "lineEnd": 866,
+      "proofLines": [
+        835,
+        836,
+        837,
+        838,
+        839,
+        840,
+        841,
+        842,
+        843,
+        844,
+        845,
+        846,
+        847,
+        848,
+        849,
+        850,
+        851,
+        852,
+        853,
+        854,
+        855,
+        856,
+        857,
+        858,
+        859,
+        860,
+        861,
+        862,
+        863,
+        864,
+        865,
+        866
+      ],
+      "proofRange": [
+        835,
+        866
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgtFairInv"
+      ]
+    },
+    "helper:AgtLiveWb": {
+      "id": "helper:AgtLiveWb",
+      "name": "AgtLiveWb",
+      "kind": "helper",
+      "lineStart": 868,
+      "lineEnd": 900,
+      "proofLines": [
+        869,
+        870,
+        871,
+        872,
+        873,
+        874,
+        875,
+        876,
+        877,
+        878,
+        879,
+        880,
+        881,
+        882,
+        883,
+        884,
+        885,
+        886,
+        887,
+        888,
+        889,
+        890,
+        891,
+        892,
+        893,
+        894,
+        895,
+        896,
+        897,
+        898,
+        899,
+        900
+      ],
+      "proofRange": [
+        869,
+        900
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgtFairInv"
+      ]
+    },
+    "helper:AgtLiveNakc": {
+      "id": "helper:AgtLiveNakc",
+      "name": "AgtLiveNakc",
+      "kind": "helper",
+      "lineStart": 902,
+      "lineEnd": 934,
+      "proofLines": [
+        903,
+        904,
+        905,
+        906,
+        907,
+        908,
+        909,
+        910,
+        911,
+        912,
+        913,
+        914,
+        915,
+        916,
+        917,
+        918,
+        919,
+        920,
+        921,
+        922,
+        923,
+        924,
+        925,
+        926,
+        927,
+        928,
+        929,
+        930,
+        931,
+        932,
+        933,
+        934
+      ],
+      "proofRange": [
+        903,
+        934
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgtFairInv"
+      ]
+    },
+    "helper:AgtLiveShWb": {
+      "id": "helper:AgtLiveShWb",
+      "name": "AgtLiveShWb",
+      "kind": "helper",
+      "lineStart": 936,
+      "lineEnd": 978,
+      "proofLines": [
+        937,
+        938,
+        939,
+        940,
+        941,
+        942,
+        943,
+        944,
+        945,
+        946,
+        947,
+        948,
+        949,
+        950,
+        951,
+        952,
+        953,
+        954,
+        955,
+        956,
+        957,
+        958,
+        959,
+        960,
+        961,
+        962,
+        963,
+        964,
+        965,
+        966,
+        967,
+        968,
+        969,
+        970,
+        971,
+        972,
+        973,
+        974,
+        975,
+        976,
+        977,
+        978
+      ],
+      "proofRange": [
+        937,
+        978
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgtEnShWbA",
+        "helper:AgtEnShWbB",
+        "helper:AgtFairInv"
+      ]
+    },
+    "helper:AgtLiveIv1": {
+      "id": "helper:AgtLiveIv1",
+      "name": "AgtLiveIv1",
+      "kind": "helper",
+      "lineStart": 980,
+      "lineEnd": 1018,
+      "proofLines": [
+        981,
+        982,
+        983,
+        984,
+        985,
+        986,
+        987,
+        988,
+        989,
+        990,
+        991,
+        992,
+        993,
+        994,
+        995,
+        996,
+        997,
+        998,
+        999,
+        1000,
+        1001,
+        1002,
+        1003,
+        1004,
+        1005,
+        1006,
+        1007,
+        1008,
+        1009,
+        1010,
+        1011,
+        1012,
+        1013,
+        1014,
+        1015,
+        1016,
+        1017,
+        1018
+      ],
+      "proofRange": [
+        981,
+        1018
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgtEnInvA",
+        "helper:AgtFairInv"
+      ]
+    },
+    "helper:AgtLiveIv2": {
+      "id": "helper:AgtLiveIv2",
+      "name": "AgtLiveIv2",
+      "kind": "helper",
+      "lineStart": 1020,
+      "lineEnd": 1058,
+      "proofLines": [
+        1021,
+        1022,
+        1023,
+        1024,
+        1025,
+        1026,
+        1027,
+        1028,
+        1029,
+        1030,
+        1031,
+        1032,
+        1033,
+        1034,
+        1035,
+        1036,
+        1037,
+        1038,
+        1039,
+        1040,
+        1041,
+        1042,
+        1043,
+        1044,
+        1045,
+        1046,
+        1047,
+        1048,
+        1049,
+        1050,
+        1051,
+        1052,
+        1053,
+        1054,
+        1055,
+        1056,
+        1057,
+        1058
+      ],
+      "proofRange": [
+        1021,
+        1058
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgtEnInvB",
+        "helper:AgtFairInv"
+      ]
+    },
+    "helper:AgtLiveIv": {
+      "id": "helper:AgtLiveIv",
+      "name": "AgtLiveIv",
+      "kind": "helper",
+      "lineStart": 1060,
+      "lineEnd": 1079,
+      "proofLines": [
+        1061,
+        1062,
+        1063,
+        1064,
+        1065,
+        1066,
+        1067,
+        1068,
+        1069,
+        1070,
+        1071,
+        1072,
+        1073,
+        1074,
+        1075,
+        1076,
+        1077,
+        1078,
+        1079
+      ],
+      "proofRange": [
+        1061,
+        1079
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgtFairInv",
+        "helper:AgtLiveIv1",
+        "helper:AgtLiveIv2"
+      ]
+    }
+  }
+}

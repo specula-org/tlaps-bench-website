@@ -1,0 +1,1970 @@
+{
+  "schemaVersion": 1,
+  "specId": "ZooKeeper/Zab.tla",
+  "sourceName": "Zab.tla",
+  "sourceSha256": "7eb06cf1052a059f0f6b3edacdd79c2197e0cf5510696b19239b33b7748479f8",
+  "resultSha256": "48e3eb4861bca35b77d39c4d16871ee1aa57a78f95449cab0f7509fc1ad3f02b",
+  "source": "---- MODULE Zab ----\nEXTENDS ZabDefs\n\n\\* BEGIN AGENT HELPERS\nLOCAL FSThm  == INSTANCE FiniteSetTheorems\nLOCAL SeqThm == INSTANCE SequenceTheorems\n\n(***************************************************************************)\n(* Finite-set facts, restated with the unprefixed operators.               *)\n(***************************************************************************)\n\nLEMMA H_FSEmpty == IsFiniteSet({})\n  BY FSThm!FS_EmptySet DEF FSThm!IsFiniteSet, IsFiniteSet\n\nLEMMA H_FSSingleton == ASSUME NEW x PROVE IsFiniteSet({x})\n  BY FSThm!FS_Singleton DEF FSThm!IsFiniteSet, IsFiniteSet\n\nLEMMA H_FSUnion == ASSUME NEW S, IsFiniteSet(S), NEW T, IsFiniteSet(T)\n                   PROVE  IsFiniteSet(S \\cup T)\n  BY FSThm!FS_Union DEF FSThm!IsFiniteSet, IsFiniteSet\n\nLEMMA H_FSDiff == ASSUME NEW S, IsFiniteSet(S), NEW T\n                  PROVE  IsFiniteSet(S \\ T)\n  BY FSThm!FS_Difference DEF FSThm!IsFiniteSet, IsFiniteSet\n\nLEMMA H_FSImage == ASSUME NEW S, IsFiniteSet(S), NEW Op(_)\n                   PROVE  IsFiniteSet({Op(x) : x \\in S})\n  BY FSThm!FS_Image DEF FSThm!IsFiniteSet, IsFiniteSet\n\nLEMMA H_FSIsFin == \\A S : FSThm!IsFiniteSet(S) <=> IsFiniteSet(S)\n  BY DEF FSThm!IsFiniteSet, IsFiniteSet\n\nLEMMA H_FSInduction ==\n  ASSUME NEW S, FSThm!IsFiniteSet(S), NEW P(_), P({}),\n         ASSUME NEW T \\in SUBSET S, FSThm!IsFiniteSet(T), P(T), NEW x \\in S \\ T\n         PROVE  P(T \\cup {x})\n  PROVE  P(S)\n  BY FSThm!FS_Induction\n\n(***************************************************************************)\n(* Maxima of finite sets.                                                  *)\n(***************************************************************************)\n\nLEMMA H_MaxRel ==\n  ASSUME NEW S, IsFiniteSet(S), S # {}, NEW R(_,_),\n         \\A a, b \\in S : R(a,b) \\/ R(b,a),\n         \\A a, b, c \\in S : R(a,b) /\\ R(b,c) => R(a,c)\n  PROVE  \\E x \\in S : \\A y \\in S : R(x,y)\n  <1> DEFINE P(T) == (T # {}) => \\E x \\in T : \\A y \\in T : R(x,y)\n  <1>1 P({}) OBVIOUS\n  <1>2 ASSUME NEW T \\in SUBSET S, FSThm!IsFiniteSet(T), P(T), NEW z \\in S \\ T\n       PROVE  P(T \\cup {z})\n    <2>1 CASE T = {}\n      BY <1>2, <2>1 DEF P\n    <2>2 CASE T # {}\n      <3>1 PICK x \\in T : \\A y \\in T : R(x,y)  BY <1>2, <2>2 DEF P\n      <3>x x \\in S /\\ z \\in S BY <1>2\n      <3>2 CASE R(z,x)\n        <4>1 \\A y \\in T \\cup {z} : R(z,y)\n          <5>1 ASSUME NEW y \\in T PROVE R(z,y)\n            BY <1>2, <3>1, <3>2, <3>x\n          <5>2 R(z,z) BY <3>x\n          <5> QED BY <5>1, <5>2\n        <4> QED BY <4>1 DEF P\n      <3>3 CASE ~R(z,x)\n        <4>1 R(x,z) BY <3>3, <3>x\n        <4>2 \\A y \\in T \\cup {z} : R(x,y) BY <3>1, <4>1\n        <4> QED BY <4>2, <3>1 DEF P\n      <3> QED BY <3>2, <3>3\n    <2> QED BY <2>1, <2>2\n  <1>3 P(S)\n    <2>a FSThm!IsFiniteSet(S) BY H_FSIsFin\n    <2> HIDE DEF P\n    <2> QED BY <1>1, <1>2, <2>a, H_FSInduction, IsaM(\"blast\")\n  <1> QED BY <1>3 DEF P\n\nLEMMA H_MaxIntExists ==\n  ASSUME NEW S, IsFiniteSet(S), S # {}, S \\subseteq Int\n  PROVE  \\E x \\in S : \\A y \\in S : x >= y\n  <1>1 \\A a, b \\in S : a >= b \\/ b >= a BY SMTT(\"r20\")\n  <1>2 \\A a, b, c \\in S : (a >= b /\\ b >= c) => a >= c BY SMTT(\"r20\")\n  <1> DEFINE R(a,b) == a >= b\n  <1>3 \\A a, b \\in S : R(a,b) \\/ R(b,a) BY <1>1\n  <1>4 \\A a, b, c \\in S : R(a,b) /\\ R(b,c) => R(a,c) BY <1>2\n  <1> QED BY <1>3, <1>4, H_MaxRel\n\nLEMMA H_MaximumProps ==\n  ASSUME NEW S, IsFiniteSet(S), S \\subseteq Int\n  PROVE  /\\ Maximum(S) \\in Int\n         /\\ S # {} => (Maximum(S) \\in S /\\ \\A y \\in S : Maximum(S) >= y)\n  <1>1 CASE S = {}\n    BY <1>1 DEF Maximum\n  <1>2 CASE S # {}\n    <2>1 \\E x \\in S : \\A y \\in S : x >= y BY <1>2, H_MaxIntExists\n    <2>2 Maximum(S) = CHOOSE n \\in S : \\A m \\in S : n >= m BY <1>2 DEF Maximum\n    <2>3 (CHOOSE n \\in S : \\A m \\in S : n >= m) \\in S\n         /\\ \\A m \\in S : (CHOOSE n \\in S : \\A m2 \\in S : n >= m2) >= m\n      BY <2>1\n    <2> QED BY <2>2, <2>3\n  <1> QED BY <1>1, <1>2\n\n(***************************************************************************)\n(* Finite sequences over an unspecified element set.                       *)\n(***************************************************************************)\n\nH_FinSeq(q) == \\E SS : q \\in Seq(SS)\n\nLEMMA H_FSeqEmpty == H_FinSeq(<< >>)\n  BY SeqThm!EmptySeq DEF H_FinSeq\n\nLEMMA H_FSeqLen ==\n  ASSUME NEW q, H_FinSeq(q)\n  PROVE  /\\ Len(q) \\in Nat\n         /\\ DOMAIN q = 1..Len(q)\n  <1>1 PICK SS : q \\in Seq(SS) BY DEF H_FinSeq\n  <1> QED BY <1>1, SeqThm!LenProperties\n\nLEMMA H_FSeqAppend ==\n  ASSUME NEW q, H_FinSeq(q), NEW e\n  PROVE  /\\ H_FinSeq(Append(q, e))\n         /\\ Len(Append(q, e)) = Len(q) + 1\n         /\\ \\A k \\in 1..Len(q) : Append(q, e)[k] = q[k]\n         /\\ Append(q, e)[Len(q) + 1] = e\n  <1>1 PICK SS : q \\in Seq(SS) BY DEF H_FinSeq\n  <1>2 q \\in Seq(SS \\cup {e}) BY <1>1, SeqThm!SeqMonotonic\n  <1>3 e \\in SS \\cup {e} OBVIOUS\n  <1> QED BY <1>2, <1>3, SeqThm!AppendProperties DEF H_FinSeq\n\nLEMMA H_FSeqTail ==\n  ASSUME NEW q, H_FinSeq(q), q # << >>\n  PROVE  /\\ H_FinSeq(Tail(q))\n         /\\ Len(q) \\in Nat \\ {0}\n         /\\ Len(Tail(q)) = Len(q) - 1\n         /\\ \\A k \\in 1..Len(Tail(q)) : Tail(q)[k] = q[k+1]\n  <1>1 PICK SS : q \\in Seq(SS) BY DEF H_FinSeq\n  <1> QED BY <1>1, SeqThm!HeadTailProperties, SeqThm!EmptySeq DEF H_FinSeq\n\nLEMMA H_FSeqElt ==\n  ASSUME NEW q, H_FinSeq(q), q # << >>\n  PROVE  1 \\in 1..Len(q)\n  BY H_FSeqTail, H_FSeqLen\n\n(***************************************************************************)\n(* Reduced type invariant: everything needed for the leadership properties *)\n(* (it deliberately says nothing about history / lastCommitted contents).  *)\n(***************************************************************************)\n\nH_CInfo == [sid : Server, connected : BOOLEAN, epoch : Nat]\n\nH_MsgP(m) == (m.mtype = CEPOCH \\/ m.mtype = NEWEPOCH) => m.mepoch \\in Nat\n\nH_QOK(q) == H_FinSeq(q) /\\ \\A k \\in 1..Len(q) : H_MsgP(q[k])\n\nH_TypeB ==\n  /\\ state         \\in [Server -> {LOOKING, FOLLOWING, LEADING}]\n  /\\ zabState      \\in [Server -> {ELECTION, DISCOVERY, SYNCHRONIZATION, BROADCAST}]\n  /\\ acceptedEpoch \\in [Server -> Nat]\n  /\\ currentEpoch  \\in [Server -> Nat]\n  /\\ learners      \\in [Server -> SUBSET Server]\n  /\\ cepochRecv    \\in [Server -> SUBSET H_CInfo]\n  /\\ \\A s \\in Server : IsFiniteSet(cepochRecv[s])\n  /\\ ackeRecv      = [s \\in Server |-> ackeRecv[s]]\n  /\\ ackldRecv     = [s \\in Server |-> ackldRecv[s]]\n  /\\ \\A s \\in Server : \\A x \\in ackeRecv[s]  : x.sid \\in Server\n  /\\ \\A s \\in Server : \\A x \\in ackldRecv[s] : x.sid \\in Server\n  /\\ sendCounter   \\in [Server -> Nat]\n  /\\ connectInfo   \\in [Server -> Server \\cup {NullPoint}]\n  /\\ leaderOracle  \\in Server \\cup {NullPoint}\n  /\\ msgs          = [a \\in Server |-> [b \\in Server |-> msgs[a][b]]]\n  /\\ \\A a, b \\in Server : H_QOK(msgs[a][b])\n  /\\ epochLeader   \\in [1..MAXEPOCH -> SUBSET Server]\n\nLEMMA H_InitTypeB == Init => H_TypeB\n  <1> SUFFICES ASSUME Init PROVE H_TypeB OBVIOUS\n  <1> USE DEF Init, InitServerVars, InitLeaderVars, InitFollowerVars,\n              InitElectionVars, InitVerifyVars, InitMsgVars\n  <1>1 \\A s \\in Server : IsFiniteSet(cepochRecv[s]) BY H_FSEmpty\n  <1>2 \\A a, b \\in Server : H_QOK(msgs[a][b])\n    BY H_FSeqEmpty, SeqThm!EmptySeq DEF H_QOK\n  <1> QED BY <1>1, <1>2, MaxEpochNat DEF H_TypeB, LOOKING, ELECTION\n\nLEMMA H_QOKEmpty == H_QOK(<< >>)\n  BY H_FSeqEmpty, SeqThm!EmptySeq DEF H_QOK\n\nLEMMA H_QOKAppend ==\n  ASSUME NEW q, H_QOK(q), NEW m, H_MsgP(m)\n  PROVE  H_QOK(Append(q, m))\n  <1>1 H_FinSeq(Append(q,m)) /\\ Len(Append(q,m)) = Len(q) + 1\n       /\\ (\\A k \\in 1..Len(q) : Append(q,m)[k] = q[k])\n       /\\ Append(q,m)[Len(q)+1] = m\n    BY H_FSeqAppend DEF H_QOK\n  <1>2 Len(q) \\in Nat BY H_FSeqLen DEF H_QOK\n  <1>3 \\A k \\in 1..Len(Append(q,m)) : H_MsgP(Append(q,m)[k])\n    <2> SUFFICES ASSUME NEW k \\in 1..Len(Append(q,m)) PROVE H_MsgP(Append(q,m)[k])\n      OBVIOUS\n    <2>1 k \\in 1..Len(q) \\/ k = Len(q)+1 BY <1>1, <1>2\n    <2> QED BY <1>1, <2>1 DEF H_QOK\n  <1> QED BY <1>1, <1>3 DEF H_QOK\n\nLEMMA H_QOKTail ==\n  ASSUME NEW q, H_QOK(q), q # << >>\n  PROVE  H_QOK(Tail(q))\n  <1>1 /\\ H_FinSeq(Tail(q))\n       /\\ Len(q) \\in Nat \\ {0}\n       /\\ Len(Tail(q)) = Len(q) - 1\n       /\\ \\A k \\in 1..Len(Tail(q)) : Tail(q)[k] = q[k+1]\n    BY H_FSeqTail DEF H_QOK\n  <1>2 \\A k \\in 1..Len(Tail(q)) : H_MsgP(Tail(q)[k])\n    BY <1>1 DEF H_QOK\n  <1> QED BY <1>1, <1>2 DEF H_QOK\n\nLEMMA H_QOKHead ==\n  ASSUME NEW q, H_QOK(q), q # << >>\n  PROVE  H_MsgP(q[1])\n  BY H_FSeqElt DEF H_QOK\n\n(***************************************************************************)\n(* Typing of the record-set updates.                                       *)\n(***************************************************************************)\n\nLEMMA H_MaxEpochNat ==\n  ASSUME NEW cr, cr \\subseteq H_CInfo, IsFiniteSet(cr)\n  PROVE  Maximum({c.epoch : c \\in cr}) + 1 \\in Nat\n  <1> DEFINE ES == {c.epoch : c \\in cr}\n  <1>1 IsFiniteSet(ES) BY H_FSImage\n  <1>2 ES \\subseteq Nat BY DEF H_CInfo\n  <1>3 ES \\subseteq Int BY <1>2\n  <1>4 Maximum(ES) \\in Int BY <1>1, <1>3, H_MaximumProps\n  <1>5 CASE ES = {}\n    BY <1>5 DEF Maximum\n  <1>6 CASE ES # {}\n    <2>1 Maximum(ES) \\in ES BY <1>1, <1>3, <1>6, H_MaximumProps\n    <2> QED BY <2>1, <1>2\n  <1> QED BY <1>5, <1>6\n\nLEMMA H_UpdCepochType ==\n  ASSUME NEW st, st \\subseteq H_CInfo, IsFiniteSet(st), NEW sid \\in Server, NEW pe \\in Nat\n  PROVE  /\\ UpdateCepochRecv(st, sid, pe) \\subseteq H_CInfo\n         /\\ IsFiniteSet(UpdateCepochRecv(st, sid, pe))\n  <1> DEFINE ni == [ sid |-> sid, connected |-> TRUE, epoch |-> pe ]\n  <1>0 ni \\in H_CInfo BY DEF H_CInfo\n  <1>1 CASE sid \\notin {x.sid : x \\in st}\n    BY <1>0, <1>1, H_FSSingleton, H_FSUnion DEF UpdateCepochRecv\n  <1>2 CASE sid \\in {x.sid : x \\in st}\n    <2>1 (CHOOSE x \\in st : x.sid = sid) \\in st BY <1>2\n    <2>2 IsFiniteSet((st \\ {CHOOSE x \\in st : x.sid = sid}) \\cup {ni})\n      BY H_FSDiff, H_FSSingleton, H_FSUnion\n    <2> QED BY <1>0, <1>2, <2>2 DEF UpdateCepochRecv\n  <1> QED BY <1>1, <1>2\n\nLEMMA H_RemCepochType ==\n  ASSUME NEW st, st \\subseteq H_CInfo, IsFiniteSet(st), NEW sid\n  PROVE  /\\ RemoveCepochRecv(st, sid) \\subseteq H_CInfo\n         /\\ IsFiniteSet(RemoveCepochRecv(st, sid))\n  <1>1 CASE sid \\notin {x.sid : x \\in st}\n    BY <1>1 DEF RemoveCepochRecv\n  <1>2 CASE sid \\in {x.sid : x \\in st}\n    <2> DEFINE inf == CHOOSE x \\in st : x.sid = sid\n    <2>1 inf \\in st BY <1>2\n    <2>2 inf \\in H_CInfo BY <2>1\n    <2>3 inf.sid = sid BY <1>2\n    <2>4 [ sid |-> sid, connected |-> FALSE, epoch |-> inf.epoch ] \\in H_CInfo\n      BY <2>2, <2>3 DEF H_CInfo\n    <2>5 IsFiniteSet((st \\ {inf}) \\cup\n                     {[ sid |-> sid, connected |-> FALSE, epoch |-> inf.epoch ]})\n      BY H_FSDiff, H_FSSingleton, H_FSUnion\n    <2> QED BY <1>2, <2>4, <2>5 DEF RemoveCepochRecv\n  <1> QED BY <1>1, <1>2\n\nLEMMA H_UpdAckeSid ==\n  ASSUME NEW st, \\A x \\in st : x.sid \\in Server, NEW sid \\in Server,\n         NEW pe, NEW ph\n  PROVE  \\A x \\in UpdateAckeRecv(st, sid, pe, ph) : x.sid \\in Server\n  BY DEF UpdateAckeRecv\n\nLEMMA H_RemAckeSid ==\n  ASSUME NEW st, \\A x \\in st : x.sid \\in Server, NEW sid\n  PROVE  \\A x \\in RemoveAckeRecv(st, sid) : x.sid \\in Server\n  <1>1 CASE sid \\notin {x.sid : x \\in st}\n    BY <1>1 DEF RemoveAckeRecv\n  <1>2 CASE sid \\in {x.sid : x \\in st}\n    <2>1 (CHOOSE x \\in st : x.sid = sid) \\in st /\\ (CHOOSE x \\in st : x.sid = sid).sid = sid\n      BY <1>2\n    <2> QED BY <1>2, <2>1 DEF RemoveAckeRecv\n  <1> QED BY <1>1, <1>2\n\nLEMMA H_UpdAckldSid ==\n  ASSUME NEW st, \\A x \\in st : x.sid \\in Server, NEW sid \\in Server\n  PROVE  \\A x \\in UpdateAckldRecv(st, sid) : x.sid \\in Server\n  BY DEF UpdateAckldRecv\n\nLEMMA H_RemAckldSid ==\n  ASSUME NEW st, \\A x \\in st : x.sid \\in Server, NEW sid\n  PROVE  \\A x \\in RemoveAckldRecv(st, sid) : x.sid \\in Server\n  <1>1 CASE sid \\notin {x.sid : x \\in st}\n    BY <1>1 DEF RemoveAckldRecv\n  <1>2 CASE sid \\in {x.sid : x \\in st}\n    <2>1 (CHOOSE x \\in st : x.sid = sid) \\in st /\\ (CHOOSE x \\in st : x.sid = sid).sid = sid\n      BY <1>2\n    <2> QED BY <1>2, <2>1 DEF RemoveAckldRecv\n  <1> QED BY <1>1, <1>2\n\nLEMMA H_RemoveLearnerTypeB ==\n  ASSUME H_TypeB, NEW i \\in Server, NEW j, RemoveLearner(i, j)\n  PROVE  /\\ learners'   \\in [Server -> SUBSET Server]\n         /\\ cepochRecv' \\in [Server -> SUBSET H_CInfo]\n         /\\ \\A s \\in Server : IsFiniteSet(cepochRecv'[s])\n         /\\ ackeRecv'  = [s \\in Server |-> ackeRecv'[s]]\n         /\\ ackldRecv' = [s \\in Server |-> ackldRecv'[s]]\n         /\\ \\A s \\in Server : \\A x \\in ackeRecv'[s]  : x.sid \\in Server\n         /\\ \\A s \\in Server : \\A x \\in ackldRecv'[s] : x.sid \\in Server\n  BY H_RemCepochType, H_RemAckeSid, H_RemAckldSid DEF RemoveLearner, H_TypeB\n\n(***************************************************************************)\n(* Shape lemmas for the message matrix.                                    *)\n(***************************************************************************)\n\nH_Mtx(mm) == mm = [x \\in Server |-> [y \\in Server |-> mm[x][y]]]\n\nLEMMA H_MtxDom == ASSUME NEW mm, H_Mtx(mm), NEW x \\in Server\n                  PROVE  DOMAIN mm = Server /\\ DOMAIN mm[x] = Server\n  BY DEF H_Mtx\n\nLEMMA H_MtxUpd1 ==\n  ASSUME NEW mm, H_Mtx(mm), NEW a \\in Server, NEW b \\in Server, NEW X\n  PROVE  /\\ H_Mtx([mm EXCEPT ![a][b] = X])\n         /\\ \\A x \\in Server, y \\in Server :\n               [mm EXCEPT ![a][b] = X][x][y] = IF x = a /\\ y = b THEN X ELSE mm[x][y]\n  BY H_MtxDom DEF H_Mtx\n\nLEMMA H_MtxUpd2 ==\n  ASSUME NEW mm, H_Mtx(mm), NEW a \\in Server, NEW b \\in Server,\n         NEW c \\in Server, NEW d \\in Server, NEW X, NEW Y\n  PROVE  /\\ H_Mtx([mm EXCEPT ![a][b] = X, ![c][d] = Y])\n         /\\ \\A x \\in Server, y \\in Server :\n               [mm EXCEPT ![a][b] = X, ![c][d] = Y][x][y] =\n                  IF x = c /\\ y = d THEN Y\n                  ELSE IF x = a /\\ y = b THEN X ELSE mm[x][y]\n  BY H_MtxDom DEF H_Mtx\n\nLEMMA H_MtxRowV ==\n  ASSUME NEW mm, H_Mtx(mm), NEW a \\in Server, NEW RowF,\n         RowF = [v \\in Server |-> RowF[v]]\n  PROVE  /\\ H_Mtx([mm EXCEPT ![a] = RowF])\n         /\\ \\A x \\in Server, y \\in Server :\n               [mm EXCEPT ![a] = RowF][x][y] = IF x = a THEN RowF[y] ELSE mm[x][y]\n  BY H_MtxDom DEF H_Mtx\n\nLEMMA H_MtxUpdRowV ==\n  ASSUME NEW mm, H_Mtx(mm), NEW a \\in Server, NEW b \\in Server, NEW c \\in Server,\n         NEW X, NEW RowF, RowF = [v \\in Server |-> RowF[v]]\n  PROVE  /\\ H_Mtx([mm EXCEPT ![a][b] = X, ![c] = RowF])\n         /\\ \\A x \\in Server, y \\in Server :\n               [mm EXCEPT ![a][b] = X, ![c] = RowF][x][y] =\n                  IF x = c THEN RowF[y] ELSE IF x = a /\\ y = b THEN X ELSE mm[x][y]\n  BY H_MtxDom DEF H_Mtx\n\nLEMMA H_MtxCleanV ==\n  ASSUME NEW mm, H_Mtx(mm), NEW S\n  PROVE  /\\ H_Mtx([s \\in Server |-> [v \\in Server |-> IF v \\in S THEN << >> ELSE mm[s][v]]])\n         /\\ \\A x \\in Server, y \\in Server :\n               [s \\in Server |-> [v \\in Server |-> IF v \\in S THEN << >> ELSE mm[s][v]]][x][y]\n                  = IF y \\in S THEN << >> ELSE mm[x][y]\n  BY DEF H_Mtx\n\n(***************************************************************************)\n(* Message-matrix update helpers specialised to msgs.                      *)\n(***************************************************************************)\n\nLEMMA H_MsgsOne ==\n  ASSUME H_TypeB, NEW a \\in Server, NEW b \\in Server, NEW X, H_QOK(X),\n         NEW nn, nn = [msgs EXCEPT ![a][b] = X]\n  PROVE  H_Mtx(nn) /\\ \\A x, y \\in Server : H_QOK(nn[x][y])\n  <1>m H_Mtx(msgs) BY DEF H_TypeB, H_Mtx\n  <1>1 H_Mtx(nn) BY <1>m, H_MtxUpd1\n  <1>2 \\A x \\in Server, y \\in Server :\n          nn[x][y] = IF x = a /\\ y = b THEN X ELSE msgs[x][y]\n    BY <1>m, H_MtxUpd1\n  <1>3 \\A x \\in Server, y \\in Server : H_QOK(nn[x][y]) BY <1>2 DEF H_TypeB\n  <1> QED BY <1>1, <1>3\n\nLEMMA H_MsgsTwo ==\n  ASSUME H_TypeB, NEW a \\in Server, NEW b \\in Server,\n         NEW c \\in Server, NEW d \\in Server,\n         NEW X, H_QOK(X), NEW Y, H_QOK(Y),\n         NEW nn, nn = [msgs EXCEPT ![a][b] = X, ![c][d] = Y]\n  PROVE  H_Mtx(nn) /\\ \\A x, y \\in Server : H_QOK(nn[x][y])\n  <1>m H_Mtx(msgs) BY DEF H_TypeB, H_Mtx\n  <1>1 H_Mtx(nn) BY <1>m, H_MtxUpd2\n  <1>2 \\A x \\in Server, y \\in Server :\n          nn[x][y] = IF x = c /\\ y = d THEN Y\n                     ELSE IF x = a /\\ y = b THEN X ELSE msgs[x][y]\n    BY <1>m, H_MtxUpd2\n  <1>3 \\A x \\in Server, y \\in Server : H_QOK(nn[x][y]) BY <1>2 DEF H_TypeB\n  <1> QED BY <1>1, <1>3\n\nLEMMA H_MsgsRow ==\n  ASSUME H_TypeB, NEW c \\in Server, NEW RF, RF = [v \\in Server |-> RF[v]],\n         \\A v \\in Server : H_QOK(RF[v]),\n         NEW nn, nn = [msgs EXCEPT ![c] = RF]\n  PROVE  H_Mtx(nn) /\\ \\A x, y \\in Server : H_QOK(nn[x][y])\n  <1>m H_Mtx(msgs) BY DEF H_TypeB, H_Mtx\n  <1>1 H_Mtx(nn) BY <1>m, H_MtxRowV\n  <1>2 \\A x \\in Server, y \\in Server :\n          nn[x][y] = IF x = c THEN RF[y] ELSE msgs[x][y]\n    BY <1>m, H_MtxRowV\n  <1>3 \\A x \\in Server, y \\in Server : H_QOK(nn[x][y]) BY <1>2 DEF H_TypeB\n  <1> QED BY <1>1, <1>3\n\nLEMMA H_MsgsBcast ==\n  ASSUME H_TypeB, NEW a \\in Server, NEW b \\in Server, NEW c \\in Server,\n         NEW X, H_QOK(X), NEW RF, RF = [v \\in Server |-> RF[v]],\n         \\A v \\in Server : H_QOK(RF[v]),\n         NEW nn, nn = [msgs EXCEPT ![a][b] = X, ![c] = RF]\n  PROVE  H_Mtx(nn) /\\ \\A x, y \\in Server : H_QOK(nn[x][y])\n  <1>m H_Mtx(msgs) BY DEF H_TypeB, H_Mtx\n  <1>1 H_Mtx(nn) BY <1>m, H_MtxUpdRowV\n  <1>2 \\A x \\in Server, y \\in Server :\n          nn[x][y] = IF x = c THEN RF[y]\n                     ELSE IF x = a /\\ y = b THEN X ELSE msgs[x][y]\n    BY <1>m, H_MtxUpdRowV\n  <1>3 \\A x \\in Server, y \\in Server : H_QOK(nn[x][y]) BY <1>2 DEF H_TypeB\n  <1> QED BY <1>1, <1>3\n\nLEMMA H_MsgsClean ==\n  ASSUME H_TypeB, NEW S,\n         NEW nn, nn = [s \\in Server |-> [v \\in Server |->\n                          IF v \\in S THEN << >> ELSE msgs[s][v]]]\n  PROVE  H_Mtx(nn) /\\ \\A x, y \\in Server : H_QOK(nn[x][y])\n  <1>m H_Mtx(msgs) BY DEF H_TypeB, H_Mtx\n  <1>1 H_Mtx(nn) BY <1>m, H_MtxCleanV\n  <1>2 \\A x \\in Server, y \\in Server :\n          nn[x][y] = IF y \\in S THEN << >> ELSE msgs[x][y]\n    BY <1>m, H_MtxCleanV\n  <1>3 \\A x \\in Server, y \\in Server : H_QOK(nn[x][y])\n    BY <1>2, H_QOKEmpty DEF H_TypeB\n  <1> QED BY <1>1, <1>3\n\nLEMMA H_MsgsDiscard ==\n  ASSUME H_TypeB, NEW a \\in Server, NEW b \\in Server,\n         NEW nn, nn = IF msgs[a][b] # << >>\n                      THEN [msgs EXCEPT ![a][b] = Tail(msgs[a][b])] ELSE msgs\n  PROVE  H_Mtx(nn) /\\ \\A x, y \\in Server : H_QOK(nn[x][y])\n  <1>m H_Mtx(msgs) BY DEF H_TypeB, H_Mtx\n  <1>1 CASE msgs[a][b] # << >>\n    <2>1 H_QOK(Tail(msgs[a][b])) BY <1>1, H_QOKTail DEF H_TypeB\n    <2> QED BY <1>1, <1>m, <2>1, H_MtxUpd1 DEF H_TypeB\n  <1>2 CASE msgs[a][b] = << >>\n    BY <1>2, <1>m DEF H_TypeB\n  <1> QED BY <1>1, <1>2\n\n(***************************************************************************)\n(* Type preservation for H_TypeB, one lemma per action.                    *)\n(***************************************************************************)\n\nLEMMA H_B_UpdateLeader ==\n  ASSUME H_TypeB, NEW i \\in Server, UpdateLeader(i)\n  PROVE  H_TypeB'\n  <1> USE DEF UpdateLeader, SwitchToLeader, IsLooking,\n              followerVars, verifyVars, msgVars\n  <1>ci [ sid |-> i, connected |-> TRUE, epoch |-> acceptedEpoch[i] ] \\in H_CInfo\n    BY DEF H_TypeB, H_CInfo\n  <1>1 cepochRecv' \\in [Server -> SUBSET H_CInfo] BY <1>ci DEF H_TypeB\n  <1>2 \\A s \\in Server : IsFiniteSet(cepochRecv'[s]) BY H_FSSingleton DEF H_TypeB\n  <1>3 /\\ ackeRecv'  = [s \\in Server |-> ackeRecv'[s]]\n       /\\ ackldRecv' = [s \\in Server |-> ackldRecv'[s]]\n       /\\ \\A s \\in Server : \\A x \\in ackeRecv'[s]  : x.sid \\in Server\n       /\\ \\A s \\in Server : \\A x \\in ackldRecv'[s] : x.sid \\in Server\n    BY DEF H_TypeB\n  <1>4 /\\ state'        \\in [Server -> {LOOKING, FOLLOWING, LEADING}]\n       /\\ zabState'     \\in [Server -> {ELECTION, DISCOVERY, SYNCHRONIZATION, BROADCAST}]\n       /\\ learners'     \\in [Server -> SUBSET Server]\n       /\\ sendCounter'  \\in [Server -> Nat]\n       /\\ leaderOracle' \\in Server \\cup {NullPoint}\n    BY DEF H_TypeB\n  <1>5 /\\ acceptedEpoch' \\in [Server -> Nat]\n       /\\ currentEpoch'  \\in [Server -> Nat]\n       /\\ connectInfo'   \\in [Server -> Server \\cup {NullPoint}]\n       /\\ epochLeader'   \\in [1..MAXEPOCH -> SUBSET Server]\n       /\\ msgs' = [a \\in Server |-> [b \\in Server |-> msgs'[a][b]]]\n       /\\ \\A a, b \\in Server : H_QOK(msgs'[a][b])\n    BY DEF H_TypeB\n  <1> QED BY <1>1, <1>2, <1>3, <1>4, <1>5 DEF H_TypeB\n\nLEMMA H_B_FollowLeader ==\n  ASSUME H_TypeB, NEW i \\in Server, FollowLeader(i)\n  PROVE  H_TypeB'\n  <1> USE DEF FollowLeader, SwitchToLeader, SwitchToFollower, IsLooking,\n              followerVars, verifyVars, msgVars, electionVars, leaderVars\n  <1>0 /\\ acceptedEpoch' \\in [Server -> Nat]\n       /\\ currentEpoch'  \\in [Server -> Nat]\n       /\\ connectInfo'   \\in [Server -> Server \\cup {NullPoint}]\n       /\\ leaderOracle'  \\in Server \\cup {NullPoint}\n       /\\ epochLeader'   \\in [1..MAXEPOCH -> SUBSET Server]\n       /\\ msgs' = [a \\in Server |-> [b \\in Server |-> msgs'[a][b]]]\n       /\\ \\A a, b \\in Server : H_QOK(msgs'[a][b])\n       /\\ state'    \\in [Server -> {LOOKING, FOLLOWING, LEADING}]\n       /\\ zabState' \\in [Server -> {ELECTION, DISCOVERY, SYNCHRONIZATION, BROADCAST}]\n    BY DEF H_TypeB\n  <1>1 CASE SwitchToLeader(i)\n    <2>ci [ sid |-> i, connected |-> TRUE, epoch |-> acceptedEpoch[i] ] \\in H_CInfo\n      BY DEF H_TypeB, H_CInfo\n    <2>1 cepochRecv' \\in [Server -> SUBSET H_CInfo] BY <1>1, <2>ci DEF H_TypeB\n    <2>2 \\A s \\in Server : IsFiniteSet(cepochRecv'[s])\n      BY <1>1, H_FSSingleton DEF H_TypeB\n    <2>3 /\\ learners'    \\in [Server -> SUBSET Server]\n         /\\ sendCounter' \\in [Server -> Nat]\n         /\\ ackeRecv'  = [s \\in Server |-> ackeRecv'[s]]\n         /\\ ackldRecv' = [s \\in Server |-> ackldRecv'[s]]\n         /\\ \\A s \\in Server : \\A x \\in ackeRecv'[s]  : x.sid \\in Server\n         /\\ \\A s \\in Server : \\A x \\in ackldRecv'[s] : x.sid \\in Server\n      <3>1 /\\ learners'    \\in [Server -> SUBSET Server]\n           /\\ sendCounter' \\in [Server -> Nat]\n           /\\ ackeRecv'  = [s \\in Server |-> ackeRecv'[s]]\n        BY <1>1 DEF H_TypeB\n      <3>2 /\\ ackldRecv' = [s \\in Server |-> ackldRecv'[s]]\n           /\\ \\A s \\in Server : \\A x \\in ackeRecv'[s]  : x.sid \\in Server\n           /\\ \\A s \\in Server : \\A x \\in ackldRecv'[s] : x.sid \\in Server\n        <4>1 ackldRecv' = [s \\in Server |-> ackldRecv'[s]]\n          BY <1>1 DEF H_TypeB\n        <4>2 \\A s \\in Server : \\A x \\in ackeRecv'[s]  : x.sid \\in Server\n          BY <1>1 DEF H_TypeB\n        <4>3 \\A s \\in Server : \\A x \\in ackldRecv'[s] : x.sid \\in Server\n          BY <1>1 DEF H_TypeB\n        <4> QED BY <4>1, <4>2, <4>3\n      <3> QED BY <3>1, <3>2\n    <2> QED BY <1>0, <2>1, <2>2, <2>3 DEF H_TypeB\n  <1>2 CASE SwitchToFollower(i) /\\ UNCHANGED leaderVars\n    <2>1 /\\ learners'    \\in [Server -> SUBSET Server]\n         /\\ sendCounter' \\in [Server -> Nat]\n         /\\ cepochRecv'  \\in [Server -> SUBSET H_CInfo]\n         /\\ (\\A s \\in Server : IsFiniteSet(cepochRecv'[s]))\n         /\\ ackeRecv'  = [s \\in Server |-> ackeRecv'[s]]\n         /\\ ackldRecv' = [s \\in Server |-> ackldRecv'[s]]\n         /\\ \\A s \\in Server : \\A x \\in ackeRecv'[s]  : x.sid \\in Server\n         /\\ \\A s \\in Server : \\A x \\in ackldRecv'[s] : x.sid \\in Server\n      BY <1>2 DEF H_TypeB\n    <2> QED BY <1>0, <2>1 DEF H_TypeB\n  <1> QED BY <1>1, <1>2\n\nLEMMA H_B_Timeout ==\n  ASSUME H_TypeB, NEW i \\in Server, NEW j \\in Server, Timeout(i, j)\n  PROVE  H_TypeB'\n  <1> USE DEF Timeout, IsLeader, IsMyLearner, IsFollower, IsMyLeader,\n              electionVars, verifyVars\n  <1>m H_Mtx(msgs) BY DEF H_TypeB, H_Mtx\n  <1>1 CASE RemoveLearner(i, j) /\\ FollowerShutdown(j) /\\ Clean(i, j)\n    <2>1 /\\ learners'   \\in [Server -> SUBSET Server]\n         /\\ cepochRecv' \\in [Server -> SUBSET H_CInfo]\n         /\\ \\A s \\in Server : IsFiniteSet(cepochRecv'[s])\n         /\\ ackeRecv'  = [s \\in Server |-> ackeRecv'[s]]\n         /\\ ackldRecv' = [s \\in Server |-> ackldRecv'[s]]\n         /\\ \\A s \\in Server : \\A x \\in ackeRecv'[s]  : x.sid \\in Server\n         /\\ \\A s \\in Server : \\A x \\in ackldRecv'[s] : x.sid \\in Server\n      BY <1>1, H_RemoveLearnerTypeB\n    <2>2 msgs' = [msgs EXCEPT ![j][i] = << >>, ![i][j] = << >>] BY <1>1 DEF Clean\n    <2>3 H_Mtx(msgs') /\\ \\A a, b \\in Server : H_QOK(msgs'[a][b])\n      BY <2>2, H_QOKEmpty, H_MsgsTwo\n    <2> QED BY <1>1, <2>1, <2>3 DEF H_TypeB, FollowerShutdown, H_Mtx\n  <1>2 CASE LeaderShutdown(i) /\\ UNCHANGED <<cepochRecv, ackeRecv, ackldRecv>>\n    <2>1 msgs' = [s \\in Server |-> [v \\in Server |->\n                     IF v \\in learners[i] THEN << >> ELSE msgs[s][v]]]\n      BY <1>2 DEF LeaderShutdown, CleanInputBuffer\n    <2>2 H_Mtx(msgs') /\\ \\A a, b \\in Server : H_QOK(msgs'[a][b])\n      BY <2>1, H_MsgsClean\n    <2> QED BY <1>2, <2>2 DEF H_TypeB, LeaderShutdown, H_Mtx\n  <1> QED BY <1>1, <1>2\n\nLEMMA H_B_Restart ==\n  ASSUME H_TypeB, NEW i \\in Server, Restart(i)\n  PROVE  H_TypeB'\n  <1> USE DEF Restart, IsLooking, IsLeader, IsFollower, HasLeader,\n              followerVars, msgVars, verifyVars\n  <1>m H_Mtx(msgs) BY DEF H_TypeB, H_Mtx\n  <1>1 CASE UNCHANGED <<state, zabState, learners, followerVars, msgVars,\n                        cepochRecv, ackeRecv, ackldRecv>>\n    BY <1>1 DEF H_TypeB\n  <1>2 CASE /\\ IsFollower(i) /\\ HasLeader(i)\n            /\\ RemoveLearner(connectInfo[i], i) /\\ FollowerShutdown(i)\n            /\\ Clean(connectInfo[i], i)\n    <2>0 connectInfo[i] \\in Server BY <1>2 DEF H_TypeB\n    <2>1 /\\ learners'   \\in [Server -> SUBSET Server]\n         /\\ cepochRecv' \\in [Server -> SUBSET H_CInfo]\n         /\\ \\A s \\in Server : IsFiniteSet(cepochRecv'[s])\n         /\\ ackeRecv'  = [s \\in Server |-> ackeRecv'[s]]\n         /\\ ackldRecv' = [s \\in Server |-> ackldRecv'[s]]\n         /\\ \\A s \\in Server : \\A x \\in ackeRecv'[s]  : x.sid \\in Server\n         /\\ \\A s \\in Server : \\A x \\in ackldRecv'[s] : x.sid \\in Server\n      BY <1>2, <2>0, H_RemoveLearnerTypeB\n    <2>2 msgs' = [msgs EXCEPT ![i][connectInfo[i]] = << >>,\n                              ![connectInfo[i]][i] = << >>]\n      BY <1>2 DEF Clean\n    <2>3 H_Mtx(msgs') /\\ \\A a, b \\in Server : H_QOK(msgs'[a][b])\n      BY <2>0, <2>2, H_QOKEmpty, H_MsgsTwo\n    <2> QED BY <1>2, <2>1, <2>3 DEF H_TypeB, FollowerShutdown, H_Mtx\n  <1>3 CASE /\\ IsFollower(i) /\\ HasLeader(i)\n            /\\ LeaderShutdown(connectInfo[i])\n            /\\ UNCHANGED <<cepochRecv, ackeRecv, ackldRecv>>\n    <2>0 connectInfo[i] \\in Server BY <1>3 DEF H_TypeB\n    <2>1 msgs' = [s \\in Server |-> [v \\in Server |->\n                     IF v \\in learners[connectInfo[i]] THEN << >> ELSE msgs[s][v]]]\n      BY <1>3 DEF LeaderShutdown, CleanInputBuffer\n    <2>2 H_Mtx(msgs') /\\ \\A a, b \\in Server : H_QOK(msgs'[a][b])\n      BY <2>1, H_MsgsClean\n    <2> QED BY <1>3, <2>0, <2>2 DEF H_TypeB, LeaderShutdown, H_Mtx\n  <1>4 CASE /\\ IsFollower(i) /\\ ~HasLeader(i)\n            /\\ FollowerShutdown(i) /\\ CleanInputBuffer({i})\n            /\\ UNCHANGED <<learners, cepochRecv, ackeRecv, ackldRecv>>\n    <2>1 msgs' = [s \\in Server |-> [v \\in Server |->\n                     IF v \\in {i} THEN << >> ELSE msgs[s][v]]]\n      BY <1>4 DEF CleanInputBuffer\n    <2>2 H_Mtx(msgs') /\\ \\A a, b \\in Server : H_QOK(msgs'[a][b])\n      BY <2>1, H_MsgsClean\n    <2> QED BY <1>4, <2>2 DEF H_TypeB, FollowerShutdown, H_Mtx\n  <1>5 CASE /\\ IsLeader(i) /\\ LeaderShutdown(i)\n            /\\ UNCHANGED <<cepochRecv, ackeRecv, ackldRecv>>\n    <2>1 msgs' = [s \\in Server |-> [v \\in Server |->\n                     IF v \\in learners[i] THEN << >> ELSE msgs[s][v]]]\n      BY <1>5 DEF LeaderShutdown, CleanInputBuffer\n    <2>2 H_Mtx(msgs') /\\ \\A a, b \\in Server : H_QOK(msgs'[a][b])\n      BY <2>1, H_MsgsClean\n    <2> QED BY <1>5, <2>2 DEF H_TypeB, LeaderShutdown, H_Mtx\n  <1> QED BY <1>1, <1>2, <1>3, <1>4, <1>5\n\nLEMMA H_B_Connect ==\n  ASSUME H_TypeB, NEW i \\in Server, NEW j \\in Server,\n         ConnectAndFollowerSendCEPOCH(i, j)\n  PROVE  H_TypeB'\n  <1> USE DEF ConnectAndFollowerSendCEPOCH, IsLeader, IsFollower, IsMyLearner,\n              HasNoLeader, serverVars, electionVars, verifyVars\n  <1>m H_Mtx(msgs) BY DEF H_TypeB, H_Mtx\n  <1> DEFINE mm == [ mtype |-> CEPOCH, mepoch |-> acceptedEpoch[j] ]\n  <1>1 H_MsgP(mm) BY DEF H_MsgP, H_TypeB\n  <1>2 msgs' = [msgs EXCEPT ![j][i] = Append(msgs[j][i], mm)] BY DEF Send\n  <1>3 H_QOK(Append(msgs[j][i], mm)) BY <1>1, H_QOKAppend DEF H_TypeB\n  <1>4 H_Mtx(msgs') /\\ \\A a, b \\in Server : H_QOK(msgs'[a][b])\n    BY <1>m, <1>2, <1>3, H_MtxUpd1 DEF H_TypeB\n  <1> QED BY <1>4 DEF H_TypeB, H_Mtx\n\nLEMMA H_B_LeaderProcessCEPOCH ==\n  ASSUME H_TypeB, NEW i \\in Server, NEW j \\in Server, LeaderProcessCEPOCH(i, j)\n  PROVE  H_TypeB'\n  <1> USE DEF LeaderProcessCEPOCH, IsLeader, PendingCEPOCH, IsMyLearner,\n              followerVars, electionVars\n  <1>h msgs[j][i] # << >> OBVIOUS\n  <1>e msgs[j][i][1].mepoch \\in Nat\n    BY <1>h, H_QOKHead DEF H_TypeB, H_MsgP\n  <1>t H_QOK(Tail(msgs[j][i])) BY <1>h, H_QOKTail DEF H_TypeB\n  <1>1 cepochRecv' \\in [Server -> SUBSET H_CInfo]\n       /\\ \\A s \\in Server : IsFiniteSet(cepochRecv'[s])\n    <2>1 cepochRecv' = [cepochRecv EXCEPT\n                          ![i] = UpdateCepochRecv(cepochRecv[i], j, msgs[j][i][1].mepoch)]\n      OBVIOUS\n    <2> QED BY <2>1, <1>e, H_UpdCepochType DEF H_TypeB\n  <1>2 acceptedEpoch' \\in [Server -> Nat]\n    <2>1 CASE acceptedEpoch' = [acceptedEpoch EXCEPT ![i] = DetermineNewEpoch(i)]\n      <3>1 DetermineNewEpoch(i) \\in Nat\n        BY <1>1, H_MaxEpochNat DEF DetermineNewEpoch\n      <3> QED BY <2>1, <3>1 DEF H_TypeB\n    <2>2 CASE UNCHANGED acceptedEpoch  BY <2>2 DEF H_TypeB\n    <2> QED BY <2>1, <2>2\n  <1>3 H_Mtx(msgs') /\\ \\A a, b \\in Server : H_QOK(msgs'[a][b])\n    <2>1 CASE DiscardAndBroadcastNEWEPOCH(i, j,\n                 [ mtype |-> NEWEPOCH, mepoch |-> acceptedEpoch'[i] ])\n      <3> DEFINE mNE == [ mtype |-> NEWEPOCH, mepoch |-> acceptedEpoch'[i] ]\n      <3> DEFINE RF == [v \\in Server |->\n               IF /\\ v \\in { c.sid : c \\in {c2 \\in cepochRecv'[i] : c2.connected = TRUE} }\n                  /\\ v \\in learners[i] /\\ v # i\n               THEN Append(msgs[i][v], mNE) ELSE msgs[i][v] ]\n      <3>1 msgs' = [msgs EXCEPT ![j][i] = Tail(msgs[j][i]), ![i] = RF]\n        BY <2>1 DEF DiscardAndBroadcastNEWEPOCH\n      <3>2 H_MsgP(mNE) BY <1>2 DEF H_MsgP, H_TypeB\n      <3>3 \\A v \\in Server : H_QOK(RF[v]) BY <3>2, H_QOKAppend DEF H_TypeB\n      <3>4 RF = [v \\in Server |-> RF[v]] OBVIOUS\n      <3> QED BY <1>t, <3>1, <3>3, <3>4, H_MsgsBcast\n    <2>2 CASE Discard(j, i)\n      BY <2>2, H_MsgsDiscard DEF Discard\n    <2>3 CASE Reply(i, j, [ mtype |-> NEWEPOCH, mepoch |-> acceptedEpoch[i] ])\n      <3> DEFINE mNE2 == [ mtype |-> NEWEPOCH, mepoch |-> acceptedEpoch[i] ]\n      <3>1 msgs' = [msgs EXCEPT ![j][i] = Tail(msgs[j][i]),\n                                ![i][j] = Append(msgs[i][j], mNE2)]\n        BY <2>3 DEF Reply\n      <3>2 H_MsgP(mNE2) BY DEF H_MsgP, H_TypeB\n      <3>3 H_QOK(Append(msgs[i][j], mNE2)) BY <3>2, H_QOKAppend DEF H_TypeB\n      <3> QED BY <1>t, <3>1, <3>3, H_MsgsTwo\n    <2> QED BY <2>1, <2>2, <2>3\n  <1> QED BY <1>1, <1>2, <1>3 DEF H_TypeB, H_Mtx\n\nLEMMA H_B_FollowerProcessNEWEPOCH ==\n  ASSUME H_TypeB, NEW i \\in Server, NEW j \\in Server, FollowerProcessNEWEPOCH(i, j)\n  PROVE  H_TypeB'\n  <1> USE DEF FollowerProcessNEWEPOCH, IsFollower, PendingNEWEPOCH, IsMyLeader,\n              electionVars, followerVars\n  <1>h msgs[j][i] # << >> OBVIOUS\n  <1>e msgs[j][i][1].mepoch \\in Nat\n    BY <1>h, H_QOKHead DEF H_TypeB, H_MsgP\n  <1>t H_QOK(Tail(msgs[j][i])) BY <1>h, H_QOKTail DEF H_TypeB\n  <1>1 CASE /\\ acceptedEpoch' = [acceptedEpoch EXCEPT ![i] = msgs[j][i][1].mepoch]\n            /\\ Reply(i, j, [ mtype |-> ACKEPOCH, mepoch |-> currentEpoch[i],\n                             mhistory |-> history[i] ])\n            /\\ zabState' = [zabState EXCEPT ![i] = SYNCHRONIZATION]\n            /\\ UNCHANGED <<followerVars, learners, cepochRecv, ackeRecv, ackldRecv, state>>\n    <2> DEFINE mAE == [ mtype |-> ACKEPOCH, mepoch |-> currentEpoch[i],\n                        mhistory |-> history[i] ]\n    <2>1 msgs' = [msgs EXCEPT ![j][i] = Tail(msgs[j][i]),\n                              ![i][j] = Append(msgs[i][j], mAE)]\n      BY <1>1 DEF Reply\n    <2>2 H_MsgP(mAE) BY DEF H_MsgP, ACKEPOCH, CEPOCH, NEWEPOCH\n    <2>3 H_QOK(Append(msgs[i][j], mAE)) BY <2>2, H_QOKAppend DEF H_TypeB\n    <2>4 H_Mtx(msgs') /\\ \\A a, b \\in Server : H_QOK(msgs'[a][b])\n      BY <1>t, <2>1, <2>3, H_MsgsTwo\n    <2>5 acceptedEpoch' \\in [Server -> Nat] BY <1>1, <1>e DEF H_TypeB\n    <2>6 zabState' \\in [Server -> {ELECTION, DISCOVERY, SYNCHRONIZATION, BROADCAST}]\n      BY <1>1 DEF H_TypeB\n    <2>7 /\\ state'        \\in [Server -> {LOOKING, FOLLOWING, LEADING}]\n         /\\ currentEpoch' \\in [Server -> Nat]\n         /\\ learners'     \\in [Server -> SUBSET Server]\n         /\\ cepochRecv'   \\in [Server -> SUBSET H_CInfo]\n         /\\ (\\A s \\in Server : IsFiniteSet(cepochRecv'[s]))\n         /\\ ackeRecv'  = [s \\in Server |-> ackeRecv'[s]]\n         /\\ ackldRecv' = [s \\in Server |-> ackldRecv'[s]]\n         /\\ (\\A s \\in Server : \\A x \\in ackeRecv'[s]  : x.sid \\in Server)\n         /\\ (\\A s \\in Server : \\A x \\in ackldRecv'[s] : x.sid \\in Server)\n         /\\ sendCounter'  \\in [Server -> Nat]\n         /\\ connectInfo'  \\in [Server -> Server \\cup {NullPoint}]\n         /\\ leaderOracle' \\in Server \\cup {NullPoint}\n         /\\ epochLeader'  \\in [1..MAXEPOCH -> SUBSET Server]\n      <3>1 /\\ state'        \\in [Server -> {LOOKING, FOLLOWING, LEADING}]\n           /\\ currentEpoch' \\in [Server -> Nat]\n           /\\ learners'     \\in [Server -> SUBSET Server]\n        BY <1>1 DEF H_TypeB\n      <3>2 /\\ cepochRecv'   \\in [Server -> SUBSET H_CInfo]\n           /\\ (\\A s \\in Server : IsFiniteSet(cepochRecv'[s]))\n           /\\ ackeRecv'  = [s \\in Server |-> ackeRecv'[s]]\n        BY <1>1 DEF H_TypeB\n      <3>3 /\\ ackldRecv' = [s \\in Server |-> ackldRecv'[s]]\n           /\\ (\\A s \\in Server : \\A x \\in ackeRecv'[s]  : x.sid \\in Server)\n           /\\ (\\A s \\in Server : \\A x \\in ackldRecv'[s] : x.sid \\in Server)\n        BY <1>1 DEF H_TypeB\n      <3>4 /\\ sendCounter'  \\in [Server -> Nat]\n           /\\ connectInfo'  \\in [Server -> Server \\cup {NullPoint}]\n           /\\ leaderOracle' \\in Server \\cup {NullPoint}\n        <4>1 sendCounter'  \\in [Server -> Nat]\n          BY <1>1 DEF H_TypeB\n        <4>2 connectInfo'  \\in [Server -> Server \\cup {NullPoint}]\n          BY <1>1 DEF H_TypeB\n        <4>3 leaderOracle' \\in Server \\cup {NullPoint}\n          BY <1>1 DEF H_TypeB\n        <4> QED BY <4>1, <4>2, <4>3\n      <3>5 /\\ epochLeader'  \\in [1..MAXEPOCH -> SUBSET Server]\n        BY <1>1 DEF H_TypeB\n      <3> QED BY <3>1, <3>2, <3>3, <3>4, <3>5\n    <2> QED BY <2>4, <2>5, <2>6, <2>7 DEF H_TypeB, H_Mtx\n  <1>2 CASE /\\ Discard(j, i)\n            /\\ UNCHANGED <<acceptedEpoch, zabState>>\n            /\\ UNCHANGED <<followerVars, learners, cepochRecv, ackeRecv, ackldRecv, state>>\n    <2>1 H_Mtx(msgs') /\\ \\A a, b \\in Server : H_QOK(msgs'[a][b])\n      BY <1>2, H_MsgsDiscard DEF Discard\n    <2>2 /\\ state'        \\in [Server -> {LOOKING, FOLLOWING, LEADING}]\n         /\\ zabState'     \\in [Server -> {ELECTION, DISCOVERY, SYNCHRONIZATION, BROADCAST}]\n         /\\ acceptedEpoch' \\in [Server -> Nat]\n         /\\ currentEpoch' \\in [Server -> Nat]\n         /\\ learners'     \\in [Server -> SUBSET Server]\n         /\\ cepochRecv'   \\in [Server -> SUBSET H_CInfo]\n         /\\ (\\A s \\in Server : IsFiniteSet(cepochRecv'[s]))\n         /\\ ackeRecv'  = [s \\in Server |-> ackeRecv'[s]]\n         /\\ ackldRecv' = [s \\in Server |-> ackldRecv'[s]]\n         /\\ (\\A s \\in Server : \\A x \\in ackeRecv'[s]  : x.sid \\in Server)\n         /\\ (\\A s \\in Server : \\A x \\in ackldRecv'[s] : x.sid \\in Server)\n         /\\ sendCounter'  \\in [Server -> Nat]\n         /\\ connectInfo'  \\in [Server -> Server \\cup {NullPoint}]\n         /\\ leaderOracle' \\in Server \\cup {NullPoint}\n         /\\ epochLeader'  \\in [1..MAXEPOCH -> SUBSET Server]\n      <3>1 /\\ state'        \\in [Server -> {LOOKING, FOLLOWING, LEADING}]\n           /\\ zabState'     \\in [Server -> {ELECTION, DISCOVERY, SYNCHRONIZATION, BROADCAST}]\n           /\\ acceptedEpoch' \\in [Server -> Nat]\n        BY <1>2 DEF H_TypeB\n      <3>2 /\\ currentEpoch' \\in [Server -> Nat]\n           /\\ learners'     \\in [Server -> SUBSET Server]\n           /\\ cepochRecv'   \\in [Server -> SUBSET H_CInfo]\n        BY <1>2 DEF H_TypeB\n      <3>3 /\\ (\\A s \\in Server : IsFiniteSet(cepochRecv'[s]))\n           /\\ ackeRecv'  = [s \\in Server |-> ackeRecv'[s]]\n           /\\ ackldRecv' = [s \\in Server |-> ackldRecv'[s]]\n        BY <1>2 DEF H_TypeB\n      <3>4 /\\ (\\A s \\in Server : \\A x \\in ackeRecv'[s]  : x.sid \\in Server)\n           /\\ (\\A s \\in Server : \\A x \\in ackldRecv'[s] : x.sid \\in Server)\n           /\\ sendCounter'  \\in [Server -> Nat]\n        BY <1>2 DEF H_TypeB\n      <3>5 /\\ connectInfo'  \\in [Server -> Server \\cup {NullPoint}]\n           /\\ leaderOracle' \\in Server \\cup {NullPoint}\n           /\\ epochLeader'  \\in [1..MAXEPOCH -> SUBSET Server]\n        <4>1 connectInfo'  \\in [Server -> Server \\cup {NullPoint}]\n          BY <1>2 DEF H_TypeB\n        <4>2 leaderOracle' \\in Server \\cup {NullPoint}\n          BY <1>2 DEF H_TypeB\n        <4>3 epochLeader'  \\in [1..MAXEPOCH -> SUBSET Server]\n          BY <1>2 DEF H_TypeB\n        <4> QED BY <4>1, <4>2, <4>3\n      <3> QED BY <3>1, <3>2, <3>3, <3>4, <3>5\n    <2> QED BY <2>1, <2>2 DEF H_TypeB, H_Mtx\n  <1>3 CASE /\\ FollowerShutdown(i)\n            /\\ Clean(i, connectInfo[i]) /\\ RemoveLearner(connectInfo[i], i)\n            /\\ UNCHANGED <<acceptedEpoch>>\n    <2>0 connectInfo[i] \\in Server BY <1>3 DEF H_TypeB\n    <2>1 /\\ learners'   \\in [Server -> SUBSET Server]\n         /\\ cepochRecv' \\in [Server -> SUBSET H_CInfo]\n         /\\ \\A s \\in Server : IsFiniteSet(cepochRecv'[s])\n         /\\ ackeRecv'  = [s \\in Server |-> ackeRecv'[s]]\n         /\\ ackldRecv' = [s \\in Server |-> ackldRecv'[s]]\n         /\\ \\A s \\in Server : \\A x \\in ackeRecv'[s]  : x.sid \\in Server\n         /\\ \\A s \\in Server : \\A x \\in ackldRecv'[s] : x.sid \\in Server\n      BY <1>3, <2>0, H_RemoveLearnerTypeB\n    <2>2 msgs' = [msgs EXCEPT ![connectInfo[i]][i] = << >>, ![i][connectInfo[i]] = << >>]\n      BY <1>3 DEF Clean\n    <2>3 H_Mtx(msgs') /\\ \\A a, b \\in Server : H_QOK(msgs'[a][b])\n      BY <2>0, <2>2, H_QOKEmpty, H_MsgsTwo\n    <2> QED BY <1>3, <2>1, <2>3 DEF H_TypeB, H_Mtx, FollowerShutdown\n  <1> QED BY <1>1, <1>2, <1>3\n\nLEMMA H_B_LeaderProcessACKEPOCH ==\n  ASSUME H_TypeB, NEW i \\in Server, NEW j \\in Server, LeaderProcessACKEPOCH(i, j)\n  PROVE  H_TypeB'\n  <1> USE DEF LeaderProcessACKEPOCH, IsLeader, PendingACKEPOCH, IsMyLearner,\n              followerVars, electionVars\n  <1>h msgs[j][i] # << >> OBVIOUS\n  <1>t H_QOK(Tail(msgs[j][i])) BY <1>h, H_QOKTail DEF H_TypeB\n  <1>a ackeRecv' = [ackeRecv EXCEPT ![i] =\n            UpdateAckeRecv(ackeRecv[i], j, msgs[j][i][1].mepoch, msgs[j][i][1].mhistory)]\n    OBVIOUS\n  <1>1 /\\ ackeRecv' = [s \\in Server |-> ackeRecv'[s]]\n       /\\ \\A s \\in Server : \\A x \\in ackeRecv'[s] : x.sid \\in Server\n    BY <1>a, H_UpdAckeSid DEF H_TypeB\n  <1>2 currentEpoch' \\in [Server -> Nat]\n    BY DEF H_TypeB\n  <1>3 epochLeader' \\in [1..MAXEPOCH -> SUBSET Server]\n    BY DEF H_TypeB\n  <1>4 H_Mtx(msgs') /\\ \\A a, b \\in Server : H_QOK(msgs'[a][b])\n    <2>1 CASE Reply(i, j, [ mtype    |-> NEWLEADER,\n                            mepoch   |-> acceptedEpoch[i],\n                            mhistory |-> history[i] ])\n      <3> DEFINE mNL == [ mtype |-> NEWLEADER, mepoch |-> acceptedEpoch[i],\n                          mhistory |-> history[i] ]\n      <3>1 msgs' = [msgs EXCEPT ![j][i] = Tail(msgs[j][i]),\n                                ![i][j] = Append(msgs[i][j], mNL)]\n        BY <2>1 DEF Reply\n      <3>2 H_MsgP(mNL) BY DEF H_MsgP, NEWLEADER, CEPOCH, NEWEPOCH\n      <3>3 H_QOK(Append(msgs[i][j], mNL)) BY <3>2, H_QOKAppend DEF H_TypeB\n      <3> QED BY <1>t, <3>1, <3>3, H_MsgsTwo\n    <2>2 CASE DiscardAndBroadcastNEWLEADER(i, j,\n                 [ mtype |-> NEWLEADER, mepoch |-> acceptedEpoch[i],\n                   mhistory |-> history'[i] ])\n      <3> DEFINE mNL2 == [ mtype |-> NEWLEADER, mepoch |-> acceptedEpoch[i],\n                           mhistory |-> history'[i] ]\n      <3> DEFINE RF == [v \\in Server |->\n               IF /\\ v \\in { a2.sid : a2 \\in {a3 \\in ackeRecv'[i] : a3.connected = TRUE} }\n                  /\\ v \\in learners[i] /\\ v # i\n               THEN Append(msgs[i][v], mNL2) ELSE msgs[i][v] ]\n      <3>1 msgs' = [msgs EXCEPT ![j][i] = Tail(msgs[j][i]), ![i] = RF]\n        BY <2>2 DEF DiscardAndBroadcastNEWLEADER\n      <3>2 H_MsgP(mNL2) BY DEF H_MsgP, NEWLEADER, CEPOCH, NEWEPOCH\n      <3>3 \\A v \\in Server : H_QOK(RF[v]) BY <3>2, H_QOKAppend DEF H_TypeB\n      <3>4 RF = [v \\in Server |-> RF[v]] OBVIOUS\n      <3> QED BY <1>t, <3>1, <3>3, <3>4, H_MsgsBcast\n    <2>3 CASE Discard(j, i)\n      BY <2>3, H_MsgsDiscard DEF Discard\n    <2> QED BY <2>1, <2>2, <2>3\n  <1> QED BY <1>1, <1>2, <1>3, <1>4 DEF H_TypeB, H_Mtx, SYNCHRONIZATION\n\nLEMMA H_B_FollowerProcessNEWLEADER ==\n  ASSUME H_TypeB, NEW i \\in Server, NEW j \\in Server, FollowerProcessNEWLEADER(i, j)\n  PROVE  H_TypeB'\n  <1> USE DEF FollowerProcessNEWLEADER, IsFollower, PendingNEWLEADER, IsMyLeader,\n              electionVars, followerVars\n  <1>h msgs[j][i] # << >> OBVIOUS\n  <1>t H_QOK(Tail(msgs[j][i])) BY <1>h, H_QOKTail DEF H_TypeB\n  <1>1 CASE /\\ FollowerShutdown(i)\n            /\\ Clean(i, connectInfo[i]) /\\ RemoveLearner(connectInfo[i], i)\n    <2>0 connectInfo[i] \\in Server BY <1>1 DEF H_TypeB\n    <2>1 /\\ learners'   \\in [Server -> SUBSET Server]\n         /\\ cepochRecv' \\in [Server -> SUBSET H_CInfo]\n         /\\ \\A s \\in Server : IsFiniteSet(cepochRecv'[s])\n         /\\ ackeRecv'  = [s \\in Server |-> ackeRecv'[s]]\n         /\\ ackldRecv' = [s \\in Server |-> ackldRecv'[s]]\n         /\\ \\A s \\in Server : \\A x \\in ackeRecv'[s]  : x.sid \\in Server\n         /\\ \\A s \\in Server : \\A x \\in ackldRecv'[s] : x.sid \\in Server\n      BY <1>1, <2>0, H_RemoveLearnerTypeB\n    <2>2 msgs' = [msgs EXCEPT ![connectInfo[i]][i] = << >>, ![i][connectInfo[i]] = << >>]\n      BY <1>1 DEF Clean\n    <2>3 H_Mtx(msgs') /\\ \\A a, b \\in Server : H_QOK(msgs'[a][b])\n      BY <2>0, <2>2, H_QOKEmpty, H_MsgsTwo\n    <2> QED BY <1>1, <2>1, <2>3 DEF H_TypeB, H_Mtx, FollowerShutdown\n  <1>2 CASE /\\ currentEpoch' = [currentEpoch EXCEPT ![i] = acceptedEpoch[i]]\n            /\\ Reply(i, j, [ mtype |-> ACKLD, mzxid |-> LastZxidOfHistory(history'[i]) ])\n            /\\ UNCHANGED <<followerVars, state, zabState, learners, cepochRecv,\n                           ackeRecv, ackldRecv>>\n    <2> DEFINE mA == [ mtype |-> ACKLD, mzxid |-> LastZxidOfHistory(history'[i]) ]\n    <2>1 msgs' = [msgs EXCEPT ![j][i] = Tail(msgs[j][i]), ![i][j] = Append(msgs[i][j], mA)]\n      BY <1>2 DEF Reply\n    <2>2 H_MsgP(mA) BY DEF H_MsgP, ACKLD, CEPOCH, NEWEPOCH\n    <2>3 H_QOK(Append(msgs[i][j], mA)) BY <2>2, H_QOKAppend DEF H_TypeB\n    <2>4 H_Mtx(msgs') /\\ \\A a, b \\in Server : H_QOK(msgs'[a][b])\n      BY <1>t, <2>1, <2>3, H_MsgsTwo\n    <2>5 currentEpoch' \\in [Server -> Nat] BY <1>2 DEF H_TypeB\n    <2>6 /\\ state'        \\in [Server -> {LOOKING, FOLLOWING, LEADING}]\n         /\\ zabState'     \\in [Server -> {ELECTION, DISCOVERY, SYNCHRONIZATION, BROADCAST}]\n         /\\ acceptedEpoch' \\in [Server -> Nat]\n         /\\ learners'     \\in [Server -> SUBSET Server]\n         /\\ cepochRecv'   \\in [Server -> SUBSET H_CInfo]\n         /\\ (\\A s \\in Server : IsFiniteSet(cepochRecv'[s]))\n         /\\ ackeRecv'  = [s \\in Server |-> ackeRecv'[s]]\n         /\\ ackldRecv' = [s \\in Server |-> ackldRecv'[s]]\n         /\\ (\\A s \\in Server : \\A x \\in ackeRecv'[s]  : x.sid \\in Server)\n         /\\ (\\A s \\in Server : \\A x \\in ackldRecv'[s] : x.sid \\in Server)\n         /\\ sendCounter'  \\in [Server -> Nat]\n         /\\ connectInfo'  \\in [Server -> Server \\cup {NullPoint}]\n         /\\ leaderOracle' \\in Server \\cup {NullPoint}\n         /\\ epochLeader'  \\in [1..MAXEPOCH -> SUBSET Server]\n      <3>1 /\\ state'        \\in [Server -> {LOOKING, FOLLOWING, LEADING}]\n           /\\ zabState'     \\in [Server -> {ELECTION, DISCOVERY, SYNCHRONIZATION, BROADCAST}]\n           /\\ acceptedEpoch' \\in [Server -> Nat]\n        BY <1>2 DEF H_TypeB\n      <3>2 /\\ learners'     \\in [Server -> SUBSET Server]\n           /\\ cepochRecv'   \\in [Server -> SUBSET H_CInfo]\n           /\\ (\\A s \\in Server : IsFiniteSet(cepochRecv'[s]))\n        BY <1>2 DEF H_TypeB\n      <3>3 /\\ ackeRecv'  = [s \\in Server |-> ackeRecv'[s]]\n           /\\ ackldRecv' = [s \\in Server |-> ackldRecv'[s]]\n           /\\ (\\A s \\in Server : \\A x \\in ackeRecv'[s]  : x.sid \\in Server)\n        BY <1>2 DEF H_TypeB\n      <3>4 /\\ (\\A s \\in Server : \\A x \\in ackldRecv'[s] : x.sid \\in Server)\n           /\\ sendCounter'  \\in [Server -> Nat]\n           /\\ connectInfo'  \\in [Server -> Server \\cup {NullPoint}]\n        <4>1 (\\A s \\in Server : \\A x \\in ackldRecv'[s] : x.sid \\in Server)\n          BY <1>2 DEF H_TypeB\n        <4>2 sendCounter'  \\in [Server -> Nat]\n          BY <1>2 DEF H_TypeB\n        <4>3 connectInfo'  \\in [Server -> Server \\cup {NullPoint}]\n          BY <1>2 DEF H_TypeB\n        <4> QED BY <4>1, <4>2, <4>3\n      <3>5 /\\ leaderOracle' \\in Server \\cup {NullPoint}\n           /\\ epochLeader'  \\in [1..MAXEPOCH -> SUBSET Server]\n        BY <1>2 DEF H_TypeB\n      <3> QED BY <3>1, <3>2, <3>3, <3>4, <3>5\n    <2> QED BY <2>4, <2>5, <2>6 DEF H_TypeB, H_Mtx\n  <1> QED BY <1>1, <1>2\n\nLEMMA H_B_LeaderProcessACKLD ==\n  ASSUME H_TypeB, NEW i \\in Server, NEW j \\in Server, LeaderProcessACKLD(i, j)\n  PROVE  H_TypeB'\n  <1> USE DEF LeaderProcessACKLD, IsLeader, PendingACKLD, IsMyLearner,\n              followerVars, electionVars\n  <1>h msgs[j][i] # << >> OBVIOUS\n  <1>t H_QOK(Tail(msgs[j][i])) BY <1>h, H_QOKTail DEF H_TypeB\n  <1>1 /\\ ackldRecv' = [s \\in Server |-> ackldRecv'[s]]\n       /\\ \\A s \\in Server : \\A x \\in ackldRecv'[s] : x.sid \\in Server\n    <2>1 ackldRecv' = [ackldRecv EXCEPT ![i] = UpdateAckldRecv(ackldRecv[i], j)]\n      OBVIOUS\n    <2> QED BY <2>1, H_UpdAckldSid DEF H_TypeB\n  <1>2 H_Mtx(msgs') /\\ \\A a, b \\in Server : H_QOK(msgs'[a][b])\n    <2>1 CASE DiscardAndBroadcastCOMMITLD(i, j,\n                 [ mtype |-> COMMITLD, mzxid |-> LastZxid(i) ])\n      <3> DEFINE mC == [ mtype |-> COMMITLD, mzxid |-> LastZxid(i) ]\n      <3> DEFINE RF == [v \\in Server |->\n               IF /\\ v \\in { a2.sid : a2 \\in {a3 \\in ackldRecv'[i] : a3.connected = TRUE} }\n                  /\\ v \\in learners[i] /\\ v # i\n               THEN Append(msgs[i][v], mC) ELSE msgs[i][v] ]\n      <3>1 msgs' = [msgs EXCEPT ![j][i] = Tail(msgs[j][i]), ![i] = RF]\n        BY <2>1 DEF DiscardAndBroadcastCOMMITLD\n      <3>2 H_MsgP(mC) BY DEF H_MsgP, COMMITLD, CEPOCH, NEWEPOCH\n      <3>3 \\A v \\in Server : H_QOK(RF[v]) BY <3>2, H_QOKAppend DEF H_TypeB\n      <3>4 RF = [v \\in Server |-> RF[v]] OBVIOUS\n      <3> QED BY <1>t, <3>1, <3>3, <3>4, H_MsgsBcast\n    <2>2 CASE Discard(j, i)\n      BY <2>2, H_MsgsDiscard DEF Discard\n    <2>3 CASE Reply(i, j, [ mtype |-> COMMITLD, mzxid |-> lastCommitted[i].zxid ])\n      <3> DEFINE mC2 == [ mtype |-> COMMITLD, mzxid |-> lastCommitted[i].zxid ]\n      <3>1 msgs' = [msgs EXCEPT ![j][i] = Tail(msgs[j][i]),\n                                ![i][j] = Append(msgs[i][j], mC2)]\n        BY <2>3 DEF Reply\n      <3>2 H_MsgP(mC2) BY DEF H_MsgP, COMMITLD, CEPOCH, NEWEPOCH\n      <3>3 H_QOK(Append(msgs[i][j], mC2)) BY <3>2, H_QOKAppend DEF H_TypeB\n      <3> QED BY <1>t, <3>1, <3>3, H_MsgsTwo\n    <2> QED BY <2>1, <2>2, <2>3\n  <1> QED BY <1>1, <1>2 DEF H_TypeB, H_Mtx, BROADCAST\n\nLEMMA H_B_FollowerProcessCOMMITLD ==\n  ASSUME H_TypeB, NEW i \\in Server, NEW j \\in Server, FollowerProcessCOMMITLD(i, j)\n  PROVE  H_TypeB'\n  <1> USE DEF FollowerProcessCOMMITLD, IsFollower, PendingCOMMITLD, IsMyLeader,\n              leaderVars, followerVars, electionVars\n  <1>1 H_Mtx(msgs') /\\ \\A a, b \\in Server : H_QOK(msgs'[a][b])\n    BY H_MsgsDiscard DEF Discard\n  <1> QED BY <1>1 DEF H_TypeB, H_Mtx, BROADCAST\n\nLEMMA H_B_LeaderProcessRequest ==\n  ASSUME H_TypeB, NEW i \\in Server, LeaderProcessRequest(i)\n  PROVE  H_TypeB'\n  BY DEF H_TypeB, LeaderProcessRequest, IsLeader, leaderVars, followerVars,\n         electionVars, msgVars, verifyVars\n\nLEMMA H_B_LeaderBroadcastPROPOSE ==\n  ASSUME H_TypeB, NEW i \\in Server, LeaderBroadcastPROPOSE(i)\n  PROVE  H_TypeB'\n  <1> USE DEF LeaderBroadcastPROPOSE, IsLeader, serverVars, followerVars, electionVars\n  <1>0a sendCounter[i] \\in Nat BY DEF H_TypeB\n  <1>0 sendCounter[i] + 1 \\in Nat BY <1>0a, SMTT(\"r10\")\n  <1>1 sendCounter' \\in [Server -> Nat] BY <1>0 DEF H_TypeB\n  <1>2 H_Mtx(msgs') /\\ \\A a, b \\in Server : H_QOK(msgs'[a][b])\n    <2> DEFINE zz == <<currentEpoch[i], sendCounter[i] + 1>>\n    <2> DEFINE tt == history[i][ZxidToIndex(history[i], zz)]\n    <2> DEFINE mP == [ mtype |-> PROPOSE, mzxid |-> tt.zxid, mdata |-> tt.value ]\n    <2> DEFINE RF == [v \\in Server |->\n             IF /\\ v \\in { a2.sid : a2 \\in {a3 \\in ackeRecv[i] : a3.connected = TRUE} }\n                /\\ v \\in learners[i] /\\ v # i\n             THEN Append(msgs[i][v], mP) ELSE msgs[i][v] ]\n    <2>1 msgs' = [msgs EXCEPT ![i] = RF] BY DEF Broadcast\n    <2>2 H_MsgP(mP) BY DEF H_MsgP, PROPOSE, CEPOCH, NEWEPOCH\n    <2>3 \\A v \\in Server : H_QOK(RF[v]) BY <2>2, H_QOKAppend DEF H_TypeB\n    <2>4 RF = [v \\in Server |-> RF[v]] OBVIOUS\n    <2> QED BY <2>1, <2>3, <2>4, H_MsgsRow\n  <1> QED BY <1>1, <1>2 DEF H_TypeB, H_Mtx\n\nLEMMA H_B_FollowerProcessPROPOSE ==\n  ASSUME H_TypeB, NEW i \\in Server, NEW j \\in Server, FollowerProcessPROPOSE(i, j)\n  PROVE  H_TypeB'\n  <1> USE DEF FollowerProcessPROPOSE, IsFollower, PendingPROPOSE, IsMyLeader,\n              leaderVars, followerVars, electionVars\n  <1>h msgs[j][i] # << >> OBVIOUS\n  <1>t H_QOK(Tail(msgs[j][i])) BY <1>h, H_QOKTail DEF H_TypeB\n  <1>1 H_Mtx(msgs') /\\ \\A a, b \\in Server : H_QOK(msgs'[a][b])\n    <2>1 CASE Reply(i, j, [ mtype |-> ACK, mzxid |-> msgs[j][i][1].mzxid ])\n      <3> DEFINE mK == [ mtype |-> ACK, mzxid |-> msgs[j][i][1].mzxid ]\n      <3>1 msgs' = [msgs EXCEPT ![j][i] = Tail(msgs[j][i]),\n                                ![i][j] = Append(msgs[i][j], mK)]\n        BY <2>1 DEF Reply\n      <3>2 H_MsgP(mK) BY DEF H_MsgP, ACK, CEPOCH, NEWEPOCH\n      <3>3 H_QOK(Append(msgs[i][j], mK)) BY <3>2, H_QOKAppend DEF H_TypeB\n      <3> QED BY <1>t, <3>1, <3>3, H_MsgsTwo\n    <2>2 CASE Discard(j, i)\n      BY <2>2, H_MsgsDiscard DEF Discard\n    <2> QED BY <2>1, <2>2\n  <1> QED BY <1>1 DEF H_TypeB, H_Mtx\n\nLEMMA H_B_LeaderProcessACK ==\n  ASSUME H_TypeB, NEW i \\in Server, NEW j \\in Server, LeaderProcessACK(i, j)\n  PROVE  H_TypeB'\n  <1> USE DEF LeaderProcessACK, IsLeader, PendingACK, IsMyLearner,\n              leaderVars, followerVars, electionVars\n  <1>h msgs[j][i] # << >> OBVIOUS\n  <1>t H_QOK(Tail(msgs[j][i])) BY <1>h, H_QOKTail DEF H_TypeB\n  <1>1 H_Mtx(msgs') /\\ \\A a, b \\in Server : H_QOK(msgs'[a][b])\n    <2>1 CASE Discard(j, i)\n      BY <2>1, H_MsgsDiscard DEF Discard\n    <2>2 CASE DiscardAndBroadcast(i, j, [ mtype |-> COMMIT,\n                                          mzxid |-> msgs[j][i][1].mzxid ])\n      <3> DEFINE mM == [ mtype |-> COMMIT, mzxid |-> msgs[j][i][1].mzxid ]\n      <3> DEFINE RF == [v \\in Server |->\n               IF /\\ v \\in { a2.sid : a2 \\in {a3 \\in ackldRecv[i] : a3.connected = TRUE} }\n                  /\\ v \\in learners[i] /\\ v # i\n               THEN Append(msgs[i][v], mM) ELSE msgs[i][v] ]\n      <3>1 msgs' = [msgs EXCEPT ![j][i] = Tail(msgs[j][i]), ![i] = RF]\n        BY <2>2 DEF DiscardAndBroadcast\n      <3>2 H_MsgP(mM) BY DEF H_MsgP, COMMIT, CEPOCH, NEWEPOCH\n      <3>3 \\A v \\in Server : H_QOK(RF[v]) BY <3>2, H_QOKAppend DEF H_TypeB\n      <3>4 RF = [v \\in Server |-> RF[v]] OBVIOUS\n      <3> QED BY <1>t, <3>1, <3>3, <3>4, H_MsgsBcast\n    <2> QED BY <2>1, <2>2 DEF LeaderTryToCommit\n  <1> QED BY <1>1 DEF H_TypeB, H_Mtx\n\nLEMMA H_B_FollowerProcessCOMMIT ==\n  ASSUME H_TypeB, NEW i \\in Server, NEW j \\in Server, FollowerProcessCOMMIT(i, j)\n  PROVE  H_TypeB'\n  <1> USE DEF FollowerProcessCOMMIT, IsFollower, PendingCOMMIT, IsMyLeader,\n              leaderVars, followerVars, electionVars\n  <1>1 H_Mtx(msgs') /\\ \\A a, b \\in Server : H_QOK(msgs'[a][b])\n    BY H_MsgsDiscard DEF Discard\n  <1> QED BY <1>1 DEF H_TypeB, H_Mtx\n\nLEMMA H_NextTypeB ==\n  ASSUME H_TypeB, [Next]_vars\n  PROVE  H_TypeB'\n  <1>1 CASE UNCHANGED vars\n    BY <1>1 DEF H_TypeB, H_Mtx, vars, serverVars, leaderVars, followerVars,\n                electionVars, msgVars, verifyVars\n  <1>2 CASE Next\n    BY <1>2, H_B_UpdateLeader, H_B_FollowLeader, H_B_Timeout, H_B_Restart,\n       H_B_Connect, H_B_LeaderProcessCEPOCH, H_B_FollowerProcessNEWEPOCH,\n       H_B_LeaderProcessACKEPOCH, H_B_FollowerProcessNEWLEADER,\n       H_B_LeaderProcessACKLD, H_B_FollowerProcessCOMMITLD,\n       H_B_LeaderProcessRequest, H_B_LeaderBroadcastPROPOSE,\n       H_B_FollowerProcessPROPOSE, H_B_LeaderProcessACK,\n       H_B_FollowerProcessCOMMIT\n       DEF Next\n  <1> QED BY <1>1, <1>2\n\nLEMMA H_SpecTypeB == Spec => []H_TypeB\n  <1>1 Init => H_TypeB BY H_InitTypeB\n  <1>2 H_TypeB /\\ [Next]_vars => H_TypeB' BY H_NextTypeB\n  <1> QED BY <1>1, <1>2, PTL DEF Spec\n\\* END AGENT HELPERS\n\nTHEOREM Spec => []Leadership1\n\\* BEGIN AGENT PROOF ZooKeeper/Zab_Leadership1.tla\n<1>1 Spec => []H_TypeB\n  BY H_SpecTypeB\n<1>2 H_TypeB => Leadership1\n  BY SMTT(\"r30\") DEF H_TypeB, Leadership1, IsLeader\n<1> QED BY <1>1, <1>2, PTL\n\\* END AGENT PROOF ZooKeeper/Zab_Leadership1.tla\n\nTHEOREM Spec => []Leadership2\n\\* BEGIN AGENT PROOF ZooKeeper/Zab_Leadership2.tla\n<1>1 Spec => []H_TypeB\n  BY H_SpecTypeB\n<1>2 H_TypeB => Leadership2\n  BY SMTT(\"r30\") DEF H_TypeB, Leadership2\n<1> QED BY <1>1, <1>2, PTL\n\\* END AGENT PROOF ZooKeeper/Zab_Leadership2.tla\n\nTHEOREM Spec => []PrefixConsistency\n\\* BEGIN AGENT PROOF ZooKeeper/Zab_PrefixConsistency.tla\n<1>1 Spec => []H_TypeB\n  BY H_SpecTypeB\n<1>2 H_TypeB => PrefixConsistency\n  BY SMTT(\"r30\") DEF H_TypeB, PrefixConsistency, Minimum, TxnEqual, ZxidEqual\n<1> QED BY <1>1, <1>2, PTL\n\\* END AGENT PROOF ZooKeeper/Zab_PrefixConsistency.tla\n\nTHEOREM Spec => []Integrity\n\\* BEGIN AGENT PROOF ZooKeeper/Zab_Integrity.tla\n<1>1 Spec => []H_TypeB\n  BY H_SpecTypeB\n<1>2 H_TypeB => Integrity\n  BY SMTT(\"r30\") DEF H_TypeB, Integrity, IsFollower, TxnEqual, ZxidEqual\n<1> QED BY <1>1, <1>2, PTL\n\\* END AGENT PROOF ZooKeeper/Zab_Integrity.tla\n\nTHEOREM Spec => []Agreement\n\\* BEGIN AGENT PROOF ZooKeeper/Zab_Agreement.tla\n<1>1 Spec => []H_TypeB\n  BY H_SpecTypeB\n<1>2 H_TypeB => Agreement\n  BY SMTT(\"r30\") DEF H_TypeB, Agreement, IsFollower, TxnEqual, ZxidEqual\n<1> QED BY <1>1, <1>2, PTL\n\\* END AGENT PROOF ZooKeeper/Zab_Agreement.tla\n\nTHEOREM Spec => []TotalOrder\n\\* BEGIN AGENT PROOF ZooKeeper/Zab_TotalOrder.tla\n<1>1 Spec => []H_TypeB\n  BY H_SpecTypeB\n<1>2 H_TypeB => TotalOrder\n  BY SMTT(\"r30\") DEF H_TypeB, TotalOrder, TxnEqual, ZxidEqual\n<1> QED BY <1>1, <1>2, PTL\n\\* END AGENT PROOF ZooKeeper/Zab_TotalOrder.tla\n\nTHEOREM Spec => []LocalPrimaryOrder\n\\* BEGIN AGENT PROOF ZooKeeper/Zab_LocalPrimaryOrder.tla\n<1>1 Spec => []H_TypeB\n  BY H_SpecTypeB\n<1>2 H_TypeB => LocalPrimaryOrder\n  BY SMTT(\"r30\") DEF H_TypeB, LocalPrimaryOrder, TxnEqual, ZxidEqual, ZxidCompare\n<1> QED BY <1>1, <1>2, PTL\n\\* END AGENT PROOF ZooKeeper/Zab_LocalPrimaryOrder.tla\n\nTHEOREM Spec => []GlobalPrimaryOrder\n\\* BEGIN AGENT PROOF ZooKeeper/Zab_GlobalPrimaryOrder.tla\n<1>1 Spec => []H_TypeB\n  BY H_SpecTypeB\n<1>2 H_TypeB => GlobalPrimaryOrder\n  BY SMTT(\"r30\") DEF H_TypeB, GlobalPrimaryOrder, EpochPrecedeInTxn\n<1> QED BY <1>1, <1>2, PTL\n\\* END AGENT PROOF ZooKeeper/Zab_GlobalPrimaryOrder.tla\n\nTHEOREM Spec => []PrimaryIntegrity\n\\* BEGIN AGENT PROOF ZooKeeper/Zab_PrimaryIntegrity.tla\n<1>1 Spec => []H_TypeB\n  BY H_SpecTypeB\n<1>2 H_TypeB => PrimaryIntegrity\n  BY SMTT(\"r30\") DEF H_TypeB, PrimaryIntegrity, IsLeader, IsFollower, IsMyLearner, IsMyLeader, TxnEqual, ZxidEqual\n<1> QED BY <1>1, <1>2, PTL\n\\* END AGENT PROOF ZooKeeper/Zab_PrimaryIntegrity.tla\n====\n",
+  "units": {
+    "ZooKeeper/Zab_Leadership1.tla": {
+      "id": "ZooKeeper/Zab_Leadership1.tla",
+      "name": "Zab_Leadership1",
+      "kind": "target",
+      "lineStart": 1103,
+      "lineEnd": 1109,
+      "proofLines": [
+        1105,
+        1106,
+        1107,
+        1108,
+        1109
+      ],
+      "proofRange": [
+        1105,
+        1109
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:H_SpecTypeB"
+      ]
+    },
+    "ZooKeeper/Zab_Leadership2.tla": {
+      "id": "ZooKeeper/Zab_Leadership2.tla",
+      "name": "Zab_Leadership2",
+      "kind": "target",
+      "lineStart": 1112,
+      "lineEnd": 1118,
+      "proofLines": [
+        1114,
+        1115,
+        1116,
+        1117,
+        1118
+      ],
+      "proofRange": [
+        1114,
+        1118
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:H_SpecTypeB"
+      ]
+    },
+    "ZooKeeper/Zab_PrefixConsistency.tla": {
+      "id": "ZooKeeper/Zab_PrefixConsistency.tla",
+      "name": "Zab_PrefixConsistency",
+      "kind": "target",
+      "lineStart": 1121,
+      "lineEnd": 1127,
+      "proofLines": [
+        1123,
+        1124,
+        1125,
+        1126,
+        1127
+      ],
+      "proofRange": [
+        1123,
+        1127
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:H_SpecTypeB"
+      ]
+    },
+    "ZooKeeper/Zab_Integrity.tla": {
+      "id": "ZooKeeper/Zab_Integrity.tla",
+      "name": "Zab_Integrity",
+      "kind": "target",
+      "lineStart": 1130,
+      "lineEnd": 1136,
+      "proofLines": [
+        1132,
+        1133,
+        1134,
+        1135,
+        1136
+      ],
+      "proofRange": [
+        1132,
+        1136
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:H_SpecTypeB"
+      ]
+    },
+    "ZooKeeper/Zab_Agreement.tla": {
+      "id": "ZooKeeper/Zab_Agreement.tla",
+      "name": "Zab_Agreement",
+      "kind": "target",
+      "lineStart": 1139,
+      "lineEnd": 1145,
+      "proofLines": [
+        1141,
+        1142,
+        1143,
+        1144,
+        1145
+      ],
+      "proofRange": [
+        1141,
+        1145
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:H_SpecTypeB"
+      ]
+    },
+    "ZooKeeper/Zab_TotalOrder.tla": {
+      "id": "ZooKeeper/Zab_TotalOrder.tla",
+      "name": "Zab_TotalOrder",
+      "kind": "target",
+      "lineStart": 1148,
+      "lineEnd": 1154,
+      "proofLines": [
+        1150,
+        1151,
+        1152,
+        1153,
+        1154
+      ],
+      "proofRange": [
+        1150,
+        1154
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:H_SpecTypeB"
+      ]
+    },
+    "ZooKeeper/Zab_LocalPrimaryOrder.tla": {
+      "id": "ZooKeeper/Zab_LocalPrimaryOrder.tla",
+      "name": "Zab_LocalPrimaryOrder",
+      "kind": "target",
+      "lineStart": 1157,
+      "lineEnd": 1163,
+      "proofLines": [
+        1159,
+        1160,
+        1161,
+        1162,
+        1163
+      ],
+      "proofRange": [
+        1159,
+        1163
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:H_SpecTypeB"
+      ]
+    },
+    "ZooKeeper/Zab_GlobalPrimaryOrder.tla": {
+      "id": "ZooKeeper/Zab_GlobalPrimaryOrder.tla",
+      "name": "Zab_GlobalPrimaryOrder",
+      "kind": "target",
+      "lineStart": 1166,
+      "lineEnd": 1172,
+      "proofLines": [
+        1168,
+        1169,
+        1170,
+        1171,
+        1172
+      ],
+      "proofRange": [
+        1168,
+        1172
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:H_SpecTypeB"
+      ]
+    },
+    "ZooKeeper/Zab_PrimaryIntegrity.tla": {
+      "id": "ZooKeeper/Zab_PrimaryIntegrity.tla",
+      "name": "Zab_PrimaryIntegrity",
+      "kind": "target",
+      "lineStart": 1175,
+      "lineEnd": 1181,
+      "proofLines": [
+        1177,
+        1178,
+        1179,
+        1180,
+        1181
+      ],
+      "proofRange": [
+        1177,
+        1181
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:H_SpecTypeB"
+      ]
+    },
+    "helper:H_FSEmpty": {
+      "id": "helper:H_FSEmpty",
+      "name": "H_FSEmpty",
+      "kind": "helper",
+      "lineStart": 12,
+      "lineEnd": 13,
+      "proofLines": [
+        13
+      ],
+      "proofRange": [
+        13,
+        13
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:H_FSSingleton": {
+      "id": "helper:H_FSSingleton",
+      "name": "H_FSSingleton",
+      "kind": "helper",
+      "lineStart": 15,
+      "lineEnd": 16,
+      "proofLines": [
+        16
+      ],
+      "proofRange": [
+        16,
+        16
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:H_FSUnion": {
+      "id": "helper:H_FSUnion",
+      "name": "H_FSUnion",
+      "kind": "helper",
+      "lineStart": 18,
+      "lineEnd": 20,
+      "proofLines": [
+        20
+      ],
+      "proofRange": [
+        20,
+        20
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:H_FSDiff": {
+      "id": "helper:H_FSDiff",
+      "name": "H_FSDiff",
+      "kind": "helper",
+      "lineStart": 22,
+      "lineEnd": 24,
+      "proofLines": [
+        24
+      ],
+      "proofRange": [
+        24,
+        24
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:H_FSImage": {
+      "id": "helper:H_FSImage",
+      "name": "H_FSImage",
+      "kind": "helper",
+      "lineStart": 26,
+      "lineEnd": 28,
+      "proofLines": [
+        28
+      ],
+      "proofRange": [
+        28,
+        28
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:H_FSIsFin": {
+      "id": "helper:H_FSIsFin",
+      "name": "H_FSIsFin",
+      "kind": "helper",
+      "lineStart": 30,
+      "lineEnd": 31,
+      "proofLines": [
+        31
+      ],
+      "proofRange": [
+        31,
+        31
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:H_FSInduction": {
+      "id": "helper:H_FSInduction",
+      "name": "H_FSInduction",
+      "kind": "helper",
+      "lineStart": 33,
+      "lineEnd": 38,
+      "proofLines": [
+        38
+      ],
+      "proofRange": [
+        38,
+        38
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:H_MaxRel": {
+      "id": "helper:H_MaxRel",
+      "name": "H_MaxRel",
+      "kind": "helper",
+      "lineStart": 44,
+      "lineEnd": 75,
+      "proofLines": [
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        58,
+        59,
+        60,
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68,
+        69,
+        70,
+        71,
+        72,
+        73,
+        74,
+        75
+      ],
+      "proofRange": [
+        49,
+        75
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:H_FSInduction",
+        "helper:H_FSIsFin"
+      ]
+    },
+    "helper:H_MaxIntExists": {
+      "id": "helper:H_MaxIntExists",
+      "name": "H_MaxIntExists",
+      "kind": "helper",
+      "lineStart": 77,
+      "lineEnd": 85,
+      "proofLines": [
+        80,
+        81,
+        82,
+        83,
+        84,
+        85
+      ],
+      "proofRange": [
+        80,
+        85
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:H_MaxRel"
+      ]
+    },
+    "helper:H_MaximumProps": {
+      "id": "helper:H_MaximumProps",
+      "name": "H_MaximumProps",
+      "kind": "helper",
+      "lineStart": 87,
+      "lineEnd": 100,
+      "proofLines": [
+        91,
+        92,
+        93,
+        94,
+        95,
+        96,
+        97,
+        98,
+        99,
+        100
+      ],
+      "proofRange": [
+        91,
+        100
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:H_MaxIntExists"
+      ]
+    },
+    "helper:H_FSeqEmpty": {
+      "id": "helper:H_FSeqEmpty",
+      "name": "H_FSeqEmpty",
+      "kind": "helper",
+      "lineStart": 108,
+      "lineEnd": 109,
+      "proofLines": [
+        109
+      ],
+      "proofRange": [
+        109,
+        109
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:H_FSeqLen": {
+      "id": "helper:H_FSeqLen",
+      "name": "H_FSeqLen",
+      "kind": "helper",
+      "lineStart": 111,
+      "lineEnd": 116,
+      "proofLines": [
+        115,
+        116
+      ],
+      "proofRange": [
+        115,
+        116
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:H_FSeqAppend": {
+      "id": "helper:H_FSeqAppend",
+      "name": "H_FSeqAppend",
+      "kind": "helper",
+      "lineStart": 118,
+      "lineEnd": 127,
+      "proofLines": [
+        124,
+        125,
+        126,
+        127
+      ],
+      "proofRange": [
+        124,
+        127
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:H_FSeqTail": {
+      "id": "helper:H_FSeqTail",
+      "name": "H_FSeqTail",
+      "kind": "helper",
+      "lineStart": 129,
+      "lineEnd": 136,
+      "proofLines": [
+        135,
+        136
+      ],
+      "proofRange": [
+        135,
+        136
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:H_FSeqElt": {
+      "id": "helper:H_FSeqElt",
+      "name": "H_FSeqElt",
+      "kind": "helper",
+      "lineStart": 138,
+      "lineEnd": 141,
+      "proofLines": [
+        141
+      ],
+      "proofRange": [
+        141,
+        141
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:H_FSeqLen",
+        "helper:H_FSeqTail"
+      ]
+    },
+    "helper:H_InitTypeB": {
+      "id": "helper:H_InitTypeB",
+      "name": "H_InitTypeB",
+      "kind": "helper",
+      "lineStart": 173,
+      "lineEnd": 180,
+      "proofLines": [
+        174,
+        175,
+        176,
+        177,
+        178,
+        179,
+        180
+      ],
+      "proofRange": [
+        174,
+        180
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:H_FSEmpty",
+        "helper:H_FSeqEmpty"
+      ]
+    },
+    "helper:H_QOKEmpty": {
+      "id": "helper:H_QOKEmpty",
+      "name": "H_QOKEmpty",
+      "kind": "helper",
+      "lineStart": 182,
+      "lineEnd": 183,
+      "proofLines": [
+        183
+      ],
+      "proofRange": [
+        183,
+        183
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:H_FSeqEmpty"
+      ]
+    },
+    "helper:H_QOKAppend": {
+      "id": "helper:H_QOKAppend",
+      "name": "H_QOKAppend",
+      "kind": "helper",
+      "lineStart": 185,
+      "lineEnd": 198,
+      "proofLines": [
+        188,
+        189,
+        190,
+        191,
+        192,
+        193,
+        194,
+        195,
+        196,
+        197,
+        198
+      ],
+      "proofRange": [
+        188,
+        198
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:H_FSeqAppend",
+        "helper:H_FSeqLen"
+      ]
+    },
+    "helper:H_QOKTail": {
+      "id": "helper:H_QOKTail",
+      "name": "H_QOKTail",
+      "kind": "helper",
+      "lineStart": 200,
+      "lineEnd": 210,
+      "proofLines": [
+        203,
+        204,
+        205,
+        206,
+        207,
+        208,
+        209,
+        210
+      ],
+      "proofRange": [
+        203,
+        210
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:H_FSeqTail"
+      ]
+    },
+    "helper:H_QOKHead": {
+      "id": "helper:H_QOKHead",
+      "name": "H_QOKHead",
+      "kind": "helper",
+      "lineStart": 212,
+      "lineEnd": 215,
+      "proofLines": [
+        215
+      ],
+      "proofRange": [
+        215,
+        215
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:H_FSeqElt"
+      ]
+    },
+    "helper:H_MaxEpochNat": {
+      "id": "helper:H_MaxEpochNat",
+      "name": "H_MaxEpochNat",
+      "kind": "helper",
+      "lineStart": 221,
+      "lineEnd": 234,
+      "proofLines": [
+        224,
+        225,
+        226,
+        227,
+        228,
+        229,
+        230,
+        231,
+        232,
+        233,
+        234
+      ],
+      "proofRange": [
+        224,
+        234
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:H_FSImage",
+        "helper:H_MaximumProps"
+      ]
+    },
+    "helper:H_UpdCepochType": {
+      "id": "helper:H_UpdCepochType",
+      "name": "H_UpdCepochType",
+      "kind": "helper",
+      "lineStart": 236,
+      "lineEnd": 249,
+      "proofLines": [
+        240,
+        241,
+        242,
+        243,
+        244,
+        245,
+        246,
+        247,
+        248,
+        249
+      ],
+      "proofRange": [
+        240,
+        249
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:H_FSDiff",
+        "helper:H_FSSingleton",
+        "helper:H_FSUnion"
+      ]
+    },
+    "helper:H_RemCepochType": {
+      "id": "helper:H_RemCepochType",
+      "name": "H_RemCepochType",
+      "kind": "helper",
+      "lineStart": 251,
+      "lineEnd": 268,
+      "proofLines": [
+        255,
+        256,
+        257,
+        258,
+        259,
+        260,
+        261,
+        262,
+        263,
+        264,
+        265,
+        266,
+        267,
+        268
+      ],
+      "proofRange": [
+        255,
+        268
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:H_FSDiff",
+        "helper:H_FSSingleton",
+        "helper:H_FSUnion"
+      ]
+    },
+    "helper:H_UpdAckeSid": {
+      "id": "helper:H_UpdAckeSid",
+      "name": "H_UpdAckeSid",
+      "kind": "helper",
+      "lineStart": 270,
+      "lineEnd": 274,
+      "proofLines": [
+        274
+      ],
+      "proofRange": [
+        274,
+        274
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:H_RemAckeSid": {
+      "id": "helper:H_RemAckeSid",
+      "name": "H_RemAckeSid",
+      "kind": "helper",
+      "lineStart": 276,
+      "lineEnd": 285,
+      "proofLines": [
+        279,
+        280,
+        281,
+        282,
+        283,
+        284,
+        285
+      ],
+      "proofRange": [
+        279,
+        285
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:H_UpdAckldSid": {
+      "id": "helper:H_UpdAckldSid",
+      "name": "H_UpdAckldSid",
+      "kind": "helper",
+      "lineStart": 287,
+      "lineEnd": 290,
+      "proofLines": [
+        290
+      ],
+      "proofRange": [
+        290,
+        290
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:H_RemAckldSid": {
+      "id": "helper:H_RemAckldSid",
+      "name": "H_RemAckldSid",
+      "kind": "helper",
+      "lineStart": 292,
+      "lineEnd": 301,
+      "proofLines": [
+        295,
+        296,
+        297,
+        298,
+        299,
+        300,
+        301
+      ],
+      "proofRange": [
+        295,
+        301
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:H_RemoveLearnerTypeB": {
+      "id": "helper:H_RemoveLearnerTypeB",
+      "name": "H_RemoveLearnerTypeB",
+      "kind": "helper",
+      "lineStart": 303,
+      "lineEnd": 312,
+      "proofLines": [
+        312
+      ],
+      "proofRange": [
+        312,
+        312
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:H_RemAckeSid",
+        "helper:H_RemAckldSid",
+        "helper:H_RemCepochType"
+      ]
+    },
+    "helper:H_MtxDom": {
+      "id": "helper:H_MtxDom",
+      "name": "H_MtxDom",
+      "kind": "helper",
+      "lineStart": 320,
+      "lineEnd": 322,
+      "proofLines": [
+        322
+      ],
+      "proofRange": [
+        322,
+        322
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:H_MtxUpd1": {
+      "id": "helper:H_MtxUpd1",
+      "name": "H_MtxUpd1",
+      "kind": "helper",
+      "lineStart": 324,
+      "lineEnd": 329,
+      "proofLines": [
+        329
+      ],
+      "proofRange": [
+        329,
+        329
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:H_MtxDom"
+      ]
+    },
+    "helper:H_MtxUpd2": {
+      "id": "helper:H_MtxUpd2",
+      "name": "H_MtxUpd2",
+      "kind": "helper",
+      "lineStart": 331,
+      "lineEnd": 339,
+      "proofLines": [
+        339
+      ],
+      "proofRange": [
+        339,
+        339
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:H_MtxDom"
+      ]
+    },
+    "helper:H_MtxRowV": {
+      "id": "helper:H_MtxRowV",
+      "name": "H_MtxRowV",
+      "kind": "helper",
+      "lineStart": 341,
+      "lineEnd": 347,
+      "proofLines": [
+        347
+      ],
+      "proofRange": [
+        347,
+        347
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:H_MtxDom"
+      ]
+    },
+    "helper:H_MtxUpdRowV": {
+      "id": "helper:H_MtxUpdRowV",
+      "name": "H_MtxUpdRowV",
+      "kind": "helper",
+      "lineStart": 349,
+      "lineEnd": 356,
+      "proofLines": [
+        356
+      ],
+      "proofRange": [
+        356,
+        356
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:H_MtxDom"
+      ]
+    },
+    "helper:H_MtxCleanV": {
+      "id": "helper:H_MtxCleanV",
+      "name": "H_MtxCleanV",
+      "kind": "helper",
+      "lineStart": 358,
+      "lineEnd": 364,
+      "proofLines": [
+        364
+      ],
+      "proofRange": [
+        364,
+        364
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:H_MsgsTwo": {
+      "id": "helper:H_MsgsTwo",
+      "name": "H_MsgsTwo",
+      "kind": "helper",
+      "lineStart": 382,
+      "lineEnd": 395,
+      "proofLines": [
+        388,
+        389,
+        390,
+        391,
+        392,
+        393,
+        394,
+        395
+      ],
+      "proofRange": [
+        388,
+        395
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:H_MtxUpd2"
+      ]
+    },
+    "helper:H_MsgsRow": {
+      "id": "helper:H_MsgsRow",
+      "name": "H_MsgsRow",
+      "kind": "helper",
+      "lineStart": 397,
+      "lineEnd": 408,
+      "proofLines": [
+        402,
+        403,
+        404,
+        405,
+        406,
+        407,
+        408
+      ],
+      "proofRange": [
+        402,
+        408
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:H_MtxRowV"
+      ]
+    },
+    "helper:H_MsgsBcast": {
+      "id": "helper:H_MsgsBcast",
+      "name": "H_MsgsBcast",
+      "kind": "helper",
+      "lineStart": 410,
+      "lineEnd": 423,
+      "proofLines": [
+        416,
+        417,
+        418,
+        419,
+        420,
+        421,
+        422,
+        423
+      ],
+      "proofRange": [
+        416,
+        423
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:H_MtxUpdRowV"
+      ]
+    },
+    "helper:H_MsgsClean": {
+      "id": "helper:H_MsgsClean",
+      "name": "H_MsgsClean",
+      "kind": "helper",
+      "lineStart": 425,
+      "lineEnd": 437,
+      "proofLines": [
+        430,
+        431,
+        432,
+        433,
+        434,
+        435,
+        436,
+        437
+      ],
+      "proofRange": [
+        430,
+        437
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:H_MtxCleanV",
+        "helper:H_QOKEmpty"
+      ]
+    },
+    "helper:H_MsgsDiscard": {
+      "id": "helper:H_MsgsDiscard",
+      "name": "H_MsgsDiscard",
+      "kind": "helper",
+      "lineStart": 439,
+      "lineEnd": 450,
+      "proofLines": [
+        444,
+        445,
+        446,
+        447,
+        448,
+        449,
+        450
+      ],
+      "proofRange": [
+        444,
+        450
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:H_MtxUpd1",
+        "helper:H_QOKTail"
+      ]
+    },
+    "helper:H_B_UpdateLeader": {
+      "id": "helper:H_B_UpdateLeader",
+      "name": "H_B_UpdateLeader",
+      "kind": "helper",
+      "lineStart": 456,
+      "lineEnd": 483,
+      "proofLines": [
+        459,
+        460,
+        461,
+        462,
+        463,
+        464,
+        465,
+        466,
+        467,
+        468,
+        469,
+        470,
+        471,
+        472,
+        473,
+        474,
+        475,
+        476,
+        477,
+        478,
+        479,
+        480,
+        481,
+        482,
+        483
+      ],
+      "proofRange": [
+        459,
+        483
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:H_FSSingleton"
+      ]
+    },
+    "helper:H_B_FollowLeader": {
+      "id": "helper:H_B_FollowLeader",
+      "name": "H_B_FollowLeader",
+      "kind": "helper",
+      "lineStart": 485,
+      "lineEnd": 539,
+      "proofLines": [
+        488,
+        489,
+        490,
+        491,
+        492,
+        493,
+        494,
+        495,
+        496,
+        497,
+        498,
+        499,
+        500,
+        501,
+        502,
+        503,
+        504,
+        505,
+        506,
+        507,
+        508,
+        509,
+        510,
+        511,
+        512,
+        513,
+        514,
+        515,
+        516,
+        517,
+        518,
+        519,
+        520,
+        521,
+        522,
+        523,
+        524,
+        525,
+        526,
+        527,
+        528,
+        529,
+        530,
+        531,
+        532,
+        533,
+        534,
+        535,
+        536,
+        537,
+        538,
+        539
+      ],
+      "proofRange": [
+        488,
+        539
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:H_FSSingleton"
+      ]
+    },
+    "helper:H_B_Timeout": {
+      "id": "helper:H_B_Timeout",
+      "name": "H_B_Timeout",
+      "kind": "helper",
+      "lineStart": 541,
+      "lineEnd": 567,
+      "proofLines": [
+        544,
+        545,
+        546,
+        547,
+        548,
+        549,
+        550,
+        551,
+        552,
+        553,
+        554,
+        555,
+        556,
+        557,
+        558,
+        559,
+        560,
+        561,
+        562,
+        563,
+        564,
+        565,
+        566,
+        567
+      ],
+      "proofRange": [
+        544,
+        567
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:H_MsgsClean",
+        "helper:H_MsgsTwo",
+        "helper:H_QOKEmpty",
+        "helper:H_RemoveLearnerTypeB"
+      ]
+    },
+    "helper:H_B_Restart": {
+      "id": "helper:H_B_Restart",
+      "name": "H_B_Restart",
+      "kind": "helper",
+      "lineStart": 569,
+      "lineEnd": 623,
+      "proofLines": [
+        572,
+        573,
+        574,
+        575,
+        576,
+        577,
+        578,
+        579,
+        580,
+        581,
+        582,
+        583,
+        584,
+        585,
+        586,
+        587,
+        588,
+        589,
+        590,
+        591,
+        592,
+        593,
+        594,
+        595,
+        596,
+        597,
+        598,
+        599,
+        600,
+        601,
+        602,
+        603,
+        604,
+        605,
+        606,
+        607,
+        608,
+        609,
+        610,
+        611,
+        612,
+        613,
+        614,
+        615,
+        616,
+        617,
+        618,
+        619,
+        620,
+        621,
+        622,
+        623
+      ],
+      "proofRange": [
+        572,
+        623
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:H_MsgsClean",
+        "helper:H_MsgsTwo",
+        "helper:H_QOKEmpty",
+        "helper:H_RemoveLearnerTypeB"
+      ]
+    },
+    "helper:H_B_Connect": {
+      "id": "helper:H_B_Connect",
+      "name": "H_B_Connect",
+      "kind": "helper",
+      "lineStart": 625,
+      "lineEnd": 638,
+      "proofLines": [
+        629,
+        630,
+        631,
+        632,
+        633,
+        634,
+        635,
+        636,
+        637,
+        638
+      ],
+      "proofRange": [
+        629,
+        638
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:H_MtxUpd1",
+        "helper:H_QOKAppend"
+      ]
+    },
+    "helper:H_B_LeaderProcessCEPOCH": {
+      "id": "helper:H_B_LeaderProcessCEPOCH",
+      "name": "H_B_LeaderProcessCEPOCH",
+      "kind": "helper",
+      "lineStart": 640,
+      "lineEnd": 687,
+      "proofLines": [
+        643,
+        644,
+        645,
+        646,
+        647,
+        648,
+        649,
+        650,
+        651,
+        652,
+        653,
+        654,
+        655,
+        656,
+        657,
+        658,
+        659,
+        660,
+        661,
+        662,
+        663,
+        664,
+        665,
+        666,
+        667,
+        668,
+        669,
+        670,
+        671,
+        672,
+        673,
+        674,
+        675,
+        676,
+        677,
+        678,
+        679,
+        680,
+        681,
+        682,
+        683,
+        684,
+        685,
+        686,
+        687
+      ],
+      "proofRange": [
+        643,
+        687
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:H_MaxEpochNat",
+        "helper:H_MsgsBcast",
+        "helper:H_MsgsDiscard",
+        "helper:H_MsgsTwo",
+        "helper:H_QOKAppend",
+        "helper:H_QOKHead",
+        "helper:H_QOKTail",
+        "helper:H_UpdCepochType"
+      ]
+    },
+    "helper:H_B_FollowerProcessNEWEPOCH": {
+      "id": "helper:H_B_FollowerProcessNEWEPOCH",
+      "name": "H_B_FollowerProcessNEWEPOCH",
+      "kind": "helper",
+      "lineStart": 689,
+      "lineEnd": 819,
+      "proofLines": [
+        692,
+        693,
+        694,
+        695,
+        696,
+        697,
+        698,
+        699,
+        700,
+        701,
+        702,
+        703,
+        704,
+        705,
+        706,
+        707,
+        708,
+        709,
+        710,
+        711,
+        712,
+        713,
+        714,
+        715,
+        716,
+        717,
+        718,
+        719,
+        720,
+        721,
+        722,
+        723,
+        724,
+        725,
+        726,
+        727,
+        728,
+        729,
+        730,
+        731,
+        732,
+        733,
+        734,
+        735,
+        736,
+        737,
+        738,
+        739,
+        740,
+        741,
+        742,
+        743,
+        744,
+        745,
+        746,
+        747,
+        748,
+        749,
+        750,
+        751,
+        752,
+        753,
+        754,
+        755,
+        756,
+        757,
+        758,
+        759,
+        760,
+        761,
+        762,
+        763,
+        764,
+        765,
+        766,
+        767,
+        768,
+        769,
+        770,
+        771,
+        772,
+        773,
+        774,
+        775,
+        776,
+        777,
+        778,
+        779,
+        780,
+        781,
+        782,
+        783,
+        784,
+        785,
+        786,
+        787,
+        788,
+        789,
+        790,
+        791,
+        792,
+        793,
+        794,
+        795,
+        796,
+        797,
+        798,
+        799,
+        800,
+        801,
+        802,
+        803,
+        804,
+        805,
+        806,
+        807,
+        808,
+        809,
+        810,
+        811,
+        812,
+        813,
+        814,
+        815,
+        816,
+        817,
+        818,
+        819
+      ],
+      "proofRange": [
+        692,
+        819
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:H_MsgsDiscard",
+        "helper:H_MsgsTwo",
+        "helper:H_QOKAppend",
+        "helper:H_QOKEmpty",
+        "helper:H_QOKHead",
+        "helper:H_QOKTail",
+        "helper:H_RemoveLearnerTypeB"
+      ]
+    },
+    "helper:H_B_LeaderProcessACKEPOCH": {
+      "id": "helper:H_B_LeaderProcessACKEPOCH",
+      "name": "H_B_LeaderProcessACKEPOCH",
+      "kind": "helper",
+      "lineStart": 821,
+      "lineEnd": 868,
+      "proofLines": [
+        824,
+        825,
+        826,
+        827,
+        828,
+        829,
+        830,
+        831,
+        832,
+        833,
+        834,
+        835,
+        836,
+        837,
+        838,
+        839,
+        840,
+        841,
+        842,
+        843,
+        844,
+        845,
+        846,
+        847,
+        848,
+        849,
+        850,
+        851,
+        852,
+        853,
+        854,
+        855,
+        856,
+        857,
+        858,
+        859,
+        860,
+        861,
+        862,
+        863,
+        864,
+        865,
+        866,
+        867,
+        868
+      ],
+      "proofRange": [
+        824,
+        868
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:H_MsgsBcast",
+        "helper:H_MsgsDiscard",
+        "helper:H_MsgsTwo",
+        "helper:H_QOKAppend",
+        "helper:H_QOKTail",
+        "helper:H_UpdAckeSid"
+      ]
+    },
+    "helper:H_B_FollowerProcessNEWLEADER": {
+      "id": "helper:H_B_FollowerProcessNEWLEADER",
+      "name": "H_B_FollowerProcessNEWLEADER",
+      "kind": "helper",
+      "lineStart": 870,
+      "lineEnd": 946,
+      "proofLines": [
+        873,
+        874,
+        875,
+        876,
+        877,
+        878,
+        879,
+        880,
+        881,
+        882,
+        883,
+        884,
+        885,
+        886,
+        887,
+        888,
+        889,
+        890,
+        891,
+        892,
+        893,
+        894,
+        895,
+        896,
+        897,
+        898,
+        899,
+        900,
+        901,
+        902,
+        903,
+        904,
+        905,
+        906,
+        907,
+        908,
+        909,
+        910,
+        911,
+        912,
+        913,
+        914,
+        915,
+        916,
+        917,
+        918,
+        919,
+        920,
+        921,
+        922,
+        923,
+        924,
+        925,
+        926,
+        927,
+        928,
+        929,
+        930,
+        931,
+        932,
+        933,
+        934,
+        935,
+        936,
+        937,
+        938,
+        939,
+        940,
+        941,
+        942,
+        943,
+        944,
+        945,
+        946
+      ],
+      "proofRange": [
+        873,
+        946
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:H_MsgsTwo",
+        "helper:H_QOKAppend",
+        "helper:H_QOKEmpty",
+        "helper:H_QOKTail",
+        "helper:H_RemoveLearnerTypeB"
+      ]
+    },
+    "helper:H_B_LeaderProcessACKLD": {
+      "id": "helper:H_B_LeaderProcessACKLD",
+      "name": "H_B_LeaderProcessACKLD",
+      "kind": "helper",
+      "lineStart": 948,
+      "lineEnd": 985,
+      "proofLines": [
+        951,
+        952,
+        953,
+        954,
+        955,
+        956,
+        957,
+        958,
+        959,
+        960,
+        961,
+        962,
+        963,
+        964,
+        965,
+        966,
+        967,
+        968,
+        969,
+        970,
+        971,
+        972,
+        973,
+        974,
+        975,
+        976,
+        977,
+        978,
+        979,
+        980,
+        981,
+        982,
+        983,
+        984,
+        985
+      ],
+      "proofRange": [
+        951,
+        985
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:H_MsgsBcast",
+        "helper:H_MsgsDiscard",
+        "helper:H_MsgsTwo",
+        "helper:H_QOKAppend",
+        "helper:H_QOKTail",
+        "helper:H_UpdAckldSid"
+      ]
+    },
+    "helper:H_B_FollowerProcessCOMMITLD": {
+      "id": "helper:H_B_FollowerProcessCOMMITLD",
+      "name": "H_B_FollowerProcessCOMMITLD",
+      "kind": "helper",
+      "lineStart": 987,
+      "lineEnd": 994,
+      "proofLines": [
+        990,
+        991,
+        992,
+        993,
+        994
+      ],
+      "proofRange": [
+        990,
+        994
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:H_MsgsDiscard"
+      ]
+    },
+    "helper:H_B_LeaderProcessRequest": {
+      "id": "helper:H_B_LeaderProcessRequest",
+      "name": "H_B_LeaderProcessRequest",
+      "kind": "helper",
+      "lineStart": 996,
+      "lineEnd": 1000,
+      "proofLines": [
+        999,
+        1000
+      ],
+      "proofRange": [
+        999,
+        1000
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:H_B_LeaderBroadcastPROPOSE": {
+      "id": "helper:H_B_LeaderBroadcastPROPOSE",
+      "name": "H_B_LeaderBroadcastPROPOSE",
+      "kind": "helper",
+      "lineStart": 1002,
+      "lineEnd": 1022,
+      "proofLines": [
+        1005,
+        1006,
+        1007,
+        1008,
+        1009,
+        1010,
+        1011,
+        1012,
+        1013,
+        1014,
+        1015,
+        1016,
+        1017,
+        1018,
+        1019,
+        1020,
+        1021,
+        1022
+      ],
+      "proofRange": [
+        1005,
+        1022
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:H_MsgsRow",
+        "helper:H_QOKAppend"
+      ]
+    },
+    "helper:H_B_FollowerProcessPROPOSE": {
+      "id": "helper:H_B_FollowerProcessPROPOSE",
+      "name": "H_B_FollowerProcessPROPOSE",
+      "kind": "helper",
+      "lineStart": 1024,
+      "lineEnd": 1043,
+      "proofLines": [
+        1027,
+        1028,
+        1029,
+        1030,
+        1031,
+        1032,
+        1033,
+        1034,
+        1035,
+        1036,
+        1037,
+        1038,
+        1039,
+        1040,
+        1041,
+        1042,
+        1043
+      ],
+      "proofRange": [
+        1027,
+        1043
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:H_MsgsDiscard",
+        "helper:H_MsgsTwo",
+        "helper:H_QOKAppend",
+        "helper:H_QOKTail"
+      ]
+    },
+    "helper:H_B_LeaderProcessACK": {
+      "id": "helper:H_B_LeaderProcessACK",
+      "name": "H_B_LeaderProcessACK",
+      "kind": "helper",
+      "lineStart": 1045,
+      "lineEnd": 1069,
+      "proofLines": [
+        1048,
+        1049,
+        1050,
+        1051,
+        1052,
+        1053,
+        1054,
+        1055,
+        1056,
+        1057,
+        1058,
+        1059,
+        1060,
+        1061,
+        1062,
+        1063,
+        1064,
+        1065,
+        1066,
+        1067,
+        1068,
+        1069
+      ],
+      "proofRange": [
+        1048,
+        1069
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:H_MsgsBcast",
+        "helper:H_MsgsDiscard",
+        "helper:H_QOKAppend",
+        "helper:H_QOKTail"
+      ]
+    },
+    "helper:H_B_FollowerProcessCOMMIT": {
+      "id": "helper:H_B_FollowerProcessCOMMIT",
+      "name": "H_B_FollowerProcessCOMMIT",
+      "kind": "helper",
+      "lineStart": 1071,
+      "lineEnd": 1078,
+      "proofLines": [
+        1074,
+        1075,
+        1076,
+        1077,
+        1078
+      ],
+      "proofRange": [
+        1074,
+        1078
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:H_MsgsDiscard"
+      ]
+    },
+    "helper:H_NextTypeB": {
+      "id": "helper:H_NextTypeB",
+      "name": "H_NextTypeB",
+      "kind": "helper",
+      "lineStart": 1080,
+      "lineEnd": 1095,
+      "proofLines": [
+        1083,
+        1084,
+        1085,
+        1086,
+        1087,
+        1088,
+        1089,
+        1090,
+        1091,
+        1092,
+        1093,
+        1094,
+        1095
+      ],
+      "proofRange": [
+        1083,
+        1095
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:H_B_Connect",
+        "helper:H_B_FollowLeader",
+        "helper:H_B_FollowerProcessCOMMIT",
+        "helper:H_B_FollowerProcessCOMMITLD",
+        "helper:H_B_FollowerProcessNEWEPOCH",
+        "helper:H_B_FollowerProcessNEWLEADER",
+        "helper:H_B_FollowerProcessPROPOSE",
+        "helper:H_B_LeaderBroadcastPROPOSE",
+        "helper:H_B_LeaderProcessACK",
+        "helper:H_B_LeaderProcessACKEPOCH",
+        "helper:H_B_LeaderProcessACKLD",
+        "helper:H_B_LeaderProcessCEPOCH",
+        "helper:H_B_LeaderProcessRequest",
+        "helper:H_B_Restart",
+        "helper:H_B_Timeout",
+        "helper:H_B_UpdateLeader"
+      ]
+    },
+    "helper:H_SpecTypeB": {
+      "id": "helper:H_SpecTypeB",
+      "name": "H_SpecTypeB",
+      "kind": "helper",
+      "lineStart": 1097,
+      "lineEnd": 1100,
+      "proofLines": [
+        1098,
+        1099,
+        1100
+      ],
+      "proofRange": [
+        1098,
+        1100
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:H_InitTypeB",
+        "helper:H_NextTypeB"
+      ]
+    }
+  }
+}

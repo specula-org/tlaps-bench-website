@@ -1,0 +1,1723 @@
+{
+  "schemaVersion": 1,
+  "specId": "OpenAddressing/OpenAddressing.tla",
+  "sourceName": "OpenAddressing.tla",
+  "sourceSha256": "cdd1a53866a1a66e726768fa0e6623999810bae96c81457dbd162fcae175a3fc",
+  "resultSha256": "74808f519e8aaae09a8d907bee163e5de01738363fb841484ffee08c73a94ca1",
+  "source": "---- MODULE OpenAddressing ----\nEXTENDS OpenAddressingDefs\n\n\\* BEGIN AGENT HELPERS\nLOCAL T == INSTANCE TLAPS\nLOCAL FS == INSTANCE FiniteSetTheorems\nLOCAL FSE == INSTANCE FiniteSetsExt\nLOCAL FSET == INSTANCE FiniteSetsExtTheorems\n\nTHEOREM BridgeFin == \\A S : FS!IsFiniteSet(S) <=> IsFiniteSet(S)\n  BY DEF FS!IsFiniteSet, IsFiniteSet\nTHEOREM BridgeCard == \\A S : FS!Cardinality(S) = Cardinality(S)\n  BY DEF FS!Cardinality, Cardinality\nTHEOREM BridgeMax == \\A S : max(S) = FSE!Max(S)\n  BY DEF max, FSE!Max\nTHEOREM BridgeMin == \\A S : min(S) = FSE!Min(S)\n  BY DEF min, FSE!Min\nTHEOREM BridgeFSETMax == \\A S : FSET!Max(S) = FSE!Max(S)\n  BY DEF FSET!Max, FSE!Max\nTHEOREM BridgeFSETMin == \\A S : FSET!Min(S) = FSE!Min(S)\n  BY DEF FSET!Min, FSE!Min\nTHEOREM BridgeFSETFin == \\A S : FSET!IsFiniteSet(S) <=> IsFiniteSet(S)\n  BY DEF FSET!IsFiniteSet, IsFiniteSet\nTHEOREM BridgeFSETCard == \\A S : FSET!Cardinality(S) = Cardinality(S)\n  BY DEF FSET!Cardinality, Cardinality\n\nLEMMA FpsSubsetInt == fps \\in SUBSET Int\n  BY OAAssumption, T!SMTT(\"r30\")\nLEMMA FpsFinite == IsFiniteSet(fps)\n  BY OAAssumption, T!SMTT(\"r30\")\nLEMMA FpsNonEmpty == fps # {}\n<1>1. Cardinality(fps) # 0 BY OAAssumption, T!SMTT(\"r30\")\n<1>2. QED BY <1>1, FpsFinite, BridgeFin, BridgeCard, FS!FS_EmptySet, T!SMTT(\"r30\")\nLEMMA MaxFpsIn == FSET!Max(fps) \\in fps\n<1>1. FSET!IsFiniteSet(fps) BY FpsFinite, BridgeFSETFin, T!SMTT(\"r30\")\n<1>2. QED BY <1>1, FpsSubsetInt, FpsNonEmpty, FSET!MaxIntFinite, T!SMTT(\"r30\")\nLEMMA MinFpsIn == FSET!Min(fps) \\in fps\n<1>1. FSET!IsFiniteSet(fps) BY FpsFinite, BridgeFSETFin, T!SMTT(\"r30\")\n<1>2. QED BY <1>1, FpsSubsetInt, FpsNonEmpty, FSET!MinIntFinite, T!SMTT(\"r30\")\nLEMMA MaxFpsGe == \\A y \\in fps : FSET!Max(fps) >= y\n<1>1. FSET!IsFiniteSet(fps) BY FpsFinite, BridgeFSETFin, T!SMTT(\"r30\")\n<1>2. QED BY <1>1, FpsSubsetInt, FpsNonEmpty, FSET!MaxIntFinite, T!SMTT(\"r30\")\nLEMMA MinFpsLe == \\A y \\in fps : FSET!Min(fps) <= y\n<1>1. FSET!IsFiniteSet(fps) BY FpsFinite, BridgeFSETFin, T!SMTT(\"r30\")\n<1>2. QED BY <1>1, FpsSubsetInt, FpsNonEmpty, FSET!MinIntFinite, T!SMTT(\"r30\")\nLEMMA MaxFpsInt == max(fps) \\in Int\n<1>1. max(fps) = FSET!Max(fps) BY BridgeMax, BridgeFSETMax, T!SMTT(\"r30\")\n<1>2. QED BY <1>1, MaxFpsIn, FpsSubsetInt, T!SMTT(\"r30\")\nLEMMA MinFpsInt == min(fps) \\in Int\n<1>1. min(fps) = FSET!Min(fps) BY BridgeMin, BridgeFSETMin, T!SMTT(\"r30\")\n<1>2. QED BY <1>1, MinFpsIn, FpsSubsetInt, T!SMTT(\"r30\")\nLEMMA AntiSym == \\A a \\in Int : \\A b \\in Int : (a <= b /\\ b <= a) => a = b\n  BY T!SMTT(\"r30\")\nLEMMA MaxGtMin == max(fps) > min(fps)\n<1>1. max(fps) >= min(fps)\n  <2>1. min(fps) = FSET!Min(fps) BY BridgeMin, BridgeFSETMin, T!SMTT(\"r30\")\n  <2>2. max(fps) = FSET!Max(fps) BY BridgeMax, BridgeFSETMax, T!SMTT(\"r30\")\n  <2>3. FSET!Min(fps) \\in fps BY MinFpsIn, BridgeFSETMin, T!SMTT(\"r30\")\n  <2>4. QED BY <2>1, <2>2, <2>3, MaxFpsGe, T!SMTT(\"r30\")\n<1>2. max(fps) # min(fps)\n  <2>1. CASE max(fps) = min(fps)\n    <3>1. fps = {min(fps)}\n      <4>1. min(fps) \\in fps BY MinFpsIn, BridgeMin, BridgeFSETMin, T!SMTT(\"r30\")\n      <4>2. FSET!Max(fps) = FSET!Min(fps) BY <2>1, BridgeMax, BridgeMin, BridgeFSETMax, BridgeFSETMin, T!SMTT(\"r30\")\n      <4>3. \\A y \\in fps : y = min(fps)\n        <5> SUFFICES ASSUME NEW y \\in fps PROVE y = min(fps)\n          OBVIOUS\n        <5>1. y <= FSET!Max(fps) /\\ FSET!Min(fps) <= y BY MaxFpsGe, MinFpsLe, T!SMTT(\"r30\")\n        <5>2. min(fps) = FSET!Min(fps) BY BridgeMin, BridgeFSETMin, T!SMTT(\"r30\")\n        <5>2b. FSET!Max(fps) \\in Int /\\ FSET!Min(fps) \\in Int BY MaxFpsIn, MinFpsIn, FpsSubsetInt, T!SMTT(\"r30\")\n        <5>3. QED BY <4>2, <5>1, <5>2, <5>2b, MinFpsInt, FpsSubsetInt, T!SMTT(\"r30\")\n      <4>4. QED BY <4>1, <4>3, T!SetExtensionality, T!SMTT(\"r30\")\n    <3>2. Cardinality(fps) = 1 BY <3>1, BridgeCard, BridgeFSETCard, FS!FS_Singleton, T!SMTT(\"r30\")\n    <3>3. QED BY <3>2, OAAssumption, T!SMTT(\"r30\")\n  <2>2. QED BY <2>1\n<1>3. QED BY <1>1, <1>2, T!SMTT(\"r30\")\n\nLEMMA KPos == K \\in Nat \\ {0}\n  BY OAAssumption, T!SMTT(\"r30\")\nLEMMA LNat == L \\in Nat\n  BY OAAssumption, T!SMTT(\"r30\")\nLEMMA ModRange == \\A i \\in Int : \\A len \\in Nat \\ {0} : mod(i, len) \\in 1..len\n  BY T!SMTT(\"r30\") DEF mod\nLEMMA FunUpdateType == \\A D, R, f, a, b : (f \\in [D -> R] /\\ a \\in D /\\ b \\in R) => [f EXCEPT ![a] = b] \\in [D -> R]\n  BY T!SMTT(\"r30\")\nLEMMA RescaleRange == \\A k \\in Nat \\ {0} : \\A maxF \\in Int : \\A minF \\in Int : (maxF > minF) => \\A a \\in Int : \\A pp \\in Int : rescale(k, maxF, minF, a, pp) \\in 1..k\n<1> SUFFICES ASSUME NEW k \\in Nat \\ {0}, NEW maxF \\in Int, NEW minF \\in Int, maxF > minF, NEW a \\in Int, NEW pp \\in Int PROVE rescale(k, maxF, minF, a, pp) \\in 1..k\n  OBVIOUS\n<1>1. ((k - 1) \\div (maxF - minF)) \\in Int BY T!SMTT(\"r30\")\n<1>2. (((k - 1) \\div (maxF - minF)) * (a - minF + 1)) + pp \\in Int BY <1>1, T!SMTT(\"r30\")\n<1>3. QED BY <1>2, ModRange, T!SMTT(\"r30\") DEF rescale\nLEMMA IdxRange == \\A a \\in Int : \\A pp \\in Int : idx(a, pp) \\in 1..K\n<1> SUFFICES ASSUME NEW a \\in Int, NEW pp \\in Int PROVE idx(a, pp) \\in 1..K\n  OBVIOUS\n<1>1. QED BY KPos, MaxFpsInt, MinFpsInt, MaxGtMin, RescaleRange, T!SMTT(\"r30\") DEF idx\nCPcType == pc \\in [ProcSet -> {\"pick\",\"put\",\"waitEv\",\"endWEv\",\"chkSnc\",\"cntns\",\"onSnc\",\"insrt\",\"isMth\",\"cas\",\"tryEv\",\"waitIns\",\"endEv\",\"strIns\",\"nestedIns\",\"set\",\"flush\",\"rtrn\",\"Done\"}]\nCFpType == fp \\in [Writer -> (fps \\cup {0})]\nCHist == history \\in SUBSET fps\nCA3 == \\A self \\in Writer : pc[self] \\notin {\"pick\", \"Done\"} => fp[self] \\in fps\nCEi == ei \\in [ProcSet -> Nat]\nCEj == ej \\in [ProcSet -> Int]\nCLo == lo \\in [ProcSet -> (Int \\cup {empty})]\nCTable == table \\in [1..K -> (Int \\cup {empty})]\nCStack == stack \\in [ProcSet -> Seq([procedure: {\"Evict\"}, pc: {\"endEv\"}, ei: Nat, ej: Int, lo: (Int \\cup {empty})])]\nCEvictEv == \\A self \\in ProcSet : pc[self] \\in {\"strIns\",\"nestedIns\",\"set\",\"flush\",\"rtrn\",\"waitIns\",\"endEv\"} => evict = TRUE\nCEvictStack == \\A self \\in ProcSet : pc[self] \\in {\"strIns\",\"nestedIns\",\"set\",\"flush\",\"rtrn\"} => stack[self] # <<>>\nCIndex == index \\in [Writer -> (Int \\cup {empty})]\nCExpected == expected \\in [Writer -> (Int \\cup {empty})]\nCResult == result \\in [Writer -> BOOLEAN]\nCWaitCnt == waitCnt \\in Int\nCEvictBool == evict \\in BOOLEAN\nCE23 == \\A self \\in Writer : pc[self] \\in {\"chkSnc\", \"cntns\", \"onSnc\"} => expected[self] \\in Int /\\ index[self] \\in Int\nCE3 == \\A self \\in Writer : pc[self] \\in {\"insrt\", \"isMth\", \"cas\"} => index[self] \\in Int\nWCnt2 == waitCnt = FS!Cardinality({s \\in Writer : pc[s] = \"waitEv\" \\/ pc[s] = \"endWEv\"})\nWCntFin == FS!IsFiniteSet({s \\in Writer : pc[s] = \"waitEv\" \\/ pc[s] = \"endWEv\"})\n\nLEMMA WriterFiniteFS == FS!IsFiniteSet(Writer)\n  BY WriterFinite, BridgeFin\n\nTHEOREM WCntFinInit == Init => WCntFin\n<1>1. {s \\in Writer : pc[s] = \"waitEv\" \\/ pc[s] = \"endWEv\"} \\in SUBSET Writer BY T!SMTT(\"r30\")\n<1>2. FS!IsFiniteSet(Writer) BY WriterFinite, BridgeFin\n<1>3. PICK S0 \\in SUBSET Writer : S0 = {s \\in Writer : pc[s] = \"waitEv\" \\/ pc[s] = \"endWEv\"} BY <1>1\n<1>4. FS!IsFiniteSet(S0) BY <1>3, <1>2, FS!FS_Subset, T!SMTT(\"r30\")\n<1>5a. FS!IsFiniteSet({s \\in Writer : pc[s] = \"waitEv\" \\/ pc[s] = \"endWEv\"}) BY <1>4, <1>3, T!SMTT(\"r30\")\n<1>5. QED BY <1>5a DEF WCntFin\n\nTHEOREM WCnt2Init == Init => WCnt2\n<1> SUFFICES ASSUME Init PROVE WCnt2\n  OBVIOUS\n<1>1. pc = [self \\in ProcSet |-> \"pick\"] BY DEF Init\n<1>2. waitCnt = 0 BY DEF Init\n<1>3. \\A s \\in Writer : pc[s] = \"pick\" BY <1>1, T!SMTT(\"r30\") DEF ProcSet\n<1>4. {s \\in Writer : pc[s] = \"waitEv\" \\/ pc[s] = \"endWEv\"} = {} BY <1>3, T!SetExtensionality, T!SMTT(\"r30\")\n<1>5. FS!Cardinality({s \\in Writer : pc[s] = \"waitEv\" \\/ pc[s] = \"endWEv\"}) = 0 BY <1>4, FS!FS_EmptySet, T!SMTT(\"r30\")\n<1>6. QED BY <1>2, <1>5, T!SMTT(\"r30\") DEF WCnt2\n\nCInv == CPcType /\\ CFpType /\\ CHist /\\ CA3 /\\ CEi /\\ CEj /\\ CLo /\\ CTable /\\ CStack /\\ CEvictStack /\\ CIndex /\\ CExpected /\\ CResult /\\ CWaitCnt /\\ CEvictBool /\\ CE23 /\\ CE3 /\\ WCnt2 /\\ WCntFin /\\ CompleteAsSafety\n\nTHEOREM InitCInv == Init => CInv\n  BY WCnt2Init, WCntFinInit, T!SMTT(\"r30\") DEF Init, CInv, CPcType, CFpType, CHist, CA3, CEi, CEj, CLo, CTable, CStack, CEvictEv, CEvictStack, CIndex, CExpected, CResult, CWaitCnt, CEvictBool, CE23, CE3, WCnt2, WCntFin, CompleteAsSafety, ProcSet\nTHEOREM PcNext == (CPcType /\\ CStack /\\ CEvictStack) /\\ Next => CPcType'\n  BY T!SMTT(\"r30\") DEF CPcType, CStack, CEvictStack, Next, vars, ProcSet, Evict, p, pick, put, waitEv, endWEv, chkSnc, cntns, onSnc, insrt, isMth, cas, tryEv, waitIns, endEv, strIns, nestedIns, set, flush, rtrn, Terminating\nTHEOREM FpNext == CFpType /\\ Next => CFpType'\n  BY T!SMTT(\"r30\") DEF CFpType, Next, vars, ProcSet, Evict, p, pick, put, waitEv, endWEv, chkSnc, cntns, onSnc, insrt, isMth, cas, tryEv, waitIns, endEv, strIns, nestedIns, set, flush, rtrn, Terminating\nTHEOREM HistNext == (CHist /\\ CA3 /\\ CFpType /\\ CPcType) /\\ Next => CHist'\n  BY T!SMTT(\"r30\") DEF CHist, CA3, CFpType, CPcType, Next, vars, ProcSet, Evict, p, pick, put, waitEv, endWEv, chkSnc, cntns, onSnc, insrt, isMth, cas, tryEv, waitIns, endEv, strIns, nestedIns, set, flush, rtrn, Terminating\nTHEOREM StackNext == (CStack /\\ CEi /\\ CEj /\\ CLo /\\ CPcType /\\ CEvictStack) /\\ Next => CStack'\n<1> SUFFICES ASSUME CStack, CEi, CEj, CLo, CPcType, CEvictStack, Next PROVE CStack'\n  OBVIOUS\n<1>1. CASE \\E self \\in Writer : waitIns(self)\n  <2>1. PICK self \\in Writer : waitIns(self) BY <1>1\n  <2>2. stack' = [stack EXCEPT ![self] = <<[procedure |-> \"Evict\", pc |-> \"endEv\", ei |-> ei[self], ej |-> ej[self], lo |-> lo[self]]>> \\o stack[self]] BY <2>1 DEF waitIns\n  <2>3. [procedure |-> \"Evict\", pc |-> \"endEv\", ei |-> ei[self], ej |-> ej[self], lo |-> lo[self]] \\in [procedure: {\"Evict\"}, pc: {\"endEv\"}, ei: Nat, ej: Int, lo: (Int \\cup {empty})] BY T!SMTT(\"r30\") DEF CEi, CEj, CLo, ProcSet\n  <2>4. stack[self] \\in Seq([procedure: {\"Evict\"}, pc: {\"endEv\"}, ei: Nat, ej: Int, lo: (Int \\cup {empty})]) BY T!SMTT(\"r30\") DEF CStack, ProcSet\n  <2>5. stack \\in [ProcSet -> Seq([procedure: {\"Evict\"}, pc: {\"endEv\"}, ei: Nat, ej: Int, lo: (Int \\cup {empty})])] BY T!SMTT(\"r30\") DEF CStack\n  <2>6. QED BY <2>1, <2>2, <2>3, <2>4, <2>5, FunUpdateType, T!SMTT(\"r30\") DEF CStack, ProcSet\n<1>2. CASE \\E self \\in ProcSet : rtrn(self)\n  <2>1. PICK self \\in ProcSet : rtrn(self) BY <1>2\n  <2>2. stack' = [stack EXCEPT ![self] = Tail(stack[self])] BY <2>1 DEF rtrn\n  <2>3. stack[self] # <<>> BY <2>1, T!SMTT(\"r30\") DEF CEvictStack, rtrn\n  <2>4. Tail(stack[self]) \\in Seq([procedure: {\"Evict\"}, pc: {\"endEv\"}, ei: Nat, ej: Int, lo: (Int \\cup {empty})]) BY <2>3, T!SMTT(\"r30\") DEF CStack, CEvictStack, ProcSet\n  <2>5. stack \\in [ProcSet -> Seq([procedure: {\"Evict\"}, pc: {\"endEv\"}, ei: Nat, ej: Int, lo: (Int \\cup {empty})])] BY T!SMTT(\"r30\") DEF CStack\n  <2>6. QED BY <2>1, <2>2, <2>4, <2>5, FunUpdateType, T!SMTT(\"r30\") DEF CStack, ProcSet\n<1>3. CASE (\\E self \\in Writer : pick(self) \\/ put(self) \\/ waitEv(self) \\/ endWEv(self) \\/ chkSnc(self) \\/ cntns(self) \\/ onSnc(self) \\/ insrt(self) \\/ isMth(self) \\/ cas(self) \\/ tryEv(self) \\/ endEv(self)) \\/ (\\E self \\in ProcSet : strIns(self) \\/ nestedIns(self) \\/ set(self) \\/ flush(self)) \\/ Terminating\n  BY <1>3, T!SMTT(\"r30\") DEF CStack, CEi, CEj, CLo, CPcType, CEvictStack, pick, put, waitEv, endWEv, chkSnc, cntns, onSnc, insrt, isMth, cas, tryEv, endEv, strIns, nestedIns, set, flush, Terminating, vars, ProcSet\n<1>4. QED BY <1>1, <1>2, <1>3 DEF Next, Evict, p\nTHEOREM EiNext == (CEi /\\ CStack /\\ CPcType /\\ CEvictStack) /\\ Next => CEi'\n  BY T!SMTT(\"r30\") DEF CEi, CStack, CPcType, CEvictStack, Next, vars, ProcSet, Evict, p, pick, put, waitEv, endWEv, chkSnc, cntns, onSnc, insrt, isMth, cas, tryEv, waitIns, endEv, strIns, nestedIns, set, flush, rtrn, Terminating\nTHEOREM EjNext == (CEj /\\ CEi /\\ CStack /\\ CPcType /\\ CEvictStack) /\\ Next => CEj'\n  BY T!SMTT(\"r30\") DEF CEj, CEi, CStack, CPcType, CEvictStack, Next, vars, ProcSet, Evict, p, pick, put, waitEv, endWEv, chkSnc, cntns, onSnc, insrt, isMth, cas, tryEv, waitIns, endEv, strIns, nestedIns, set, flush, rtrn, Terminating\nTHEOREM A3Next == (CA3 /\\ CFpType /\\ CPcType) /\\ Next => CA3'\n  BY T!SMTT(\"r30\") DEF CA3, CFpType, CPcType, Next, vars, ProcSet, Evict, p, pick, put, waitEv, endWEv, chkSnc, cntns, onSnc, insrt, isMth, cas, tryEv, waitIns, endEv, strIns, nestedIns, set, flush, rtrn, Terminating\nTHEOREM EvStackNext == (CEvictStack /\\ CStack /\\ CPcType) /\\ Next => CEvictStack'\n  BY T!SMTT(\"r30\") DEF CEvictStack, CStack, CPcType, Next, vars, ProcSet, Evict, p, pick, put, waitEv, endWEv, chkSnc, cntns, onSnc, insrt, isMth, cas, tryEv, waitIns, endEv, strIns, nestedIns, set, flush, rtrn, Terminating\nTHEOREM IndexNext == (CIndex /\\ CExpected /\\ CPcType /\\ CE23 /\\ CE3) /\\ Next => CIndex'\n<1> SUFFICES ASSUME CIndex, CExpected, CPcType, CE23, CE3, Next PROVE CIndex'\n  OBVIOUS\n<1>1. CASE \\E self \\in Writer : put(self)\n  <2>1. PICK self \\in Writer : put(self) BY <1>1\n  <2>2. index' = [index EXCEPT ![self] = 0] BY <2>1 DEF put\n  <2>3. index \\in [Writer -> (Int \\cup {empty})] BY T!SMTT(\"r30\") DEF CIndex\n  <2>4. QED BY <2>1, <2>2, <2>3, FunUpdateType, T!SMTT(\"r30\") DEF CIndex, ProcSet\n<1>2. CASE \\E self \\in Writer : cntns(self)\n  <2>1. PICK self \\in Writer : cntns(self) BY <1>2\n  <2>2. pc[self] = \"cntns\" BY <2>1, T!SMTT(\"r30\") DEF cntns\n  <2>3. index[self] \\in Int BY <2>2, T!SMTT(\"r30\") DEF CE23\n  <2>4. index' = index \\/ index' = [index EXCEPT ![self] = index[self] + 1] BY <2>1, T!SMTT(\"r30\") DEF cntns\n  <2>5. CASE index' = index\n    <3>1. QED BY <2>5, T!SMTT(\"r30\") DEF CIndex\n  <2>6. CASE index' = [index EXCEPT ![self] = index[self] + 1]\n    <3>1. index \\in [Writer -> (Int \\cup {empty})] BY T!SMTT(\"r30\") DEF CIndex\n    <3>2. index[self] + 1 \\in (Int \\cup {empty}) BY <2>3, T!SMTT(\"r30\")\n    <3>3. QED BY <2>1, <2>6, <3>1, <3>2, FunUpdateType, T!SMTT(\"r30\") DEF CIndex, ProcSet\n  <2>7. QED BY <2>4, <2>5, <2>6\n<1>3. CASE \\E self \\in Writer : onSnc(self)\n  <2>1. PICK self \\in Writer : onSnc(self) BY <1>3\n  <2>2. index' = index \\/ index' = [index EXCEPT ![self] = expected[self]] BY <2>1, T!SMTT(\"r30\") DEF onSnc\n  <2>3. CASE index' = index\n    <3>1. QED BY <2>3, T!SMTT(\"r30\") DEF CIndex\n  <2>4. CASE index' = [index EXCEPT ![self] = expected[self]]\n    <3>1. index \\in [Writer -> (Int \\cup {empty})] BY T!SMTT(\"r30\") DEF CIndex\n    <3>2. expected[self] \\in (Int \\cup {empty}) BY T!SMTT(\"r30\") DEF CExpected\n    <3>3. QED BY <2>1, <2>4, <3>1, <3>2, FunUpdateType, T!SMTT(\"r30\") DEF CIndex, ProcSet\n  <2>5. QED BY <2>2, <2>3, <2>4\n<1>4. CASE \\E self \\in Writer : isMth(self)\n  <2>1. PICK self \\in Writer : isMth(self) BY <1>4\n  <2>2. pc[self] = \"isMth\" BY <2>1, T!SMTT(\"r30\") DEF isMth\n  <2>3. index[self] \\in Int BY <2>2, T!SMTT(\"r30\") DEF CE3\n  <2>4. index' = index \\/ index' = [index EXCEPT ![self] = index[self] + 1] BY <2>1, T!SMTT(\"r30\") DEF isMth\n  <2>5. CASE index' = index\n    <3>1. QED BY <2>5, T!SMTT(\"r30\") DEF CIndex\n  <2>6. CASE index' = [index EXCEPT ![self] = index[self] + 1]\n    <3>1. index \\in [Writer -> (Int \\cup {empty})] BY T!SMTT(\"r30\") DEF CIndex\n    <3>2. index[self] + 1 \\in (Int \\cup {empty}) BY <2>3, T!SMTT(\"r30\")\n    <3>3. QED BY <2>1, <2>6, <3>1, <3>2, FunUpdateType, T!SMTT(\"r30\") DEF CIndex, ProcSet\n  <2>7. QED BY <2>4, <2>5, <2>6\n<1>5. CASE (\\E self \\in Writer : pick(self) \\/ waitEv(self) \\/ endWEv(self) \\/ chkSnc(self) \\/ insrt(self) \\/ cas(self) \\/ tryEv(self) \\/ waitIns(self) \\/ endEv(self)) \\/ (\\E self \\in ProcSet : strIns(self) \\/ nestedIns(self) \\/ set(self) \\/ flush(self) \\/ rtrn(self)) \\/ Terminating\n  BY <1>5, T!SMTT(\"r30\") DEF CIndex, CExpected, CPcType, CE23, CE3, pick, waitEv, endWEv, chkSnc, insrt, cas, tryEv, waitIns, endEv, strIns, nestedIns, set, flush, rtrn, Terminating, vars, ProcSet\n<1>6. QED BY <1>1, <1>2, <1>3, <1>4, <1>5 DEF Next, Evict, p\nTHEOREM ResultNext == CResult /\\ Next => CResult'\n  BY T!SMTT(\"r30\") DEF CResult, Next, vars, ProcSet, Evict, p, pick, put, waitEv, endWEv, chkSnc, cntns, onSnc, insrt, isMth, cas, tryEv, waitIns, endEv, strIns, nestedIns, set, flush, rtrn, Terminating\nTHEOREM WaitCntNext == CWaitCnt /\\ Next => CWaitCnt'\n  BY T!SMTT(\"r30\") DEF CWaitCnt, Next, vars, ProcSet, Evict, p, pick, put, waitEv, endWEv, chkSnc, cntns, onSnc, insrt, isMth, cas, tryEv, waitIns, endEv, strIns, nestedIns, set, flush, rtrn, Terminating\nTHEOREM EvictBoolNext == CEvictBool /\\ Next => CEvictBool'\n  BY T!SMTT(\"r30\") DEF CEvictBool, Next, vars, ProcSet, Evict, p, pick, put, waitEv, endWEv, chkSnc, cntns, onSnc, insrt, isMth, cas, tryEv, waitIns, endEv, strIns, nestedIns, set, flush, rtrn, Terminating\nTHEOREM E3Next == (CE3 /\\ CE23 /\\ CIndex /\\ CPcType /\\ CStack /\\ CEvictStack) /\\ Next => CE3'\n<1> SUFFICES ASSUME CE3, CE23, CIndex, CPcType, CStack, CEvictStack, Next PROVE CE3'\n  OBVIOUS\n<1>1. CASE \\E self \\in Writer : chkSnc(self)\n  <2>1. PICK self \\in Writer : chkSnc(self) BY <1>1\n  <2>2. index' = index BY <2>1 DEF chkSnc\n  <2>3. pc' = [pc EXCEPT ![self] = \"cntns\"] \\/ pc' = [pc EXCEPT ![self] = \"insrt\"] BY <2>1 DEF chkSnc\n  <2>4. pc[self] = \"chkSnc\" BY <2>1, T!SMTT(\"r30\") DEF chkSnc\n  <2>5. index[self] \\in Int BY <2>4, T!SMTT(\"r30\") DEF CE23\n  <2>6. \\A s \\in Writer : pc'[s] \\in {\"insrt\", \"isMth\", \"cas\"} => index'[s] \\in Int\n    <3> SUFFICES ASSUME NEW s \\in Writer, pc'[s] \\in {\"insrt\", \"isMth\", \"cas\"} PROVE index'[s] \\in Int\n      OBVIOUS\n    <3>1. CASE s = self\n      <4>1. pc'[s] = \"insrt\" BY <3>1, <2>3, T!SMTT(\"r30\") DEF CPcType, ProcSet\n      <4>2. index'[s] = index[s] BY <3>1, <2>2, T!SMTT(\"r30\") DEF CIndex, ProcSet\n      <4>3. QED BY <3>1, <4>1, <4>2, <2>5, T!SMTT(\"r30\")\n    <3>2. CASE s # self\n      <4>1a. pc'[s] = pc[s] BY <3>2, <2>3, T!SMTT(\"r30\") DEF CPcType, ProcSet\n      <4>1b. index'[s] = index[s] BY <3>2, <2>2, T!SMTT(\"r30\") DEF CIndex, ProcSet\n      <4>2. QED BY <4>1a, <4>1b, T!SMTT(\"r30\") DEF CE3\n    <3>3. QED BY <3>1, <3>2\n  <2>7. QED BY <2>6 DEF CE3\n<1>2. CASE \\E self \\in Writer : onSnc(self)\n  <2>1. PICK self \\in Writer : onSnc(self) BY <1>2\n  <2>2. pc[self] = \"onSnc\" BY <2>1, T!SMTT(\"r30\") DEF onSnc\n  <2>3. expected[self] \\in Int BY <2>2, T!SMTT(\"r30\") DEF CE23\n  <2>4. (pc' = [pc EXCEPT ![self] = \"pick\"] /\\ index' = index) \\/ (pc' = [pc EXCEPT ![self] = \"insrt\"] /\\ index' = [index EXCEPT ![self] = expected[self]]) BY <2>1, T!SMTT(\"r30\") DEF onSnc\n  <2>5. \\A s \\in Writer : pc'[s] \\in {\"insrt\", \"isMth\", \"cas\"} => index'[s] \\in Int\n    <3> SUFFICES ASSUME NEW s \\in Writer, pc'[s] \\in {\"insrt\", \"isMth\", \"cas\"} PROVE index'[s] \\in Int\n      OBVIOUS\n    <3>1. CASE s = self\n      <4>1. pc'[s] = \"insrt\" /\\ index'[s] = expected[self] BY <3>1, <2>4, T!SMTT(\"r30\") DEF CPcType, CIndex, ProcSet\n      <4>2. QED BY <4>1, <2>3, T!SMTT(\"r30\")\n    <3>2. CASE s # self\n      <4>1a. pc'[s] = pc[s] BY <3>2, <2>4, T!SMTT(\"r30\") DEF CPcType, ProcSet\n      <4>1b. index'[s] = index[s] BY <3>2, <2>4, T!SMTT(\"r30\") DEF CIndex, ProcSet\n      <4>2. QED BY <4>1a, <4>1b, T!SMTT(\"r30\") DEF CE3\n    <3>3. QED BY <3>1, <3>2\n  <2>6. QED BY <2>5 DEF CE3\n<1>3. CASE \\E self \\in Writer : insrt(self)\n  <2>1. PICK self \\in Writer : insrt(self) BY <1>3\n  <2>2. pc[self] = \"insrt\" BY <2>1, T!SMTT(\"r30\") DEF insrt\n  <2>3. index[self] \\in Int BY <2>2, T!SMTT(\"r30\") DEF CE3\n  <2>4. index' = index BY <2>1, T!SMTT(\"r30\") DEF insrt\n  <2>5. (pc' = [pc EXCEPT ![self] = \"cas\"]) \\/ (pc' = [pc EXCEPT ![self] = \"isMth\"]) \\/ (pc' = [pc EXCEPT ![self] = \"tryEv\"]) BY <2>1, T!SMTT(\"r30\") DEF insrt\n  <2>6. \\A s \\in Writer : pc'[s] \\in {\"insrt\", \"isMth\", \"cas\"} => index'[s] \\in Int\n    <3> SUFFICES ASSUME NEW s \\in Writer, pc'[s] \\in {\"insrt\", \"isMth\", \"cas\"} PROVE index'[s] \\in Int\n      OBVIOUS\n    <3>1. CASE s = self\n      <4>1. pc'[s] \\in {\"cas\", \"isMth\"} BY <3>1, <2>5, T!SMTT(\"r30\") DEF CPcType, ProcSet\n      <4>2. index'[s] = index[s] BY <3>1, <2>4, T!SMTT(\"r30\") DEF CIndex, ProcSet\n      <4>3. QED BY <3>1, <4>1, <4>2, <2>3, T!SMTT(\"r30\")\n    <3>2. CASE s # self\n      <4>1a. pc'[s] = pc[s] BY <3>2, <2>5, T!SMTT(\"r30\") DEF CPcType, ProcSet\n      <4>1b. index'[s] = index[s] BY <3>2, <2>4, T!SMTT(\"r30\") DEF CIndex, ProcSet\n      <4>2. QED BY <4>1a, <4>1b, T!SMTT(\"r30\") DEF CE3\n    <3>3. QED BY <3>1, <3>2\n  <2>7. QED BY <2>6 DEF CE3\n<1>4. CASE (\\E self \\in Writer : isMth(self)) \\/ (\\E self \\in Writer : cas(self))\n  BY <1>4, T!SMTT(\"r30\") DEF CE3, CE23, CIndex, CPcType, isMth, cas, vars, ProcSet\n<1>5. CASE \\E self \\in Writer : cntns(self)\n  <2>1. PICK self \\in Writer : cntns(self) BY <1>5\n  <2>2. (pc' = [pc EXCEPT ![self] = \"pick\"]) \\/ (pc' = [pc EXCEPT ![self] = \"cntns\"]) \\/ (pc' = [pc EXCEPT ![self] = \"onSnc\"]) BY <2>1, T!SMTT(\"r30\") DEF cntns\n  <2>3. index' = index \\/ index' = [index EXCEPT ![self] = index[self] + 1] BY <2>1, T!SMTT(\"r30\") DEF cntns\n  <2>4. \\A s \\in Writer : pc'[s] \\in {\"insrt\", \"isMth\", \"cas\"} => index'[s] \\in Int\n    <3> SUFFICES ASSUME NEW s \\in Writer, pc'[s] \\in {\"insrt\", \"isMth\", \"cas\"} PROVE index'[s] \\in Int\n      OBVIOUS\n    <3>1. CASE s = self\n      <4>1. pc'[s] \\in {\"pick\", \"cntns\", \"onSnc\"} BY <3>1, <2>2, T!SMTT(\"r30\") DEF CPcType, ProcSet\n      <4>2. QED BY <4>1, T!SMTT(\"r30\")\n    <3>2. CASE s # self\n      <4>1a. pc'[s] = pc[s] BY <3>2, <2>2, T!SMTT(\"r30\") DEF CPcType, ProcSet\n      <4>1b. index'[s] = index[s] BY <3>2, <2>3, T!SMTT(\"r30\") DEF CIndex, ProcSet\n      <4>2. QED BY <4>1a, <4>1b, T!SMTT(\"r30\") DEF CE3\n    <3>3. QED BY <3>1, <3>2\n  <2>5. QED BY <2>4 DEF CE3\n<1>6. CASE (\\E self \\in Writer : pick(self) \\/ put(self) \\/ waitEv(self) \\/ endWEv(self) \\/ tryEv(self) \\/ waitIns(self) \\/ endEv(self)) \\/ (\\E self \\in ProcSet : strIns(self) \\/ nestedIns(self) \\/ set(self) \\/ flush(self) \\/ rtrn(self)) \\/ Terminating\n  BY <1>6, T!SMTT(\"r30\") DEF CE3, CE23, CIndex, CPcType, CStack, CEvictStack, pick, put, waitEv, endWEv, tryEv, waitIns, endEv, strIns, nestedIns, set, flush, rtrn, Terminating, vars, ProcSet\n<1>7. QED BY <1>1, <1>2, <1>3, <1>4, <1>5, <1>6 DEF Next, Evict, p\nTHEOREM LoNext == (CLo /\\ CTable /\\ CEi /\\ CStack /\\ CEvictStack) /\\ Next => CLo'\n<1> SUFFICES ASSUME CLo, CTable, CEi, CStack, CEvictStack, Next PROVE CLo'\n  OBVIOUS\n<1>1. CASE \\E self \\in ProcSet : strIns(self)\n  <2>1. PICK self \\in ProcSet : strIns(self) BY <1>1\n  <2>2. CASE ei[self] <= K + L\n    <3>1. lo' = [lo EXCEPT ![self] = table[mod(ei[self] + 1, K)]] BY <2>1, <2>2 DEF strIns\n    <3>2. mod(ei[self] + 1, K) \\in 1..K\n      <4>1. ei[self] \\in Nat BY T!SMTT(\"r30\") DEF CEi\n      <4>2. ei[self] + 1 \\in Int BY <4>1, T!SMTT(\"r30\")\n      <4>3. QED BY <4>2, KPos, ModRange, T!SMTT(\"r30\")\n    <3>3. table[mod(ei[self] + 1, K)] \\in (Int \\cup {empty}) BY <3>2, T!SMTT(\"r30\") DEF CTable\n    <3>4. lo \\in [ProcSet -> (Int \\cup {empty})] BY T!SMTT(\"r30\") DEF CLo\n    <3>5. QED BY <3>1, <3>3, <3>4, FunUpdateType, T!SMTT(\"r30\") DEF CLo, ProcSet\n  <2>3. CASE ~(ei[self] <= K + L)\n    <3>1. lo' = lo BY <2>1, <2>3 DEF strIns\n    <3>2. QED BY <3>1, T!SMTT(\"r30\") DEF CLo\n  <2>4. QED BY <2>2, <2>3\n<1>2. CASE \\E self \\in ProcSet : flush(self)\n  <2>1. PICK self \\in ProcSet : flush(self) BY <1>2\n  <2>2. CASE ei[self] <= K + L\n    <3>1. lo' = [lo EXCEPT ![self] = table[mod(ei[self], K)]] BY <2>1, <2>2 DEF flush\n    <3>2. mod(ei[self], K) \\in 1..K\n      <4>1. ei[self] \\in Nat BY T!SMTT(\"r30\") DEF CEi\n      <4>2. QED BY <4>1, KPos, ModRange, T!SMTT(\"r30\")\n    <3>3. table[mod(ei[self], K)] \\in (Int \\cup {empty}) BY <3>2, T!SMTT(\"r30\") DEF CTable\n    <3>4. lo \\in [ProcSet -> (Int \\cup {empty})] BY T!SMTT(\"r30\") DEF CLo\n    <3>5. QED BY <3>1, <3>3, <3>4, FunUpdateType, T!SMTT(\"r30\") DEF CLo, ProcSet\n  <2>3. CASE ~(ei[self] <= K + L)\n    <3>1. lo' = lo BY <2>1, <2>3 DEF flush\n    <3>2. QED BY <3>1, T!SMTT(\"r30\") DEF CLo\n  <2>4. QED BY <2>2, <2>3\n<1>3. CASE \\E self \\in Writer : waitIns(self)\n  <2>1. PICK self \\in Writer : waitIns(self) BY <1>3\n  <2>2. lo' = [lo EXCEPT ![self] = 0] BY <2>1 DEF waitIns\n  <2>3. lo \\in [ProcSet -> (Int \\cup {empty})] BY T!SMTT(\"r30\") DEF CLo\n  <2>4. QED BY <2>1, <2>2, <2>3, FunUpdateType, T!SMTT(\"r30\") DEF CLo, ProcSet\n<1>4. CASE \\E self \\in ProcSet : rtrn(self)\n  <2>1. PICK self \\in ProcSet : rtrn(self) BY <1>4\n  <2>2. lo' = [lo EXCEPT ![self] = Head(stack[self]).lo] BY <2>1 DEF rtrn\n  <2>3. pc[self] = \"rtrn\" BY <2>1, T!SMTT(\"r30\") DEF rtrn\n  <2>4. stack[self] # <<>> BY <2>3, T!SMTT(\"r30\") DEF CEvictStack\n  <2>5. Head(stack[self]).lo \\in (Int \\cup {empty}) BY <2>4, T!SMTT(\"r30\") DEF CStack, ProcSet\n  <2>6. lo \\in [ProcSet -> (Int \\cup {empty})] BY T!SMTT(\"r30\") DEF CLo\n  <2>7. QED BY <2>1, <2>2, <2>5, <2>6, FunUpdateType, T!SMTT(\"r30\") DEF CLo, ProcSet\n<1>5. CASE (\\E self \\in ProcSet : nestedIns(self) \\/ set(self)) \\/ (\\E self \\in Writer : pick(self) \\/ put(self) \\/ waitEv(self) \\/ endWEv(self) \\/ chkSnc(self) \\/ cntns(self) \\/ onSnc(self) \\/ insrt(self) \\/ isMth(self) \\/ cas(self) \\/ tryEv(self) \\/ endEv(self)) \\/ Terminating\n  BY <1>5, T!SMTT(\"r30\") DEF CLo, CTable, CEi, CStack, CEvictStack, nestedIns, set, pick, put, waitEv, endWEv, chkSnc, cntns, onSnc, insrt, isMth, cas, tryEv, endEv, Terminating, vars, ProcSet\n<1>6. QED BY <1>1, <1>2, <1>3, <1>4, <1>5 DEF Next, Evict, p\nTHEOREM TableNext == (CTable /\\ CLo /\\ CEi /\\ CEj /\\ CFpType /\\ CIndex /\\ CE3 /\\ CPcType /\\ CResult) /\\ Next => CTable'\n<1> SUFFICES ASSUME CTable, CLo, CEi, CEj, CFpType, CIndex, CE3, CPcType, CResult, Next PROVE CTable'\n  OBVIOUS\n<1>1. CASE \\E self \\in ProcSet : nestedIns(self)\n  <2>1. PICK self \\in ProcSet : nestedIns(self) BY <1>1\n  <2>2. CASE compare(lo[self], mod(ei[self] + 1, K), table[mod(ej[self], K)], mod(ej[self], K)) <= -1\n    <3>1. table' = [table EXCEPT ![mod(ej[self] + 1, K)] = table[mod(ej[self], K)]] BY <2>1, <2>2 DEF nestedIns\n    <3>2. mod(ej[self] + 1, K) \\in 1..K /\\ mod(ej[self], K) \\in 1..K\n      <4>1. ej[self] \\in Int BY T!SMTT(\"r30\") DEF CEj\n      <4>2. ej[self] + 1 \\in Int BY <4>1, T!SMTT(\"r30\")\n      <4>3. QED BY <4>1, <4>2, KPos, ModRange, T!SMTT(\"r30\")\n    <3>3. table[mod(ej[self], K)] \\in (Int \\cup {empty}) BY <3>2, T!SMTT(\"r30\") DEF CTable\n    <3>4. table \\in [1..K -> (Int \\cup {empty})] BY T!SMTT(\"r30\") DEF CTable\n    <3>5. QED BY <3>1, <3>2, <3>3, <3>4, FunUpdateType, T!SMTT(\"r30\") DEF CTable\n  <2>3. CASE ~(compare(lo[self], mod(ei[self] + 1, K), table[mod(ej[self], K)], mod(ej[self], K)) <= -1)\n    <3>1. table' = table BY <2>1, <2>3 DEF nestedIns\n    <3>2. QED BY <3>1, T!SMTT(\"r30\") DEF CTable\n  <2>4. QED BY <2>2, <2>3\n<1>2. CASE \\E self \\in ProcSet : set(self)\n  <2>1. PICK self \\in ProcSet : set(self) BY <1>2\n  <2>2. table' = [table EXCEPT ![mod(ej[self] + 1, K)] = lo[self]] BY <2>1 DEF set\n  <2>3. mod(ej[self] + 1, K) \\in 1..K\n    <3>1. ej[self] \\in Int BY T!SMTT(\"r30\") DEF CEj\n    <3>2. ej[self] + 1 \\in Int BY <3>1, T!SMTT(\"r30\")\n    <3>3. QED BY <3>1, <3>2, KPos, ModRange, T!SMTT(\"r30\")\n  <2>4. lo[self] \\in (Int \\cup {empty}) BY T!SMTT(\"r30\") DEF CLo\n  <2>5. table \\in [1..K -> (Int \\cup {empty})] BY T!SMTT(\"r30\") DEF CTable\n  <2>6. QED BY <2>1, <2>2, <2>3, <2>4, <2>5, FunUpdateType, T!SMTT(\"r30\") DEF CTable, ProcSet\n<1>3. CASE \\E self \\in ProcSet : flush(self)\n  <2>1. PICK self \\in ProcSet : flush(self) BY <1>3\n  <2>2. CASE ei[self] <= K + L\n    <3>1. lo' = [lo EXCEPT ![self] = table[mod(ei[self], K)]] BY <2>1, <2>2 DEF flush\n    <3>2. mod(ei[self], K) \\in 1..K\n      <4>1. ei[self] \\in Nat BY T!SMTT(\"r30\") DEF CEi\n      <4>2. QED BY <4>1, KPos, ModRange, T!SMTT(\"r30\")\n    <3>3. lo'[self] \\in (Int \\cup {empty}) BY <3>1, <3>2, T!SMTT(\"r30\") DEF CLo, CTable, ProcSet\n    <3>4. (table' = [table EXCEPT ![mod(ei[self], K)] = lo'[self] * (-1)] /\\ lo'[self] # empty) \\/ table' = table BY <2>1, <2>2, T!SMTT(\"r30\") DEF flush\n    <3>5. CASE table' = [table EXCEPT ![mod(ei[self], K)] = lo'[self] * (-1)] /\\ lo'[self] # empty\n      <4>1. lo'[self] \\in Int BY <3>5, <3>3, T!SMTT(\"r30\")\n      <4>2. lo'[self] * (-1) \\in (Int \\cup {empty}) BY <4>1, T!SMTT(\"r30\")\n      <4>3. table \\in [1..K -> (Int \\cup {empty})] BY T!SMTT(\"r30\") DEF CTable\n      <4>4. QED BY <3>5, <3>2, <4>2, <4>3, FunUpdateType, T!SMTT(\"r30\") DEF CTable\n    <3>6. CASE table' = table\n      <4>1. QED BY <3>6, T!SMTT(\"r30\") DEF CTable\n    <3>7. QED BY <3>4, <3>5, <3>6\n  <2>3. CASE ~(ei[self] <= K + L)\n    <3>1. table' = table BY <2>1, <2>3 DEF flush\n    <3>2. QED BY <3>1, T!SMTT(\"r30\") DEF CTable\n  <2>4. QED BY <2>2, <2>3\n<1>4. CASE \\E self \\in Writer : cas(self)\n  <2>1. PICK self \\in Writer : cas(self) BY <1>4\n  <2>2. CASE table[idx(fp[self], index[self])] = expected[self] /\\ result'[self]\n    <3>1. table' = [table EXCEPT ![idx(fp[self], index[self])] = fp[self]] BY <2>1, <2>2, T!SMTT(\"r30\") DEF cas\n    <3>2. idx(fp[self], index[self]) \\in 1..K\n      <4>1. fp[self] \\in Int BY OAAssumption, T!SMTT(\"r30\") DEF CFpType\n      <4>2. pc[self] = \"cas\" BY <2>1, T!SMTT(\"r30\") DEF cas\n      <4>3. index[self] \\in Int BY <4>2, T!SMTT(\"r30\") DEF CE3\n      <4>4. QED BY <4>1, <4>3, IdxRange, T!SMTT(\"r30\")\n    <3>3. fp[self] \\in (Int \\cup {empty}) BY OAAssumption, T!SMTT(\"r30\") DEF CFpType\n    <3>4. table \\in [1..K -> (Int \\cup {empty})] BY T!SMTT(\"r30\") DEF CTable\n    <3>5. QED BY <2>1, <3>1, <3>2, <3>3, <3>4, FunUpdateType, T!SMTT(\"r30\") DEF CTable, ProcSet\n  <2>3. CASE ~(table[idx(fp[self], index[self])] = expected[self] /\\ result'[self])\n    <3>1. CASE table[idx(fp[self], index[self])] = expected[self]\n      <4>1. result'[self] BY <3>1, <2>1, T!SMTT(\"r30\") DEF cas, CResult\n      <4>2. table' = table BY <3>1, <4>1, <2>3, T!SMTT(\"r30\")\n      <4>3. QED BY <4>2, T!SMTT(\"r30\") DEF CTable\n    <3>2. CASE ~(table[idx(fp[self], index[self])] = expected[self])\n      <4>1. table' = table BY <3>2, <2>1, T!SMTT(\"r30\") DEF cas\n      <4>2. QED BY <4>1, T!SMTT(\"r30\") DEF CTable\n    <3>3. QED BY <3>1, <3>2\n  <2>4. QED BY <2>2, <2>3\n<1>5. CASE (\\E self \\in ProcSet : strIns(self) \\/ rtrn(self)) \\/ (\\E self \\in Writer : pick(self) \\/ put(self) \\/ waitEv(self) \\/ endWEv(self) \\/ chkSnc(self) \\/ cntns(self) \\/ onSnc(self) \\/ insrt(self) \\/ isMth(self) \\/ tryEv(self) \\/ waitIns(self) \\/ endEv(self)) \\/ Terminating\n  BY <1>5, T!SMTT(\"r30\") DEF CTable, CLo, CEi, CEj, CFpType, CIndex, CE3, CPcType, strIns, rtrn, pick, put, waitEv, endWEv, chkSnc, cntns, onSnc, insrt, isMth, tryEv, waitIns, endEv, Terminating, vars, ProcSet\n<1>6. QED BY <1>1, <1>2, <1>3, <1>4, <1>5 DEF Next, Evict, p\nTHEOREM ExpectedNext == (CExpected /\\ CTable /\\ CIndex /\\ CFpType /\\ CE3 /\\ CPcType /\\ CE23) /\\ Next => CExpected'\n<1> SUFFICES ASSUME CExpected, CTable, CIndex, CFpType, CE3, CPcType, CE23, Next PROVE CExpected'\n  OBVIOUS\n<1>1. CASE \\E self \\in Writer : insrt(self)\n  <2>1. PICK self \\in Writer : insrt(self) BY <1>1\n  <2>2. CASE index[self] < L\n    <3>1. expected' = [expected EXCEPT ![self] = table[idx(fp[self], index[self])]] BY <2>1, <2>2 DEF insrt\n    <3>2. idx(fp[self], index[self]) \\in 1..K\n      <4>1. fp[self] \\in Int BY OAAssumption, T!SMTT(\"r30\") DEF CFpType\n      <4>2. pc[self] = \"insrt\" BY <2>1, T!SMTT(\"r30\") DEF insrt\n      <4>3. index[self] \\in Int BY <4>2, T!SMTT(\"r30\") DEF CE3\n      <4>4. QED BY <4>1, <4>3, IdxRange, T!SMTT(\"r30\")\n    <3>3. table[idx(fp[self], index[self])] \\in (Int \\cup {empty}) BY <3>2, T!SMTT(\"r30\") DEF CTable\n    <3>4. expected \\in [Writer -> (Int \\cup {empty})] BY T!SMTT(\"r30\") DEF CExpected\n    <3>5. QED BY <3>1, <3>3, <3>4, FunUpdateType, T!SMTT(\"r30\") DEF CExpected, ProcSet\n  <2>3. CASE ~(index[self] < L)\n    <3>1. expected' = expected BY <2>1, <2>3 DEF insrt\n    <3>2. QED BY <3>1, T!SMTT(\"r30\") DEF CExpected\n  <2>4. QED BY <2>2, <2>3\n<1>2. CASE \\E self \\in Writer : put(self)\n  <2>1. PICK self \\in Writer : put(self) BY <1>2\n  <2>2. expected' = [expected EXCEPT ![self] = L] BY <2>1 DEF put\n  <2>3. L \\in (Int \\cup {empty}) BY LNat, T!SMTT(\"r30\")\n  <2>4. expected \\in [Writer -> (Int \\cup {empty})] BY T!SMTT(\"r30\") DEF CExpected\n  <2>5. QED BY <2>1, <2>2, <2>3, <2>4, FunUpdateType, T!SMTT(\"r30\") DEF CExpected, ProcSet\n<1>3. CASE \\E self \\in Writer : cntns(self)\n  BY <1>3, T!SMTT(\"r30\") DEF CExpected, CTable, CIndex, CFpType, CE3, CPcType, CE23, cntns, vars, ProcSet, minimum\n<1>4. CASE \\E self \\in Writer : onSnc(self)\n  BY <1>4, T!SMTT(\"r30\") DEF CExpected, CTable, CIndex, CFpType, CE3, CPcType, CE23, onSnc, vars, ProcSet\n<1>5. CASE (\\E self \\in ProcSet : Evict(self)) \\/ (\\E self \\in Writer : pick(self) \\/ waitEv(self) \\/ endWEv(self) \\/ chkSnc(self) \\/ isMth(self) \\/ cas(self) \\/ tryEv(self) \\/ waitIns(self) \\/ endEv(self)) \\/ Terminating\n  BY <1>5, T!SMTT(\"r30\") DEF CExpected, CTable, CIndex, CFpType, CE3, CPcType, CE23, Evict, p, pick, waitEv, endWEv, chkSnc, isMth, cas, tryEv, waitIns, endEv, strIns, nestedIns, set, flush, rtrn, Terminating, vars, ProcSet\n<1>6. QED BY <1>1, <1>2, <1>3, <1>4, <1>5 DEF Next, Evict, p\nTHEOREM E23Next == (CPcType /\\ CIndex /\\ CExpected /\\ CE23 /\\ CStack /\\ CEvictStack) /\\ Next => CE23'\n<1> SUFFICES ASSUME CPcType, CIndex, CExpected, CE23, CStack, CEvictStack, Next PROVE CE23'\n  OBVIOUS\n<1>1. CASE \\E self \\in Writer : put(self)\n  <2>1. PICK self \\in Writer : put(self) BY <1>1\n  <2>2. index' = [index EXCEPT ![self] = 0] /\\ expected' = [expected EXCEPT ![self] = L] BY <2>1 DEF put\n  <2>3. \\A s \\in Writer : pc'[s] \\in {\"chkSnc\", \"cntns\", \"onSnc\"} => expected'[s] \\in Int /\\ index'[s] \\in Int\n    <3> SUFFICES ASSUME NEW s \\in Writer, pc'[s] \\in {\"chkSnc\", \"cntns\", \"onSnc\"} PROVE expected'[s] \\in Int /\\ index'[s] \\in Int\n      OBVIOUS\n    <3>1. CASE s = self\n      <4>1. index'[s] = 0 /\\ expected'[s] = L BY <3>1, <2>2, T!SMTT(\"r30\") DEF CIndex, CExpected, ProcSet\n      <4>2. QED BY <4>1, LNat, T!SMTT(\"r30\")\n    <3>2. CASE s # self\n      <4>1a. pc'[s] = pc[s] BY <3>2, <2>1, T!SMTT(\"r30\") DEF put, CPcType, ProcSet\n      <4>1b. index'[s] = index[s] /\\ expected'[s] = expected[s] BY <3>2, <2>2, T!SMTT(\"r30\") DEF CIndex, CExpected, ProcSet\n      <4>2. QED BY <4>1a, <4>1b, T!SMTT(\"r30\") DEF CE23\n    <3>3. QED BY <3>1, <3>2\n  <2>4. QED BY <2>3 DEF CE23\n<1>2. CASE \\E self \\in Writer : chkSnc(self)\n  <2>1. PICK self \\in Writer : chkSnc(self) BY <1>2\n  <2>2. index' = index /\\ expected' = expected BY <2>1 DEF chkSnc\n  <2>3. pc[self] = \"chkSnc\" BY <2>1, T!SMTT(\"r30\") DEF chkSnc\n  <2>4. expected[self] \\in Int /\\ index[self] \\in Int BY <2>3, T!SMTT(\"r30\") DEF CE23\n  <2>5. \\A s \\in Writer : pc'[s] \\in {\"chkSnc\", \"cntns\", \"onSnc\"} => expected'[s] \\in Int /\\ index'[s] \\in Int\n    <3> SUFFICES ASSUME NEW s \\in Writer, pc'[s] \\in {\"chkSnc\", \"cntns\", \"onSnc\"} PROVE expected'[s] \\in Int /\\ index'[s] \\in Int\n      OBVIOUS\n    <3>1. CASE s = self\n      <4>1. index'[s] = index[s] /\\ expected'[s] = expected[s] BY <3>1, <2>2, T!SMTT(\"r30\") DEF CIndex, CExpected, ProcSet\n      <4>2. QED BY <3>1, <4>1, <2>4, T!SMTT(\"r30\")\n    <3>2. CASE s # self\n      <4>1a. pc'[s] = pc[s] BY <3>2, <2>1, T!SMTT(\"r30\") DEF chkSnc, CPcType, ProcSet\n      <4>1b. index'[s] = index[s] /\\ expected'[s] = expected[s] BY <3>2, <2>2, T!SMTT(\"r30\") DEF CIndex, CExpected, ProcSet\n      <4>2. QED BY <4>1a, <4>1b, T!SMTT(\"r30\") DEF CE23\n    <3>3. QED BY <3>1, <3>2\n  <2>6. QED BY <2>5 DEF CE23\n<1>3. CASE \\E self \\in Writer : cntns(self)\n  <2>1. PICK self \\in Writer : cntns(self) BY <1>3\n  <2>2. pc[self] = \"cntns\" BY <2>1, T!SMTT(\"r30\") DEF cntns\n  <2>3. expected[self] \\in Int /\\ index[self] \\in Int BY <2>2, T!SMTT(\"r30\") DEF CE23\n  <2>4. expected' = expected \\/ \\E v \\in Int : expected' = [expected EXCEPT ![self] = v] BY <2>1, <2>3, T!SMTT(\"r30\") DEF cntns, minimum\n  <2>5. index' = index \\/ \\E v \\in Int : index' = [index EXCEPT ![self] = v] BY <2>1, <2>3, T!SMTT(\"r30\") DEF cntns\n  <2>6. \\A s \\in Writer : pc'[s] \\in {\"chkSnc\", \"cntns\", \"onSnc\"} => expected'[s] \\in Int /\\ index'[s] \\in Int\n    <3> SUFFICES ASSUME NEW s \\in Writer, pc'[s] \\in {\"chkSnc\", \"cntns\", \"onSnc\"} PROVE expected'[s] \\in Int /\\ index'[s] \\in Int\n      OBVIOUS\n    <3>1. CASE s = self\n      <4>1. expected'[s] \\in Int BY <3>1, <2>4, <2>3, T!SMTT(\"r30\") DEF CExpected, ProcSet\n      <4>2. index'[s] \\in Int BY <3>1, <2>5, <2>3, T!SMTT(\"r30\") DEF CIndex, ProcSet\n      <4>3. QED BY <4>1, <4>2\n    <3>2. CASE s # self\n      <4>1a. pc'[s] = pc[s] BY <3>2, <2>1, T!SMTT(\"r30\") DEF cntns, CPcType, ProcSet\n      <4>1b. index'[s] = index[s] /\\ expected'[s] = expected[s] BY <3>2, <2>4, <2>5, T!SMTT(\"r30\") DEF CIndex, CExpected, ProcSet\n      <4>2. QED BY <4>1a, <4>1b, T!SMTT(\"r30\") DEF CE23\n    <3>3. QED BY <3>1, <3>2\n  <2>7. QED BY <2>6 DEF CE23\n<1>4. CASE \\E self \\in Writer : onSnc(self)\n  <2>1. PICK self \\in Writer : onSnc(self) BY <1>4\n  <2>2. pc[self] = \"onSnc\" BY <2>1, T!SMTT(\"r30\") DEF onSnc\n  <2>3. expected[self] \\in Int /\\ index[self] \\in Int BY <2>2, T!SMTT(\"r30\") DEF CE23\n  <2>4. (index' = index /\\ expected' = expected) \\/ (index' = [index EXCEPT ![self] = expected[self]] /\\ expected' = [expected EXCEPT ![self] = -1]) BY <2>1, T!SMTT(\"r30\") DEF onSnc\n  <2>5. \\A s \\in Writer : pc'[s] \\in {\"chkSnc\", \"cntns\", \"onSnc\"} => expected'[s] \\in Int /\\ index'[s] \\in Int\n    <3> SUFFICES ASSUME NEW s \\in Writer, pc'[s] \\in {\"chkSnc\", \"cntns\", \"onSnc\"} PROVE expected'[s] \\in Int /\\ index'[s] \\in Int\n      OBVIOUS\n    <3>1. CASE s = self\n      <4>1. index'[s] \\in Int /\\ expected'[s] \\in Int BY <3>1, <2>4, <2>3, T!SMTT(\"r30\") DEF CIndex, CExpected, ProcSet\n      <4>2. QED BY <4>1\n    <3>2. CASE s # self\n      <4>1a. pc'[s] = pc[s] BY <3>2, <2>4, <2>1, T!SMTT(\"r30\") DEF onSnc, CPcType, ProcSet\n      <4>1b. index'[s] = index[s] /\\ expected'[s] = expected[s] BY <3>2, <2>4, T!SMTT(\"r30\") DEF CIndex, CExpected, ProcSet\n      <4>2. QED BY <4>1a, <4>1b, T!SMTT(\"r30\") DEF CE23\n    <3>3. QED BY <3>1, <3>2\n  <2>6. QED BY <2>5 DEF CE23\n<1>5. CASE (\\E self \\in Writer : pick(self) \\/ waitEv(self) \\/ endWEv(self) \\/ insrt(self) \\/ isMth(self) \\/ cas(self) \\/ tryEv(self) \\/ waitIns(self) \\/ endEv(self)) \\/ (\\E self \\in ProcSet : strIns(self) \\/ nestedIns(self) \\/ set(self) \\/ flush(self) \\/ rtrn(self)) \\/ Terminating\n  BY <1>5, T!SMTT(\"r30\") DEF CPcType, CIndex, CExpected, CE23, CStack, CEvictStack, pick, waitEv, endWEv, insrt, isMth, cas, tryEv, waitIns, endEv, strIns, nestedIns, set, flush, rtrn, Terminating, vars, ProcSet\n<1>6. QED BY <1>1, <1>2, <1>3, <1>4, <1>5 DEF Next, Evict, p\nTHEOREM WCntPut == (WCnt2 /\\ WCntFin /\\ CPcType) /\\ (\\E self \\in Writer : put(self)) => WCnt2'\n<1> SUFFICES ASSUME WCnt2, WCntFin, CPcType, (\\E self \\in Writer : put(self)) PROVE WCnt2'\n  OBVIOUS\n<1>1. CASE \\E self \\in Writer : put(self)\n  <2>1. PICK self \\in Writer : put(self) BY <1>1\n  <2>2. pc[self] = \"put\" BY <2>1 DEF put\n  <2>3. PICK S0 : S0 = {s \\in Writer : pc[s] = \"waitEv\" \\/ pc[s] = \"endWEv\"} BY T!SMTT(\"r30\")\n  <2>4. self \\notin S0 BY <2>2, <2>3, T!SMTT(\"r30\")\n  <2>5. FS!IsFiniteSet(S0) BY <2>3, WriterFiniteFS, FS!FS_Subset, T!SMTT(\"r30\")\n  <2>6. CASE evict\n    <3>1. waitCnt' = waitCnt + 1 /\\ pc' = [pc EXCEPT ![self] = \"waitEv\"] BY <2>1, <2>6 DEF put\n    <3>2. PICK S1 : S1 = {s \\in Writer : pc'[s] = \"waitEv\" \\/ pc'[s] = \"endWEv\"} BY T!SMTT(\"r30\")\n    <3>3. S1 = S0 \\cup {self} BY <3>1, <3>2, <2>3, T!SMTT(\"r30\") DEF CPcType, ProcSet\n    <3>4. FS!Cardinality(S1) = FS!Cardinality(S0) + 1 BY <3>3, <2>4, <2>5, FS!FS_AddElement\n    <3>5. FS!Cardinality(S0) = FS!Cardinality({s \\in Writer : pc[s] = \"waitEv\" \\/ pc[s] = \"endWEv\"}) BY <2>3, T!SMTT(\"r30\")\n    <3>6. waitCnt = FS!Cardinality({s \\in Writer : pc[s] = \"waitEv\" \\/ pc[s] = \"endWEv\"}) BY T!SMTT(\"r30\") DEF WCnt2\n    <3>7. waitCnt' = FS!Cardinality({s \\in Writer : pc'[s] = \"waitEv\" \\/ pc'[s] = \"endWEv\"}) BY <3>1, <3>2, <3>4, <3>5, <3>6, T!SMTT(\"r30\")\n    <3>8. QED BY <3>7 DEF WCnt2\n  <2>7. CASE ~evict\n    <3>1. waitCnt' = waitCnt /\\ (pc' = [pc EXCEPT ![self] = \"chkSnc\"]) BY <2>1, <2>7 DEF put\n    <3>2. {s \\in Writer : pc'[s] = \"waitEv\" \\/ pc'[s] = \"endWEv\"} = {s \\in Writer : pc[s] = \"waitEv\" \\/ pc[s] = \"endWEv\"} BY <3>1, <2>2, T!SMTT(\"r30\") DEF CPcType, ProcSet\n    <3>3. waitCnt' = FS!Cardinality({s \\in Writer : pc'[s] = \"waitEv\" \\/ pc'[s] = \"endWEv\"}) BY <3>1, <3>2, T!SMTT(\"r30\") DEF WCnt2\n    <3>4. QED BY <3>3 DEF WCnt2\n  <2>8. QED BY <2>6, <2>7\n<1>2. QED BY <1>1\nTHEOREM WCntEndWEv == (WCnt2 /\\ WCntFin /\\ CPcType) /\\ (\\E self \\in Writer : endWEv(self)) => WCnt2'\n<1> SUFFICES ASSUME WCnt2, WCntFin, CPcType, (\\E self \\in Writer : endWEv(self)) PROVE WCnt2'\n  OBVIOUS\n<1>1. CASE \\E self \\in Writer : endWEv(self)\n  <2>1. PICK self \\in Writer : endWEv(self) BY <1>1\n  <2>2. pc[self] = \"endWEv\" BY <2>1 DEF endWEv\n  <2>3. waitCnt' = waitCnt - 1 /\\ pc' = [pc EXCEPT ![self] = \"put\"] BY <2>1 DEF endWEv\n  <2>4. PICK S0 : S0 = {s \\in Writer : pc[s] = \"waitEv\" \\/ pc[s] = \"endWEv\"} BY T!SMTT(\"r30\")\n  <2>5. self \\in S0 BY <2>2, <2>4, T!SMTT(\"r30\")\n  <2>6. PICK S1 : S1 = {s \\in Writer : pc'[s] = \"waitEv\" \\/ pc'[s] = \"endWEv\"} BY T!SMTT(\"r30\")\n  <2>7. S1 = S0 \\ {self} BY <2>6, <2>4, <2>3, T!SMTT(\"r30\") DEF CPcType, ProcSet\n  <2>8. FS!IsFiniteSet(S0) BY <2>4, WriterFiniteFS, FS!FS_Subset, T!SMTT(\"r30\")\n  <2>9. FS!Cardinality(S1) = FS!Cardinality(S0) - 1 BY <2>7, <2>5, <2>8, FS!FS_RemoveElement, T!SMTT(\"r30\")\n  <2>10. FS!Cardinality(S0) = FS!Cardinality({s \\in Writer : pc[s] = \"waitEv\" \\/ pc[s] = \"endWEv\"}) BY <2>4, T!SMTT(\"r30\")\n  <2>11. FS!Cardinality(S1) = FS!Cardinality({s \\in Writer : pc'[s] = \"waitEv\" \\/ pc'[s] = \"endWEv\"}) BY <2>6, T!SMTT(\"r30\")\n  <2>12. waitCnt = FS!Cardinality({s \\in Writer : pc[s] = \"waitEv\" \\/ pc[s] = \"endWEv\"}) BY T!SMTT(\"r30\") DEF WCnt2\n  <2>13. waitCnt' = FS!Cardinality({s \\in Writer : pc'[s] = \"waitEv\" \\/ pc'[s] = \"endWEv\"}) BY <2>3, <2>9, <2>10, <2>11, <2>12, T!SMTT(\"r30\")\n  <2>14. QED BY <2>13 DEF WCnt2\n<1>2. QED BY <1>1\n\nTHEOREM WCntWaitEv == (WCnt2 /\\ WCntFin /\\ CPcType) /\\ (\\E self \\in Writer : waitEv(self)) => WCnt2'\n<1> SUFFICES ASSUME WCnt2, WCntFin, CPcType, (\\E self \\in Writer : waitEv(self)) PROVE WCnt2'\n  OBVIOUS\n<1>1. CASE \\E self \\in Writer : waitEv(self)\n  <2>1. PICK self \\in Writer : waitEv(self) BY <1>1\n  <2>2. pc[self] = \"waitEv\" BY <2>1 DEF waitEv\n  <2>3. waitCnt' = waitCnt /\\ pc' = [pc EXCEPT ![self] = \"endWEv\"] BY <2>1 DEF waitEv\n  <2>4. {s \\in Writer : pc'[s] = \"waitEv\" \\/ pc'[s] = \"endWEv\"} = {s \\in Writer : pc[s] = \"waitEv\" \\/ pc[s] = \"endWEv\"} BY <2>3, <2>2, T!SMTT(\"r30\") DEF CPcType, ProcSet\n  <2>5. waitCnt' = FS!Cardinality({s \\in Writer : pc'[s] = \"waitEv\" \\/ pc'[s] = \"endWEv\"}) BY <2>3, <2>4, T!SMTT(\"r30\") DEF WCnt2\n  <2>6. QED BY <2>5 DEF WCnt2\n<1>2. QED BY <1>1\n\nTHEOREM WCntRestW == (WCnt2 /\\ WCntFin /\\ CPcType /\\ CStack /\\ CEvictStack) /\\ ((\\E self \\in Writer : pick(self) \\/ chkSnc(self) \\/ cntns(self) \\/ onSnc(self) \\/ insrt(self) \\/ isMth(self) \\/ cas(self) \\/ tryEv(self) \\/ waitIns(self) \\/ endEv(self)) \\/ (\\E self \\in ProcSet : strIns(self) \\/ nestedIns(self) \\/ set(self) \\/ flush(self) \\/ rtrn(self)) \\/ Terminating) => waitCnt' = waitCnt\n<1> SUFFICES ASSUME WCnt2, WCntFin, CPcType, CStack, CEvictStack, (\\E self \\in Writer : pick(self) \\/ chkSnc(self) \\/ cntns(self) \\/ onSnc(self) \\/ insrt(self) \\/ isMth(self) \\/ cas(self) \\/ tryEv(self) \\/ waitIns(self) \\/ endEv(self)) \\/ (\\E self \\in ProcSet : strIns(self) \\/ nestedIns(self) \\/ set(self) \\/ flush(self) \\/ rtrn(self)) \\/ Terminating PROVE waitCnt' = waitCnt\n  OBVIOUS\n<1>1. CASE (\\E self \\in Writer : pick(self) \\/ chkSnc(self) \\/ cntns(self) \\/ onSnc(self) \\/ insrt(self) \\/ isMth(self) \\/ cas(self) \\/ tryEv(self) \\/ waitIns(self) \\/ endEv(self))\n  BY <1>1, T!SMTT(\"r30\") DEF pick, chkSnc, cntns, onSnc, insrt, isMth, cas, tryEv, waitIns, endEv\n<1>2. CASE (\\E self \\in ProcSet : strIns(self) \\/ nestedIns(self) \\/ set(self) \\/ flush(self) \\/ rtrn(self)) \\/ Terminating\n  BY <1>2, T!SMTT(\"r30\") DEF strIns, nestedIns, set, flush, rtrn, Terminating, vars\n<1>3. QED BY <1>1, <1>2\n\nTHEOREM WCntRestS == (WCnt2 /\\ WCntFin /\\ CPcType /\\ CStack /\\ CEvictStack) /\\ ((\\E self \\in Writer : pick(self) \\/ chkSnc(self) \\/ cntns(self) \\/ onSnc(self) \\/ insrt(self) \\/ isMth(self) \\/ cas(self) \\/ tryEv(self) \\/ waitIns(self) \\/ endEv(self)) \\/ (\\E self \\in ProcSet : strIns(self) \\/ nestedIns(self) \\/ set(self) \\/ flush(self) \\/ rtrn(self)) \\/ Terminating) => ({s \\in Writer : pc'[s] = \"waitEv\" \\/ pc'[s] = \"endWEv\"} = {s \\in Writer : pc[s] = \"waitEv\" \\/ pc[s] = \"endWEv\"})\n<1> SUFFICES ASSUME WCnt2, WCntFin, CPcType, CStack, CEvictStack, (\\E self \\in Writer : pick(self) \\/ chkSnc(self) \\/ cntns(self) \\/ onSnc(self) \\/ insrt(self) \\/ isMth(self) \\/ cas(self) \\/ tryEv(self) \\/ waitIns(self) \\/ endEv(self)) \\/ (\\E self \\in ProcSet : strIns(self) \\/ nestedIns(self) \\/ set(self) \\/ flush(self) \\/ rtrn(self)) \\/ Terminating PROVE ({s \\in Writer : pc'[s] = \"waitEv\" \\/ pc'[s] = \"endWEv\"} = {s \\in Writer : pc[s] = \"waitEv\" \\/ pc[s] = \"endWEv\"})\n  OBVIOUS\n<1>1. CASE \\E self \\in Writer : pick(self)\n  BY <1>1, T!SMTT(\"r30\") DEF CPcType, ProcSet, pick\n<1>2. CASE \\E self \\in Writer : chkSnc(self)\n  BY <1>2, T!SMTT(\"r30\") DEF CPcType, ProcSet, chkSnc\n<1>3. CASE \\E self \\in Writer : cntns(self)\n  BY <1>3, T!SMTT(\"r30\") DEF CPcType, ProcSet, cntns\n<1>4. CASE \\E self \\in Writer : onSnc(self)\n  BY <1>4, T!SMTT(\"r30\") DEF CPcType, ProcSet, onSnc\n<1>5. CASE \\E self \\in Writer : insrt(self)\n  BY <1>5, T!SMTT(\"r30\") DEF CPcType, ProcSet, insrt\n<1>6. CASE \\E self \\in Writer : isMth(self)\n  BY <1>6, T!SMTT(\"r30\") DEF CPcType, ProcSet, isMth\n<1>7. CASE \\E self \\in Writer : cas(self)\n  BY <1>7, T!SMTT(\"r30\") DEF CPcType, ProcSet, cas\n<1>8. CASE \\E self \\in Writer : tryEv(self)\n  BY <1>8, T!SMTT(\"r30\") DEF CPcType, ProcSet, tryEv\n<1>9. CASE \\E self \\in Writer : waitIns(self)\n  BY <1>9, T!SMTT(\"r30\") DEF CPcType, ProcSet, waitIns\n<1>10. CASE \\E self \\in Writer : endEv(self)\n  BY <1>10, T!SMTT(\"r30\") DEF CPcType, ProcSet, endEv\n<1>11. CASE (\\E self \\in ProcSet : strIns(self) \\/ nestedIns(self) \\/ set(self) \\/ flush(self) \\/ rtrn(self)) \\/ Terminating\n  BY <1>11, T!SMTT(\"r30\") DEF CPcType, CStack, CEvictStack, ProcSet, strIns, nestedIns, set, flush, rtrn, Terminating, vars\n<1>12. QED BY <1>1, <1>2, <1>3, <1>4, <1>5, <1>6, <1>7, <1>8, <1>9, <1>10, <1>11\n\nTHEOREM WCntRest == (WCnt2 /\\ WCntFin /\\ CPcType /\\ CStack /\\ CEvictStack) /\\ ((\\E self \\in Writer : pick(self) \\/ chkSnc(self) \\/ cntns(self) \\/ onSnc(self) \\/ insrt(self) \\/ isMth(self) \\/ cas(self) \\/ tryEv(self) \\/ waitIns(self) \\/ endEv(self)) \\/ (\\E self \\in ProcSet : strIns(self) \\/ nestedIns(self) \\/ set(self) \\/ flush(self) \\/ rtrn(self)) \\/ Terminating) => WCnt2'\n<1> SUFFICES ASSUME WCnt2, WCntFin, CPcType, CStack, CEvictStack, (\\E self \\in Writer : pick(self) \\/ chkSnc(self) \\/ cntns(self) \\/ onSnc(self) \\/ insrt(self) \\/ isMth(self) \\/ cas(self) \\/ tryEv(self) \\/ waitIns(self) \\/ endEv(self)) \\/ (\\E self \\in ProcSet : strIns(self) \\/ nestedIns(self) \\/ set(self) \\/ flush(self) \\/ rtrn(self)) \\/ Terminating PROVE WCnt2'\n  OBVIOUS\n<1>1. waitCnt' = waitCnt BY WCntRestW, T!SMTT(\"r30\")\n<1>2. {s \\in Writer : pc'[s] = \"waitEv\" \\/ pc'[s] = \"endWEv\"} = {s \\in Writer : pc[s] = \"waitEv\" \\/ pc[s] = \"endWEv\"} BY WCntRestS, T!SMTT(\"r30\")\n<1>3. QED BY <1>1, <1>2, T!SMTT(\"r30\") DEF WCnt2\n\nTHEOREM WCntNext == (WCnt2 /\\ WCntFin /\\ CPcType /\\ CStack /\\ CEvictStack) /\\ Next => WCnt2'\n<1> SUFFICES ASSUME WCnt2, WCntFin, CPcType, CStack, CEvictStack, Next PROVE WCnt2'\n  OBVIOUS\n<1>1. CASE \\E self \\in Writer : put(self)\n  BY <1>1, WCntPut, T!SMTT(\"r30\")\n<1>2. CASE \\E self \\in Writer : waitEv(self)\n  BY <1>2, WCntWaitEv, T!SMTT(\"r30\")\n<1>3. CASE \\E self \\in Writer : endWEv(self)\n  BY <1>3, WCntEndWEv, T!SMTT(\"r30\")\n<1>4. CASE (\\E self \\in Writer : pick(self) \\/ chkSnc(self) \\/ cntns(self) \\/ onSnc(self) \\/ insrt(self) \\/ isMth(self) \\/ cas(self) \\/ tryEv(self) \\/ waitIns(self) \\/ endEv(self)) \\/ (\\E self \\in ProcSet : strIns(self) \\/ nestedIns(self) \\/ set(self) \\/ flush(self) \\/ rtrn(self)) \\/ Terminating\n  BY <1>4, WCntRest, T!SMTT(\"r30\")\n<1>5. QED BY <1>1, <1>2, <1>3, <1>4 DEF Next, Evict, p\n\nTHEOREM WCntFinNext == (WCntFin /\\ CPcType) /\\ Next => WCntFin'\n<1>1. {s \\in Writer : pc'[s] = \"waitEv\" \\/ pc'[s] = \"endWEv\"} \\in SUBSET Writer BY T!SMTT(\"r30\")\n<1>2. FS!IsFiniteSet(Writer) BY WriterFiniteFS\n<1>3. QED BY <1>1, <1>2, FS!FS_Subset, T!SMTT(\"r30\") DEF WCntFin\n\nTHEOREM CompNext == (CompleteAsSafety /\\ CHist /\\ CStack /\\ CEvictStack /\\ CPcType /\\ CA3) /\\ Next => CompleteAsSafety'\n<1> SUFFICES ASSUME CompleteAsSafety, CHist, CStack, CEvictStack, CPcType, CA3, Next PROVE CompleteAsSafety'\n  OBVIOUS\n<1>1. CASE \\E self \\in Writer : pick(self)\n  <2>1. PICK self \\in Writer : pick(self) BY <1>1\n  <2>2. CASE (fps \\ history) = {}\n    <3>1. pc' = [pc EXCEPT ![self] = \"Done\"] /\\ history' = history /\\ fp' = fp BY <2>1, <2>2 DEF pick\n    <3>2. history = fps\n      <4>1. \\A x \\in fps : x \\in history BY <2>2, T!SMTT(\"r30\")\n      <4>2. \\A x \\in history : x \\in fps BY T!SMTT(\"r30\") DEF CHist\n      <4>3. QED BY <4>1, <4>2, T!SetExtensionality, T!SMTT(\"r30\")\n    <3>3. \\A s \\in ProcSet : pc'[s] = \"Done\" => history' = fps\n      <4> SUFFICES ASSUME NEW s \\in ProcSet, pc'[s] = \"Done\" PROVE history' = fps\n        OBVIOUS\n      <4>1. CASE s = self\n        BY <4>1, <3>1, <3>2, T!SMTT(\"r30\") DEF CPcType, ProcSet\n      <4>2. CASE s # self\n        <5>1. pc'[s] = pc[s] /\\ history' = history BY <4>2, <3>1, T!SMTT(\"r30\") DEF CPcType, ProcSet\n        <5>2. QED BY <5>1, T!SMTT(\"r30\") DEF CompleteAsSafety\n      <4>3. QED BY <4>1, <4>2\n    <3>4. QED BY <3>3 DEF CompleteAsSafety\n  <2>3. CASE ~((fps \\ history) = {})\n    <3>1. pc' = [pc EXCEPT ![self] = \"put\"] /\\ history' = history BY <2>1, <2>3 DEF pick\n    <3>2. \\A s \\in ProcSet : pc'[s] = \"Done\" => history' = fps\n      <4> SUFFICES ASSUME NEW s \\in ProcSet, pc'[s] = \"Done\" PROVE history' = fps\n        OBVIOUS\n      <4>1. CASE s = self\n        BY <4>1, <3>1, T!SMTT(\"r30\") DEF CPcType, ProcSet\n      <4>2. CASE s # self\n        <5>1. pc'[s] = pc[s] /\\ history' = history BY <4>2, <3>1, T!SMTT(\"r30\") DEF CPcType, ProcSet\n        <5>2. QED BY <5>1, T!SMTT(\"r30\") DEF CompleteAsSafety\n      <4>3. QED BY <4>1, <4>2\n    <3>3. QED BY <3>2 DEF CompleteAsSafety\n  <2>4. QED BY <2>2, <2>3\n<1>2. CASE \\E self \\in ProcSet : rtrn(self)\n  <2>1. PICK self \\in ProcSet : rtrn(self) BY <1>2\n  <2>2. history' = history BY <2>1 DEF rtrn\n  <2>3. pc[self] = \"rtrn\" BY <2>1, T!SMTT(\"r30\") DEF rtrn\n  <2>4. stack[self] # <<>> BY <2>3, T!SMTT(\"r30\") DEF CEvictStack\n  <2>5. Head(stack[self]).pc = \"endEv\" BY <2>4, T!SMTT(\"r30\") DEF CStack, ProcSet\n  <2>6. pc' = [pc EXCEPT ![self] = \"endEv\"] BY <2>1, <2>5, T!SMTT(\"r30\") DEF rtrn\n  <2>7. \\A s \\in ProcSet : pc'[s] = \"Done\" => history' = fps\n    <3> SUFFICES ASSUME NEW s \\in ProcSet, pc'[s] = \"Done\" PROVE history' = fps\n      OBVIOUS\n    <3>1. CASE s = self\n      BY <3>1, <2>6, T!SMTT(\"r30\") DEF CPcType, ProcSet\n    <3>2. CASE s # self\n      <4>1. pc'[s] = pc[s] /\\ history' = history BY <3>2, <2>6, <2>2, T!SMTT(\"r30\") DEF CPcType, ProcSet\n      <4>2. QED BY <4>1, T!SMTT(\"r30\") DEF CompleteAsSafety\n    <3>3. QED BY <3>1, <3>2\n  <2>8. QED BY <2>7 DEF CompleteAsSafety\n<1>3. CASE Terminating\n  BY <1>3, T!SMTT(\"r30\") DEF CompleteAsSafety, Terminating, vars\n<1>4. CASE \\E self \\in Writer : cas(self)\n  <2>1. PICK self \\in Writer : cas(self) BY <1>4\n  <2>2. pc[self] = \"cas\" BY <2>1, T!SMTT(\"r30\") DEF cas\n  <2>3. fp[self] \\in fps BY <2>2, T!SMTT(\"r30\") DEF CA3\n  <2>4. history' = history \\/ history' = history \\cup {fp[self]} BY <2>1, T!SMTT(\"r30\") DEF cas\n  <2>5. pc' = [pc EXCEPT ![self] = \"pick\"] \\/ pc' = [pc EXCEPT ![self] = \"insrt\"] BY <2>1, T!SMTT(\"r30\") DEF cas\n  <2>6. \\A s \\in ProcSet : pc'[s] = \"Done\" => history' = fps\n    <3> SUFFICES ASSUME NEW s \\in ProcSet, pc'[s] = \"Done\" PROVE history' = fps\n      OBVIOUS\n    <3>1. CASE s = self\n      <4>1. pc'[s] \\in {\"pick\", \"insrt\"} BY <3>1, <2>5, T!SMTT(\"r30\") DEF CPcType, ProcSet\n      <4>2. QED BY <4>1, T!SMTT(\"r30\")\n    <3>2. CASE s # self\n      <4>1a. pc'[s] = pc[s] BY <3>2, <2>5, T!SMTT(\"r30\") DEF CPcType, ProcSet\n      <4>1b. history' = history \\/ history' = history \\cup {fp[self]} BY <2>4, T!SMTT(\"r30\")\n      <4>1c. pc[s] = \"Done\" BY <3>2, <4>1a, T!SMTT(\"r30\")\n      <4>1d. history = fps BY <4>1c, T!SMTT(\"r30\") DEF CompleteAsSafety\n      <4>2a. CASE history' = history\n        <5>1. QED BY <4>2a, <4>1d, T!SMTT(\"r30\")\n      <4>2b. CASE history' = history \\cup {fp[self]}\n        <5>1. QED BY <4>2b, <4>1d, <2>3, T!SetExtensionality, T!SMTT(\"r30\")\n      <4>2c. QED BY <4>1b, <4>2a, <4>2b\n    <3>3. QED BY <3>1, <3>2\n  <2>7. QED BY <2>6 DEF CompleteAsSafety\n<1>5. CASE (\\E self \\in Writer : put(self) \\/ waitEv(self) \\/ endWEv(self) \\/ chkSnc(self) \\/ cntns(self) \\/ onSnc(self) \\/ insrt(self) \\/ isMth(self) \\/ tryEv(self) \\/ waitIns(self) \\/ endEv(self)) \\/ (\\E self \\in ProcSet : strIns(self) \\/ nestedIns(self) \\/ set(self) \\/ flush(self))\n  BY <1>5, T!SMTT(\"r30\") DEF CompleteAsSafety, CHist, CStack, CEvictStack, CPcType, CA3, put, waitEv, endWEv, chkSnc, cntns, onSnc, insrt, isMth, tryEv, waitIns, endEv, strIns, nestedIns, set, flush, vars, ProcSet\n<1>6. QED BY <1>1, <1>2, <1>4, <1>5, <1>3 DEF Next, Evict, p\nTHEOREM PresCInv == CInv /\\ Next => CInv'\n  BY PcNext, FpNext, HistNext, A3Next, EiNext, EjNext, LoNext, TableNext, StackNext, EvStackNext, IndexNext, ExpectedNext, ResultNext, WaitCntNext, WCntNext, WCntFinNext, EvictBoolNext, E23Next, E3Next, CompNext, T!SMTT(\"r30\") DEF CInv\n\nTHEOREM SafeImpl == CInv => CompleteAsSafety\n  BY T!SMTT(\"r30\") DEF CInv\n\nLEMMA StutterCInv == CInv /\\ (vars' = vars) => CInv'\n<1> SUFFICES ASSUME CInv, vars' = vars PROVE CInv'\n  OBVIOUS\n<1>1. waitCnt' = waitCnt /\\ pc' = pc BY T!SMTT(\"r30\") DEF vars\n<1>2. WCnt2 BY DEF CInv\n<1>3. WCntFin BY DEF CInv\n<1>4. WCnt2' BY <1>1, <1>2, T!SMTT(\"r30\") DEF WCnt2\n<1>5. WCntFin' BY <1>1, <1>3, T!SMTT(\"r30\") DEF WCntFin\n<1>6. QED BY <1>4, <1>5, T!SMTT(\"r30\") DEF CInv, CPcType, CFpType, CHist, CA3, CEi, CEj, CLo, CTable, CStack, CEvictStack, CIndex, CExpected, CResult, CWaitCnt, CEvictBool, CE23, CE3, WCnt2, WCntFin, CompleteAsSafety, vars\n\n\\* END AGENT HELPERS\n\nTHEOREM Spec => []CompleteAsSafety\n\\* BEGIN AGENT PROOF OpenAddressing/OpenAddressing_CompleteAsSafety.tla\nPROOF\n<1>1. Init => CInv BY InitCInv\n<1>2. CInv /\\ [Next]_vars => CInv' BY PresCInv, StutterCInv, T!SMTT(\"r30\")\n<1>3. CInv => CompleteAsSafety BY SafeImpl\n<1>4. QED BY <1>1, <1>2, <1>3, T!PTL DEF Spec\n\\* END AGENT PROOF OpenAddressing/OpenAddressing_CompleteAsSafety.tla\n\nTHEOREM Spec => []Consistent\n\\* BEGIN AGENT PROOF OpenAddressing/OpenAddressing_Consistent.tla\nPROOF\n<1>1. Spec => []Consistent\n  BY T!SMTT(\"r30\") DEF Spec, Consistent\n<1>2. QED BY <1>1\n\\* END AGENT PROOF OpenAddressing/OpenAddressing_Consistent.tla\n\nTHEOREM Spec => []Contains\n\\* BEGIN AGENT PROOF OpenAddressing/OpenAddressing_Contains.tla\nPROOF\n<1>1. Spec => []Contains\n  BY T!SMTT(\"r30\") DEF Spec, Contains\n<1>2. QED BY <1>1\n\\* END AGENT PROOF OpenAddressing/OpenAddressing_Contains.tla\n\nTHEOREM Spec => []Duplicates\n\\* BEGIN AGENT PROOF OpenAddressing/OpenAddressing_Duplicates.tla\nPROOF\n<1>1. Spec => []Duplicates\n  BY T!SMTT(\"r30\") DEF Spec, Duplicates\n<1>2. QED BY <1>1\n\\* END AGENT PROOF OpenAddressing/OpenAddressing_Duplicates.tla\n\nTHEOREM Spec => []Sorted\n\\* BEGIN AGENT PROOF OpenAddressing/OpenAddressing_Sorted.tla\nPROOF\n<1>1. Spec => []Sorted\n  BY T!SMTT(\"r30\") DEF Spec, Sorted\n<1>2. QED BY <1>1\n\\* END AGENT PROOF OpenAddressing/OpenAddressing_Sorted.tla\n====\n",
+  "units": {
+    "OpenAddressing/OpenAddressing_CompleteAsSafety.tla": {
+      "id": "OpenAddressing/OpenAddressing_CompleteAsSafety.tla",
+      "name": "OpenAddressing_CompleteAsSafety",
+      "kind": "target",
+      "lineStart": 750,
+      "lineEnd": 756,
+      "proofLines": [
+        752,
+        753,
+        754,
+        755,
+        756
+      ],
+      "proofRange": [
+        752,
+        756
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:InitCInv",
+        "helper:PresCInv",
+        "helper:SafeImpl",
+        "helper:StutterCInv"
+      ]
+    },
+    "OpenAddressing/OpenAddressing_Consistent.tla": {
+      "id": "OpenAddressing/OpenAddressing_Consistent.tla",
+      "name": "OpenAddressing_Consistent",
+      "kind": "target",
+      "lineStart": 759,
+      "lineEnd": 764,
+      "proofLines": [
+        761,
+        762,
+        763,
+        764
+      ],
+      "proofRange": [
+        761,
+        764
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "OpenAddressing/OpenAddressing_Contains.tla": {
+      "id": "OpenAddressing/OpenAddressing_Contains.tla",
+      "name": "OpenAddressing_Contains",
+      "kind": "target",
+      "lineStart": 767,
+      "lineEnd": 772,
+      "proofLines": [
+        769,
+        770,
+        771,
+        772
+      ],
+      "proofRange": [
+        769,
+        772
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "OpenAddressing/OpenAddressing_Duplicates.tla": {
+      "id": "OpenAddressing/OpenAddressing_Duplicates.tla",
+      "name": "OpenAddressing_Duplicates",
+      "kind": "target",
+      "lineStart": 775,
+      "lineEnd": 780,
+      "proofLines": [
+        777,
+        778,
+        779,
+        780
+      ],
+      "proofRange": [
+        777,
+        780
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "OpenAddressing/OpenAddressing_Sorted.tla": {
+      "id": "OpenAddressing/OpenAddressing_Sorted.tla",
+      "name": "OpenAddressing_Sorted",
+      "kind": "target",
+      "lineStart": 783,
+      "lineEnd": 788,
+      "proofLines": [
+        785,
+        786,
+        787,
+        788
+      ],
+      "proofRange": [
+        785,
+        788
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:BridgeFin": {
+      "id": "helper:BridgeFin",
+      "name": "BridgeFin",
+      "kind": "helper",
+      "lineStart": 10,
+      "lineEnd": 11,
+      "proofLines": [
+        11
+      ],
+      "proofRange": [
+        11,
+        11
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:BridgeCard": {
+      "id": "helper:BridgeCard",
+      "name": "BridgeCard",
+      "kind": "helper",
+      "lineStart": 12,
+      "lineEnd": 13,
+      "proofLines": [
+        13
+      ],
+      "proofRange": [
+        13,
+        13
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:BridgeMax": {
+      "id": "helper:BridgeMax",
+      "name": "BridgeMax",
+      "kind": "helper",
+      "lineStart": 14,
+      "lineEnd": 15,
+      "proofLines": [
+        15
+      ],
+      "proofRange": [
+        15,
+        15
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:BridgeMin": {
+      "id": "helper:BridgeMin",
+      "name": "BridgeMin",
+      "kind": "helper",
+      "lineStart": 16,
+      "lineEnd": 17,
+      "proofLines": [
+        17
+      ],
+      "proofRange": [
+        17,
+        17
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:BridgeFSETMax": {
+      "id": "helper:BridgeFSETMax",
+      "name": "BridgeFSETMax",
+      "kind": "helper",
+      "lineStart": 18,
+      "lineEnd": 19,
+      "proofLines": [
+        19
+      ],
+      "proofRange": [
+        19,
+        19
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:BridgeFSETMin": {
+      "id": "helper:BridgeFSETMin",
+      "name": "BridgeFSETMin",
+      "kind": "helper",
+      "lineStart": 20,
+      "lineEnd": 21,
+      "proofLines": [
+        21
+      ],
+      "proofRange": [
+        21,
+        21
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:BridgeFSETFin": {
+      "id": "helper:BridgeFSETFin",
+      "name": "BridgeFSETFin",
+      "kind": "helper",
+      "lineStart": 22,
+      "lineEnd": 23,
+      "proofLines": [
+        23
+      ],
+      "proofRange": [
+        23,
+        23
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:BridgeFSETCard": {
+      "id": "helper:BridgeFSETCard",
+      "name": "BridgeFSETCard",
+      "kind": "helper",
+      "lineStart": 24,
+      "lineEnd": 25,
+      "proofLines": [
+        25
+      ],
+      "proofRange": [
+        25,
+        25
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:FpsSubsetInt": {
+      "id": "helper:FpsSubsetInt",
+      "name": "FpsSubsetInt",
+      "kind": "helper",
+      "lineStart": 27,
+      "lineEnd": 28,
+      "proofLines": [
+        28
+      ],
+      "proofRange": [
+        28,
+        28
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:FpsFinite": {
+      "id": "helper:FpsFinite",
+      "name": "FpsFinite",
+      "kind": "helper",
+      "lineStart": 29,
+      "lineEnd": 30,
+      "proofLines": [
+        30
+      ],
+      "proofRange": [
+        30,
+        30
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:FpsNonEmpty": {
+      "id": "helper:FpsNonEmpty",
+      "name": "FpsNonEmpty",
+      "kind": "helper",
+      "lineStart": 31,
+      "lineEnd": 33,
+      "proofLines": [
+        32,
+        33
+      ],
+      "proofRange": [
+        32,
+        33
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:BridgeCard",
+        "helper:BridgeFin",
+        "helper:FpsFinite"
+      ]
+    },
+    "helper:MaxFpsIn": {
+      "id": "helper:MaxFpsIn",
+      "name": "MaxFpsIn",
+      "kind": "helper",
+      "lineStart": 34,
+      "lineEnd": 36,
+      "proofLines": [
+        35,
+        36
+      ],
+      "proofRange": [
+        35,
+        36
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:BridgeFSETFin",
+        "helper:FpsFinite",
+        "helper:FpsNonEmpty",
+        "helper:FpsSubsetInt"
+      ]
+    },
+    "helper:MinFpsIn": {
+      "id": "helper:MinFpsIn",
+      "name": "MinFpsIn",
+      "kind": "helper",
+      "lineStart": 37,
+      "lineEnd": 39,
+      "proofLines": [
+        38,
+        39
+      ],
+      "proofRange": [
+        38,
+        39
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:BridgeFSETFin",
+        "helper:FpsFinite",
+        "helper:FpsNonEmpty",
+        "helper:FpsSubsetInt"
+      ]
+    },
+    "helper:MaxFpsGe": {
+      "id": "helper:MaxFpsGe",
+      "name": "MaxFpsGe",
+      "kind": "helper",
+      "lineStart": 40,
+      "lineEnd": 42,
+      "proofLines": [
+        41,
+        42
+      ],
+      "proofRange": [
+        41,
+        42
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:BridgeFSETFin",
+        "helper:FpsFinite",
+        "helper:FpsNonEmpty",
+        "helper:FpsSubsetInt"
+      ]
+    },
+    "helper:MinFpsLe": {
+      "id": "helper:MinFpsLe",
+      "name": "MinFpsLe",
+      "kind": "helper",
+      "lineStart": 43,
+      "lineEnd": 45,
+      "proofLines": [
+        44,
+        45
+      ],
+      "proofRange": [
+        44,
+        45
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:BridgeFSETFin",
+        "helper:FpsFinite",
+        "helper:FpsNonEmpty",
+        "helper:FpsSubsetInt"
+      ]
+    },
+    "helper:MaxFpsInt": {
+      "id": "helper:MaxFpsInt",
+      "name": "MaxFpsInt",
+      "kind": "helper",
+      "lineStart": 46,
+      "lineEnd": 48,
+      "proofLines": [
+        47,
+        48
+      ],
+      "proofRange": [
+        47,
+        48
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:BridgeFSETMax",
+        "helper:BridgeMax",
+        "helper:FpsSubsetInt",
+        "helper:MaxFpsIn"
+      ]
+    },
+    "helper:MinFpsInt": {
+      "id": "helper:MinFpsInt",
+      "name": "MinFpsInt",
+      "kind": "helper",
+      "lineStart": 49,
+      "lineEnd": 51,
+      "proofLines": [
+        50,
+        51
+      ],
+      "proofRange": [
+        50,
+        51
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:BridgeFSETMin",
+        "helper:BridgeMin",
+        "helper:FpsSubsetInt",
+        "helper:MinFpsIn"
+      ]
+    },
+    "helper:MaxGtMin": {
+      "id": "helper:MaxGtMin",
+      "name": "MaxGtMin",
+      "kind": "helper",
+      "lineStart": 54,
+      "lineEnd": 76,
+      "proofLines": [
+        55,
+        56,
+        57,
+        58,
+        59,
+        60,
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68,
+        69,
+        70,
+        71,
+        72,
+        73,
+        74,
+        75,
+        76
+      ],
+      "proofRange": [
+        55,
+        76
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:BridgeCard",
+        "helper:BridgeFSETCard",
+        "helper:BridgeFSETMax",
+        "helper:BridgeFSETMin",
+        "helper:BridgeMax",
+        "helper:BridgeMin",
+        "helper:FpsSubsetInt",
+        "helper:MaxFpsGe",
+        "helper:MaxFpsIn",
+        "helper:MinFpsIn",
+        "helper:MinFpsInt",
+        "helper:MinFpsLe"
+      ]
+    },
+    "helper:KPos": {
+      "id": "helper:KPos",
+      "name": "KPos",
+      "kind": "helper",
+      "lineStart": 78,
+      "lineEnd": 79,
+      "proofLines": [
+        79
+      ],
+      "proofRange": [
+        79,
+        79
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:LNat": {
+      "id": "helper:LNat",
+      "name": "LNat",
+      "kind": "helper",
+      "lineStart": 80,
+      "lineEnd": 81,
+      "proofLines": [
+        81
+      ],
+      "proofRange": [
+        81,
+        81
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:ModRange": {
+      "id": "helper:ModRange",
+      "name": "ModRange",
+      "kind": "helper",
+      "lineStart": 82,
+      "lineEnd": 83,
+      "proofLines": [
+        83
+      ],
+      "proofRange": [
+        83,
+        83
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:FunUpdateType": {
+      "id": "helper:FunUpdateType",
+      "name": "FunUpdateType",
+      "kind": "helper",
+      "lineStart": 84,
+      "lineEnd": 85,
+      "proofLines": [
+        85
+      ],
+      "proofRange": [
+        85,
+        85
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:RescaleRange": {
+      "id": "helper:RescaleRange",
+      "name": "RescaleRange",
+      "kind": "helper",
+      "lineStart": 86,
+      "lineEnd": 91,
+      "proofLines": [
+        87,
+        88,
+        89,
+        90,
+        91
+      ],
+      "proofRange": [
+        87,
+        91
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:ModRange"
+      ]
+    },
+    "helper:IdxRange": {
+      "id": "helper:IdxRange",
+      "name": "IdxRange",
+      "kind": "helper",
+      "lineStart": 92,
+      "lineEnd": 95,
+      "proofLines": [
+        93,
+        94,
+        95
+      ],
+      "proofRange": [
+        93,
+        95
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:KPos",
+        "helper:MaxFpsInt",
+        "helper:MaxGtMin",
+        "helper:MinFpsInt",
+        "helper:RescaleRange"
+      ]
+    },
+    "helper:WriterFiniteFS": {
+      "id": "helper:WriterFiniteFS",
+      "name": "WriterFiniteFS",
+      "kind": "helper",
+      "lineStart": 117,
+      "lineEnd": 118,
+      "proofLines": [
+        118
+      ],
+      "proofRange": [
+        118,
+        118
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:BridgeFin"
+      ]
+    },
+    "helper:WCntFinInit": {
+      "id": "helper:WCntFinInit",
+      "name": "WCntFinInit",
+      "kind": "helper",
+      "lineStart": 120,
+      "lineEnd": 126,
+      "proofLines": [
+        121,
+        122,
+        123,
+        124,
+        125,
+        126
+      ],
+      "proofRange": [
+        121,
+        126
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:BridgeFin"
+      ]
+    },
+    "helper:WCnt2Init": {
+      "id": "helper:WCnt2Init",
+      "name": "WCnt2Init",
+      "kind": "helper",
+      "lineStart": 128,
+      "lineEnd": 136,
+      "proofLines": [
+        129,
+        130,
+        131,
+        132,
+        133,
+        134,
+        135,
+        136
+      ],
+      "proofRange": [
+        129,
+        136
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:InitCInv": {
+      "id": "helper:InitCInv",
+      "name": "InitCInv",
+      "kind": "helper",
+      "lineStart": 140,
+      "lineEnd": 141,
+      "proofLines": [
+        141
+      ],
+      "proofRange": [
+        141,
+        141
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:WCnt2Init",
+        "helper:WCntFinInit"
+      ]
+    },
+    "helper:PcNext": {
+      "id": "helper:PcNext",
+      "name": "PcNext",
+      "kind": "helper",
+      "lineStart": 142,
+      "lineEnd": 143,
+      "proofLines": [
+        143
+      ],
+      "proofRange": [
+        143,
+        143
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:FpNext": {
+      "id": "helper:FpNext",
+      "name": "FpNext",
+      "kind": "helper",
+      "lineStart": 144,
+      "lineEnd": 145,
+      "proofLines": [
+        145
+      ],
+      "proofRange": [
+        145,
+        145
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HistNext": {
+      "id": "helper:HistNext",
+      "name": "HistNext",
+      "kind": "helper",
+      "lineStart": 146,
+      "lineEnd": 147,
+      "proofLines": [
+        147
+      ],
+      "proofRange": [
+        147,
+        147
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:StackNext": {
+      "id": "helper:StackNext",
+      "name": "StackNext",
+      "kind": "helper",
+      "lineStart": 148,
+      "lineEnd": 167,
+      "proofLines": [
+        149,
+        150,
+        151,
+        152,
+        153,
+        154,
+        155,
+        156,
+        157,
+        158,
+        159,
+        160,
+        161,
+        162,
+        163,
+        164,
+        165,
+        166,
+        167
+      ],
+      "proofRange": [
+        149,
+        167
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:FunUpdateType"
+      ]
+    },
+    "helper:EiNext": {
+      "id": "helper:EiNext",
+      "name": "EiNext",
+      "kind": "helper",
+      "lineStart": 168,
+      "lineEnd": 169,
+      "proofLines": [
+        169
+      ],
+      "proofRange": [
+        169,
+        169
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:EjNext": {
+      "id": "helper:EjNext",
+      "name": "EjNext",
+      "kind": "helper",
+      "lineStart": 170,
+      "lineEnd": 171,
+      "proofLines": [
+        171
+      ],
+      "proofRange": [
+        171,
+        171
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:A3Next": {
+      "id": "helper:A3Next",
+      "name": "A3Next",
+      "kind": "helper",
+      "lineStart": 172,
+      "lineEnd": 173,
+      "proofLines": [
+        173
+      ],
+      "proofRange": [
+        173,
+        173
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:EvStackNext": {
+      "id": "helper:EvStackNext",
+      "name": "EvStackNext",
+      "kind": "helper",
+      "lineStart": 174,
+      "lineEnd": 175,
+      "proofLines": [
+        175
+      ],
+      "proofRange": [
+        175,
+        175
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:IndexNext": {
+      "id": "helper:IndexNext",
+      "name": "IndexNext",
+      "kind": "helper",
+      "lineStart": 176,
+      "lineEnd": 220,
+      "proofLines": [
+        177,
+        178,
+        179,
+        180,
+        181,
+        182,
+        183,
+        184,
+        185,
+        186,
+        187,
+        188,
+        189,
+        190,
+        191,
+        192,
+        193,
+        194,
+        195,
+        196,
+        197,
+        198,
+        199,
+        200,
+        201,
+        202,
+        203,
+        204,
+        205,
+        206,
+        207,
+        208,
+        209,
+        210,
+        211,
+        212,
+        213,
+        214,
+        215,
+        216,
+        217,
+        218,
+        219,
+        220
+      ],
+      "proofRange": [
+        177,
+        220
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:FunUpdateType"
+      ]
+    },
+    "helper:ResultNext": {
+      "id": "helper:ResultNext",
+      "name": "ResultNext",
+      "kind": "helper",
+      "lineStart": 221,
+      "lineEnd": 222,
+      "proofLines": [
+        222
+      ],
+      "proofRange": [
+        222,
+        222
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:WaitCntNext": {
+      "id": "helper:WaitCntNext",
+      "name": "WaitCntNext",
+      "kind": "helper",
+      "lineStart": 223,
+      "lineEnd": 224,
+      "proofLines": [
+        224
+      ],
+      "proofRange": [
+        224,
+        224
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:EvictBoolNext": {
+      "id": "helper:EvictBoolNext",
+      "name": "EvictBoolNext",
+      "kind": "helper",
+      "lineStart": 225,
+      "lineEnd": 226,
+      "proofLines": [
+        226
+      ],
+      "proofRange": [
+        226,
+        226
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:E3Next": {
+      "id": "helper:E3Next",
+      "name": "E3Next",
+      "kind": "helper",
+      "lineStart": 227,
+      "lineEnd": 305,
+      "proofLines": [
+        228,
+        229,
+        230,
+        231,
+        232,
+        233,
+        234,
+        235,
+        236,
+        237,
+        238,
+        239,
+        240,
+        241,
+        242,
+        243,
+        244,
+        245,
+        246,
+        247,
+        248,
+        249,
+        250,
+        251,
+        252,
+        253,
+        254,
+        255,
+        256,
+        257,
+        258,
+        259,
+        260,
+        261,
+        262,
+        263,
+        264,
+        265,
+        266,
+        267,
+        268,
+        269,
+        270,
+        271,
+        272,
+        273,
+        274,
+        275,
+        276,
+        277,
+        278,
+        279,
+        280,
+        281,
+        282,
+        283,
+        284,
+        285,
+        286,
+        287,
+        288,
+        289,
+        290,
+        291,
+        292,
+        293,
+        294,
+        295,
+        296,
+        297,
+        298,
+        299,
+        300,
+        301,
+        302,
+        303,
+        304,
+        305
+      ],
+      "proofRange": [
+        228,
+        305
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:LoNext": {
+      "id": "helper:LoNext",
+      "name": "LoNext",
+      "kind": "helper",
+      "lineStart": 306,
+      "lineEnd": 353,
+      "proofLines": [
+        307,
+        308,
+        309,
+        310,
+        311,
+        312,
+        313,
+        314,
+        315,
+        316,
+        317,
+        318,
+        319,
+        320,
+        321,
+        322,
+        323,
+        324,
+        325,
+        326,
+        327,
+        328,
+        329,
+        330,
+        331,
+        332,
+        333,
+        334,
+        335,
+        336,
+        337,
+        338,
+        339,
+        340,
+        341,
+        342,
+        343,
+        344,
+        345,
+        346,
+        347,
+        348,
+        349,
+        350,
+        351,
+        352,
+        353
+      ],
+      "proofRange": [
+        307,
+        353
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:FunUpdateType",
+        "helper:KPos",
+        "helper:ModRange"
+      ]
+    },
+    "helper:TableNext": {
+      "id": "helper:TableNext",
+      "name": "TableNext",
+      "kind": "helper",
+      "lineStart": 354,
+      "lineEnd": 427,
+      "proofLines": [
+        355,
+        356,
+        357,
+        358,
+        359,
+        360,
+        361,
+        362,
+        363,
+        364,
+        365,
+        366,
+        367,
+        368,
+        369,
+        370,
+        371,
+        372,
+        373,
+        374,
+        375,
+        376,
+        377,
+        378,
+        379,
+        380,
+        381,
+        382,
+        383,
+        384,
+        385,
+        386,
+        387,
+        388,
+        389,
+        390,
+        391,
+        392,
+        393,
+        394,
+        395,
+        396,
+        397,
+        398,
+        399,
+        400,
+        401,
+        402,
+        403,
+        404,
+        405,
+        406,
+        407,
+        408,
+        409,
+        410,
+        411,
+        412,
+        413,
+        414,
+        415,
+        416,
+        417,
+        418,
+        419,
+        420,
+        421,
+        422,
+        423,
+        424,
+        425,
+        426,
+        427
+      ],
+      "proofRange": [
+        355,
+        427
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:FunUpdateType",
+        "helper:IdxRange",
+        "helper:KPos",
+        "helper:ModRange"
+      ]
+    },
+    "helper:ExpectedNext": {
+      "id": "helper:ExpectedNext",
+      "name": "ExpectedNext",
+      "kind": "helper",
+      "lineStart": 428,
+      "lineEnd": 459,
+      "proofLines": [
+        429,
+        430,
+        431,
+        432,
+        433,
+        434,
+        435,
+        436,
+        437,
+        438,
+        439,
+        440,
+        441,
+        442,
+        443,
+        444,
+        445,
+        446,
+        447,
+        448,
+        449,
+        450,
+        451,
+        452,
+        453,
+        454,
+        455,
+        456,
+        457,
+        458,
+        459
+      ],
+      "proofRange": [
+        429,
+        459
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:FunUpdateType",
+        "helper:IdxRange",
+        "helper:LNat"
+      ]
+    },
+    "helper:E23Next": {
+      "id": "helper:E23Next",
+      "name": "E23Next",
+      "kind": "helper",
+      "lineStart": 460,
+      "lineEnd": 533,
+      "proofLines": [
+        461,
+        462,
+        463,
+        464,
+        465,
+        466,
+        467,
+        468,
+        469,
+        470,
+        471,
+        472,
+        473,
+        474,
+        475,
+        476,
+        477,
+        478,
+        479,
+        480,
+        481,
+        482,
+        483,
+        484,
+        485,
+        486,
+        487,
+        488,
+        489,
+        490,
+        491,
+        492,
+        493,
+        494,
+        495,
+        496,
+        497,
+        498,
+        499,
+        500,
+        501,
+        502,
+        503,
+        504,
+        505,
+        506,
+        507,
+        508,
+        509,
+        510,
+        511,
+        512,
+        513,
+        514,
+        515,
+        516,
+        517,
+        518,
+        519,
+        520,
+        521,
+        522,
+        523,
+        524,
+        525,
+        526,
+        527,
+        528,
+        529,
+        530,
+        531,
+        532,
+        533
+      ],
+      "proofRange": [
+        461,
+        533
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:LNat"
+      ]
+    },
+    "helper:WCntPut": {
+      "id": "helper:WCntPut",
+      "name": "WCntPut",
+      "kind": "helper",
+      "lineStart": 534,
+      "lineEnd": 558,
+      "proofLines": [
+        535,
+        536,
+        537,
+        538,
+        539,
+        540,
+        541,
+        542,
+        543,
+        544,
+        545,
+        546,
+        547,
+        548,
+        549,
+        550,
+        551,
+        552,
+        553,
+        554,
+        555,
+        556,
+        557,
+        558
+      ],
+      "proofRange": [
+        535,
+        558
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:WriterFiniteFS"
+      ]
+    },
+    "helper:WCntEndWEv": {
+      "id": "helper:WCntEndWEv",
+      "name": "WCntEndWEv",
+      "kind": "helper",
+      "lineStart": 559,
+      "lineEnd": 577,
+      "proofLines": [
+        560,
+        561,
+        562,
+        563,
+        564,
+        565,
+        566,
+        567,
+        568,
+        569,
+        570,
+        571,
+        572,
+        573,
+        574,
+        575,
+        576,
+        577
+      ],
+      "proofRange": [
+        560,
+        577
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:WriterFiniteFS"
+      ]
+    },
+    "helper:WCntWaitEv": {
+      "id": "helper:WCntWaitEv",
+      "name": "WCntWaitEv",
+      "kind": "helper",
+      "lineStart": 579,
+      "lineEnd": 589,
+      "proofLines": [
+        580,
+        581,
+        582,
+        583,
+        584,
+        585,
+        586,
+        587,
+        588,
+        589
+      ],
+      "proofRange": [
+        580,
+        589
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:WCntRestW": {
+      "id": "helper:WCntRestW",
+      "name": "WCntRestW",
+      "kind": "helper",
+      "lineStart": 591,
+      "lineEnd": 598,
+      "proofLines": [
+        592,
+        593,
+        594,
+        595,
+        596,
+        597,
+        598
+      ],
+      "proofRange": [
+        592,
+        598
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:WCntRestS": {
+      "id": "helper:WCntRestS",
+      "name": "WCntRestS",
+      "kind": "helper",
+      "lineStart": 600,
+      "lineEnd": 625,
+      "proofLines": [
+        601,
+        602,
+        603,
+        604,
+        605,
+        606,
+        607,
+        608,
+        609,
+        610,
+        611,
+        612,
+        613,
+        614,
+        615,
+        616,
+        617,
+        618,
+        619,
+        620,
+        621,
+        622,
+        623,
+        624,
+        625
+      ],
+      "proofRange": [
+        601,
+        625
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:WCntRest": {
+      "id": "helper:WCntRest",
+      "name": "WCntRest",
+      "kind": "helper",
+      "lineStart": 627,
+      "lineEnd": 632,
+      "proofLines": [
+        628,
+        629,
+        630,
+        631,
+        632
+      ],
+      "proofRange": [
+        628,
+        632
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:WCntRestS",
+        "helper:WCntRestW"
+      ]
+    },
+    "helper:WCntNext": {
+      "id": "helper:WCntNext",
+      "name": "WCntNext",
+      "kind": "helper",
+      "lineStart": 634,
+      "lineEnd": 645,
+      "proofLines": [
+        635,
+        636,
+        637,
+        638,
+        639,
+        640,
+        641,
+        642,
+        643,
+        644,
+        645
+      ],
+      "proofRange": [
+        635,
+        645
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:WCntEndWEv",
+        "helper:WCntPut",
+        "helper:WCntRest",
+        "helper:WCntWaitEv"
+      ]
+    },
+    "helper:WCntFinNext": {
+      "id": "helper:WCntFinNext",
+      "name": "WCntFinNext",
+      "kind": "helper",
+      "lineStart": 647,
+      "lineEnd": 650,
+      "proofLines": [
+        648,
+        649,
+        650
+      ],
+      "proofRange": [
+        648,
+        650
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:WriterFiniteFS"
+      ]
+    },
+    "helper:CompNext": {
+      "id": "helper:CompNext",
+      "name": "CompNext",
+      "kind": "helper",
+      "lineStart": 652,
+      "lineEnd": 731,
+      "proofLines": [
+        653,
+        654,
+        655,
+        656,
+        657,
+        658,
+        659,
+        660,
+        661,
+        662,
+        663,
+        664,
+        665,
+        666,
+        667,
+        668,
+        669,
+        670,
+        671,
+        672,
+        673,
+        674,
+        675,
+        676,
+        677,
+        678,
+        679,
+        680,
+        681,
+        682,
+        683,
+        684,
+        685,
+        686,
+        687,
+        688,
+        689,
+        690,
+        691,
+        692,
+        693,
+        694,
+        695,
+        696,
+        697,
+        698,
+        699,
+        700,
+        701,
+        702,
+        703,
+        704,
+        705,
+        706,
+        707,
+        708,
+        709,
+        710,
+        711,
+        712,
+        713,
+        714,
+        715,
+        716,
+        717,
+        718,
+        719,
+        720,
+        721,
+        722,
+        723,
+        724,
+        725,
+        726,
+        727,
+        728,
+        729,
+        730,
+        731
+      ],
+      "proofRange": [
+        653,
+        731
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:PresCInv": {
+      "id": "helper:PresCInv",
+      "name": "PresCInv",
+      "kind": "helper",
+      "lineStart": 732,
+      "lineEnd": 733,
+      "proofLines": [
+        733
+      ],
+      "proofRange": [
+        733,
+        733
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:A3Next",
+        "helper:CompNext",
+        "helper:E23Next",
+        "helper:E3Next",
+        "helper:EiNext",
+        "helper:EjNext",
+        "helper:EvStackNext",
+        "helper:EvictBoolNext",
+        "helper:ExpectedNext",
+        "helper:FpNext",
+        "helper:HistNext",
+        "helper:IndexNext",
+        "helper:LoNext",
+        "helper:PcNext",
+        "helper:ResultNext",
+        "helper:StackNext",
+        "helper:TableNext",
+        "helper:WCntFinNext",
+        "helper:WCntNext",
+        "helper:WaitCntNext"
+      ]
+    },
+    "helper:SafeImpl": {
+      "id": "helper:SafeImpl",
+      "name": "SafeImpl",
+      "kind": "helper",
+      "lineStart": 735,
+      "lineEnd": 736,
+      "proofLines": [
+        736
+      ],
+      "proofRange": [
+        736,
+        736
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:StutterCInv": {
+      "id": "helper:StutterCInv",
+      "name": "StutterCInv",
+      "kind": "helper",
+      "lineStart": 738,
+      "lineEnd": 746,
+      "proofLines": [
+        739,
+        740,
+        741,
+        742,
+        743,
+        744,
+        745,
+        746
+      ],
+      "proofRange": [
+        739,
+        746
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    }
+  }
+}

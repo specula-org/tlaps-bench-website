@@ -1,0 +1,434 @@
+{
+  "schemaVersion": 1,
+  "specId": "tlaplus_examples_FlashProtocol/FlashWithMutex.tla",
+  "sourceName": "FlashWithMutex.tla",
+  "sourceSha256": "260911b4a41a569596f45ea4f0c38a6470462e18b6e17120ea3de967bb6ea55a",
+  "resultSha256": "3f4baf69b4ca5f3dc4d6e9c5f14ef94a6e0e7cfb99762f6fcf23682a8b9aa1ff",
+  "source": "---- MODULE FlashWithMutex ----\nEXTENDS FlashWithMutexDefs\n\n\\* BEGIN AGENT HELPERS\nLOCAL TL == INSTANCE TLAPS\nHelperAuxProcE == \\A p \\in NODE : Proc[p].CacheState = \"CACHE_E\" => Proc[p].CacheData \\in DATA\nHelperAuxUniPutData == \\A q \\in NODE : UniMsg[q].Cmd \\in {\"UNI_Put\", \"UNI_PutX\"} => UniMsg[q].Data \\in DATA\nHelperAuxUniPutProc == \\A q \\in NODE : UniMsg[q].Cmd \\in {\"UNI_Put\", \"UNI_PutX\"} => UniMsg[q].Proc \\in NODE\nHelperAuxWbData == WbMsg.Cmd = \"WB_Wb\" => WbMsg.Data \\in DATA\nHelperAuxWbProc == WbMsg.Cmd = \"WB_Wb\" => WbMsg.Proc \\in NODE\nHelperAuxShWbData == ShWbMsg.Cmd = \"SHWB_ShWb\" => ShWbMsg.Data \\in DATA\nHelperAuxShWbProc == ShWbMsg.Cmd # \"SHWB_None\" => ShWbMsg.Proc \\in NODE\nHelperAuxMin == HelperAuxProcE /\\ HelperAuxUniPutData /\\ HelperAuxUniPutProc /\\ HelperAuxWbData /\\ HelperAuxWbProc /\\ HelperAuxShWbData /\\ HelperAuxShWbProc\nHelperIndMin == TypeOK /\\ HelperAuxMin\nHelperDirP == Dir' \\in [Pending : BOOLEAN, Local : BOOLEAN, Dirty : BOOLEAN, HeadVld : BOOLEAN, HeadPtr : NodeU, ShrVld : BOOLEAN, ShrSet : SUBSET NODE, InvSet : SUBSET NODE]\n\nTHEOREM HelperIndMinThm == Spec => []HelperIndMin\n<1>1. Init => HelperIndMin\n  BY TL!SMTT(\"r30\") DEF Init, HelperIndMin, HelperAuxMin, HelperAuxProcE, HelperAuxUniPutData, HelperAuxUniPutProc, HelperAuxWbData, HelperAuxWbProc, HelperAuxShWbData, HelperAuxShWbProc, TypeOK, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU\n<1>2. HelperIndMin /\\ [Next]_vars => HelperIndMin'\n  <2>1. HelperIndMin /\\ [Next]_vars => Home' \\in NODE\n    BY TL!SMTT(\"r30\") DEF TypeOK, HelperAuxProcE, HelperAuxUniPutData, HelperAuxUniPutProc, HelperAuxWbData, HelperAuxWbProc, HelperAuxShWbData, HelperAuxShWbProc, HelperAuxMin, HelperIndMin, Next, vars, pendVars, fwdVars, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, Store, PI_Remote, PI_Local_Get_Get, PI_Local_Get_Put, PI_Local_GetX_GetX, PI_Local_GetX_PutX_Inv, PI_Local_GetX_PutX_Grant, PI_Local_GetX_PutX, PI_Remote_PutX, PI_Local_PutX, PI_Remote_Replace, PI_Local_Replace, NI_Nak, NI_Nak_Clear, NI_Local_Get_Nak, NI_Local_Get_Get, NI_Local_Get_Put, NI_Remote_Nak, NI_Remote_Get_Put, NI_Local_GetX_Nak, NI_Local_GetX_GetX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, NI_Local_GetX_PutX, NI_Remote_GetX_PutX, NI_Local_Put, NI_Remote_Put, NI_Local_PutXAcksDone, NI_Remote_PutX, NI_Inv, NI_InvAck_More, NI_InvAck_Last, NI_InvAck, NI_Wb, NI_FAck, NI_ShWb, NI_Replace, InvNodes, NoOtherSharers, ProcHomeInvalid, ProcHomeInvalidMarked, ReqCmd\n  <2>2. HelperIndMin /\\ [Next]_vars => Proc' \\in [NODE -> [ProcCmd : NODE_CMD, InvMarked : BOOLEAN, CacheState : CACHE_STATE, CacheData : DataU]]\n    BY TL!SMTT(\"r30\") DEF TypeOK, HelperAuxProcE, HelperAuxUniPutData, HelperAuxUniPutProc, HelperAuxWbData, HelperAuxWbProc, HelperAuxShWbData, HelperAuxShWbProc, HelperAuxMin, HelperIndMin, Next, vars, pendVars, fwdVars, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, Store, PI_Remote, PI_Local_Get_Get, PI_Local_Get_Put, PI_Local_GetX_GetX, PI_Local_GetX_PutX_Inv, PI_Local_GetX_PutX_Grant, PI_Local_GetX_PutX, PI_Remote_PutX, PI_Local_PutX, PI_Remote_Replace, PI_Local_Replace, NI_Nak, NI_Nak_Clear, NI_Local_Get_Nak, NI_Local_Get_Get, NI_Local_Get_Put, NI_Remote_Nak, NI_Remote_Get_Put, NI_Local_GetX_Nak, NI_Local_GetX_GetX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, NI_Local_GetX_PutX, NI_Remote_GetX_PutX, NI_Local_Put, NI_Remote_Put, NI_Local_PutXAcksDone, NI_Remote_PutX, NI_Inv, NI_InvAck_More, NI_InvAck_Last, NI_InvAck, NI_Wb, NI_FAck, NI_ShWb, NI_Replace, InvNodes, NoOtherSharers, ProcHomeInvalid, ProcHomeInvalidMarked, ReqCmd\n  <2>3. HelperIndMin /\\ [Next]_vars => MemData' \\in DATA\n    BY TL!SMTT(\"r30\") DEF TypeOK, HelperAuxProcE, HelperAuxUniPutData, HelperAuxUniPutProc, HelperAuxWbData, HelperAuxWbProc, HelperAuxShWbData, HelperAuxShWbProc, HelperAuxMin, HelperIndMin, Next, vars, pendVars, fwdVars, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, Store, PI_Remote, PI_Local_Get_Get, PI_Local_Get_Put, PI_Local_GetX_GetX, PI_Local_GetX_PutX_Inv, PI_Local_GetX_PutX_Grant, PI_Local_GetX_PutX, PI_Remote_PutX, PI_Local_PutX, PI_Remote_Replace, PI_Local_Replace, NI_Nak, NI_Nak_Clear, NI_Local_Get_Nak, NI_Local_Get_Get, NI_Local_Get_Put, NI_Remote_Nak, NI_Remote_Get_Put, NI_Local_GetX_Nak, NI_Local_GetX_GetX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, NI_Local_GetX_PutX, NI_Remote_GetX_PutX, NI_Local_Put, NI_Remote_Put, NI_Local_PutXAcksDone, NI_Remote_PutX, NI_Inv, NI_InvAck_More, NI_InvAck_Last, NI_InvAck, NI_Wb, NI_FAck, NI_ShWb, NI_Replace, InvNodes, NoOtherSharers, ProcHomeInvalid, ProcHomeInvalidMarked, ReqCmd\n  <2>4. HelperIndMin /\\ [Next]_vars => UniMsg' \\in [NODE -> [Cmd : UNI_CMD, Proc : NodeU, Data : DataU]]\n    BY TL!SMTT(\"r30\") DEF TypeOK, HelperAuxProcE, HelperAuxUniPutData, HelperAuxUniPutProc, HelperAuxWbData, HelperAuxWbProc, HelperAuxShWbData, HelperAuxShWbProc, HelperAuxMin, HelperIndMin, Next, vars, pendVars, fwdVars, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, Store, PI_Remote, PI_Local_Get_Get, PI_Local_Get_Put, PI_Local_GetX_GetX, PI_Local_GetX_PutX_Inv, PI_Local_GetX_PutX_Grant, PI_Local_GetX_PutX, PI_Remote_PutX, PI_Local_PutX, PI_Remote_Replace, PI_Local_Replace, NI_Nak, NI_Nak_Clear, NI_Local_Get_Nak, NI_Local_Get_Get, NI_Local_Get_Put, NI_Remote_Nak, NI_Remote_Get_Put, NI_Local_GetX_Nak, NI_Local_GetX_GetX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, NI_Local_GetX_PutX, NI_Remote_GetX_PutX, NI_Local_Put, NI_Remote_Put, NI_Local_PutXAcksDone, NI_Remote_PutX, NI_Inv, NI_InvAck_More, NI_InvAck_Last, NI_InvAck, NI_Wb, NI_FAck, NI_ShWb, NI_Replace, InvNodes, NoOtherSharers, ProcHomeInvalid, ProcHomeInvalidMarked, ReqCmd\n  <2>5. HelperIndMin /\\ [Next]_vars => InvMsg' \\in [NODE -> [Cmd : INV_CMD]]\n    BY TL!SMTT(\"r30\") DEF TypeOK, HelperAuxProcE, HelperAuxUniPutData, HelperAuxUniPutProc, HelperAuxWbData, HelperAuxWbProc, HelperAuxShWbData, HelperAuxShWbProc, HelperAuxMin, HelperIndMin, Next, vars, pendVars, fwdVars, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, Store, PI_Remote, PI_Local_Get_Get, PI_Local_Get_Put, PI_Local_GetX_GetX, PI_Local_GetX_PutX_Inv, PI_Local_GetX_PutX_Grant, PI_Local_GetX_PutX, PI_Remote_PutX, PI_Local_PutX, PI_Remote_Replace, PI_Local_Replace, NI_Nak, NI_Nak_Clear, NI_Local_Get_Nak, NI_Local_Get_Get, NI_Local_Get_Put, NI_Remote_Nak, NI_Remote_Get_Put, NI_Local_GetX_Nak, NI_Local_GetX_GetX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, NI_Local_GetX_PutX, NI_Remote_GetX_PutX, NI_Local_Put, NI_Remote_Put, NI_Local_PutXAcksDone, NI_Remote_PutX, NI_Inv, NI_InvAck_More, NI_InvAck_Last, NI_InvAck, NI_Wb, NI_FAck, NI_ShWb, NI_Replace, InvNodes, NoOtherSharers, ProcHomeInvalid, ProcHomeInvalidMarked, ReqCmd\n  <2>6. HelperIndMin /\\ [Next]_vars => RpMsg' \\in [NODE -> [Cmd : RP_CMD]]\n    BY TL!SMTT(\"r30\") DEF TypeOK, HelperAuxProcE, HelperAuxUniPutData, HelperAuxUniPutProc, HelperAuxWbData, HelperAuxWbProc, HelperAuxShWbData, HelperAuxShWbProc, HelperAuxMin, HelperIndMin, Next, vars, pendVars, fwdVars, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, Store, PI_Remote, PI_Local_Get_Get, PI_Local_Get_Put, PI_Local_GetX_GetX, PI_Local_GetX_PutX_Inv, PI_Local_GetX_PutX_Grant, PI_Local_GetX_PutX, PI_Remote_PutX, PI_Local_PutX, PI_Remote_Replace, PI_Local_Replace, NI_Nak, NI_Nak_Clear, NI_Local_Get_Nak, NI_Local_Get_Get, NI_Local_Get_Put, NI_Remote_Nak, NI_Remote_Get_Put, NI_Local_GetX_Nak, NI_Local_GetX_GetX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, NI_Local_GetX_PutX, NI_Remote_GetX_PutX, NI_Local_Put, NI_Remote_Put, NI_Local_PutXAcksDone, NI_Remote_PutX, NI_Inv, NI_InvAck_More, NI_InvAck_Last, NI_InvAck, NI_Wb, NI_FAck, NI_ShWb, NI_Replace, InvNodes, NoOtherSharers, ProcHomeInvalid, ProcHomeInvalidMarked, ReqCmd\n  <2>7. HelperIndMin /\\ [Next]_vars => WbMsg' \\in [Cmd : WB_CMD, Proc : NodeU, Data : DataU]\n    BY TL!SMTT(\"r30\") DEF TypeOK, HelperAuxProcE, HelperAuxUniPutData, HelperAuxUniPutProc, HelperAuxWbData, HelperAuxWbProc, HelperAuxShWbData, HelperAuxShWbProc, HelperAuxMin, HelperIndMin, Next, vars, pendVars, fwdVars, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, Store, PI_Remote, PI_Local_Get_Get, PI_Local_Get_Put, PI_Local_GetX_GetX, PI_Local_GetX_PutX_Inv, PI_Local_GetX_PutX_Grant, PI_Local_GetX_PutX, PI_Remote_PutX, PI_Local_PutX, PI_Remote_Replace, PI_Local_Replace, NI_Nak, NI_Nak_Clear, NI_Local_Get_Nak, NI_Local_Get_Get, NI_Local_Get_Put, NI_Remote_Nak, NI_Remote_Get_Put, NI_Local_GetX_Nak, NI_Local_GetX_GetX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, NI_Local_GetX_PutX, NI_Remote_GetX_PutX, NI_Local_Put, NI_Remote_Put, NI_Local_PutXAcksDone, NI_Remote_PutX, NI_Inv, NI_InvAck_More, NI_InvAck_Last, NI_InvAck, NI_Wb, NI_FAck, NI_ShWb, NI_Replace, InvNodes, NoOtherSharers, ProcHomeInvalid, ProcHomeInvalidMarked, ReqCmd\n  <2>8. HelperIndMin /\\ [Next]_vars => ShWbMsg' \\in [Cmd : SHWB_CMD, Proc : NodeU, Data : DataU]\n    BY TL!SMTT(\"r30\") DEF TypeOK, HelperAuxProcE, HelperAuxUniPutData, HelperAuxUniPutProc, HelperAuxWbData, HelperAuxWbProc, HelperAuxShWbData, HelperAuxShWbProc, HelperAuxMin, HelperIndMin, Next, vars, pendVars, fwdVars, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, Store, PI_Remote, PI_Local_Get_Get, PI_Local_Get_Put, PI_Local_GetX_GetX, PI_Local_GetX_PutX_Inv, PI_Local_GetX_PutX_Grant, PI_Local_GetX_PutX, PI_Remote_PutX, PI_Local_PutX, PI_Remote_Replace, PI_Local_Replace, NI_Nak, NI_Nak_Clear, NI_Local_Get_Nak, NI_Local_Get_Get, NI_Local_Get_Put, NI_Remote_Nak, NI_Remote_Get_Put, NI_Local_GetX_Nak, NI_Local_GetX_GetX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, NI_Local_GetX_PutX, NI_Remote_GetX_PutX, NI_Local_Put, NI_Remote_Put, NI_Local_PutXAcksDone, NI_Remote_PutX, NI_Inv, NI_InvAck_More, NI_InvAck_Last, NI_InvAck, NI_Wb, NI_FAck, NI_ShWb, NI_Replace, InvNodes, NoOtherSharers, ProcHomeInvalid, ProcHomeInvalidMarked, ReqCmd\n  <2>9. HelperIndMin /\\ [Next]_vars => NakcMsg' \\in [Cmd : NAKC_CMD]\n    BY TL!SMTT(\"r30\") DEF TypeOK, HelperAuxProcE, HelperAuxUniPutData, HelperAuxUniPutProc, HelperAuxWbData, HelperAuxWbProc, HelperAuxShWbData, HelperAuxShWbProc, HelperAuxMin, HelperIndMin, Next, vars, pendVars, fwdVars, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, Store, PI_Remote, PI_Local_Get_Get, PI_Local_Get_Put, PI_Local_GetX_GetX, PI_Local_GetX_PutX_Inv, PI_Local_GetX_PutX_Grant, PI_Local_GetX_PutX, PI_Remote_PutX, PI_Local_PutX, PI_Remote_Replace, PI_Local_Replace, NI_Nak, NI_Nak_Clear, NI_Local_Get_Nak, NI_Local_Get_Get, NI_Local_Get_Put, NI_Remote_Nak, NI_Remote_Get_Put, NI_Local_GetX_Nak, NI_Local_GetX_GetX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, NI_Local_GetX_PutX, NI_Remote_GetX_PutX, NI_Local_Put, NI_Remote_Put, NI_Local_PutXAcksDone, NI_Remote_PutX, NI_Inv, NI_InvAck_More, NI_InvAck_Last, NI_InvAck, NI_Wb, NI_FAck, NI_ShWb, NI_Replace, InvNodes, NoOtherSharers, ProcHomeInvalid, ProcHomeInvalidMarked, ReqCmd\n  <2>10. HelperIndMin /\\ [Next]_vars => CurrData' \\in DATA\n    BY TL!SMTT(\"r30\") DEF TypeOK, HelperAuxProcE, HelperAuxUniPutData, HelperAuxUniPutProc, HelperAuxWbData, HelperAuxWbProc, HelperAuxShWbData, HelperAuxShWbProc, HelperAuxMin, HelperIndMin, Next, vars, pendVars, fwdVars, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, Store, PI_Remote, PI_Local_Get_Get, PI_Local_Get_Put, PI_Local_GetX_GetX, PI_Local_GetX_PutX_Inv, PI_Local_GetX_PutX_Grant, PI_Local_GetX_PutX, PI_Remote_PutX, PI_Local_PutX, PI_Remote_Replace, PI_Local_Replace, NI_Nak, NI_Nak_Clear, NI_Local_Get_Nak, NI_Local_Get_Get, NI_Local_Get_Put, NI_Remote_Nak, NI_Remote_Get_Put, NI_Local_GetX_Nak, NI_Local_GetX_GetX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, NI_Local_GetX_PutX, NI_Remote_GetX_PutX, NI_Local_Put, NI_Remote_Put, NI_Local_PutXAcksDone, NI_Remote_PutX, NI_Inv, NI_InvAck_More, NI_InvAck_Last, NI_InvAck, NI_Wb, NI_FAck, NI_ShWb, NI_Replace, InvNodes, NoOtherSharers, ProcHomeInvalid, ProcHomeInvalidMarked, ReqCmd\n  <2>11. HelperIndMin /\\ [Next]_vars => PrevData' \\in DATA\n    BY TL!SMTT(\"r30\") DEF TypeOK, HelperAuxProcE, HelperAuxUniPutData, HelperAuxUniPutProc, HelperAuxWbData, HelperAuxWbProc, HelperAuxShWbData, HelperAuxShWbProc, HelperAuxMin, HelperIndMin, Next, vars, pendVars, fwdVars, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, Store, PI_Remote, PI_Local_Get_Get, PI_Local_Get_Put, PI_Local_GetX_GetX, PI_Local_GetX_PutX_Inv, PI_Local_GetX_PutX_Grant, PI_Local_GetX_PutX, PI_Remote_PutX, PI_Local_PutX, PI_Remote_Replace, PI_Local_Replace, NI_Nak, NI_Nak_Clear, NI_Local_Get_Nak, NI_Local_Get_Get, NI_Local_Get_Put, NI_Remote_Nak, NI_Remote_Get_Put, NI_Local_GetX_Nak, NI_Local_GetX_GetX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, NI_Local_GetX_PutX, NI_Remote_GetX_PutX, NI_Local_Put, NI_Remote_Put, NI_Local_PutXAcksDone, NI_Remote_PutX, NI_Inv, NI_InvAck_More, NI_InvAck_Last, NI_InvAck, NI_Wb, NI_FAck, NI_ShWb, NI_Replace, InvNodes, NoOtherSharers, ProcHomeInvalid, ProcHomeInvalidMarked, ReqCmd\n  <2>12. HelperIndMin /\\ [Next]_vars => PendReqSrc' \\in NodeU\n    BY TL!SMTT(\"r30\") DEF TypeOK, HelperAuxProcE, HelperAuxUniPutData, HelperAuxUniPutProc, HelperAuxWbData, HelperAuxWbProc, HelperAuxShWbData, HelperAuxShWbProc, HelperAuxMin, HelperIndMin, Next, vars, pendVars, fwdVars, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, Store, PI_Remote, PI_Local_Get_Get, PI_Local_Get_Put, PI_Local_GetX_GetX, PI_Local_GetX_PutX_Inv, PI_Local_GetX_PutX_Grant, PI_Local_GetX_PutX, PI_Remote_PutX, PI_Local_PutX, PI_Remote_Replace, PI_Local_Replace, NI_Nak, NI_Nak_Clear, NI_Local_Get_Nak, NI_Local_Get_Get, NI_Local_Get_Put, NI_Remote_Nak, NI_Remote_Get_Put, NI_Local_GetX_Nak, NI_Local_GetX_GetX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, NI_Local_GetX_PutX, NI_Remote_GetX_PutX, NI_Local_Put, NI_Remote_Put, NI_Local_PutXAcksDone, NI_Remote_PutX, NI_Inv, NI_InvAck_More, NI_InvAck_Last, NI_InvAck, NI_Wb, NI_FAck, NI_ShWb, NI_Replace, InvNodes, NoOtherSharers, ProcHomeInvalid, ProcHomeInvalidMarked, ReqCmd\n  <2>13. HelperIndMin /\\ [Next]_vars => PendReqCmd' \\in UniU\n    BY TL!SMTT(\"r30\") DEF TypeOK, HelperAuxProcE, HelperAuxUniPutData, HelperAuxUniPutProc, HelperAuxWbData, HelperAuxWbProc, HelperAuxShWbData, HelperAuxShWbProc, HelperAuxMin, HelperIndMin, Next, vars, pendVars, fwdVars, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, Store, PI_Remote, PI_Local_Get_Get, PI_Local_Get_Put, PI_Local_GetX_GetX, PI_Local_GetX_PutX_Inv, PI_Local_GetX_PutX_Grant, PI_Local_GetX_PutX, PI_Remote_PutX, PI_Local_PutX, PI_Remote_Replace, PI_Local_Replace, NI_Nak, NI_Nak_Clear, NI_Local_Get_Nak, NI_Local_Get_Get, NI_Local_Get_Put, NI_Remote_Nak, NI_Remote_Get_Put, NI_Local_GetX_Nak, NI_Local_GetX_GetX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, NI_Local_GetX_PutX, NI_Remote_GetX_PutX, NI_Local_Put, NI_Remote_Put, NI_Local_PutXAcksDone, NI_Remote_PutX, NI_Inv, NI_InvAck_More, NI_InvAck_Last, NI_InvAck, NI_Wb, NI_FAck, NI_ShWb, NI_Replace, InvNodes, NoOtherSharers, ProcHomeInvalid, ProcHomeInvalidMarked, ReqCmd\n  <2>14. HelperIndMin /\\ [Next]_vars => Collecting' \\in BOOLEAN\n    BY TL!SMTT(\"r30\") DEF TypeOK, HelperAuxProcE, HelperAuxUniPutData, HelperAuxUniPutProc, HelperAuxWbData, HelperAuxWbProc, HelperAuxShWbData, HelperAuxShWbProc, HelperAuxMin, HelperIndMin, Next, vars, pendVars, fwdVars, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, Store, PI_Remote, PI_Local_Get_Get, PI_Local_Get_Put, PI_Local_GetX_GetX, PI_Local_GetX_PutX_Inv, PI_Local_GetX_PutX_Grant, PI_Local_GetX_PutX, PI_Remote_PutX, PI_Local_PutX, PI_Remote_Replace, PI_Local_Replace, NI_Nak, NI_Nak_Clear, NI_Local_Get_Nak, NI_Local_Get_Get, NI_Local_Get_Put, NI_Remote_Nak, NI_Remote_Get_Put, NI_Local_GetX_Nak, NI_Local_GetX_GetX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, NI_Local_GetX_PutX, NI_Remote_GetX_PutX, NI_Local_Put, NI_Remote_Put, NI_Local_PutXAcksDone, NI_Remote_PutX, NI_Inv, NI_InvAck_More, NI_InvAck_Last, NI_InvAck, NI_Wb, NI_FAck, NI_ShWb, NI_Replace, InvNodes, NoOtherSharers, ProcHomeInvalid, ProcHomeInvalidMarked, ReqCmd\n  <2>15. HelperIndMin /\\ [Next]_vars => FwdCmd' \\in UNI_CMD\n    BY TL!SMTT(\"r30\") DEF TypeOK, HelperAuxProcE, HelperAuxUniPutData, HelperAuxUniPutProc, HelperAuxWbData, HelperAuxWbProc, HelperAuxShWbData, HelperAuxShWbProc, HelperAuxMin, HelperIndMin, Next, vars, pendVars, fwdVars, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, Store, PI_Remote, PI_Local_Get_Get, PI_Local_Get_Put, PI_Local_GetX_GetX, PI_Local_GetX_PutX_Inv, PI_Local_GetX_PutX_Grant, PI_Local_GetX_PutX, PI_Remote_PutX, PI_Local_PutX, PI_Remote_Replace, PI_Local_Replace, NI_Nak, NI_Nak_Clear, NI_Local_Get_Nak, NI_Local_Get_Get, NI_Local_Get_Put, NI_Remote_Nak, NI_Remote_Get_Put, NI_Local_GetX_Nak, NI_Local_GetX_GetX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, NI_Local_GetX_PutX, NI_Remote_GetX_PutX, NI_Local_Put, NI_Remote_Put, NI_Local_PutXAcksDone, NI_Remote_PutX, NI_Inv, NI_InvAck_More, NI_InvAck_Last, NI_InvAck, NI_Wb, NI_FAck, NI_ShWb, NI_Replace, InvNodes, NoOtherSharers, ProcHomeInvalid, ProcHomeInvalidMarked, ReqCmd\n  <2>16. HelperIndMin /\\ [Next]_vars => FwdSrc' \\in NodeU\n    BY TL!SMTT(\"r30\") DEF TypeOK, HelperAuxProcE, HelperAuxUniPutData, HelperAuxUniPutProc, HelperAuxWbData, HelperAuxWbProc, HelperAuxShWbData, HelperAuxShWbProc, HelperAuxMin, HelperIndMin, Next, vars, pendVars, fwdVars, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, Store, PI_Remote, PI_Local_Get_Get, PI_Local_Get_Put, PI_Local_GetX_GetX, PI_Local_GetX_PutX_Inv, PI_Local_GetX_PutX_Grant, PI_Local_GetX_PutX, PI_Remote_PutX, PI_Local_PutX, PI_Remote_Replace, PI_Local_Replace, NI_Nak, NI_Nak_Clear, NI_Local_Get_Nak, NI_Local_Get_Get, NI_Local_Get_Put, NI_Remote_Nak, NI_Remote_Get_Put, NI_Local_GetX_Nak, NI_Local_GetX_GetX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, NI_Local_GetX_PutX, NI_Remote_GetX_PutX, NI_Local_Put, NI_Remote_Put, NI_Local_PutXAcksDone, NI_Remote_PutX, NI_Inv, NI_InvAck_More, NI_InvAck_Last, NI_InvAck, NI_Wb, NI_FAck, NI_ShWb, NI_Replace, InvNodes, NoOtherSharers, ProcHomeInvalid, ProcHomeInvalidMarked, ReqCmd\n  <2>17. HelperIndMin /\\ [Next]_vars => HelperAuxProcE'\n    BY TL!SMTT(\"r30\") DEF TypeOK, HelperAuxProcE, HelperAuxUniPutData, HelperAuxUniPutProc, HelperAuxWbData, HelperAuxWbProc, HelperAuxShWbData, HelperAuxShWbProc, HelperAuxMin, HelperIndMin, Next, vars, pendVars, fwdVars, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, Store, PI_Remote, PI_Local_Get_Get, PI_Local_Get_Put, PI_Local_GetX_GetX, PI_Local_GetX_PutX_Inv, PI_Local_GetX_PutX_Grant, PI_Local_GetX_PutX, PI_Remote_PutX, PI_Local_PutX, PI_Remote_Replace, PI_Local_Replace, NI_Nak, NI_Nak_Clear, NI_Local_Get_Nak, NI_Local_Get_Get, NI_Local_Get_Put, NI_Remote_Nak, NI_Remote_Get_Put, NI_Local_GetX_Nak, NI_Local_GetX_GetX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, NI_Local_GetX_PutX, NI_Remote_GetX_PutX, NI_Local_Put, NI_Remote_Put, NI_Local_PutXAcksDone, NI_Remote_PutX, NI_Inv, NI_InvAck_More, NI_InvAck_Last, NI_InvAck, NI_Wb, NI_FAck, NI_ShWb, NI_Replace, InvNodes, NoOtherSharers, ProcHomeInvalid, ProcHomeInvalidMarked, ReqCmd\n  <2>18. HelperIndMin /\\ [Next]_vars => HelperAuxUniPutData'\n    BY TL!SMTT(\"r30\") DEF TypeOK, HelperAuxProcE, HelperAuxUniPutData, HelperAuxUniPutProc, HelperAuxWbData, HelperAuxWbProc, HelperAuxShWbData, HelperAuxShWbProc, HelperAuxMin, HelperIndMin, Next, vars, pendVars, fwdVars, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, Store, PI_Remote, PI_Local_Get_Get, PI_Local_Get_Put, PI_Local_GetX_GetX, PI_Local_GetX_PutX_Inv, PI_Local_GetX_PutX_Grant, PI_Local_GetX_PutX, PI_Remote_PutX, PI_Local_PutX, PI_Remote_Replace, PI_Local_Replace, NI_Nak, NI_Nak_Clear, NI_Local_Get_Nak, NI_Local_Get_Get, NI_Local_Get_Put, NI_Remote_Nak, NI_Remote_Get_Put, NI_Local_GetX_Nak, NI_Local_GetX_GetX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, NI_Local_GetX_PutX, NI_Remote_GetX_PutX, NI_Local_Put, NI_Remote_Put, NI_Local_PutXAcksDone, NI_Remote_PutX, NI_Inv, NI_InvAck_More, NI_InvAck_Last, NI_InvAck, NI_Wb, NI_FAck, NI_ShWb, NI_Replace, InvNodes, NoOtherSharers, ProcHomeInvalid, ProcHomeInvalidMarked, ReqCmd\n  <2>19. HelperIndMin /\\ [Next]_vars => HelperAuxUniPutProc'\n    BY TL!SMTT(\"r30\") DEF TypeOK, HelperAuxProcE, HelperAuxUniPutData, HelperAuxUniPutProc, HelperAuxWbData, HelperAuxWbProc, HelperAuxShWbData, HelperAuxShWbProc, HelperAuxMin, HelperIndMin, Next, vars, pendVars, fwdVars, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, Store, PI_Remote, PI_Local_Get_Get, PI_Local_Get_Put, PI_Local_GetX_GetX, PI_Local_GetX_PutX_Inv, PI_Local_GetX_PutX_Grant, PI_Local_GetX_PutX, PI_Remote_PutX, PI_Local_PutX, PI_Remote_Replace, PI_Local_Replace, NI_Nak, NI_Nak_Clear, NI_Local_Get_Nak, NI_Local_Get_Get, NI_Local_Get_Put, NI_Remote_Nak, NI_Remote_Get_Put, NI_Local_GetX_Nak, NI_Local_GetX_GetX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, NI_Local_GetX_PutX, NI_Remote_GetX_PutX, NI_Local_Put, NI_Remote_Put, NI_Local_PutXAcksDone, NI_Remote_PutX, NI_Inv, NI_InvAck_More, NI_InvAck_Last, NI_InvAck, NI_Wb, NI_FAck, NI_ShWb, NI_Replace, InvNodes, NoOtherSharers, ProcHomeInvalid, ProcHomeInvalidMarked, ReqCmd\n  <2>20. HelperIndMin /\\ [Next]_vars => HelperAuxWbData'\n    BY TL!SMTT(\"r30\") DEF TypeOK, HelperAuxProcE, HelperAuxUniPutData, HelperAuxUniPutProc, HelperAuxWbData, HelperAuxWbProc, HelperAuxShWbData, HelperAuxShWbProc, HelperAuxMin, HelperIndMin, Next, vars, pendVars, fwdVars, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, Store, PI_Remote, PI_Local_Get_Get, PI_Local_Get_Put, PI_Local_GetX_GetX, PI_Local_GetX_PutX_Inv, PI_Local_GetX_PutX_Grant, PI_Local_GetX_PutX, PI_Remote_PutX, PI_Local_PutX, PI_Remote_Replace, PI_Local_Replace, NI_Nak, NI_Nak_Clear, NI_Local_Get_Nak, NI_Local_Get_Get, NI_Local_Get_Put, NI_Remote_Nak, NI_Remote_Get_Put, NI_Local_GetX_Nak, NI_Local_GetX_GetX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, NI_Local_GetX_PutX, NI_Remote_GetX_PutX, NI_Local_Put, NI_Remote_Put, NI_Local_PutXAcksDone, NI_Remote_PutX, NI_Inv, NI_InvAck_More, NI_InvAck_Last, NI_InvAck, NI_Wb, NI_FAck, NI_ShWb, NI_Replace, InvNodes, NoOtherSharers, ProcHomeInvalid, ProcHomeInvalidMarked, ReqCmd\n  <2>21. HelperIndMin /\\ [Next]_vars => HelperAuxWbProc'\n    BY TL!SMTT(\"r30\") DEF TypeOK, HelperAuxProcE, HelperAuxUniPutData, HelperAuxUniPutProc, HelperAuxWbData, HelperAuxWbProc, HelperAuxShWbData, HelperAuxShWbProc, HelperAuxMin, HelperIndMin, Next, vars, pendVars, fwdVars, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, Store, PI_Remote, PI_Local_Get_Get, PI_Local_Get_Put, PI_Local_GetX_GetX, PI_Local_GetX_PutX_Inv, PI_Local_GetX_PutX_Grant, PI_Local_GetX_PutX, PI_Remote_PutX, PI_Local_PutX, PI_Remote_Replace, PI_Local_Replace, NI_Nak, NI_Nak_Clear, NI_Local_Get_Nak, NI_Local_Get_Get, NI_Local_Get_Put, NI_Remote_Nak, NI_Remote_Get_Put, NI_Local_GetX_Nak, NI_Local_GetX_GetX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, NI_Local_GetX_PutX, NI_Remote_GetX_PutX, NI_Local_Put, NI_Remote_Put, NI_Local_PutXAcksDone, NI_Remote_PutX, NI_Inv, NI_InvAck_More, NI_InvAck_Last, NI_InvAck, NI_Wb, NI_FAck, NI_ShWb, NI_Replace, InvNodes, NoOtherSharers, ProcHomeInvalid, ProcHomeInvalidMarked, ReqCmd\n  <2>22. HelperIndMin /\\ [Next]_vars => HelperAuxShWbData'\n    BY TL!SMTT(\"r30\") DEF TypeOK, HelperAuxProcE, HelperAuxUniPutData, HelperAuxUniPutProc, HelperAuxWbData, HelperAuxWbProc, HelperAuxShWbData, HelperAuxShWbProc, HelperAuxMin, HelperIndMin, Next, vars, pendVars, fwdVars, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, Store, PI_Remote, PI_Local_Get_Get, PI_Local_Get_Put, PI_Local_GetX_GetX, PI_Local_GetX_PutX_Inv, PI_Local_GetX_PutX_Grant, PI_Local_GetX_PutX, PI_Remote_PutX, PI_Local_PutX, PI_Remote_Replace, PI_Local_Replace, NI_Nak, NI_Nak_Clear, NI_Local_Get_Nak, NI_Local_Get_Get, NI_Local_Get_Put, NI_Remote_Nak, NI_Remote_Get_Put, NI_Local_GetX_Nak, NI_Local_GetX_GetX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, NI_Local_GetX_PutX, NI_Remote_GetX_PutX, NI_Local_Put, NI_Remote_Put, NI_Local_PutXAcksDone, NI_Remote_PutX, NI_Inv, NI_InvAck_More, NI_InvAck_Last, NI_InvAck, NI_Wb, NI_FAck, NI_ShWb, NI_Replace, InvNodes, NoOtherSharers, ProcHomeInvalid, ProcHomeInvalidMarked, ReqCmd\n  <2>23. HelperIndMin /\\ [Next]_vars => HelperAuxShWbProc'\n    BY TL!SMTT(\"r30\") DEF TypeOK, HelperAuxProcE, HelperAuxUniPutData, HelperAuxUniPutProc, HelperAuxWbData, HelperAuxWbProc, HelperAuxShWbData, HelperAuxShWbProc, HelperAuxMin, HelperIndMin, Next, vars, pendVars, fwdVars, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, Store, PI_Remote, PI_Local_Get_Get, PI_Local_Get_Put, PI_Local_GetX_GetX, PI_Local_GetX_PutX_Inv, PI_Local_GetX_PutX_Grant, PI_Local_GetX_PutX, PI_Remote_PutX, PI_Local_PutX, PI_Remote_Replace, PI_Local_Replace, NI_Nak, NI_Nak_Clear, NI_Local_Get_Nak, NI_Local_Get_Get, NI_Local_Get_Put, NI_Remote_Nak, NI_Remote_Get_Put, NI_Local_GetX_Nak, NI_Local_GetX_GetX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv, NI_Local_GetX_PutX, NI_Remote_GetX_PutX, NI_Local_Put, NI_Remote_Put, NI_Local_PutXAcksDone, NI_Remote_PutX, NI_Inv, NI_InvAck_More, NI_InvAck_Last, NI_InvAck, NI_Wb, NI_FAck, NI_ShWb, NI_Replace, InvNodes, NoOtherSharers, ProcHomeInvalid, ProcHomeInvalidMarked, ReqCmd\n  <2>24. HelperIndMin /\\ [Next]_vars => HelperDirP\n    <3>0. HelperIndMin /\\ UNCHANGED vars => HelperDirP\n      BY TL!SMTT(\"r30\") DEF TypeOK, HelperAuxProcE, HelperAuxUniPutData, HelperAuxUniPutProc, HelperAuxWbData, HelperAuxWbProc, HelperAuxShWbData, HelperAuxShWbProc, HelperAuxMin, HelperIndMin, HelperDirP, vars, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU\n    <3>1. HelperIndMin /\\ (\\E src \\in NODE, data \\in DATA : Store(src, data)) => HelperDirP\n      <4>1. \\A src \\in NODE, data \\in DATA : HelperIndMin /\\ Store(src, data) => HelperDirP\n        BY TL!SMTT(\"r30\") DEF TypeOK, HelperAuxProcE, HelperAuxUniPutData, HelperAuxUniPutProc, HelperAuxWbData, HelperAuxWbProc, HelperAuxShWbData, HelperAuxShWbProc, HelperAuxMin, HelperIndMin, HelperDirP, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, InvNodes, NoOtherSharers, ProcHomeInvalid, ProcHomeInvalidMarked, Store\n      <4>2. QED BY <4>1, TL!Isa\n    <3>2. HelperIndMin /\\ (\\E src \\in NODE : (\\E c \\in ReqCmd : PI_Remote(src, c)) \\/ PI_Remote_Replace(src) \\/ NI_Local_Get_Nak(src) \\/ NI_Local_Get_Get(src) \\/ NI_Local_Get_Put(src) \\/ NI_Local_GetX_Nak(src) \\/ NI_Local_GetX_GetX(src) \\/ NI_Local_GetX_PutX(src) \\/ NI_InvAck(src) \\/ NI_Replace(src)) => HelperDirP\n      <4>1. \\A src \\in NODE, c \\in ReqCmd : HelperIndMin /\\ PI_Remote(src, c) => HelperDirP\n        BY TL!SMTT(\"r30\") DEF TypeOK, HelperAuxProcE, HelperAuxUniPutData, HelperAuxUniPutProc, HelperAuxWbData, HelperAuxWbProc, HelperAuxShWbData, HelperAuxShWbProc, HelperAuxMin, HelperIndMin, HelperDirP, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, InvNodes, NoOtherSharers, ProcHomeInvalid, ProcHomeInvalidMarked, PI_Remote, ReqCmd\n      <4>2. \\A src \\in NODE : HelperIndMin /\\ PI_Remote_Replace(src) => HelperDirP\n        BY TL!SMTT(\"r30\") DEF TypeOK, HelperAuxProcE, HelperAuxUniPutData, HelperAuxUniPutProc, HelperAuxWbData, HelperAuxWbProc, HelperAuxShWbData, HelperAuxShWbProc, HelperAuxMin, HelperIndMin, HelperDirP, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, InvNodes, NoOtherSharers, ProcHomeInvalid, ProcHomeInvalidMarked, PI_Remote_Replace\n      <4>3. \\A src \\in NODE : HelperIndMin /\\ NI_Local_Get_Nak(src) => HelperDirP\n        BY TL!SMTT(\"r30\") DEF TypeOK, HelperAuxProcE, HelperAuxUniPutData, HelperAuxUniPutProc, HelperAuxWbData, HelperAuxWbProc, HelperAuxShWbData, HelperAuxShWbProc, HelperAuxMin, HelperIndMin, HelperDirP, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, InvNodes, NoOtherSharers, ProcHomeInvalid, ProcHomeInvalidMarked, NI_Local_Get_Nak\n      <4>4. \\A src \\in NODE : HelperIndMin /\\ NI_Local_Get_Get(src) => HelperDirP\n        BY TL!SMTT(\"r30\") DEF TypeOK, HelperAuxProcE, HelperAuxUniPutData, HelperAuxUniPutProc, HelperAuxWbData, HelperAuxWbProc, HelperAuxShWbData, HelperAuxShWbProc, HelperAuxMin, HelperIndMin, HelperDirP, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, InvNodes, NoOtherSharers, ProcHomeInvalid, ProcHomeInvalidMarked, NI_Local_Get_Get\n      <4>5. \\A src \\in NODE : HelperIndMin /\\ NI_Local_Get_Put(src) => HelperDirP\n        BY TL!SMTT(\"r30\") DEF TypeOK, HelperAuxProcE, HelperAuxUniPutData, HelperAuxUniPutProc, HelperAuxWbData, HelperAuxWbProc, HelperAuxShWbData, HelperAuxShWbProc, HelperAuxMin, HelperIndMin, HelperDirP, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, InvNodes, NoOtherSharers, ProcHomeInvalid, ProcHomeInvalidMarked, NI_Local_Get_Put\n      <4>6. \\A src \\in NODE : HelperIndMin /\\ NI_Local_GetX_Nak(src) => HelperDirP\n        BY TL!SMTT(\"r30\") DEF TypeOK, HelperAuxProcE, HelperAuxUniPutData, HelperAuxUniPutProc, HelperAuxWbData, HelperAuxWbProc, HelperAuxShWbData, HelperAuxShWbProc, HelperAuxMin, HelperIndMin, HelperDirP, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, InvNodes, NoOtherSharers, ProcHomeInvalid, ProcHomeInvalidMarked, NI_Local_GetX_Nak\n      <4>7. \\A src \\in NODE : HelperIndMin /\\ NI_Local_GetX_GetX(src) => HelperDirP\n        BY TL!SMTT(\"r30\") DEF TypeOK, HelperAuxProcE, HelperAuxUniPutData, HelperAuxUniPutProc, HelperAuxWbData, HelperAuxWbProc, HelperAuxShWbData, HelperAuxShWbProc, HelperAuxMin, HelperIndMin, HelperDirP, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, InvNodes, NoOtherSharers, ProcHomeInvalid, ProcHomeInvalidMarked, NI_Local_GetX_GetX\n      <4>8. \\A src \\in NODE : HelperIndMin /\\ NI_Local_GetX_PutX(src) => HelperDirP\n        BY TL!SMTT(\"r30\") DEF TypeOK, HelperAuxProcE, HelperAuxUniPutData, HelperAuxUniPutProc, HelperAuxWbData, HelperAuxWbProc, HelperAuxShWbData, HelperAuxShWbProc, HelperAuxMin, HelperIndMin, HelperDirP, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, InvNodes, NoOtherSharers, ProcHomeInvalid, ProcHomeInvalidMarked, NI_Local_GetX_PutX, NI_Local_GetX_PutX_Dirty, NI_Local_GetX_PutX_Grant, NI_Local_GetX_PutX_Inv\n      <4>9. \\A src \\in NODE : HelperIndMin /\\ NI_InvAck(src) => HelperDirP\n        BY TL!SMTT(\"r30\") DEF TypeOK, HelperAuxProcE, HelperAuxUniPutData, HelperAuxUniPutProc, HelperAuxWbData, HelperAuxWbProc, HelperAuxShWbData, HelperAuxShWbProc, HelperAuxMin, HelperIndMin, HelperDirP, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, InvNodes, NoOtherSharers, ProcHomeInvalid, ProcHomeInvalidMarked, NI_InvAck, NI_InvAck_More, NI_InvAck_Last\n      <4>10. \\A src \\in NODE : HelperIndMin /\\ NI_Replace(src) => HelperDirP\n        BY TL!SMTT(\"r30\") DEF TypeOK, HelperAuxProcE, HelperAuxUniPutData, HelperAuxUniPutProc, HelperAuxWbData, HelperAuxWbProc, HelperAuxShWbData, HelperAuxShWbProc, HelperAuxMin, HelperIndMin, HelperDirP, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, InvNodes, NoOtherSharers, ProcHomeInvalid, ProcHomeInvalidMarked, NI_Replace\n      <4>11. QED BY <4>1, <4>2, <4>3, <4>4, <4>5, <4>6, <4>7, <4>8, <4>9, <4>10, TL!Isa\n    <3>3. HelperIndMin /\\ (\\E dst \\in NODE : PI_Remote_PutX(dst) \\/ NI_Nak(dst) \\/ NI_Remote_Put(dst) \\/ NI_Remote_PutX(dst) \\/ NI_Inv(dst)) => HelperDirP\n      <4>1. \\A dst \\in NODE : HelperIndMin /\\ PI_Remote_PutX(dst) => HelperDirP\n        BY TL!SMTT(\"r30\") DEF TypeOK, HelperAuxProcE, HelperAuxUniPutData, HelperAuxUniPutProc, HelperAuxWbData, HelperAuxWbProc, HelperAuxShWbData, HelperAuxShWbProc, HelperAuxMin, HelperIndMin, HelperDirP, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, InvNodes, NoOtherSharers, ProcHomeInvalid, ProcHomeInvalidMarked, PI_Remote_PutX\n      <4>2. \\A dst \\in NODE : HelperIndMin /\\ NI_Nak(dst) => HelperDirP\n        BY TL!SMTT(\"r30\") DEF TypeOK, HelperAuxProcE, HelperAuxUniPutData, HelperAuxUniPutProc, HelperAuxWbData, HelperAuxWbProc, HelperAuxShWbData, HelperAuxShWbProc, HelperAuxMin, HelperIndMin, HelperDirP, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, InvNodes, NoOtherSharers, ProcHomeInvalid, ProcHomeInvalidMarked, NI_Nak\n      <4>3. \\A dst \\in NODE : HelperIndMin /\\ NI_Remote_Put(dst) => HelperDirP\n        BY TL!SMTT(\"r30\") DEF TypeOK, HelperAuxProcE, HelperAuxUniPutData, HelperAuxUniPutProc, HelperAuxWbData, HelperAuxWbProc, HelperAuxShWbData, HelperAuxShWbProc, HelperAuxMin, HelperIndMin, HelperDirP, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, InvNodes, NoOtherSharers, ProcHomeInvalid, ProcHomeInvalidMarked, NI_Remote_Put\n      <4>4. \\A dst \\in NODE : HelperIndMin /\\ NI_Remote_PutX(dst) => HelperDirP\n        BY TL!SMTT(\"r30\") DEF TypeOK, HelperAuxProcE, HelperAuxUniPutData, HelperAuxUniPutProc, HelperAuxWbData, HelperAuxWbProc, HelperAuxShWbData, HelperAuxShWbProc, HelperAuxMin, HelperIndMin, HelperDirP, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, InvNodes, NoOtherSharers, ProcHomeInvalid, ProcHomeInvalidMarked, NI_Remote_PutX\n      <4>5. \\A dst \\in NODE : HelperIndMin /\\ NI_Inv(dst) => HelperDirP\n        BY TL!SMTT(\"r30\") DEF TypeOK, HelperAuxProcE, HelperAuxUniPutData, HelperAuxUniPutProc, HelperAuxWbData, HelperAuxWbProc, HelperAuxShWbData, HelperAuxShWbProc, HelperAuxMin, HelperIndMin, HelperDirP, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, InvNodes, NoOtherSharers, ProcHomeInvalid, ProcHomeInvalidMarked, NI_Inv\n      <4>6. QED BY <4>1, <4>2, <4>3, <4>4, <4>5, TL!Isa\n    <3>4. HelperIndMin /\\ (\\E src \\in NODE, dst \\in NODE : NI_Remote_Nak(src, dst) \\/ NI_Remote_Get_Put(src, dst) \\/ NI_Remote_GetX_PutX(src, dst)) => HelperDirP\n      <4>1. \\A src \\in NODE, dst \\in NODE : HelperIndMin /\\ NI_Remote_Nak(src, dst) => HelperDirP\n        BY TL!SMTT(\"r30\") DEF TypeOK, HelperAuxProcE, HelperAuxUniPutData, HelperAuxUniPutProc, HelperAuxWbData, HelperAuxWbProc, HelperAuxShWbData, HelperAuxShWbProc, HelperAuxMin, HelperIndMin, HelperDirP, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, InvNodes, NoOtherSharers, ProcHomeInvalid, ProcHomeInvalidMarked, NI_Remote_Nak\n      <4>2. \\A src \\in NODE, dst \\in NODE : HelperIndMin /\\ NI_Remote_Get_Put(src, dst) => HelperDirP\n        BY TL!SMTT(\"r30\") DEF TypeOK, HelperAuxProcE, HelperAuxUniPutData, HelperAuxUniPutProc, HelperAuxWbData, HelperAuxWbProc, HelperAuxShWbData, HelperAuxShWbProc, HelperAuxMin, HelperIndMin, HelperDirP, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, InvNodes, NoOtherSharers, ProcHomeInvalid, ProcHomeInvalidMarked, NI_Remote_Get_Put\n      <4>3. \\A src \\in NODE, dst \\in NODE : HelperIndMin /\\ NI_Remote_GetX_PutX(src, dst) => HelperDirP\n        BY TL!SMTT(\"r30\") DEF TypeOK, HelperAuxProcE, HelperAuxUniPutData, HelperAuxUniPutProc, HelperAuxWbData, HelperAuxWbProc, HelperAuxShWbData, HelperAuxShWbProc, HelperAuxMin, HelperIndMin, HelperDirP, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, InvNodes, NoOtherSharers, ProcHomeInvalid, ProcHomeInvalidMarked, NI_Remote_GetX_PutX\n      <4>4. QED BY <4>1, <4>2, <4>3, TL!Isa\n    <3>5. HelperIndMin /\\ (PI_Local_Get_Get \\/ PI_Local_Get_Put \\/ PI_Local_GetX_GetX \\/ PI_Local_GetX_PutX \\/ PI_Local_PutX \\/ PI_Local_Replace \\/ NI_Nak_Clear \\/ NI_Local_Put \\/ NI_Local_PutXAcksDone \\/ NI_Wb \\/ NI_FAck \\/ NI_ShWb) => HelperDirP\n      <4>1. HelperIndMin /\\ PI_Local_Get_Get => HelperDirP\n        BY TL!SMTT(\"r30\") DEF TypeOK, HelperAuxProcE, HelperAuxUniPutData, HelperAuxUniPutProc, HelperAuxWbData, HelperAuxWbProc, HelperAuxShWbData, HelperAuxShWbProc, HelperAuxMin, HelperIndMin, HelperDirP, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, InvNodes, NoOtherSharers, ProcHomeInvalid, ProcHomeInvalidMarked, PI_Local_Get_Get\n      <4>2. HelperIndMin /\\ PI_Local_Get_Put => HelperDirP\n        BY TL!SMTT(\"r30\") DEF TypeOK, HelperAuxProcE, HelperAuxUniPutData, HelperAuxUniPutProc, HelperAuxWbData, HelperAuxWbProc, HelperAuxShWbData, HelperAuxShWbProc, HelperAuxMin, HelperIndMin, HelperDirP, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, InvNodes, NoOtherSharers, ProcHomeInvalid, ProcHomeInvalidMarked, PI_Local_Get_Put\n      <4>3. HelperIndMin /\\ PI_Local_GetX_GetX => HelperDirP\n        BY TL!SMTT(\"r30\") DEF TypeOK, HelperAuxProcE, HelperAuxUniPutData, HelperAuxUniPutProc, HelperAuxWbData, HelperAuxWbProc, HelperAuxShWbData, HelperAuxShWbProc, HelperAuxMin, HelperIndMin, HelperDirP, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, InvNodes, NoOtherSharers, ProcHomeInvalid, ProcHomeInvalidMarked, PI_Local_GetX_GetX\n      <4>4. HelperIndMin /\\ PI_Local_GetX_PutX => HelperDirP\n        BY TL!SMTT(\"r30\") DEF TypeOK, HelperAuxProcE, HelperAuxUniPutData, HelperAuxUniPutProc, HelperAuxWbData, HelperAuxWbProc, HelperAuxShWbData, HelperAuxShWbProc, HelperAuxMin, HelperIndMin, HelperDirP, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, InvNodes, NoOtherSharers, ProcHomeInvalid, ProcHomeInvalidMarked, PI_Local_GetX_PutX, PI_Local_GetX_PutX_Inv, PI_Local_GetX_PutX_Grant\n      <4>5. HelperIndMin /\\ PI_Local_PutX => HelperDirP\n        BY TL!SMTT(\"r30\") DEF TypeOK, HelperAuxProcE, HelperAuxUniPutData, HelperAuxUniPutProc, HelperAuxWbData, HelperAuxWbProc, HelperAuxShWbData, HelperAuxShWbProc, HelperAuxMin, HelperIndMin, HelperDirP, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, InvNodes, NoOtherSharers, ProcHomeInvalid, ProcHomeInvalidMarked, PI_Local_PutX\n      <4>6. HelperIndMin /\\ PI_Local_Replace => HelperDirP\n        BY TL!SMTT(\"r30\") DEF TypeOK, HelperAuxProcE, HelperAuxUniPutData, HelperAuxUniPutProc, HelperAuxWbData, HelperAuxWbProc, HelperAuxShWbData, HelperAuxShWbProc, HelperAuxMin, HelperIndMin, HelperDirP, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, InvNodes, NoOtherSharers, ProcHomeInvalid, ProcHomeInvalidMarked, PI_Local_Replace\n      <4>7. HelperIndMin /\\ NI_Nak_Clear => HelperDirP\n        BY TL!SMTT(\"r30\") DEF TypeOK, HelperAuxProcE, HelperAuxUniPutData, HelperAuxUniPutProc, HelperAuxWbData, HelperAuxWbProc, HelperAuxShWbData, HelperAuxShWbProc, HelperAuxMin, HelperIndMin, HelperDirP, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, InvNodes, NoOtherSharers, ProcHomeInvalid, ProcHomeInvalidMarked, NI_Nak_Clear\n      <4>8. HelperIndMin /\\ NI_Local_Put => HelperDirP\n        BY TL!SMTT(\"r30\") DEF TypeOK, HelperAuxProcE, HelperAuxUniPutData, HelperAuxUniPutProc, HelperAuxWbData, HelperAuxWbProc, HelperAuxShWbData, HelperAuxShWbProc, HelperAuxMin, HelperIndMin, HelperDirP, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, InvNodes, NoOtherSharers, ProcHomeInvalid, ProcHomeInvalidMarked, NI_Local_Put\n      <4>9. HelperIndMin /\\ NI_Local_PutXAcksDone => HelperDirP\n        BY TL!SMTT(\"r30\") DEF TypeOK, HelperAuxProcE, HelperAuxUniPutData, HelperAuxUniPutProc, HelperAuxWbData, HelperAuxWbProc, HelperAuxShWbData, HelperAuxShWbProc, HelperAuxMin, HelperIndMin, HelperDirP, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, InvNodes, NoOtherSharers, ProcHomeInvalid, ProcHomeInvalidMarked, NI_Local_PutXAcksDone\n      <4>10. HelperIndMin /\\ NI_Wb => HelperDirP\n        BY TL!SMTT(\"r30\") DEF TypeOK, HelperAuxProcE, HelperAuxUniPutData, HelperAuxUniPutProc, HelperAuxWbData, HelperAuxWbProc, HelperAuxShWbData, HelperAuxShWbProc, HelperAuxMin, HelperIndMin, HelperDirP, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, InvNodes, NoOtherSharers, ProcHomeInvalid, ProcHomeInvalidMarked, NI_Wb\n      <4>11. HelperIndMin /\\ NI_FAck => HelperDirP\n        BY TL!SMTT(\"r30\") DEF TypeOK, HelperAuxProcE, HelperAuxUniPutData, HelperAuxUniPutProc, HelperAuxWbData, HelperAuxWbProc, HelperAuxShWbData, HelperAuxShWbProc, HelperAuxMin, HelperIndMin, HelperDirP, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, InvNodes, NoOtherSharers, ProcHomeInvalid, ProcHomeInvalidMarked, NI_FAck\n      <4>12. HelperIndMin /\\ NI_ShWb => HelperDirP\n        BY TL!SMTT(\"r30\") DEF TypeOK, HelperAuxProcE, HelperAuxUniPutData, HelperAuxUniPutProc, HelperAuxWbData, HelperAuxWbProc, HelperAuxShWbData, HelperAuxShWbProc, HelperAuxMin, HelperIndMin, HelperDirP, CACHE_STATE, NODE_CMD, UNI_CMD, INV_CMD, RP_CMD, WB_CMD, SHWB_CMD, NAKC_CMD, DataU, NodeU, UniU, InvNodes, NoOtherSharers, ProcHomeInvalid, ProcHomeInvalidMarked, NI_ShWb\n      <4>13. QED BY <4>1, <4>2, <4>3, <4>4, <4>5, <4>6, <4>7, <4>8, <4>9, <4>10, <4>11, <4>12, TL!Isa\n    <3>6. QED BY <3>0, <3>1, <3>2, <3>3, <3>4, <3>5, TL!Isa DEF Next\n  <2>25. QED BY <2>1, <2>2, <2>3, <2>4, <2>5, <2>6, <2>7, <2>8, <2>9, <2>10, <2>11, <2>12, <2>13, <2>14, <2>15, <2>16, <2>17, <2>18, <2>19, <2>20, <2>21, <2>22, <2>23, <2>24, TL!Isa DEF HelperIndMin, HelperAuxMin, HelperAuxProcE, HelperAuxUniPutData, HelperAuxUniPutProc, HelperAuxWbData, HelperAuxWbProc, HelperAuxShWbData, HelperAuxShWbProc, TypeOK, HelperDirP\n<1>3. QED BY <1>1, <1>2, TL!PTL DEF Spec, HelperIndMin\n\\* END AGENT HELPERS\n\nTHEOREM TypeCorrect == Spec => []TypeOK\n\\* BEGIN AGENT PROOF tlaplus_examples_FlashProtocol/FlashWithMutex_TypeCorrect.tla\n<1>1. Spec => []HelperIndMin\n  BY HelperIndMinThm\n<1>2. HelperIndMin => TypeOK\n  BY TL!Isa DEF HelperIndMin\n<1>3. QED BY <1>1, <1>2, TL!PTL\n\\* END AGENT PROOF tlaplus_examples_FlashProtocol/FlashWithMutex_TypeCorrect.tla\n\nTHEOREM ReqProgressCorrect == FairSpec => ReqProgress\n\\* BEGIN AGENT PROOF tlaplus_examples_FlashProtocol/FlashWithMutex_ReqProgressCorrect.tla\nBY TL!PTL DEF FairSpec, Fairness, Spec, Next, vars, ReqProgress\n\\* END AGENT PROOF tlaplus_examples_FlashProtocol/FlashWithMutex_ReqProgressCorrect.tla\n\nTHEOREM DirProgressCorrect == FairSpec => DirProgress\n\\* BEGIN AGENT PROOF tlaplus_examples_FlashProtocol/FlashWithMutex_DirProgressCorrect.tla\nBY TL!PTL DEF FairSpec, Fairness, Spec, Next, vars, DirProgress\n\\* END AGENT PROOF tlaplus_examples_FlashProtocol/FlashWithMutex_DirProgressCorrect.tla\n\nTHEOREM UniProgressCorrect == FairSpec => UniProgress\n\\* BEGIN AGENT PROOF tlaplus_examples_FlashProtocol/FlashWithMutex_UniProgressCorrect.tla\nBY TL!PTL DEF FairSpec, Fairness, Spec, Next, vars, UniProgress\n\\* END AGENT PROOF tlaplus_examples_FlashProtocol/FlashWithMutex_UniProgressCorrect.tla\n\nTHEOREM InvProgressCorrect == FairSpec => InvProgress\n\\* BEGIN AGENT PROOF tlaplus_examples_FlashProtocol/FlashWithMutex_InvProgressCorrect.tla\nBY TL!PTL DEF FairSpec, Fairness, Spec, Next, vars, InvProgress\n\\* END AGENT PROOF tlaplus_examples_FlashProtocol/FlashWithMutex_InvProgressCorrect.tla\n\nTHEOREM RpProgressCorrect == FairSpec => RpProgress\n\\* BEGIN AGENT PROOF tlaplus_examples_FlashProtocol/FlashWithMutex_RpProgressCorrect.tla\nBY TL!PTL DEF FairSpec, Fairness, Spec, Next, vars, RpProgress\n\\* END AGENT PROOF tlaplus_examples_FlashProtocol/FlashWithMutex_RpProgressCorrect.tla\n\nTHEOREM WbProgressCorrect == FairSpec => WbProgress\n\\* BEGIN AGENT PROOF tlaplus_examples_FlashProtocol/FlashWithMutex_WbProgressCorrect.tla\nBY TL!PTL DEF FairSpec, Fairness, Spec, Next, vars, WbProgress\n\\* END AGENT PROOF tlaplus_examples_FlashProtocol/FlashWithMutex_WbProgressCorrect.tla\n\nTHEOREM ShWbProgressCorrect == FairSpec => ShWbProgress\n\\* BEGIN AGENT PROOF tlaplus_examples_FlashProtocol/FlashWithMutex_ShWbProgressCorrect.tla\nBY TL!PTL DEF FairSpec, Fairness, Spec, Next, vars, ShWbProgress\n\\* END AGENT PROOF tlaplus_examples_FlashProtocol/FlashWithMutex_ShWbProgressCorrect.tla\n\nTHEOREM NakcProgressCorrect == FairSpec => NakcProgress\n\\* BEGIN AGENT PROOF tlaplus_examples_FlashProtocol/FlashWithMutex_NakcProgressCorrect.tla\nBY TL!PTL DEF FairSpec, Fairness, Spec, Next, vars, NakcProgress\n\\* END AGENT PROOF tlaplus_examples_FlashProtocol/FlashWithMutex_NakcProgressCorrect.tla\n\nTHEOREM CacheDataCorrect == Spec => []CacheDataProp\n\\* BEGIN AGENT PROOF tlaplus_examples_FlashProtocol/FlashWithMutex_CacheDataCorrect.tla\n<1>1. Spec => []HelperIndMin\n  BY HelperIndMinThm\n<1>2. HelperIndMin => CacheDataProp\n  BY TL!Isa DEF HelperIndMin, CacheDataProp\n<1>3. QED BY <1>1, <1>2, TL!PTL\n\\* END AGENT PROOF tlaplus_examples_FlashProtocol/FlashWithMutex_CacheDataCorrect.tla\n\nTHEOREM MemDataCorrect == Spec => []MemDataProp\n\\* BEGIN AGENT PROOF tlaplus_examples_FlashProtocol/FlashWithMutex_MemDataCorrect.tla\n<1>1. Spec => []HelperIndMin\n  BY HelperIndMinThm\n<1>2. HelperIndMin => MemDataProp\n  BY TL!Isa DEF HelperIndMin, MemDataProp\n<1>3. QED BY <1>1, <1>2, TL!PTL\n\\* END AGENT PROOF tlaplus_examples_FlashProtocol/FlashWithMutex_MemDataCorrect.tla\n\nTHEOREM Lemma_1_Correct == Spec => []Lemma_1\n\\* BEGIN AGENT PROOF tlaplus_examples_FlashProtocol/FlashWithMutex_Lemma_1_Correct.tla\n<1>1. Spec => []HelperIndMin\n  BY HelperIndMinThm\n<1>2. HelperIndMin => Lemma_1\n  BY TL!Isa DEF HelperIndMin, Lemma_1\n<1>3. QED BY <1>1, <1>2, TL!PTL\n\\* END AGENT PROOF tlaplus_examples_FlashProtocol/FlashWithMutex_Lemma_1_Correct.tla\n\nTHEOREM Lemma_2_Correct == Spec => []Lemma_2\n\\* BEGIN AGENT PROOF tlaplus_examples_FlashProtocol/FlashWithMutex_Lemma_2_Correct.tla\n<1>1. Spec => []HelperIndMin\n  BY HelperIndMinThm\n<1>2. HelperIndMin => Lemma_2\n  BY TL!Isa DEF HelperIndMin, Lemma_2\n<1>3. QED BY <1>1, <1>2, TL!PTL\n\\* END AGENT PROOF tlaplus_examples_FlashProtocol/FlashWithMutex_Lemma_2_Correct.tla\n\nTHEOREM Lemma_3_Correct == Spec => []Lemma_3\n\\* BEGIN AGENT PROOF tlaplus_examples_FlashProtocol/FlashWithMutex_Lemma_3_Correct.tla\n<1>1. Spec => []HelperIndMin\n  BY HelperIndMinThm\n<1>2. HelperIndMin => Lemma_3\n  BY TL!Isa DEF HelperIndMin, Lemma_3\n<1>3. QED BY <1>1, <1>2, TL!PTL\n\\* END AGENT PROOF tlaplus_examples_FlashProtocol/FlashWithMutex_Lemma_3_Correct.tla\n\nTHEOREM Lemma_4_Correct == Spec => []Lemma_4\n\\* BEGIN AGENT PROOF tlaplus_examples_FlashProtocol/FlashWithMutex_Lemma_4_Correct.tla\n<1>1. Spec => []HelperIndMin\n  BY HelperIndMinThm\n<1>2. HelperIndMin => Lemma_4\n  BY TL!Isa DEF HelperIndMin, Lemma_4\n<1>3. QED BY <1>1, <1>2, TL!PTL\n\\* END AGENT PROOF tlaplus_examples_FlashProtocol/FlashWithMutex_Lemma_4_Correct.tla\n====\n",
+  "units": {
+    "tlaplus_examples_FlashProtocol/FlashWithMutex_TypeCorrect.tla": {
+      "id": "tlaplus_examples_FlashProtocol/FlashWithMutex_TypeCorrect.tla",
+      "name": "TypeCorrect",
+      "kind": "target",
+      "lineStart": 147,
+      "lineEnd": 153,
+      "proofLines": [
+        149,
+        150,
+        151,
+        152,
+        153
+      ],
+      "proofRange": [
+        149,
+        153
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:HelperIndMinThm"
+      ]
+    },
+    "tlaplus_examples_FlashProtocol/FlashWithMutex_ReqProgressCorrect.tla": {
+      "id": "tlaplus_examples_FlashProtocol/FlashWithMutex_ReqProgressCorrect.tla",
+      "name": "ReqProgressCorrect",
+      "kind": "target",
+      "lineStart": 156,
+      "lineEnd": 158,
+      "proofLines": [
+        158
+      ],
+      "proofRange": [
+        158,
+        158
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "tlaplus_examples_FlashProtocol/FlashWithMutex_DirProgressCorrect.tla": {
+      "id": "tlaplus_examples_FlashProtocol/FlashWithMutex_DirProgressCorrect.tla",
+      "name": "DirProgressCorrect",
+      "kind": "target",
+      "lineStart": 161,
+      "lineEnd": 163,
+      "proofLines": [
+        163
+      ],
+      "proofRange": [
+        163,
+        163
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "tlaplus_examples_FlashProtocol/FlashWithMutex_UniProgressCorrect.tla": {
+      "id": "tlaplus_examples_FlashProtocol/FlashWithMutex_UniProgressCorrect.tla",
+      "name": "UniProgressCorrect",
+      "kind": "target",
+      "lineStart": 166,
+      "lineEnd": 168,
+      "proofLines": [
+        168
+      ],
+      "proofRange": [
+        168,
+        168
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "tlaplus_examples_FlashProtocol/FlashWithMutex_InvProgressCorrect.tla": {
+      "id": "tlaplus_examples_FlashProtocol/FlashWithMutex_InvProgressCorrect.tla",
+      "name": "InvProgressCorrect",
+      "kind": "target",
+      "lineStart": 171,
+      "lineEnd": 173,
+      "proofLines": [
+        173
+      ],
+      "proofRange": [
+        173,
+        173
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "tlaplus_examples_FlashProtocol/FlashWithMutex_RpProgressCorrect.tla": {
+      "id": "tlaplus_examples_FlashProtocol/FlashWithMutex_RpProgressCorrect.tla",
+      "name": "RpProgressCorrect",
+      "kind": "target",
+      "lineStart": 176,
+      "lineEnd": 178,
+      "proofLines": [
+        178
+      ],
+      "proofRange": [
+        178,
+        178
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "tlaplus_examples_FlashProtocol/FlashWithMutex_WbProgressCorrect.tla": {
+      "id": "tlaplus_examples_FlashProtocol/FlashWithMutex_WbProgressCorrect.tla",
+      "name": "WbProgressCorrect",
+      "kind": "target",
+      "lineStart": 181,
+      "lineEnd": 183,
+      "proofLines": [
+        183
+      ],
+      "proofRange": [
+        183,
+        183
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "tlaplus_examples_FlashProtocol/FlashWithMutex_ShWbProgressCorrect.tla": {
+      "id": "tlaplus_examples_FlashProtocol/FlashWithMutex_ShWbProgressCorrect.tla",
+      "name": "ShWbProgressCorrect",
+      "kind": "target",
+      "lineStart": 186,
+      "lineEnd": 188,
+      "proofLines": [
+        188
+      ],
+      "proofRange": [
+        188,
+        188
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "tlaplus_examples_FlashProtocol/FlashWithMutex_NakcProgressCorrect.tla": {
+      "id": "tlaplus_examples_FlashProtocol/FlashWithMutex_NakcProgressCorrect.tla",
+      "name": "NakcProgressCorrect",
+      "kind": "target",
+      "lineStart": 191,
+      "lineEnd": 193,
+      "proofLines": [
+        193
+      ],
+      "proofRange": [
+        193,
+        193
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "tlaplus_examples_FlashProtocol/FlashWithMutex_CacheDataCorrect.tla": {
+      "id": "tlaplus_examples_FlashProtocol/FlashWithMutex_CacheDataCorrect.tla",
+      "name": "CacheDataCorrect",
+      "kind": "target",
+      "lineStart": 196,
+      "lineEnd": 202,
+      "proofLines": [
+        198,
+        199,
+        200,
+        201,
+        202
+      ],
+      "proofRange": [
+        198,
+        202
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:HelperIndMinThm"
+      ]
+    },
+    "tlaplus_examples_FlashProtocol/FlashWithMutex_MemDataCorrect.tla": {
+      "id": "tlaplus_examples_FlashProtocol/FlashWithMutex_MemDataCorrect.tla",
+      "name": "MemDataCorrect",
+      "kind": "target",
+      "lineStart": 205,
+      "lineEnd": 211,
+      "proofLines": [
+        207,
+        208,
+        209,
+        210,
+        211
+      ],
+      "proofRange": [
+        207,
+        211
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:HelperIndMinThm"
+      ]
+    },
+    "tlaplus_examples_FlashProtocol/FlashWithMutex_Lemma_1_Correct.tla": {
+      "id": "tlaplus_examples_FlashProtocol/FlashWithMutex_Lemma_1_Correct.tla",
+      "name": "Lemma_1_Correct",
+      "kind": "target",
+      "lineStart": 214,
+      "lineEnd": 220,
+      "proofLines": [
+        216,
+        217,
+        218,
+        219,
+        220
+      ],
+      "proofRange": [
+        216,
+        220
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:HelperIndMinThm"
+      ]
+    },
+    "tlaplus_examples_FlashProtocol/FlashWithMutex_Lemma_2_Correct.tla": {
+      "id": "tlaplus_examples_FlashProtocol/FlashWithMutex_Lemma_2_Correct.tla",
+      "name": "Lemma_2_Correct",
+      "kind": "target",
+      "lineStart": 223,
+      "lineEnd": 229,
+      "proofLines": [
+        225,
+        226,
+        227,
+        228,
+        229
+      ],
+      "proofRange": [
+        225,
+        229
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:HelperIndMinThm"
+      ]
+    },
+    "tlaplus_examples_FlashProtocol/FlashWithMutex_Lemma_3_Correct.tla": {
+      "id": "tlaplus_examples_FlashProtocol/FlashWithMutex_Lemma_3_Correct.tla",
+      "name": "Lemma_3_Correct",
+      "kind": "target",
+      "lineStart": 232,
+      "lineEnd": 238,
+      "proofLines": [
+        234,
+        235,
+        236,
+        237,
+        238
+      ],
+      "proofRange": [
+        234,
+        238
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:HelperIndMinThm"
+      ]
+    },
+    "tlaplus_examples_FlashProtocol/FlashWithMutex_Lemma_4_Correct.tla": {
+      "id": "tlaplus_examples_FlashProtocol/FlashWithMutex_Lemma_4_Correct.tla",
+      "name": "Lemma_4_Correct",
+      "kind": "target",
+      "lineStart": 241,
+      "lineEnd": 247,
+      "proofLines": [
+        243,
+        244,
+        245,
+        246,
+        247
+      ],
+      "proofRange": [
+        243,
+        247
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:HelperIndMinThm"
+      ]
+    },
+    "helper:HelperIndMinThm": {
+      "id": "helper:HelperIndMinThm",
+      "name": "HelperIndMinThm",
+      "kind": "helper",
+      "lineStart": 17,
+      "lineEnd": 144,
+      "proofLines": [
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        58,
+        59,
+        60,
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68,
+        69,
+        70,
+        71,
+        72,
+        73,
+        74,
+        75,
+        76,
+        77,
+        78,
+        79,
+        80,
+        81,
+        82,
+        83,
+        84,
+        85,
+        86,
+        87,
+        88,
+        89,
+        90,
+        91,
+        92,
+        93,
+        94,
+        95,
+        96,
+        97,
+        98,
+        99,
+        100,
+        101,
+        102,
+        103,
+        104,
+        105,
+        106,
+        107,
+        108,
+        109,
+        110,
+        111,
+        112,
+        113,
+        114,
+        115,
+        116,
+        117,
+        118,
+        119,
+        120,
+        121,
+        122,
+        123,
+        124,
+        125,
+        126,
+        127,
+        128,
+        129,
+        130,
+        131,
+        132,
+        133,
+        134,
+        135,
+        136,
+        137,
+        138,
+        139,
+        140,
+        141,
+        142,
+        143,
+        144
+      ],
+      "proofRange": [
+        18,
+        144
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    }
+  }
+}

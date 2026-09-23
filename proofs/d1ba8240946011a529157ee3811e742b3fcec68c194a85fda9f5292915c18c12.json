@@ -1,0 +1,629 @@
+{
+  "schemaVersion": 1,
+  "specId": "tlaplus_examples_GermanProtocol/GermanData.tla",
+  "sourceName": "GermanData.tla",
+  "sourceSha256": "99d9dc70178a461645b239bf021786d8749b993ab94f1b0524c520eb35646074",
+  "resultSha256": "1822d71e413e8df3e0a6a8537af95e2cb136eaf6938ee127f478a90207ab6039",
+  "source": "---- MODULE GermanData ----\nEXTENDS GermanDataDefs\n\n\\* BEGIN AGENT HELPERS\nLOCAL AgentTL == INSTANCE TLAPS\n\nAgent_TypeOK ==\n    /\\ cache \\in [NODE -> [state : {\"I\", \"S\", \"E\"}, data : DATA \\cup {NoData}]]\n    /\\ chan1 \\in [NODE -> [cmd : {\"Empty\", \"ReqS\", \"ReqE\"}, data : DATA \\cup {NoData}]]\n    /\\ chan2 \\in [NODE -> [cmd : {\"Empty\", \"Inv\", \"GntS\", \"GntE\"}, data : DATA \\cup {NoData}]]\n    /\\ chan3 \\in [NODE -> [cmd : {\"Empty\", \"InvAck\"}, data : DATA \\cup {NoData}]]\n    /\\ invSet \\in SUBSET NODE\n    /\\ shrSet \\in SUBSET NODE\n    /\\ exGntd \\in BOOLEAN\n    /\\ curCmd \\in {\"Empty\", \"ReqS\", \"ReqE\"}\n    /\\ curPtr \\in (NODE \\cup {NoNode})\n    /\\ memData \\in (DATA \\cup {NoData})\n    /\\ auxData \\in (DATA \\cup {NoData})\n\nAgent_AuxInvCache == \\A i \\in NODE : chan2[i].cmd = \"Inv\" => cache[i].state \\in {\"S\", \"E\"}\nAgent_AuxInvAckCache == \\A i \\in NODE : chan3[i].cmd = \"InvAck\" => cache[i].state = \"I\"\nAgent_AuxInvShr == \\A i \\in NODE : chan2[i].cmd = \"Inv\" => i \\in shrSet\nAgent_AuxGntShr == \\A i \\in NODE : chan2[i].cmd \\in {\"GntS\", \"GntE\"} => i \\in shrSet\nAgent_AuxInvAckShr == \\A i \\in NODE : chan3[i].cmd = \"InvAck\" => i \\in shrSet\nAgent_AuxInvSubset == invSet \\subseteq shrSet\nAgent_AuxInvNotIn == \\A i \\in NODE : chan2[i].cmd = \"Inv\" => i \\notin invSet\nAgent_AuxInvAckNotIn == \\A i \\in NODE : chan3[i].cmd = \"InvAck\" => i \\notin invSet\nAgent_AuxEEx == \\A i \\in NODE : cache[i].state = \"E\" => exGntd = TRUE\nAgent_AuxGntEEx == \\A i \\in NODE : chan2[i].cmd = \"GntE\" => exGntd = TRUE\nAgent_AuxGntSNoEx == \\A i \\in NODE : chan2[i].cmd = \"GntS\" => exGntd = FALSE\nAgent_AuxSNoEx == \\A i \\in NODE : cache[i].state = \"S\" => exGntd = FALSE\nAgent_AuxMemData == memData \\in DATA\nAgent_AuxAuxData == auxData \\in DATA\nAgent_AuxINoData == \\A i \\in NODE : cache[i].state = \"I\" => cache[i].data = NoData\nAgent_AuxChan1Data == \\A i \\in NODE : chan1[i].data = NoData\nAgent_AuxChan2EmptyNoData == \\A i \\in NODE : chan2[i].cmd = \"Empty\" => chan2[i].data = NoData\nAgent_AuxChan2InvNoData == \\A i \\in NODE : chan2[i].cmd = \"Inv\" => chan2[i].data = NoData\nAgent_AuxGntData == \\A i \\in NODE : chan2[i].cmd \\in {\"GntS\", \"GntE\"} => chan2[i].data \\in DATA\nAgent_AuxChan3EmptyNoData == \\A i \\in NODE : chan3[i].cmd = \"Empty\" => chan3[i].data = NoData\nAgent_AuxGntEqMem == \\A i \\in NODE : chan2[i].cmd \\in {\"GntS\", \"GntE\"} => chan2[i].data = memData\nAgent_AuxGntEqAux == \\A i \\in NODE : chan2[i].cmd \\in {\"GntS\", \"GntE\"} => chan2[i].data = auxData\nAgent_AuxInvAckValid == \\A i \\in NODE : chan3[i].cmd = \"InvAck\" => chan3[i].data \\in {NoData, auxData}\nAgent_AuxShrPending == \\A i \\in NODE : i \\in shrSet => (cache[i].state \\in {\"S\", \"E\"} \\/ chan2[i].cmd \\in {\"GntS\", \"GntE\", \"Inv\"} \\/ chan3[i].cmd = \"InvAck\")\nAgent_AuxInvCur == \\A i \\in NODE : chan2[i].cmd = \"Inv\" => curCmd # \"Empty\"\nAgent_AuxInvAckCur == \\A i \\in NODE : chan3[i].cmd = \"InvAck\" => curCmd # \"Empty\"\nAgent_AuxCurEmptyNoInv == (curCmd = \"Empty\") => (\\A i \\in NODE : chan2[i].cmd # \"Inv\" /\\ chan3[i].cmd # \"InvAck\")\nAgent_AuxInvAckNoExNoData == \\A i \\in NODE : (chan3[i].cmd = \"InvAck\" /\\ exGntd = FALSE) => chan3[i].data = NoData\nAgent_AuxInvAckExAux == \\A i \\in NODE : (chan3[i].cmd = \"InvAck\" /\\ exGntd = TRUE) => chan3[i].data = auxData\nAgent_AuxExOne == (exGntd = TRUE) => (\\E i \\in NODE : (cache[i].state = \"E\" \\/ chan2[i].cmd = \"GntE\" \\/ (chan3[i].cmd = \"InvAck\" /\\ chan3[i].data # NoData)) /\\ (\\A j \\in NODE \\ {i} : cache[j].state # \"E\" /\\ chan2[j].cmd # \"GntE\" /\\ ~(chan3[j].cmd = \"InvAck\" /\\ chan3[j].data # NoData)))\nAgent_AuxNoExNo == (exGntd = FALSE) => (\\A i \\in NODE : cache[i].state # \"E\" /\\ chan2[i].cmd # \"GntE\" /\\ ~(chan3[i].cmd = \"InvAck\" /\\ chan3[i].data # NoData))\nAgent_AuxENoGntSelf == \\A i \\in NODE : ~(cache[i].state = \"E\" /\\ chan2[i].cmd \\in {\"GntS\", \"GntE\"})\nAgent_AuxENoInvAckSelf == \\A i \\in NODE : ~(cache[i].state = \"E\" /\\ chan3[i].cmd = \"InvAck\")\nAgent_AuxInvInvAckExcl == \\A i \\in NODE : ~(chan2[i].cmd = \"Inv\" /\\ chan3[i].cmd = \"InvAck\")\nAgent_AuxGntInvAckExcl == \\A i \\in NODE : ~(chan2[i].cmd \\in {\"GntS\", \"GntE\"} /\\ chan3[i].cmd = \"InvAck\")\nAgent_AuxGntENoS == \\A i \\in NODE : chan2[i].cmd = \"GntE\" => (\\A j \\in NODE : cache[j].state # \"S\")\nAgent_AuxGntENoInvAck == \\A i \\in NODE : chan2[i].cmd = \"GntE\" => (\\A j \\in NODE : chan3[j].cmd # \"InvAck\")\nAgent_AuxGntNoE == (\\E i \\in NODE : chan2[i].cmd \\in {\"GntS\", \"GntE\"}) => (\\A j \\in NODE : cache[j].state # \"E\")\nAgent_AuxPendingPtr == (curCmd # \"Empty\") => (curPtr \\in NODE)\nAgent_AuxGntECacheI == \\A i \\in NODE : chan2[i].cmd = \"GntE\" => cache[i].state = \"I\"\nAgent_AuxReqSNoExNoInv == ((curCmd = \"ReqS\" /\\ exGntd = FALSE) => (\\A i \\in NODE : chan2[i].cmd # \"Inv\" /\\ chan3[i].cmd # \"InvAck\"))\n\nAgent_IndFull ==\n    /\\ Agent_TypeOK\n    /\\ TransactionConsistency\n    /\\ DirectoryAccurate\n    /\\ ExclusiveIsolation\n    /\\ WritebackCarriesLatest\n    /\\ DataProp\n    /\\ Agent_AuxInvCache\n    /\\ Agent_AuxInvAckCache\n    /\\ Agent_AuxInvShr\n    /\\ Agent_AuxGntShr\n    /\\ Agent_AuxInvAckShr\n    /\\ Agent_AuxInvSubset\n    /\\ Agent_AuxInvNotIn\n    /\\ Agent_AuxInvAckNotIn\n    /\\ Agent_AuxEEx\n    /\\ Agent_AuxGntEEx\n    /\\ Agent_AuxGntSNoEx\n    /\\ Agent_AuxSNoEx\n    /\\ Agent_AuxMemData\n    /\\ Agent_AuxAuxData\n    /\\ Agent_AuxINoData\n    /\\ Agent_AuxChan1Data\n    /\\ Agent_AuxChan2EmptyNoData\n    /\\ Agent_AuxChan2InvNoData\n    /\\ Agent_AuxGntData\n    /\\ Agent_AuxChan3EmptyNoData\n    /\\ Agent_AuxGntEqMem\n    /\\ Agent_AuxGntEqAux\n    /\\ Agent_AuxInvAckValid\n    /\\ Agent_AuxShrPending\n    /\\ Agent_AuxInvCur\n    /\\ Agent_AuxInvAckCur\n    /\\ Agent_AuxCurEmptyNoInv\n    /\\ Agent_AuxInvAckNoExNoData\n    /\\ Agent_AuxInvAckExAux\n    /\\ Agent_AuxExOne\n    /\\ Agent_AuxNoExNo\n    /\\ Agent_AuxENoGntSelf\n    /\\ Agent_AuxENoInvAckSelf\n    /\\ Agent_AuxInvInvAckExcl\n    /\\ Agent_AuxGntInvAckExcl\n    /\\ Agent_AuxGntENoS\n    /\\ Agent_AuxGntENoInvAck\n    /\\ Agent_AuxGntNoE\n    /\\ Agent_AuxPendingPtr\n    /\\ Agent_AuxGntECacheI\n    /\\ Agent_AuxReqSNoExNoInv\n\nLEMMA Agent_Init == Init => Agent_IndFull\n  BY NoDataNotInDATA, NoNodeNotInNODE, AgentTL!SMTT(\"r20\") DEF Init, Agent_IndFull, Agent_IndFull, Agent_TypeOK, TransactionConsistency, DirectoryAccurate, ExclusiveIsolation, WritebackCarriesLatest, DataProp, Agent_AuxInvCache, Agent_AuxInvAckCache, Agent_AuxInvShr, Agent_AuxGntShr, Agent_AuxInvAckShr, Agent_AuxInvSubset, Agent_AuxInvNotIn, Agent_AuxInvAckNotIn, Agent_AuxEEx, Agent_AuxGntEEx, Agent_AuxGntSNoEx, Agent_AuxSNoEx, Agent_AuxMemData, Agent_AuxAuxData, Agent_AuxINoData, Agent_AuxChan1Data, Agent_AuxChan2EmptyNoData, Agent_AuxChan2InvNoData, Agent_AuxGntData, Agent_AuxChan3EmptyNoData, Agent_AuxGntEqMem, Agent_AuxGntEqAux, Agent_AuxInvAckValid, Agent_AuxShrPending, Agent_AuxInvCur, Agent_AuxInvAckCur, Agent_AuxCurEmptyNoInv, Agent_AuxInvAckNoExNoData, Agent_AuxInvAckExAux, Agent_AuxExOne, Agent_AuxNoExNo, Agent_AuxENoGntSelf, Agent_AuxENoInvAckSelf, Agent_AuxInvInvAckExcl, Agent_AuxGntInvAckExcl, Agent_AuxGntENoS, Agent_AuxGntENoInvAck, Agent_AuxGntNoE, Agent_AuxPendingPtr, Agent_AuxGntECacheI, Agent_AuxReqSNoExNoInv\n\nLEMMA Agent_PresStore == \\A i \\in NODE, d \\in DATA : Agent_IndFull /\\ Store(i, d) => Agent_IndFull'\n  BY NoDataNotInDATA, NoNodeNotInNODE, AgentTL!SMTT(\"r20\") DEF Store, Agent_IndFull, Agent_IndFull, Agent_TypeOK, TransactionConsistency, DirectoryAccurate, ExclusiveIsolation, WritebackCarriesLatest, DataProp, Agent_AuxInvCache, Agent_AuxInvAckCache, Agent_AuxInvShr, Agent_AuxGntShr, Agent_AuxInvAckShr, Agent_AuxInvSubset, Agent_AuxInvNotIn, Agent_AuxInvAckNotIn, Agent_AuxEEx, Agent_AuxGntEEx, Agent_AuxGntSNoEx, Agent_AuxSNoEx, Agent_AuxMemData, Agent_AuxAuxData, Agent_AuxINoData, Agent_AuxChan1Data, Agent_AuxChan2EmptyNoData, Agent_AuxChan2InvNoData, Agent_AuxGntData, Agent_AuxChan3EmptyNoData, Agent_AuxGntEqMem, Agent_AuxGntEqAux, Agent_AuxInvAckValid, Agent_AuxShrPending, Agent_AuxInvCur, Agent_AuxInvAckCur, Agent_AuxCurEmptyNoInv, Agent_AuxInvAckNoExNoData, Agent_AuxInvAckExAux, Agent_AuxExOne, Agent_AuxNoExNo, Agent_AuxENoGntSelf, Agent_AuxENoInvAckSelf, Agent_AuxInvInvAckExcl, Agent_AuxGntInvAckExcl, Agent_AuxGntENoS, Agent_AuxGntENoInvAck, Agent_AuxGntNoE, Agent_AuxPendingPtr, Agent_AuxGntECacheI, Agent_AuxReqSNoExNoInv\n\nLEMMA Agent_PresSendReq == \\A i \\in NODE : Agent_IndFull /\\ SendReq(i) => Agent_IndFull'\n  BY NoDataNotInDATA, NoNodeNotInNODE, AgentTL!SMTT(\"r20\") DEF SendReq, Agent_IndFull, Agent_IndFull, Agent_TypeOK, TransactionConsistency, DirectoryAccurate, ExclusiveIsolation, WritebackCarriesLatest, DataProp, Agent_AuxInvCache, Agent_AuxInvAckCache, Agent_AuxInvShr, Agent_AuxGntShr, Agent_AuxInvAckShr, Agent_AuxInvSubset, Agent_AuxInvNotIn, Agent_AuxInvAckNotIn, Agent_AuxEEx, Agent_AuxGntEEx, Agent_AuxGntSNoEx, Agent_AuxSNoEx, Agent_AuxMemData, Agent_AuxAuxData, Agent_AuxINoData, Agent_AuxChan1Data, Agent_AuxChan2EmptyNoData, Agent_AuxChan2InvNoData, Agent_AuxGntData, Agent_AuxChan3EmptyNoData, Agent_AuxGntEqMem, Agent_AuxGntEqAux, Agent_AuxInvAckValid, Agent_AuxShrPending, Agent_AuxInvCur, Agent_AuxInvAckCur, Agent_AuxCurEmptyNoInv, Agent_AuxInvAckNoExNoData, Agent_AuxInvAckExAux, Agent_AuxExOne, Agent_AuxNoExNo, Agent_AuxENoGntSelf, Agent_AuxENoInvAckSelf, Agent_AuxInvInvAckExcl, Agent_AuxGntInvAckExcl, Agent_AuxGntENoS, Agent_AuxGntENoInvAck, Agent_AuxGntNoE, Agent_AuxPendingPtr, Agent_AuxGntECacheI, Agent_AuxReqSNoExNoInv\n\nLEMMA Agent_PresRecvGnt == \\A i \\in NODE : Agent_IndFull /\\ RecvGnt(i) => Agent_IndFull'\n  BY NoDataNotInDATA, NoNodeNotInNODE, AgentTL!SMTT(\"r20\") DEF RecvGnt, Agent_IndFull, Agent_IndFull, Agent_TypeOK, TransactionConsistency, DirectoryAccurate, ExclusiveIsolation, WritebackCarriesLatest, DataProp, Agent_AuxInvCache, Agent_AuxInvAckCache, Agent_AuxInvShr, Agent_AuxGntShr, Agent_AuxInvAckShr, Agent_AuxInvSubset, Agent_AuxInvNotIn, Agent_AuxInvAckNotIn, Agent_AuxEEx, Agent_AuxGntEEx, Agent_AuxGntSNoEx, Agent_AuxSNoEx, Agent_AuxMemData, Agent_AuxAuxData, Agent_AuxINoData, Agent_AuxChan1Data, Agent_AuxChan2EmptyNoData, Agent_AuxChan2InvNoData, Agent_AuxGntData, Agent_AuxChan3EmptyNoData, Agent_AuxGntEqMem, Agent_AuxGntEqAux, Agent_AuxInvAckValid, Agent_AuxShrPending, Agent_AuxInvCur, Agent_AuxInvAckCur, Agent_AuxCurEmptyNoInv, Agent_AuxInvAckNoExNoData, Agent_AuxInvAckExAux, Agent_AuxExOne, Agent_AuxNoExNo, Agent_AuxENoGntSelf, Agent_AuxENoInvAckSelf, Agent_AuxInvInvAckExcl, Agent_AuxGntInvAckExcl, Agent_AuxGntENoS, Agent_AuxGntENoInvAck, Agent_AuxGntNoE, Agent_AuxPendingPtr, Agent_AuxGntECacheI, Agent_AuxReqSNoExNoInv\n\nLEMMA Agent_PresSendInvAck == \\A i \\in NODE : Agent_IndFull /\\ SendInvAck(i) => Agent_IndFull'\n  BY NoDataNotInDATA, NoNodeNotInNODE, AgentTL!SMTT(\"r20\") DEF SendInvAck, Agent_IndFull, Agent_IndFull, Agent_TypeOK, TransactionConsistency, DirectoryAccurate, ExclusiveIsolation, WritebackCarriesLatest, DataProp, Agent_AuxInvCache, Agent_AuxInvAckCache, Agent_AuxInvShr, Agent_AuxGntShr, Agent_AuxInvAckShr, Agent_AuxInvSubset, Agent_AuxInvNotIn, Agent_AuxInvAckNotIn, Agent_AuxEEx, Agent_AuxGntEEx, Agent_AuxGntSNoEx, Agent_AuxSNoEx, Agent_AuxMemData, Agent_AuxAuxData, Agent_AuxINoData, Agent_AuxChan1Data, Agent_AuxChan2EmptyNoData, Agent_AuxChan2InvNoData, Agent_AuxGntData, Agent_AuxChan3EmptyNoData, Agent_AuxGntEqMem, Agent_AuxGntEqAux, Agent_AuxInvAckValid, Agent_AuxShrPending, Agent_AuxInvCur, Agent_AuxInvAckCur, Agent_AuxCurEmptyNoInv, Agent_AuxInvAckNoExNoData, Agent_AuxInvAckExAux, Agent_AuxExOne, Agent_AuxNoExNo, Agent_AuxENoGntSelf, Agent_AuxENoInvAckSelf, Agent_AuxInvInvAckExcl, Agent_AuxGntInvAckExcl, Agent_AuxGntENoS, Agent_AuxGntENoInvAck, Agent_AuxGntNoE, Agent_AuxPendingPtr, Agent_AuxGntECacheI, Agent_AuxReqSNoExNoInv\n\nLEMMA Agent_PresRecvReq == \\A i \\in NODE : Agent_IndFull /\\ RecvReq(i) => Agent_IndFull'\n  BY NoDataNotInDATA, NoNodeNotInNODE, AgentTL!SMTT(\"r20\") DEF RecvReq, Agent_IndFull, Agent_IndFull, Agent_TypeOK, TransactionConsistency, DirectoryAccurate, ExclusiveIsolation, WritebackCarriesLatest, DataProp, Agent_AuxInvCache, Agent_AuxInvAckCache, Agent_AuxInvShr, Agent_AuxGntShr, Agent_AuxInvAckShr, Agent_AuxInvSubset, Agent_AuxInvNotIn, Agent_AuxInvAckNotIn, Agent_AuxEEx, Agent_AuxGntEEx, Agent_AuxGntSNoEx, Agent_AuxSNoEx, Agent_AuxMemData, Agent_AuxAuxData, Agent_AuxINoData, Agent_AuxChan1Data, Agent_AuxChan2EmptyNoData, Agent_AuxChan2InvNoData, Agent_AuxGntData, Agent_AuxChan3EmptyNoData, Agent_AuxGntEqMem, Agent_AuxGntEqAux, Agent_AuxInvAckValid, Agent_AuxShrPending, Agent_AuxInvCur, Agent_AuxInvAckCur, Agent_AuxCurEmptyNoInv, Agent_AuxInvAckNoExNoData, Agent_AuxInvAckExAux, Agent_AuxExOne, Agent_AuxNoExNo, Agent_AuxENoGntSelf, Agent_AuxENoInvAckSelf, Agent_AuxInvInvAckExcl, Agent_AuxGntInvAckExcl, Agent_AuxGntENoS, Agent_AuxGntENoInvAck, Agent_AuxGntNoE, Agent_AuxPendingPtr, Agent_AuxGntECacheI, Agent_AuxReqSNoExNoInv\n\nLEMMA Agent_PresSendInv == \\A i \\in NODE : Agent_IndFull /\\ SendInv(i) => Agent_IndFull'\n  BY NoDataNotInDATA, NoNodeNotInNODE, AgentTL!SMTT(\"r20\") DEF SendInv, Agent_IndFull, Agent_IndFull, Agent_TypeOK, TransactionConsistency, DirectoryAccurate, ExclusiveIsolation, WritebackCarriesLatest, DataProp, Agent_AuxInvCache, Agent_AuxInvAckCache, Agent_AuxInvShr, Agent_AuxGntShr, Agent_AuxInvAckShr, Agent_AuxInvSubset, Agent_AuxInvNotIn, Agent_AuxInvAckNotIn, Agent_AuxEEx, Agent_AuxGntEEx, Agent_AuxGntSNoEx, Agent_AuxSNoEx, Agent_AuxMemData, Agent_AuxAuxData, Agent_AuxINoData, Agent_AuxChan1Data, Agent_AuxChan2EmptyNoData, Agent_AuxChan2InvNoData, Agent_AuxGntData, Agent_AuxChan3EmptyNoData, Agent_AuxGntEqMem, Agent_AuxGntEqAux, Agent_AuxInvAckValid, Agent_AuxShrPending, Agent_AuxInvCur, Agent_AuxInvAckCur, Agent_AuxCurEmptyNoInv, Agent_AuxInvAckNoExNoData, Agent_AuxInvAckExAux, Agent_AuxExOne, Agent_AuxNoExNo, Agent_AuxENoGntSelf, Agent_AuxENoInvAckSelf, Agent_AuxInvInvAckExcl, Agent_AuxGntInvAckExcl, Agent_AuxGntENoS, Agent_AuxGntENoInvAck, Agent_AuxGntNoE, Agent_AuxPendingPtr, Agent_AuxGntECacheI, Agent_AuxReqSNoExNoInv\n\nLEMMA Agent_PresRecvInvAck == \\A i \\in NODE : Agent_IndFull /\\ RecvInvAck(i) => Agent_IndFull'\n  BY NoDataNotInDATA, NoNodeNotInNODE, AgentTL!SMTT(\"r20\") DEF RecvInvAck, Agent_IndFull, Agent_IndFull, Agent_TypeOK, TransactionConsistency, DirectoryAccurate, ExclusiveIsolation, WritebackCarriesLatest, DataProp, Agent_AuxInvCache, Agent_AuxInvAckCache, Agent_AuxInvShr, Agent_AuxGntShr, Agent_AuxInvAckShr, Agent_AuxInvSubset, Agent_AuxInvNotIn, Agent_AuxInvAckNotIn, Agent_AuxEEx, Agent_AuxGntEEx, Agent_AuxGntSNoEx, Agent_AuxSNoEx, Agent_AuxMemData, Agent_AuxAuxData, Agent_AuxINoData, Agent_AuxChan1Data, Agent_AuxChan2EmptyNoData, Agent_AuxChan2InvNoData, Agent_AuxGntData, Agent_AuxChan3EmptyNoData, Agent_AuxGntEqMem, Agent_AuxGntEqAux, Agent_AuxInvAckValid, Agent_AuxShrPending, Agent_AuxInvCur, Agent_AuxInvAckCur, Agent_AuxCurEmptyNoInv, Agent_AuxInvAckNoExNoData, Agent_AuxInvAckExAux, Agent_AuxExOne, Agent_AuxNoExNo, Agent_AuxENoGntSelf, Agent_AuxENoInvAckSelf, Agent_AuxInvInvAckExcl, Agent_AuxGntInvAckExcl, Agent_AuxGntENoS, Agent_AuxGntENoInvAck, Agent_AuxGntNoE, Agent_AuxPendingPtr, Agent_AuxGntECacheI, Agent_AuxReqSNoExNoInv\n\nLEMMA Agent_PresSendGnt == \\A i \\in NODE : Agent_IndFull /\\ SendGnt(i) => Agent_IndFull'\n  BY NoDataNotInDATA, NoNodeNotInNODE, AgentTL!SMTT(\"r20\") DEF SendGnt, Agent_IndFull, Agent_IndFull, Agent_TypeOK, TransactionConsistency, DirectoryAccurate, ExclusiveIsolation, WritebackCarriesLatest, DataProp, Agent_AuxInvCache, Agent_AuxInvAckCache, Agent_AuxInvShr, Agent_AuxGntShr, Agent_AuxInvAckShr, Agent_AuxInvSubset, Agent_AuxInvNotIn, Agent_AuxInvAckNotIn, Agent_AuxEEx, Agent_AuxGntEEx, Agent_AuxGntSNoEx, Agent_AuxSNoEx, Agent_AuxMemData, Agent_AuxAuxData, Agent_AuxINoData, Agent_AuxChan1Data, Agent_AuxChan2EmptyNoData, Agent_AuxChan2InvNoData, Agent_AuxGntData, Agent_AuxChan3EmptyNoData, Agent_AuxGntEqMem, Agent_AuxGntEqAux, Agent_AuxInvAckValid, Agent_AuxShrPending, Agent_AuxInvCur, Agent_AuxInvAckCur, Agent_AuxCurEmptyNoInv, Agent_AuxInvAckNoExNoData, Agent_AuxInvAckExAux, Agent_AuxExOne, Agent_AuxNoExNo, Agent_AuxENoGntSelf, Agent_AuxENoInvAckSelf, Agent_AuxInvInvAckExcl, Agent_AuxGntInvAckExcl, Agent_AuxGntENoS, Agent_AuxGntENoInvAck, Agent_AuxGntNoE, Agent_AuxPendingPtr, Agent_AuxGntECacheI, Agent_AuxReqSNoExNoInv\n\nLEMMA Agent_Next == Agent_IndFull /\\ Next => Agent_IndFull'\n  BY Agent_PresStore, Agent_PresSendReq, Agent_PresRecvGnt, Agent_PresSendInvAck, Agent_PresRecvReq, Agent_PresSendInv, Agent_PresRecvInvAck, Agent_PresSendGnt DEF Next\n\nLEMMA Agent_Stut == Agent_IndFull /\\ UNCHANGED vars => Agent_IndFull'\n  BY DEF Agent_IndFull, Agent_IndFull, Agent_TypeOK, TransactionConsistency, DirectoryAccurate, ExclusiveIsolation, WritebackCarriesLatest, DataProp, Agent_AuxInvCache, Agent_AuxInvAckCache, Agent_AuxInvShr, Agent_AuxGntShr, Agent_AuxInvAckShr, Agent_AuxInvSubset, Agent_AuxInvNotIn, Agent_AuxInvAckNotIn, Agent_AuxEEx, Agent_AuxGntEEx, Agent_AuxGntSNoEx, Agent_AuxSNoEx, Agent_AuxMemData, Agent_AuxAuxData, Agent_AuxINoData, Agent_AuxChan1Data, Agent_AuxChan2EmptyNoData, Agent_AuxChan2InvNoData, Agent_AuxGntData, Agent_AuxChan3EmptyNoData, Agent_AuxGntEqMem, Agent_AuxGntEqAux, Agent_AuxInvAckValid, Agent_AuxShrPending, Agent_AuxInvCur, Agent_AuxInvAckCur, Agent_AuxCurEmptyNoInv, Agent_AuxInvAckNoExNoData, Agent_AuxInvAckExAux, Agent_AuxExOne, Agent_AuxNoExNo, Agent_AuxENoGntSelf, Agent_AuxENoInvAckSelf, Agent_AuxInvInvAckExcl, Agent_AuxGntInvAckExcl, Agent_AuxGntENoS, Agent_AuxGntENoInvAck, Agent_AuxGntNoE, Agent_AuxPendingPtr, Agent_AuxGntECacheI, Agent_AuxReqSNoExNoInv, vars\n\nLEMMA Agent_Box == Spec => []Agent_IndFull\n<1>1. Init => Agent_IndFull BY Agent_Init DEF Init, Agent_IndFull\n<1>2. Agent_IndFull /\\ [Next]_vars => Agent_IndFull'\n  <2>1. Agent_IndFull /\\ Next => Agent_IndFull' BY Agent_Next\n  <2>2. Agent_IndFull /\\ UNCHANGED vars => Agent_IndFull' BY Agent_Stut\n  <2>3. QED BY <2>1, <2>2\n<1>3. QED BY <1>1, <1>2, AgentTL!PTL DEF Spec\n\nLEMMA Agent_ImplData == Agent_IndFull => DataProp\n  BY DEF Agent_IndFull\n\nLEMMA Agent_ImplTC == Agent_IndFull => TransactionConsistency\n  BY DEF Agent_IndFull\n\nLEMMA Agent_ImplDir == Agent_IndFull => DirectoryAccurate\n  BY DEF Agent_IndFull\n\nLEMMA Agent_ImplExcl == Agent_IndFull => ExclusiveIsolation\n  BY DEF Agent_IndFull\n\nLEMMA Agent_ImplWBC == Agent_IndFull => WritebackCarriesLatest\n  BY DEF Agent_IndFull\n\nLEMMA Agent_RefInit == Init => Abstract!Init\n  BY NoDataNotInDATA, NoNodeNotInNODE, AgentTL!SMTT(\"r20\") DEF Init, Abstract!Init\n\nLEMMA Agent_RefStore == \\A i \\in NODE, d \\in DATA : Agent_IndFull /\\ Store(i, d) => UNCHANGED Abstract!vars\n  BY NoDataNotInDATA, NoNodeNotInNODE, AgentTL!SMTT(\"r20\") DEF Store, Agent_IndFull, Abstract!vars, Agent_IndFull, Agent_TypeOK, TransactionConsistency, DirectoryAccurate, ExclusiveIsolation, WritebackCarriesLatest, DataProp, Agent_AuxInvCache, Agent_AuxInvAckCache, Agent_AuxInvShr, Agent_AuxGntShr, Agent_AuxInvAckShr, Agent_AuxInvSubset, Agent_AuxInvNotIn, Agent_AuxInvAckNotIn, Agent_AuxEEx, Agent_AuxGntEEx, Agent_AuxGntSNoEx, Agent_AuxSNoEx, Agent_AuxMemData, Agent_AuxAuxData, Agent_AuxINoData, Agent_AuxChan1Data, Agent_AuxChan2EmptyNoData, Agent_AuxChan2InvNoData, Agent_AuxGntData, Agent_AuxChan3EmptyNoData, Agent_AuxGntEqMem, Agent_AuxGntEqAux, Agent_AuxInvAckValid, Agent_AuxShrPending, Agent_AuxInvCur, Agent_AuxInvAckCur, Agent_AuxCurEmptyNoInv, Agent_AuxInvAckNoExNoData, Agent_AuxInvAckExAux, Agent_AuxExOne, Agent_AuxNoExNo, Agent_AuxENoGntSelf, Agent_AuxENoInvAckSelf, Agent_AuxInvInvAckExcl, Agent_AuxGntInvAckExcl, Agent_AuxGntENoS, Agent_AuxGntENoInvAck, Agent_AuxGntNoE, Agent_AuxPendingPtr, Agent_AuxGntECacheI, Agent_AuxReqSNoExNoInv\n\nLEMMA Agent_RefSendReq == \\A i \\in NODE : Agent_IndFull /\\ SendReq(i) => Abstract!SendReq(i)\n  BY NoDataNotInDATA, NoNodeNotInNODE, AgentTL!SMTT(\"r20\") DEF SendReq, Abstract!SendReq, Agent_IndFull, Abstract!vars, Agent_IndFull, Agent_TypeOK, TransactionConsistency, DirectoryAccurate, ExclusiveIsolation, WritebackCarriesLatest, DataProp, Agent_AuxInvCache, Agent_AuxInvAckCache, Agent_AuxInvShr, Agent_AuxGntShr, Agent_AuxInvAckShr, Agent_AuxInvSubset, Agent_AuxInvNotIn, Agent_AuxInvAckNotIn, Agent_AuxEEx, Agent_AuxGntEEx, Agent_AuxGntSNoEx, Agent_AuxSNoEx, Agent_AuxMemData, Agent_AuxAuxData, Agent_AuxINoData, Agent_AuxChan1Data, Agent_AuxChan2EmptyNoData, Agent_AuxChan2InvNoData, Agent_AuxGntData, Agent_AuxChan3EmptyNoData, Agent_AuxGntEqMem, Agent_AuxGntEqAux, Agent_AuxInvAckValid, Agent_AuxShrPending, Agent_AuxInvCur, Agent_AuxInvAckCur, Agent_AuxCurEmptyNoInv, Agent_AuxInvAckNoExNoData, Agent_AuxInvAckExAux, Agent_AuxExOne, Agent_AuxNoExNo, Agent_AuxENoGntSelf, Agent_AuxENoInvAckSelf, Agent_AuxInvInvAckExcl, Agent_AuxGntInvAckExcl, Agent_AuxGntENoS, Agent_AuxGntENoInvAck, Agent_AuxGntNoE, Agent_AuxPendingPtr, Agent_AuxGntECacheI, Agent_AuxReqSNoExNoInv\n\nLEMMA Agent_RefRecvGnt == \\A i \\in NODE : Agent_IndFull /\\ RecvGnt(i) => Abstract!RecvGnt(i)\n  BY NoDataNotInDATA, NoNodeNotInNODE, AgentTL!SMTT(\"r20\") DEF RecvGnt, Abstract!RecvGnt, Agent_IndFull, Abstract!vars, Agent_IndFull, Agent_TypeOK, TransactionConsistency, DirectoryAccurate, ExclusiveIsolation, WritebackCarriesLatest, DataProp, Agent_AuxInvCache, Agent_AuxInvAckCache, Agent_AuxInvShr, Agent_AuxGntShr, Agent_AuxInvAckShr, Agent_AuxInvSubset, Agent_AuxInvNotIn, Agent_AuxInvAckNotIn, Agent_AuxEEx, Agent_AuxGntEEx, Agent_AuxGntSNoEx, Agent_AuxSNoEx, Agent_AuxMemData, Agent_AuxAuxData, Agent_AuxINoData, Agent_AuxChan1Data, Agent_AuxChan2EmptyNoData, Agent_AuxChan2InvNoData, Agent_AuxGntData, Agent_AuxChan3EmptyNoData, Agent_AuxGntEqMem, Agent_AuxGntEqAux, Agent_AuxInvAckValid, Agent_AuxShrPending, Agent_AuxInvCur, Agent_AuxInvAckCur, Agent_AuxCurEmptyNoInv, Agent_AuxInvAckNoExNoData, Agent_AuxInvAckExAux, Agent_AuxExOne, Agent_AuxNoExNo, Agent_AuxENoGntSelf, Agent_AuxENoInvAckSelf, Agent_AuxInvInvAckExcl, Agent_AuxGntInvAckExcl, Agent_AuxGntENoS, Agent_AuxGntENoInvAck, Agent_AuxGntNoE, Agent_AuxPendingPtr, Agent_AuxGntECacheI, Agent_AuxReqSNoExNoInv\n\nLEMMA Agent_RefSendInvAck == \\A i \\in NODE : Agent_IndFull /\\ SendInvAck(i) => Abstract!SendInvAck(i)\n  BY NoDataNotInDATA, NoNodeNotInNODE, AgentTL!SMTT(\"r20\") DEF SendInvAck, Abstract!SendInvAck, Agent_IndFull, Abstract!vars, Agent_IndFull, Agent_TypeOK, TransactionConsistency, DirectoryAccurate, ExclusiveIsolation, WritebackCarriesLatest, DataProp, Agent_AuxInvCache, Agent_AuxInvAckCache, Agent_AuxInvShr, Agent_AuxGntShr, Agent_AuxInvAckShr, Agent_AuxInvSubset, Agent_AuxInvNotIn, Agent_AuxInvAckNotIn, Agent_AuxEEx, Agent_AuxGntEEx, Agent_AuxGntSNoEx, Agent_AuxSNoEx, Agent_AuxMemData, Agent_AuxAuxData, Agent_AuxINoData, Agent_AuxChan1Data, Agent_AuxChan2EmptyNoData, Agent_AuxChan2InvNoData, Agent_AuxGntData, Agent_AuxChan3EmptyNoData, Agent_AuxGntEqMem, Agent_AuxGntEqAux, Agent_AuxInvAckValid, Agent_AuxShrPending, Agent_AuxInvCur, Agent_AuxInvAckCur, Agent_AuxCurEmptyNoInv, Agent_AuxInvAckNoExNoData, Agent_AuxInvAckExAux, Agent_AuxExOne, Agent_AuxNoExNo, Agent_AuxENoGntSelf, Agent_AuxENoInvAckSelf, Agent_AuxInvInvAckExcl, Agent_AuxGntInvAckExcl, Agent_AuxGntENoS, Agent_AuxGntENoInvAck, Agent_AuxGntNoE, Agent_AuxPendingPtr, Agent_AuxGntECacheI, Agent_AuxReqSNoExNoInv\n\nLEMMA Agent_RefRecvReq == \\A i \\in NODE : Agent_IndFull /\\ RecvReq(i) => Abstract!RecvReq(i)\n  BY NoDataNotInDATA, NoNodeNotInNODE, AgentTL!SMTT(\"r20\") DEF RecvReq, Abstract!RecvReq, Agent_IndFull, Abstract!vars, Agent_IndFull, Agent_TypeOK, TransactionConsistency, DirectoryAccurate, ExclusiveIsolation, WritebackCarriesLatest, DataProp, Agent_AuxInvCache, Agent_AuxInvAckCache, Agent_AuxInvShr, Agent_AuxGntShr, Agent_AuxInvAckShr, Agent_AuxInvSubset, Agent_AuxInvNotIn, Agent_AuxInvAckNotIn, Agent_AuxEEx, Agent_AuxGntEEx, Agent_AuxGntSNoEx, Agent_AuxSNoEx, Agent_AuxMemData, Agent_AuxAuxData, Agent_AuxINoData, Agent_AuxChan1Data, Agent_AuxChan2EmptyNoData, Agent_AuxChan2InvNoData, Agent_AuxGntData, Agent_AuxChan3EmptyNoData, Agent_AuxGntEqMem, Agent_AuxGntEqAux, Agent_AuxInvAckValid, Agent_AuxShrPending, Agent_AuxInvCur, Agent_AuxInvAckCur, Agent_AuxCurEmptyNoInv, Agent_AuxInvAckNoExNoData, Agent_AuxInvAckExAux, Agent_AuxExOne, Agent_AuxNoExNo, Agent_AuxENoGntSelf, Agent_AuxENoInvAckSelf, Agent_AuxInvInvAckExcl, Agent_AuxGntInvAckExcl, Agent_AuxGntENoS, Agent_AuxGntENoInvAck, Agent_AuxGntNoE, Agent_AuxPendingPtr, Agent_AuxGntECacheI, Agent_AuxReqSNoExNoInv\n\nLEMMA Agent_RefSendInv == \\A i \\in NODE : Agent_IndFull /\\ SendInv(i) => Abstract!SendInv(i)\n  BY NoDataNotInDATA, NoNodeNotInNODE, AgentTL!SMTT(\"r20\") DEF SendInv, Abstract!SendInv, Agent_IndFull, Abstract!vars, Agent_IndFull, Agent_TypeOK, TransactionConsistency, DirectoryAccurate, ExclusiveIsolation, WritebackCarriesLatest, DataProp, Agent_AuxInvCache, Agent_AuxInvAckCache, Agent_AuxInvShr, Agent_AuxGntShr, Agent_AuxInvAckShr, Agent_AuxInvSubset, Agent_AuxInvNotIn, Agent_AuxInvAckNotIn, Agent_AuxEEx, Agent_AuxGntEEx, Agent_AuxGntSNoEx, Agent_AuxSNoEx, Agent_AuxMemData, Agent_AuxAuxData, Agent_AuxINoData, Agent_AuxChan1Data, Agent_AuxChan2EmptyNoData, Agent_AuxChan2InvNoData, Agent_AuxGntData, Agent_AuxChan3EmptyNoData, Agent_AuxGntEqMem, Agent_AuxGntEqAux, Agent_AuxInvAckValid, Agent_AuxShrPending, Agent_AuxInvCur, Agent_AuxInvAckCur, Agent_AuxCurEmptyNoInv, Agent_AuxInvAckNoExNoData, Agent_AuxInvAckExAux, Agent_AuxExOne, Agent_AuxNoExNo, Agent_AuxENoGntSelf, Agent_AuxENoInvAckSelf, Agent_AuxInvInvAckExcl, Agent_AuxGntInvAckExcl, Agent_AuxGntENoS, Agent_AuxGntENoInvAck, Agent_AuxGntNoE, Agent_AuxPendingPtr, Agent_AuxGntECacheI, Agent_AuxReqSNoExNoInv\n\nLEMMA Agent_RefRecvInvAck == \\A i \\in NODE : Agent_IndFull /\\ RecvInvAck(i) => Abstract!RecvInvAck(i)\n  BY NoDataNotInDATA, NoNodeNotInNODE, AgentTL!SMTT(\"r20\") DEF RecvInvAck, Abstract!RecvInvAck, Agent_IndFull, Abstract!vars, Agent_IndFull, Agent_TypeOK, TransactionConsistency, DirectoryAccurate, ExclusiveIsolation, WritebackCarriesLatest, DataProp, Agent_AuxInvCache, Agent_AuxInvAckCache, Agent_AuxInvShr, Agent_AuxGntShr, Agent_AuxInvAckShr, Agent_AuxInvSubset, Agent_AuxInvNotIn, Agent_AuxInvAckNotIn, Agent_AuxEEx, Agent_AuxGntEEx, Agent_AuxGntSNoEx, Agent_AuxSNoEx, Agent_AuxMemData, Agent_AuxAuxData, Agent_AuxINoData, Agent_AuxChan1Data, Agent_AuxChan2EmptyNoData, Agent_AuxChan2InvNoData, Agent_AuxGntData, Agent_AuxChan3EmptyNoData, Agent_AuxGntEqMem, Agent_AuxGntEqAux, Agent_AuxInvAckValid, Agent_AuxShrPending, Agent_AuxInvCur, Agent_AuxInvAckCur, Agent_AuxCurEmptyNoInv, Agent_AuxInvAckNoExNoData, Agent_AuxInvAckExAux, Agent_AuxExOne, Agent_AuxNoExNo, Agent_AuxENoGntSelf, Agent_AuxENoInvAckSelf, Agent_AuxInvInvAckExcl, Agent_AuxGntInvAckExcl, Agent_AuxGntENoS, Agent_AuxGntENoInvAck, Agent_AuxGntNoE, Agent_AuxPendingPtr, Agent_AuxGntECacheI, Agent_AuxReqSNoExNoInv\n\nLEMMA Agent_RefSendGnt == \\A i \\in NODE : Agent_IndFull /\\ SendGnt(i) => Abstract!SendGnt(i)\n  BY NoDataNotInDATA, NoNodeNotInNODE, AgentTL!SMTT(\"r20\") DEF SendGnt, Abstract!SendGnt, Agent_IndFull, Abstract!vars, Agent_IndFull, Agent_TypeOK, TransactionConsistency, DirectoryAccurate, ExclusiveIsolation, WritebackCarriesLatest, DataProp, Agent_AuxInvCache, Agent_AuxInvAckCache, Agent_AuxInvShr, Agent_AuxGntShr, Agent_AuxInvAckShr, Agent_AuxInvSubset, Agent_AuxInvNotIn, Agent_AuxInvAckNotIn, Agent_AuxEEx, Agent_AuxGntEEx, Agent_AuxGntSNoEx, Agent_AuxSNoEx, Agent_AuxMemData, Agent_AuxAuxData, Agent_AuxINoData, Agent_AuxChan1Data, Agent_AuxChan2EmptyNoData, Agent_AuxChan2InvNoData, Agent_AuxGntData, Agent_AuxChan3EmptyNoData, Agent_AuxGntEqMem, Agent_AuxGntEqAux, Agent_AuxInvAckValid, Agent_AuxShrPending, Agent_AuxInvCur, Agent_AuxInvAckCur, Agent_AuxCurEmptyNoInv, Agent_AuxInvAckNoExNoData, Agent_AuxInvAckExAux, Agent_AuxExOne, Agent_AuxNoExNo, Agent_AuxENoGntSelf, Agent_AuxENoInvAckSelf, Agent_AuxInvInvAckExcl, Agent_AuxGntInvAckExcl, Agent_AuxGntENoS, Agent_AuxGntENoInvAck, Agent_AuxGntNoE, Agent_AuxPendingPtr, Agent_AuxGntECacheI, Agent_AuxReqSNoExNoInv\n\nLEMMA Agent_RefNext == Agent_IndFull /\\ Next => Abstract!Next \\/ UNCHANGED Abstract!vars\n  BY Agent_RefStore, Agent_RefSendReq, Agent_RefRecvGnt, Agent_RefSendInvAck, Agent_RefRecvReq, Agent_RefSendInv, Agent_RefRecvInvAck, Agent_RefSendGnt DEF Next, Abstract!Next\n\nLEMMA Agent_RefStut == Agent_IndFull /\\ UNCHANGED vars => UNCHANGED Abstract!vars\n  BY DEF Agent_IndFull, Agent_IndFull, Agent_TypeOK, TransactionConsistency, DirectoryAccurate, ExclusiveIsolation, WritebackCarriesLatest, DataProp, Agent_AuxInvCache, Agent_AuxInvAckCache, Agent_AuxInvShr, Agent_AuxGntShr, Agent_AuxInvAckShr, Agent_AuxInvSubset, Agent_AuxInvNotIn, Agent_AuxInvAckNotIn, Agent_AuxEEx, Agent_AuxGntEEx, Agent_AuxGntSNoEx, Agent_AuxSNoEx, Agent_AuxMemData, Agent_AuxAuxData, Agent_AuxINoData, Agent_AuxChan1Data, Agent_AuxChan2EmptyNoData, Agent_AuxChan2InvNoData, Agent_AuxGntData, Agent_AuxChan3EmptyNoData, Agent_AuxGntEqMem, Agent_AuxGntEqAux, Agent_AuxInvAckValid, Agent_AuxShrPending, Agent_AuxInvCur, Agent_AuxInvAckCur, Agent_AuxCurEmptyNoInv, Agent_AuxInvAckNoExNoData, Agent_AuxInvAckExAux, Agent_AuxExOne, Agent_AuxNoExNo, Agent_AuxENoGntSelf, Agent_AuxENoInvAckSelf, Agent_AuxInvInvAckExcl, Agent_AuxGntInvAckExcl, Agent_AuxGntENoS, Agent_AuxGntENoInvAck, Agent_AuxGntNoE, Agent_AuxPendingPtr, Agent_AuxGntECacheI, Agent_AuxReqSNoExNoInv, vars, Abstract!vars\n\nLEMMA Agent_RefStep == Agent_IndFull /\\ [Next]_vars => [Abstract!Next]_Abstract!vars\n<1>1. Agent_IndFull /\\ Next => Abstract!Next \\/ UNCHANGED Abstract!vars BY Agent_RefNext\n<1>2. Agent_IndFull /\\ UNCHANGED vars => UNCHANGED Abstract!vars BY Agent_RefStut\n<1>3. QED BY <1>1, <1>2 DEF Next, Abstract!Next, vars, Abstract!vars\n\\* END AGENT HELPERS\n\nTHEOREM Spec => []DataProp\n\\* BEGIN AGENT PROOF tlaplus_examples_GermanProtocol/GermanData_DataProp.tla\n<1>1. Agent_IndFull => DataProp BY Agent_ImplData\n<1>2. QED BY Agent_Box, <1>1, AgentTL!PTL DEF Spec\n\\* END AGENT PROOF tlaplus_examples_GermanProtocol/GermanData_DataProp.tla\n\nTHEOREM Spec => []TransactionConsistency\n\\* BEGIN AGENT PROOF tlaplus_examples_GermanProtocol/GermanData_TransactionConsistency.tla\n<1>1. Agent_IndFull => TransactionConsistency BY Agent_ImplTC\n<1>2. QED BY Agent_Box, <1>1, AgentTL!PTL DEF Spec\n\\* END AGENT PROOF tlaplus_examples_GermanProtocol/GermanData_TransactionConsistency.tla\n\nTHEOREM Spec => []DirectoryAccurate\n\\* BEGIN AGENT PROOF tlaplus_examples_GermanProtocol/GermanData_DirectoryAccurate.tla\n<1>1. Agent_IndFull => DirectoryAccurate BY Agent_ImplDir\n<1>2. QED BY Agent_Box, <1>1, AgentTL!PTL DEF Spec\n\\* END AGENT PROOF tlaplus_examples_GermanProtocol/GermanData_DirectoryAccurate.tla\n\nTHEOREM Spec => []ExclusiveIsolation\n\\* BEGIN AGENT PROOF tlaplus_examples_GermanProtocol/GermanData_ExclusiveIsolation.tla\n<1>1. Agent_IndFull => ExclusiveIsolation BY Agent_ImplExcl\n<1>2. QED BY Agent_Box, <1>1, AgentTL!PTL DEF Spec\n\\* END AGENT PROOF tlaplus_examples_GermanProtocol/GermanData_ExclusiveIsolation.tla\n\nTHEOREM Spec => []WritebackCarriesLatest\n\\* BEGIN AGENT PROOF tlaplus_examples_GermanProtocol/GermanData_WritebackCarriesLatest.tla\n<1>1. Agent_IndFull => WritebackCarriesLatest BY Agent_ImplWBC\n<1>2. QED BY Agent_Box, <1>1, AgentTL!PTL DEF Spec\n\\* END AGENT PROOF tlaplus_examples_GermanProtocol/GermanData_WritebackCarriesLatest.tla\n\nTHEOREM Spec => Refinement\n\\* BEGIN AGENT PROOF tlaplus_examples_GermanProtocol/GermanData_Refinement.tla\n<1>1. Init => Abstract!Init BY Agent_RefInit\n<1>2. Agent_IndFull /\\ [Next]_vars => [Abstract!Next]_Abstract!vars BY Agent_RefStep\n<1>3. Spec => []Agent_IndFull BY Agent_Box\n<1>4. QED BY <1>1, <1>2, <1>3, AgentTL!PTL DEF Spec, Refinement, Abstract!Spec\n\\* END AGENT PROOF tlaplus_examples_GermanProtocol/GermanData_Refinement.tla\n====\n",
+  "units": {
+    "tlaplus_examples_GermanProtocol/GermanData_DataProp.tla": {
+      "id": "tlaplus_examples_GermanProtocol/GermanData_DataProp.tla",
+      "name": "GermanData_DataProp",
+      "kind": "target",
+      "lineStart": 206,
+      "lineEnd": 209,
+      "proofLines": [
+        208,
+        209
+      ],
+      "proofRange": [
+        208,
+        209
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:Agent_Box",
+        "helper:Agent_ImplData"
+      ]
+    },
+    "tlaplus_examples_GermanProtocol/GermanData_TransactionConsistency.tla": {
+      "id": "tlaplus_examples_GermanProtocol/GermanData_TransactionConsistency.tla",
+      "name": "GermanData_TransactionConsistency",
+      "kind": "target",
+      "lineStart": 212,
+      "lineEnd": 215,
+      "proofLines": [
+        214,
+        215
+      ],
+      "proofRange": [
+        214,
+        215
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:Agent_Box",
+        "helper:Agent_ImplTC"
+      ]
+    },
+    "tlaplus_examples_GermanProtocol/GermanData_DirectoryAccurate.tla": {
+      "id": "tlaplus_examples_GermanProtocol/GermanData_DirectoryAccurate.tla",
+      "name": "GermanData_DirectoryAccurate",
+      "kind": "target",
+      "lineStart": 218,
+      "lineEnd": 221,
+      "proofLines": [
+        220,
+        221
+      ],
+      "proofRange": [
+        220,
+        221
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:Agent_Box",
+        "helper:Agent_ImplDir"
+      ]
+    },
+    "tlaplus_examples_GermanProtocol/GermanData_ExclusiveIsolation.tla": {
+      "id": "tlaplus_examples_GermanProtocol/GermanData_ExclusiveIsolation.tla",
+      "name": "GermanData_ExclusiveIsolation",
+      "kind": "target",
+      "lineStart": 224,
+      "lineEnd": 227,
+      "proofLines": [
+        226,
+        227
+      ],
+      "proofRange": [
+        226,
+        227
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:Agent_Box",
+        "helper:Agent_ImplExcl"
+      ]
+    },
+    "tlaplus_examples_GermanProtocol/GermanData_WritebackCarriesLatest.tla": {
+      "id": "tlaplus_examples_GermanProtocol/GermanData_WritebackCarriesLatest.tla",
+      "name": "GermanData_WritebackCarriesLatest",
+      "kind": "target",
+      "lineStart": 230,
+      "lineEnd": 233,
+      "proofLines": [
+        232,
+        233
+      ],
+      "proofRange": [
+        232,
+        233
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:Agent_Box",
+        "helper:Agent_ImplWBC"
+      ]
+    },
+    "tlaplus_examples_GermanProtocol/GermanData_Refinement.tla": {
+      "id": "tlaplus_examples_GermanProtocol/GermanData_Refinement.tla",
+      "name": "GermanData_Refinement",
+      "kind": "target",
+      "lineStart": 236,
+      "lineEnd": 241,
+      "proofLines": [
+        238,
+        239,
+        240,
+        241
+      ],
+      "proofRange": [
+        238,
+        241
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:Agent_Box",
+        "helper:Agent_RefInit",
+        "helper:Agent_RefStep"
+      ]
+    },
+    "helper:Agent_Init": {
+      "id": "helper:Agent_Init",
+      "name": "Agent_Init",
+      "kind": "helper",
+      "lineStart": 111,
+      "lineEnd": 112,
+      "proofLines": [
+        112
+      ],
+      "proofRange": [
+        112,
+        112
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:Agent_PresStore": {
+      "id": "helper:Agent_PresStore",
+      "name": "Agent_PresStore",
+      "kind": "helper",
+      "lineStart": 114,
+      "lineEnd": 115,
+      "proofLines": [
+        115
+      ],
+      "proofRange": [
+        115,
+        115
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:Agent_PresSendReq": {
+      "id": "helper:Agent_PresSendReq",
+      "name": "Agent_PresSendReq",
+      "kind": "helper",
+      "lineStart": 117,
+      "lineEnd": 118,
+      "proofLines": [
+        118
+      ],
+      "proofRange": [
+        118,
+        118
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:Agent_PresRecvGnt": {
+      "id": "helper:Agent_PresRecvGnt",
+      "name": "Agent_PresRecvGnt",
+      "kind": "helper",
+      "lineStart": 120,
+      "lineEnd": 121,
+      "proofLines": [
+        121
+      ],
+      "proofRange": [
+        121,
+        121
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:Agent_PresSendInvAck": {
+      "id": "helper:Agent_PresSendInvAck",
+      "name": "Agent_PresSendInvAck",
+      "kind": "helper",
+      "lineStart": 123,
+      "lineEnd": 124,
+      "proofLines": [
+        124
+      ],
+      "proofRange": [
+        124,
+        124
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:Agent_PresRecvReq": {
+      "id": "helper:Agent_PresRecvReq",
+      "name": "Agent_PresRecvReq",
+      "kind": "helper",
+      "lineStart": 126,
+      "lineEnd": 127,
+      "proofLines": [
+        127
+      ],
+      "proofRange": [
+        127,
+        127
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:Agent_PresSendInv": {
+      "id": "helper:Agent_PresSendInv",
+      "name": "Agent_PresSendInv",
+      "kind": "helper",
+      "lineStart": 129,
+      "lineEnd": 130,
+      "proofLines": [
+        130
+      ],
+      "proofRange": [
+        130,
+        130
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:Agent_PresRecvInvAck": {
+      "id": "helper:Agent_PresRecvInvAck",
+      "name": "Agent_PresRecvInvAck",
+      "kind": "helper",
+      "lineStart": 132,
+      "lineEnd": 133,
+      "proofLines": [
+        133
+      ],
+      "proofRange": [
+        133,
+        133
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:Agent_PresSendGnt": {
+      "id": "helper:Agent_PresSendGnt",
+      "name": "Agent_PresSendGnt",
+      "kind": "helper",
+      "lineStart": 135,
+      "lineEnd": 136,
+      "proofLines": [
+        136
+      ],
+      "proofRange": [
+        136,
+        136
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:Agent_Next": {
+      "id": "helper:Agent_Next",
+      "name": "Agent_Next",
+      "kind": "helper",
+      "lineStart": 138,
+      "lineEnd": 139,
+      "proofLines": [
+        139
+      ],
+      "proofRange": [
+        139,
+        139
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:Agent_PresRecvGnt",
+        "helper:Agent_PresRecvInvAck",
+        "helper:Agent_PresRecvReq",
+        "helper:Agent_PresSendGnt",
+        "helper:Agent_PresSendInv",
+        "helper:Agent_PresSendInvAck",
+        "helper:Agent_PresSendReq",
+        "helper:Agent_PresStore"
+      ]
+    },
+    "helper:Agent_Stut": {
+      "id": "helper:Agent_Stut",
+      "name": "Agent_Stut",
+      "kind": "helper",
+      "lineStart": 141,
+      "lineEnd": 142,
+      "proofLines": [
+        142
+      ],
+      "proofRange": [
+        142,
+        142
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:Agent_Box": {
+      "id": "helper:Agent_Box",
+      "name": "Agent_Box",
+      "kind": "helper",
+      "lineStart": 144,
+      "lineEnd": 150,
+      "proofLines": [
+        145,
+        146,
+        147,
+        148,
+        149,
+        150
+      ],
+      "proofRange": [
+        145,
+        150
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:Agent_Init",
+        "helper:Agent_Next",
+        "helper:Agent_Stut"
+      ]
+    },
+    "helper:Agent_ImplData": {
+      "id": "helper:Agent_ImplData",
+      "name": "Agent_ImplData",
+      "kind": "helper",
+      "lineStart": 152,
+      "lineEnd": 153,
+      "proofLines": [
+        153
+      ],
+      "proofRange": [
+        153,
+        153
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:Agent_ImplTC": {
+      "id": "helper:Agent_ImplTC",
+      "name": "Agent_ImplTC",
+      "kind": "helper",
+      "lineStart": 155,
+      "lineEnd": 156,
+      "proofLines": [
+        156
+      ],
+      "proofRange": [
+        156,
+        156
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:Agent_ImplDir": {
+      "id": "helper:Agent_ImplDir",
+      "name": "Agent_ImplDir",
+      "kind": "helper",
+      "lineStart": 158,
+      "lineEnd": 159,
+      "proofLines": [
+        159
+      ],
+      "proofRange": [
+        159,
+        159
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:Agent_ImplExcl": {
+      "id": "helper:Agent_ImplExcl",
+      "name": "Agent_ImplExcl",
+      "kind": "helper",
+      "lineStart": 161,
+      "lineEnd": 162,
+      "proofLines": [
+        162
+      ],
+      "proofRange": [
+        162,
+        162
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:Agent_ImplWBC": {
+      "id": "helper:Agent_ImplWBC",
+      "name": "Agent_ImplWBC",
+      "kind": "helper",
+      "lineStart": 164,
+      "lineEnd": 165,
+      "proofLines": [
+        165
+      ],
+      "proofRange": [
+        165,
+        165
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:Agent_RefInit": {
+      "id": "helper:Agent_RefInit",
+      "name": "Agent_RefInit",
+      "kind": "helper",
+      "lineStart": 167,
+      "lineEnd": 168,
+      "proofLines": [
+        168
+      ],
+      "proofRange": [
+        168,
+        168
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:Agent_RefStore": {
+      "id": "helper:Agent_RefStore",
+      "name": "Agent_RefStore",
+      "kind": "helper",
+      "lineStart": 170,
+      "lineEnd": 171,
+      "proofLines": [
+        171
+      ],
+      "proofRange": [
+        171,
+        171
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:Agent_RefSendReq": {
+      "id": "helper:Agent_RefSendReq",
+      "name": "Agent_RefSendReq",
+      "kind": "helper",
+      "lineStart": 173,
+      "lineEnd": 174,
+      "proofLines": [
+        174
+      ],
+      "proofRange": [
+        174,
+        174
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:Agent_RefRecvGnt": {
+      "id": "helper:Agent_RefRecvGnt",
+      "name": "Agent_RefRecvGnt",
+      "kind": "helper",
+      "lineStart": 176,
+      "lineEnd": 177,
+      "proofLines": [
+        177
+      ],
+      "proofRange": [
+        177,
+        177
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:Agent_RefSendInvAck": {
+      "id": "helper:Agent_RefSendInvAck",
+      "name": "Agent_RefSendInvAck",
+      "kind": "helper",
+      "lineStart": 179,
+      "lineEnd": 180,
+      "proofLines": [
+        180
+      ],
+      "proofRange": [
+        180,
+        180
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:Agent_RefRecvReq": {
+      "id": "helper:Agent_RefRecvReq",
+      "name": "Agent_RefRecvReq",
+      "kind": "helper",
+      "lineStart": 182,
+      "lineEnd": 183,
+      "proofLines": [
+        183
+      ],
+      "proofRange": [
+        183,
+        183
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:Agent_RefSendInv": {
+      "id": "helper:Agent_RefSendInv",
+      "name": "Agent_RefSendInv",
+      "kind": "helper",
+      "lineStart": 185,
+      "lineEnd": 186,
+      "proofLines": [
+        186
+      ],
+      "proofRange": [
+        186,
+        186
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:Agent_RefRecvInvAck": {
+      "id": "helper:Agent_RefRecvInvAck",
+      "name": "Agent_RefRecvInvAck",
+      "kind": "helper",
+      "lineStart": 188,
+      "lineEnd": 189,
+      "proofLines": [
+        189
+      ],
+      "proofRange": [
+        189,
+        189
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:Agent_RefSendGnt": {
+      "id": "helper:Agent_RefSendGnt",
+      "name": "Agent_RefSendGnt",
+      "kind": "helper",
+      "lineStart": 191,
+      "lineEnd": 192,
+      "proofLines": [
+        192
+      ],
+      "proofRange": [
+        192,
+        192
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:Agent_RefNext": {
+      "id": "helper:Agent_RefNext",
+      "name": "Agent_RefNext",
+      "kind": "helper",
+      "lineStart": 194,
+      "lineEnd": 195,
+      "proofLines": [
+        195
+      ],
+      "proofRange": [
+        195,
+        195
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:Agent_RefRecvGnt",
+        "helper:Agent_RefRecvInvAck",
+        "helper:Agent_RefRecvReq",
+        "helper:Agent_RefSendGnt",
+        "helper:Agent_RefSendInv",
+        "helper:Agent_RefSendInvAck",
+        "helper:Agent_RefSendReq",
+        "helper:Agent_RefStore"
+      ]
+    },
+    "helper:Agent_RefStut": {
+      "id": "helper:Agent_RefStut",
+      "name": "Agent_RefStut",
+      "kind": "helper",
+      "lineStart": 197,
+      "lineEnd": 198,
+      "proofLines": [
+        198
+      ],
+      "proofRange": [
+        198,
+        198
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:Agent_RefStep": {
+      "id": "helper:Agent_RefStep",
+      "name": "Agent_RefStep",
+      "kind": "helper",
+      "lineStart": 200,
+      "lineEnd": 203,
+      "proofLines": [
+        201,
+        202,
+        203
+      ],
+      "proofRange": [
+        201,
+        203
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:Agent_RefNext",
+        "helper:Agent_RefStut"
+      ]
+    }
+  }
+}

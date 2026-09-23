@@ -1,0 +1,1995 @@
+{
+  "schemaVersion": 1,
+  "specId": "ivy_examples_hybrid_reliable_broadcast_cisa/ivy_examples_hybrid_reliable_broadcast_cisa.tla",
+  "sourceName": "ivy_examples_hybrid_reliable_broadcast_cisa.tla",
+  "sourceSha256": "b6e6e47379ef6a5b121d61c4361f977fdcb1ec1be1fe17ed4376359040525552",
+  "resultSha256": "3ae35a9779224efbf87a4d00a7e45978dde2bd73f06c7886acf993b05a12f7db",
+  "source": "---- MODULE ivy_examples_hybrid_reliable_broadcast_cisa ----\nEXTENDS ivy_examples_hybrid_reliable_broadcast_cisaDefs\n\n\\* BEGIN AGENT HELPERS\n\\* ------------------------------------------------------------------\n\\* Helper definitions\n\\* ------------------------------------------------------------------\n\nTypeOKA ==\n  /\\ accept \\in [Node -> BOOLEAN]\n  /\\ sentMsg \\in [Node -> [Node -> BOOLEAN]]\n  /\\ rcvMsg \\in [Node -> [Node -> BOOLEAN]]\n\nNoObInitA == \\A m \\in Node : Obedient(m) => m \\notin RcvInit\n\nSafeCoreA ==\n  /\\ \\A s, d \\in Node : (Obedient(d) /\\ rcvMsg[s][d]) => sentMsg[s][d]\n  /\\ \\A s, d \\in Node : Obedient(s) => ~sentMsg[s][d]\n  /\\ \\A n \\in Node : Obedient(n) => ~accept[n]\n\nSafeInvA == TypeOKA /\\ (NoObInitA => SafeCoreA)\n\n\\* ------------------------------------------------------------------\n\\* Quorum facts\n\\* ------------------------------------------------------------------\n\nLEMMA NoQuorumsL ==\n  ASSUME NEW n \\in Node, NEW rm,\n         \\A src \\in Node : Obedient(src) => ~rm[src][n]\n  PROVE  /\\ ~HasAQuorumRcv(n, rm)\n         /\\ ~HasBQuorumRcv(n, rm)\n<1>1. ~HasAQuorumRcv(n, rm)\n  <2> SUFFICES ASSUME NEW a \\in QuorumA,\n                      \\A src \\in Node : InA(src, a) => rm[src][n]\n               PROVE  FALSE\n    BY DEF HasAQuorumRcv\n  <2>1. PICK m \\in Node : InA(m, a) /\\ Obedient(m)\n    BY QuorumAssumption\n  <2>2. QED\n    BY <2>1\n<1>2. ~HasBQuorumRcv(n, rm)\n  <2> SUFFICES ASSUME NEW b \\in QuorumB,\n                      \\A src \\in Node : InB(src, b) => rm[src][n]\n               PROVE  FALSE\n    BY DEF HasBQuorumRcv\n  <2>1. PICK a \\in QuorumA : \\A z \\in Node : InA(z, a) => (InB(z, b) /\\ Symmetric(z))\n    BY QuorumAssumption\n  <2>2. PICK m \\in Node : InA(m, a) /\\ Obedient(m)\n    BY QuorumAssumption\n  <2>3. QED\n    BY <2>1, <2>2\n<1>3. QED\n  BY <1>1, <1>2\n\n\\* ------------------------------------------------------------------\n\\* Type invariant\n\\* ------------------------------------------------------------------\n\nLEMMA TypeNextL == ASSUME TypeOKA, [Next]_vars PROVE TypeOKA'\n<1> USE TypeAssumption DEF TypeOKA\n<1>1. CASE UNCHANGED vars\n  BY <1>1 DEF vars\n<1>2. CASE \\E n \\in Node : ReceiveInit(n)\n  BY <1>2 DEF ReceiveInit, SendAllFrom\n<1>3. CASE \\E n, s \\in Node : ReceiveMsg(n, s)\n  BY <1>3 DEF ReceiveMsg, SendAllFrom\n<1>4. CASE \\E n, s \\in Node : ReceiveMsgC(n, s)\n  <2>1. PICK n \\in Node, s \\in Node : ReceiveMsgC(n, s)\n    BY <1>4\n  <2>2. PICK send \\in BOOLEAN :\n          LET newRcv == [rcvMsg EXCEPT ![s][n] = TRUE] IN\n            /\\ rcvMsg' = newRcv\n            /\\ accept' = IF HasBQuorumRcv(n, newRcv)\n                           THEN [accept EXCEPT ![n] = TRUE] ELSE accept\n            /\\ sentMsg' = IF HasAQuorumRcv(n, newRcv) /\\ send\n                            THEN SendAllFrom(sentMsg, n) ELSE sentMsg\n    BY <2>1 DEF ReceiveMsgC\n  <2>3. QED\n    BY <2>2 DEF SendAllFrom\n<1>5. CASE \\E n \\in Node : ReceiveInitI(n)\n  BY <1>5 DEF ReceiveInitI\n<1>6. CASE \\E n, s \\in Node : ReceiveMsgI(n, s)\n  BY <1>6 DEF ReceiveMsgI\n<1>7. CASE \\E n \\in Node : FaultySendS(n)\n  BY <1>7 DEF FaultySendS, SendAllFrom\n<1>8. CASE \\E n \\in Node : FaultyStateSA(n)\n  BY <1>8 DEF FaultyStateSA, SetReceiveColumn\n<1>9. CASE \\E n \\in Node : FaultySendA(n)\n  BY <1>9 DEF FaultySendA\n<1>10. QED\n  BY <1>1, <1>2, <1>3, <1>4, <1>5, <1>6, <1>7, <1>8, <1>9 DEF Next\n\n\n\\* ------------------------------------------------------------------\n\\* Core safety invariant step\n\\* ------------------------------------------------------------------\n\nLEMMA ObedNoQL ==\n  ASSUME TypeOKA, SafeCoreA, NEW n \\in Node, Obedient(n), NEW s \\in Node, sentMsg[s][n]\n  PROVE  LET newRcv == [rcvMsg EXCEPT ![s][n] = TRUE] IN\n           /\\ ~HasAQuorumRcv(n, newRcv)\n           /\\ ~HasBQuorumRcv(n, newRcv)\n           /\\ \\A src \\in Node : newRcv[src][n] => sentMsg[src][n]\n<1> DEFINE newRcv == [rcvMsg EXCEPT ![s][n] = TRUE]\n<1> USE TypeAssumption DEF TypeOKA, SafeCoreA\n<1>0. ~Obedient(s)\n  OBVIOUS\n<1>1. \\A src \\in Node : newRcv[src][n] => sentMsg[src][n]\n  OBVIOUS\n<1>2. \\A src \\in Node : Obedient(src) => ~newRcv[src][n]\n  BY <1>0, <1>1\n<1>3. QED\n  BY <1>1, <1>2, NoQuorumsL\n\nLEMMA CoreSendL ==\n  ASSUME TypeOKA, SafeCoreA,\n         NEW n \\in Node, ~Obedient(n),\n         sentMsg' \\in [Node -> [Node -> BOOLEAN]],\n         \\A m \\in Node : m # n => sentMsg'[m] = sentMsg[m],\n         \\A d \\in Node : sentMsg[n][d] => sentMsg'[n][d],\n         rcvMsg' = rcvMsg, accept' = accept\n  PROVE  SafeCoreA'\nBY TypeAssumption DEF TypeOKA, SafeCoreA\n\nLEMMA CoreRcvL ==\n  ASSUME TypeOKA, SafeCoreA,\n         NEW n \\in Node, NEW s \\in Node, sentMsg[s][n],\n         rcvMsg' = [rcvMsg EXCEPT ![s][n] = TRUE],\n         sentMsg' \\in [Node -> [Node -> BOOLEAN]],\n         accept' \\in [Node -> BOOLEAN],\n         \\A m \\in Node : m # n => sentMsg'[m] = sentMsg[m],\n         \\A d \\in Node : sentMsg[n][d] => sentMsg'[n][d],\n         \\A m \\in Node : m # n => accept'[m] = accept[m],\n         Obedient(n) => (sentMsg' = sentMsg /\\ accept' = accept)\n  PROVE  SafeCoreA'\n<1> USE TypeAssumption DEF TypeOKA, SafeCoreA\n<1>1. CASE Obedient(n)\n  <2>1. \\A src \\in Node : rcvMsg'[src][n] => sentMsg[src][n]\n    BY <1>1, ObedNoQL\n  <2>2. QED\n    BY <1>1, <2>1\n<1>2. CASE ~Obedient(n)\n  BY <1>2\n<1>3. QED\n  BY <1>1, <1>2\n\nLEMMA CoreNextL ==\n  ASSUME TypeOKA, NoObInitA, SafeCoreA, Next\n  PROVE  SafeCoreA'\n<1> USE TypeAssumption DEF TypeOKA\n<1>1. CASE \\E n \\in Node : ReceiveInit(n)\n  <2>1. PICK n \\in Node : ReceiveInit(n)\n    BY <1>1\n  <2>2. ~Obedient(n)\n    BY <2>1 DEF NoObInitA, ReceiveInit\n  <2>3. QED\n    BY <2>1, <2>2, CoreSendL DEF ReceiveInit, SendAllFrom\n<1>2. CASE \\E n \\in Node : FaultySendS(n)\n  <2>1. PICK n \\in Node : FaultySendS(n)\n    BY <1>2\n  <2>2. ~Obedient(n)\n    BY <2>1 DEF Obedient, FaultySendS\n  <2>3. QED\n    BY <2>1, <2>2, CoreSendL DEF FaultySendS, SendAllFrom\n<1>3. CASE \\E n \\in Node : ReceiveInitI(n)\n  <2>1. PICK n \\in Node : ReceiveInitI(n)\n    BY <1>3\n  <2>2. ~Obedient(n)\n    BY <2>1 DEF NoObInitA, ReceiveInitI\n  <2>3. PICK newRow \\in [Node -> BOOLEAN] :\n          /\\ \\A dst \\in Node : sentMsg[n][dst] => newRow[dst]\n          /\\ sentMsg' = [sentMsg EXCEPT ![n] = newRow]\n    BY <2>1 DEF ReceiveInitI\n  <2>4. QED\n    BY <2>1, <2>2, <2>3, CoreSendL DEF ReceiveInitI\n<1>4. CASE \\E n \\in Node : FaultySendA(n)\n  <2>1. PICK n \\in Node : FaultySendA(n)\n    BY <1>4\n  <2>2. ~Obedient(n)\n    BY <2>1 DEF Obedient, FaultySendA\n  <2>3. PICK newRow \\in [Node -> BOOLEAN] :\n          /\\ \\A dst \\in Node : sentMsg[n][dst] => newRow[dst]\n          /\\ sentMsg' = [sentMsg EXCEPT ![n] = newRow]\n    BY <2>1 DEF FaultySendA\n  <2>4. QED\n    BY <2>1, <2>2, <2>3, CoreSendL DEF FaultySendA\n<1>5. CASE \\E n \\in Node : FaultyStateSA(n)\n  <2>1. PICK n \\in Node : FaultyStateSA(n)\n    BY <1>5\n  <2>2. ~Obedient(n)\n    BY <2>1 DEF Obedient, FaultyStateSA\n  <2>3. PICK newAccept \\in BOOLEAN, newCol \\in [Node -> BOOLEAN] :\n          /\\ accept' = [accept EXCEPT ![n] = newAccept]\n          /\\ rcvMsg' = SetReceiveColumn(rcvMsg, n, newCol)\n    BY <2>1 DEF FaultyStateSA\n  <2>4. QED\n    BY <2>1, <2>2, <2>3 DEF FaultyStateSA, SetReceiveColumn, SafeCoreA\n<1>6. CASE \\E n, s \\in Node : ReceiveMsg(n, s)\n  <2>1. PICK n \\in Node, s \\in Node : ReceiveMsg(n, s)\n    BY <1>6\n  <2>2. sentMsg[s][n]\n    BY <2>1 DEF ReceiveMsg\n  <2>3. Obedient(n) => (sentMsg' = sentMsg /\\ accept' = accept)\n    BY <2>1, <2>2, ObedNoQL DEF ReceiveMsg\n  <2>4. QED\n    BY <2>1, <2>2, <2>3, CoreRcvL DEF ReceiveMsg, SendAllFrom\n<1>7. CASE \\E n, s \\in Node : ReceiveMsgC(n, s)\n  <2>1. PICK n \\in Node, s \\in Node : ReceiveMsgC(n, s)\n    BY <1>7\n  <2>2. sentMsg[s][n]\n    BY <2>1 DEF ReceiveMsgC\n  <2>3. PICK send \\in BOOLEAN :\n          LET newRcv == [rcvMsg EXCEPT ![s][n] = TRUE] IN\n            /\\ rcvMsg' = newRcv\n            /\\ accept' = IF HasBQuorumRcv(n, newRcv)\n                           THEN [accept EXCEPT ![n] = TRUE] ELSE accept\n            /\\ sentMsg' = IF HasAQuorumRcv(n, newRcv) /\\ send\n                            THEN SendAllFrom(sentMsg, n) ELSE sentMsg\n    BY <2>1 DEF ReceiveMsgC\n  <2>4. Obedient(n) => (sentMsg' = sentMsg /\\ accept' = accept)\n    BY <2>2, <2>3, ObedNoQL\n  <2>5. QED\n    BY <2>2, <2>3, <2>4, CoreRcvL DEF SendAllFrom\n<1>8. CASE \\E n, s \\in Node : ReceiveMsgI(n, s)\n  <2>1. PICK n \\in Node, s \\in Node : ReceiveMsgI(n, s)\n    BY <1>8\n  <2>2. sentMsg[s][n]\n    BY <2>1 DEF ReceiveMsgI\n  <2>3. Obedient(n)\n    BY <2>1, QuorumAssumption DEF ReceiveMsgI, Obedient\n  <2>4. PICK newRow \\in [Node -> BOOLEAN] :\n          LET newRcv == [rcvMsg EXCEPT ![s][n] = TRUE] IN\n            /\\ rcvMsg' = newRcv\n            /\\ accept' = IF HasBQuorumRcv(n, newRcv)\n                           THEN [accept EXCEPT ![n] = TRUE] ELSE accept\n            /\\ (IF HasAQuorumRcv(n, newRcv)\n                  THEN \\A dst \\in Node : sentMsg[n][dst] => newRow[dst]\n                  ELSE newRow = sentMsg[n])\n            /\\ sentMsg' = [sentMsg EXCEPT ![n] = newRow]\n    BY <2>1 DEF ReceiveMsgI\n  <2>5. sentMsg' = sentMsg /\\ accept' = accept\n    <3>1. ~HasAQuorumRcv(n, [rcvMsg EXCEPT ![s][n] = TRUE])\n          /\\ ~HasBQuorumRcv(n, [rcvMsg EXCEPT ![s][n] = TRUE])\n      BY <2>2, <2>3, ObedNoQL\n    <3>2. newRow = sentMsg[n]\n      BY <2>4, <3>1\n    <3>3. sentMsg' = sentMsg\n      BY <2>4, <3>2\n    <3>4. QED\n      BY <2>4, <3>1, <3>3\n  <2>6. QED\n    BY <2>2, <2>4, <2>5, CoreRcvL\n<1>9. QED\n  BY <1>1, <1>2, <1>3, <1>4, <1>5, <1>6, <1>7, <1>8 DEF Next\n\n\n\\* ------------------------------------------------------------------\n\\* Safety theorem\n\\* ------------------------------------------------------------------\n\nLEMMA SafeInitL == Init => SafeInvA\n  BY TypeAssumption DEF Init, SafeInvA, SafeCoreA, TypeOKA\n\nLEMMA SafeNextL == ASSUME SafeInvA, [Next]_vars PROVE SafeInvA'\n<1>1. TypeOKA'\n  BY TypeNextL DEF SafeInvA\n<1>2. NoObInitA' => SafeCoreA'\n  <2> SUFFICES ASSUME NoObInitA' PROVE SafeCoreA'\n    OBVIOUS\n  <2>1. NoObInitA\n    BY DEF NoObInitA, Obedient\n  <2>2. SafeCoreA /\\ TypeOKA\n    BY <2>1 DEF SafeInvA\n  <2>3. CASE UNCHANGED vars\n    BY <2>2, <2>3 DEF SafeCoreA, vars\n  <2>4. CASE Next\n    BY <2>1, <2>2, <2>4, CoreNextL\n  <2>5. QED\n    BY <2>3, <2>4 DEF vars\n<1>3. QED\n  BY <1>1, <1>2 DEF SafeInvA\n\nLEMMA SafeImpL == SafeInvA => Unforgeability\n<1> SUFFICES ASSUME SafeInvA, \\E n \\in Node : Obedient(n) /\\ accept[n]\n             PROVE  \\E m \\in Node : Obedient(m) /\\ m \\in RcvInit\n  BY DEF Unforgeability\n<1>1. ~NoObInitA\n  BY DEF SafeInvA, SafeCoreA\n<1>2. QED\n  BY <1>1 DEF NoObInitA\n\n\\* ------------------------------------------------------------------\n\\* Liveness invariant\n\\* ------------------------------------------------------------------\n\nLiveCoreA ==\n  /\\ \\A s, d \\in Node : (Obedient(d) /\\ rcvMsg[s][d]) => sentMsg[s][d]\n  /\\ \\A z \\in Node : Symmetric(z) =>\n        (\\A d1, d2 \\in Node : sentMsg[z][d1] => sentMsg[z][d2])\n  /\\ \\A n \\in Node : (Obedient(n) /\\ accept[n]) => HasBQuorumRcv(n, rcvMsg)\n\nLiveInvA == TypeOKA /\\ LiveCoreA\n\nLEMMA HasBMonoL ==\n  ASSUME NEW n, NEW rm1, NEW rm2, HasBQuorumRcv(n, rm1),\n         \\A src \\in Node : rm1[src][n] => rm2[src][n]\n  PROVE  HasBQuorumRcv(n, rm2)\n  BY DEF HasBQuorumRcv\n\nLEMMA HasAMonoL ==\n  ASSUME NEW n, NEW rm1, NEW rm2, HasAQuorumRcv(n, rm1),\n         \\A src \\in Node : rm1[src][n] => rm2[src][n]\n  PROVE  HasAQuorumRcv(n, rm2)\n  BY DEF HasAQuorumRcv\n\nLEMMA LiveSendL ==\n  ASSUME TypeOKA, LiveCoreA, NEW n \\in Node,\n         sentMsg' \\in [Node -> [Node -> BOOLEAN]],\n         \\A m \\in Node : m # n => sentMsg'[m] = sentMsg[m],\n         \\A d \\in Node : sentMsg[n][d] => sentMsg'[n][d],\n         Symmetric(n) => (\\A d1, d2 \\in Node : sentMsg'[n][d1] => sentMsg'[n][d2]),\n         rcvMsg' = rcvMsg, accept' = accept\n  PROVE  LiveCoreA'\nBY TypeAssumption DEF TypeOKA, LiveCoreA\n\nLEMMA LiveRcvL ==\n  ASSUME TypeOKA, LiveCoreA,\n         NEW n \\in Node, NEW s \\in Node, sentMsg[s][n],\n         rcvMsg' = [rcvMsg EXCEPT ![s][n] = TRUE],\n         sentMsg' \\in [Node -> [Node -> BOOLEAN]],\n         accept' \\in [Node -> BOOLEAN],\n         \\A m \\in Node : m # n => sentMsg'[m] = sentMsg[m],\n         \\A d \\in Node : sentMsg[n][d] => sentMsg'[n][d],\n         Symmetric(n) => (\\A d1, d2 \\in Node : sentMsg'[n][d1] => sentMsg'[n][d2]),\n         \\A m \\in Node : m # n => accept'[m] = accept[m],\n         accept'[n] => (accept[n] \\/ HasBQuorumRcv(n, rcvMsg'))\n  PROVE  LiveCoreA'\n<1> USE TypeAssumption DEF TypeOKA\n<1>0. \\A m \\in Node : \\A src \\in Node : rcvMsg[src][m] => rcvMsg'[src][m]\n  OBVIOUS\n<1>1. \\A s1, d \\in Node : (Obedient(d) /\\ rcvMsg'[s1][d]) => sentMsg'[s1][d]\n  BY DEF LiveCoreA\n<1>2. \\A z \\in Node : Symmetric(z) =>\n        (\\A d1, d2 \\in Node : sentMsg'[z][d1] => sentMsg'[z][d2])\n  BY DEF LiveCoreA\n<1>3. \\A m \\in Node : (Obedient(m) /\\ accept'[m]) => HasBQuorumRcv(m, rcvMsg')\n  <2> SUFFICES ASSUME NEW m \\in Node, Obedient(m), accept'[m]\n               PROVE  HasBQuorumRcv(m, rcvMsg')\n    OBVIOUS\n  <2>1. CASE m = n\n    <3>1. CASE accept[n]\n      BY <1>0, <2>1, <3>1, HasBMonoL DEF LiveCoreA\n    <3>2. QED\n      BY <2>1, <3>1\n  <2>2. CASE m # n\n    BY <1>0, <2>2, HasBMonoL DEF LiveCoreA\n  <2>3. QED\n    BY <2>1, <2>2\n<1>4. QED\n  BY <1>1, <1>2, <1>3 DEF LiveCoreA\n\nLEMMA LiveNextL ==\n  ASSUME TypeOKA, LiveCoreA, Next\n  PROVE  LiveCoreA'\n<1> USE TypeAssumption DEF TypeOKA\n<1>1. CASE \\E n \\in Node : ReceiveInit(n)\n  <2>1. PICK n \\in Node : ReceiveInit(n)\n    BY <1>1\n  <2>2. QED\n    BY <2>1, LiveSendL DEF ReceiveInit, SendAllFrom\n<1>2. CASE \\E n \\in Node : FaultySendS(n)\n  <2>1. PICK n \\in Node : FaultySendS(n)\n    BY <1>2\n  <2>2. QED\n    BY <2>1, LiveSendL DEF FaultySendS, SendAllFrom\n<1>3. CASE \\E n \\in Node : ReceiveInitI(n)\n  <2>1. PICK n \\in Node : ReceiveInitI(n)\n    BY <1>3\n  <2>2. ~Symmetric(n)\n    BY <2>1, QuorumAssumption DEF Symmetric, ReceiveInitI\n  <2>3. PICK newRow \\in [Node -> BOOLEAN] :\n          /\\ \\A dst \\in Node : sentMsg[n][dst] => newRow[dst]\n          /\\ sentMsg' = [sentMsg EXCEPT ![n] = newRow]\n    BY <2>1 DEF ReceiveInitI\n  <2>4. QED\n    BY <2>1, <2>2, <2>3, LiveSendL DEF ReceiveInitI\n<1>4. CASE \\E n \\in Node : FaultySendA(n)\n  <2>1. PICK n \\in Node : FaultySendA(n)\n    BY <1>4\n  <2>2. ~Symmetric(n)\n    BY <2>1 DEF Symmetric, FaultySendA\n  <2>3. PICK newRow \\in [Node -> BOOLEAN] :\n          /\\ \\A dst \\in Node : sentMsg[n][dst] => newRow[dst]\n          /\\ sentMsg' = [sentMsg EXCEPT ![n] = newRow]\n    BY <2>1 DEF FaultySendA\n  <2>4. QED\n    BY <2>1, <2>2, <2>3, LiveSendL DEF FaultySendA\n<1>5. CASE \\E n \\in Node : FaultyStateSA(n)\n  <2>1. PICK n \\in Node : FaultyStateSA(n)\n    BY <1>5\n  <2>2. ~Obedient(n)\n    BY <2>1 DEF Obedient, FaultyStateSA\n  <2>3. PICK newAccept \\in BOOLEAN, newCol \\in [Node -> BOOLEAN] :\n          /\\ accept' = [accept EXCEPT ![n] = newAccept]\n          /\\ rcvMsg' = SetReceiveColumn(rcvMsg, n, newCol)\n    BY <2>1 DEF FaultyStateSA\n  <2>4. sentMsg' = sentMsg\n    BY <2>1 DEF FaultyStateSA\n  <2>5. \\A m \\in Node : m # n =>\n          (\\A src \\in Node : rcvMsg[src][m] => rcvMsg'[src][m])\n    BY <2>3 DEF SetReceiveColumn\n  <2>6. QED\n    BY <2>2, <2>3, <2>4, <2>5, HasBMonoL DEF SetReceiveColumn, LiveCoreA\n<1>6. CASE \\E n, s \\in Node : ReceiveMsg(n, s)\n  <2>1. PICK n \\in Node, s \\in Node : ReceiveMsg(n, s)\n    BY <1>6\n  <2>2. sentMsg[s][n]\n    BY <2>1 DEF ReceiveMsg\n  <2>3. QED\n    BY <2>1, <2>2, LiveRcvL DEF ReceiveMsg, SendAllFrom, LiveCoreA\n<1>7. CASE \\E n, s \\in Node : ReceiveMsgC(n, s)\n  <2>1. PICK n \\in Node, s \\in Node : ReceiveMsgC(n, s)\n    BY <1>7\n  <2>2. sentMsg[s][n]\n    BY <2>1 DEF ReceiveMsgC\n  <2>3. PICK send \\in BOOLEAN :\n          LET newRcv == [rcvMsg EXCEPT ![s][n] = TRUE] IN\n            /\\ rcvMsg' = newRcv\n            /\\ accept' = IF HasBQuorumRcv(n, newRcv)\n                           THEN [accept EXCEPT ![n] = TRUE] ELSE accept\n            /\\ sentMsg' = IF HasAQuorumRcv(n, newRcv) /\\ send\n                            THEN SendAllFrom(sentMsg, n) ELSE sentMsg\n    BY <2>1 DEF ReceiveMsgC\n  <2>4. QED\n    BY <2>2, <2>3, LiveRcvL DEF SendAllFrom, LiveCoreA\n<1>8. CASE \\E n, s \\in Node : ReceiveMsgI(n, s)\n  <2>1. PICK n \\in Node, s \\in Node : ReceiveMsgI(n, s)\n    BY <1>8\n  <2>2. sentMsg[s][n]\n    BY <2>1 DEF ReceiveMsgI\n  <2>3. ~Symmetric(n)\n    BY <2>1, QuorumAssumption DEF Symmetric, ReceiveMsgI\n  <2>4. PICK newRow \\in [Node -> BOOLEAN] :\n          LET newRcv == [rcvMsg EXCEPT ![s][n] = TRUE] IN\n            /\\ rcvMsg' = newRcv\n            /\\ accept' = IF HasBQuorumRcv(n, newRcv)\n                           THEN [accept EXCEPT ![n] = TRUE] ELSE accept\n            /\\ (IF HasAQuorumRcv(n, newRcv)\n                  THEN \\A dst \\in Node : sentMsg[n][dst] => newRow[dst]\n                  ELSE newRow = sentMsg[n])\n            /\\ sentMsg' = [sentMsg EXCEPT ![n] = newRow]\n    BY <2>1 DEF ReceiveMsgI\n  <2>5. \\A d \\in Node : sentMsg[n][d] => sentMsg'[n][d]\n    BY <2>4\n  <2>6. QED\n    BY <2>2, <2>3, <2>4, <2>5, LiveRcvL\n<1>9. QED\n  BY <1>1, <1>2, <1>3, <1>4, <1>5, <1>6, <1>7, <1>8 DEF Next\n\nLEMMA LiveInvInitL == Init => LiveInvA\n  BY TypeAssumption DEF Init, LiveInvA, LiveCoreA, TypeOKA\n\nLEMMA LiveInvNextL == ASSUME LiveInvA, [Next]_vars PROVE LiveInvA'\n<1>1. TypeOKA'\n  BY TypeNextL DEF LiveInvA\n<1>2. LiveCoreA'\n  <2>1. CASE UNCHANGED vars\n    BY <2>1 DEF LiveInvA, LiveCoreA, vars\n  <2>2. CASE Next\n    BY <2>2, LiveNextL DEF LiveInvA\n  <2>3. QED\n    BY <2>1, <2>2 DEF vars\n<1>3. QED\n  BY <1>1, <1>2 DEF LiveInvA\n\nLEMMA LiveInvL == SafetySpec => []LiveInvA\n<1>1. Init => LiveInvA\n  BY LiveInvInitL\n<1>2. LiveInvA /\\ [Next]_vars => LiveInvA'\n  BY LiveInvNextL\n<1>3. QED\n  BY <1>1, <1>2, PTL DEF SafetySpec\n\n\n\\* ------------------------------------------------------------------\n\\* Monotonicity\n\\* ------------------------------------------------------------------\n\nLEMMA SentMonoL ==\n  ASSUME TypeOKA, [Next]_vars\n  PROVE  \\A m, d \\in Node : sentMsg[m][d] => sentMsg'[m][d]\n<1> USE TypeAssumption DEF TypeOKA\n<1>1. CASE UNCHANGED vars\n  BY <1>1 DEF vars\n<1>2. CASE \\E n \\in Node : ReceiveInit(n)\n  BY <1>2 DEF ReceiveInit, SendAllFrom\n<1>3. CASE \\E n, s \\in Node : ReceiveMsg(n, s)\n  BY <1>3 DEF ReceiveMsg, SendAllFrom\n<1>4. CASE \\E n, s \\in Node : ReceiveMsgC(n, s)\n  <2>1. PICK n \\in Node, s \\in Node : ReceiveMsgC(n, s)\n    BY <1>4\n  <2>2. PICK send \\in BOOLEAN :\n          LET newRcv == [rcvMsg EXCEPT ![s][n] = TRUE] IN\n            sentMsg' = IF HasAQuorumRcv(n, newRcv) /\\ send\n                         THEN SendAllFrom(sentMsg, n) ELSE sentMsg\n    BY <2>1 DEF ReceiveMsgC\n  <2>3. QED\n    BY <2>2 DEF SendAllFrom\n<1>5. CASE \\E n \\in Node : ReceiveInitI(n)\n  BY <1>5 DEF ReceiveInitI\n<1>6. CASE \\E n, s \\in Node : ReceiveMsgI(n, s)\n  <2>1. PICK n \\in Node, s \\in Node : ReceiveMsgI(n, s)\n    BY <1>6\n  <2>2. PICK newRow \\in [Node -> BOOLEAN] :\n          LET newRcv == [rcvMsg EXCEPT ![s][n] = TRUE] IN\n            /\\ (IF HasAQuorumRcv(n, newRcv)\n                  THEN \\A dst \\in Node : sentMsg[n][dst] => newRow[dst]\n                  ELSE newRow = sentMsg[n])\n            /\\ sentMsg' = [sentMsg EXCEPT ![n] = newRow]\n    BY <2>1 DEF ReceiveMsgI\n  <2>3. QED\n    BY <2>2\n<1>7. CASE \\E n \\in Node : FaultySendS(n)\n  BY <1>7 DEF FaultySendS, SendAllFrom\n<1>8. CASE \\E n \\in Node : FaultyStateSA(n)\n  BY <1>8 DEF FaultyStateSA\n<1>9. CASE \\E n \\in Node : FaultySendA(n)\n  BY <1>9 DEF FaultySendA\n<1>10. QED\n  BY <1>1, <1>2, <1>3, <1>4, <1>5, <1>6, <1>7, <1>8, <1>9 DEF Next\n\nLEMMA RcvMonoL ==\n  ASSUME TypeOKA, [Next]_vars, NEW d \\in Node, Obedient(d)\n  PROVE  \\A src \\in Node : rcvMsg[src][d] => rcvMsg'[src][d]\n<1> USE TypeAssumption DEF TypeOKA\n<1>1. CASE UNCHANGED vars\n  BY <1>1 DEF vars\n<1>2. CASE \\E n \\in Node : ReceiveInit(n)\n  BY <1>2 DEF ReceiveInit\n<1>3. CASE \\E n, s \\in Node : ReceiveMsg(n, s)\n  BY <1>3 DEF ReceiveMsg\n<1>4. CASE \\E n, s \\in Node : ReceiveMsgC(n, s)\n  <2>1. PICK n \\in Node, s \\in Node : ReceiveMsgC(n, s)\n    BY <1>4\n  <2>2. rcvMsg' = [rcvMsg EXCEPT ![s][n] = TRUE]\n    BY <2>1 DEF ReceiveMsgC\n  <2>3. QED\n    BY <2>2\n<1>5. CASE \\E n \\in Node : ReceiveInitI(n)\n  BY <1>5 DEF ReceiveInitI\n<1>6. CASE \\E n, s \\in Node : ReceiveMsgI(n, s)\n  <2>1. PICK n \\in Node, s \\in Node : ReceiveMsgI(n, s)\n    BY <1>6\n  <2>2. rcvMsg' = [rcvMsg EXCEPT ![s][n] = TRUE]\n    BY <2>1 DEF ReceiveMsgI\n  <2>3. QED\n    BY <2>2\n<1>7. CASE \\E n \\in Node : FaultySendS(n)\n  BY <1>7 DEF FaultySendS\n<1>8. CASE \\E n \\in Node : FaultyStateSA(n)\n  <2>1. PICK n \\in Node : FaultyStateSA(n)\n    BY <1>8\n  <2>2. n # d\n    BY <2>1 DEF Obedient, FaultyStateSA\n  <2>3. QED\n    BY <2>1, <2>2 DEF FaultyStateSA, SetReceiveColumn\n<1>9. CASE \\E n \\in Node : FaultySendA(n)\n  BY <1>9 DEF FaultySendA\n<1>10. QED\n  BY <1>1, <1>2, <1>3, <1>4, <1>5, <1>6, <1>7, <1>8, <1>9 DEF Next\n\nLEMMA AccMonoL ==\n  ASSUME TypeOKA, [Next]_vars, NEW c \\in Node, Obedient(c)\n  PROVE  accept[c] => accept'[c]\n<1> USE TypeAssumption DEF TypeOKA\n<1>1. CASE UNCHANGED vars\n  BY <1>1 DEF vars\n<1>2. CASE \\E n \\in Node : ReceiveInit(n)\n  BY <1>2 DEF ReceiveInit\n<1>3. CASE \\E n, s \\in Node : ReceiveMsg(n, s)\n  BY <1>3 DEF ReceiveMsg\n<1>4. CASE \\E n, s \\in Node : ReceiveMsgC(n, s)\n  <2>1. PICK n \\in Node, s \\in Node : ReceiveMsgC(n, s)\n    BY <1>4\n  <2>2. accept' = IF HasBQuorumRcv(n, [rcvMsg EXCEPT ![s][n] = TRUE])\n                    THEN [accept EXCEPT ![n] = TRUE] ELSE accept\n    BY <2>1 DEF ReceiveMsgC\n  <2>3. QED\n    BY <2>2\n<1>5. CASE \\E n \\in Node : ReceiveInitI(n)\n  BY <1>5 DEF ReceiveInitI\n<1>6. CASE \\E n, s \\in Node : ReceiveMsgI(n, s)\n  <2>1. PICK n \\in Node, s \\in Node : ReceiveMsgI(n, s)\n    BY <1>6\n  <2>2. accept' = IF HasBQuorumRcv(n, [rcvMsg EXCEPT ![s][n] = TRUE])\n                    THEN [accept EXCEPT ![n] = TRUE] ELSE accept\n    BY <2>1 DEF ReceiveMsgI\n  <2>3. QED\n    BY <2>2\n<1>7. CASE \\E n \\in Node : FaultySendS(n)\n  BY <1>7 DEF FaultySendS\n<1>8. CASE \\E n \\in Node : FaultyStateSA(n)\n  <2>1. PICK n \\in Node : FaultyStateSA(n)\n    BY <1>8\n  <2>2. n # c\n    BY <2>1 DEF Obedient, FaultyStateSA\n  <2>3. QED\n    BY <2>1, <2>2 DEF FaultyStateSA\n<1>9. CASE \\E n \\in Node : FaultySendA(n)\n  BY <1>9 DEF FaultySendA\n<1>10. QED\n  BY <1>1, <1>2, <1>3, <1>4, <1>5, <1>6, <1>7, <1>8, <1>9 DEF Next\n\n\n\\* ------------------------------------------------------------------\n\\* Generic WF1 rule and Spec projections\n\\* ------------------------------------------------------------------\n\nLEMMA SpecSafeL == Spec => SafetySpec\n  BY PTL DEF Spec\n\nLEMMA SpecNextL == Spec => [][Next]_vars\n  BY PTL DEF Spec, SafetySpec\n\nLEMMA SpecInvL == Spec => []LiveInvA\n  BY LiveInvL, SpecSafeL, PTL\n\nLEMMA SpecWFInitL ==\n  ASSUME NEW n \\in Node, Correct(n), n \\in RcvInit\n  PROVE  Spec => WF_vars(CorrectReceiveInit(n))\n  BY Isa DEF Spec\n\nLEMMA SpecWFMsgL ==\n  ASSUME NEW n \\in Node, NEW s \\in Node, Correct(n)\n  PROVE  Spec => WF_vars(CorrectReceiveMsg(n, s))\n  BY Isa DEF Spec\n\n\n\\* ------------------------------------------------------------------\n\\* Eventual reception\n\\* ------------------------------------------------------------------\n\nSentAllA(n) == \\A d \\in Node : sentMsg[n][d]\n\nEvSentAll(n) == <>[]SentAllA(n)\nEvRcvd(z, c) == <>[]rcvMsg[z][c]\n\nLEMMA EvRcvdL ==\n  ASSUME NEW c \\in Node, Correct(c), NEW z \\in Node\n  PROVE  Spec => (EvSentAll(z) => EvRcvd(z, c))\n<1> DEFINE P == LiveInvA /\\ SentAllA(z) /\\ ~rcvMsg[z][c]\n<1> DEFINE Q == rcvMsg[z][c]\n<1>1. Spec => [][Next]_vars\n  BY SpecNextL\n<1>2. Spec => []LiveInvA\n  BY SpecInvL\n<1>3. Spec => WF_vars(CorrectReceiveMsg(c, z))\n  BY SpecWFMsgL DEF Correct\n<1>4. P /\\ [Next]_vars => (P' \\/ Q')\n  BY LiveInvNextL, SentMonoL DEF LiveInvA, SentAllA\n<1>5. P /\\ <<CorrectReceiveMsg(c, z)>>_vars => Q'\n  BY TypeAssumption DEF CorrectReceiveMsg, ReceiveMsg, LiveInvA, TypeOKA\n<1>6. P => ENABLED <<CorrectReceiveMsg(c, z)>>_vars\n  BY ExpandENABLED, TypeAssumption\n     DEF CorrectReceiveMsg, ReceiveMsg, vars, SendAllFrom, LiveInvA, TypeOKA, SentAllA\n<1>7. LiveInvA /\\ Q /\\ [Next]_vars => Q'\n  BY RcvMonoL DEF LiveInvA, LiveCoreA, Correct, Obedient\n<1>8. QED\n  BY <1>1, <1>2, <1>3, <1>4, <1>5, <1>6, <1>7, PTL DEF EvSentAll, EvRcvd\n\n\nEvHasAQ(c) == <>[]HasAQuorumRcv(c, rcvMsg)\nEvHasBQ(c) == <>[]HasBQuorumRcv(c, rcvMsg)\nEvAcc(c) == <>[]accept[c]\n\nLEMMA EvSentAllInitL ==\n  ASSUME NEW n \\in Node, Correct(n), n \\in RcvInit\n  PROVE  Spec => EvSentAll(n)\n<1> DEFINE P == LiveInvA /\\ ~SentAllA(n)\n<1> DEFINE Q == SentAllA(n)\n<1>1. Spec => [][Next]_vars\n  BY SpecNextL\n<1>2. Spec => []LiveInvA\n  BY SpecInvL\n<1>3. Spec => WF_vars(CorrectReceiveInit(n))\n  BY SpecWFInitL\n<1>4. P /\\ [Next]_vars => (P' \\/ Q')\n  BY LiveInvNextL DEF LiveInvA\n<1>5. P /\\ <<CorrectReceiveInit(n)>>_vars => Q'\n  BY TypeAssumption\n     DEF CorrectReceiveInit, ReceiveInit, SendAllFrom, SentAllA, LiveInvA, TypeOKA\n<1>6. P => ENABLED <<CorrectReceiveInit(n)>>_vars\n  BY ExpandENABLED, TypeAssumption\n     DEF CorrectReceiveInit, ReceiveInit, vars, SendAllFrom, LiveInvA, TypeOKA, SentAllA\n<1>7. LiveInvA /\\ Q /\\ [Next]_vars => Q'\n  BY SentMonoL DEF LiveInvA, SentAllA\n<1>8. QED\n  BY <1>1, <1>2, <1>3, <1>4, <1>5, <1>6, <1>7, PTL DEF EvSentAll\n\nLEMMA EvSentAllRelayL ==\n  ASSUME NEW c \\in Node, Correct(c), NEW z \\in Node\n  PROVE  Spec => ((EvSentAll(z) /\\ EvHasAQ(c)) => EvSentAll(c))\n<1> DEFINE P == LiveInvA /\\ SentAllA(z) /\\ HasAQuorumRcv(c, rcvMsg) /\\ ~SentAllA(c)\n<1> DEFINE Q == SentAllA(c)\n<1> USE TypeAssumption DEF LiveInvA, TypeOKA\n<1>a. Obedient(c)\n  BY DEF Correct, Obedient\n<1>b. LiveInvA /\\ [Next]_vars /\\ HasAQuorumRcv(c, rcvMsg) => HasAQuorumRcv(c, rcvMsg)'\n  BY <1>a, RcvMonoL, HasAMonoL\n<1>1. Spec => [][Next]_vars\n  BY SpecNextL\n<1>2. Spec => []LiveInvA\n  BY SpecInvL\n<1>3. Spec => WF_vars(CorrectReceiveMsg(c, z))\n  BY SpecWFMsgL\n<1>4. P /\\ [Next]_vars => (P' \\/ Q')\n  BY <1>b, LiveInvNextL, SentMonoL DEF SentAllA\n<1>c. P => HasAQuorumRcv(c, [rcvMsg EXCEPT ![z][c] = TRUE])\n  BY HasAMonoL\n<1>5. P /\\ <<CorrectReceiveMsg(c, z)>>_vars => Q'\n  BY <1>c DEF CorrectReceiveMsg, ReceiveMsg, SendAllFrom, SentAllA\n<1>d. P => SendAllFrom(sentMsg, c) # sentMsg\n  BY DEF SendAllFrom, SentAllA\n<1>6. P => ENABLED <<CorrectReceiveMsg(c, z)>>_vars\n  BY <1>c, <1>d, ExpandENABLED\n     DEF CorrectReceiveMsg, ReceiveMsg, vars, SentAllA\n<1>7. LiveInvA /\\ Q /\\ [Next]_vars => Q'\n  BY SentMonoL DEF SentAllA\n<1>8. QED\n  BY <1>1, <1>2, <1>3, <1>4, <1>5, <1>6, <1>7, PTL DEF EvSentAll, EvHasAQ\n\nLEMMA EvAcceptL ==\n  ASSUME NEW c \\in Node, Correct(c), NEW z \\in Node\n  PROVE  Spec => ((EvSentAll(z) /\\ EvHasBQ(c)) => EvAcc(c))\n<1> DEFINE P == LiveInvA /\\ SentAllA(z) /\\ HasBQuorumRcv(c, rcvMsg) /\\ ~accept[c]\n<1> DEFINE Q == accept[c]\n<1> USE TypeAssumption DEF LiveInvA, TypeOKA\n<1>a. Obedient(c)\n  BY DEF Correct, Obedient\n<1>b. LiveInvA /\\ [Next]_vars /\\ HasBQuorumRcv(c, rcvMsg) => HasBQuorumRcv(c, rcvMsg)'\n  BY <1>a, RcvMonoL, HasBMonoL\n<1>1. Spec => [][Next]_vars\n  BY SpecNextL\n<1>2. Spec => []LiveInvA\n  BY SpecInvL\n<1>3. Spec => WF_vars(CorrectReceiveMsg(c, z))\n  BY SpecWFMsgL\n<1>4. P /\\ [Next]_vars => (P' \\/ Q')\n  BY <1>b, LiveInvNextL, SentMonoL DEF SentAllA\n<1>c. P => HasBQuorumRcv(c, [rcvMsg EXCEPT ![z][c] = TRUE])\n  BY HasBMonoL\n<1>d. P => [accept EXCEPT ![c] = TRUE] # accept\n  OBVIOUS\n<1>5. P /\\ <<CorrectReceiveMsg(c, z)>>_vars => Q'\n  BY <1>c DEF CorrectReceiveMsg, ReceiveMsg\n<1>6. P => ENABLED <<CorrectReceiveMsg(c, z)>>_vars\n  BY <1>c, <1>d, ExpandENABLED\n     DEF CorrectReceiveMsg, ReceiveMsg, vars, SentAllA\n<1>7. LiveInvA /\\ Q /\\ [Next]_vars => Q'\n  BY <1>a, AccMonoL\n<1>8. QED\n  BY <1>1, <1>2, <1>3, <1>4, <1>5, <1>6, <1>7, PTL DEF EvAcc, EvSentAll, EvHasBQ\n\n\n\\* ------------------------------------------------------------------\n\\* Finite induction with a forall-shaped inductive step\n\\* ------------------------------------------------------------------\n\nLOCAL FSTA == INSTANCE FiniteSetTheorems\n\nLEMMA BridgeFinL == \\A S : FSTA!IsFiniteSet(S) = IsFiniteSet(S)\n  BY DEF FSTA!IsFiniteSet, IsFiniteSet\n\nLEMMA BridgeCardL == \\A S : FSTA!Cardinality(S) = Cardinality(S)\n  BY DEF FSTA!Cardinality, Cardinality\n\nLEMMA FSIndA ==\n  ASSUME NEW S, IsFiniteSet(S), NEW P(_), P({}),\n         ASSUME NEW T \\in SUBSET S, IsFiniteSet(T), P(T), NEW x \\in S \\ T\n         PROVE  P(T \\cup {x})\n  PROVE  P(S)\n  BY FSTA!FS_Induction, BridgeFinL\n\n\\* ------------------------------------------------------------------\n\\* Finite conjunctions of received messages\n\\* ------------------------------------------------------------------\n\nConjRcv(c, T) == \\A z \\in T : rcvMsg[z][c]\nEvConjRcv(c, T) == <>[]ConjRcv(c, T)\n\nLEMMA ConjRcvEmptyL == ASSUME NEW c PROVE Spec => []ConjRcv(c, {})\n<1>1. Init => ConjRcv(c, {})\n  BY DEF ConjRcv\n<1>2. ConjRcv(c, {}) /\\ [Next]_vars => ConjRcv(c, {})'\n  BY DEF ConjRcv\n<1>3. QED\n  BY <1>1, <1>2, SpecSafeL, PTL DEF SafetySpec\n\nLEMMA ConjRcvSplitL ==\n  ASSUME NEW c, NEW T, NEW y\n  PROVE  Spec => [](ConjRcv(c, T \\cup {y}) <=> (ConjRcv(c, T) /\\ rcvMsg[y][c]))\n<1> DEFINE X == ConjRcv(c, T \\cup {y}) <=> (ConjRcv(c, T) /\\ rcvMsg[y][c])\n<1>1. Init => X\n  BY DEF ConjRcv\n<1>2. X /\\ [Next]_vars => X'\n  BY DEF ConjRcv\n<1>3. QED\n  BY <1>1, <1>2, SpecSafeL, PTL DEF SafetySpec\n\nLEMMA ConjRcvBaseL == ASSUME NEW c, Spec PROVE EvConjRcv(c, {})\n  BY ConjRcvEmptyL, PTL DEF EvConjRcv\n\nLEMMA ConjRcvStepL ==\n  ASSUME NEW c, NEW T, NEW y, Spec, EvRcvd(y, c)\n  PROVE  EvConjRcv(c, T) => EvConjRcv(c, T \\cup {y})\n  BY ConjRcvSplitL, PTL DEF EvConjRcv, EvRcvd\n\nLEMMA ConjRcvMainL ==\n  ASSUME NEW c, NEW S, IsFiniteSet(S), Spec, \\A z \\in S : EvRcvd(z, c)\n  PROVE  EvConjRcv(c, S)\n<1>0. IsFiniteSet(S)\n  OBVIOUS\n<1>1. EvConjRcv(c, {})\n  BY ConjRcvBaseL\n<1>2. ASSUME NEW T \\in SUBSET S, IsFiniteSet(T), EvConjRcv(c, T), NEW x \\in S \\ T\n      PROVE  EvConjRcv(c, T \\cup {x})\n  <2>1. EvRcvd(x, c)\n    BY <1>2\n  <2>2. QED\n    BY <1>2, <2>1, ConjRcvStepL\n<1>3. QED\n  BY ONLY <1>0, <1>1, <1>2, FSIndA\n\n\\* ------------------------------------------------------------------\n\\* Finite conjunctions of acceptances\n\\* ------------------------------------------------------------------\n\nConjAcc(T) == \\A z \\in T : accept[z]\nEvConjAcc(T) == <>[]ConjAcc(T)\n\nLEMMA ConjAccEmptyL == Spec => []ConjAcc({})\n<1>1. Init => ConjAcc({})\n  BY DEF ConjAcc\n<1>2. ConjAcc({}) /\\ [Next]_vars => ConjAcc({})'\n  BY DEF ConjAcc\n<1>3. QED\n  BY <1>1, <1>2, SpecSafeL, PTL DEF SafetySpec\n\nLEMMA ConjAccSplitL ==\n  ASSUME NEW T, NEW y\n  PROVE  Spec => [](ConjAcc(T \\cup {y}) <=> (ConjAcc(T) /\\ accept[y]))\n<1> DEFINE X == ConjAcc(T \\cup {y}) <=> (ConjAcc(T) /\\ accept[y])\n<1>1. Init => X\n  BY DEF ConjAcc\n<1>2. X /\\ [Next]_vars => X'\n  BY DEF ConjAcc\n<1>3. QED\n  BY <1>1, <1>2, SpecSafeL, PTL DEF SafetySpec\n\nLEMMA ConjAccBaseL == ASSUME Spec PROVE EvConjAcc({})\n  BY ConjAccEmptyL, PTL DEF EvConjAcc\n\nLEMMA ConjAccStepL ==\n  ASSUME NEW T, NEW y, Spec, EvAcc(y)\n  PROVE  EvConjAcc(T) => EvConjAcc(T \\cup {y})\n  BY ConjAccSplitL, PTL DEF EvConjAcc, EvAcc\n\nLEMMA ConjAccMainL ==\n  ASSUME NEW S, IsFiniteSet(S), Spec, \\A z \\in S : EvAcc(z)\n  PROVE  EvConjAcc(S)\n<1>0. IsFiniteSet(S)\n  OBVIOUS\n<1>1. EvConjAcc({})\n  BY ConjAccBaseL\n<1>2. ASSUME NEW T \\in SUBSET S, IsFiniteSet(T), EvConjAcc(T), NEW x \\in S \\ T\n      PROVE  EvConjAcc(T \\cup {x})\n  <2>1. EvAcc(x)\n    BY <1>2\n  <2>2. QED\n    BY <1>2, <2>1, ConjAccStepL\n<1>3. QED\n  BY ONLY <1>0, <1>1, <1>2, FSIndA\n\n\n\\* ------------------------------------------------------------------\n\\* Distinguished quorums and nodes\n\\* ------------------------------------------------------------------\n\nBQA == CHOOSE b \\in QuorumB : \\A n \\in Node : InB(n, b) => Correct(n)\nAQA == CHOOSE a \\in QuorumA : \\A z \\in Node : InA(z, a) => (InB(z, BQA) /\\ Symmetric(z))\nCNA == CHOOSE n \\in Node : InA(n, AQA) /\\ Obedient(n)\n\nBMemA == {z \\in Node : InB(z, BQA)}\n\nLEMMA WitnessL ==\n  /\\ BQA \\in QuorumB\n  /\\ \\A n \\in Node : InB(n, BQA) => Correct(n)\n  /\\ AQA \\in QuorumA\n  /\\ \\A z \\in Node : InA(z, AQA) => (InB(z, AQA) \\/ TRUE)\n  /\\ \\A z \\in Node : InA(z, AQA) => (InB(z, BQA) /\\ Symmetric(z))\n  /\\ CNA \\in Node\n  /\\ InA(CNA, AQA)\n  /\\ Obedient(CNA)\n  /\\ InB(CNA, BQA)\n  /\\ Correct(CNA)\n<1>1. BQA \\in QuorumB /\\ \\A n \\in Node : InB(n, BQA) => Correct(n)\n  <2>1. \\E b \\in QuorumB : \\A n \\in Node : InB(n, b) => Correct(n)\n    BY QuorumAssumption\n  <2>2. QED\n    BY <2>1 DEF BQA\n<1>2. AQA \\in QuorumA /\\ \\A z \\in Node : InA(z, AQA) => (InB(z, BQA) /\\ Symmetric(z))\n  <2>1. \\E a \\in QuorumA : \\A z \\in Node : InA(z, a) => (InB(z, BQA) /\\ Symmetric(z))\n    BY <1>1, QuorumAssumption\n  <2>2. QED\n    BY <2>1 DEF AQA\n<1>3. CNA \\in Node /\\ InA(CNA, AQA) /\\ Obedient(CNA)\n  <2>1. \\E n \\in Node : InA(n, AQA) /\\ Obedient(n)\n    BY <1>2, QuorumAssumption\n  <2>2. QED\n    BY <2>1 DEF CNA\n<1>4. QED\n  BY <1>1, <1>2, <1>3\n\nLEMMA NodeSubFinL == ASSUME NEW T \\in SUBSET Node PROVE IsFiniteSet(T)\n  BY NodeFinite, FSTA!FS_Subset, BridgeFinL, BridgeCardL\n\n\\* ------------------------------------------------------------------\n\\* From a received quorum to the quorum predicates\n\\* ------------------------------------------------------------------\n\nLEMMA HasBAlwaysL ==\n  ASSUME NEW c, NEW b \\in QuorumB\n  PROVE  Spec =>\n         [](ConjRcv(c, {z \\in Node : InB(z, b)}) => HasBQuorumRcv(c, rcvMsg))\n<1> DEFINE X == ConjRcv(c, {z \\in Node : InB(z, b)}) => HasBQuorumRcv(c, rcvMsg)\n<1>1. Init => X\n  BY DEF ConjRcv, HasBQuorumRcv\n<1>2. X /\\ [Next]_vars => X'\n  BY DEF ConjRcv, HasBQuorumRcv\n<1>3. QED\n  BY <1>1, <1>2, SpecSafeL, PTL DEF SafetySpec\n\nLEMMA HasBFromConjL ==\n  ASSUME NEW c, NEW b \\in QuorumB, Spec\n  PROVE  EvConjRcv(c, {z \\in Node : InB(z, b)}) => EvHasBQ(c)\n  BY HasBAlwaysL, PTL DEF EvConjRcv, EvHasBQ\n\nLEMMA HasAAlwaysL ==\n  ASSUME NEW c, NEW a \\in QuorumA\n  PROVE  Spec =>\n         [](ConjRcv(c, {z \\in Node : InA(z, a)}) => HasAQuorumRcv(c, rcvMsg))\n<1> DEFINE X == ConjRcv(c, {z \\in Node : InA(z, a)}) => HasAQuorumRcv(c, rcvMsg)\n<1>1. Init => X\n  BY DEF ConjRcv, HasAQuorumRcv\n<1>2. X /\\ [Next]_vars => X'\n  BY DEF ConjRcv, HasAQuorumRcv\n<1>3. QED\n  BY <1>1, <1>2, SpecSafeL, PTL DEF SafetySpec\n\nLEMMA HasAFromConjL ==\n  ASSUME NEW c, NEW a \\in QuorumA, Spec\n  PROVE  EvConjRcv(c, {z \\in Node : InA(z, a)}) => EvHasAQ(c)\n  BY HasAAlwaysL, PTL DEF EvConjRcv, EvHasAQ\n\n\\* ------------------------------------------------------------------\n\\* Correctness\n\\* ------------------------------------------------------------------\n\nLEMMA SomeCorrectAlwaysL == Spec => [](accept[CNA] => SomeCorrectAccepts)\n<1> DEFINE X == accept[CNA] => SomeCorrectAccepts\n<1>1. Init => X\n  BY WitnessL DEF SomeCorrectAccepts\n<1>2. X /\\ [Next]_vars => X'\n  BY WitnessL DEF SomeCorrectAccepts\n<1>3. QED\n  BY <1>1, <1>2, SpecSafeL, PTL DEF SafetySpec\n\nLEMMA SomeCorrectFromAccL == ASSUME Spec PROVE EvAcc(CNA) => <>SomeCorrectAccepts\n  BY SomeCorrectAlwaysL, PTL DEF EvAcc\n\nLEMMA CorrLemmaL == ASSUME Spec, AllObedientInit PROVE <>SomeCorrectAccepts\n<1>w. CNA \\in Node /\\ Correct(CNA) /\\ BQA \\in QuorumB\n  BY WitnessL\n<1>i. CNA \\in RcvInit\n  BY <1>w, AllObedientInit DEF Correct, Obedient, AllObedientInit\n<1>1. \\A z \\in BMemA : EvRcvd(z, CNA)\n  <2>1. TAKE z \\in BMemA\n  <2>2. z \\in Node /\\ Correct(z)\n    BY WitnessL DEF BMemA\n  <2>3. z \\in RcvInit\n    BY <2>2, AllObedientInit DEF Correct, Obedient, AllObedientInit\n  <2>4. EvSentAll(z)\n    BY <2>2, <2>3, EvSentAllInitL\n  <2>5. QED\n    BY <1>w, <2>2, <2>4, EvRcvdL\n<1>2. IsFiniteSet(BMemA)\n  BY NodeSubFinL DEF BMemA\n<1>3. EvConjRcv(CNA, BMemA)\n  BY <1>1, <1>2, ConjRcvMainL\n<1>4. EvHasBQ(CNA)\n  BY <1>w, <1>3, HasBFromConjL DEF BMemA\n<1>5. EvSentAll(CNA)\n  BY <1>w, <1>i, EvSentAllInitL\n<1>6. EvAcc(CNA)\n  BY <1>w, <1>4, <1>5, EvAcceptL\n<1>7. QED\n  BY <1>6, SomeCorrectFromAccL\n\n\\* ------------------------------------------------------------------\n\\* Relay\n\\* ------------------------------------------------------------------\n\nRowSentA(a) == \\A z \\in Node : InA(z, a) => SentAllA(z)\nExRowSent == \\E a \\in QuorumA : RowSentA(a)\nEvRowSent(a) == <>[]RowSentA(a)\nEvRow1(a) == <>RowSentA(a)\nEvAllAcc == <>AllCorrectAccept\nAMemA(a) == {z \\in Node : InA(z, a)}\nCorrSetA == {z \\in Node : Correct(z)}\nAWitA(a) == CHOOSE z \\in Node : InA(z, a) /\\ Obedient(z)\n\nLEMMA AWitL ==\n  ASSUME NEW a \\in QuorumA\n  PROVE  AWitA(a) \\in Node /\\ InA(AWitA(a), a) /\\ Obedient(AWitA(a))\n<1>1. \\E z \\in Node : InA(z, a) /\\ Obedient(z)\n  BY QuorumAssumption\n<1>2. QED\n  BY <1>1 DEF AWitA\n\nLEMMA RowFromAcceptL ==\n  ASSUME NEW acc, NEW sm, NEW rm,\n         \\A s, d \\in Node : (Obedient(d) /\\ rm[s][d]) => sm[s][d],\n         \\A z \\in Node : Symmetric(z) =>\n            (\\A d1, d2 \\in Node : sm[z][d1] => sm[z][d2]),\n         \\A n \\in Node : (Obedient(n) /\\ acc[n]) => HasBQuorumRcv(n, rm),\n         \\E n \\in Node : Obedient(n) /\\ acc[n]\n  PROVE  \\E a \\in QuorumA : \\A z \\in Node : InA(z, a) => (\\A d \\in Node : sm[z][d])\n<1>1. PICK n \\in Node : Obedient(n) /\\ acc[n]\n  OBVIOUS\n<1>2. HasBQuorumRcv(n, rm)\n  BY <1>1\n<1>3. PICK b \\in QuorumB : \\A src \\in Node : InB(src, b) => rm[src][n]\n  BY <1>2 DEF HasBQuorumRcv\n<1>4. PICK a \\in QuorumA : \\A z \\in Node : InA(z, a) => (InB(z, b) /\\ Symmetric(z))\n  BY <1>3, QuorumAssumption\n<1>5. \\A z \\in Node : InA(z, a) => (\\A d \\in Node : sm[z][d])\n  <2> SUFFICES ASSUME NEW z \\in Node, InA(z, a), NEW d \\in Node\n               PROVE  sm[z][d]\n    OBVIOUS\n  <2>2. InB(z, b) /\\ Symmetric(z)\n    BY <1>4\n  <2>3. rm[z][n]\n    BY <1>3, <2>2\n  <2>4. sm[z][n]\n    BY <1>1, <2>3\n  <2>5. QED\n    BY <2>2, <2>4\n<1>6. QED\n  BY <1>4, <1>5\n\nLEMMA ExRowAlwaysL ==\n  Spec => [](LiveInvA /\\ SomeObedientAccepts => ExRowSent)\n<1> DEFINE X == LiveInvA /\\ SomeObedientAccepts => ExRowSent\n<1>1. Init => X\n  BY RowFromAcceptL\n     DEF LiveInvA, LiveCoreA, SomeObedientAccepts, ExRowSent, RowSentA, SentAllA\n<1>2. X /\\ [Next]_vars => X'\n  BY RowFromAcceptL\n     DEF LiveInvA, LiveCoreA, SomeObedientAccepts, ExRowSent, RowSentA, SentAllA\n<1>3. QED\n  BY <1>1, <1>2, SpecSafeL, PTL DEF SafetySpec\n\nLEMMA EvExRowL == ASSUME Spec, <>SomeObedientAccepts PROVE <>ExRowSent\n  BY ExRowAlwaysL, SpecInvL, PTL\n\nLEMMA DiamondExL ==\n  ASSUME NEW SS, NEW TEMPORAL F(_)\n  PROVE  <>(\\E z \\in SS : F(z)) => (\\E z \\in SS : <>F(z))\n  OBVIOUS\n\nLEMMA RowStableL == ASSUME NEW a PROVE Spec => (EvRow1(a) => EvRowSent(a))\n<1>1. Spec => [][Next]_vars\n  BY SpecNextL\n<1>2. Spec => []LiveInvA\n  BY SpecInvL\n<1>3. LiveInvA /\\ RowSentA(a) /\\ [Next]_vars => RowSentA(a)'\n  BY SentMonoL DEF LiveInvA, RowSentA, SentAllA\n<1>4. QED\n  BY <1>1, <1>2, <1>3, PTL DEF EvRowSent, EvRow1\n\nLEMMA RowImpliesSentL ==\n  ASSUME NEW a, NEW z \\in Node, InA(z, a)\n  PROVE  Spec => [](RowSentA(a) => SentAllA(z))\n<1> DEFINE X == RowSentA(a) => SentAllA(z)\n<1>1. Init => X\n  BY DEF RowSentA\n<1>2. X /\\ [Next]_vars => X'\n  BY DEF RowSentA\n<1>3. QED\n  BY <1>1, <1>2, SpecSafeL, PTL DEF SafetySpec\n\nLEMMA EvSentFromRowL ==\n  ASSUME NEW a, NEW z \\in Node, InA(z, a), Spec, EvRowSent(a)\n  PROVE  EvSentAll(z)\n  BY RowImpliesSentL, PTL DEF EvRowSent, EvSentAll\n\nLEMMA SentAllCorrectL ==\n  ASSUME NEW a \\in QuorumA, Spec, EvRowSent(a), NEW c \\in Node, Correct(c)\n  PROVE  EvSentAll(c)\n<1>1. \\A z \\in AMemA(a) : EvRcvd(z, c)\n  <2>1. TAKE z \\in AMemA(a)\n  <2>2. z \\in Node /\\ InA(z, a)\n    BY DEF AMemA\n  <2>3. EvSentAll(z)\n    BY <2>2, EvSentFromRowL\n  <2>4. QED\n    BY <2>2, <2>3, EvRcvdL\n<1>2. IsFiniteSet(AMemA(a))\n  BY NodeSubFinL DEF AMemA\n<1>3. EvConjRcv(c, AMemA(a))\n  BY <1>1, <1>2, ConjRcvMainL\n<1>4. EvHasAQ(c)\n  BY <1>3, HasAFromConjL DEF AMemA\n<1>5. EvSentAll(AWitA(a))\n  BY AWitL, EvSentFromRowL\n<1>6. QED\n  BY <1>4, <1>5, AWitL, EvSentAllRelayL\n\nLEMMA AccFromRowL ==\n  ASSUME NEW a \\in QuorumA, Spec, EvRowSent(a), NEW c \\in Node, Correct(c)\n  PROVE  EvAcc(c)\n<1>w. CNA \\in Node /\\ Correct(CNA) /\\ BQA \\in QuorumB\n  BY WitnessL\n<1>1. \\A z \\in BMemA : EvRcvd(z, c)\n  <2>1. TAKE z \\in BMemA\n  <2>2. z \\in Node /\\ Correct(z)\n    BY WitnessL DEF BMemA\n  <2>3. EvSentAll(z)\n    BY <2>2, SentAllCorrectL\n  <2>4. QED\n    BY <2>2, <2>3, EvRcvdL\n<1>2. IsFiniteSet(BMemA)\n  BY NodeSubFinL DEF BMemA\n<1>3. EvConjRcv(c, BMemA)\n  BY <1>1, <1>2, ConjRcvMainL\n<1>4. EvHasBQ(c)\n  BY <1>w, <1>3, HasBFromConjL DEF BMemA\n<1>5. EvSentAll(CNA)\n  BY <1>w, SentAllCorrectL\n<1>6. QED\n  BY <1>4, <1>5, <1>w, EvAcceptL\n\nLEMMA AllAccAlwaysL == Spec => [](ConjAcc(CorrSetA) => AllCorrectAccept)\n<1> DEFINE X == ConjAcc(CorrSetA) => AllCorrectAccept\n<1>1. Init => X\n  BY DEF ConjAcc, CorrSetA, AllCorrectAccept\n<1>2. X /\\ [Next]_vars => X'\n  BY DEF ConjAcc, CorrSetA, AllCorrectAccept\n<1>3. QED\n  BY <1>1, <1>2, SpecSafeL, PTL DEF SafetySpec\n\nLEMMA RelayFromRowL ==\n  ASSUME NEW a \\in QuorumA, Spec, EvRowSent(a)\n  PROVE  EvAllAcc\n<1>1. \\A z \\in CorrSetA : EvAcc(z)\n  <2>1. TAKE z \\in CorrSetA\n  <2>2. z \\in Node /\\ Correct(z)\n    BY DEF CorrSetA\n  <2>3. QED\n    BY <2>2, AccFromRowL\n<1>2. IsFiniteSet(CorrSetA)\n  BY NodeSubFinL DEF CorrSetA\n<1>3. EvConjAcc(CorrSetA)\n  BY <1>1, <1>2, ConjAccMainL\n<1>4. QED\n  BY <1>3, AllAccAlwaysL, PTL DEF EvConjAcc, EvAllAcc\n\nLEMMA RelayLemmaL == ASSUME Spec, <>SomeObedientAccepts PROVE <>AllCorrectAccept\n<1>1. <>ExRowSent\n  BY EvExRowL\n<1>2. \\E a \\in QuorumA : <>RowSentA(a)\n  BY ONLY <1>1, DiamondExL DEF ExRowSent\n<1>3. \\E a \\in QuorumA : EvRow1(a)\n  BY <1>2 DEF EvRow1\n<1>4. \\A a \\in QuorumA : (EvRow1(a) => EvAllAcc)\n  <2>1. TAKE a \\in QuorumA\n  <2>2. EvRow1(a) => EvRowSent(a)\n    BY RowStableL\n  <2>3. QED\n    BY <2>2, RelayFromRowL\n<1>5. EvAllAcc\n  BY <1>3, <1>4\n<1>6. QED\n  BY <1>5 DEF EvAllAcc\n\\* END AGENT HELPERS\n\nTHEOREM Safety == SafetySpec => []Unforgeability\n\\* BEGIN AGENT PROOF ivy_examples_hybrid_reliable_broadcast_cisa/ivy_examples_hybrid_reliable_broadcast_cisa_Safety.tla\n<1>1. Init => SafeInvA\n  BY SafeInitL\n<1>2. SafeInvA /\\ [Next]_vars => SafeInvA'\n  BY SafeNextL\n<1>3. SafeInvA => Unforgeability\n  BY SafeImpL\n<1>4. QED\n  BY <1>1, <1>2, <1>3, PTL DEF SafetySpec\n\\* END AGENT PROOF ivy_examples_hybrid_reliable_broadcast_cisa/ivy_examples_hybrid_reliable_broadcast_cisa_Safety.tla\n\nTHEOREM CorrectnessLiveness == Spec => Correctness\n\\* BEGIN AGENT PROOF ivy_examples_hybrid_reliable_broadcast_cisa/ivy_examples_hybrid_reliable_broadcast_cisa_CorrectnessLiveness.tla\n<1>1. Spec /\\ AllObedientInit => <>SomeCorrectAccepts\n  BY CorrLemmaL\n<1>2. QED\n  BY <1>1, PTL DEF Correctness\n\\* END AGENT PROOF ivy_examples_hybrid_reliable_broadcast_cisa/ivy_examples_hybrid_reliable_broadcast_cisa_CorrectnessLiveness.tla\n\nTHEOREM RelayLiveness == Spec => Relay\n\\* BEGIN AGENT PROOF ivy_examples_hybrid_reliable_broadcast_cisa/ivy_examples_hybrid_reliable_broadcast_cisa_RelayLiveness.tla\n<1>1. Spec /\\ <>SomeObedientAccepts => <>AllCorrectAccept\n  BY RelayLemmaL\n<1>2. QED\n  BY <1>1, PTL DEF Relay\n\\* END AGENT PROOF ivy_examples_hybrid_reliable_broadcast_cisa/ivy_examples_hybrid_reliable_broadcast_cisa_RelayLiveness.tla\n====\n",
+  "units": {
+    "ivy_examples_hybrid_reliable_broadcast_cisa/ivy_examples_hybrid_reliable_broadcast_cisa_Safety.tla": {
+      "id": "ivy_examples_hybrid_reliable_broadcast_cisa/ivy_examples_hybrid_reliable_broadcast_cisa_Safety.tla",
+      "name": "Safety",
+      "kind": "target",
+      "lineStart": 1197,
+      "lineEnd": 1206,
+      "proofLines": [
+        1199,
+        1200,
+        1201,
+        1202,
+        1203,
+        1204,
+        1205,
+        1206
+      ],
+      "proofRange": [
+        1199,
+        1206
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:SafeImpL",
+        "helper:SafeInitL",
+        "helper:SafeNextL"
+      ]
+    },
+    "ivy_examples_hybrid_reliable_broadcast_cisa/ivy_examples_hybrid_reliable_broadcast_cisa_CorrectnessLiveness.tla": {
+      "id": "ivy_examples_hybrid_reliable_broadcast_cisa/ivy_examples_hybrid_reliable_broadcast_cisa_CorrectnessLiveness.tla",
+      "name": "CorrectnessLiveness",
+      "kind": "target",
+      "lineStart": 1209,
+      "lineEnd": 1214,
+      "proofLines": [
+        1211,
+        1212,
+        1213,
+        1214
+      ],
+      "proofRange": [
+        1211,
+        1214
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:CorrLemmaL"
+      ]
+    },
+    "ivy_examples_hybrid_reliable_broadcast_cisa/ivy_examples_hybrid_reliable_broadcast_cisa_RelayLiveness.tla": {
+      "id": "ivy_examples_hybrid_reliable_broadcast_cisa/ivy_examples_hybrid_reliable_broadcast_cisa_RelayLiveness.tla",
+      "name": "RelayLiveness",
+      "kind": "target",
+      "lineStart": 1217,
+      "lineEnd": 1222,
+      "proofLines": [
+        1219,
+        1220,
+        1221,
+        1222
+      ],
+      "proofRange": [
+        1219,
+        1222
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:RelayLemmaL"
+      ]
+    },
+    "helper:NoQuorumsL": {
+      "id": "helper:NoQuorumsL",
+      "name": "NoQuorumsL",
+      "kind": "helper",
+      "lineStart": 27,
+      "lineEnd": 53,
+      "proofLines": [
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53
+      ],
+      "proofRange": [
+        32,
+        53
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:TypeNextL": {
+      "id": "helper:TypeNextL",
+      "name": "TypeNextL",
+      "kind": "helper",
+      "lineStart": 59,
+      "lineEnd": 91,
+      "proofLines": [
+        60,
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68,
+        69,
+        70,
+        71,
+        72,
+        73,
+        74,
+        75,
+        76,
+        77,
+        78,
+        79,
+        80,
+        81,
+        82,
+        83,
+        84,
+        85,
+        86,
+        87,
+        88,
+        89,
+        90,
+        91
+      ],
+      "proofRange": [
+        60,
+        91
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:ObedNoQL": {
+      "id": "helper:ObedNoQL",
+      "name": "ObedNoQL",
+      "kind": "helper",
+      "lineStart": 98,
+      "lineEnd": 113,
+      "proofLines": [
+        104,
+        105,
+        106,
+        107,
+        108,
+        109,
+        110,
+        111,
+        112,
+        113
+      ],
+      "proofRange": [
+        104,
+        113
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:NoQuorumsL"
+      ]
+    },
+    "helper:CoreSendL": {
+      "id": "helper:CoreSendL",
+      "name": "CoreSendL",
+      "kind": "helper",
+      "lineStart": 115,
+      "lineEnd": 123,
+      "proofLines": [
+        123
+      ],
+      "proofRange": [
+        123,
+        123
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:CoreRcvL": {
+      "id": "helper:CoreRcvL",
+      "name": "CoreRcvL",
+      "kind": "helper",
+      "lineStart": 125,
+      "lineEnd": 145,
+      "proofLines": [
+        136,
+        137,
+        138,
+        139,
+        140,
+        141,
+        142,
+        143,
+        144,
+        145
+      ],
+      "proofRange": [
+        136,
+        145
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:ObedNoQL"
+      ]
+    },
+    "helper:CoreNextL": {
+      "id": "helper:CoreNextL",
+      "name": "CoreNextL",
+      "kind": "helper",
+      "lineStart": 147,
+      "lineEnd": 254,
+      "proofLines": [
+        150,
+        151,
+        152,
+        153,
+        154,
+        155,
+        156,
+        157,
+        158,
+        159,
+        160,
+        161,
+        162,
+        163,
+        164,
+        165,
+        166,
+        167,
+        168,
+        169,
+        170,
+        171,
+        172,
+        173,
+        174,
+        175,
+        176,
+        177,
+        178,
+        179,
+        180,
+        181,
+        182,
+        183,
+        184,
+        185,
+        186,
+        187,
+        188,
+        189,
+        190,
+        191,
+        192,
+        193,
+        194,
+        195,
+        196,
+        197,
+        198,
+        199,
+        200,
+        201,
+        202,
+        203,
+        204,
+        205,
+        206,
+        207,
+        208,
+        209,
+        210,
+        211,
+        212,
+        213,
+        214,
+        215,
+        216,
+        217,
+        218,
+        219,
+        220,
+        221,
+        222,
+        223,
+        224,
+        225,
+        226,
+        227,
+        228,
+        229,
+        230,
+        231,
+        232,
+        233,
+        234,
+        235,
+        236,
+        237,
+        238,
+        239,
+        240,
+        241,
+        242,
+        243,
+        244,
+        245,
+        246,
+        247,
+        248,
+        249,
+        250,
+        251,
+        252,
+        253,
+        254
+      ],
+      "proofRange": [
+        150,
+        254
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:CoreRcvL",
+        "helper:CoreSendL",
+        "helper:ObedNoQL"
+      ]
+    },
+    "helper:SafeInitL": {
+      "id": "helper:SafeInitL",
+      "name": "SafeInitL",
+      "kind": "helper",
+      "lineStart": 261,
+      "lineEnd": 262,
+      "proofLines": [
+        262
+      ],
+      "proofRange": [
+        262,
+        262
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:SafeNextL": {
+      "id": "helper:SafeNextL",
+      "name": "SafeNextL",
+      "kind": "helper",
+      "lineStart": 264,
+      "lineEnd": 281,
+      "proofLines": [
+        265,
+        266,
+        267,
+        268,
+        269,
+        270,
+        271,
+        272,
+        273,
+        274,
+        275,
+        276,
+        277,
+        278,
+        279,
+        280,
+        281
+      ],
+      "proofRange": [
+        265,
+        281
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:CoreNextL",
+        "helper:TypeNextL"
+      ]
+    },
+    "helper:SafeImpL": {
+      "id": "helper:SafeImpL",
+      "name": "SafeImpL",
+      "kind": "helper",
+      "lineStart": 283,
+      "lineEnd": 290,
+      "proofLines": [
+        284,
+        285,
+        286,
+        287,
+        288,
+        289,
+        290
+      ],
+      "proofRange": [
+        284,
+        290
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HasBMonoL": {
+      "id": "helper:HasBMonoL",
+      "name": "HasBMonoL",
+      "kind": "helper",
+      "lineStart": 304,
+      "lineEnd": 308,
+      "proofLines": [
+        308
+      ],
+      "proofRange": [
+        308,
+        308
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HasAMonoL": {
+      "id": "helper:HasAMonoL",
+      "name": "HasAMonoL",
+      "kind": "helper",
+      "lineStart": 310,
+      "lineEnd": 314,
+      "proofLines": [
+        314
+      ],
+      "proofRange": [
+        314,
+        314
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:LiveSendL": {
+      "id": "helper:LiveSendL",
+      "name": "LiveSendL",
+      "kind": "helper",
+      "lineStart": 316,
+      "lineEnd": 324,
+      "proofLines": [
+        324
+      ],
+      "proofRange": [
+        324,
+        324
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:LiveRcvL": {
+      "id": "helper:LiveRcvL",
+      "name": "LiveRcvL",
+      "kind": "helper",
+      "lineStart": 326,
+      "lineEnd": 360,
+      "proofLines": [
+        338,
+        339,
+        340,
+        341,
+        342,
+        343,
+        344,
+        345,
+        346,
+        347,
+        348,
+        349,
+        350,
+        351,
+        352,
+        353,
+        354,
+        355,
+        356,
+        357,
+        358,
+        359,
+        360
+      ],
+      "proofRange": [
+        338,
+        360
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:HasBMonoL"
+      ]
+    },
+    "helper:LiveNextL": {
+      "id": "helper:LiveNextL",
+      "name": "LiveNextL",
+      "kind": "helper",
+      "lineStart": 362,
+      "lineEnd": 458,
+      "proofLines": [
+        365,
+        366,
+        367,
+        368,
+        369,
+        370,
+        371,
+        372,
+        373,
+        374,
+        375,
+        376,
+        377,
+        378,
+        379,
+        380,
+        381,
+        382,
+        383,
+        384,
+        385,
+        386,
+        387,
+        388,
+        389,
+        390,
+        391,
+        392,
+        393,
+        394,
+        395,
+        396,
+        397,
+        398,
+        399,
+        400,
+        401,
+        402,
+        403,
+        404,
+        405,
+        406,
+        407,
+        408,
+        409,
+        410,
+        411,
+        412,
+        413,
+        414,
+        415,
+        416,
+        417,
+        418,
+        419,
+        420,
+        421,
+        422,
+        423,
+        424,
+        425,
+        426,
+        427,
+        428,
+        429,
+        430,
+        431,
+        432,
+        433,
+        434,
+        435,
+        436,
+        437,
+        438,
+        439,
+        440,
+        441,
+        442,
+        443,
+        444,
+        445,
+        446,
+        447,
+        448,
+        449,
+        450,
+        451,
+        452,
+        453,
+        454,
+        455,
+        456,
+        457,
+        458
+      ],
+      "proofRange": [
+        365,
+        458
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:HasBMonoL",
+        "helper:LiveRcvL",
+        "helper:LiveSendL"
+      ]
+    },
+    "helper:LiveInvInitL": {
+      "id": "helper:LiveInvInitL",
+      "name": "LiveInvInitL",
+      "kind": "helper",
+      "lineStart": 460,
+      "lineEnd": 461,
+      "proofLines": [
+        461
+      ],
+      "proofRange": [
+        461,
+        461
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:LiveInvNextL": {
+      "id": "helper:LiveInvNextL",
+      "name": "LiveInvNextL",
+      "kind": "helper",
+      "lineStart": 463,
+      "lineEnd": 474,
+      "proofLines": [
+        464,
+        465,
+        466,
+        467,
+        468,
+        469,
+        470,
+        471,
+        472,
+        473,
+        474
+      ],
+      "proofRange": [
+        464,
+        474
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:LiveNextL",
+        "helper:TypeNextL"
+      ]
+    },
+    "helper:LiveInvL": {
+      "id": "helper:LiveInvL",
+      "name": "LiveInvL",
+      "kind": "helper",
+      "lineStart": 476,
+      "lineEnd": 482,
+      "proofLines": [
+        477,
+        478,
+        479,
+        480,
+        481,
+        482
+      ],
+      "proofRange": [
+        477,
+        482
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:LiveInvInitL",
+        "helper:LiveInvNextL"
+      ]
+    },
+    "helper:SentMonoL": {
+      "id": "helper:SentMonoL",
+      "name": "SentMonoL",
+      "kind": "helper",
+      "lineStart": 489,
+      "lineEnd": 530,
+      "proofLines": [
+        492,
+        493,
+        494,
+        495,
+        496,
+        497,
+        498,
+        499,
+        500,
+        501,
+        502,
+        503,
+        504,
+        505,
+        506,
+        507,
+        508,
+        509,
+        510,
+        511,
+        512,
+        513,
+        514,
+        515,
+        516,
+        517,
+        518,
+        519,
+        520,
+        521,
+        522,
+        523,
+        524,
+        525,
+        526,
+        527,
+        528,
+        529,
+        530
+      ],
+      "proofRange": [
+        492,
+        530
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:RcvMonoL": {
+      "id": "helper:RcvMonoL",
+      "name": "RcvMonoL",
+      "kind": "helper",
+      "lineStart": 532,
+      "lineEnd": 570,
+      "proofLines": [
+        535,
+        536,
+        537,
+        538,
+        539,
+        540,
+        541,
+        542,
+        543,
+        544,
+        545,
+        546,
+        547,
+        548,
+        549,
+        550,
+        551,
+        552,
+        553,
+        554,
+        555,
+        556,
+        557,
+        558,
+        559,
+        560,
+        561,
+        562,
+        563,
+        564,
+        565,
+        566,
+        567,
+        568,
+        569,
+        570
+      ],
+      "proofRange": [
+        535,
+        570
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AccMonoL": {
+      "id": "helper:AccMonoL",
+      "name": "AccMonoL",
+      "kind": "helper",
+      "lineStart": 572,
+      "lineEnd": 612,
+      "proofLines": [
+        575,
+        576,
+        577,
+        578,
+        579,
+        580,
+        581,
+        582,
+        583,
+        584,
+        585,
+        586,
+        587,
+        588,
+        589,
+        590,
+        591,
+        592,
+        593,
+        594,
+        595,
+        596,
+        597,
+        598,
+        599,
+        600,
+        601,
+        602,
+        603,
+        604,
+        605,
+        606,
+        607,
+        608,
+        609,
+        610,
+        611,
+        612
+      ],
+      "proofRange": [
+        575,
+        612
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:SpecSafeL": {
+      "id": "helper:SpecSafeL",
+      "name": "SpecSafeL",
+      "kind": "helper",
+      "lineStart": 619,
+      "lineEnd": 620,
+      "proofLines": [
+        620
+      ],
+      "proofRange": [
+        620,
+        620
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:SpecNextL": {
+      "id": "helper:SpecNextL",
+      "name": "SpecNextL",
+      "kind": "helper",
+      "lineStart": 622,
+      "lineEnd": 623,
+      "proofLines": [
+        623
+      ],
+      "proofRange": [
+        623,
+        623
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:SpecInvL": {
+      "id": "helper:SpecInvL",
+      "name": "SpecInvL",
+      "kind": "helper",
+      "lineStart": 625,
+      "lineEnd": 626,
+      "proofLines": [
+        626
+      ],
+      "proofRange": [
+        626,
+        626
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:LiveInvL",
+        "helper:SpecSafeL"
+      ]
+    },
+    "helper:SpecWFInitL": {
+      "id": "helper:SpecWFInitL",
+      "name": "SpecWFInitL",
+      "kind": "helper",
+      "lineStart": 628,
+      "lineEnd": 631,
+      "proofLines": [
+        631
+      ],
+      "proofRange": [
+        631,
+        631
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:SpecWFMsgL": {
+      "id": "helper:SpecWFMsgL",
+      "name": "SpecWFMsgL",
+      "kind": "helper",
+      "lineStart": 633,
+      "lineEnd": 636,
+      "proofLines": [
+        636
+      ],
+      "proofRange": [
+        636,
+        636
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:EvRcvdL": {
+      "id": "helper:EvRcvdL",
+      "name": "EvRcvdL",
+      "kind": "helper",
+      "lineStart": 648,
+      "lineEnd": 669,
+      "proofLines": [
+        651,
+        652,
+        653,
+        654,
+        655,
+        656,
+        657,
+        658,
+        659,
+        660,
+        661,
+        662,
+        663,
+        664,
+        665,
+        666,
+        667,
+        668,
+        669
+      ],
+      "proofRange": [
+        651,
+        669
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:LiveInvNextL",
+        "helper:RcvMonoL",
+        "helper:SentMonoL",
+        "helper:SpecInvL",
+        "helper:SpecNextL",
+        "helper:SpecWFMsgL"
+      ]
+    },
+    "helper:EvSentAllInitL": {
+      "id": "helper:EvSentAllInitL",
+      "name": "EvSentAllInitL",
+      "kind": "helper",
+      "lineStart": 676,
+      "lineEnd": 698,
+      "proofLines": [
+        679,
+        680,
+        681,
+        682,
+        683,
+        684,
+        685,
+        686,
+        687,
+        688,
+        689,
+        690,
+        691,
+        692,
+        693,
+        694,
+        695,
+        696,
+        697,
+        698
+      ],
+      "proofRange": [
+        679,
+        698
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:LiveInvNextL",
+        "helper:SentMonoL",
+        "helper:SpecInvL",
+        "helper:SpecNextL",
+        "helper:SpecWFInitL"
+      ]
+    },
+    "helper:EvSentAllRelayL": {
+      "id": "helper:EvSentAllRelayL",
+      "name": "EvSentAllRelayL",
+      "kind": "helper",
+      "lineStart": 700,
+      "lineEnd": 730,
+      "proofLines": [
+        703,
+        704,
+        705,
+        706,
+        707,
+        708,
+        709,
+        710,
+        711,
+        712,
+        713,
+        714,
+        715,
+        716,
+        717,
+        718,
+        719,
+        720,
+        721,
+        722,
+        723,
+        724,
+        725,
+        726,
+        727,
+        728,
+        729,
+        730
+      ],
+      "proofRange": [
+        703,
+        730
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:HasAMonoL",
+        "helper:LiveInvNextL",
+        "helper:RcvMonoL",
+        "helper:SentMonoL",
+        "helper:SpecInvL",
+        "helper:SpecNextL",
+        "helper:SpecWFMsgL"
+      ]
+    },
+    "helper:EvAcceptL": {
+      "id": "helper:EvAcceptL",
+      "name": "EvAcceptL",
+      "kind": "helper",
+      "lineStart": 732,
+      "lineEnd": 762,
+      "proofLines": [
+        735,
+        736,
+        737,
+        738,
+        739,
+        740,
+        741,
+        742,
+        743,
+        744,
+        745,
+        746,
+        747,
+        748,
+        749,
+        750,
+        751,
+        752,
+        753,
+        754,
+        755,
+        756,
+        757,
+        758,
+        759,
+        760,
+        761,
+        762
+      ],
+      "proofRange": [
+        735,
+        762
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AccMonoL",
+        "helper:HasBMonoL",
+        "helper:LiveInvNextL",
+        "helper:RcvMonoL",
+        "helper:SentMonoL",
+        "helper:SpecInvL",
+        "helper:SpecNextL",
+        "helper:SpecWFMsgL"
+      ]
+    },
+    "helper:BridgeFinL": {
+      "id": "helper:BridgeFinL",
+      "name": "BridgeFinL",
+      "kind": "helper",
+      "lineStart": 771,
+      "lineEnd": 772,
+      "proofLines": [
+        772
+      ],
+      "proofRange": [
+        772,
+        772
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:BridgeCardL": {
+      "id": "helper:BridgeCardL",
+      "name": "BridgeCardL",
+      "kind": "helper",
+      "lineStart": 774,
+      "lineEnd": 775,
+      "proofLines": [
+        775
+      ],
+      "proofRange": [
+        775,
+        775
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:FSIndA": {
+      "id": "helper:FSIndA",
+      "name": "FSIndA",
+      "kind": "helper",
+      "lineStart": 777,
+      "lineEnd": 782,
+      "proofLines": [
+        782
+      ],
+      "proofRange": [
+        782,
+        782
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:BridgeFinL"
+      ]
+    },
+    "helper:ConjRcvEmptyL": {
+      "id": "helper:ConjRcvEmptyL",
+      "name": "ConjRcvEmptyL",
+      "kind": "helper",
+      "lineStart": 791,
+      "lineEnd": 797,
+      "proofLines": [
+        792,
+        793,
+        794,
+        795,
+        796,
+        797
+      ],
+      "proofRange": [
+        792,
+        797
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:SpecSafeL"
+      ]
+    },
+    "helper:ConjRcvSplitL": {
+      "id": "helper:ConjRcvSplitL",
+      "name": "ConjRcvSplitL",
+      "kind": "helper",
+      "lineStart": 799,
+      "lineEnd": 808,
+      "proofLines": [
+        802,
+        803,
+        804,
+        805,
+        806,
+        807,
+        808
+      ],
+      "proofRange": [
+        802,
+        808
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:SpecSafeL"
+      ]
+    },
+    "helper:ConjRcvBaseL": {
+      "id": "helper:ConjRcvBaseL",
+      "name": "ConjRcvBaseL",
+      "kind": "helper",
+      "lineStart": 810,
+      "lineEnd": 811,
+      "proofLines": [
+        811
+      ],
+      "proofRange": [
+        811,
+        811
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:ConjRcvEmptyL"
+      ]
+    },
+    "helper:ConjRcvStepL": {
+      "id": "helper:ConjRcvStepL",
+      "name": "ConjRcvStepL",
+      "kind": "helper",
+      "lineStart": 813,
+      "lineEnd": 816,
+      "proofLines": [
+        816
+      ],
+      "proofRange": [
+        816,
+        816
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:ConjRcvSplitL"
+      ]
+    },
+    "helper:ConjRcvMainL": {
+      "id": "helper:ConjRcvMainL",
+      "name": "ConjRcvMainL",
+      "kind": "helper",
+      "lineStart": 818,
+      "lineEnd": 832,
+      "proofLines": [
+        821,
+        822,
+        823,
+        824,
+        825,
+        826,
+        827,
+        828,
+        829,
+        830,
+        831,
+        832
+      ],
+      "proofRange": [
+        821,
+        832
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:ConjRcvBaseL",
+        "helper:ConjRcvStepL",
+        "helper:FSIndA"
+      ]
+    },
+    "helper:ConjAccEmptyL": {
+      "id": "helper:ConjAccEmptyL",
+      "name": "ConjAccEmptyL",
+      "kind": "helper",
+      "lineStart": 841,
+      "lineEnd": 847,
+      "proofLines": [
+        842,
+        843,
+        844,
+        845,
+        846,
+        847
+      ],
+      "proofRange": [
+        842,
+        847
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:SpecSafeL"
+      ]
+    },
+    "helper:ConjAccSplitL": {
+      "id": "helper:ConjAccSplitL",
+      "name": "ConjAccSplitL",
+      "kind": "helper",
+      "lineStart": 849,
+      "lineEnd": 858,
+      "proofLines": [
+        852,
+        853,
+        854,
+        855,
+        856,
+        857,
+        858
+      ],
+      "proofRange": [
+        852,
+        858
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:SpecSafeL"
+      ]
+    },
+    "helper:ConjAccBaseL": {
+      "id": "helper:ConjAccBaseL",
+      "name": "ConjAccBaseL",
+      "kind": "helper",
+      "lineStart": 860,
+      "lineEnd": 861,
+      "proofLines": [
+        861
+      ],
+      "proofRange": [
+        861,
+        861
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:ConjAccEmptyL"
+      ]
+    },
+    "helper:ConjAccStepL": {
+      "id": "helper:ConjAccStepL",
+      "name": "ConjAccStepL",
+      "kind": "helper",
+      "lineStart": 863,
+      "lineEnd": 866,
+      "proofLines": [
+        866
+      ],
+      "proofRange": [
+        866,
+        866
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:ConjAccSplitL"
+      ]
+    },
+    "helper:ConjAccMainL": {
+      "id": "helper:ConjAccMainL",
+      "name": "ConjAccMainL",
+      "kind": "helper",
+      "lineStart": 868,
+      "lineEnd": 882,
+      "proofLines": [
+        871,
+        872,
+        873,
+        874,
+        875,
+        876,
+        877,
+        878,
+        879,
+        880,
+        881,
+        882
+      ],
+      "proofRange": [
+        871,
+        882
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:ConjAccBaseL",
+        "helper:ConjAccStepL",
+        "helper:FSIndA"
+      ]
+    },
+    "helper:WitnessL": {
+      "id": "helper:WitnessL",
+      "name": "WitnessL",
+      "kind": "helper",
+      "lineStart": 895,
+      "lineEnd": 922,
+      "proofLines": [
+        906,
+        907,
+        908,
+        909,
+        910,
+        911,
+        912,
+        913,
+        914,
+        915,
+        916,
+        917,
+        918,
+        919,
+        920,
+        921,
+        922
+      ],
+      "proofRange": [
+        906,
+        922
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:NodeSubFinL": {
+      "id": "helper:NodeSubFinL",
+      "name": "NodeSubFinL",
+      "kind": "helper",
+      "lineStart": 924,
+      "lineEnd": 925,
+      "proofLines": [
+        925
+      ],
+      "proofRange": [
+        925,
+        925
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:BridgeCardL",
+        "helper:BridgeFinL"
+      ]
+    },
+    "helper:HasBAlwaysL": {
+      "id": "helper:HasBAlwaysL",
+      "name": "HasBAlwaysL",
+      "kind": "helper",
+      "lineStart": 931,
+      "lineEnd": 941,
+      "proofLines": [
+        935,
+        936,
+        937,
+        938,
+        939,
+        940,
+        941
+      ],
+      "proofRange": [
+        935,
+        941
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:SpecSafeL"
+      ]
+    },
+    "helper:HasBFromConjL": {
+      "id": "helper:HasBFromConjL",
+      "name": "HasBFromConjL",
+      "kind": "helper",
+      "lineStart": 943,
+      "lineEnd": 946,
+      "proofLines": [
+        946
+      ],
+      "proofRange": [
+        946,
+        946
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:HasBAlwaysL"
+      ]
+    },
+    "helper:HasAAlwaysL": {
+      "id": "helper:HasAAlwaysL",
+      "name": "HasAAlwaysL",
+      "kind": "helper",
+      "lineStart": 948,
+      "lineEnd": 958,
+      "proofLines": [
+        952,
+        953,
+        954,
+        955,
+        956,
+        957,
+        958
+      ],
+      "proofRange": [
+        952,
+        958
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:SpecSafeL"
+      ]
+    },
+    "helper:HasAFromConjL": {
+      "id": "helper:HasAFromConjL",
+      "name": "HasAFromConjL",
+      "kind": "helper",
+      "lineStart": 960,
+      "lineEnd": 963,
+      "proofLines": [
+        963
+      ],
+      "proofRange": [
+        963,
+        963
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:HasAAlwaysL"
+      ]
+    },
+    "helper:SomeCorrectAlwaysL": {
+      "id": "helper:SomeCorrectAlwaysL",
+      "name": "SomeCorrectAlwaysL",
+      "kind": "helper",
+      "lineStart": 969,
+      "lineEnd": 976,
+      "proofLines": [
+        970,
+        971,
+        972,
+        973,
+        974,
+        975,
+        976
+      ],
+      "proofRange": [
+        970,
+        976
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:SpecSafeL",
+        "helper:WitnessL"
+      ]
+    },
+    "helper:SomeCorrectFromAccL": {
+      "id": "helper:SomeCorrectFromAccL",
+      "name": "SomeCorrectFromAccL",
+      "kind": "helper",
+      "lineStart": 978,
+      "lineEnd": 979,
+      "proofLines": [
+        979
+      ],
+      "proofRange": [
+        979,
+        979
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:SomeCorrectAlwaysL"
+      ]
+    },
+    "helper:CorrLemmaL": {
+      "id": "helper:CorrLemmaL",
+      "name": "CorrLemmaL",
+      "kind": "helper",
+      "lineStart": 981,
+      "lineEnd": 1007,
+      "proofLines": [
+        982,
+        983,
+        984,
+        985,
+        986,
+        987,
+        988,
+        989,
+        990,
+        991,
+        992,
+        993,
+        994,
+        995,
+        996,
+        997,
+        998,
+        999,
+        1000,
+        1001,
+        1002,
+        1003,
+        1004,
+        1005,
+        1006,
+        1007
+      ],
+      "proofRange": [
+        982,
+        1007
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:ConjRcvMainL",
+        "helper:EvAcceptL",
+        "helper:EvRcvdL",
+        "helper:EvSentAllInitL",
+        "helper:HasBFromConjL",
+        "helper:NodeSubFinL",
+        "helper:SomeCorrectFromAccL",
+        "helper:WitnessL"
+      ]
+    },
+    "helper:AWitL": {
+      "id": "helper:AWitL",
+      "name": "AWitL",
+      "kind": "helper",
+      "lineStart": 1022,
+      "lineEnd": 1028,
+      "proofLines": [
+        1025,
+        1026,
+        1027,
+        1028
+      ],
+      "proofRange": [
+        1025,
+        1028
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:RowFromAcceptL": {
+      "id": "helper:RowFromAcceptL",
+      "name": "RowFromAcceptL",
+      "kind": "helper",
+      "lineStart": 1030,
+      "lineEnd": 1059,
+      "proofLines": [
+        1038,
+        1039,
+        1040,
+        1041,
+        1042,
+        1043,
+        1044,
+        1045,
+        1046,
+        1047,
+        1048,
+        1049,
+        1050,
+        1051,
+        1052,
+        1053,
+        1054,
+        1055,
+        1056,
+        1057,
+        1058,
+        1059
+      ],
+      "proofRange": [
+        1038,
+        1059
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:ExRowAlwaysL": {
+      "id": "helper:ExRowAlwaysL",
+      "name": "ExRowAlwaysL",
+      "kind": "helper",
+      "lineStart": 1061,
+      "lineEnd": 1071,
+      "proofLines": [
+        1063,
+        1064,
+        1065,
+        1066,
+        1067,
+        1068,
+        1069,
+        1070,
+        1071
+      ],
+      "proofRange": [
+        1063,
+        1071
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:RowFromAcceptL",
+        "helper:SpecSafeL"
+      ]
+    },
+    "helper:EvExRowL": {
+      "id": "helper:EvExRowL",
+      "name": "EvExRowL",
+      "kind": "helper",
+      "lineStart": 1073,
+      "lineEnd": 1074,
+      "proofLines": [
+        1074
+      ],
+      "proofRange": [
+        1074,
+        1074
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:ExRowAlwaysL",
+        "helper:SpecInvL"
+      ]
+    },
+    "helper:DiamondExL": {
+      "id": "helper:DiamondExL",
+      "name": "DiamondExL",
+      "kind": "helper",
+      "lineStart": 1076,
+      "lineEnd": 1079,
+      "proofLines": [
+        1079
+      ],
+      "proofRange": [
+        1079,
+        1079
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:RowStableL": {
+      "id": "helper:RowStableL",
+      "name": "RowStableL",
+      "kind": "helper",
+      "lineStart": 1081,
+      "lineEnd": 1089,
+      "proofLines": [
+        1082,
+        1083,
+        1084,
+        1085,
+        1086,
+        1087,
+        1088,
+        1089
+      ],
+      "proofRange": [
+        1082,
+        1089
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:SentMonoL",
+        "helper:SpecInvL",
+        "helper:SpecNextL"
+      ]
+    },
+    "helper:RowImpliesSentL": {
+      "id": "helper:RowImpliesSentL",
+      "name": "RowImpliesSentL",
+      "kind": "helper",
+      "lineStart": 1091,
+      "lineEnd": 1100,
+      "proofLines": [
+        1094,
+        1095,
+        1096,
+        1097,
+        1098,
+        1099,
+        1100
+      ],
+      "proofRange": [
+        1094,
+        1100
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:SpecSafeL"
+      ]
+    },
+    "helper:EvSentFromRowL": {
+      "id": "helper:EvSentFromRowL",
+      "name": "EvSentFromRowL",
+      "kind": "helper",
+      "lineStart": 1102,
+      "lineEnd": 1105,
+      "proofLines": [
+        1105
+      ],
+      "proofRange": [
+        1105,
+        1105
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:RowImpliesSentL"
+      ]
+    },
+    "helper:SentAllCorrectL": {
+      "id": "helper:SentAllCorrectL",
+      "name": "SentAllCorrectL",
+      "kind": "helper",
+      "lineStart": 1107,
+      "lineEnd": 1127,
+      "proofLines": [
+        1110,
+        1111,
+        1112,
+        1113,
+        1114,
+        1115,
+        1116,
+        1117,
+        1118,
+        1119,
+        1120,
+        1121,
+        1122,
+        1123,
+        1124,
+        1125,
+        1126,
+        1127
+      ],
+      "proofRange": [
+        1110,
+        1127
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AWitL",
+        "helper:ConjRcvMainL",
+        "helper:EvRcvdL",
+        "helper:EvSentAllRelayL",
+        "helper:EvSentFromRowL",
+        "helper:HasAFromConjL",
+        "helper:NodeSubFinL"
+      ]
+    },
+    "helper:AccFromRowL": {
+      "id": "helper:AccFromRowL",
+      "name": "AccFromRowL",
+      "kind": "helper",
+      "lineStart": 1129,
+      "lineEnd": 1151,
+      "proofLines": [
+        1132,
+        1133,
+        1134,
+        1135,
+        1136,
+        1137,
+        1138,
+        1139,
+        1140,
+        1141,
+        1142,
+        1143,
+        1144,
+        1145,
+        1146,
+        1147,
+        1148,
+        1149,
+        1150,
+        1151
+      ],
+      "proofRange": [
+        1132,
+        1151
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:ConjRcvMainL",
+        "helper:EvAcceptL",
+        "helper:EvRcvdL",
+        "helper:HasBFromConjL",
+        "helper:NodeSubFinL",
+        "helper:SentAllCorrectL",
+        "helper:WitnessL"
+      ]
+    },
+    "helper:AllAccAlwaysL": {
+      "id": "helper:AllAccAlwaysL",
+      "name": "AllAccAlwaysL",
+      "kind": "helper",
+      "lineStart": 1153,
+      "lineEnd": 1160,
+      "proofLines": [
+        1154,
+        1155,
+        1156,
+        1157,
+        1158,
+        1159,
+        1160
+      ],
+      "proofRange": [
+        1154,
+        1160
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:SpecSafeL"
+      ]
+    },
+    "helper:RelayFromRowL": {
+      "id": "helper:RelayFromRowL",
+      "name": "RelayFromRowL",
+      "kind": "helper",
+      "lineStart": 1162,
+      "lineEnd": 1176,
+      "proofLines": [
+        1165,
+        1166,
+        1167,
+        1168,
+        1169,
+        1170,
+        1171,
+        1172,
+        1173,
+        1174,
+        1175,
+        1176
+      ],
+      "proofRange": [
+        1165,
+        1176
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AccFromRowL",
+        "helper:AllAccAlwaysL",
+        "helper:ConjAccMainL",
+        "helper:NodeSubFinL"
+      ]
+    },
+    "helper:RelayLemmaL": {
+      "id": "helper:RelayLemmaL",
+      "name": "RelayLemmaL",
+      "kind": "helper",
+      "lineStart": 1178,
+      "lineEnd": 1194,
+      "proofLines": [
+        1179,
+        1180,
+        1181,
+        1182,
+        1183,
+        1184,
+        1185,
+        1186,
+        1187,
+        1188,
+        1189,
+        1190,
+        1191,
+        1192,
+        1193,
+        1194
+      ],
+      "proofRange": [
+        1179,
+        1194
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:DiamondExL",
+        "helper:EvExRowL",
+        "helper:RelayFromRowL",
+        "helper:RowStableL"
+      ]
+    }
+  }
+}

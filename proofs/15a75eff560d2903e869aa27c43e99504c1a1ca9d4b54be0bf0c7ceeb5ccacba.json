@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "specId": "ivy_examples_ticket_nested/ivy_examples_ticket_nested.tla",
+  "sourceName": "ivy_examples_ticket_nested.tla",
+  "sourceSha256": "345bc571e1f19e2873684ce9b28cd949465c17c3089fe2bd4f4b3e4e5e62dd4f",
+  "resultSha256": "294d4a64b69a72756e47465db0b0578eabfb2630c12e22fee5b74ceb1ce8727d",
+  "source": "---- MODULE ivy_examples_ticket_nested ----\nEXTENDS ivy_examples_ticket_nestedDefs\n\n\\* BEGIN AGENT HELPERS\n\\* END AGENT HELPERS\n\nTHEOREM Safety == SafetySpec => []MutualExclusion\n\\* BEGIN AGENT PROOF ivy_examples_ticket_nested/ivy_examples_ticket_nested_Safety.tla\nPROOF OMITTED\n\\* END AGENT PROOF ivy_examples_ticket_nested/ivy_examples_ticket_nested_Safety.tla\n\nTHEOREM Liveness == Spec => NonStarvation\n\\* BEGIN AGENT PROOF ivy_examples_ticket_nested/ivy_examples_ticket_nested_Liveness.tla\nPROOF OMITTED\n\\* END AGENT PROOF ivy_examples_ticket_nested/ivy_examples_ticket_nested_Liveness.tla\n====\n",
+  "units": {
+    "ivy_examples_ticket_nested/ivy_examples_ticket_nested_Safety.tla": {
+      "id": "ivy_examples_ticket_nested/ivy_examples_ticket_nested_Safety.tla",
+      "name": "Safety",
+      "kind": "target",
+      "lineStart": 7,
+      "lineEnd": 9,
+      "proofLines": [],
+      "proofRange": [
+        9,
+        9
+      ],
+      "proofOmitted": true,
+      "dependencies": []
+    },
+    "ivy_examples_ticket_nested/ivy_examples_ticket_nested_Liveness.tla": {
+      "id": "ivy_examples_ticket_nested/ivy_examples_ticket_nested_Liveness.tla",
+      "name": "Liveness",
+      "kind": "target",
+      "lineStart": 12,
+      "lineEnd": 14,
+      "proofLines": [],
+      "proofRange": [
+        14,
+        14
+      ],
+      "proofOmitted": true,
+      "dependencies": []
+    }
+  }
+}

@@ -1,0 +1,507 @@
+{
+  "schemaVersion": 1,
+  "specId": "CahillSSI/CahillSerializability.tla",
+  "sourceName": "CahillSerializability.tla",
+  "sourceSha256": "6b9c23f3064345c729e8b2ea9b3b0d0c9b483748d802d177da89c8195d06b9d3",
+  "resultSha256": "e1391992fc179c68ef96dafef226cb4ba18e418307b9ce59e84e1305c51f19a8",
+  "source": "---- MODULE CahillSerializability ----\nEXTENDS CahillSerializabilityDefs\n\n\\* BEGIN AGENT HELPERS\nLOCAL AgentTLAPS == INSTANCE TLAPS\nLOCAL AgentSeqThm == INSTANCE SequenceTheorems\nAgentEventSet == ([op:{\"begin\"}, txnid:TxnId] \\cup [op:{\"commit\"}, txnid:TxnId] \\cup [op:{\"abort\"}, txnid:TxnId, reason:STRING] \\cup [op:{\"read\"}, txnid:TxnId, key:Key, ver:TxnId] \\cup [op:{\"write\"}, txnid:TxnId, key:Key])\nAgentHasBegin(h) == \\A t \\in ActiveOrFinalizedTxns(h) : \\E i \\in 1..Len(h) : h[i] = [op |-> \"begin\", txnid |-> t]\nAgentHistOK == /\\ history \\in Seq(AgentEventSet)\n               /\\ AgentHasBegin(history)\nAgentInv == /\\ AgentHistOK\n            /\\ CahillSerializable(history)\nLEMMA AgentSelectAppend == ASSUME NEW S, NEW s \\in Seq(S), NEW e \\in S, NEW C\n                          PROVE SelectSeq(Append(s, e), LAMBDA x : x.txnid \\in C) = IF e.txnid \\in C THEN Append(SelectSeq(s, LAMBDA x : x.txnid \\in C), e) ELSE SelectSeq(s, LAMBDA x : x.txnid \\in C)\nBY AgentTLAPS!SMTT(\"r20\")\nLEMMA AgentGeneralCT == ASSUME NEW h \\in Seq(AgentEventSet), NEW e \\in AgentEventSet, e.op # \"commit\"\n                       PROVE CommittedTxns(Append(h, e)) = CommittedTxns(h)\nBY AgentTLAPS!SMTT(\"r20\") DEF CommittedTxns, SelectEvents, Range, AgentEventSet\nLEMMA AgentGeneralCH == ASSUME NEW h \\in Seq(AgentEventSet), NEW e \\in AgentEventSet, e.op # \"commit\", e.txnid \\notin CommittedTxns(h)\n                       PROVE SelectSeq(Append(h, e), LAMBDA x : x.txnid \\in CommittedTxns(Append(h, e))) = SelectSeq(h, LAMBDA x : x.txnid \\in CommittedTxns(h))\n<1>1. CommittedTxns(Append(h, e)) = CommittedTxns(h) BY AgentGeneralCT DEF AgentEventSet\n<1>2. e \\in AgentEventSet OBVIOUS\n<1>3. e.txnid \\notin CommittedTxns(h) OBVIOUS\n<1>4. SelectSeq(Append(h, e), LAMBDA x : x.txnid \\in CommittedTxns(h)) = SelectSeq(h, LAMBDA x : x.txnid \\in CommittedTxns(h))\n  BY <1>2, <1>3, AgentSelectAppend, AgentTLAPS!SMTT(\"r10\") DEF AgentEventSet\n<1>5. QED BY <1>1, <1>4 DEF CommittedTxns\nLEMMA AgentGeneralKeys == ASSUME NEW h \\in Seq(AgentEventSet), NEW e \\in AgentEventSet, NEW T1, NEW op, T1 \\in CommittedTxns(h), e.txnid # T1\n                         PROVE KeysThatTxnHasDoneOperationOn(Append(h, e), T1, op) = KeysThatTxnHasDoneOperationOn(h, T1, op)\nBY AgentTLAPS!SMTT(\"r20\") DEF KeysThatTxnHasDoneOperationOn, SelectEvents, Range, AgentEventSet\nLEMMA AgentGeneralMVSG == ASSUME NEW h \\in Seq(AgentEventSet), NEW e \\in AgentEventSet, e.op # \"commit\", e.txnid \\notin CommittedTxns(h)\n                         PROVE CahillMVSG(Append(h, e)) = CahillMVSG(h)\n<1>1. CommittedTxns(Append(h, e)) = CommittedTxns(h) BY AgentGeneralCT DEF AgentEventSet\n<1>2. SelectSeq(Append(h, e), LAMBDA x : x.txnid \\in CommittedTxns(Append(h, e))) = SelectSeq(h, LAMBDA x : x.txnid \\in CommittedTxns(h)) BY AgentGeneralCH DEF AgentEventSet\n<1>3. \\A T1 \\in CommittedTxns(h) : \\A o : KeysThatTxnHasDoneOperationOn(Append(h, e), T1, o) = KeysThatTxnHasDoneOperationOn(h, T1, o)\n  <2>1. ASSUME NEW T1 \\in CommittedTxns(h), NEW o PROVE KeysThatTxnHasDoneOperationOn(Append(h, e), T1, o) = KeysThatTxnHasDoneOperationOn(h, T1, o)\n    <3>1. e.txnid # T1 BY AgentTLAPS!SMTT(\"r10\") DEF CommittedTxns, SelectEvents, Range, AgentEventSet\n    <3>2. QED BY <3>1, AgentGeneralKeys DEF AgentEventSet\n  <2>2. QED BY <2>1\n<1>4. QED BY <1>1, <1>2, <1>3 DEF CahillMVSG\nLEMMA AgentCommittedSubset == ASSUME NEW s \\in Seq(AgentEventSet) PROVE CommittedTxns(s) \\subseteq TxnId\nBY AgentTLAPS!SMTT(\"r15\") DEF CommittedTxns, SelectEvents, Range, AgentEventSet\nLEMMA AgentStartTimeValid == ASSUME NEW h \\in Seq(AgentEventSet), NEW txn \\in TxnId, AgentHasBegin(h), txn \\in ActiveOrFinalizedTxns(h), history = h\n                            PROVE /\\ StartTime(history, txn) \\in 1..Len(history)\n                                  /\\ history[StartTime(history, txn)] = [op |-> \"begin\", txnid |-> txn]\nBY AgentTLAPS!SMTT(\"r20\") DEF StartTime, AgentHasBegin, ActiveOrFinalizedTxns, SelectEvents, Range, AgentEventSet\nLEMMA AgentSubSeqHist == ASSUME NEW h \\in Seq(AgentEventSet), NEW txn \\in TxnId, AgentHasBegin(h), txn \\in ActiveOrFinalizedTxns(h), history = h\n                        PROVE SubSeq(history, 1, StartTime(history, txn)) \\in Seq(AgentEventSet)\n<1>1. StartTime(history, txn) \\in 1..Len(history) BY AgentStartTimeValid DEF AgentEventSet\n<1>2. \\A i \\in 1..StartTime(history, txn) : history[i] \\in AgentEventSet BY <1>1, AgentSeqThm!ElementOfSeq, AgentTLAPS!SMTT(\"r10\") DEF AgentEventSet\n<1>3. QED BY <1>1, <1>2, AgentSeqThm!SubSeqProperties, AgentTLAPS!SMTT(\"r10\") DEF AgentEventSet\nLEMMA AgentSelectSeqType == ASSUME NEW s \\in Seq(AgentEventSet), NEW k \\in Key PROVE SelectSeq(s, LAMBDA e : e.op = \"write\" /\\ e.key = k /\\ e.txnid \\in CommittedTxns(s)) \\in Seq(AgentEventSet)\nBY AgentTLAPS!SMTT(\"r20\") DEF AgentEventSet\nLEMMA AgentLatestSubset == ASSUME NEW h \\in Seq(AgentEventSet), NEW txn \\in TxnId, NEW k \\in Key, AgentHasBegin(h), txn \\in ActiveOrFinalizedTxns(h), history = h\n                          PROVE LatestCommittedVersionOfKeyWhenTxnBegan(txn, k) \\subseteq TxnId\n<1>1. SubSeq(history, 1, StartTime(history, txn)) \\in Seq(AgentEventSet) BY AgentSubSeqHist DEF AgentEventSet\n<1>2. CommittedTxns(SubSeq(history, 1, StartTime(history, txn))) \\subseteq TxnId BY <1>1, AgentCommittedSubset DEF AgentEventSet\n<1>3. SelectSeq(SubSeq(history, 1, StartTime(history, txn)), LAMBDA e : e.op = \"write\" /\\ e.key = k /\\ e.txnid \\in CommittedTxns(SubSeq(history, 1, StartTime(history, txn)))) \\in Seq(AgentEventSet) BY <1>1, AgentSelectSeqType DEF AgentEventSet\n<1>4. QED BY <1>1, <1>2, <1>3, AgentTLAPS!SMTT(\"r20\") DEF LatestCommittedVersionOfKeyWhenTxnBegan, CommittedWriteHistoryOfKey, AgentEventSet\nLEMMA AgentReadVerSubset == ASSUME NEW txn \\in TxnId, NEW k \\in Key, NEW h \\in Seq(AgentEventSet), AgentHasBegin(h), txn \\in ActiveTxns(h), history = h\n                           PROVE VersionThatWouldBeReadBy(txn, k) \\subseteq TxnId\n<1>1. txn \\in ActiveOrFinalizedTxns(h) BY AgentTLAPS!SMTT(\"r10\") DEF ActiveTxns, ActiveOrFinalizedTxns, FinalizedTxns, CommittedTxns, AbortedTxns, SelectEvents, Range, AgentEventSet\n<1>2. LatestCommittedVersionOfKeyWhenTxnBegan(txn, k) \\subseteq TxnId BY <1>1, AgentLatestSubset DEF AgentEventSet\n<1>3. QED BY <1>2, AgentTLAPS!SMTT(\"r15\") DEF VersionThatWouldBeReadBy, KeysCurrentlyXLockedByActiveTxn, AgentEventSet\nLEMMA AgentHasBeginPreserved == ASSUME NEW h \\in Seq(AgentEventSet), NEW e \\in AgentEventSet, NEW h2, h2 = Append(h, e), AgentHasBegin(h), (e.op = \"begin\" => e.txnid \\notin ActiveOrFinalizedTxns(h)) /\\ (e.op # \"begin\" => e.txnid \\in ActiveOrFinalizedTxns(h))\n                               PROVE AgentHasBegin(h2)\nBY AgentTLAPS!SMTT(\"r25\") DEF AgentHasBegin, ActiveOrFinalizedTxns, SelectEvents, Range, AgentEventSet\nLEMMA AgentInitHistOK == Init => AgentHistOK\nBY AgentTLAPS!SMTT(\"r15\") DEF Init, AgentHistOK, AgentEventSet, AgentHasBegin, ActiveOrFinalizedTxns, SelectEvents, Range\nLEMMA AgentInitSerial == Init => CahillSerializable(history)\nBY AgentTLAPS!SMTT(\"r15\") DEF Init, CahillSerializable, CahillMVSG, IsCycle, FindAllNodesInAnyCycle, CommittedTxns, SelectEvents, Range, ActiveOrFinalizedTxns, AbortedTxns, FinalizedTxns, ActiveTxns, KeysThatTxnHasDoneOperationOn, IndexOfOpInHistory\nLEMMA AgentBeginPresInv == ASSUME NEW txn \\in TxnId, AgentInv, Begin(txn) PROVE AgentInv'\n<1>1. history \\in Seq(AgentEventSet) BY DEF AgentInv, AgentHistOK\n<1>2. AgentHasBegin(history) BY DEF AgentInv, AgentHistOK\n<1>3. CahillSerializable(history) BY DEF AgentInv\n<1>4. [op |-> \"begin\", txnid |-> txn] \\in AgentEventSet BY AgentTLAPS!SMTT(\"r5\") DEF AgentEventSet\n<1>5. history' = Append(history, [op |-> \"begin\", txnid |-> txn]) BY DEF Begin\n<1>6. txn \\notin ActiveOrFinalizedTxns(history) BY DEF Begin\n<1>7. history' \\in Seq(AgentEventSet) BY <1>1, <1>4, <1>5, AgentSeqThm!AppendProperties DEF AgentEventSet\n<1>8. AgentHasBegin(history') BY <1>1, <1>2, <1>4, <1>5, <1>6, AgentHasBeginPreserved DEF AgentEventSet\n<1>9. AgentHistOK' BY <1>7, <1>8 DEF AgentHistOK\n<1>10. txn \\notin CommittedTxns(history) BY <1>6, AgentTLAPS!SMTT(\"r10\") DEF ActiveOrFinalizedTxns, CommittedTxns, SelectEvents, Range, AgentEventSet\n<1>11. CahillMVSG(history') = CahillMVSG(history) BY <1>1, <1>4, <1>5, <1>10, AgentGeneralMVSG DEF AgentEventSet\n<1>12. CahillSerializable(history') BY <1>3, <1>11 DEF CahillSerializable\n<1>13. QED BY <1>9, <1>12 DEF AgentInv, AgentHistOK\nLEMMA AgentChooseAbortPresInv == ASSUME NEW txn \\in TxnId, AgentInv, ChooseToAbort(txn) PROVE AgentInv'\n<1>1. history \\in Seq(AgentEventSet) BY DEF AgentInv, AgentHistOK\n<1>2. AgentHasBegin(history) BY DEF AgentInv, AgentHistOK\n<1>3. CahillSerializable(history) BY DEF AgentInv\n<1>4. [op |-> \"abort\", txnid |-> txn, reason |-> \"voluntary\"] \\in AgentEventSet BY AgentTLAPS!SMTT(\"r5\") DEF AgentEventSet\n<1>5. history' = Append(history, [op |-> \"abort\", txnid |-> txn, reason |-> \"voluntary\"]) BY DEF ChooseToAbort, internalAbort\n<1>6. txn \\in ActiveTxns(history) BY DEF ChooseToAbort, StartedAndCanDoPublicOperation\n<1>7. txn \\in ActiveOrFinalizedTxns(history) BY <1>6, AgentTLAPS!SMTT(\"r10\") DEF ActiveTxns, ActiveOrFinalizedTxns, FinalizedTxns, CommittedTxns, AbortedTxns, SelectEvents, Range\n<1>8. history' \\in Seq(AgentEventSet) BY <1>1, <1>4, <1>5, AgentSeqThm!AppendProperties DEF AgentEventSet\n<1>9. AgentHasBegin(history') BY <1>1, <1>2, <1>4, <1>5, <1>7, AgentHasBeginPreserved DEF AgentEventSet\n<1>10. AgentHistOK' BY <1>8, <1>9 DEF AgentHistOK\n<1>11. txn \\notin CommittedTxns(history) BY <1>6, AgentTLAPS!SMTT(\"r10\") DEF ActiveTxns, ActiveOrFinalizedTxns, FinalizedTxns, CommittedTxns, AbortedTxns, SelectEvents, Range\n<1>12. CahillMVSG(history') = CahillMVSG(history) BY <1>1, <1>4, <1>5, <1>11, AgentGeneralMVSG DEF AgentEventSet\n<1>13. CahillSerializable(history') BY <1>3, <1>12 DEF CahillSerializable\n<1>14. QED BY <1>10, <1>13 DEF AgentInv, AgentHistOK\nLEMMA AgentReadAbortPresInv == ASSUME NEW txn \\in TxnId, NEW key \\in Key, AgentInv, Read(txn, key), (\\E xNew \\in VersionIDsOfKeyNewerThanReadByTxn(txn, key) : xNew \\in CommittedTxns(history) /\\ outConflict[xNew]) PROVE AgentInv'\n<1>1. history \\in Seq(AgentEventSet) BY DEF AgentInv, AgentHistOK\n<1>2. AgentHasBegin(history) BY DEF AgentInv, AgentHistOK\n<1>3. CahillSerializable(history) BY DEF AgentInv\n<1>4. [op |-> \"abort\", txnid |-> txn, reason |-> \"in attempted read, to preserve serializability\"] \\in AgentEventSet BY AgentTLAPS!SMTT(\"r5\") DEF AgentEventSet\n<1>5. history' = Append(history, [op |-> \"abort\", txnid |-> txn, reason |-> \"in attempted read, to preserve serializability\"]) BY DEF Read, internalAbort, VersionThatWouldBeReadBy, VersionIDsOfKeyNewerThanReadByTxn\n<1>6. txn \\in ActiveTxns(history) BY DEF Read, StartedAndCanDoPublicOperation\n<1>7. txn \\in ActiveOrFinalizedTxns(history) BY <1>6, AgentTLAPS!SMTT(\"r10\") DEF ActiveTxns, ActiveOrFinalizedTxns, FinalizedTxns, CommittedTxns, AbortedTxns, SelectEvents, Range\n<1>8. history' \\in Seq(AgentEventSet) BY <1>1, <1>4, <1>5, AgentSeqThm!AppendProperties DEF AgentEventSet\n<1>9. AgentHasBegin(history') BY <1>1, <1>2, <1>4, <1>5, <1>7, AgentHasBeginPreserved DEF AgentEventSet\n<1>10. AgentHistOK' BY <1>8, <1>9 DEF AgentHistOK\n<1>11. txn \\notin CommittedTxns(history) BY <1>6, AgentTLAPS!SMTT(\"r10\") DEF ActiveTxns, ActiveOrFinalizedTxns, FinalizedTxns, CommittedTxns, AbortedTxns, SelectEvents, Range\n<1>12. CahillMVSG(history') = CahillMVSG(history) BY <1>1, <1>4, <1>5, <1>11, AgentGeneralMVSG DEF AgentEventSet\n<1>13. CahillSerializable(history') BY <1>3, <1>12 DEF CahillSerializable\n<1>14. QED BY <1>10, <1>13 DEF AgentInv, AgentHistOK\nLEMMA AgentReadSuccessPresInv == ASSUME NEW txn \\in TxnId, NEW key \\in Key, AgentInv, Read(txn, key), ~(\\E xNew \\in VersionIDsOfKeyNewerThanReadByTxn(txn, key) : xNew \\in CommittedTxns(history) /\\ outConflict[xNew]) PROVE AgentInv'\n<1>1. history \\in Seq(AgentEventSet) BY DEF AgentInv, AgentHistOK\n<1>2. AgentHasBegin(history) BY DEF AgentInv, AgentHistOK\n<1>3. CahillSerializable(history) BY DEF AgentInv\n<1>4. txn \\in ActiveTxns(history) BY DEF Read, StartedAndCanDoPublicOperation\n<1>5. VersionThatWouldBeReadBy(txn, key) \\subseteq TxnId BY <1>1, <1>2, <1>4, AgentReadVerSubset DEF AgentHistOK\n<1>6. VersionThatWouldBeReadBy(txn, key) # {} BY DEF Read\n<1>7. (CHOOSE ver \\in VersionThatWouldBeReadBy(txn, key) : TRUE) \\in TxnId BY <1>5, <1>6, AgentTLAPS!SMTT(\"r10\") DEF AgentEventSet\n<1>8. [op |-> \"read\", txnid |-> txn, key |-> key, ver |-> (CHOOSE ver \\in VersionThatWouldBeReadBy(txn, key) : TRUE)] \\in AgentEventSet BY <1>7, AgentTLAPS!SMTT(\"r10\") DEF AgentEventSet\n<1>9. history' = Append(history, [op |-> \"read\", txnid |-> txn, key |-> key, ver |-> (CHOOSE ver \\in VersionThatWouldBeReadBy(txn, key) : TRUE)]) BY DEF Read, internalAbort, VersionThatWouldBeReadBy, VersionIDsOfKeyNewerThanReadByTxn\n<1>10. txn \\in ActiveOrFinalizedTxns(history) BY <1>4, AgentTLAPS!SMTT(\"r10\") DEF ActiveTxns, ActiveOrFinalizedTxns, FinalizedTxns, CommittedTxns, AbortedTxns, SelectEvents, Range\n<1>11. history' \\in Seq(AgentEventSet) BY <1>1, <1>8, <1>9, AgentSeqThm!AppendProperties DEF AgentEventSet\n<1>12. AgentHasBegin(history') BY <1>1, <1>2, <1>8, <1>9, <1>10, AgentHasBeginPreserved DEF AgentEventSet\n<1>13. AgentHistOK' BY <1>11, <1>12 DEF AgentHistOK\n<1>14. txn \\notin CommittedTxns(history) BY <1>4, AgentTLAPS!SMTT(\"r10\") DEF ActiveTxns, ActiveOrFinalizedTxns, FinalizedTxns, CommittedTxns, AbortedTxns, SelectEvents, Range\n<1>15. CahillMVSG(history') = CahillMVSG(history) BY <1>1, <1>8, <1>9, <1>14, AgentGeneralMVSG DEF AgentEventSet\n<1>16. CahillSerializable(history') BY <1>3, <1>15 DEF CahillSerializable\n<1>17. QED BY <1>13, <1>16 DEF AgentInv, AgentHistOK\nLEMMA AgentCommitAbortPresInv == ASSUME NEW txn \\in TxnId, AgentInv, Commit(txn), inConflict[txn] /\\ outConflict[txn] PROVE AgentInv'\n<1>1. history \\in Seq(AgentEventSet) BY DEF AgentInv, AgentHistOK\n<1>2. AgentHasBegin(history) BY DEF AgentInv, AgentHistOK\n<1>3. CahillSerializable(history) BY DEF AgentInv\n<1>4. [op |-> \"abort\", txnid |-> txn, reason |-> \"in attempted commit, to preserve serializability\"] \\in AgentEventSet BY AgentTLAPS!SMTT(\"r5\") DEF AgentEventSet\n<1>5. history' = Append(history, [op |-> \"abort\", txnid |-> txn, reason |-> \"in attempted commit, to preserve serializability\"]) BY DEF Commit, internalAbort\n<1>6. txn \\in ActiveTxns(history) BY DEF Commit, StartedAndCanDoPublicOperation\n<1>7. txn \\in ActiveOrFinalizedTxns(history) BY <1>6, AgentTLAPS!SMTT(\"r10\") DEF ActiveTxns, ActiveOrFinalizedTxns, FinalizedTxns, CommittedTxns, AbortedTxns, SelectEvents, Range\n<1>8. history' \\in Seq(AgentEventSet) BY <1>1, <1>4, <1>5, AgentSeqThm!AppendProperties DEF AgentEventSet\n<1>9. AgentHasBegin(history') BY <1>1, <1>2, <1>4, <1>5, <1>7, AgentHasBeginPreserved DEF AgentEventSet\n<1>10. AgentHistOK' BY <1>8, <1>9 DEF AgentHistOK\n<1>11. txn \\notin CommittedTxns(history) BY <1>6, AgentTLAPS!SMTT(\"r10\") DEF ActiveTxns, ActiveOrFinalizedTxns, FinalizedTxns, CommittedTxns, AbortedTxns, SelectEvents, Range\n<1>12. CahillMVSG(history') = CahillMVSG(history) BY <1>1, <1>4, <1>5, <1>11, AgentGeneralMVSG DEF AgentEventSet\n<1>13. CahillSerializable(history') BY <1>3, <1>12 DEF CahillSerializable\n<1>14. QED BY <1>10, <1>13 DEF AgentInv, AgentHistOK\nLEMMA AgentStutterPresInv == ASSUME AgentInv, UNCHANGED allvars PROVE AgentInv'\nBY DEF AgentInv, AgentHistOK, AgentHasBegin, CahillSerializable, allvars\nLEMMA AgentWriteFCWPresInv == ASSUME NEW txn \\in TxnId, NEW key \\in Key, AgentInv, StartWriteMayBlock(txn, key), WritersCommittedToKeySinceTxnBegan(txn, key) # {} PROVE AgentInv'\n<1>1. history \\in Seq(AgentEventSet) BY DEF AgentInv, AgentHistOK\n<1>2. AgentHasBegin(history) BY DEF AgentInv, AgentHistOK\n<1>3. CahillSerializable(history) BY DEF AgentInv\n<1>4. [op |-> \"abort\", txnid |-> txn, reason |-> \"forced by First Committer Wins\"] \\in AgentEventSet BY AgentTLAPS!SMTT(\"r5\") DEF AgentEventSet\n<1>5. history' = Append(history, [op |-> \"abort\", txnid |-> txn, reason |-> \"forced by First Committer Wins\"]) BY DEF StartWriteMayBlock\n<1>6. txn \\in ActiveTxns(history) BY DEF StartWriteMayBlock, StartedAndCanDoPublicOperation\n<1>7. txn \\in ActiveOrFinalizedTxns(history) BY <1>6, AgentTLAPS!SMTT(\"r10\") DEF ActiveTxns, ActiveOrFinalizedTxns, FinalizedTxns, CommittedTxns, AbortedTxns, SelectEvents, Range\n<1>8. history' \\in Seq(AgentEventSet) BY <1>1, <1>4, <1>5, AgentSeqThm!AppendProperties DEF AgentEventSet\n<1>9. AgentHasBegin(history') BY <1>1, <1>2, <1>4, <1>5, <1>7, AgentHasBeginPreserved DEF AgentEventSet\n<1>10. AgentHistOK' BY <1>8, <1>9 DEF AgentHistOK\n<1>11. txn \\notin CommittedTxns(history) BY <1>6, AgentTLAPS!SMTT(\"r10\") DEF ActiveTxns, ActiveOrFinalizedTxns, FinalizedTxns, CommittedTxns, AbortedTxns, SelectEvents, Range\n<1>12. CahillMVSG(history') = CahillMVSG(history) BY <1>1, <1>4, <1>5, <1>11, AgentGeneralMVSG DEF AgentEventSet\n<1>13. CahillSerializable(history') BY <1>3, <1>12 DEF CahillSerializable\n<1>14. QED BY <1>10, <1>13 DEF AgentInv, AgentHistOK\n\\* END AGENT HELPERS\n\nTHEOREM CahillSerializableCorrect == Spec => []CahillSerializable(history)\n\\* BEGIN AGENT PROOF CahillSSI/CahillSerializability_CahillSerializableCorrect.tla\n<1>1. Init => AgentInv BY AgentInitHistOK, AgentInitSerial DEF AgentInv\n<1>2. AgentInv /\\ [Next]_allvars => AgentInv' BY AgentBeginPresInv, AgentChooseAbortPresInv, AgentReadAbortPresInv, AgentReadSuccessPresInv, AgentCommitAbortPresInv, AgentStutterPresInv, AgentWriteFCWPresInv DEF AgentInv, AgentHistOK, Next, allvars, Begin, Commit, ChooseToAbort, Read, StartWriteMayBlock, FinishBlockedWrite, LegitimateTermination, internalAbort, VersionThatWouldBeReadBy, VersionIDsOfKeyNewerThanReadByTxn\n<1>3. QED BY <1>1, <1>2, AgentTLAPS!PTL DEF Spec, Init, Next, allvars, AgentInv, CahillSerializable\n\\* END AGENT PROOF CahillSSI/CahillSerializability_CahillSerializableCorrect.tla\n====\n",
+  "units": {
+    "CahillSSI/CahillSerializability_CahillSerializableCorrect.tla": {
+      "id": "CahillSSI/CahillSerializability_CahillSerializableCorrect.tla",
+      "name": "CahillSerializableCorrect",
+      "kind": "target",
+      "lineStart": 167,
+      "lineEnd": 171,
+      "proofLines": [
+        169,
+        170,
+        171
+      ],
+      "proofRange": [
+        169,
+        171
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgentBeginPresInv",
+        "helper:AgentChooseAbortPresInv",
+        "helper:AgentCommitAbortPresInv",
+        "helper:AgentInitHistOK",
+        "helper:AgentInitSerial",
+        "helper:AgentReadAbortPresInv",
+        "helper:AgentReadSuccessPresInv",
+        "helper:AgentStutterPresInv",
+        "helper:AgentWriteFCWPresInv"
+      ]
+    },
+    "helper:AgentSelectAppend": {
+      "id": "helper:AgentSelectAppend",
+      "name": "AgentSelectAppend",
+      "kind": "helper",
+      "lineStart": 13,
+      "lineEnd": 15,
+      "proofLines": [
+        15
+      ],
+      "proofRange": [
+        15,
+        15
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgentGeneralCT": {
+      "id": "helper:AgentGeneralCT",
+      "name": "AgentGeneralCT",
+      "kind": "helper",
+      "lineStart": 16,
+      "lineEnd": 18,
+      "proofLines": [
+        18
+      ],
+      "proofRange": [
+        18,
+        18
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgentGeneralCH": {
+      "id": "helper:AgentGeneralCH",
+      "name": "AgentGeneralCH",
+      "kind": "helper",
+      "lineStart": 19,
+      "lineEnd": 26,
+      "proofLines": [
+        21,
+        22,
+        23,
+        24,
+        25,
+        26
+      ],
+      "proofRange": [
+        21,
+        26
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgentGeneralCT",
+        "helper:AgentSelectAppend"
+      ]
+    },
+    "helper:AgentGeneralKeys": {
+      "id": "helper:AgentGeneralKeys",
+      "name": "AgentGeneralKeys",
+      "kind": "helper",
+      "lineStart": 27,
+      "lineEnd": 29,
+      "proofLines": [
+        29
+      ],
+      "proofRange": [
+        29,
+        29
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgentGeneralMVSG": {
+      "id": "helper:AgentGeneralMVSG",
+      "name": "AgentGeneralMVSG",
+      "kind": "helper",
+      "lineStart": 30,
+      "lineEnd": 39,
+      "proofLines": [
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39
+      ],
+      "proofRange": [
+        32,
+        39
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgentGeneralCH",
+        "helper:AgentGeneralCT",
+        "helper:AgentGeneralKeys"
+      ]
+    },
+    "helper:AgentCommittedSubset": {
+      "id": "helper:AgentCommittedSubset",
+      "name": "AgentCommittedSubset",
+      "kind": "helper",
+      "lineStart": 40,
+      "lineEnd": 41,
+      "proofLines": [
+        41
+      ],
+      "proofRange": [
+        41,
+        41
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgentStartTimeValid": {
+      "id": "helper:AgentStartTimeValid",
+      "name": "AgentStartTimeValid",
+      "kind": "helper",
+      "lineStart": 42,
+      "lineEnd": 45,
+      "proofLines": [
+        45
+      ],
+      "proofRange": [
+        45,
+        45
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgentSubSeqHist": {
+      "id": "helper:AgentSubSeqHist",
+      "name": "AgentSubSeqHist",
+      "kind": "helper",
+      "lineStart": 46,
+      "lineEnd": 50,
+      "proofLines": [
+        48,
+        49,
+        50
+      ],
+      "proofRange": [
+        48,
+        50
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgentStartTimeValid"
+      ]
+    },
+    "helper:AgentSelectSeqType": {
+      "id": "helper:AgentSelectSeqType",
+      "name": "AgentSelectSeqType",
+      "kind": "helper",
+      "lineStart": 51,
+      "lineEnd": 52,
+      "proofLines": [
+        52
+      ],
+      "proofRange": [
+        52,
+        52
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgentLatestSubset": {
+      "id": "helper:AgentLatestSubset",
+      "name": "AgentLatestSubset",
+      "kind": "helper",
+      "lineStart": 53,
+      "lineEnd": 58,
+      "proofLines": [
+        55,
+        56,
+        57,
+        58
+      ],
+      "proofRange": [
+        55,
+        58
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgentCommittedSubset",
+        "helper:AgentSelectSeqType",
+        "helper:AgentSubSeqHist"
+      ]
+    },
+    "helper:AgentReadVerSubset": {
+      "id": "helper:AgentReadVerSubset",
+      "name": "AgentReadVerSubset",
+      "kind": "helper",
+      "lineStart": 59,
+      "lineEnd": 63,
+      "proofLines": [
+        61,
+        62,
+        63
+      ],
+      "proofRange": [
+        61,
+        63
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgentLatestSubset"
+      ]
+    },
+    "helper:AgentHasBeginPreserved": {
+      "id": "helper:AgentHasBeginPreserved",
+      "name": "AgentHasBeginPreserved",
+      "kind": "helper",
+      "lineStart": 64,
+      "lineEnd": 66,
+      "proofLines": [
+        66
+      ],
+      "proofRange": [
+        66,
+        66
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgentInitHistOK": {
+      "id": "helper:AgentInitHistOK",
+      "name": "AgentInitHistOK",
+      "kind": "helper",
+      "lineStart": 67,
+      "lineEnd": 68,
+      "proofLines": [
+        68
+      ],
+      "proofRange": [
+        68,
+        68
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgentInitSerial": {
+      "id": "helper:AgentInitSerial",
+      "name": "AgentInitSerial",
+      "kind": "helper",
+      "lineStart": 69,
+      "lineEnd": 70,
+      "proofLines": [
+        70
+      ],
+      "proofRange": [
+        70,
+        70
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgentBeginPresInv": {
+      "id": "helper:AgentBeginPresInv",
+      "name": "AgentBeginPresInv",
+      "kind": "helper",
+      "lineStart": 71,
+      "lineEnd": 84,
+      "proofLines": [
+        72,
+        73,
+        74,
+        75,
+        76,
+        77,
+        78,
+        79,
+        80,
+        81,
+        82,
+        83,
+        84
+      ],
+      "proofRange": [
+        72,
+        84
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgentGeneralMVSG",
+        "helper:AgentHasBeginPreserved"
+      ]
+    },
+    "helper:AgentChooseAbortPresInv": {
+      "id": "helper:AgentChooseAbortPresInv",
+      "name": "AgentChooseAbortPresInv",
+      "kind": "helper",
+      "lineStart": 85,
+      "lineEnd": 99,
+      "proofLines": [
+        86,
+        87,
+        88,
+        89,
+        90,
+        91,
+        92,
+        93,
+        94,
+        95,
+        96,
+        97,
+        98,
+        99
+      ],
+      "proofRange": [
+        86,
+        99
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgentGeneralMVSG",
+        "helper:AgentHasBeginPreserved"
+      ]
+    },
+    "helper:AgentReadAbortPresInv": {
+      "id": "helper:AgentReadAbortPresInv",
+      "name": "AgentReadAbortPresInv",
+      "kind": "helper",
+      "lineStart": 100,
+      "lineEnd": 114,
+      "proofLines": [
+        101,
+        102,
+        103,
+        104,
+        105,
+        106,
+        107,
+        108,
+        109,
+        110,
+        111,
+        112,
+        113,
+        114
+      ],
+      "proofRange": [
+        101,
+        114
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgentGeneralMVSG",
+        "helper:AgentHasBeginPreserved"
+      ]
+    },
+    "helper:AgentReadSuccessPresInv": {
+      "id": "helper:AgentReadSuccessPresInv",
+      "name": "AgentReadSuccessPresInv",
+      "kind": "helper",
+      "lineStart": 115,
+      "lineEnd": 132,
+      "proofLines": [
+        116,
+        117,
+        118,
+        119,
+        120,
+        121,
+        122,
+        123,
+        124,
+        125,
+        126,
+        127,
+        128,
+        129,
+        130,
+        131,
+        132
+      ],
+      "proofRange": [
+        116,
+        132
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgentGeneralMVSG",
+        "helper:AgentHasBeginPreserved",
+        "helper:AgentReadVerSubset"
+      ]
+    },
+    "helper:AgentCommitAbortPresInv": {
+      "id": "helper:AgentCommitAbortPresInv",
+      "name": "AgentCommitAbortPresInv",
+      "kind": "helper",
+      "lineStart": 133,
+      "lineEnd": 147,
+      "proofLines": [
+        134,
+        135,
+        136,
+        137,
+        138,
+        139,
+        140,
+        141,
+        142,
+        143,
+        144,
+        145,
+        146,
+        147
+      ],
+      "proofRange": [
+        134,
+        147
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgentGeneralMVSG",
+        "helper:AgentHasBeginPreserved"
+      ]
+    },
+    "helper:AgentStutterPresInv": {
+      "id": "helper:AgentStutterPresInv",
+      "name": "AgentStutterPresInv",
+      "kind": "helper",
+      "lineStart": 148,
+      "lineEnd": 149,
+      "proofLines": [
+        149
+      ],
+      "proofRange": [
+        149,
+        149
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgentWriteFCWPresInv": {
+      "id": "helper:AgentWriteFCWPresInv",
+      "name": "AgentWriteFCWPresInv",
+      "kind": "helper",
+      "lineStart": 150,
+      "lineEnd": 164,
+      "proofLines": [
+        151,
+        152,
+        153,
+        154,
+        155,
+        156,
+        157,
+        158,
+        159,
+        160,
+        161,
+        162,
+        163,
+        164
+      ],
+      "proofRange": [
+        151,
+        164
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgentGeneralMVSG",
+        "helper:AgentHasBeginPreserved"
+      ]
+    }
+  }
+}
