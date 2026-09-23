@@ -60,11 +60,9 @@ function PassScore({ passed, total, overall = false }) {
   </div>;
 }
 
-function ExpandButton({ open, label, controls, onClick }) {
-  return <button type="button" className="detail-toggle" aria-expanded={open} aria-controls={controls}
-    aria-label={`${open ? "Hide" : "Show"} ${label}`} onClick={onClick}>
-    <span aria-hidden="true">{open ? "−" : "+"}</span>
-  </button>;
+function NameToggle({ open, label, controls, onClick, children }) {
+  return <button type="button" className="row-name-toggle" aria-expanded={open} aria-controls={controls}
+    aria-label={label} onClick={onClick}>{children}</button>;
 }
 
 function SortHeader({ column, sort, setSort, numeric = false }) {
@@ -147,21 +145,19 @@ function ModelDetails({ model }) {
       <caption className="sr-only">{model.name} task-family metrics</caption>
       <thead><tr>
         {columns.map((column, i) => <SortHeader key={column.key} column={column} sort={sort} setSort={setSort} numeric={i > 1} />)}
-        <th scope="col"><span className="sr-only">Expand invariants</span></th>
       </tr></thead>
       <tbody>{groups.map((group) => {
         const open = expanded.has(group.id);
         const panelId = `invariants-${model.id}-${group.id}`;
         return <React.Fragment key={group.id}>
           <tr data-family={group.id} className={"spec-row" + (open ? " is-open" : "")} onClick={(e) => rowClick(e, () => toggle(group.id))}>
-            <th scope="row" className="spec-name" data-label="Task family">{group.name}</th>
+            <th scope="row" className="spec-name" data-label="Task family"><NameToggle open={open} label={group.name} controls={panelId} onClick={() => toggle(group.id)}>{group.name}</NameToggle></th>
             <td className="group-level" data-label="Level">{group.level}</td>
             <td className="numeric scope-cell" data-label="Specs / inv">{group.metrics.specsInv}</td>
             <td className="numeric spec-score" data-label={model.name}><PassScore passed={group.passed} total={group.total} /></td>
             <MetricCells metrics={group.metrics} />
-            <td className="toggle-cell"><ExpandButton open={open} label={`${model.name} ${group.name} invariants`} controls={panelId} onClick={() => toggle(group.id)} /></td>
           </tr>
-          <tr id={panelId} className="inv-expand-row" hidden={!open}><td colSpan={11}>{open && <Invariants model={model} group={group} />}</td></tr>
+          <tr id={panelId} className="inv-expand-row" hidden={!open}><td colSpan={10}>{open && <Invariants model={model} group={group} />}</td></tr>
         </React.Fragment>;
       })}</tbody>
       <tfoot><tr className="group-total">
@@ -170,7 +166,6 @@ function ModelDetails({ model }) {
         <td className="numeric scope-cell" data-label="Specs / inv">{model.documentMetrics.total.specsInv}</td>
         <td className="numeric spec-score" data-label={model.name}><PassScore passed={model.passed} total={model.total} /></td>
         <MetricCells metrics={model.documentMetrics.total} />
-        <td className="toggle-cell" />
       </tr></tfoot>
     </table>
   </div>;
@@ -194,22 +189,20 @@ export function ResultsTable({ models }) {
         <caption className="sr-only">Proof-from-scratch leaderboard</caption>
         <thead><tr><th scope="col" className="rank-cell">#</th>
           {MODEL_COLUMNS.map((column, i) => <SortHeader key={column.key} column={column} sort={sort} setSort={setSort} numeric={i > 0} />)}
-          <th scope="col"><span className="sr-only">Run details</span></th>
         </tr></thead>
         <tbody>{rows.map((model) => {
           const open = expanded.has(model.id);
           return <React.Fragment key={model.id}>
             <tr className={"model-row" + (open ? " is-open" : "")} onClick={(e) => rowClick(e, () => toggle(model.id))}>
               <td className="rank-cell">{String(ranks[model.id]).padStart(2, "0")}</td>
-              <th scope="row" className="model-cell"><img src={model.logo} alt="" className="model-logo" />
+              <th scope="row" className="model-cell"><NameToggle open={open} label={model.name} controls={`details-${model.id}`} onClick={() => toggle(model.id)}><img src={model.logo} alt="" className="model-logo" />
                 <span><strong>{model.name}</strong><small>{model.harness} · {model.effort}</small></span>
-              </th>
+              </NameToggle></th>
               <td className="numeric scope-cell" data-label="Specs / inv">{model.metrics.specsInv}</td>
               <td className="rate-cell" data-label="Score"><PassScore passed={model.passed} total={model.total} overall /></td>
               <MetricCells metrics={model.metrics} />
-              <td className="toggle-cell"><ExpandButton open={open} label={`${model.name} run details`} controls={`details-${model.id}`} onClick={() => toggle(model.id)} /></td>
             </tr>
-            <tr id={`details-${model.id}`} className="detail-row" hidden={!open}><td colSpan={11}>{open && <ModelDetails model={model} />}</td></tr>
+            <tr id={`details-${model.id}`} className="detail-row" hidden={!open}><td colSpan={10}>{open && <ModelDetails model={model} />}</td></tr>
           </React.Fragment>;
         })}</tbody>
       </table>
