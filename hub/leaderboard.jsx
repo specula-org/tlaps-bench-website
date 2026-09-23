@@ -71,14 +71,32 @@ function TaskFamilyName({ name }) {
   return <span>{name.slice(0, parenthesis)}<span className="family-qualifier">{name.slice(parenthesis + 1)}</span></span>;
 }
 
+const HEADER_LINES = {
+  totalHours: ["Total", "hours"],
+  minutesPerInv: ["Minutes", "/ inv"],
+  turnsPerInv: ["Turns", "/ inv"],
+  tokensInOutPerInvM: ["Tokens in / out", "per inv (M)"],
+  costPerInvUsd: ["Cost / inv", "(USD)"],
+  costUsd: ["Cost", "(USD)"],
+};
+
 function SortHeader({ column, sort, setSort, numeric = false }) {
   const active = sort.key === column.key;
+  const [label, unit] = HEADER_LINES[column.key] || [column.label];
   return <th scope="col" className={numeric ? "numeric" : ""}
     aria-sort={active ? (sort.dir === "asc" ? "ascending" : "descending") : undefined}>
     <button type="button" className="sort-button" onClick={() => setSort((s) => nextBreakdownSort(s, column.key))}>
-      {column.label}<span className={active ? "sort-arrow active" : "sort-arrow"} aria-hidden="true">{active && sort.dir === "asc" ? "↑" : "↓"}</span>
+      <span className="column-label">{label}{unit && <> <span className="column-unit">{unit}</span></>}</span>
+      <span className={active ? "sort-arrow active" : "sort-arrow"} aria-hidden="true">{active && sort.dir === "asc" ? "↑" : "↓"}</span>
     </button>
   </th>;
+}
+
+function TableColumns({ kind }) {
+  const widths = kind === "models"
+    ? [36, 240, 82, 100, 92, 94, 92, 152, 112, 104]
+    : [260, 92, 82, 100, 92, 94, 92, 152, 112, 104];
+  return <colgroup>{widths.map((width, index) => <col key={index} style={{ width }} />)}</colgroup>;
 }
 
 function SortSelect({ label, columns, sort, setSort }) {
@@ -149,6 +167,7 @@ function ModelDetails({ model }) {
     <SortSelect label={`Sort ${model.name} task families`} columns={columns} sort={sort} setSort={setSort} />
     <table className="spec-table document-table">
       <caption className="sr-only">{model.name} task-family metrics</caption>
+      <TableColumns kind="families" />
       <thead><tr>
         {columns.map((column, i) => <SortHeader key={column.key} column={column} sort={sort} setSort={setSort} numeric={i > 1} />)}
       </tr></thead>
@@ -193,6 +212,7 @@ export function ResultsTable({ models }) {
     <div className="leaderboard-table-wrap">
       <table className="leaderboard-table document-table">
         <caption className="sr-only">Proof-from-scratch leaderboard</caption>
+        <TableColumns kind="models" />
         <thead><tr><th scope="col" className="rank-cell">#</th>
           {MODEL_COLUMNS.map((column, i) => <SortHeader key={column.key} column={column} sort={sort} setSort={setSort} numeric={i > 0} />)}
         </tr></thead>
@@ -202,7 +222,7 @@ export function ResultsTable({ models }) {
             <tr className={"model-row" + (open ? " is-open" : "")} onClick={(e) => rowClick(e, () => toggle(model.id))}>
               <td className="rank-cell">{String(ranks[model.id]).padStart(2, "0")}</td>
               <th scope="row" className="model-cell"><NameToggle open={open} label={model.name} controls={`details-${model.id}`} onClick={() => toggle(model.id)}><img src={model.logo} alt="" className="model-logo" />
-                <span><strong>{model.name}</strong><small>{model.harness} · {model.effort}</small></span>
+                <span className="model-identity"><strong>{model.name}</strong><small className="model-config">{model.harness} · {model.effort}</small></span>
               </NameToggle></th>
               <td className="numeric scope-cell" data-label="Specs / inv">{model.metrics.specsInv}</td>
               <td className="rate-cell" data-label="Score"><PassScore passed={model.passed} total={model.total} overall /></td>
