@@ -55,7 +55,7 @@ function PassScore({ passed, total, overall = false }) {
   };
   return <div className={overall ? "pass-score overall-score" : "pass-score spec-pass-score"} style={colors}
     role="img" aria-label={`${label}%: ${passed} of ${total} proved`}>
-    <span className="score-badge" aria-hidden="true"><span className="score-dot" /><span className="score-value">{label}<span className="score-unit">%</span></span></span>
+    <span className="score-badge" aria-hidden="true"><span className="score-value">{label}<span className="score-unit">%</span></span></span>
     <span className="score-fraction" aria-hidden="true">{passed} / {total}</span>
   </div>;
 }
