@@ -4,6 +4,7 @@ import { SITE } from "./site-content.mjs";
 
 const inputPath = "results/proof-from-scratch-summary.json";
 const summary = JSON.parse(readFileSync(inputPath, "utf8"));
+const documentMetrics = JSON.parse(readFileSync("results/document-metrics.json", "utf8"));
 const { suite, cohort, source } = summary;
 const fail = (message) => { throw new Error(`${inputPath}: ${message}`); };
 const count = (value, label, min = 0) => {
@@ -30,6 +31,9 @@ const testedFamilies = cohort.familyIds.map((id) => {
   if (!families.has(id)) fail(`unknown cohort family: ${id}`);
   return families.get(id);
 });
+if (!Array.isArray(SITE.taskFamilyOrder) || SITE.taskFamilyOrder.length !== cohort.familyIds.length ||
+    new Set(SITE.taskFamilyOrder).size !== cohort.familyIds.length ||
+    SITE.taskFamilyOrder.some((id) => !families.has(id))) fail("invalid README task-family order");
 if (sum(testedFamilies, "taskCount") !== cohort.taskCount ||
     sum(testedFamilies, "specCount") !== cohort.specCount) fail("cohort totals do not match families");
 if (!Array.isArray(cohort.models) || !cohort.models.length) fail("missing models");
@@ -115,12 +119,59 @@ for (const model of cohort.models) {
     fail(`usage details disagree with the reported rounded metrics: ${model.id}`);
   }
 }
+const metricColumns = ["Total hours", "Minutes / inv", "Turns / inv", "Tokens in / out per inv (M)", "Cost / inv (USD)", "Cost (USD)"];
+const metricKeys = ["totalHours", "minutesPerInv", "turnsPerInv", "tokensInOutPerInvM", "costPerInvUsd", "costUsd"];
+if (documentMetrics.sourceUrl !== source.url + "?tab=t.0" ||
+    documentMetrics.retrievedAt !== source.retrievedAt ||
+    !/^[a-f0-9]{64}$/.test(documentMetrics.textSha256) ||
+    documentMetrics.tables?.length !== cohort.models.length) fail("invalid document metric snapshot");
+const modelDocuments = new Map();
+for (const table of documentMetrics.tables) {
+  const model = cohort.models.find((item) => item.id === table.modelId);
+  if (!model || modelDocuments.has(model.id)) fail("unknown or duplicate document table");
+  const columns = ["Task family", "Level", "Specs / inv", model.name, ...metricColumns];
+  if (JSON.stringify(table.columns) !== JSON.stringify(columns) || table.rows?.length !== cohort.familyIds.length + 1) {
+    fail(`document column/row mismatch: ${model.id}`);
+  }
+  const money = (value) => model.id === "opus-5"
+    ? "$" + Math.round(value).toLocaleString("en-US")
+    : value < 0.01 ? "<$0.01" : "$" + value.toFixed(2);
+  const metrics = {};
+  table.rows.forEach((row, index) => {
+    const result = model.results[index];
+    const family = result && families.get(result.family);
+    const specs = result ? model.specs.filter((spec) => spec.family === result.family) : model.specs;
+    const usage = Object.fromEntries(usageFields.map((field) => [field, sum(specs, field)]));
+    const passed = result ? result.passed : model.passed;
+    const total = result ? result.total : model.total;
+    const rate = 100 * passed / total;
+    const score = `${passed}/${total} (${Number.isInteger(rate) ? rate : rate.toFixed(1)}%)`;
+    const expected = [
+      family?.name ?? "Total / average", family?.level ?? "", `${specs.length} / ${total}`, score,
+      (usage.timeSecs / 3600).toFixed(1), String(Math.ceil(usage.timeSecs / 60 / total)),
+      Math.ceil(usage.turns / total).toLocaleString("en-US"),
+      `${(usage.inputTokens / total / 1e6).toFixed(1)} / ${(usage.outputTokens / total / 1e6).toFixed(3)}`,
+      money(usage.costUsd / total), money(usage.costUsd),
+    ];
+    if (JSON.stringify(row) !== JSON.stringify(expected)) {
+      fail(`document metrics disagree with recorded results: ${model.id}/${family?.id ?? "total"}\nDocument: ${JSON.stringify(row)}\nComputed: ${JSON.stringify(expected)}`);
+    }
+    metrics[family?.id ?? "total"] = {
+      specsInv: row[2],
+      ...Object.fromEntries(metricKeys.map((key, i) => [key, row[i + 4]])),
+    };
+  });
+  modelDocuments.set(model.id, metrics);
+}
 const data = {
   ...SITE,
   ...summary,
   cohort: {
     ...cohort,
-    models: cohort.models.map((model) => ({ ...model, passRate: model.passed / model.total * 100 }))
+    models: cohort.models.map((model) => ({
+      ...model, passRate: model.passed / model.total * 100,
+      documentMetrics: modelDocuments.get(model.id),
+    }))
       .sort((a, b) => b.passRate - a.passRate || a.name.localeCompare(b.name)),
   },
 };

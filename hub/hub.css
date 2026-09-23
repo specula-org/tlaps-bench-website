@@ -294,3 +294,69 @@ table { width: 100%; border-collapse: collapse; }
   .model-row .tokens-cell::before { content: "Tokens / inv: "; font: 9px var(--sans); }
   .model-row .turns-cell { grid-row: 4; padding-top: 0; }
 }
+
+/* Match the complete metric set and units in the experiment tables. */
+.leaderboard-section > .wrap { width: min(100%, 1440px); max-width: 1440px; }
+.leaderboard-table-wrap { position: relative; overflow-x: auto; }
+.leaderboard-table { min-width: 1200px; }
+.document-table { table-layout: fixed; }
+.document-table .sort-button { white-space: normal; line-height: 1.5; }
+.leaderboard-table > thead th { padding: 13px 10px; }
+.leaderboard-table > thead th:first-child { width: 36px; }
+.leaderboard-table > thead th:nth-child(2) { width: 205px; }
+.leaderboard-table > thead th:nth-child(3) { width: 82px; }
+.leaderboard-table > thead th:nth-child(4) { width: 104px; }
+.leaderboard-table > thead th:nth-child(8) { width: 153px; }
+.leaderboard-table > thead th:last-child { width: 40px; }
+.model-row > td, .model-row > th { padding: 22px 10px; }
+.document-table .scope-cell, .document-table .metric-value { font: 500 11px/1.5 var(--mono); white-space: nowrap; }
+.document-table .metric-value { display: block; }
+.document-table .rate-cell { width: auto; }
+.model-detail { padding: 16px; }
+.spec-table > thead th { padding: 12px 8px; }
+.spec-table > thead th:first-child { width: 21%; }
+.spec-table > thead th:nth-child(2) { width: 8%; }
+.spec-table > thead th:nth-child(3) { width: 7%; }
+.spec-table > thead th:nth-child(4) { width: 9%; }
+.spec-table > thead th:nth-child(8) { width: 13%; }
+.spec-table > thead th:last-child { width: 30px; }
+.document-table .spec-row > th { width: auto; font: 500 12px/1.5 var(--sans); }
+.document-table .spec-row > td, .document-table .spec-row > th { padding: 14px 8px; }
+.document-table .group-level { font: 11px/1.5 var(--sans); color: var(--ink-2); }
+.spec-table .score-badge { min-width: 69px; padding: 6px; gap: 5px; }
+.spec-table .score-value { font-size: 15px; }
+.group-total > td, .group-total > th { padding: 14px 8px; border-top: 2px solid var(--line); background: var(--paper-2); }
+.group-total > th { font: 600 12px/1.5 var(--sans); text-align: left; }
+.inv-usage { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 20px; }
+@media (max-width: 600px) {
+  .leaderboard-table { min-width: 0; table-layout: auto; }
+  .model-row { grid-template-columns: 22px 1fr 1fr 28px; gap: 14px 10px; padding: 16px 14px; }
+  .model-row > td, .model-row > th { padding: 0; }
+  .model-row .scope-cell { grid-column: 1 / 3; grid-row: 2; text-align: left; align-self: center; }
+  .model-row .rate-cell { grid-column: 3 / 5; grid-row: 2; text-align: right; margin: 0; }
+  .model-row .rate-cell::before { display: none; }
+  .model-row > .metric-cell { grid-column: span 2; text-align: left; }
+  .model-row .scope-cell::before, .model-row > .metric-cell::before { content: attr(data-label); display: block; margin-bottom: 5px; color: var(--ink-3); font: 9px/1.4 var(--sans); }
+  .document-table .metric-value, .document-table .scope-cell { font-size: 11px; }
+  .model-detail { padding: 12px 8px; }
+  .spec-table { min-width: 0; }
+  .document-table .spec-row, .document-table .group-total { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 13px 8px; padding: 14px 10px; }
+  .document-table .spec-row > td, .document-table .spec-row > th, .document-table .group-total > td, .document-table .group-total > th { border: 0; padding: 0; min-width: 0; text-align: left; background: transparent; }
+  .document-table .spec-row .spec-name, .document-table .group-total .spec-name { grid-column: 1 / 6; grid-row: 1; font-size: 12px; }
+  .document-table .spec-row .toggle-cell, .document-table .group-total .toggle-cell { grid-column: 6; grid-row: 1; text-align: right; }
+  .spec-table .group-level { grid-column: 1 / 4; grid-row: 2; }
+  .spec-table .scope-cell { grid-column: 4 / 7; grid-row: 2; }
+  .spec-table .spec-score { grid-column: 1 / 3; grid-row: 3; }
+  .spec-table .metric-totalHours { grid-column: 3 / 5; grid-row: 3; }
+  .spec-table .metric-minutesPerInv { grid-column: 5 / 7; grid-row: 3; }
+  .spec-table .metric-turnsPerInv { grid-column: 1 / 3; grid-row: 4; }
+  .spec-table .metric-tokensInOutPerInvM { grid-column: 3 / 7; grid-row: 4; }
+  .spec-table .metric-costPerInvUsd { grid-column: 1 / 4; grid-row: 5; }
+  .spec-table .metric-costUsd { grid-column: 4 / 7; grid-row: 5; }
+  .spec-table .metric-cell::before, .spec-table .scope-cell::before, .spec-table .group-level::before { content: attr(data-label); display: block; margin-bottom: 5px; color: var(--ink-3); font: 8px/1.4 var(--sans); }
+  .spec-table .spec-score::before { content: "Score"; }
+  .document-table .group-total { border-top: 2px solid var(--line); background: var(--paper-2); }
+  .group-total .spec-score::before { display: block; color: var(--ink-3); font: 8px var(--sans); margin-bottom: 5px; }
+  .inv-usage { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 15px; }
+  .inv-usage dt { line-height: 1.5; }
+}

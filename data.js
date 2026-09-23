@@ -3,6 +3,19 @@ window.TLAPS_DATA = {
   "title": "TLAPS-Bench",
   "repo": "https://github.com/specula-org/tlaps-bench",
   "introduction": "A benchmark for writing machine-checked TLA+ proofs of complex protocols and system implementations.",
+  "taskFamilyOrder": [
+    "ivy-liveness",
+    "cache-coherence",
+    "zookeeper-protocol",
+    "cahill-ssi",
+    "ivy-tlb",
+    "open-addressing",
+    "btree",
+    "etcd-raft",
+    "zookeeper-implementation",
+    "mongodb-transactions"
+  ],
+  "taskFamilyOrderSource": "https://github.com/specula-org/tlaps-bench/blob/d9b4722dca22fb5b71c3680e77911b61ae805784/README.md#benchmark-problems",
   "source": {
     "url": "https://docs.google.com/document/d/1TpcKAx2Cm5Ft23n6nTTfskS1mbhPcB8DbcTdPtyZjWM/edit",
     "retrievedAt": "2026-09-23",
@@ -944,7 +957,108 @@ window.TLAPS_DATA = {
           "costUsd": 1533.5645421640952
         },
         "costLabel": "API cost",
-        "passRate": 51.388888888888886
+        "passRate": 51.388888888888886,
+        "documentMetrics": {
+          "ivy-liveness": {
+            "specsInv": "5 / 10",
+            "totalHours": "5.7",
+            "minutesPerInv": "35",
+            "turnsPerInv": "67",
+            "tokensInOutPerInvM": "15.6 / 0.140",
+            "costPerInvUsd": "$13",
+            "costUsd": "$131"
+          },
+          "ivy-tlb": {
+            "specsInv": "1 / 2",
+            "totalHours": "1.4",
+            "minutesPerInv": "42",
+            "turnsPerInv": "49",
+            "tokensInOutPerInvM": "7.8 / 0.097",
+            "costPerInvUsd": "$9",
+            "costUsd": "$18"
+          },
+          "open-addressing": {
+            "specsInv": "1 / 5",
+            "totalHours": "7.1",
+            "minutesPerInv": "86",
+            "turnsPerInv": "99",
+            "tokensInOutPerInvM": "28.1 / 0.204",
+            "costPerInvUsd": "$27",
+            "costUsd": "$137"
+          },
+          "etcd-raft": {
+            "specsInv": "1 / 8",
+            "totalHours": "13.4",
+            "minutesPerInv": "101",
+            "turnsPerInv": "45",
+            "tokensInOutPerInvM": "23.6 / 0.083",
+            "costPerInvUsd": "$45",
+            "costUsd": "$360"
+          },
+          "zookeeper-protocol": {
+            "specsInv": "1 / 9",
+            "totalHours": "3.7",
+            "minutesPerInv": "25",
+            "turnsPerInv": "29",
+            "tokensInOutPerInvM": "9.8 / 0.049",
+            "costPerInvUsd": "$10",
+            "costUsd": "$91"
+          },
+          "zookeeper-implementation": {
+            "specsInv": "1 / 9",
+            "totalHours": "5.8",
+            "minutesPerInv": "39",
+            "turnsPerInv": "34",
+            "tokensInOutPerInvM": "16.2 / 0.064",
+            "costPerInvUsd": "$16",
+            "costUsd": "$144"
+          },
+          "cache-coherence": {
+            "specsInv": "3 / 22",
+            "totalHours": "10.8",
+            "minutesPerInv": "30",
+            "turnsPerInv": "20",
+            "tokensInOutPerInvM": "7.9 / 0.031",
+            "costPerInvUsd": "$13",
+            "costUsd": "$276"
+          },
+          "btree": {
+            "specsInv": "1 / 5",
+            "totalHours": "4.3",
+            "minutesPerInv": "52",
+            "turnsPerInv": "55",
+            "tokensInOutPerInvM": "26.8 / 0.128",
+            "costPerInvUsd": "$28",
+            "costUsd": "$141"
+          },
+          "mongodb-transactions": {
+            "specsInv": "1 / 1",
+            "totalHours": "2.7",
+            "minutesPerInv": "162",
+            "turnsPerInv": "196",
+            "tokensInOutPerInvM": "39.0 / 0.502",
+            "costPerInvUsd": "$38",
+            "costUsd": "$38"
+          },
+          "cahill-ssi": {
+            "specsInv": "1 / 1",
+            "totalHours": "9.8",
+            "minutesPerInv": "590",
+            "turnsPerInv": "312",
+            "tokensInOutPerInvM": "85.7 / 0.901",
+            "costPerInvUsd": "$198",
+            "costUsd": "$198"
+          },
+          "total": {
+            "specsInv": "16 / 72",
+            "totalHours": "64.6",
+            "minutesPerInv": "54",
+            "turnsPerInv": "48",
+            "tokensInOutPerInvM": "16.2 / 0.097",
+            "costPerInvUsd": "$21",
+            "costUsd": "$1,534"
+          }
+        }
       },
       {
         "id": "muse-spark-1-3",
@@ -1781,7 +1895,108 @@ window.TLAPS_DATA = {
           "costUsd": 6.5129860100000005
         },
         "costLabel": "Contributor equivalent",
-        "passRate": 16.666666666666664
+        "passRate": 16.666666666666664,
+        "documentMetrics": {
+          "ivy-liveness": {
+            "specsInv": "5 / 10",
+            "totalHours": "7.3",
+            "minutesPerInv": "45",
+            "turnsPerInv": "119",
+            "tokensInOutPerInvM": "21.2 / 0.132",
+            "costPerInvUsd": "$0.13",
+            "costUsd": "$1.34"
+          },
+          "ivy-tlb": {
+            "specsInv": "1 / 2",
+            "totalHours": "5.0",
+            "minutesPerInv": "152",
+            "turnsPerInv": "124",
+            "tokensInOutPerInvM": "25.8 / 0.212",
+            "costPerInvUsd": "$0.21",
+            "costUsd": "$0.42"
+          },
+          "open-addressing": {
+            "specsInv": "1 / 5",
+            "totalHours": "8.4",
+            "minutesPerInv": "101",
+            "turnsPerInv": "187",
+            "tokensInOutPerInvM": "80.1 / 0.160",
+            "costPerInvUsd": "$0.39",
+            "costUsd": "$1.97"
+          },
+          "etcd-raft": {
+            "specsInv": "1 / 8",
+            "totalHours": "1.1",
+            "minutesPerInv": "9",
+            "turnsPerInv": "26",
+            "tokensInOutPerInvM": "4.3 / 0.018",
+            "costPerInvUsd": "$0.02",
+            "costUsd": "$0.12"
+          },
+          "zookeeper-protocol": {
+            "specsInv": "1 / 9",
+            "totalHours": "1.0",
+            "minutesPerInv": "7",
+            "turnsPerInv": "16",
+            "tokensInOutPerInvM": "2.3 / 0.023",
+            "costPerInvUsd": "$0.02",
+            "costUsd": "$0.14"
+          },
+          "zookeeper-implementation": {
+            "specsInv": "1 / 9",
+            "totalHours": "2.5",
+            "minutesPerInv": "17",
+            "turnsPerInv": "23",
+            "tokensInOutPerInvM": "6.6 / 0.058",
+            "costPerInvUsd": "$0.05",
+            "costUsd": "$0.47"
+          },
+          "cache-coherence": {
+            "specsInv": "3 / 22",
+            "totalHours": "3.6",
+            "minutesPerInv": "10",
+            "turnsPerInv": "25",
+            "tokensInOutPerInvM": "3.7 / 0.019",
+            "costPerInvUsd": "$0.02",
+            "costUsd": "$0.38"
+          },
+          "btree": {
+            "specsInv": "1 / 5",
+            "totalHours": "6.7",
+            "minutesPerInv": "81",
+            "turnsPerInv": "174",
+            "tokensInOutPerInvM": "53.9 / 0.253",
+            "costPerInvUsd": "$0.26",
+            "costUsd": "$1.31"
+          },
+          "mongodb-transactions": {
+            "specsInv": "1 / 1",
+            "totalHours": "1.1",
+            "minutesPerInv": "68",
+            "turnsPerInv": "206",
+            "tokensInOutPerInvM": "34.6 / 0.152",
+            "costPerInvUsd": "$0.19",
+            "costUsd": "$0.19"
+          },
+          "cahill-ssi": {
+            "specsInv": "1 / 1",
+            "totalHours": "0.9",
+            "minutesPerInv": "52",
+            "turnsPerInv": "162",
+            "tokensInOutPerInvM": "29.3 / 0.210",
+            "costPerInvUsd": "$0.16",
+            "costUsd": "$0.16"
+          },
+          "total": {
+            "specsInv": "16 / 72",
+            "totalHours": "37.7",
+            "minutesPerInv": "32",
+            "turnsPerInv": "66",
+            "tokensInOutPerInvM": "16.6 / 0.076",
+            "costPerInvUsd": "$0.09",
+            "costUsd": "$6.51"
+          }
+        }
       }
     ]
   }

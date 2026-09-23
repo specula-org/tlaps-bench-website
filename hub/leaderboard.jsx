@@ -1,4 +1,4 @@
-import { formatDuration, formatTokens, formatCompactTokens, sortedBreakdownRows, nextBreakdownSort } from "./leaderboard-utils.js";
+import { formatTokens, sortedBreakdownRows, nextBreakdownSort } from "./leaderboard-utils.js";
 
 const { useState } = React;
 const FAMILY_INFO = Object.fromEntries(TLAPS_DATA.suite.families.map((family) => [family.id, family]));
@@ -11,8 +11,31 @@ const rowClick = (event, action) => {
   if (!event.target.closest("button, a, input, select")) action();
 };
 const fmt = (value, formatter) => value == null ? "—" : formatter(value);
-const time = (value) => fmt(value, (n) => formatDuration(n, false));
-const tokens = (value) => fmt(value, formatCompactTokens);
+
+const RESOURCE_COLUMNS = [
+  { key: "totalHours", label: "Total hours" },
+  { key: "minutesPerInv", label: "Minutes / inv" },
+  { key: "turnsPerInv", label: "Turns / inv" },
+  { key: "tokensInOutPerInvM", label: "Tokens in / out per inv (M)" },
+  { key: "costPerInvUsd", label: "Cost / inv (USD)" },
+  { key: "costUsd", label: "Cost (USD)" },
+];
+
+function MetricCells({ metrics }) {
+  return RESOURCE_COLUMNS.map((column) => <td key={column.key}
+    className={`numeric metric-cell metric-${column.key}`} data-label={column.label} data-metric={column.key}>
+    <span className="metric-value">{metrics[column.key]}</span>
+  </td>);
+}
+
+function metricValue(row, key) {
+  if (key === "rate") return row.passed / row.total;
+  if (key === "specsInv") return row.total;
+  if (key === "name" || key === "level") return row[key];
+  const text = row.metrics[key];
+  if (key === "tokensInOutPerInvM") return text.split("/").reduce((sum, value) => sum + Number(value.trim()), 0);
+  return Number(text.replace(/[$,<]/g, ""));
+}
 
 function scoreColor(rate, stops) {
   const position = Math.max(0, Math.min(100, rate)) / 50;
@@ -80,9 +103,7 @@ function Invariants({ model, group }) {
   return <div className="inv-panel">
     <div className="inv-heading"><h4>{group.name}</h4><span>{group.total} invariants / properties</span></div>
     <dl className="inv-usage">
-      <div><dt>Avg. time / inv</dt><dd>{time(group.timeSecs / group.total)}</dd></div>
-      <div><dt>Avg. tokens / inv</dt><dd>{tokens((group.inputTokens + group.outputTokens) / group.total)}</dd></div>
-      <div><dt>Avg. turns / inv</dt><dd>{(group.turns / group.total).toFixed(1)}</dd></div>
+      {RESOURCE_COLUMNS.map((column) => <div key={column.key}><dt>{column.label}</dt><dd>{group.metrics[column.key]}</dd></div>)}
     </dl>
     <div className="detail-toolbar inv-toolbar">
       <select aria-label={`Filter ${group.name} results`} value={verdict} onChange={(e) => setVerdict(e.target.value)}>
@@ -104,73 +125,71 @@ function Invariants({ model, group }) {
   </div>;
 }
 
-const GROUP_COLUMNS = [
-  { key: "name", label: "Task family" }, { key: "rate", label: "Score" },
-  { key: "timeSecs", label: "Time" }, { key: "totalTokens", label: "Tokens" }, { key: "turns", label: "Turns" },
-];
-
 function ModelDetails({ model }) {
   const [expanded, setExpanded] = useState(() => new Set());
   const [sort, setSort] = useState({ key: "canonical", dir: "asc" });
-  const groups = sortedBreakdownRows(model.results.map((result) => {
-    const members = model.specs.filter((spec) => spec.family === result.family);
-    const sum = (field) => members.reduce((total, spec) => total + spec[field], 0);
-    return {
-      ...FAMILY_INFO[result.family], ...result, id: result.family,
-      timeSecs: sum("timeSecs"), inputTokens: sum("inputTokens"), outputTokens: sum("outputTokens"),
-      turns: sum("turns"),
-      cacheReadInputTokens: members.every((spec) => spec.cacheReadInputTokens != null) ? sum("cacheReadInputTokens") : null,
-      tasks: members.flatMap((spec) => spec.tasks.map((task) => ({ ...task, specName: spec.name }))),
-    };
-  }), sort, (group, key) => key === "rate" ? group.passed / group.total : key === "totalTokens" ? group.inputTokens + group.outputTokens : group[key]);
+  const columns = [
+    { key: "name", label: "Task family" }, { key: "level", label: "Level" },
+    { key: "specsInv", label: "Specs / inv" }, { key: "rate", label: model.name },
+    ...RESOURCE_COLUMNS,
+  ];
+  const groups = sortedBreakdownRows(TLAPS_DATA.taskFamilyOrder.map((id) => model.results.find((result) => result.family === id)).map((result) => ({
+    ...FAMILY_INFO[result.family], ...result, id: result.family,
+    metrics: model.documentMetrics[result.family],
+    tasks: model.specs.filter((spec) => spec.family === result.family)
+      .flatMap((spec) => spec.tasks.map((task) => ({ ...task, specName: spec.name }))),
+  })), sort, metricValue);
   const toggle = (id) => setExpanded((current) => toggleSet(current, id));
   return <div className="model-detail">
-    <dl className="run-metrics">
-      <div><dt>Total time</dt><dd>{time(model.usage.timeSecs)}</dd></div>
-      <div><dt>Input / output tokens</dt><dd>{tokens(model.usage.inputTokens)} / {tokens(model.usage.outputTokens)}</dd></div>
-      <div><dt>Turns</dt><dd>{formatTokens(model.usage.turns)}</dd></div>
-    </dl>
-    <SortSelect label={`Sort ${model.name} task families`} columns={GROUP_COLUMNS} sort={sort} setSort={setSort} />
-    <table className="spec-table">
-      <caption className="sr-only">{model.name} task families, usage, and invariant results</caption>
+    <SortSelect label={`Sort ${model.name} task families`} columns={columns} sort={sort} setSort={setSort} />
+    <table className="spec-table document-table">
+      <caption className="sr-only">{model.name} task-family metrics</caption>
       <thead><tr>
-        {GROUP_COLUMNS.map((column, i) => <SortHeader key={column.key} column={column} sort={sort} setSort={setSort} numeric={i > 0} />)}
+        {columns.map((column, i) => <SortHeader key={column.key} column={column} sort={sort} setSort={setSort} numeric={i > 1} />)}
         <th scope="col"><span className="sr-only">Expand invariants</span></th>
       </tr></thead>
       <tbody>{groups.map((group) => {
         const open = expanded.has(group.id);
-        const panelId = `invariants-${model.id}-${group.id.replace(/[^a-zA-Z0-9_-]/g, "-")}`;
+        const panelId = `invariants-${model.id}-${group.id}`;
         return <React.Fragment key={group.id}>
           <tr data-family={group.id} className={"spec-row" + (open ? " is-open" : "")} onClick={(e) => rowClick(e, () => toggle(group.id))}>
-            <th scope="row" className="spec-name" data-label="Task family"><strong>{group.name}</strong><small>{group.level}</small></th>
-            <td className="numeric spec-score" data-label="Score"><PassScore passed={group.passed} total={group.total} /></td>
-            <td className="numeric spec-time" data-label="Time"><strong>{time(group.timeSecs)}</strong><small>{time(group.timeSecs / group.total)} / inv</small></td>
-            <td className="numeric spec-tokens" data-label="Tokens"><strong>{tokens(group.inputTokens + group.outputTokens)}</strong><small>{group.cacheReadInputTokens == null ? `${tokens(group.inputTokens)} in` : `${(100 * group.cacheReadInputTokens / group.inputTokens).toFixed(1)}% cached`}</small></td>
-            <td className="numeric spec-turns" data-label="Turns"><strong>{formatTokens(group.turns)}</strong><small>{(group.turns / group.total).toFixed(1)} / inv</small></td>
+            <th scope="row" className="spec-name" data-label="Task family">{group.name}</th>
+            <td className="group-level" data-label="Level">{group.level}</td>
+            <td className="numeric scope-cell" data-label="Specs / inv">{group.metrics.specsInv}</td>
+            <td className="numeric spec-score" data-label={model.name}><PassScore passed={group.passed} total={group.total} /></td>
+            <MetricCells metrics={group.metrics} />
             <td className="toggle-cell"><ExpandButton open={open} label={`${model.name} ${group.name} invariants`} controls={panelId} onClick={() => toggle(group.id)} /></td>
           </tr>
-          <tr id={panelId} className="inv-expand-row" hidden={!open}><td colSpan={6}>{open && <Invariants model={model} group={group} />}</td></tr>
+          <tr id={panelId} className="inv-expand-row" hidden={!open}><td colSpan={11}>{open && <Invariants model={model} group={group} />}</td></tr>
         </React.Fragment>;
       })}</tbody>
+      <tfoot><tr className="group-total">
+        <th scope="row" className="spec-name">Total / average</th>
+        <td className="group-level" />
+        <td className="numeric scope-cell" data-label="Specs / inv">{model.documentMetrics.total.specsInv}</td>
+        <td className="numeric spec-score" data-label={model.name}><PassScore passed={model.passed} total={model.total} /></td>
+        <MetricCells metrics={model.documentMetrics.total} />
+        <td className="toggle-cell" />
+      </tr></tfoot>
     </table>
   </div>;
 }
 
 const MODEL_COLUMNS = [
-  { key: "name", label: "Model" }, { key: "passRate", label: "Score" },
-  { key: "minutesPerTask", label: "Time / inv" }, { key: "tokensPerTask", label: "Tokens / inv" }, { key: "turnsPerTask", label: "Turns / inv" },
+  { key: "name", label: "Model" }, { key: "specsInv", label: "Specs / inv" },
+  { key: "rate", label: "Score" }, ...RESOURCE_COLUMNS,
 ];
 
 export function ResultsTable({ models }) {
   const [expanded, setExpanded] = useState(() => new Set());
-  const [sort, setSort] = useState({ key: "passRate", dir: "desc" });
-  const rows = sortedBreakdownRows(models, sort, (model, key) => key === "tokensPerTask" ? (model.usage.inputTokens + model.usage.outputTokens) / model.total : model[key]);
+  const [sort, setSort] = useState({ key: "rate", dir: "desc" });
+  const rows = sortedBreakdownRows(models.map((model) => ({ ...model, metrics: model.documentMetrics.total })), sort, metricValue);
   const ranks = Object.fromEntries([...models].sort((a, b) => b.passRate - a.passRate).map((m, index) => [m.id, index + 1]));
   const toggle = (id) => setExpanded((current) => toggleSet(current, id));
   return <>
     <SortSelect label="Sort leaderboard" columns={MODEL_COLUMNS} sort={sort} setSort={setSort} />
     <div className="leaderboard-table-wrap">
-      <table className="leaderboard-table">
+      <table className="leaderboard-table document-table">
         <caption className="sr-only">Proof-from-scratch leaderboard</caption>
         <thead><tr><th scope="col" className="rank-cell">#</th>
           {MODEL_COLUMNS.map((column, i) => <SortHeader key={column.key} column={column} sort={sort} setSort={setSort} numeric={i > 0} />)}
@@ -184,13 +203,12 @@ export function ResultsTable({ models }) {
               <th scope="row" className="model-cell"><img src={model.logo} alt="" className="model-logo" />
                 <span><strong>{model.name}</strong><small>{model.harness} · {model.effort}</small></span>
               </th>
-              <td className="rate-cell"><PassScore passed={model.passed} total={model.total} overall /></td>
-              <td className="numeric time-cell">{model.minutesPerTask}<span> min</span></td>
-              <td className="numeric tokens-cell" title="Input + output tokens per invariant">{tokens((model.usage.inputTokens + model.usage.outputTokens) / model.total)}</td>
-              <td className="numeric turns-cell">{model.turnsPerTask}</td>
+              <td className="numeric scope-cell" data-label="Specs / inv">{model.metrics.specsInv}</td>
+              <td className="rate-cell" data-label="Score"><PassScore passed={model.passed} total={model.total} overall /></td>
+              <MetricCells metrics={model.metrics} />
               <td className="toggle-cell"><ExpandButton open={open} label={`${model.name} run details`} controls={`details-${model.id}`} onClick={() => toggle(model.id)} /></td>
             </tr>
-            <tr id={`details-${model.id}`} className="detail-row" hidden={!open}><td colSpan={7}>{open && <ModelDetails model={model} />}</td></tr>
+            <tr id={`details-${model.id}`} className="detail-row" hidden={!open}><td colSpan={11}>{open && <ModelDetails model={model} />}</td></tr>
           </React.Fragment>;
         })}</tbody>
       </table>
