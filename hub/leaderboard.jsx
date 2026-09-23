@@ -65,6 +65,12 @@ function NameToggle({ open, label, controls, onClick, children }) {
     aria-label={label} onClick={onClick}>{children}</button>;
 }
 
+function TaskFamilyName({ name }) {
+  const parenthesis = name.indexOf(" (");
+  if (parenthesis < 0) return name;
+  return <span>{name.slice(0, parenthesis)}<span className="family-qualifier">{name.slice(parenthesis + 1)}</span></span>;
+}
+
 function SortHeader({ column, sort, setSort, numeric = false }) {
   const active = sort.key === column.key;
   return <th scope="col" className={numeric ? "numeric" : ""}
@@ -99,7 +105,7 @@ function Invariants({ model, group }) {
   ), sort, (row, key) => row[key]);
   const verdicts = [...new Set(group.tasks.map((task) => task.verdict))].sort();
   return <div className="inv-panel">
-    <div className="inv-heading"><h4>{group.name}</h4><span>{group.total} invariants / properties</span></div>
+    <div className="inv-heading"><h4><TaskFamilyName name={group.name} /></h4><span>{group.total} invariants / properties</span></div>
     <dl className="inv-usage">
       {RESOURCE_COLUMNS.map((column) => <div key={column.key}><dt>{column.label}</dt><dd>{group.metrics[column.key]}</dd></div>)}
     </dl>
@@ -151,7 +157,7 @@ function ModelDetails({ model }) {
         const panelId = `invariants-${model.id}-${group.id}`;
         return <React.Fragment key={group.id}>
           <tr data-family={group.id} className={"spec-row" + (open ? " is-open" : "")} onClick={(e) => rowClick(e, () => toggle(group.id))}>
-            <th scope="row" className="spec-name" data-label="Task family"><NameToggle open={open} label={group.name} controls={panelId} onClick={() => toggle(group.id)}>{group.name}</NameToggle></th>
+            <th scope="row" className="spec-name" data-label="Task family"><NameToggle open={open} label={group.name} controls={panelId} onClick={() => toggle(group.id)}><TaskFamilyName name={group.name} /></NameToggle></th>
             <td className="group-level" data-label="Level">{group.level}</td>
             <td className="numeric scope-cell" data-label="Specs / inv">{group.metrics.specsInv}</td>
             <td className="numeric spec-score" data-label={model.name}><PassScore passed={group.passed} total={group.total} /></td>

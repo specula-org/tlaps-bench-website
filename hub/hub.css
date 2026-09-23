@@ -354,6 +354,7 @@ table { width: 100%; border-collapse: collapse; }
 
 .row-name-toggle { display: inline-flex; align-items: center; max-width: 100%; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; text-align: inherit; }
 .row-name-toggle:hover { color: var(--accent-text); }
+.family-qualifier { display: block; margin-top: 3px; }
 @media (max-width: 600px) {
   .model-row .model-cell { grid-column: 2 / 5; }
 }
