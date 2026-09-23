@@ -135,6 +135,7 @@ function ModelDetails({ model }) {
   ];
   const groups = sortedBreakdownRows(TLAPS_DATA.taskFamilyOrder.map((id) => model.results.find((result) => result.family === id)).map((result) => ({
     ...FAMILY_INFO[result.family], ...result, id: result.family,
+    name: FAMILY_INFO[result.family].displayName || FAMILY_INFO[result.family].name,
     metrics: model.documentMetrics[result.family],
     tasks: model.specs.filter((spec) => spec.family === result.family)
       .flatMap((spec) => spec.tasks.map((task) => ({ ...task, specName: spec.name }))),

@@ -79,7 +79,8 @@ window.TLAPS_DATA = {
         "name": "Cache coherence (German / FLASH)",
         "level": "Protocol",
         "specCount": 3,
-        "taskCount": 22
+        "taskCount": 22,
+        "displayName": "Cache coherence (German, German Data, FLASH)"
       },
       {
         "id": "btree",
