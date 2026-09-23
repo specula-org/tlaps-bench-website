@@ -12,7 +12,7 @@ const rowClick = (event, action) => {
   if (!event.target.closest("button, a, input, select")) action();
 };
 const fmt = (value, formatter) => value == null ? "—" : formatter(value);
-const checkTime = (value) => value == null ? "—" : `≈${Math.max(1, Math.round(value))}`;
+const checkTime = (value) => value == null ? "—" : String(Math.max(1, Math.round(value)));
 
 function Collapse({ open, children }) {
   const [visited, setVisited] = useState(open);
