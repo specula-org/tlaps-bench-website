@@ -144,7 +144,7 @@
         "Codex + GPT-6 Astra"
       ],
       "outcomeNote": "Model counterexample; 1 of 4 targets proved.",
-      "pendingProofAttribution": "Codex + GPT-6 Astra (proof pending)"
+      "pendingProofAttribution": "Codex + GPT-6 Astra"
     },
     {
       "name": "OSWALD WAL (from s3-wal-collection)",
