@@ -1,4 +1,5 @@
 import "./pages.jsx";
+import { RetiredProblems } from "./retired-problems.jsx";
 
 const { useState, useEffect } = React;
 
@@ -67,7 +68,7 @@ function App() {
   return (
     <div data-screen-label="home">
       <Nav tweaks={tweaks} update={update} />
-      <main><PageHome /><PageLeaderboard /></main>
+      <main><PageHome /><PageLeaderboard /><RetiredProblems /></main>
       <footer className="site-foot">
         <div className="wrap">
           <div style={{display:"flex",alignItems:"center",gap:10}}>

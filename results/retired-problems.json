@@ -1,0 +1,527 @@
+{
+  "source": {
+    "url": "https://docs.google.com/document/d/1y_gVVS0aRDcrD8WVppNyJbA4hUJKVb3HmuafvjUsmsM/edit?tab=t.m4mi8m67wbo1",
+    "retrievedAt": "2026-09-28T09:28:28.834413+00:00",
+    "revisionId": "ANLCKQmxiCJ3GpnHTqhkmZ7VC699Kvd8X2-cndXHC_XOulrHafgjkvbmz2vaxsCmlgiP5HkyOKzEvKRKqtNajGBKllXsBHampFIbTc-uitM--VU"
+  },
+  "title": "Retired Problems (Proofs Available)",
+  "description": "We have retired the following problems from TLAPS-Bench, because they are well proved (or disproved) by frontier AI models and thus are no longer capable of measuring the frontier.",
+  "proofNotice": "If you need the TLA+ proofs of these protocols, contact us and we can share them.",
+  "columns": [
+    "Problems",
+    "Type",
+    "# Spec",
+    "# Invariants",
+    "Proved by"
+  ],
+  "problems": [
+    {
+      "name": "TCP state machine",
+      "type": "Protocol",
+      "specCount": 1,
+      "invariantCount": 3,
+      "provedBy": [
+        "Claude Code + Opus 5.5",
+        "codex + gpt 6 astra"
+      ],
+      "outcome": "proved",
+      "nameParts": [
+        {
+          "text": "TCP state machine",
+          "url": "https://github.com/specula-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/tlaplus_examples_tcp/tcp_proof.tla"
+        }
+      ]
+    },
+    {
+      "name": "Ivy protocols (alternating bit, reliable broadcast, split queue, ticket, nested ticket)",
+      "type": "Protocol",
+      "specCount": 5,
+      "invariantCount": 10,
+      "provedBy": [
+        "Claude Code + Opus 5",
+        "codex + gpt 6 astra"
+      ],
+      "nameParts": [
+        {
+          "text": "Ivy protocols ("
+        },
+        {
+          "text": "alternating bit",
+          "url": "https://github.com/specula-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/ivy_examples_alternating_bit_protocol/ivy_examples_alternating_bit_protocol.tla"
+        },
+        {
+          "text": ", "
+        },
+        {
+          "text": "reliable broadcast",
+          "url": "https://github.com/specula-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/ivy_examples_hybrid_reliable_broadcast_cisa/ivy_examples_hybrid_reliable_broadcast_cisa.tla"
+        },
+        {
+          "text": ", "
+        },
+        {
+          "text": "split queue",
+          "url": "https://github.com/specula-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/ivy_examples_split_queue_2_new/ivy_examples_split_queue_2_new.tla"
+        },
+        {
+          "text": ", "
+        },
+        {
+          "text": "ticket",
+          "url": "https://github.com/specula-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/ivy_examples_ticket/ivy_examples_ticket.tla"
+        },
+        {
+          "text": ", "
+        },
+        {
+          "text": "nested ticket",
+          "url": "https://github.com/specula-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/ivy_examples_ticket_nested/ivy_examples_ticket_nested.tla"
+        },
+        {
+          "text": ")"
+        }
+      ],
+      "outcome": "proved"
+    },
+    {
+      "name": "The German cache coherence protocols",
+      "type": "Protocol",
+      "specCount": 2,
+      "invariantCount": 7,
+      "provedBy": [
+        "Claude Code + Opus 5",
+        "OpenCode + Muse Spark 1.3",
+        "codex + gpt 6 astra"
+      ],
+      "outcome": "proved",
+      "nameParts": [
+        {
+          "text": "The German cache coherence protocols",
+          "url": "https://github.com/specula-org/TLAPS-Bench/tree/main/benchmark/proof-from-scratch-module/tlaplus_examples_GermanProtocol"
+        }
+      ]
+    },
+    {
+      "name": "Replicated counter convergence (CRDT)",
+      "type": "Protocol",
+      "specCount": 1,
+      "invariantCount": 3,
+      "provedBy": [
+        "codex + gpt 6 astra"
+      ],
+      "outcome": "proved",
+      "nameParts": [
+        {
+          "text": "Replicated counter convergence (CRDT)",
+          "url": "https://github.com/specula-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/tlaplus_examples_FiniteMonotonic/CRDT_proof.tla"
+        }
+      ]
+    },
+    {
+      "name": "SlateDB WAL (from s3-wal-collection)",
+      "type": "Protocol",
+      "specCount": 1,
+      "invariantCount": 4,
+      "provedBy": [],
+      "nameParts": [
+        {
+          "text": "SlateDB WAL",
+          "url": "https://github.com/specula-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/SlateDBWAL/SlateDBWALProof.tla"
+        },
+        {
+          "text": " ("
+        },
+        {
+          "text": "s3-wal-collection",
+          "url": "https://github.com/Vanlightly/s3-wal-collection"
+        },
+        {
+          "text": ")"
+        }
+      ],
+      "outcome": "disproved",
+      "disprovedBy": [
+        "codex + gpt 6 astra"
+      ],
+      "outcomeNote": "Model counterexample; 1 of 4 targets proved."
+    },
+    {
+      "name": "OSWALD WAL (from s3-wal-collection)",
+      "type": "Protocol",
+      "specCount": 1,
+      "invariantCount": 3,
+      "provedBy": [
+        "codex + gpt 6 astra"
+      ],
+      "nameParts": [
+        {
+          "text": "OSWALD WAL",
+          "url": "https://github.com/specula-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/OSWALD/OswaldProof.tla"
+        },
+        {
+          "text": " ("
+        },
+        {
+          "text": "s3-wal-collection",
+          "url": "https://github.com/Vanlightly/s3-wal-collection"
+        },
+        {
+          "text": ")"
+        }
+      ],
+      "outcome": "proved"
+    },
+    {
+      "name": "Byzantine Paxos (Consensus, VoteProof, PConProof, BPConProof)",
+      "type": "Protocol",
+      "specCount": 4,
+      "invariantCount": 11,
+      "provedBy": [
+        "Claude Code + Opus 5.5",
+        "codex + gpt 6 astra"
+      ],
+      "outcome": "proved",
+      "nameParts": [
+        {
+          "text": "Byzantine Paxos ("
+        },
+        {
+          "text": "Consensus",
+          "url": "https://github.com/specula-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/tlaplus_examples_byzpaxos/Consensus.tla"
+        },
+        {
+          "text": ", "
+        },
+        {
+          "text": "VoteProof",
+          "url": "https://github.com/specula-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/tlaplus_examples_byzpaxos/VoteProof.tla"
+        },
+        {
+          "text": ", "
+        },
+        {
+          "text": "PConProof",
+          "url": "https://github.com/specula-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/tlaplus_examples_byzpaxos/PConProof.tla"
+        },
+        {
+          "text": ", "
+        },
+        {
+          "text": "BPConProof",
+          "url": "https://github.com/specula-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/tlaplus_examples_byzpaxos/BPConProof.tla"
+        },
+        {
+          "text": ")"
+        }
+      ]
+    },
+    {
+      "name": "Byzantine broadcast",
+      "type": "Protocol",
+      "specCount": 1,
+      "invariantCount": 5,
+      "provedBy": [
+        "Claude Code + Opus 5.5",
+        "codex + gpt 6 astra"
+      ],
+      "outcome": "proved",
+      "nameParts": [
+        {
+          "text": "Byzantine broadcast",
+          "url": "https://github.com/specula-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/tlaplus_examples_bcastByz/bcastByz.tla"
+        }
+      ]
+    },
+    {
+      "name": "Bosco asynchronous Byzantine consensus",
+      "type": "Protocol",
+      "specCount": 1,
+      "invariantCount": 5,
+      "provedBy": [
+        "Claude Code + Opus 5.5",
+        "codex + gpt 6 astra"
+      ],
+      "outcome": "proved",
+      "nameParts": [
+        {
+          "text": "Bosco asynchronous Byzantine consensus",
+          "url": "https://github.com/specula-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/tlaplus_examples_bosco/bosco.tla"
+        }
+      ]
+    },
+    {
+      "name": "Sailfish BFT consensus",
+      "type": "Protocol",
+      "specCount": 1,
+      "invariantCount": 3,
+      "provedBy": [
+        "Claude Code + Opus 5.5",
+        "codex + gpt 6 astra"
+      ],
+      "outcome": "proved",
+      "nameParts": [
+        {
+          "text": "Sailfish BFT consensus",
+          "url": "https://github.com/specula-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/tlaplus_examples_dag-consensus/Sailfish.tla"
+        }
+      ]
+    },
+    {
+      "name": "Nano cryptocurrency transaction",
+      "type": "Protocol",
+      "specCount": 1,
+      "invariantCount": 1,
+      "provedBy": [
+        "codex + gpt 6 astra"
+      ],
+      "outcome": "proved",
+      "outcomeNote": "The stated target covers initial-state properties.",
+      "nameParts": [
+        {
+          "text": "Nano cryptocurrency transaction",
+          "url": "https://github.com/specula-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/tlaplus_examples_NanoBlockchain/Nano.tla"
+        }
+      ]
+    },
+    {
+      "name": "Misra graph reachability algorithm",
+      "type": "Protocol",
+      "specCount": 2,
+      "invariantCount": 2,
+      "provedBy": [
+        "codex + gpt 6 astra"
+      ],
+      "outcome": "proved",
+      "nameParts": [
+        {
+          "text": "Misra graph reachability algorithm",
+          "url": "https://github.com/specula-org/TLAPS-Bench/tree/main/benchmark/proof-from-scratch-module/tlaplus_examples_MisraReachability"
+        }
+      ]
+    },
+    {
+      "name": "Spanning tree (abstract model)",
+      "type": "Protocol",
+      "specCount": 1,
+      "invariantCount": 1,
+      "provedBy": [
+        "codex + gpt 6 astra"
+      ],
+      "outcome": "proved",
+      "nameParts": [
+        {
+          "text": "Spanning tree (abstract model)",
+          "url": "https://github.com/specula-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/tlaplus_examples_SpanningTree/SpanTree_proof.tla"
+        }
+      ]
+    },
+    {
+      "name": "Spanning tree (message passing)",
+      "type": "Protocol",
+      "specCount": 1,
+      "invariantCount": 1,
+      "provedBy": [
+        "codex + gpt 6 astra"
+      ],
+      "outcome": "proved",
+      "nameParts": [
+        {
+          "text": "Spanning tree (message passing)",
+          "url": "https://github.com/specula-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/tlaplus_examples_spanning/spanning_proof.tla"
+        }
+      ]
+    },
+    {
+      "name": "Dijkstra-Scholten termination detection",
+      "type": "Protocol",
+      "specCount": 1,
+      "invariantCount": 3,
+      "provedBy": [
+        "codex + gpt 6 astra"
+      ],
+      "outcome": "proved",
+      "nameParts": [
+        {
+          "text": "Dijkstra-Scholten termination detection",
+          "url": "https://github.com/specula-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/tlaplus_examples_ewd687a/EWD687a_proof.tla"
+        }
+      ]
+    },
+    {
+      "name": "Dijkstra ring termination detection",
+      "type": "Protocol",
+      "specCount": 3,
+      "invariantCount": 6,
+      "provedBy": [
+        "codex + gpt 6 astra"
+      ],
+      "outcome": "proved",
+      "nameParts": [
+        {
+          "text": "Dijkstra ring termination detection",
+          "url": "https://github.com/specula-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/EWD840/EWD840.tla"
+        },
+        {
+          "text": " ("
+        },
+        {
+          "text": "EWD840_proof",
+          "url": "https://github.com/specula-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/tlaplus_examples_ewd840/EWD840_proof.tla"
+        },
+        {
+          "text": ", "
+        },
+        {
+          "text": "SyncTerminationDetection_proof",
+          "url": "https://github.com/specula-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/tlaplus_examples_ewd840/SyncTerminationDetection_proof.tla"
+        },
+        {
+          "text": ")"
+        }
+      ]
+    },
+    {
+      "name": "Termination detection",
+      "type": "Protocol",
+      "specCount": 3,
+      "invariantCount": 7,
+      "provedBy": [
+        "codex + gpt 6 astra"
+      ],
+      "outcome": "proved",
+      "nameParts": [
+        {
+          "text": "Termination detection",
+          "url": "https://github.com/specula-org/TLAPS-Bench/tree/main/benchmark/proof-from-scratch-module/tlaplus_examples_ewd998"
+        }
+      ]
+    },
+    {
+      "name": "Kumar termination detection",
+      "type": "Protocol",
+      "specCount": 1,
+      "invariantCount": 1,
+      "provedBy": [
+        "codex + gpt 6 astra"
+      ],
+      "outcome": "proved",
+      "nameParts": [
+        {
+          "text": "Kumar termination detection",
+          "url": "https://github.com/specula-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/tlaplus_examples_Termination/Termination_proof.tla"
+        }
+      ]
+    },
+    {
+      "name": "Paxos (voting, consensus, commit, etc)",
+      "type": "Protocol",
+      "specCount": 12,
+      "invariantCount": 27,
+      "provedBy": [
+        "codex + gpt 6 astra"
+      ],
+      "outcome": "proved",
+      "nameParts": [
+        {
+          "text": "Paxos",
+          "url": "https://github.com/specula-org/TLAPS-Bench/tree/main/benchmark/proof-from-scratch-module/Paxos"
+        },
+        {
+          "text": " ("
+        },
+        {
+          "text": "voting",
+          "url": "https://github.com/specula-org/TLAPS-Bench/tree/main/benchmark/proof-from-scratch-module/tlaplus_examples_Paxos"
+        },
+        {
+          "text": ", "
+        },
+        {
+          "text": "consensus",
+          "url": "https://github.com/specula-org/TLAPS-Bench/tree/main/benchmark/proof-from-scratch-module/Consensus"
+        },
+        {
+          "text": ", "
+        },
+        {
+          "text": "commit",
+          "url": "https://github.com/specula-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/tlaplus_examples_transaction_commit/PaxosCommit_proof.tla"
+        },
+        {
+          "text": ", "
+        },
+        {
+          "text": "etc",
+          "url": "https://github.com/specula-org/TLAPS-Bench/tree/main/benchmark/proof-from-scratch-module/tlaplus_examples_PaxosHowToWinATuringAward"
+        },
+        {
+          "text": ")"
+        }
+      ]
+    },
+    {
+      "name": "Two-phase commit",
+      "type": "Protocol",
+      "specCount": 3,
+      "invariantCount": 4,
+      "provedBy": [
+        "codex + gpt 6 astra"
+      ],
+      "outcome": "proved",
+      "nameParts": [
+        {
+          "text": "Two-phase commit",
+          "url": "https://github.com/specula-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/tlaplus_examples_TwoPhase/TwoPhase.tla"
+        },
+        {
+          "text": " ("
+        },
+        {
+          "text": "TwoPhase_proof",
+          "url": "https://github.com/specula-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/tlaplus_examples_TwoPhase/TwoPhase_proof.tla"
+        },
+        {
+          "text": ", "
+        },
+        {
+          "text": "transaction commit",
+          "url": "https://github.com/specula-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/tlaplus_examples_transaction_commit/TwoPhase_proof.tla"
+        },
+        {
+          "text": ")"
+        }
+      ]
+    },
+    {
+      "name": "Gray-Lamport transaction commit",
+      "type": "Protocol",
+      "specCount": 1,
+      "invariantCount": 1,
+      "provedBy": [
+        "codex + gpt 6 astra"
+      ],
+      "outcome": "proved",
+      "nameParts": [
+        {
+          "text": "Gray-Lamport transaction commit",
+          "url": "https://github.com/specula-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/tlaplus_examples_transaction_commit/TCommit_proof.tla"
+        }
+      ]
+    }
+  ],
+  "attributionAudit": {
+    "benchmarkRevision": "cb668172b1c55ba711397277bec2017528ecfbb8",
+    "auditedAt": "2026-09-28T11:51:39.942251+00:00",
+    "scope": "Complete recorded proofs of the listed targets at the archived specification versions.",
+    "harnessAttribution": {
+      "gpt-6-astra": {
+        "harness": "Codex",
+        "source": "User-specified harness attribution"
+      }
+    }
+  },
+  "linkSource": {
+    "pullRequest": "https://github.com/specula-org/TLAPS-Bench/pull/172",
+    "mergeCommit": "9a55ce5f10daaa5a5261b287bcd317fd6b8734bd"
+  }
+}
