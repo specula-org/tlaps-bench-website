@@ -37,6 +37,8 @@ export function RetiredProblems() {
               <td className="retired-provers" data-label={retiredProblems.columns[4]}>
                 {problem.provedBy.map((prover) =>
                   <span className="retired-prover" key={prover}>{prover}</span>)}
+                {problem.provedBy.length === 0 && problem.pendingProofAttribution &&
+                  <span className="retired-prover">{problem.pendingProofAttribution}</span>}
               </td>
             </tr>)}</tbody>
           </table>

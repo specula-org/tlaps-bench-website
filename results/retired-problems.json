@@ -22,7 +22,7 @@
       "invariantCount": 3,
       "provedBy": [
         "Claude Code + Opus 5.5",
-        "codex + gpt 6 astra"
+        "Codex + GPT-6 Astra"
       ],
       "outcome": "proved",
       "nameParts": [
@@ -39,7 +39,7 @@
       "invariantCount": 10,
       "provedBy": [
         "Claude Code + Opus 5",
-        "codex + gpt 6 astra"
+        "Codex + GPT-6 Astra"
       ],
       "nameParts": [
         {
@@ -91,7 +91,7 @@
       "provedBy": [
         "Claude Code + Opus 5",
         "OpenCode + Muse Spark 1.3",
-        "codex + gpt 6 astra"
+        "Codex + GPT-6 Astra"
       ],
       "outcome": "proved",
       "nameParts": [
@@ -107,7 +107,7 @@
       "specCount": 1,
       "invariantCount": 3,
       "provedBy": [
-        "codex + gpt 6 astra"
+        "Codex + GPT-6 Astra"
       ],
       "outcome": "proved",
       "nameParts": [
@@ -141,9 +141,10 @@
       ],
       "outcome": "disproved",
       "disprovedBy": [
-        "codex + gpt 6 astra"
+        "Codex + GPT-6 Astra"
       ],
-      "outcomeNote": "Model counterexample; 1 of 4 targets proved."
+      "outcomeNote": "Model counterexample; 1 of 4 targets proved.",
+      "pendingProofAttribution": "Codex + GPT-6 Astra (proof pending)"
     },
     {
       "name": "OSWALD WAL (from s3-wal-collection)",
@@ -151,7 +152,7 @@
       "specCount": 1,
       "invariantCount": 3,
       "provedBy": [
-        "codex + gpt 6 astra"
+        "Codex + GPT-6 Astra"
       ],
       "nameParts": [
         {
@@ -178,7 +179,7 @@
       "invariantCount": 11,
       "provedBy": [
         "Claude Code + Opus 5.5",
-        "codex + gpt 6 astra"
+        "Codex + GPT-6 Astra"
       ],
       "outcome": "proved",
       "nameParts": [
@@ -222,7 +223,7 @@
       "invariantCount": 5,
       "provedBy": [
         "Claude Code + Opus 5.5",
-        "codex + gpt 6 astra"
+        "Codex + GPT-6 Astra"
       ],
       "outcome": "proved",
       "nameParts": [
@@ -239,7 +240,7 @@
       "invariantCount": 5,
       "provedBy": [
         "Claude Code + Opus 5.5",
-        "codex + gpt 6 astra"
+        "Codex + GPT-6 Astra"
       ],
       "outcome": "proved",
       "nameParts": [
@@ -256,7 +257,7 @@
       "invariantCount": 3,
       "provedBy": [
         "Claude Code + Opus 5.5",
-        "codex + gpt 6 astra"
+        "Codex + GPT-6 Astra"
       ],
       "outcome": "proved",
       "nameParts": [
@@ -272,7 +273,7 @@
       "specCount": 1,
       "invariantCount": 1,
       "provedBy": [
-        "codex + gpt 6 astra"
+        "Codex + GPT-6 Astra"
       ],
       "outcome": "proved",
       "outcomeNote": "The stated target covers initial-state properties.",
@@ -289,7 +290,7 @@
       "specCount": 2,
       "invariantCount": 2,
       "provedBy": [
-        "codex + gpt 6 astra"
+        "Codex + GPT-6 Astra"
       ],
       "outcome": "proved",
       "nameParts": [
@@ -305,7 +306,7 @@
       "specCount": 1,
       "invariantCount": 1,
       "provedBy": [
-        "codex + gpt 6 astra"
+        "Codex + GPT-6 Astra"
       ],
       "outcome": "proved",
       "nameParts": [
@@ -321,7 +322,7 @@
       "specCount": 1,
       "invariantCount": 1,
       "provedBy": [
-        "codex + gpt 6 astra"
+        "Codex + GPT-6 Astra"
       ],
       "outcome": "proved",
       "nameParts": [
@@ -337,7 +338,7 @@
       "specCount": 1,
       "invariantCount": 3,
       "provedBy": [
-        "codex + gpt 6 astra"
+        "Codex + GPT-6 Astra"
       ],
       "outcome": "proved",
       "nameParts": [
@@ -353,7 +354,7 @@
       "specCount": 3,
       "invariantCount": 6,
       "provedBy": [
-        "codex + gpt 6 astra"
+        "Codex + GPT-6 Astra"
       ],
       "outcome": "proved",
       "nameParts": [
@@ -386,7 +387,7 @@
       "specCount": 3,
       "invariantCount": 7,
       "provedBy": [
-        "codex + gpt 6 astra"
+        "Codex + GPT-6 Astra"
       ],
       "outcome": "proved",
       "nameParts": [
@@ -402,7 +403,7 @@
       "specCount": 1,
       "invariantCount": 1,
       "provedBy": [
-        "codex + gpt 6 astra"
+        "Codex + GPT-6 Astra"
       ],
       "outcome": "proved",
       "nameParts": [
@@ -418,7 +419,7 @@
       "specCount": 12,
       "invariantCount": 27,
       "provedBy": [
-        "codex + gpt 6 astra"
+        "Codex + GPT-6 Astra"
       ],
       "outcome": "proved",
       "nameParts": [
@@ -465,7 +466,7 @@
       "specCount": 3,
       "invariantCount": 4,
       "provedBy": [
-        "codex + gpt 6 astra"
+        "Codex + GPT-6 Astra"
       ],
       "outcome": "proved",
       "nameParts": [
@@ -498,7 +499,7 @@
       "specCount": 1,
       "invariantCount": 1,
       "provedBy": [
-        "codex + gpt 6 astra"
+        "Codex + GPT-6 Astra"
       ],
       "outcome": "proved",
       "nameParts": [
