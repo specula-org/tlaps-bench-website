@@ -19,14 +19,24 @@ if (!Array.isArray(suite.families) || !suite.families.length) fail("missing fami
 const families = new Map();
 for (const family of suite.families) {
   if (!family.id || !family.name || families.has(family.id)) fail("invalid or duplicate family");
-  if (!["Protocol", "Code level"].includes(family.level)) fail(`invalid level: ${family.id}`);
+  if (!["Protocol", "System"].includes(family.level)) fail(`invalid level: ${family.id}`);
   count(family.specCount, `${family.id} specs`, 1);
   count(family.taskCount, `${family.id} tasks`, 1);
+  if (family.specCount !== 1 || !family.specId?.endsWith(".tla") ||
+      !Array.isArray(family.taskIds) || family.taskIds.length !== family.taskCount ||
+      family.taskIds.some((id) => typeof id !== "string" || !id.endsWith(".tla")) ||
+      new Set(family.taskIds).size !== family.taskCount) fail(`invalid v1.0 task manifest: ${family.id}`);
   families.set(family.id, family);
 }
 const sum = (rows, field) => rows.reduce((total, row) => total + row[field], 0);
 if (sum(suite.families, "taskCount") !== suite.taskCount ||
     sum(suite.families, "specCount") !== suite.specCount) fail("suite totals do not match families");
+if (suite.specCount !== 9 || suite.taskCount !== 55 ||
+    new Set(suite.families.map((family) => family.specId)).size !== suite.specCount ||
+    new Set(suite.families.flatMap((family) => family.taskIds)).size !== suite.taskCount ||
+    source.problemSetUrl !== SITE.taskFamilyOrderSource ||
+    !/^[a-f0-9]{40}$/.test(source.problemSetCommit) ||
+    !source.problemSetUrl.includes(`/blob/${source.problemSetCommit}/README.md`)) fail("invalid v1.0 problem set");
 if (!Array.isArray(cohort.familyIds) || !cohort.familyIds.length ||
     new Set(cohort.familyIds).size !== cohort.familyIds.length) fail("invalid cohort family list");
 const testedFamilies = cohort.familyIds.map((id) => {
@@ -74,6 +84,11 @@ for (const model of cohort.models) {
   for (const spec of model.specs) {
     if (!spec.id || !spec.name || specIds.has(spec.id) || !cohort.familyIds.includes(spec.family)) {
       fail(`invalid specification: ${model.id}/${spec.id}`);
+    }
+    const family = families.get(spec.family);
+    if (spec.id !== family.specId || !Array.isArray(spec.tasks) ||
+        JSON.stringify(spec.tasks.map((task) => task.id).sort()) !== JSON.stringify([...family.taskIds].sort())) {
+      fail(`specification differs from the v1.0 task manifest: ${model.id}/${spec.id}`);
     }
     specIds.add(spec.id);
     if (!/^[a-f0-9]{64}$/.test(spec.resultSha256)) fail(`missing result hash: ${spec.id}`);

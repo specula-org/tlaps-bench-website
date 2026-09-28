@@ -23,7 +23,7 @@ function PageLeaderboard() {
       <div className="wrap">
         <header className="leaderboard-intro">
           <h2 id="leaderboard-title">Leaderboard</h2>
-          <p className="leaderboard-lead">Writing proofs from scratch for complex systems: {cohort.taskCount} tasks across {cohort.specCount} specifications.</p>
+          <p className="leaderboard-lead">The v1.0 problem set: {cohort.taskCount} tasks across {cohort.specCount} specifications, with proofs written from scratch.</p>
         </header>
         <ResultsTable models={cohort.models} />
       </div>
