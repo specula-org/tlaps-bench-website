@@ -6,7 +6,7 @@
   },
   "title": "Retired Problems (Proofs Available)",
   "description": "We have retired the following problems from TLAPS-Bench, because they are well proved (or disproved) by frontier AI models and thus are no longer capable of measuring the frontier.",
-  "proofNotice": "If you need the TLA+ proofs of these protocols, contact us and we can share them.",
+  "proofNotice": "If you need the TLA+ proofs of these problems, contact us and we can share them.",
   "columns": [
     "Problems",
     "Type",
@@ -508,6 +508,29 @@
           "url": "https://github.com/specula-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/tlaplus_examples_transaction_commit/TCommit_proof.tla"
         }
       ]
+    },
+    {
+      "name": "B-tree",
+      "type": "System",
+      "specCount": 1,
+      "invariantCount": 5,
+      "provedBy": [
+        "Codex + GPT-6 Astra"
+      ],
+      "outcome": "proved",
+      "nameParts": [
+        {
+          "text": "B-tree",
+          "url": "https://github.com/specula-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/tlaplus_examples_btree/btree.tla"
+        }
+      ],
+      "proofEvidence": {
+        "benchmarkRevision": "59dbbe4d1f49f52fc6368d6f56e892e83497b2dc",
+        "resultSha256": "d2316d02f983092ba524faec5ed157a81221cabac5f84ed15d8b4f5239050632",
+        "proofSha256": "d0761252fe3f0a146d7e6a39ed73153ec34a909ae8d191b98df138d8e73f6874",
+        "trustedTargetCount": 5,
+        "targetCount": 5
+      }
     }
   ],
   "attributionAudit": {
@@ -524,5 +547,9 @@
   "linkSource": {
     "pullRequest": "https://github.com/specula-org/TLAPS-Bench/pull/172",
     "mergeCommit": "9a55ce5f10daaa5a5261b287bcd317fd6b8734bd"
+  },
+  "selectionUpdate": {
+    "problemSetCommit": "047b388697e130e76619c213ae3c5590dd61d5b0",
+    "addedRetiredProblem": "B-tree"
   }
 }

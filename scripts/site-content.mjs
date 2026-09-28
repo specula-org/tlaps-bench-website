@@ -5,7 +5,7 @@ export const SITE = {
     "A benchmark for writing machine-checked TLA+ proofs of complex protocols and system implementations.",
   taskFamilyOrder: [
     "cache-coherence", "zookeeper-protocol", "cahill-ssi",
-    "ivy-tlb", "open-addressing", "btree", "etcd-raft", "zookeeper-implementation", "mongodb-transactions",
+    "ivy-tlb", "open-addressing", "etcd-raft", "hashicorp-raft", "zookeeper-implementation", "mongodb-transactions",
   ],
-  taskFamilyOrderSource: "https://github.com/specula-org/TLAPS-Bench/blob/fd715c1ddc5b5d8947a8653df41e678949e99700/README.md#benchmark-problems",
+  taskFamilyOrderSource: "https://github.com/specula-org/TLAPS-Bench/blob/047b388697e130e76619c213ae3c5590dd61d5b0/README.md#current-problem-set",
 };

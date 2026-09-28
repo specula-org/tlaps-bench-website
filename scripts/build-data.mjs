@@ -31,7 +31,7 @@ for (const family of suite.families) {
 const sum = (rows, field) => rows.reduce((total, row) => total + row[field], 0);
 if (sum(suite.families, "taskCount") !== suite.taskCount ||
     sum(suite.families, "specCount") !== suite.specCount) fail("suite totals do not match families");
-if (suite.specCount !== 9 || suite.taskCount !== 55 ||
+if (suite.specCount !== 9 || suite.taskCount !== 56 ||
     new Set(suite.families.map((family) => family.specId)).size !== suite.specCount ||
     new Set(suite.families.flatMap((family) => family.taskIds)).size !== suite.taskCount ||
     source.problemSetUrl !== SITE.taskFamilyOrderSource ||
