@@ -5982,7 +5982,7 @@
         "totalHours": null,
         "minutesPerTask": null,
         "turnsPerTask": null,
-        "costLabel": null,
+        "costLabel": "Cost (USD)",
         "specs": [
           {
             "id": "tlaplus_examples_FlashProtocol/FlashWithMutex.tla",
@@ -5992,7 +5992,7 @@
             "total": 15,
             "timeSecs": null,
             "turns": null,
-            "costUsd": null,
+            "costUsd": 88.514075,
             "inputTokens": 76348233,
             "outputTokens": 198189,
             "tasks": [
@@ -6417,7 +6417,7 @@
             "total": 9,
             "timeSecs": null,
             "turns": null,
-            "costUsd": null,
+            "costUsd": 186.7341425,
             "inputTokens": 162897430,
             "outputTokens": 397574,
             "tasks": [
@@ -6645,7 +6645,7 @@
             "total": 1,
             "timeSecs": null,
             "turns": null,
-            "costUsd": null,
+            "costUsd": 19.588536,
             "inputTokens": 13000947,
             "outputTokens": 94245,
             "tasks": [
@@ -6737,7 +6737,7 @@
             "total": 2,
             "timeSecs": null,
             "turns": null,
-            "costUsd": null,
+            "costUsd": 63.4549085,
             "inputTokens": 55441433,
             "outputTokens": 132799,
             "tasks": [
@@ -6809,7 +6809,7 @@
             "total": 5,
             "timeSecs": null,
             "turns": null,
-            "costUsd": null,
+            "costUsd": 47.249852,
             "inputTokens": 40855849,
             "outputTokens": 98458,
             "tasks": [
@@ -6931,7 +6931,7 @@
             "total": 8,
             "timeSecs": null,
             "turns": null,
-            "costUsd": null,
+            "costUsd": 85.5940085,
             "inputTokens": 75258347,
             "outputTokens": 176790,
             "tasks": [
@@ -7114,7 +7114,7 @@
             "total": 6,
             "timeSecs": null,
             "turns": null,
-            "costUsd": null,
+            "costUsd": 13.174682,
             "inputTokens": 8805814,
             "outputTokens": 55895,
             "tasks": [
@@ -7434,7 +7434,7 @@
             "total": 9,
             "timeSecs": null,
             "turns": null,
-            "costUsd": null,
+            "costUsd": 129.7838155,
             "inputTokens": 112777136,
             "outputTokens": 286858,
             "tasks": [
@@ -7747,7 +7747,7 @@
             "total": 1,
             "timeSecs": null,
             "turns": null,
-            "costUsd": null,
+            "costUsd": 19.269974,
             "inputTokens": 12537735,
             "outputTokens": 82504,
             "tasks": [
@@ -7876,7 +7876,7 @@
         "usage": {
           "timeSecs": null,
           "turns": null,
-          "costUsd": null,
+          "costUsd": 653.363994,
           "inputTokens": 557922924,
           "outputTokens": 1523312
         },

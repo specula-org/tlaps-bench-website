@@ -212,7 +212,7 @@ window.TLAPS_DATA = {
         "totalHours": null,
         "minutesPerTask": null,
         "turnsPerTask": null,
-        "costLabel": null,
+        "costLabel": "Cost (USD)",
         "specs": [
           {
             "id": "tlaplus_examples_FlashProtocol/FlashWithMutex.tla",
@@ -222,7 +222,7 @@ window.TLAPS_DATA = {
             "total": 15,
             "timeSecs": null,
             "turns": null,
-            "costUsd": null,
+            "costUsd": 88.514075,
             "inputTokens": 76348233,
             "outputTokens": 198189,
             "tasks": [
@@ -647,7 +647,7 @@ window.TLAPS_DATA = {
             "total": 9,
             "timeSecs": null,
             "turns": null,
-            "costUsd": null,
+            "costUsd": 186.7341425,
             "inputTokens": 162897430,
             "outputTokens": 397574,
             "tasks": [
@@ -875,7 +875,7 @@ window.TLAPS_DATA = {
             "total": 1,
             "timeSecs": null,
             "turns": null,
-            "costUsd": null,
+            "costUsd": 19.588536,
             "inputTokens": 13000947,
             "outputTokens": 94245,
             "tasks": [
@@ -967,7 +967,7 @@ window.TLAPS_DATA = {
             "total": 2,
             "timeSecs": null,
             "turns": null,
-            "costUsd": null,
+            "costUsd": 63.4549085,
             "inputTokens": 55441433,
             "outputTokens": 132799,
             "tasks": [
@@ -1039,7 +1039,7 @@ window.TLAPS_DATA = {
             "total": 5,
             "timeSecs": null,
             "turns": null,
-            "costUsd": null,
+            "costUsd": 47.249852,
             "inputTokens": 40855849,
             "outputTokens": 98458,
             "tasks": [
@@ -1161,7 +1161,7 @@ window.TLAPS_DATA = {
             "total": 8,
             "timeSecs": null,
             "turns": null,
-            "costUsd": null,
+            "costUsd": 85.5940085,
             "inputTokens": 75258347,
             "outputTokens": 176790,
             "tasks": [
@@ -1344,7 +1344,7 @@ window.TLAPS_DATA = {
             "total": 6,
             "timeSecs": null,
             "turns": null,
-            "costUsd": null,
+            "costUsd": 13.174682,
             "inputTokens": 8805814,
             "outputTokens": 55895,
             "tasks": [
@@ -1664,7 +1664,7 @@ window.TLAPS_DATA = {
             "total": 9,
             "timeSecs": null,
             "turns": null,
-            "costUsd": null,
+            "costUsd": 129.7838155,
             "inputTokens": 112777136,
             "outputTokens": 286858,
             "tasks": [
@@ -1977,7 +1977,7 @@ window.TLAPS_DATA = {
             "total": 1,
             "timeSecs": null,
             "turns": null,
-            "costUsd": null,
+            "costUsd": 19.269974,
             "inputTokens": 12537735,
             "outputTokens": 82504,
             "tasks": [
@@ -2106,7 +2106,7 @@ window.TLAPS_DATA = {
         "usage": {
           "timeSecs": null,
           "turns": null,
-          "costUsd": null,
+          "costUsd": 653.363994,
           "inputTokens": 557922924,
           "outputTokens": 1523312
         },
@@ -2120,8 +2120,8 @@ window.TLAPS_DATA = {
             "minutesPerInv": "",
             "turnsPerInv": "",
             "tokensInOutPerInvM": "5.1 / 0.013",
-            "costPerInvUsd": "",
-            "costUsd": ""
+            "costPerInvUsd": "$5.90",
+            "costUsd": "$88.51"
           },
           "zookeeper-protocol": {
             "specsInv": "1 / 9",
@@ -2129,8 +2129,8 @@ window.TLAPS_DATA = {
             "minutesPerInv": "",
             "turnsPerInv": "",
             "tokensInOutPerInvM": "18.1 / 0.044",
-            "costPerInvUsd": "",
-            "costUsd": ""
+            "costPerInvUsd": "$20.75",
+            "costUsd": "$186.73"
           },
           "cahill-ssi": {
             "specsInv": "1 / 1",
@@ -2138,8 +2138,8 @@ window.TLAPS_DATA = {
             "minutesPerInv": "",
             "turnsPerInv": "",
             "tokensInOutPerInvM": "13.0 / 0.094",
-            "costPerInvUsd": "",
-            "costUsd": ""
+            "costPerInvUsd": "$19.59",
+            "costUsd": "$19.59"
           },
           "ivy-tlb": {
             "specsInv": "1 / 2",
@@ -2147,8 +2147,8 @@ window.TLAPS_DATA = {
             "minutesPerInv": "",
             "turnsPerInv": "",
             "tokensInOutPerInvM": "27.7 / 0.066",
-            "costPerInvUsd": "",
-            "costUsd": ""
+            "costPerInvUsd": "$31.73",
+            "costUsd": "$63.45"
           },
           "open-addressing": {
             "specsInv": "1 / 5",
@@ -2156,8 +2156,8 @@ window.TLAPS_DATA = {
             "minutesPerInv": "",
             "turnsPerInv": "",
             "tokensInOutPerInvM": "8.2 / 0.020",
-            "costPerInvUsd": "",
-            "costUsd": ""
+            "costPerInvUsd": "$9.45",
+            "costUsd": "$47.25"
           },
           "etcd-raft": {
             "specsInv": "1 / 8",
@@ -2165,8 +2165,8 @@ window.TLAPS_DATA = {
             "minutesPerInv": "",
             "turnsPerInv": "",
             "tokensInOutPerInvM": "9.4 / 0.022",
-            "costPerInvUsd": "",
-            "costUsd": ""
+            "costPerInvUsd": "$10.70",
+            "costUsd": "$85.59"
           },
           "hashicorp-raft": {
             "specsInv": "1 / 6",
@@ -2174,8 +2174,8 @@ window.TLAPS_DATA = {
             "minutesPerInv": "",
             "turnsPerInv": "",
             "tokensInOutPerInvM": "1.5 / 0.009",
-            "costPerInvUsd": "",
-            "costUsd": ""
+            "costPerInvUsd": "$2.20",
+            "costUsd": "$13.17"
           },
           "zookeeper-implementation": {
             "specsInv": "1 / 9",
@@ -2183,8 +2183,8 @@ window.TLAPS_DATA = {
             "minutesPerInv": "",
             "turnsPerInv": "",
             "tokensInOutPerInvM": "12.5 / 0.032",
-            "costPerInvUsd": "",
-            "costUsd": ""
+            "costPerInvUsd": "$14.42",
+            "costUsd": "$129.78"
           },
           "mongodb-transactions": {
             "specsInv": "1 / 1",
@@ -2192,8 +2192,8 @@ window.TLAPS_DATA = {
             "minutesPerInv": "",
             "turnsPerInv": "",
             "tokensInOutPerInvM": "12.5 / 0.083",
-            "costPerInvUsd": "",
-            "costUsd": ""
+            "costPerInvUsd": "$19.27",
+            "costUsd": "$19.27"
           },
           "total": {
             "specsInv": "9 / 56",
@@ -2201,8 +2201,8 @@ window.TLAPS_DATA = {
             "minutesPerInv": "",
             "turnsPerInv": "",
             "tokensInOutPerInvM": "10.0 / 0.027",
-            "costPerInvUsd": "",
-            "costUsd": ""
+            "costPerInvUsd": "$11.67",
+            "costUsd": "$653.36"
           }
         }
       },
