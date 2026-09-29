@@ -16,7 +16,7 @@ Problem selection follows the [finalized v1.0 README](https://github.com/specula
 
 The Retired Problems table includes B-tree (1 specification, 5 targets), attributed to Codex + GPT-6 Astra from the complete repaired-input run at benchmark revision `59dbbe4d1f49f52fc6368d6f56e892e83497b2dc`. Its result and proof hashes are recorded with that row in `results/retired-problems.json`.
 
-The table also includes Walgit WAL (7 targets), DiskStateQueue (1), TencentPaxos (2), and Barriers (5), each with complete recorded proofs from Codex + GPT-6 Astra at max effort. Their proof records include artifact hashes and the original benchmark revisions; all task modules and manifest-declared input dependencies match benchmark revision `e03314edb30c100fcb3e201a94554106c0091b33` byte-for-byte. This is an audit of existing results, not a new proof run.
+The table also includes Walgit WAL (7 targets), TLC disk-backed state queue (1), TencentPaxos (2), and Reusable synchronization barriers (5), each with complete recorded proofs from Codex + GPT-6 Astra at max effort. Their proof records include artifact hashes and the original benchmark revisions; all task modules and manifest-declared input dependencies match benchmark revision `e03314edb30c100fcb3e201a94554106c0091b33` byte-for-byte. This is an audit of existing results, not a new proof run.
 
 ## Invariant details
 

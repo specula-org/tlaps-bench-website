@@ -572,7 +572,7 @@
       ]
     },
     {
-      "name": "Barriers",
+      "name": "Reusable synchronization barriers",
       "type": "Protocol",
       "specCount": 1,
       "invariantCount": 5,
@@ -582,7 +582,7 @@
       "outcome": "proved",
       "nameParts": [
         {
-          "text": "Barriers",
+          "text": "Reusable synchronization barriers",
           "url": "https://github.com/specula-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/tlaplus_examples_barriers/Barriers.tla"
         }
       ],
@@ -622,7 +622,7 @@
       }
     },
     {
-      "name": "DiskStateQueue",
+      "name": "TLC disk-backed state queue",
       "type": "System",
       "specCount": 1,
       "invariantCount": 1,
@@ -632,7 +632,7 @@
       "outcome": "proved",
       "nameParts": [
         {
-          "text": "DiskStateQueue",
+          "text": "TLC disk-backed state queue",
           "url": "https://github.com/specula-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/DiskStateQueue/DiskStateQueueProof.tla"
         }
       ],
