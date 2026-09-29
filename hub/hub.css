@@ -55,12 +55,13 @@ p { margin: 0; color: var(--ink-2); }
 .theme-toggle { display: inline-grid; place-items: center; width: 32px; height: 32px; padding: 0; border: 1px solid var(--line); border-radius: 5px; color: var(--ink-2); background: transparent; font-size: 16px; }
 .nav-cta:hover, .theme-toggle:hover { background: var(--paper-2); }
 .home-hero { padding: 64px 24px 43px; text-align: center; background: radial-gradient(ellipse 48% 50% at 50% 0, var(--accent-soft), transparent), var(--paper); }
-.home-hero-inner { display: block; width: 100%; max-width: 820px; margin: 0 auto; padding: 0; }
+.home-hero-inner { display: block; width: 100%; max-width: 1040px; margin: 0 auto; padding: 0; }
 .home-kicker { display: inline-flex; align-items: center; gap: 9px; color: var(--accent-text); font: 500 10px/1.6 var(--mono); letter-spacing: .13em; text-transform: uppercase; }
 .home-kicker > span { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
-h1 { margin: 22px 0; font: 600 clamp(44px, 5vw, 66px)/1.07 var(--serif); letter-spacing: -.035em; }
+h1 { margin: 0 0 24px; font: 600 clamp(44px, 5vw, 66px)/1.07 var(--serif); letter-spacing: -.035em; }
 h1 em { color: var(--accent-text); font-style: normal; }
-.home-hero-lead { max-width: 670px; margin: 0 auto; font: 20px/1.55 var(--serif); text-wrap: balance; }
+.home-title-name { display: block; margin-bottom: 16px; }
+.home-title-description { display: block; font-size: clamp(28px, 3.2vw, 44px); line-height: 1.2; letter-spacing: -.025em; text-wrap: balance; }
 .home-actions { display: flex; justify-content: center; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 26px; }
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: 12px; padding: 8px 13px; border: 1px solid var(--line); border-radius: 5px; background: var(--surface); font-size: 13px; line-height: 1.4; font-weight: 500; }
 .btn:hover { background: var(--paper-2); }
@@ -214,8 +215,7 @@ table { width: 100%; border-collapse: collapse; }
 }
 @media (max-width: 600px) {
   .home-hero { padding: 42px 20px 30px; }
-  h1 { font-size: clamp(35px, 8.6vw, 49px); margin: 20px 0; }
-  .home-hero-lead { font-size: 18px; }
+  h1 { font-size: clamp(35px, 8.6vw, 49px); margin: 0 0 22px; }
   .home-actions { gap: 8px; margin-top: 22px; }
   .leaderboard-table { min-width: 0; table-layout: auto; }
   .document-table colgroup, .document-table > thead { display: none; }
