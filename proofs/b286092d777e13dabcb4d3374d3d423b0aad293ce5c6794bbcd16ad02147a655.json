@@ -1,0 +1,231 @@
+{
+  "schemaVersion": 1,
+  "specId": "etcd_raft/etcd_raft.tla",
+  "sourceName": "etcd_raft.tla",
+  "sourceSha256": "51b17236d74c26d6344147f12c2051d15c5918a89afbd90ae5f045a194ad1f19",
+  "resultSha256": "5b4857c79a8899b1e5aa7bb3ebe68617102d51ce315a78fb314a07152f92c23c",
+  "source": "---- MODULE etcd_raft ----\nEXTENDS etcd_raftDefs\n\n\\* BEGIN AGENT HELPERS\nLOCAL AgentBackend == INSTANCE TLAPS\n\nLEMMA AgentInitialRoles ==\n    Init => \\A i \\in Server : state[i] # Leader\nBY AgentBackend!SMTT(\"r5\"), DistinctRoles\n   DEF Init, InitServerVars\n\n\\* END AGENT HELPERS\n\nTHEOREM Spec => []LogInv\n\\* BEGIN AGENT PROOF etcd_raft/etcd_raft_LogInv.tla\n<1>1. Init => LogInv\n    BY AgentBackend!SMTT(\"r5\")\n      DEF Init, InitLogVars, InitConfigVars, LogInv, Committed, IsPrefix, SubSeq, Len, LastTerm, GetConfig, GetJointConfig, Quorum\n<1>2. LogInv /\\ [Next]_vars => LogInv'\n    BY AgentBackend!SMTT(\"r5\")\n       DEF LogInv, Next, NextAsync, NextCrash, NextUnreliable,\n           vars, messageVars, serverVars, candidateVars, leaderVars,\n           logVars, configVars\n<1>3. QED\n    BY <1>1, <1>2, AgentBackend!PTL DEF Spec\n\\* END AGENT PROOF etcd_raft/etcd_raft_LogInv.tla\n\nTHEOREM CommittedIsDurable == Spec => []CommittedIsDurableInv\n\\* BEGIN AGENT PROOF etcd_raft/etcd_raft_CommittedIsDurable.tla\n<1>1. Init => CommittedIsDurableInv\n    BY AgentInitialRoles, AgentBackend!SMTT(\"r5\") DEF CommittedIsDurableInv\n<1>2. CommittedIsDurableInv /\\ [Next]_vars => CommittedIsDurableInv'\n    BY AgentBackend!SMTT(\"r5\")\n       DEF CommittedIsDurableInv, Next, NextAsync, NextCrash, NextUnreliable,\n           vars, messageVars, serverVars, candidateVars, leaderVars,\n           logVars, configVars\n<1>3. QED\n    BY <1>1, <1>2, AgentBackend!PTL DEF Spec\n\\* END AGENT PROOF etcd_raft/etcd_raft_CommittedIsDurable.tla\n\nTHEOREM ElectionSafety == Spec => []ElectionSafetyInv\n\\* BEGIN AGENT PROOF etcd_raft/etcd_raft_ElectionSafety.tla\n<1>1. Init => ElectionSafetyInv\n    BY AgentInitialRoles, AgentBackend!SMTT(\"r5\") DEF ElectionSafetyInv\n<1>2. ElectionSafetyInv /\\ [Next]_vars => ElectionSafetyInv'\n    BY AgentBackend!SMTT(\"r5\")\n       DEF ElectionSafetyInv, Next, NextAsync, NextCrash, NextUnreliable,\n           vars, messageVars, serverVars, candidateVars, leaderVars,\n           logVars, configVars\n<1>3. QED\n    BY <1>1, <1>2, AgentBackend!PTL DEF Spec\n\\* END AGENT PROOF etcd_raft/etcd_raft_ElectionSafety.tla\n\nTHEOREM LeaderCompleteness == Spec => []LeaderCompletenessInv\n\\* BEGIN AGENT PROOF etcd_raft/etcd_raft_LeaderCompleteness.tla\n<1>1. Init => LeaderCompletenessInv\n    BY AgentInitialRoles, AgentBackend!SMTT(\"r5\") DEF LeaderCompletenessInv, CurrentLeaders\n<1>2. LeaderCompletenessInv /\\ [Next]_vars => LeaderCompletenessInv'\n    BY AgentBackend!SMTT(\"r5\")\n       DEF LeaderCompletenessInv, Next, NextAsync, NextCrash, NextUnreliable,\n           vars, messageVars, serverVars, candidateVars, leaderVars,\n           logVars, configVars\n<1>3. QED\n    BY <1>1, <1>2, AgentBackend!PTL DEF Spec\n\\* END AGENT PROOF etcd_raft/etcd_raft_LeaderCompleteness.tla\n\nTHEOREM LogMatching == Spec => []LogMatchingInv\n\\* BEGIN AGENT PROOF etcd_raft/etcd_raft_LogMatching.tla\n<1>1. Init => LogMatchingInv\n    BY AgentBackend!SMTT(\"r5\")\n      DEF Init, InitLogVars, InitConfigVars, LogMatchingInv, Committed, IsPrefix, SubSeq, Len, LastTerm, GetConfig, GetJointConfig, Quorum\n<1>2. LogMatchingInv /\\ [Next]_vars => LogMatchingInv'\n    BY AgentBackend!SMTT(\"r5\")\n       DEF LogMatchingInv, Next, NextAsync, NextCrash, NextUnreliable,\n           vars, messageVars, serverVars, candidateVars, leaderVars,\n           logVars, configVars\n<1>3. QED\n    BY <1>1, <1>2, AgentBackend!PTL DEF Spec\n\\* END AGENT PROOF etcd_raft/etcd_raft_LogMatching.tla\n\nTHEOREM MoreThanOneLeader == Spec => []MoreThanOneLeaderInv\n\\* BEGIN AGENT PROOF etcd_raft/etcd_raft_MoreThanOneLeader.tla\n<1>1. Init => MoreThanOneLeaderInv\n    BY AgentInitialRoles, AgentBackend!SMTT(\"r5\") DEF MoreThanOneLeaderInv\n<1>2. MoreThanOneLeaderInv /\\ [Next]_vars => MoreThanOneLeaderInv'\n    BY AgentBackend!SMTT(\"r5\")\n       DEF MoreThanOneLeaderInv, Next, NextAsync, NextCrash, NextUnreliable,\n           vars, messageVars, serverVars, candidateVars, leaderVars,\n           logVars, configVars\n<1>3. QED\n    BY <1>1, <1>2, AgentBackend!PTL DEF Spec\n\\* END AGENT PROOF etcd_raft/etcd_raft_MoreThanOneLeader.tla\n\nTHEOREM MoreUpToDate == Spec => []MoreUpToDateCorrectInv\n\\* BEGIN AGENT PROOF etcd_raft/etcd_raft_MoreUpToDate.tla\n<1>1. Init => MoreUpToDateCorrectInv\n    BY AgentBackend!SMTT(\"r5\")\n      DEF Init, InitLogVars, InitConfigVars, MoreUpToDateCorrectInv, Committed, IsPrefix, SubSeq, Len, LastTerm, GetConfig, GetJointConfig, Quorum\n<1>2. MoreUpToDateCorrectInv /\\ [Next]_vars => MoreUpToDateCorrectInv'\n    BY AgentBackend!SMTT(\"r5\")\n       DEF MoreUpToDateCorrectInv, Next, NextAsync, NextCrash, NextUnreliable,\n           vars, messageVars, serverVars, candidateVars, leaderVars,\n           logVars, configVars\n<1>3. QED\n    BY <1>1, <1>2, AgentBackend!PTL DEF Spec\n\\* END AGENT PROOF etcd_raft/etcd_raft_MoreUpToDate.tla\n\nTHEOREM QuorumLog == Spec => []QuorumLogInv\n\\* BEGIN AGENT PROOF etcd_raft/etcd_raft_QuorumLog.tla\n<1>1. Init => QuorumLogInv\n    BY AgentBackend!SMTT(\"r5\")\n      DEF Init, InitLogVars, InitConfigVars, QuorumLogInv, Committed, IsPrefix, SubSeq, Len, LastTerm, GetConfig, GetJointConfig, Quorum\n<1>2. QuorumLogInv /\\ [Next]_vars => QuorumLogInv'\n    BY AgentBackend!SMTT(\"r5\")\n       DEF QuorumLogInv, Next, NextAsync, NextCrash, NextUnreliable,\n           vars, messageVars, serverVars, candidateVars, leaderVars,\n           logVars, configVars\n<1>3. QED\n    BY <1>1, <1>2, AgentBackend!PTL DEF Spec\n\\* END AGENT PROOF etcd_raft/etcd_raft_QuorumLog.tla\n====\n",
+  "units": {
+    "etcd_raft/etcd_raft_LogInv.tla": {
+      "id": "etcd_raft/etcd_raft_LogInv.tla",
+      "name": "etcd_raft/etcd_raft_LogInv.tla",
+      "kind": "target",
+      "lineStart": 14,
+      "lineEnd": 25,
+      "proofLines": [
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25
+      ],
+      "proofRange": [
+        16,
+        25
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "etcd_raft/etcd_raft_CommittedIsDurable.tla": {
+      "id": "etcd_raft/etcd_raft_CommittedIsDurable.tla",
+      "name": "CommittedIsDurable",
+      "kind": "target",
+      "lineStart": 28,
+      "lineEnd": 38,
+      "proofLines": [
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38
+      ],
+      "proofRange": [
+        30,
+        38
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgentInitialRoles"
+      ]
+    },
+    "etcd_raft/etcd_raft_ElectionSafety.tla": {
+      "id": "etcd_raft/etcd_raft_ElectionSafety.tla",
+      "name": "ElectionSafety",
+      "kind": "target",
+      "lineStart": 41,
+      "lineEnd": 51,
+      "proofLines": [
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51
+      ],
+      "proofRange": [
+        43,
+        51
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgentInitialRoles"
+      ]
+    },
+    "etcd_raft/etcd_raft_LeaderCompleteness.tla": {
+      "id": "etcd_raft/etcd_raft_LeaderCompleteness.tla",
+      "name": "LeaderCompleteness",
+      "kind": "target",
+      "lineStart": 54,
+      "lineEnd": 64,
+      "proofLines": [
+        56,
+        57,
+        58,
+        59,
+        60,
+        61,
+        62,
+        63,
+        64
+      ],
+      "proofRange": [
+        56,
+        64
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgentInitialRoles"
+      ]
+    },
+    "etcd_raft/etcd_raft_LogMatching.tla": {
+      "id": "etcd_raft/etcd_raft_LogMatching.tla",
+      "name": "LogMatching",
+      "kind": "target",
+      "lineStart": 67,
+      "lineEnd": 78,
+      "proofLines": [
+        69,
+        70,
+        71,
+        72,
+        73,
+        74,
+        75,
+        76,
+        77,
+        78
+      ],
+      "proofRange": [
+        69,
+        78
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "etcd_raft/etcd_raft_MoreThanOneLeader.tla": {
+      "id": "etcd_raft/etcd_raft_MoreThanOneLeader.tla",
+      "name": "MoreThanOneLeader",
+      "kind": "target",
+      "lineStart": 81,
+      "lineEnd": 91,
+      "proofLines": [
+        83,
+        84,
+        85,
+        86,
+        87,
+        88,
+        89,
+        90,
+        91
+      ],
+      "proofRange": [
+        83,
+        91
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgentInitialRoles"
+      ]
+    },
+    "etcd_raft/etcd_raft_MoreUpToDate.tla": {
+      "id": "etcd_raft/etcd_raft_MoreUpToDate.tla",
+      "name": "MoreUpToDate",
+      "kind": "target",
+      "lineStart": 94,
+      "lineEnd": 105,
+      "proofLines": [
+        96,
+        97,
+        98,
+        99,
+        100,
+        101,
+        102,
+        103,
+        104,
+        105
+      ],
+      "proofRange": [
+        96,
+        105
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "etcd_raft/etcd_raft_QuorumLog.tla": {
+      "id": "etcd_raft/etcd_raft_QuorumLog.tla",
+      "name": "QuorumLog",
+      "kind": "target",
+      "lineStart": 108,
+      "lineEnd": 119,
+      "proofLines": [
+        110,
+        111,
+        112,
+        113,
+        114,
+        115,
+        116,
+        117,
+        118,
+        119
+      ],
+      "proofRange": [
+        110,
+        119
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgentInitialRoles": {
+      "id": "helper:AgentInitialRoles",
+      "name": "AgentInitialRoles",
+      "kind": "helper",
+      "lineStart": 7,
+      "lineEnd": 10,
+      "proofLines": [
+        9,
+        10
+      ],
+      "proofRange": [
+        9,
+        10
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    }
+  }
+}

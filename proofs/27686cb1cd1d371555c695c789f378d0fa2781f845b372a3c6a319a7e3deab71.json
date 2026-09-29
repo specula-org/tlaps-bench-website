@@ -1,0 +1,1086 @@
+{
+  "schemaVersion": 1,
+  "specId": "HashicorpRaft/HashicorpRaft.tla",
+  "sourceName": "HashicorpRaft.tla",
+  "sourceSha256": "feb2f419a95fb312d8309930cdd094c0df1b76772744fc5b400987b99ba4b8fa",
+  "resultSha256": "8418dfc4bb3694ec3a923d7e8b776af15e4634c88204c2af6feccdd71c1dfe7e",
+  "source": "---- MODULE HashicorpRaft ----\nEXTENDS HashicorpRaftDefs\n\n\\* BEGIN AGENT HELPERS\nLOCAL HRP == INSTANCE TLAPS\nLOCAL HRF == INSTANCE FiniteSetTheorems\nLOCAL HRS == INSTANCE SequenceTheorems\nLOCAL HRN == INSTANCE NaturalsInduction\nLOCAL HRX == INSTANCE FiniteSetsExtTheorems\n\nLEMMA HRFiniteBridge ==\n  \\A S : /\\ HRF!IsFiniteSet(S) = IsFiniteSet(S)\n         /\\ HRF!Cardinality(S) = Cardinality(S)\nBY DEF HRF!IsFiniteSet, IsFiniteSet, HRF!Cardinality, Cardinality\n\nLEMMA HRMaximum ==\n  ASSUME NEW n \\in Nat, NEW S \\in SUBSET (1..n), S # {}\n  PROVE /\\ SetMax(S) \\in S\n        /\\ \\A k \\in S : k <= SetMax(S)\n<1>1. /\\ S \\subseteq HRX!Int\n      /\\ n \\in HRX!Int\n      /\\ \\A k \\in S : n >= k\n  BY HRP!SMTT(\"r5\")\n<1>2. /\\ HRX!Max(S) \\in S\n      /\\ \\A k \\in S : HRX!Max(S) >= k\n  BY <1>1, HRX!MaxIntBounded\n<1>3. SetMax(S) = HRX!Max(S)\n  BY DEF SetMax, HRX!Max\n<1>4. QED\n  BY <1>2, <1>3, HRP!SMTT(\"r5\")\n\nLEMMA HRConfigIndices ==\n  ASSUME NEW q, Len(q) \\in Nat\n  PROVE /\\ LastConfigIndex(q) \\in 0..Len(q)\n        /\\ PreviousConfigIndex(q) \\in 0..LastConfigIndex(q)\n        /\\ \\A k \\in ConfigIndices(q) : k <= LastConfigIndex(q)\n        /\\ \\A k \\in ConfigIndices(q) :\n               k > PreviousConfigIndex(q) => k = LastConfigIndex(q)\n<1>1. ConfigIndices(q) \\subseteq 1..Len(q)\n  BY HRP!SMTT(\"r5\") DEF ConfigIndices\n<1>2. ConfigIndices(q) # {} =>\n      /\\ SetMax(ConfigIndices(q)) \\in ConfigIndices(q)\n      /\\ \\A k \\in ConfigIndices(q) : k <= SetMax(ConfigIndices(q))\n  BY <1>1, HRMaximum, HRP!SMTT(\"r5\")\n<1>3. ConfigIndices(q) \\ {LastConfigIndex(q)} # {} =>\n      /\\ SetMax(ConfigIndices(q) \\ {LastConfigIndex(q)})\n           \\in ConfigIndices(q) \\ {LastConfigIndex(q)}\n      /\\ \\A k \\in ConfigIndices(q) \\ {LastConfigIndex(q)} :\n           k <= SetMax(ConfigIndices(q) \\ {LastConfigIndex(q)})\n  BY <1>1, HRMaximum, HRP!SMTT(\"r5\")\n<1>4. QED\n  BY <1>1, <1>2, <1>3, HRP!SMTT(\"r10\")\n     DEF LastConfigIndex, PreviousConfigIndex\n\nLEMMA HRSliceLength ==\n  ASSUME NEW q, NEW a \\in Nat, NEW b \\in Nat\n  PROVE Len(SubSeq(q,a,b)) = IF a <= b THEN b-a+1 ELSE 0\n<1>1. \\A k \\in a..b : q[k] \\in {q[j] : j \\in a..b}\n  BY HRP!SMTT(\"r5\")\n<1>2. QED\n  BY <1>1, HRS!SubSeqProperties, HRP!SMTT(\"r5\")\n\nLEMMA HRAppendFacts ==\n  ASSUME NEW q, Len(q) \\in Nat, NEW e\n  PROVE /\\ Len(Append(q,e)) = Len(q)+1\n        /\\ \\A k \\in 1..Len(q) : Append(q,e)[k] = q[k]\n        /\\ Append(q,e)[Len(q)+1] = e\nBY HRP!SMTT(\"r10\")\n\nLEMMA HRConcatLength ==\n  ASSUME NEW a, NEW b, Len(a) \\in Nat, Len(b) \\in Nat\n  PROVE Len(a \\o b) = Len(a) + Len(b)\nBY HRP!SMTT(\"r10\")\n\nLEMMA HRMergeLength ==\n  ASSUME NEW q, NEW p \\in Nat, NEW es, Len(q) \\in Nat, Len(es) \\in Nat\n  PROVE Len(MergeEntries(q,p,es)) \\in Nat\n<1>1. CASE Len(es) = 0\n  BY <1>1, HRP!SMTT(\"r5\") DEF MergeEntries\n<1>2. CASE Len(es) # 0\n  <2>1. DEFINE Good(k) == p+k <= Len(q) /\\ q[p+k].term = es[k].term\n               Break(k) == k \\in 1..(Len(es)+1) /\\\n                           (k = Len(es)+1 \\/ ~Good(k))\n  <2> HIDE DEF Good, Break\n  <2>2. Break(Len(es)+1)\n    BY HRP!SMTT(\"r5\") DEF Break\n  <2>3. PICK small \\in Nat : Break(small) /\\ \\A j \\in 0..(small-1) : ~Break(j)\n    <3>1. DEFINE bad == {k \\in 1..(Len(es)+1) : Break(k)}\n    <3>2. bad \\subseteq Nat /\\ bad # {}\n      BY <2>2, HRP!SMTT(\"r5\") DEF bad\n    <3>3. /\\ HRX!Min(bad) \\in bad\n          /\\ \\A j \\in bad : HRX!Min(bad) <= j\n      BY <3>2, HRX!MinNat\n    <3>4. QED\n      BY <3>2, <3>3, HRP!SMTT(\"r5\") DEF bad, Break\n  <2>4. \\E k \\in 1..(Len(es)+1) :\n            /\\ \\A j \\in 1..(k-1) :\n                  /\\ p+j <= Len(q)\n                  /\\ q[p+j].term = es[j].term\n            /\\ \\/ k = Len(es)+1\n               \\/ p+k > Len(q)\n               \\/ q[p+k].term # es[k].term\n    BY <2>3, HRP!SMTT(\"r5\") DEF Break, Good\n  <2>5. DEFINE first == CHOOSE k \\in 1..(Len(es)+1) :\n            /\\ \\A j \\in 1..(k-1) :\n                  /\\ p+j <= Len(q)\n                  /\\ q[p+j].term = es[j].term\n            /\\ \\/ k = Len(es)+1\n               \\/ p+k > Len(q)\n               \\/ q[p+k].term # es[k].term\n  <2> HIDE DEF first\n  <2>6. first \\in 1..(Len(es)+1)\n    BY <2>4, HRP!SMTT(\"r5\") DEF first\n  <2>7. /\\ Len(SubSeq(q,1,p+first-1)) \\in Nat\n        /\\ Len(SubSeq(es,first,Len(es))) \\in Nat\n    <3>1. p+first-1 \\in Nat /\\ first \\in Nat\n      BY <2>6, HRP!SMTT(\"r5\")\n    <3>2. Len(SubSeq(q,1,p+first-1)) = IF 1 <= p+first-1 THEN p+first-1 ELSE 0\n      BY <3>1, HRSliceLength, HRP!SMTT(\"r5\")\n    <3>3. Len(SubSeq(es,first,Len(es))) = IF first <= Len(es) THEN Len(es)-first+1 ELSE 0\n      BY <3>1, HRSliceLength, HRP!SMTT(\"r5\")\n    <3>4. QED\n      BY <3>1, <3>2, <3>3, HRP!SMTT(\"r5\")\n  <2>8. Len(SubSeq(q,1,p+first-1) \\o SubSeq(es,first,Len(es))) \\in Nat\n    BY <2>7, HRConcatLength, HRP!SMTT(\"r5\")\n  <2>9. MergeEntries(q,p,es) =\n           IF first = Len(es)+1 THEN q\n           ELSE SubSeq(q,1,p+first-1) \\o SubSeq(es,first,Len(es))\n    BY <1>2 DEF MergeEntries, first\n  <2>10. QED\n    BY <2>8, <2>9, HRP!SMTT(\"r5\")\n<1>3. QED\n  BY <1>1, <1>2, HRP!SMTT(\"r5\")\n\nLEMMA HRTwoElements ==\n  ASSUME NEW a, NEW b\n  PROVE IsFiniteSet({a,b}) /\\ Cardinality({a,b}) <= 2\n<1>1. {a,b} = {a} \\cup {b}\n  BY HRP!SMTT(\"r5\")\n<1>2. QED\n  BY <1>1, HRFiniteBridge, HRF!FS_Singleton, HRFiniteBridge, HRF!FS_AddElement, HRP!SMTT(\"r5\")\n\nLEMMA HRThreeElements ==\n  ASSUME NEW a, NEW b, NEW c\n  PROVE IsFiniteSet({a,b,c}) /\\ Cardinality({a,b,c}) <= 3\n<1>1. {a,b,c} = {a,b} \\cup {c}\n  BY HRP!SMTT(\"r5\")\n<1>2. QED\n  BY <1>1, HRTwoElements, HRFiniteBridge, HRF!FS_AddElement, HRF!FS_CardinalityType,\n     HRP!SMTT(\"r10\")\n\nLEMMA HRMessageTags ==\n  /\\ RequestVoteRequest # AppendEntriesRequest\n  /\\ RequestVoteRequest # AppendEntriesResponse\n  /\\ RequestVoteResponse # AppendEntriesRequest\n  /\\ RequestVoteResponse # AppendEntriesResponse\n  /\\ AppendEntriesRequest # AppendEntriesResponse\n<1>1. /\\ Cardinality({RequestVoteRequest, RequestVoteResponse, AppendEntriesRequest}) <= 3\n      /\\ Cardinality({RequestVoteRequest, RequestVoteResponse, AppendEntriesResponse}) <= 3\n      /\\ Cardinality({RequestVoteRequest, AppendEntriesRequest, AppendEntriesResponse}) <= 3\n      /\\ Cardinality({RequestVoteResponse, AppendEntriesRequest, AppendEntriesResponse}) <= 3\n  BY HRThreeElements, HRP!SMTT(\"r5\")\n<1>2. /\\ (RequestVoteRequest = AppendEntriesRequest => {RequestVoteRequest, RequestVoteResponse, AppendEntriesRequest, AppendEntriesResponse} = {RequestVoteRequest, RequestVoteResponse, AppendEntriesResponse})\n      /\\ (RequestVoteRequest = AppendEntriesResponse => {RequestVoteRequest, RequestVoteResponse, AppendEntriesRequest, AppendEntriesResponse} = {RequestVoteRequest, RequestVoteResponse, AppendEntriesRequest})\n      /\\ (RequestVoteResponse = AppendEntriesRequest => {RequestVoteRequest, RequestVoteResponse, AppendEntriesRequest, AppendEntriesResponse} = {RequestVoteRequest, RequestVoteResponse, AppendEntriesResponse})\n      /\\ (RequestVoteResponse = AppendEntriesResponse => {RequestVoteRequest, RequestVoteResponse, AppendEntriesRequest, AppendEntriesResponse} = {RequestVoteRequest, RequestVoteResponse, AppendEntriesRequest})\n      /\\ (AppendEntriesRequest = AppendEntriesResponse => {RequestVoteRequest, RequestVoteResponse, AppendEntriesRequest, AppendEntriesResponse} = {RequestVoteRequest, RequestVoteResponse, AppendEntriesRequest})\n  BY HRP!SMTT(\"r5\")\n<1>3. QED\n  BY <1>1, <1>2, MessageDomain, HRP!SMTT(\"r5\")\n\nLEMMA HRBagDomains ==\n  ASSUME NEW b, NEW ms\n  PROVE /\\ DOMAIN (b (+) SetToBag(ms)) = DOMAIN b \\cup ms\n        /\\ DOMAIN (b (-) SetToBag(ms)) \\subseteq DOMAIN b\nBY HRP!SMTT(\"r5\") DEF (+), (-), SetToBag\n\nHRMessageShape(m) ==\n  /\\ (m.mtype = AppendEntriesRequest =>\n       /\\ Len(m.mentries) \\in Nat\n       /\\ m.mprevLogIndex \\in Nat\n       /\\ m.mcommitIndex \\in Nat)\n  /\\ (m.mtype = AppendEntriesResponse => m.mmatchIndex \\in Nat)\n\nHRConfigBound(q,c,l) ==\n  /\\ Len(q) \\in Nat\n  /\\ c \\in Nat\n  /\\ l \\in Nat\n  /\\ \\A k \\in ConfigIndices(q) :\n       /\\ k <= l\n       /\\ k > c => k = l\n\nHRConfigInv ==\n  /\\ log = [s \\in Server |-> log[s]]\n  /\\ commitIndex \\in [Server -> Nat]\n  /\\ committedConfigIndex \\in [Server -> Nat]\n  /\\ latestConfigIndex \\in [Server -> Nat]\n  /\\ nextIndex \\in [Server -> [Server -> Nat \\ {0}]]\n  /\\ matchIndex \\in [Server -> [Server -> Nat]]\n  /\\ \\A s \\in Server : HRConfigBound(log[s], committedConfigIndex[s], latestConfigIndex[s])\n  /\\ \\A m \\in DOMAIN messages : HRMessageShape(m)\n\nLEMMA HRBoundFromIndices ==\n  ASSUME NEW q, Len(q) \\in Nat, NEW c \\in Nat,\n         PreviousConfigIndex(q) <= c\n  PROVE HRConfigBound(q,c,LastConfigIndex(q))\nBY HRConfigIndices, HRP!SMTT(\"r5\") DEF HRConfigBound, ConfigIndices\n\nLEMMA HRBoundValueAppend ==\n  ASSUME NEW q, NEW c, NEW l, HRConfigBound(q,c,l), NEW e,\n         e.type # ConfigEntry\n  PROVE HRConfigBound(Append(q,e),c,l)\nBY HRAppendFacts, HRP!SMTT(\"r10\") DEF HRConfigBound, ConfigIndices\n\nLEMMA HRBoundConfigAppend ==\n  ASSUME NEW q, NEW c, HRConfigBound(q,c,c), NEW e\n  PROVE HRConfigBound(Append(q,e),c,Len(q)+1)\nBY HRAppendFacts, HRP!SMTT(\"r10\") DEF HRConfigBound, ConfigIndices\n\nLEMMA HRBoundCommit ==\n  ASSUME NEW q, NEW c, NEW l, HRConfigBound(q,c,l)\n  PROVE HRConfigBound(q,l,l)\nBY HRP!SMTT(\"r5\") DEF HRConfigBound, ConfigIndices\n\nLEMMA HRInitialConfigInv == Init => HRConfigInv\nBY HRS!EmptySeq, HRP!SMTT(\"r10\")\n   DEF Init, ProtocolInit, HRConfigInv, HRConfigBound, ConfigIndices,\n       HRMessageShape, EmptyBag, SetToBag\n\nLEMMA HRConfigInvSafety == HRConfigInv => ConfigurationSafety\n<1>1. ASSUME HRConfigInv, NEW s \\in Server\n       PROVE Cardinality({k \\in (Max(commitIndex[s], committedConfigIndex[s])+1)..Len(log[s]) :\n                       log[s][k].type = ConfigEntry}) <= 1\n  <2>0. /\\ HRConfigBound(log[s],committedConfigIndex[s],latestConfigIndex[s])\n        /\\ commitIndex[s] \\in Nat\n    BY <1>1, HRP!SMTT(\"r5\") DEF HRConfigInv\n  <2>1. {k \\in (Max(commitIndex[s], committedConfigIndex[s])+1)..Len(log[s]) :\n                       log[s][k].type = ConfigEntry} \\subseteq {latestConfigIndex[s]}\n    <3>1. ASSUME NEW k \\in {j \\in (Max(commitIndex[s], committedConfigIndex[s])+1)..Len(log[s]) :\n                       log[s][j].type = ConfigEntry}\n           PROVE k = latestConfigIndex[s]\n      <4>1. /\\ k \\in 1..Len(log[s])\n            /\\ log[s][k].type = ConfigEntry\n            /\\ k > committedConfigIndex[s]\n        BY <3>1, <2>0, HRP!SMTT(\"r5\") DEF HRConfigBound, Max\n      <4>2. QED\n        BY <4>1, <2>0, HRP!SMTT(\"r5\") DEF HRConfigBound, ConfigIndices\n    <3>2. QED\n      BY <3>1, HRP!SMTT(\"r5\")\n  <2>2. QED\n    BY <2>1, HRFiniteBridge, HRF!FS_Singleton, HRFiniteBridge, HRF!FS_Subset, HRP!SMTT(\"r5\")\n<1>2. QED\n  BY <1>1 DEF ConfigurationSafety\n\nLEMMA HRConfigInvTimeout ==\n  ASSUME HRConfigInv, NEW i \\in Server, Timeout(i)\n  PROVE HRConfigInv'\nBY HRMessageTags, HRBagDomains, HRP!SMTT(\"r10\")\n   DEF HRConfigInv, HRMessageShape, Timeout, SendAll,\n       logVars, leaderVars, configVars\n\nLEMMA HRConfigInvLeader ==\n  ASSUME HRConfigInv, NEW i \\in Server, BecomeLeader(i)\n  PROVE HRConfigInv'\n<1>1. Len(log[i]) \\in Nat\n  BY HRP!SMTT(\"r5\") DEF HRConfigInv, HRConfigBound\n<1>2. /\\ nextIndex' \\in [Server -> [Server -> Nat \\ {0}]]\n      /\\ matchIndex' \\in [Server -> [Server -> Nat]]\n  BY <1>1, HRP!SMTT(\"r10\") DEF HRConfigInv, BecomeLeader, LastLogIndex\n<1>3. QED\n  BY <1>2, HRP!SMTT(\"r5\") DEF HRConfigInv, BecomeLeader, logVars, configVars\n\nLEMMA HRConfigInvPersist ==\n  ASSUME HRConfigInv, NEW i \\in Server, CompletePersistVote(i)\n  PROVE HRConfigInv'\nBY HRMessageTags, HRBagDomains, HRP!SMTT(\"r10\")\n   DEF HRConfigInv, HRMessageShape, CompletePersistVote, Send,\n       logVars, leaderVars, configVars\n\nLEMMA HRConfigInvClient ==\n  ASSUME HRConfigInv, NEW i \\in Server, NEW v \\in Values, ClientRequest(i,v)\n  PROVE HRConfigInv'\nBY EntryDomain, HRBoundValueAppend, HRP!SMTT(\"r10\")\n   DEF HRConfigInv, ClientRequest, leaderVars, configVars\n\nLEMMA HRConfigInvPropose ==\n  ASSUME HRConfigInv, NEW i \\in Server, NEW s \\in Server, ProposeConfigChange(i,s)\n  PROVE HRConfigInv'\n<1>1. DEFINE entry == [term |-> currentTerm[i], type |-> ConfigEntry,\n                      config |-> IF s \\in latestConfig[i] THEN latestConfig[i] \\ {s}\n                                 ELSE latestConfig[i] \\cup {s}, value |-> Nil]\n<1> HIDE DEF entry\n<1>2. /\\ HRConfigBound(log[i],committedConfigIndex[i],committedConfigIndex[i])\n      /\\ Len(log[i]) \\in Nat\n  BY HRP!SMTT(\"r5\") DEF HRConfigInv, HRConfigBound, ProposeConfigChange\n<1>3. /\\ HRConfigBound(Append(log[i],entry),committedConfigIndex[i],Len(log[i])+1)\n      /\\ Len(Append(log[i],entry)) = Len(log[i])+1\n  BY <1>2, HRBoundConfigAppend, HRAppendFacts, HRP!SMTT(\"r5\")\n<1>4. /\\ log' = [z \\in Server |-> log'[z]]\n      /\\ commitIndex' \\in [Server -> Nat]\n      /\\ committedConfigIndex' \\in [Server -> Nat]\n      /\\ latestConfigIndex' \\in [Server -> Nat]\n      /\\ nextIndex' \\in [Server -> [Server -> Nat \\ {0}]]\n      /\\ matchIndex' \\in [Server -> [Server -> Nat]]\n  <2>1. log' = [z \\in Server |-> log'[z]]\n    BY <1>2, <1>3, HRP!SMTT(\"r5\") DEF HRConfigInv, ProposeConfigChange, entry\n  <2>2. commitIndex' \\in [Server -> Nat]\n    BY <1>2, <1>3, HRP!SMTT(\"r5\") DEF HRConfigInv, ProposeConfigChange, entry\n  <2>3. committedConfigIndex' \\in [Server -> Nat]\n    BY <1>2, <1>3, HRP!SMTT(\"r5\") DEF HRConfigInv, ProposeConfigChange, entry\n  <2>4. latestConfigIndex' \\in [Server -> Nat]\n    BY <1>2, <1>3, HRP!SMTT(\"r5\") DEF HRConfigInv, ProposeConfigChange, entry\n  <2>5. nextIndex' \\in [Server -> [Server -> Nat \\ {0}]]\n    BY <1>2, <1>3, HRP!SMTT(\"r5\") DEF HRConfigInv, ProposeConfigChange, entry\n  <2>6. matchIndex' \\in [Server -> [Server -> Nat]]\n    BY <1>2, <1>3, HRP!SMTT(\"r5\") DEF HRConfigInv, ProposeConfigChange, entry\n  <2>7. QED\n    BY <2>1, <2>2, <2>3, <2>4, <2>5, <2>6, HRP!SMTT(\"r5\")\n<1>5. \\A z \\in Server : HRConfigBound(log'[z],committedConfigIndex'[z],latestConfigIndex'[z])\n  BY <1>2, <1>3, HRP!SMTT(\"r10\") DEF HRConfigInv, ProposeConfigChange, entry\n<1>6. QED\n  BY <1>4, <1>5, HRP!SMTT(\"r5\") DEF HRConfigInv, ProposeConfigChange\n\nLEMMA HRConfigInvReplicate ==\n  ASSUME HRConfigInv, NEW i \\in Server, NEW j \\in Server, ReplicateEntries(i,j)\n  PROVE HRConfigInv'\n<1>1. /\\ Len(log[i]) \\in Nat\n      /\\ nextIndex[i][j] \\in Nat \\ {0}\n      /\\ commitIndex[i] \\in Nat\n  BY HRP!SMTT(\"r5\") DEF HRConfigInv, HRConfigBound\n<1>2. Len(SubSeq(log[i],nextIndex[i][j],Len(log[i]))) \\in Nat\n  BY <1>1, HRSliceLength, HRP!SMTT(\"r5\")\n<1>3. QED\n  BY <1>1, <1>2, HRMessageTags, HRBagDomains, HRS!EmptySeq, HRP!SMTT(\"r10\")\n     DEF HRConfigInv, HRMessageShape, ReplicateEntries, Send,\n         LastLogIndex, logVars, leaderVars, configVars\n\nLEMMA HRConfigInvHeartbeat ==\n  ASSUME HRConfigInv, NEW i \\in Server, NEW j \\in Server, SendHeartbeat(i,j)\n  PROVE HRConfigInv'\nBY HRMessageTags, HRBagDomains, HRS!EmptySeq, HRP!SMTT(\"r10\")\n   DEF HRConfigInv, HRMessageShape, SendHeartbeat, Send,\n       logVars, leaderVars, configVars\n\nLEMMA HRConfigInvCrash ==\n  ASSUME HRConfigInv, NEW i \\in Server, Crash(i)\n  PROVE HRConfigInv'\n<1>1. Len(log[i]) \\in Nat\n  BY HRP!SMTT(\"r5\") DEF HRConfigInv, HRConfigBound\n<1>2. /\\ LastConfigIndex(log[i]) \\in Nat\n      /\\ PreviousConfigIndex(log[i]) \\in Nat\n  BY <1>1, HRConfigIndices, HRP!SMTT(\"r5\")\n<1>3. HRConfigBound(log[i],PreviousConfigIndex(log[i]),LastConfigIndex(log[i]))\n  BY <1>1, <1>2, HRBoundFromIndices, HRP!SMTT(\"r5\")\n<1>4. /\\ log' = [z \\in Server |-> log'[z]]\n      /\\ commitIndex' \\in [Server -> Nat]\n      /\\ committedConfigIndex' \\in [Server -> Nat]\n      /\\ latestConfigIndex' \\in [Server -> Nat]\n      /\\ nextIndex' \\in [Server -> [Server -> Nat \\ {0}]]\n      /\\ matchIndex' \\in [Server -> [Server -> Nat]]\n  <2>1. log' = [z \\in Server |-> log'[z]]\n    BY <1>2, HRP!SMTT(\"r5\") DEF HRConfigInv, Crash\n  <2>2. commitIndex' \\in [Server -> Nat]\n    BY <1>2, HRP!SMTT(\"r5\") DEF HRConfigInv, Crash\n  <2>3. committedConfigIndex' \\in [Server -> Nat]\n    BY <1>2, HRP!SMTT(\"r5\") DEF HRConfigInv, Crash\n  <2>4. latestConfigIndex' \\in [Server -> Nat]\n    BY <1>2, HRP!SMTT(\"r5\") DEF HRConfigInv, Crash\n  <2>5. nextIndex' \\in [Server -> [Server -> Nat \\ {0}]]\n    BY <1>2, HRP!SMTT(\"r5\") DEF HRConfigInv, Crash\n  <2>6. matchIndex' \\in [Server -> [Server -> Nat]]\n    BY <1>2, HRP!SMTT(\"r5\") DEF HRConfigInv, Crash\n  <2>7. QED\n    BY <2>1, <2>2, <2>3, <2>4, <2>5, <2>6, HRP!SMTT(\"r5\")\n<1>5. \\A z \\in Server : HRConfigBound(log'[z],committedConfigIndex'[z],latestConfigIndex'[z])\n  BY <1>3, HRP!SMTT(\"r10\") DEF HRConfigInv, Crash\n<1>6. QED\n  BY <1>4, <1>5, HRP!SMTT(\"r5\") DEF HRConfigInv, Crash\n\nLEMMA HRConfigInvAdvance ==\n  ASSUME HRConfigInv, NEW i \\in Server, AdvanceCommitIndex(i)\n  PROVE HRConfigInv'\n<1>1. DEFINE eligible == {idx \\in (commitIndex[i]+1)..LastLogIndex(i) :\n                          /\\ IsQuorum(({i} \\cup {s \\in Server : matchIndex[i][s] >= idx})\n                                      \\cap latestConfig[i], latestConfig[i])\n                          /\\ log[i][idx].term = currentTerm[i]}\n<1>2. eligible # {} /\\ eligible \\subseteq 1..Len(log[i]) /\\ Len(log[i]) \\in Nat\n  BY HRP!SMTT(\"r5\") DEF eligible, AdvanceCommitIndex, LastLogIndex,\n       HRConfigInv, HRConfigBound\n<1>3. SetMax(eligible) \\in Nat\n  BY <1>2, HRMaximum, HRP!SMTT(\"r5\")\n<1>4. QED\n  BY <1>3, HRBoundCommit, HRP!SMTT(\"r10\")\n     DEF HRConfigInv, AdvanceCommitIndex, LastLogIndex, eligible, leaderVars\n\nLEMMA HRConfigInvOtherLocal ==\n  ASSUME HRConfigInv, NEW i \\in Server,\n         CheckLeaderLease(i) \\/ DiskBlock(i) \\/ DiskUnblock(i)\n  PROVE HRConfigInv'\nBY HRP!SMTT(\"r5\")\n   DEF HRConfigInv, CheckLeaderLease, DiskBlock, DiskUnblock,\n       logVars, leaderVars, configVars\n\nLEMMA HRConfigInvVoteRequest ==\n  ASSUME HRConfigInv, NEW m \\in DOMAIN messages, HandleRequestVoteRequest(m.mdest,m)\n  PROVE HRConfigInv'\nBY HRMessageTags, HRBagDomains, HRP!SMTT(\"r10\")\n   DEF HRConfigInv, HRMessageShape, HandleRequestVoteRequest, Reply, Discard,\n       logVars, leaderVars, configVars\n\nLEMMA HRConfigInvVoteResponse ==\n  ASSUME HRConfigInv, NEW m \\in DOMAIN messages, HandleRequestVoteResponse(m.mdest,m)\n  PROVE HRConfigInv'\nBY HRBagDomains, HRP!SMTT(\"r10\")\n   DEF HRConfigInv, HandleRequestVoteResponse, Discard,\n       logVars, leaderVars, configVars\n\nHRReceivedCommit(q,c,mc) == IF mc > c THEN Min(mc,Len(q)) ELSE c\nHRReceivedConfig(q,cc,c) == IF LastConfigIndex(q) <= c THEN LastConfigIndex(q)\n                          ELSE Max(PreviousConfigIndex(q),Min(cc,LastConfigIndex(q)))\n\nLEMMA HRReceiveBound ==\n  ASSUME NEW q, Len(q) \\in Nat, NEW c \\in Nat, NEW cc \\in Nat, NEW mc \\in Nat\n  PROVE /\\ HRReceivedCommit(q,c,mc) \\in Nat\n        /\\ HRReceivedConfig(q,cc,HRReceivedCommit(q,c,mc)) \\in Nat\n        /\\ LastConfigIndex(q) \\in Nat\n        /\\ HRConfigBound(q,HRReceivedConfig(q,cc,HRReceivedCommit(q,c,mc)),LastConfigIndex(q))\n<1>1. /\\ LastConfigIndex(q) \\in Nat\n      /\\ PreviousConfigIndex(q) \\in Nat\n      /\\ PreviousConfigIndex(q) <= LastConfigIndex(q)\n  BY HRConfigIndices, HRP!SMTT(\"r5\")\n<1>2. /\\ HRReceivedCommit(q,c,mc) \\in Nat\n      /\\ HRReceivedConfig(q,cc,HRReceivedCommit(q,c,mc)) \\in Nat\n      /\\ PreviousConfigIndex(q) <= HRReceivedConfig(q,cc,HRReceivedCommit(q,c,mc))\n  BY <1>1, HRP!SMTT(\"r5\") DEF HRReceivedCommit, HRReceivedConfig, Min, Max\n<1>3. QED\n  BY <1>1, <1>2, HRBoundFromIndices, HRP!SMTT(\"r5\")\n\nLEMMA HRConfigInvAppendRequest ==\n  ASSUME HRConfigInv, NEW m \\in DOMAIN messages, HandleAppendEntriesRequest(m.mdest,m)\n  PROVE HRConfigInv'\n<1>1. /\\ m.mprevLogIndex \\in Nat\n      /\\ m.mcommitIndex \\in Nat\n      /\\ Len(m.mentries) \\in Nat\n  BY HRP!SMTT(\"r5\") DEF HRConfigInv, HRMessageShape, HandleAppendEntriesRequest\n<1>2. m.mdest \\in Server => Len(MergeEntries(log[m.mdest],m.mprevLogIndex,m.mentries)) \\in Nat\n  BY <1>1, HRMergeLength, HRP!SMTT(\"r5\") DEF HRConfigInv, HRConfigBound\n<1>3. DEFINE qnew == MergeEntries(log[m.mdest],m.mprevLogIndex,m.mentries)\n<1> HIDE DEF qnew\n<1>4. m.mdest \\in Server =>\n        /\\ HRReceivedCommit(qnew,commitIndex[m.mdest],m.mcommitIndex) \\in Nat\n        /\\ HRReceivedConfig(qnew,committedConfigIndex[m.mdest],\n                       HRReceivedCommit(qnew,commitIndex[m.mdest],m.mcommitIndex)) \\in Nat\n        /\\ LastConfigIndex(qnew) \\in Nat\n        /\\ HRConfigBound(qnew,HRReceivedConfig(qnew,committedConfigIndex[m.mdest],\n                       HRReceivedCommit(qnew,commitIndex[m.mdest],m.mcommitIndex)),LastConfigIndex(qnew))\n  BY <1>1, <1>2, HRReceiveBound, HRP!SMTT(\"r5\") DEF HRConfigInv, qnew\n<1>5. \\A z \\in DOMAIN messages' : HRMessageShape(z)\n  BY <1>1, HRMessageTags, HRBagDomains, HRP!SMTT(\"r10\")\n     DEF HRConfigInv, HRMessageShape, HandleAppendEntriesRequest, Reply\n<1>6. QED\n  BY <1>4, <1>5, HRP!SMTT(\"r15\")\n     DEF HRConfigInv, HandleAppendEntriesRequest, qnew, HRReceivedCommit, HRReceivedConfig,\n         logVars, leaderVars, configVars\n\nLEMMA HRConfigInvReplicateResponse ==\n  ASSUME HRConfigInv, NEW m \\in DOMAIN messages, HandleReplicateResponse(m.mdest,m)\n  PROVE HRConfigInv'\n<1>1. m.mmatchIndex \\in Nat\n  BY HRP!SMTT(\"r5\") DEF HRConfigInv, HRMessageShape, HandleReplicateResponse\n<1>2. m.mdest \\in Server /\\ m.msource \\in Server =>\n        /\\ Max(nextIndex[m.mdest][m.msource],m.mmatchIndex+1) \\in Nat \\ {0}\n        /\\ Max(1,nextIndex[m.mdest][m.msource]-1) \\in Nat \\ {0}\n        /\\ Max(matchIndex[m.mdest][m.msource],m.mmatchIndex) \\in Nat\n  BY <1>1, HRP!SMTT(\"r5\") DEF HRConfigInv, Max\n<1>3. nextIndex' \\in [Server -> [Server -> Nat \\ {0}]]\n  BY <1>2, HRP!SMTT(\"r10\") DEF HRConfigInv, HandleReplicateResponse, leaderVars\n<1>4. matchIndex' \\in [Server -> [Server -> Nat]]\n  BY <1>2, HRP!SMTT(\"r10\") DEF HRConfigInv, HandleReplicateResponse, leaderVars\n<1>5. \\A z \\in DOMAIN messages' : HRMessageShape(z)\n  BY HRBagDomains, HRP!SMTT(\"r5\") DEF HRConfigInv, HandleReplicateResponse, Discard\n<1>6. QED\n  BY <1>3, <1>4, <1>5, HRP!SMTT(\"r5\")\n     DEF HRConfigInv, HandleReplicateResponse, logVars, configVars\n\nLEMMA HRConfigInvOtherMessage ==\n  ASSUME HRConfigInv, NEW m \\in DOMAIN messages,\n         HandleHeartbeatResponse(m.mdest,m) \\/ DropStaleMessage(m) \\/ LoseMessage(m)\n  PROVE HRConfigInv'\nBY HRBagDomains, HRP!SMTT(\"r10\")\n   DEF HRConfigInv, HandleHeartbeatResponse, DropStaleMessage, LoseMessage, Discard,\n       logVars, leaderVars, configVars\n\nLEMMA HRConfigInvStep == HRConfigInv /\\ [Next]_vars => HRConfigInv'\n<1>1. HRConfigInv /\\ ProtocolNext => HRConfigInv'\n  BY HRConfigInvTimeout, HRConfigInvLeader, HRConfigInvPersist, HRConfigInvClient,\n     HRConfigInvPropose, HRConfigInvReplicate, HRConfigInvHeartbeat, HRConfigInvCrash,\n     HRConfigInvAdvance, HRConfigInvOtherLocal, HRConfigInvVoteRequest,\n     HRConfigInvVoteResponse, HRConfigInvAppendRequest, HRConfigInvReplicateResponse,\n     HRConfigInvOtherMessage\n     DEF ProtocolNext\n<1>2. HRConfigInv /\\ UNCHANGED vars => HRConfigInv'\n  BY HRP!SMTT(\"r5\")\n     DEF HRConfigInv, vars, protocolVars, serverVars, logVars, leaderVars,\n         candidateVars, leaseVars, diskVars, configVars, persistVars, historyVars\n<1>3. QED\n  BY <1>1, <1>2 DEF Next\n\nLEMMA HRConfigInvAlways == Spec => []HRConfigInv\nBY HRInitialConfigInv, HRConfigInvStep, HRP!PTL DEF Spec\n\n\\* END AGENT HELPERS\n\nTHEOREM LeaderCompletenessCorrect == Spec => []LeaderCompleteness\n\\* BEGIN AGENT PROOF HashicorpRaft/HashicorpRaft_LeaderCompletenessCorrect.tla\n<1>1. Init => LeaderCompleteness\n  BY HRP!SMTT(\"r5\") DEF Init, LeaderCompleteness\n<1>2. LeaderCompleteness /\\ UNCHANGED vars => LeaderCompleteness'\n  BY HRP!SMTT(\"r5\")\n     DEF LeaderCompleteness, vars, protocolVars, historyVars, logVars\n<1>3. HRConfigInv /\\ LeaderCompleteness /\\ Next => LeaderCompleteness'\n  BY HRP!SMTT(\"r5\") DEF LeaderCompleteness, Next, RecordEvents\n<1>4. QED\n  BY <1>1, <1>2, <1>3, HRConfigInvAlways, HRP!PTL DEF Spec\n\\* END AGENT PROOF HashicorpRaft/HashicorpRaft_LeaderCompletenessCorrect.tla\n\nTHEOREM StateMachineSafetyCorrect == Spec => []StateMachineSafety\n\\* BEGIN AGENT PROOF HashicorpRaft/HashicorpRaft_StateMachineSafetyCorrect.tla\n<1>1. Init => StateMachineSafety\n  BY HRP!SMTT(\"r5\") DEF Init, StateMachineSafety\n<1>2. StateMachineSafety /\\ UNCHANGED vars => StateMachineSafety'\n  BY HRP!SMTT(\"r5\")\n     DEF StateMachineSafety, vars, protocolVars, historyVars, logVars\n<1>3. HRConfigInv /\\ StateMachineSafety /\\ Next => StateMachineSafety'\n  BY HRP!SMTT(\"r5\") DEF StateMachineSafety, Next, RecordEvents\n<1>4. QED\n  BY <1>1, <1>2, <1>3, HRConfigInvAlways, HRP!PTL DEF Spec\n\\* END AGENT PROOF HashicorpRaft/HashicorpRaft_StateMachineSafetyCorrect.tla\n\nTHEOREM CommittedEntriesPreservedCorrect == Spec => []CommittedEntriesPreserved\n\\* BEGIN AGENT PROOF HashicorpRaft/HashicorpRaft_CommittedEntriesPreservedCorrect.tla\n<1>1. Init => CommittedEntriesPreserved\n  BY HRP!SMTT(\"r5\") DEF Init, CommittedEntriesPreserved\n<1>2. CommittedEntriesPreserved /\\ UNCHANGED vars => CommittedEntriesPreserved'\n  BY HRP!SMTT(\"r5\")\n     DEF CommittedEntriesPreserved, vars, protocolVars, historyVars, logVars\n<1>3. HRConfigInv /\\ CommittedEntriesPreserved /\\ Next => CommittedEntriesPreserved'\n  BY HRP!SMTT(\"r5\") DEF CommittedEntriesPreserved, Next, RecordEvents\n<1>4. QED\n  BY <1>1, <1>2, <1>3, HRConfigInvAlways, HRP!PTL DEF Spec\n\\* END AGENT PROOF HashicorpRaft/HashicorpRaft_CommittedEntriesPreservedCorrect.tla\n\nTHEOREM LogMatchingCorrect == Spec => []LogMatching\n\\* BEGIN AGENT PROOF HashicorpRaft/HashicorpRaft_LogMatchingCorrect.tla\n<1>1. Init => LogMatching\n  BY HRS!EmptySeq, HRP!SMTT(\"r5\") DEF Init, LogMatching, ProtocolInit, Min\n<1>2. LogMatching /\\ UNCHANGED vars => LogMatching'\n  BY HRP!SMTT(\"r5\")\n     DEF LogMatching, vars, protocolVars, historyVars, logVars\n<1>3. HRConfigInv /\\ LogMatching /\\ Next => LogMatching'\n  BY HRP!SMTT(\"r5\") DEF LogMatching, Next, RecordEvents\n<1>4. QED\n  BY <1>1, <1>2, <1>3, HRConfigInvAlways, HRP!PTL DEF Spec\n\\* END AGENT PROOF HashicorpRaft/HashicorpRaft_LogMatchingCorrect.tla\n\nTHEOREM ElectionSafetyCorrect == Spec => []ElectionSafety\n\\* BEGIN AGENT PROOF HashicorpRaft/HashicorpRaft_ElectionSafetyCorrect.tla\n<1>1. Init => ElectionSafety\n  BY HRP!SMTT(\"r5\") DEF Init, ElectionSafety\n<1>2. ElectionSafety /\\ UNCHANGED vars => ElectionSafety'\n  BY HRP!SMTT(\"r5\")\n     DEF ElectionSafety, vars, protocolVars, historyVars, logVars\n<1>3. HRConfigInv /\\ ElectionSafety /\\ Next => ElectionSafety'\n  BY HRP!SMTT(\"r5\") DEF ElectionSafety, Next, RecordEvents\n<1>4. QED\n  BY <1>1, <1>2, <1>3, HRConfigInvAlways, HRP!PTL DEF Spec\n\\* END AGENT PROOF HashicorpRaft/HashicorpRaft_ElectionSafetyCorrect.tla\n\nTHEOREM ConfigurationSafetyCorrect == Spec => []ConfigurationSafety\n\\* BEGIN AGENT PROOF HashicorpRaft/HashicorpRaft_ConfigurationSafetyCorrect.tla\nBY HRConfigInvAlways, HRConfigInvSafety, HRP!PTL\n\\* END AGENT PROOF HashicorpRaft/HashicorpRaft_ConfigurationSafetyCorrect.tla\n====\n",
+  "units": {
+    "HashicorpRaft/HashicorpRaft_LeaderCompletenessCorrect.tla": {
+      "id": "HashicorpRaft/HashicorpRaft_LeaderCompletenessCorrect.tla",
+      "name": "LeaderCompletenessCorrect",
+      "kind": "target",
+      "lineStart": 514,
+      "lineEnd": 524,
+      "proofLines": [
+        516,
+        517,
+        518,
+        519,
+        520,
+        521,
+        522,
+        523,
+        524
+      ],
+      "proofRange": [
+        516,
+        524
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:HRConfigInvAlways"
+      ]
+    },
+    "HashicorpRaft/HashicorpRaft_StateMachineSafetyCorrect.tla": {
+      "id": "HashicorpRaft/HashicorpRaft_StateMachineSafetyCorrect.tla",
+      "name": "StateMachineSafetyCorrect",
+      "kind": "target",
+      "lineStart": 527,
+      "lineEnd": 537,
+      "proofLines": [
+        529,
+        530,
+        531,
+        532,
+        533,
+        534,
+        535,
+        536,
+        537
+      ],
+      "proofRange": [
+        529,
+        537
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:HRConfigInvAlways"
+      ]
+    },
+    "HashicorpRaft/HashicorpRaft_CommittedEntriesPreservedCorrect.tla": {
+      "id": "HashicorpRaft/HashicorpRaft_CommittedEntriesPreservedCorrect.tla",
+      "name": "CommittedEntriesPreservedCorrect",
+      "kind": "target",
+      "lineStart": 540,
+      "lineEnd": 550,
+      "proofLines": [
+        542,
+        543,
+        544,
+        545,
+        546,
+        547,
+        548,
+        549,
+        550
+      ],
+      "proofRange": [
+        542,
+        550
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:HRConfigInvAlways"
+      ]
+    },
+    "HashicorpRaft/HashicorpRaft_LogMatchingCorrect.tla": {
+      "id": "HashicorpRaft/HashicorpRaft_LogMatchingCorrect.tla",
+      "name": "LogMatchingCorrect",
+      "kind": "target",
+      "lineStart": 553,
+      "lineEnd": 563,
+      "proofLines": [
+        555,
+        556,
+        557,
+        558,
+        559,
+        560,
+        561,
+        562,
+        563
+      ],
+      "proofRange": [
+        555,
+        563
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:HRConfigInvAlways"
+      ]
+    },
+    "HashicorpRaft/HashicorpRaft_ElectionSafetyCorrect.tla": {
+      "id": "HashicorpRaft/HashicorpRaft_ElectionSafetyCorrect.tla",
+      "name": "ElectionSafetyCorrect",
+      "kind": "target",
+      "lineStart": 566,
+      "lineEnd": 576,
+      "proofLines": [
+        568,
+        569,
+        570,
+        571,
+        572,
+        573,
+        574,
+        575,
+        576
+      ],
+      "proofRange": [
+        568,
+        576
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:HRConfigInvAlways"
+      ]
+    },
+    "HashicorpRaft/HashicorpRaft_ConfigurationSafetyCorrect.tla": {
+      "id": "HashicorpRaft/HashicorpRaft_ConfigurationSafetyCorrect.tla",
+      "name": "ConfigurationSafetyCorrect",
+      "kind": "target",
+      "lineStart": 579,
+      "lineEnd": 581,
+      "proofLines": [
+        581
+      ],
+      "proofRange": [
+        581,
+        581
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:HRConfigInvAlways",
+        "helper:HRConfigInvSafety"
+      ]
+    },
+    "helper:HRFiniteBridge": {
+      "id": "helper:HRFiniteBridge",
+      "name": "HRFiniteBridge",
+      "kind": "helper",
+      "lineStart": 11,
+      "lineEnd": 14,
+      "proofLines": [
+        14
+      ],
+      "proofRange": [
+        14,
+        14
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HRMaximum": {
+      "id": "helper:HRMaximum",
+      "name": "HRMaximum",
+      "kind": "helper",
+      "lineStart": 16,
+      "lineEnd": 30,
+      "proofLines": [
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30
+      ],
+      "proofRange": [
+        20,
+        30
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HRConfigIndices": {
+      "id": "helper:HRConfigIndices",
+      "name": "HRConfigIndices",
+      "kind": "helper",
+      "lineStart": 32,
+      "lineEnd": 53,
+      "proofLines": [
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53
+      ],
+      "proofRange": [
+        39,
+        53
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:HRMaximum"
+      ]
+    },
+    "helper:HRSliceLength": {
+      "id": "helper:HRSliceLength",
+      "name": "HRSliceLength",
+      "kind": "helper",
+      "lineStart": 55,
+      "lineEnd": 61,
+      "proofLines": [
+        58,
+        59,
+        60,
+        61
+      ],
+      "proofRange": [
+        58,
+        61
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HRAppendFacts": {
+      "id": "helper:HRAppendFacts",
+      "name": "HRAppendFacts",
+      "kind": "helper",
+      "lineStart": 63,
+      "lineEnd": 68,
+      "proofLines": [
+        68
+      ],
+      "proofRange": [
+        68,
+        68
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HRConcatLength": {
+      "id": "helper:HRConcatLength",
+      "name": "HRConcatLength",
+      "kind": "helper",
+      "lineStart": 70,
+      "lineEnd": 73,
+      "proofLines": [
+        73
+      ],
+      "proofRange": [
+        73,
+        73
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HRMergeLength": {
+      "id": "helper:HRMergeLength",
+      "name": "HRMergeLength",
+      "kind": "helper",
+      "lineStart": 75,
+      "lineEnd": 133,
+      "proofLines": [
+        78,
+        79,
+        80,
+        81,
+        82,
+        83,
+        84,
+        85,
+        86,
+        87,
+        88,
+        89,
+        90,
+        91,
+        92,
+        93,
+        94,
+        95,
+        96,
+        97,
+        98,
+        99,
+        100,
+        101,
+        102,
+        103,
+        104,
+        105,
+        106,
+        107,
+        108,
+        109,
+        110,
+        111,
+        112,
+        113,
+        114,
+        115,
+        116,
+        117,
+        118,
+        119,
+        120,
+        121,
+        122,
+        123,
+        124,
+        125,
+        126,
+        127,
+        128,
+        129,
+        130,
+        131,
+        132,
+        133
+      ],
+      "proofRange": [
+        78,
+        133
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:HRConcatLength",
+        "helper:HRSliceLength"
+      ]
+    },
+    "helper:HRTwoElements": {
+      "id": "helper:HRTwoElements",
+      "name": "HRTwoElements",
+      "kind": "helper",
+      "lineStart": 135,
+      "lineEnd": 141,
+      "proofLines": [
+        138,
+        139,
+        140,
+        141
+      ],
+      "proofRange": [
+        138,
+        141
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:HRFiniteBridge"
+      ]
+    },
+    "helper:HRThreeElements": {
+      "id": "helper:HRThreeElements",
+      "name": "HRThreeElements",
+      "kind": "helper",
+      "lineStart": 143,
+      "lineEnd": 150,
+      "proofLines": [
+        146,
+        147,
+        148,
+        149,
+        150
+      ],
+      "proofRange": [
+        146,
+        150
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:HRFiniteBridge",
+        "helper:HRTwoElements"
+      ]
+    },
+    "helper:HRMessageTags": {
+      "id": "helper:HRMessageTags",
+      "name": "HRMessageTags",
+      "kind": "helper",
+      "lineStart": 152,
+      "lineEnd": 170,
+      "proofLines": [
+        158,
+        159,
+        160,
+        161,
+        162,
+        163,
+        164,
+        165,
+        166,
+        167,
+        168,
+        169,
+        170
+      ],
+      "proofRange": [
+        158,
+        170
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:HRThreeElements"
+      ]
+    },
+    "helper:HRBagDomains": {
+      "id": "helper:HRBagDomains",
+      "name": "HRBagDomains",
+      "kind": "helper",
+      "lineStart": 172,
+      "lineEnd": 176,
+      "proofLines": [
+        176
+      ],
+      "proofRange": [
+        176,
+        176
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HRBoundFromIndices": {
+      "id": "helper:HRBoundFromIndices",
+      "name": "HRBoundFromIndices",
+      "kind": "helper",
+      "lineStart": 203,
+      "lineEnd": 207,
+      "proofLines": [
+        207
+      ],
+      "proofRange": [
+        207,
+        207
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:HRConfigIndices"
+      ]
+    },
+    "helper:HRBoundValueAppend": {
+      "id": "helper:HRBoundValueAppend",
+      "name": "HRBoundValueAppend",
+      "kind": "helper",
+      "lineStart": 209,
+      "lineEnd": 213,
+      "proofLines": [
+        213
+      ],
+      "proofRange": [
+        213,
+        213
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:HRAppendFacts"
+      ]
+    },
+    "helper:HRBoundConfigAppend": {
+      "id": "helper:HRBoundConfigAppend",
+      "name": "HRBoundConfigAppend",
+      "kind": "helper",
+      "lineStart": 215,
+      "lineEnd": 218,
+      "proofLines": [
+        218
+      ],
+      "proofRange": [
+        218,
+        218
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:HRAppendFacts"
+      ]
+    },
+    "helper:HRBoundCommit": {
+      "id": "helper:HRBoundCommit",
+      "name": "HRBoundCommit",
+      "kind": "helper",
+      "lineStart": 220,
+      "lineEnd": 223,
+      "proofLines": [
+        223
+      ],
+      "proofRange": [
+        223,
+        223
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HRInitialConfigInv": {
+      "id": "helper:HRInitialConfigInv",
+      "name": "HRInitialConfigInv",
+      "kind": "helper",
+      "lineStart": 225,
+      "lineEnd": 228,
+      "proofLines": [
+        226,
+        227,
+        228
+      ],
+      "proofRange": [
+        226,
+        228
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HRConfigInvSafety": {
+      "id": "helper:HRConfigInvSafety",
+      "name": "HRConfigInvSafety",
+      "kind": "helper",
+      "lineStart": 230,
+      "lineEnd": 253,
+      "proofLines": [
+        231,
+        232,
+        233,
+        234,
+        235,
+        236,
+        237,
+        238,
+        239,
+        240,
+        241,
+        242,
+        243,
+        244,
+        245,
+        246,
+        247,
+        248,
+        249,
+        250,
+        251,
+        252,
+        253
+      ],
+      "proofRange": [
+        231,
+        253
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:HRFiniteBridge"
+      ]
+    },
+    "helper:HRConfigInvTimeout": {
+      "id": "helper:HRConfigInvTimeout",
+      "name": "HRConfigInvTimeout",
+      "kind": "helper",
+      "lineStart": 255,
+      "lineEnd": 260,
+      "proofLines": [
+        258,
+        259,
+        260
+      ],
+      "proofRange": [
+        258,
+        260
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:HRBagDomains",
+        "helper:HRMessageTags"
+      ]
+    },
+    "helper:HRConfigInvLeader": {
+      "id": "helper:HRConfigInvLeader",
+      "name": "HRConfigInvLeader",
+      "kind": "helper",
+      "lineStart": 262,
+      "lineEnd": 271,
+      "proofLines": [
+        265,
+        266,
+        267,
+        268,
+        269,
+        270,
+        271
+      ],
+      "proofRange": [
+        265,
+        271
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HRConfigInvPersist": {
+      "id": "helper:HRConfigInvPersist",
+      "name": "HRConfigInvPersist",
+      "kind": "helper",
+      "lineStart": 273,
+      "lineEnd": 278,
+      "proofLines": [
+        276,
+        277,
+        278
+      ],
+      "proofRange": [
+        276,
+        278
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:HRBagDomains",
+        "helper:HRMessageTags"
+      ]
+    },
+    "helper:HRConfigInvClient": {
+      "id": "helper:HRConfigInvClient",
+      "name": "HRConfigInvClient",
+      "kind": "helper",
+      "lineStart": 280,
+      "lineEnd": 284,
+      "proofLines": [
+        283,
+        284
+      ],
+      "proofRange": [
+        283,
+        284
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:HRBoundValueAppend"
+      ]
+    },
+    "helper:HRConfigInvPropose": {
+      "id": "helper:HRConfigInvPropose",
+      "name": "HRConfigInvPropose",
+      "kind": "helper",
+      "lineStart": 286,
+      "lineEnd": 322,
+      "proofLines": [
+        289,
+        290,
+        291,
+        292,
+        293,
+        294,
+        295,
+        296,
+        297,
+        298,
+        299,
+        300,
+        301,
+        302,
+        303,
+        304,
+        305,
+        306,
+        307,
+        308,
+        309,
+        310,
+        311,
+        312,
+        313,
+        314,
+        315,
+        316,
+        317,
+        318,
+        319,
+        320,
+        321,
+        322
+      ],
+      "proofRange": [
+        289,
+        322
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:HRAppendFacts",
+        "helper:HRBoundConfigAppend"
+      ]
+    },
+    "helper:HRConfigInvReplicate": {
+      "id": "helper:HRConfigInvReplicate",
+      "name": "HRConfigInvReplicate",
+      "kind": "helper",
+      "lineStart": 324,
+      "lineEnd": 336,
+      "proofLines": [
+        327,
+        328,
+        329,
+        330,
+        331,
+        332,
+        333,
+        334,
+        335,
+        336
+      ],
+      "proofRange": [
+        327,
+        336
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:HRBagDomains",
+        "helper:HRMessageTags",
+        "helper:HRSliceLength"
+      ]
+    },
+    "helper:HRConfigInvHeartbeat": {
+      "id": "helper:HRConfigInvHeartbeat",
+      "name": "HRConfigInvHeartbeat",
+      "kind": "helper",
+      "lineStart": 338,
+      "lineEnd": 343,
+      "proofLines": [
+        341,
+        342,
+        343
+      ],
+      "proofRange": [
+        341,
+        343
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:HRBagDomains",
+        "helper:HRMessageTags"
+      ]
+    },
+    "helper:HRConfigInvCrash": {
+      "id": "helper:HRConfigInvCrash",
+      "name": "HRConfigInvCrash",
+      "kind": "helper",
+      "lineStart": 345,
+      "lineEnd": 378,
+      "proofLines": [
+        348,
+        349,
+        350,
+        351,
+        352,
+        353,
+        354,
+        355,
+        356,
+        357,
+        358,
+        359,
+        360,
+        361,
+        362,
+        363,
+        364,
+        365,
+        366,
+        367,
+        368,
+        369,
+        370,
+        371,
+        372,
+        373,
+        374,
+        375,
+        376,
+        377,
+        378
+      ],
+      "proofRange": [
+        348,
+        378
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:HRBoundFromIndices",
+        "helper:HRConfigIndices"
+      ]
+    },
+    "helper:HRConfigInvAdvance": {
+      "id": "helper:HRConfigInvAdvance",
+      "name": "HRConfigInvAdvance",
+      "kind": "helper",
+      "lineStart": 380,
+      "lineEnd": 394,
+      "proofLines": [
+        383,
+        384,
+        385,
+        386,
+        387,
+        388,
+        389,
+        390,
+        391,
+        392,
+        393,
+        394
+      ],
+      "proofRange": [
+        383,
+        394
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:HRBoundCommit",
+        "helper:HRMaximum"
+      ]
+    },
+    "helper:HRConfigInvOtherLocal": {
+      "id": "helper:HRConfigInvOtherLocal",
+      "name": "HRConfigInvOtherLocal",
+      "kind": "helper",
+      "lineStart": 396,
+      "lineEnd": 402,
+      "proofLines": [
+        400,
+        401,
+        402
+      ],
+      "proofRange": [
+        400,
+        402
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:HRConfigInvVoteRequest": {
+      "id": "helper:HRConfigInvVoteRequest",
+      "name": "HRConfigInvVoteRequest",
+      "kind": "helper",
+      "lineStart": 404,
+      "lineEnd": 409,
+      "proofLines": [
+        407,
+        408,
+        409
+      ],
+      "proofRange": [
+        407,
+        409
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:HRBagDomains",
+        "helper:HRMessageTags"
+      ]
+    },
+    "helper:HRConfigInvVoteResponse": {
+      "id": "helper:HRConfigInvVoteResponse",
+      "name": "HRConfigInvVoteResponse",
+      "kind": "helper",
+      "lineStart": 411,
+      "lineEnd": 416,
+      "proofLines": [
+        414,
+        415,
+        416
+      ],
+      "proofRange": [
+        414,
+        416
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:HRBagDomains"
+      ]
+    },
+    "helper:HRReceiveBound": {
+      "id": "helper:HRReceiveBound",
+      "name": "HRReceiveBound",
+      "kind": "helper",
+      "lineStart": 422,
+      "lineEnd": 437,
+      "proofLines": [
+        428,
+        429,
+        430,
+        431,
+        432,
+        433,
+        434,
+        435,
+        436,
+        437
+      ],
+      "proofRange": [
+        428,
+        437
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:HRBoundFromIndices",
+        "helper:HRConfigIndices"
+      ]
+    },
+    "helper:HRConfigInvAppendRequest": {
+      "id": "helper:HRConfigInvAppendRequest",
+      "name": "HRConfigInvAppendRequest",
+      "kind": "helper",
+      "lineStart": 439,
+      "lineEnd": 464,
+      "proofLines": [
+        442,
+        443,
+        444,
+        445,
+        446,
+        447,
+        448,
+        449,
+        450,
+        451,
+        452,
+        453,
+        454,
+        455,
+        456,
+        457,
+        458,
+        459,
+        460,
+        461,
+        462,
+        463,
+        464
+      ],
+      "proofRange": [
+        442,
+        464
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:HRBagDomains",
+        "helper:HRMergeLength",
+        "helper:HRMessageTags",
+        "helper:HRReceiveBound"
+      ]
+    },
+    "helper:HRConfigInvReplicateResponse": {
+      "id": "helper:HRConfigInvReplicateResponse",
+      "name": "HRConfigInvReplicateResponse",
+      "kind": "helper",
+      "lineStart": 466,
+      "lineEnd": 484,
+      "proofLines": [
+        469,
+        470,
+        471,
+        472,
+        473,
+        474,
+        475,
+        476,
+        477,
+        478,
+        479,
+        480,
+        481,
+        482,
+        483,
+        484
+      ],
+      "proofRange": [
+        469,
+        484
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:HRBagDomains"
+      ]
+    },
+    "helper:HRConfigInvOtherMessage": {
+      "id": "helper:HRConfigInvOtherMessage",
+      "name": "HRConfigInvOtherMessage",
+      "kind": "helper",
+      "lineStart": 486,
+      "lineEnd": 492,
+      "proofLines": [
+        490,
+        491,
+        492
+      ],
+      "proofRange": [
+        490,
+        492
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:HRBagDomains"
+      ]
+    },
+    "helper:HRConfigInvStep": {
+      "id": "helper:HRConfigInvStep",
+      "name": "HRConfigInvStep",
+      "kind": "helper",
+      "lineStart": 494,
+      "lineEnd": 507,
+      "proofLines": [
+        495,
+        496,
+        497,
+        498,
+        499,
+        500,
+        501,
+        502,
+        503,
+        504,
+        505,
+        506,
+        507
+      ],
+      "proofRange": [
+        495,
+        507
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:HRConfigInvAdvance",
+        "helper:HRConfigInvAppendRequest",
+        "helper:HRConfigInvClient",
+        "helper:HRConfigInvCrash",
+        "helper:HRConfigInvHeartbeat",
+        "helper:HRConfigInvLeader",
+        "helper:HRConfigInvOtherLocal",
+        "helper:HRConfigInvOtherMessage",
+        "helper:HRConfigInvPersist",
+        "helper:HRConfigInvPropose",
+        "helper:HRConfigInvReplicate",
+        "helper:HRConfigInvReplicateResponse",
+        "helper:HRConfigInvTimeout",
+        "helper:HRConfigInvVoteRequest",
+        "helper:HRConfigInvVoteResponse"
+      ]
+    },
+    "helper:HRConfigInvAlways": {
+      "id": "helper:HRConfigInvAlways",
+      "name": "HRConfigInvAlways",
+      "kind": "helper",
+      "lineStart": 509,
+      "lineEnd": 510,
+      "proofLines": [
+        510
+      ],
+      "proofRange": [
+        510,
+        510
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:HRConfigInvStep",
+        "helper:HRInitialConfigInv"
+      ]
+    }
+  }
+}

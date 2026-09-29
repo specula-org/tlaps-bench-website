@@ -1,0 +1,814 @@
+{
+  "schemaVersion": 1,
+  "specId": "ZooKeeper/Zab.tla",
+  "sourceName": "Zab.tla",
+  "sourceSha256": "e155fc2a9b45391dba1137b7c93ff437f74bed7ff8b0f6ac5eaa9578b0a2a8aa",
+  "resultSha256": "066c95158035e8e6abdde6bd14ad4050bdf51a86b2258791cf8f0872eb24a00e",
+  "source": "---- MODULE Zab ----\nEXTENDS ZabDefs\n\n\\* BEGIN AGENT HELPERS\n\nLOCAL AgentFS == INSTANCE FiniteSetTheorems\n\nLEMMA AgentCardinalityBridge ==\n  \\A S : AgentFS!Cardinality(S) = Cardinality(S)\n  BY DEF AgentFS!Cardinality, Cardinality\n\nAgentAllInitial ==\n  /\\ Leadership1\n  /\\ Leadership2\n  /\\ PrefixConsistency\n  /\\ Integrity\n  /\\ Agreement\n  /\\ TotalOrder\n  /\\ LocalPrimaryOrder\n  /\\ GlobalPrimaryOrder\n  /\\ PrimaryIntegrity\n\nLEMMA AgentTxnReflexive == \\A t : TxnEqual(t,t)\n  BY DEF TxnEqual, ZxidEqual\n\nLEMMA AgentTxnSymmetric == \\A t,u : TxnEqual(t,u) => TxnEqual(u,t)\n  BY DEF TxnEqual, ZxidEqual\n\nLEMMA AgentTxnTransitive ==\n  \\A t,u,v : TxnEqual(t,u) /\\ TxnEqual(u,v) => TxnEqual(t,v)\n  BY DEF TxnEqual, ZxidEqual\n\nLEMMA AgentMinimumPair ==\n  ASSUME NEW a \\in Nat, NEW b \\in Nat\n  PROVE /\\ Minimum({a,b}) \\in Nat\n        /\\ Minimum({a,b}) <= a\n        /\\ Minimum({a,b}) <= b\n        /\\ Minimum({a,b}) = a \\/ Minimum({a,b}) = b\n<1>1. \\E n \\in {a,b} : \\A m \\in {a,b} : n <= m\n  BY SMTT(\"r5\")\n<1>2. QED\n  BY <1>1, SMTT(\"r5\") DEF Minimum\n\nLEMMA AgentInitSafety == Init => AgentAllInitial\n<1>1. Init => Leadership1\n  BY SMTT(\"r5\") DEF Init, InitServerVars, Leadership1, IsLeader,\n                      LOOKING, LEADING\n<1>2. Init => Leadership2\n  BY AgentFS!FS_EmptySet, AgentCardinalityBridge, SMTT(\"r5\")\n     DEF Init, InitVerifyVars, Leadership2, AgentFS!FS_EmptySet\n<1>3. Init => PrefixConsistency\n  BY AgentMinimumPair, SMTT(\"r5\")\n     DEF Init, InitServerVars, PrefixConsistency, TxnEqual, ZxidEqual\n<1>4. Init => Integrity\n  BY SMTT(\"r5\") DEF Init, InitServerVars, Integrity, IsFollower,\n                      LOOKING, FOLLOWING\n<1>5. Init => Agreement\n  BY SMTT(\"r5\") DEF Init, InitServerVars, Agreement, IsFollower,\n                      LOOKING, FOLLOWING\n<1>6. Init => TotalOrder\n  BY SMTT(\"r5\") DEF Init, InitServerVars, TotalOrder\n<1>7. Init => LocalPrimaryOrder\n  BY SMTT(\"r5\") DEF Init, InitServerVars, LocalPrimaryOrder\n<1>8. Init => GlobalPrimaryOrder\n  BY SMTT(\"r5\") DEF Init, InitServerVars, GlobalPrimaryOrder\n<1>9. Init => PrimaryIntegrity\n  BY SMTT(\"r5\") DEF Init, InitServerVars, PrimaryIntegrity,\n                      IsLeader, LOOKING, LEADING\n<1>10. QED\n  BY <1>1, <1>2, <1>3, <1>4, <1>5, <1>6, <1>7, <1>8, <1>9\n     DEF AgentAllInitial\n\n\\* Connections and learner sets describe disjoint leader/follower groups.\nAgentTopology ==\n  /\\ state \\in [Server -> {LOOKING, FOLLOWING, LEADING}]\n  /\\ learners \\in [Server -> SUBSET Server]\n  /\\ connectInfo \\in [Server -> Server \\cup {NullPoint}]\n  /\\ \\A s \\in Server:\n       /\\ (~IsLeader(s) => learners[s] = {})\n       /\\ (~IsFollower(s) => connectInfo[s] = NullPoint)\n       /\\ (IsLeader(s) =>\n             /\\ s \\in learners[s]\n             /\\ \\A t \\in learners[s] \\ {s}:\n                  IsFollower(t) /\\ connectInfo[t] = s)\n       /\\ (IsFollower(s) /\\ HasLeader(s) =>\n             IsLeader(connectInfo[s]) /\\ s \\in learners[connectInfo[s]])\n\nLEMMA AgentTopologyInitially == Init => AgentTopology\n  BY NullPointNotServer, SMTT(\"r5\")\n     DEF Init, InitServerVars, InitLeaderVars, InitFollowerVars,\n         AgentTopology, IsLeader, IsFollower, HasLeader,\n         LOOKING, FOLLOWING, LEADING\n\nLEMMA AgentDropLeader ==\n  ASSUME AgentTopology, NEW i \\in Server, IsLeader(i), LeaderShutdown(i)\n  PROVE AgentTopology'\n  BY SMTT(\"r20\") DEF AgentTopology, LeaderShutdown, IsLeader, IsFollower,\n                       HasLeader, LOOKING, LEADING, FOLLOWING\n\nLEMMA AgentDropFollower ==\n  ASSUME AgentTopology, NEW i \\in Server, NEW j \\in Server,\n         IsLeader(i), IsFollower(j), IsMyLeader(j,i),\n         RemoveLearner(i,j), FollowerShutdown(j)\n  PROVE AgentTopology'\n  BY NullPointNotServer, SMTT(\"r10\")\n     DEF AgentTopology, RemoveLearner, FollowerShutdown,\n         IsLeader, IsFollower, IsMyLeader, HasLeader, LOOKING, LEADING, FOLLOWING\n\nLEMMA AgentDropUnconnectedFollower ==\n  ASSUME AgentTopology, NEW i \\in Server, IsFollower(i), ~HasLeader(i),\n         FollowerShutdown(i), UNCHANGED learners\n  PROVE AgentTopology'\n  BY NullPointNotServer, SMTT(\"r10\")\n     DEF AgentTopology, FollowerShutdown, IsLeader, IsFollower, HasLeader,\n         LOOKING, LEADING, FOLLOWING\n\nLEMMA AgentTopologyPreserved ==\n  AgentTopology /\\ [Next]_vars => AgentTopology'\n<1>1. ASSUME AgentTopology, [Next]_vars\n      PROVE AgentTopology'\n  <2>1. CASE UNCHANGED vars\n    BY <1>1, <2>1, SMTT(\"r5\") DEF AgentTopology, vars, serverVars, leaderVars,\n                followerVars, IsLeader, IsFollower, HasLeader\n  <2>2. CASE \\E i \\in Server: UpdateLeader(i)\n    BY <1>1, <2>2, SMTT(\"r10\")\n       DEF AgentTopology, UpdateLeader, SwitchToLeader, IsLooking,\n           IsLeader, IsFollower, HasLeader, LOOKING, LEADING, FOLLOWING,\n           followerVars\n  <2>3. CASE \\E i \\in Server: FollowLeader(i)\n    BY <1>1, <2>3, SMTT(\"r10\")\n       DEF AgentTopology, FollowLeader, SwitchToLeader, SwitchToFollower,\n           IsLooking, IsLeader, IsFollower, HasLeader,\n           LOOKING, LEADING, FOLLOWING, followerVars, leaderVars\n  <2>4. CASE \\E i,j \\in Server: Timeout(i,j)\n    BY <1>1, <2>4, AgentDropLeader, AgentDropFollower, SMTT(\"r5\") DEF Timeout\n  <2>5. CASE \\E i \\in Server: Restart(i)\n    BY <1>1, <2>5, AgentDropLeader, AgentDropFollower,\n       AgentDropUnconnectedFollower, NullPointNotServer, SMTT(\"r10\")\n       DEF Restart, AgentTopology, IsMyLeader, IsLooking, IsLeader,\n           IsFollower, HasLeader, LOOKING, LEADING, FOLLOWING, followerVars\n  <2>6. CASE \\E i,j \\in Server: ConnectAndFollowerSendCEPOCH(i,j)\n    BY <1>1, <2>6, NullPointNotServer, SMTT(\"r10\")\n       DEF AgentTopology, ConnectAndFollowerSendCEPOCH,\n           IsLeader, IsFollower, HasLeader, HasNoLeader, IsMyLearner,\n           LOOKING, LEADING, FOLLOWING, serverVars\n  <2>7. CASE \\E i,j \\in Server: LeaderProcessCEPOCH(i,j)\n    BY <1>1, <2>7, SMTT(\"r5\") DEF AgentTopology, LeaderProcessCEPOCH, followerVars,\n               IsLeader, IsFollower, HasLeader\n  <2>8. CASE \\E i,j \\in Server: FollowerProcessNEWEPOCH(i,j)\n    BY <1>1, <2>8, NullPointNotServer, SMTT(\"r10\")\n       DEF AgentTopology, FollowerProcessNEWEPOCH, RemoveLearner,\n           FollowerShutdown, IsMyLeader, IsLeader, IsFollower, HasLeader,\n           LOOKING, LEADING, FOLLOWING, followerVars\n  <2>9. CASE \\E i,j \\in Server: LeaderProcessACKEPOCH(i,j)\n    BY <1>1, <2>9, SMTT(\"r5\") DEF AgentTopology, LeaderProcessACKEPOCH, followerVars,\n               IsLeader, IsFollower, HasLeader\n  <2>10. CASE \\E i,j \\in Server: FollowerProcessNEWLEADER(i,j)\n    BY <1>1, <2>10, NullPointNotServer, SMTT(\"r10\")\n       DEF AgentTopology, FollowerProcessNEWLEADER, RemoveLearner,\n           FollowerShutdown, IsMyLeader, IsLeader, IsFollower, HasLeader,\n           LOOKING, LEADING, FOLLOWING, followerVars\n  <2>11. CASE \\E i,j \\in Server: LeaderProcessACKLD(i,j)\n    BY <1>1, <2>11, SMTT(\"r5\") DEF AgentTopology, LeaderProcessACKLD, followerVars,\n                IsLeader, IsFollower, HasLeader\n  <2>12. CASE \\E i,j \\in Server: FollowerProcessCOMMITLD(i,j)\n    BY <1>1, <2>12, SMTT(\"r5\") DEF AgentTopology, FollowerProcessCOMMITLD,\n                leaderVars, followerVars, IsLeader, IsFollower, HasLeader\n  <2>13. CASE \\E i \\in Server: LeaderProcessRequest(i)\n    BY <1>1, <2>13, SMTT(\"r5\") DEF AgentTopology, LeaderProcessRequest,\n                leaderVars, followerVars, IsLeader, IsFollower, HasLeader\n  <2>14. CASE \\E i \\in Server: LeaderBroadcastPROPOSE(i)\n    BY <1>1, <2>14, SMTT(\"r5\") DEF AgentTopology, LeaderBroadcastPROPOSE,\n                serverVars, followerVars, IsLeader, IsFollower, HasLeader\n  <2>15. CASE \\E i,j \\in Server: FollowerProcessPROPOSE(i,j)\n    BY <1>1, <2>15, SMTT(\"r5\") DEF AgentTopology, FollowerProcessPROPOSE,\n                leaderVars, followerVars, IsLeader, IsFollower, HasLeader\n  <2>16. CASE \\E i,j \\in Server: LeaderProcessACK(i,j)\n    BY <1>1, <2>16, SMTT(\"r5\") DEF AgentTopology, LeaderProcessACK,\n                leaderVars, followerVars, IsLeader, IsFollower, HasLeader\n  <2>17. CASE \\E i,j \\in Server: FollowerProcessCOMMIT(i,j)\n    BY <1>1, <2>17, SMTT(\"r5\") DEF AgentTopology, FollowerProcessCOMMIT,\n                leaderVars, followerVars, IsLeader, IsFollower, HasLeader\n  <2>18. QED\n    BY SMTT(\"r5\"), <1>1, <2>1, <2>2, <2>3, <2>4, <2>5, <2>6, <2>7, <2>8,\n       <2>9, <2>10, <2>11, <2>12, <2>13, <2>14, <2>15, <2>16, <2>17\n       DEF Next\n<1>2. QED BY <1>1\n\nLEMMA AgentTopologyInvariant == Spec => []AgentTopology\n<1>1. Init => AgentTopology\n  BY AgentTopologyInitially\n<1>2. AgentTopology /\\ [Next]_vars => AgentTopology'\n  BY AgentTopologyPreserved\n<1>3. QED\n  BY <1>1, <1>2, PTL DEF Spec\n\nLEMMA AgentLearnersDisjoint ==\n  AgentTopology =>\n    \\A i,j \\in Server: IsLeader(i) /\\ IsLeader(j) /\\ i # j\n      => learners[i] \\cap learners[j] = {}\n  BY SMTT(\"r5\") DEF AgentTopology, IsLeader, IsFollower,\n                      LEADING, FOLLOWING\n\n\nAgentCommitNatural == \\A s \\in Server : lastCommitted[s].index \\in Nat\n\nAgentNoRepeats ==\n  \\A s \\in Server : \\A a,b \\in 1..lastCommitted[s].index :\n    TxnEqual(history[s][a], history[s][b]) => a = b\n\nAgentEpochOrdered ==\n  \\A s \\in Server : \\A a,b \\in 1..lastCommitted[s].index :\n    a <= b => history[s][a].zxid[1] <= history[s][b].zxid[1]\n\nAgentEpochTyped ==\n  \\A s \\in Server : \\A a \\in 1..lastCommitted[s].index :\n    history[s][a].zxid[1] \\in Nat\n\nAgentIntegrityAll ==\n  \\A s \\in Server : \\A a \\in 1..lastCommitted[s].index :\n    \\E p \\in proposalMsgsLog :\n      TxnEqual(history[s][a], [zxid |-> p.zxid, value |-> p.data])\n\nLEMMA AgentInitialHistoryFacts ==\n  Init => /\\ AgentCommitNatural\n          /\\ AgentNoRepeats\n          /\\ AgentEpochOrdered\n          /\\ AgentEpochTyped\n          /\\ AgentIntegrityAll\n<1>1. Init => AgentCommitNatural /\\ AgentNoRepeats\n  BY SMTT(\"r5\") DEF Init, InitServerVars, AgentCommitNatural, AgentNoRepeats\n<1>2. Init => AgentEpochOrdered /\\ AgentEpochTyped\n  BY SMTT(\"r5\") DEF Init, InitServerVars, AgentEpochOrdered,\n                      AgentEpochTyped, BootstrapTxn, BootstrapZxid\n<1>3. Init => AgentIntegrityAll\n  BY SMTT(\"r5\") DEF Init, InitServerVars, InitVerifyVars,\n                      BootstrapTxn, BootstrapZxid, BootstrapProposalMsgs,\n                      AgentIntegrityAll, TxnEqual, ZxidEqual\n<1>4. QED BY <1>1, <1>2, <1>3\n\n\\* A common committed index denotes the same transaction at both servers.\nLEMMA AgentCommonIndex ==\n  ASSUME AgentCommitNatural, PrefixConsistency,\n         NEW i \\in Server, NEW j \\in Server,\n         NEW k \\in 1..lastCommitted[i].index,\n         k \\in 1..lastCommitted[j].index\n  PROVE TxnEqual(history[i][k], history[j][k])\n<1>1. LET m == Minimum({lastCommitted[i].index, lastCommitted[j].index})\n      IN /\\ m \\in Nat\n         /\\ m = lastCommitted[i].index \\/ m = lastCommitted[j].index\n  BY AgentMinimumPair DEF AgentCommitNatural\n<1>2. LET m == Minimum({lastCommitted[i].index, lastCommitted[j].index})\n      IN m > 0 /\\ k \\in 1..m\n  BY <1>1, SMTT(\"r5\") DEF AgentCommitNatural\n<1>3. QED\n  BY <1>2 DEF PrefixConsistency\n\nLEMMA AgentAgreementFromPrefix ==\n  AgentCommitNatural /\\ PrefixConsistency => Agreement\n<1>1. ASSUME AgentCommitNatural, PrefixConsistency,\n             NEW i \\in Server, NEW j \\in Server,\n             NEW a \\in 1..lastCommitted[i].index,\n             NEW b \\in 1..lastCommitted[j].index\n      PROVE \\/ \\E k \\in 1..lastCommitted[j].index:\n                   TxnEqual(history[j][k], history[i][a])\n            \\/ \\E k \\in 1..lastCommitted[i].index:\n                   TxnEqual(history[i][k], history[j][b])\n  <2>1. CASE a <= lastCommitted[j].index\n    <3>1. a \\in 1..lastCommitted[j].index\n      BY <1>1, <2>1, SMTT(\"r5\") DEF AgentCommitNatural\n    <3>2. TxnEqual(history[i][a], history[j][a])\n      BY <1>1, <3>1, AgentCommonIndex\n    <3>3. QED BY <1>1, <3>1, <3>2, AgentTxnSymmetric\n  <2>2. CASE ~(a <= lastCommitted[j].index)\n    <3>1. b \\in 1..lastCommitted[i].index\n      BY <1>1, <2>2, SMTT(\"r5\") DEF AgentCommitNatural\n    <3>2. TxnEqual(history[i][b], history[j][b])\n      BY <1>1, <3>1, AgentCommonIndex\n    <3>3. QED BY <1>1, <3>1, <3>2\n  <2>3. QED BY <2>1, <2>2\n<1>2. QED BY <1>1 DEF Agreement\n\n\\* Prefix consistency and absence of repeated transactions fix the index\n\\* of every transaction that is committed at more than one server.\nLEMMA AgentEqualCommittedIndices ==\n  ASSUME AgentCommitNatural, PrefixConsistency, AgentNoRepeats,\n         NEW i \\in Server, NEW j \\in Server,\n         NEW a \\in 1..lastCommitted[i].index,\n         NEW b \\in 1..lastCommitted[j].index,\n         TxnEqual(history[i][a], history[j][b])\n  PROVE a = b\n<1>1. CASE a <= lastCommitted[j].index\n  <2>1. a \\in 1..lastCommitted[j].index\n    BY <1>1, SMTT(\"r5\") DEF AgentCommitNatural\n  <2>2. TxnEqual(history[i][a], history[j][a])\n    BY <2>1, AgentCommonIndex\n  <2>3. TxnEqual(history[j][a], history[j][b])\n    BY <2>2, AgentTxnSymmetric, AgentTxnTransitive\n  <2>4. QED BY <2>1, <2>3 DEF AgentNoRepeats\n<1>2. CASE ~(a <= lastCommitted[j].index)\n  <2>1. b \\in 1..lastCommitted[i].index\n    BY <1>2, SMTT(\"r5\") DEF AgentCommitNatural\n  <2>2. TxnEqual(history[i][b], history[j][b])\n    BY <2>1, AgentCommonIndex\n  <2>3. TxnEqual(history[i][a], history[i][b])\n    BY <2>2, AgentTxnSymmetric, AgentTxnTransitive\n  <2>4. QED BY <2>1, <2>3 DEF AgentNoRepeats\n<1>3. QED BY <1>1, <1>2\n\nLEMMA AgentTotalOrderFromPrefix ==\n  AgentCommitNatural /\\ PrefixConsistency /\\ AgentNoRepeats => TotalOrder\n<1>1. ASSUME AgentCommitNatural, PrefixConsistency, AgentNoRepeats,\n             NEW i \\in Server, NEW j \\in Server,\n             NEW a \\in 1..(lastCommitted[i].index - 1),\n             NEW b \\in (a+1)..lastCommitted[i].index,\n             NEW k \\in 1..lastCommitted[j].index,\n             TxnEqual(history[i][b], history[j][k])\n      PROVE /\\ TxnEqual(history[i][b], history[j][b])\n            /\\ b \\in 1..lastCommitted[j].index\n            /\\ a \\in 1..(b-1)\n            /\\ TxnEqual(history[i][a], history[j][a])\n  <2>1. a \\in 1..lastCommitted[i].index /\\ b \\in 1..lastCommitted[i].index\n    BY <1>1, SMTT(\"r5\") DEF AgentCommitNatural\n  <2>2. b = k\n    BY <1>1, <2>1, AgentEqualCommittedIndices\n  <2>3. a \\in 1..lastCommitted[j].index /\\ a \\in 1..(b-1)\n    BY <1>1, <2>1, <2>2, SMTT(\"r5\") DEF AgentCommitNatural\n  <2>4. TxnEqual(history[i][a], history[j][a])\n    BY <1>1, <2>1, <2>3, AgentCommonIndex\n  <2>5. QED BY <1>1, <2>2, <2>3, <2>4\n<1>2. QED\n  BY <1>1 DEF TotalOrder\n\nLEMMA AgentGlobalOrderFromEpochOrder ==\n  AgentCommitNatural /\\ AgentEpochTyped /\\ AgentEpochOrdered\n    => GlobalPrimaryOrder\n  BY SMTT(\"r5\") DEF AgentCommitNatural, AgentEpochTyped,\n                      AgentEpochOrdered, GlobalPrimaryOrder, EpochPrecedeInTxn\n\nLEMMA AgentIntegrityFromAll == AgentIntegrityAll => Integrity\n  BY DEF AgentIntegrityAll, Integrity\n\n\n\\* Candidate state strengthenings for the remaining protocol obligations.\nAgentLeadershipCandidate == AgentTopology /\\ Leadership1\nAgentPrefixCandidate == AgentCommitNatural /\\ PrefixConsistency\nAgentTotalCandidate == AgentPrefixCandidate /\\ AgentNoRepeats\nAgentGlobalCandidate == AgentCommitNatural /\\ AgentEpochTyped /\\ AgentEpochOrdered\n\n\\* END AGENT HELPERS\n\nTHEOREM Spec => []Leadership1\n\\* BEGIN AGENT PROOF ZooKeeper/Zab_Leadership1.tla\n<1>1. Init => AgentLeadershipCandidate\n  BY AgentInitSafety, AgentTopologyInitially\n     DEF AgentAllInitial, AgentLeadershipCandidate, AgentTopology, Leadership1, IsLeader, IsFollower, HasLeader\n<1>2. AgentLeadershipCandidate /\\ UNCHANGED vars => AgentLeadershipCandidate'\n  BY SMTT(\"r5\") DEF AgentLeadershipCandidate, AgentTopology, Leadership1, IsLeader, IsFollower, HasLeader, vars, serverVars, leaderVars, followerVars, electionVars, msgVars, verifyVars\n\\* The non-stuttering case also needs invariants relating queued messages\n\\* and quorum snapshots to the current epochs and committed histories.\n<1>3. AgentLeadershipCandidate /\\ Next => AgentLeadershipCandidate'\n  BY AgentTopologyPreserved, SMTT(\"r1\")\n     DEF AgentLeadershipCandidate, AgentTopology, Leadership1, IsLeader, IsFollower, HasLeader, Next, UpdateLeader, FollowLeader, Timeout, Restart,\n         ConnectAndFollowerSendCEPOCH, LeaderProcessCEPOCH,\n         FollowerProcessNEWEPOCH, LeaderProcessACKEPOCH,\n         FollowerProcessNEWLEADER, LeaderProcessACKLD,\n         FollowerProcessCOMMITLD, LeaderProcessRequest,\n         LeaderBroadcastPROPOSE, FollowerProcessPROPOSE,\n         LeaderProcessACK, FollowerProcessCOMMIT, vars, serverVars, leaderVars, followerVars, electionVars, msgVars, verifyVars\n<1>4. Spec => []AgentLeadershipCandidate\n  BY <1>1, <1>2, <1>3, PTL DEF Spec\n<1>5. AgentLeadershipCandidate => Leadership1\n  BY DEF AgentLeadershipCandidate, AgentTopology, Leadership1, IsLeader, IsFollower, HasLeader\n<1>6. QED\n  BY <1>4, <1>5, PTL\n\\* END AGENT PROOF ZooKeeper/Zab_Leadership1.tla\n\nTHEOREM Spec => []Leadership2\n\\* BEGIN AGENT PROOF ZooKeeper/Zab_Leadership2.tla\n<1>1. Init => Leadership2\n  BY AgentInitSafety DEF AgentAllInitial\n<1>2. Leadership2 /\\ UNCHANGED epochLeader => Leadership2'\n  BY DEF Leadership2\n\\* The missing election invariant must ensure that adding i here cannot\n\\* introduce a second member into the set for acceptedEpoch[i].\n<1>3. ASSUME Leadership2, NEW i \\in Server, NEW j \\in Server,\n             LeaderProcessACKEPOCH(i,j)\n      PROVE Leadership2'\n  BY <1>3, SMTT(\"r1\") DEF Leadership2, LeaderProcessACKEPOCH\n<1>4. Leadership2 /\\ Next => Leadership2'\n  BY <1>2, <1>3, SMTT(\"r5\")\n     DEF Next, UpdateLeader, FollowLeader, Timeout, Restart,\n         ConnectAndFollowerSendCEPOCH, LeaderProcessCEPOCH,\n         FollowerProcessNEWEPOCH, LeaderProcessACKEPOCH,\n         FollowerProcessNEWLEADER, LeaderProcessACKLD,\n         FollowerProcessCOMMITLD, LeaderProcessRequest,\n         LeaderBroadcastPROPOSE, FollowerProcessPROPOSE,\n         LeaderProcessACK, FollowerProcessCOMMIT, verifyVars\n<1>5. Leadership2 /\\ [Next]_vars => Leadership2'\n  BY <1>2, <1>4 DEF vars, verifyVars\n<1>6. QED\n  BY <1>1, <1>5, PTL DEF Spec\n\\* END AGENT PROOF ZooKeeper/Zab_Leadership2.tla\n\nTHEOREM Spec => []PrefixConsistency\n\\* BEGIN AGENT PROOF ZooKeeper/Zab_PrefixConsistency.tla\n<1>1. Init => AgentPrefixCandidate\n  BY AgentInitSafety, AgentInitialHistoryFacts\n     DEF AgentAllInitial, AgentPrefixCandidate, AgentCommitNatural, PrefixConsistency\n<1>2. AgentPrefixCandidate /\\ UNCHANGED vars => AgentPrefixCandidate'\n  BY SMTT(\"r5\") DEF AgentPrefixCandidate, AgentCommitNatural, PrefixConsistency, vars, serverVars, leaderVars, followerVars, electionVars, msgVars, verifyVars\n\\* The non-stuttering case also needs invariants relating queued messages\n\\* and quorum snapshots to the current epochs and committed histories.\n<1>3. AgentPrefixCandidate /\\ Next => AgentPrefixCandidate'\n  BY SMTT(\"r1\")\n     DEF AgentPrefixCandidate, AgentCommitNatural, PrefixConsistency, Next, UpdateLeader, FollowLeader, Timeout, Restart,\n         ConnectAndFollowerSendCEPOCH, LeaderProcessCEPOCH,\n         FollowerProcessNEWEPOCH, LeaderProcessACKEPOCH,\n         FollowerProcessNEWLEADER, LeaderProcessACKLD,\n         FollowerProcessCOMMITLD, LeaderProcessRequest,\n         LeaderBroadcastPROPOSE, FollowerProcessPROPOSE,\n         LeaderProcessACK, FollowerProcessCOMMIT, vars, serverVars, leaderVars, followerVars, electionVars, msgVars, verifyVars\n<1>4. Spec => []AgentPrefixCandidate\n  BY <1>1, <1>2, <1>3, PTL DEF Spec\n<1>5. AgentPrefixCandidate => PrefixConsistency\n  BY DEF AgentPrefixCandidate, AgentCommitNatural, PrefixConsistency\n<1>6. QED\n  BY <1>4, <1>5, PTL\n\\* END AGENT PROOF ZooKeeper/Zab_PrefixConsistency.tla\n\nTHEOREM Spec => []Integrity\n\\* BEGIN AGENT PROOF ZooKeeper/Zab_Integrity.tla\n<1>1. Init => AgentIntegrityAll\n  BY AgentInitialHistoryFacts\n     DEF AgentAllInitial, AgentIntegrityAll\n<1>2. AgentIntegrityAll /\\ UNCHANGED vars => AgentIntegrityAll'\n  BY SMTT(\"r5\") DEF AgentIntegrityAll, vars, serverVars, leaderVars, followerVars, electionVars, msgVars, verifyVars\n\\* The non-stuttering case also needs invariants relating queued messages\n\\* and quorum snapshots to the current epochs and committed histories.\n<1>3. AgentIntegrityAll /\\ Next => AgentIntegrityAll'\n  BY SMTT(\"r1\")\n     DEF AgentIntegrityAll, Next, UpdateLeader, FollowLeader, Timeout, Restart,\n         ConnectAndFollowerSendCEPOCH, LeaderProcessCEPOCH,\n         FollowerProcessNEWEPOCH, LeaderProcessACKEPOCH,\n         FollowerProcessNEWLEADER, LeaderProcessACKLD,\n         FollowerProcessCOMMITLD, LeaderProcessRequest,\n         LeaderBroadcastPROPOSE, FollowerProcessPROPOSE,\n         LeaderProcessACK, FollowerProcessCOMMIT, vars, serverVars, leaderVars, followerVars, electionVars, msgVars, verifyVars\n<1>4. Spec => []AgentIntegrityAll\n  BY <1>1, <1>2, <1>3, PTL DEF Spec\n<1>5. AgentIntegrityAll => Integrity\n  BY AgentIntegrityFromAll DEF AgentIntegrityAll\n<1>6. QED\n  BY <1>4, <1>5, PTL\n\\* END AGENT PROOF ZooKeeper/Zab_Integrity.tla\n\nTHEOREM Spec => []Agreement\n\\* BEGIN AGENT PROOF ZooKeeper/Zab_Agreement.tla\n<1>1. Init => AgentPrefixCandidate\n  BY AgentInitSafety, AgentInitialHistoryFacts\n     DEF AgentAllInitial, AgentPrefixCandidate, AgentCommitNatural, PrefixConsistency\n<1>2. AgentPrefixCandidate /\\ UNCHANGED vars => AgentPrefixCandidate'\n  BY SMTT(\"r5\") DEF AgentPrefixCandidate, AgentCommitNatural, PrefixConsistency, vars, serverVars, leaderVars, followerVars, electionVars, msgVars, verifyVars\n\\* The non-stuttering case also needs invariants relating queued messages\n\\* and quorum snapshots to the current epochs and committed histories.\n<1>3. AgentPrefixCandidate /\\ Next => AgentPrefixCandidate'\n  BY SMTT(\"r1\")\n     DEF AgentPrefixCandidate, AgentCommitNatural, PrefixConsistency, Next, UpdateLeader, FollowLeader, Timeout, Restart,\n         ConnectAndFollowerSendCEPOCH, LeaderProcessCEPOCH,\n         FollowerProcessNEWEPOCH, LeaderProcessACKEPOCH,\n         FollowerProcessNEWLEADER, LeaderProcessACKLD,\n         FollowerProcessCOMMITLD, LeaderProcessRequest,\n         LeaderBroadcastPROPOSE, FollowerProcessPROPOSE,\n         LeaderProcessACK, FollowerProcessCOMMIT, vars, serverVars, leaderVars, followerVars, electionVars, msgVars, verifyVars\n<1>4. Spec => []AgentPrefixCandidate\n  BY <1>1, <1>2, <1>3, PTL DEF Spec\n<1>5. AgentPrefixCandidate => Agreement\n  BY AgentAgreementFromPrefix DEF AgentPrefixCandidate, AgentCommitNatural, PrefixConsistency\n<1>6. QED\n  BY <1>4, <1>5, PTL\n\\* END AGENT PROOF ZooKeeper/Zab_Agreement.tla\n\nTHEOREM Spec => []TotalOrder\n\\* BEGIN AGENT PROOF ZooKeeper/Zab_TotalOrder.tla\n<1>1. Init => AgentTotalCandidate\n  BY AgentInitSafety, AgentInitialHistoryFacts\n     DEF AgentAllInitial, AgentTotalCandidate, AgentPrefixCandidate, AgentCommitNatural, PrefixConsistency, AgentNoRepeats\n<1>2. AgentTotalCandidate /\\ UNCHANGED vars => AgentTotalCandidate'\n  BY SMTT(\"r5\") DEF AgentTotalCandidate, AgentPrefixCandidate, AgentCommitNatural, PrefixConsistency, AgentNoRepeats, vars, serverVars, leaderVars, followerVars, electionVars, msgVars, verifyVars\n\\* The non-stuttering case also needs invariants relating queued messages\n\\* and quorum snapshots to the current epochs and committed histories.\n<1>3. AgentTotalCandidate /\\ Next => AgentTotalCandidate'\n  BY SMTT(\"r1\")\n     DEF AgentTotalCandidate, AgentPrefixCandidate, AgentCommitNatural, PrefixConsistency, AgentNoRepeats, Next, UpdateLeader, FollowLeader, Timeout, Restart,\n         ConnectAndFollowerSendCEPOCH, LeaderProcessCEPOCH,\n         FollowerProcessNEWEPOCH, LeaderProcessACKEPOCH,\n         FollowerProcessNEWLEADER, LeaderProcessACKLD,\n         FollowerProcessCOMMITLD, LeaderProcessRequest,\n         LeaderBroadcastPROPOSE, FollowerProcessPROPOSE,\n         LeaderProcessACK, FollowerProcessCOMMIT, vars, serverVars, leaderVars, followerVars, electionVars, msgVars, verifyVars\n<1>4. Spec => []AgentTotalCandidate\n  BY <1>1, <1>2, <1>3, PTL DEF Spec\n<1>5. AgentTotalCandidate => TotalOrder\n  BY AgentTotalOrderFromPrefix DEF AgentTotalCandidate, AgentPrefixCandidate, AgentCommitNatural, PrefixConsistency, AgentNoRepeats\n<1>6. QED\n  BY <1>4, <1>5, PTL\n\\* END AGENT PROOF ZooKeeper/Zab_TotalOrder.tla\n\nTHEOREM Spec => []LocalPrimaryOrder\n\\* BEGIN AGENT PROOF ZooKeeper/Zab_LocalPrimaryOrder.tla\n<1>1. Init => LocalPrimaryOrder\n  BY AgentInitSafety DEF AgentAllInitial\n<1>2. LocalPrimaryOrder /\\ UNCHANGED vars => LocalPrimaryOrder'\n  BY SMTT(\"r5\") DEF LocalPrimaryOrder, vars, serverVars, leaderVars, followerVars, electionVars, msgVars, verifyVars\n<1>3. LocalPrimaryOrder /\\ Next => LocalPrimaryOrder'\n  BY SMTT(\"r1\")\n     DEF LocalPrimaryOrder, Next, UpdateLeader, FollowLeader, Timeout, Restart,\n         ConnectAndFollowerSendCEPOCH, LeaderProcessCEPOCH,\n         FollowerProcessNEWEPOCH, LeaderProcessACKEPOCH,\n         FollowerProcessNEWLEADER, LeaderProcessACKLD,\n         FollowerProcessCOMMITLD, LeaderProcessRequest,\n         LeaderBroadcastPROPOSE, FollowerProcessPROPOSE,\n         LeaderProcessACK, FollowerProcessCOMMIT, vars, serverVars, leaderVars, followerVars, electionVars, msgVars, verifyVars\n<1>4. QED\n  BY <1>1, <1>2, <1>3, PTL DEF Spec\n\\* END AGENT PROOF ZooKeeper/Zab_LocalPrimaryOrder.tla\n\nTHEOREM Spec => []GlobalPrimaryOrder\n\\* BEGIN AGENT PROOF ZooKeeper/Zab_GlobalPrimaryOrder.tla\n<1>1. Init => AgentGlobalCandidate\n  BY AgentInitialHistoryFacts\n     DEF AgentAllInitial, AgentGlobalCandidate, AgentCommitNatural, AgentEpochTyped, AgentEpochOrdered\n<1>2. AgentGlobalCandidate /\\ UNCHANGED vars => AgentGlobalCandidate'\n  BY SMTT(\"r5\") DEF AgentGlobalCandidate, AgentCommitNatural, AgentEpochTyped, AgentEpochOrdered, vars, serverVars, leaderVars, followerVars, electionVars, msgVars, verifyVars\n\\* The non-stuttering case also needs invariants relating queued messages\n\\* and quorum snapshots to the current epochs and committed histories.\n<1>3. AgentGlobalCandidate /\\ Next => AgentGlobalCandidate'\n  BY SMTT(\"r1\")\n     DEF AgentGlobalCandidate, AgentCommitNatural, AgentEpochTyped, AgentEpochOrdered, Next, UpdateLeader, FollowLeader, Timeout, Restart,\n         ConnectAndFollowerSendCEPOCH, LeaderProcessCEPOCH,\n         FollowerProcessNEWEPOCH, LeaderProcessACKEPOCH,\n         FollowerProcessNEWLEADER, LeaderProcessACKLD,\n         FollowerProcessCOMMITLD, LeaderProcessRequest,\n         LeaderBroadcastPROPOSE, FollowerProcessPROPOSE,\n         LeaderProcessACK, FollowerProcessCOMMIT, vars, serverVars, leaderVars, followerVars, electionVars, msgVars, verifyVars\n<1>4. Spec => []AgentGlobalCandidate\n  BY <1>1, <1>2, <1>3, PTL DEF Spec\n<1>5. AgentGlobalCandidate => GlobalPrimaryOrder\n  BY AgentGlobalOrderFromEpochOrder DEF AgentGlobalCandidate, AgentCommitNatural, AgentEpochTyped, AgentEpochOrdered\n<1>6. QED\n  BY <1>4, <1>5, PTL\n\\* END AGENT PROOF ZooKeeper/Zab_GlobalPrimaryOrder.tla\n\nTHEOREM Spec => []PrimaryIntegrity\n\\* BEGIN AGENT PROOF ZooKeeper/Zab_PrimaryIntegrity.tla\n<1>1. Init => PrimaryIntegrity\n  BY AgentInitSafety DEF AgentAllInitial\n<1>2. PrimaryIntegrity /\\ UNCHANGED vars => PrimaryIntegrity'\n  BY SMTT(\"r5\") DEF PrimaryIntegrity, IsLeader, IsMyLearner, IsFollower, IsMyLeader, vars, serverVars, leaderVars, followerVars, electionVars, msgVars, verifyVars\n<1>3. PrimaryIntegrity /\\ Next => PrimaryIntegrity'\n  BY SMTT(\"r1\")\n     DEF PrimaryIntegrity, IsLeader, IsMyLearner, IsFollower, IsMyLeader, Next, UpdateLeader, FollowLeader, Timeout, Restart,\n         ConnectAndFollowerSendCEPOCH, LeaderProcessCEPOCH,\n         FollowerProcessNEWEPOCH, LeaderProcessACKEPOCH,\n         FollowerProcessNEWLEADER, LeaderProcessACKLD,\n         FollowerProcessCOMMITLD, LeaderProcessRequest,\n         LeaderBroadcastPROPOSE, FollowerProcessPROPOSE,\n         LeaderProcessACK, FollowerProcessCOMMIT, vars, serverVars, leaderVars, followerVars, electionVars, msgVars, verifyVars\n<1>4. QED\n  BY <1>1, <1>2, <1>3, PTL DEF Spec\n\\* END AGENT PROOF ZooKeeper/Zab_PrimaryIntegrity.tla\n====\n",
+  "units": {
+    "ZooKeeper/Zab_Leadership1.tla": {
+      "id": "ZooKeeper/Zab_Leadership1.tla",
+      "name": "ZooKeeper/Zab_Leadership1.tla",
+      "kind": "target",
+      "lineStart": 352,
+      "lineEnd": 375,
+      "proofLines": [
+        354,
+        355,
+        356,
+        357,
+        358,
+        361,
+        362,
+        363,
+        364,
+        365,
+        366,
+        367,
+        368,
+        369,
+        370,
+        371,
+        372,
+        373,
+        374,
+        375
+      ],
+      "proofRange": [
+        354,
+        375
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgentInitSafety",
+        "helper:AgentTopologyInitially",
+        "helper:AgentTopologyPreserved"
+      ]
+    },
+    "ZooKeeper/Zab_Leadership2.tla": {
+      "id": "ZooKeeper/Zab_Leadership2.tla",
+      "name": "ZooKeeper/Zab_Leadership2.tla",
+      "kind": "target",
+      "lineStart": 378,
+      "lineEnd": 402,
+      "proofLines": [
+        380,
+        381,
+        382,
+        383,
+        386,
+        387,
+        388,
+        389,
+        390,
+        391,
+        392,
+        393,
+        394,
+        395,
+        396,
+        397,
+        398,
+        399,
+        400,
+        401,
+        402
+      ],
+      "proofRange": [
+        380,
+        402
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgentInitSafety"
+      ]
+    },
+    "ZooKeeper/Zab_PrefixConsistency.tla": {
+      "id": "ZooKeeper/Zab_PrefixConsistency.tla",
+      "name": "ZooKeeper/Zab_PrefixConsistency.tla",
+      "kind": "target",
+      "lineStart": 405,
+      "lineEnd": 428,
+      "proofLines": [
+        407,
+        408,
+        409,
+        410,
+        411,
+        414,
+        415,
+        416,
+        417,
+        418,
+        419,
+        420,
+        421,
+        422,
+        423,
+        424,
+        425,
+        426,
+        427,
+        428
+      ],
+      "proofRange": [
+        407,
+        428
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgentInitSafety",
+        "helper:AgentInitialHistoryFacts"
+      ]
+    },
+    "ZooKeeper/Zab_Integrity.tla": {
+      "id": "ZooKeeper/Zab_Integrity.tla",
+      "name": "ZooKeeper/Zab_Integrity.tla",
+      "kind": "target",
+      "lineStart": 431,
+      "lineEnd": 454,
+      "proofLines": [
+        433,
+        434,
+        435,
+        436,
+        437,
+        440,
+        441,
+        442,
+        443,
+        444,
+        445,
+        446,
+        447,
+        448,
+        449,
+        450,
+        451,
+        452,
+        453,
+        454
+      ],
+      "proofRange": [
+        433,
+        454
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgentInitialHistoryFacts",
+        "helper:AgentIntegrityFromAll"
+      ]
+    },
+    "ZooKeeper/Zab_Agreement.tla": {
+      "id": "ZooKeeper/Zab_Agreement.tla",
+      "name": "ZooKeeper/Zab_Agreement.tla",
+      "kind": "target",
+      "lineStart": 457,
+      "lineEnd": 480,
+      "proofLines": [
+        459,
+        460,
+        461,
+        462,
+        463,
+        466,
+        467,
+        468,
+        469,
+        470,
+        471,
+        472,
+        473,
+        474,
+        475,
+        476,
+        477,
+        478,
+        479,
+        480
+      ],
+      "proofRange": [
+        459,
+        480
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgentAgreementFromPrefix",
+        "helper:AgentInitSafety",
+        "helper:AgentInitialHistoryFacts"
+      ]
+    },
+    "ZooKeeper/Zab_TotalOrder.tla": {
+      "id": "ZooKeeper/Zab_TotalOrder.tla",
+      "name": "ZooKeeper/Zab_TotalOrder.tla",
+      "kind": "target",
+      "lineStart": 483,
+      "lineEnd": 506,
+      "proofLines": [
+        485,
+        486,
+        487,
+        488,
+        489,
+        492,
+        493,
+        494,
+        495,
+        496,
+        497,
+        498,
+        499,
+        500,
+        501,
+        502,
+        503,
+        504,
+        505,
+        506
+      ],
+      "proofRange": [
+        485,
+        506
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgentInitSafety",
+        "helper:AgentInitialHistoryFacts",
+        "helper:AgentTotalOrderFromPrefix"
+      ]
+    },
+    "ZooKeeper/Zab_LocalPrimaryOrder.tla": {
+      "id": "ZooKeeper/Zab_LocalPrimaryOrder.tla",
+      "name": "ZooKeeper/Zab_LocalPrimaryOrder.tla",
+      "kind": "target",
+      "lineStart": 509,
+      "lineEnd": 525,
+      "proofLines": [
+        511,
+        512,
+        513,
+        514,
+        515,
+        516,
+        517,
+        518,
+        519,
+        520,
+        521,
+        522,
+        523,
+        524,
+        525
+      ],
+      "proofRange": [
+        511,
+        525
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgentInitSafety"
+      ]
+    },
+    "ZooKeeper/Zab_GlobalPrimaryOrder.tla": {
+      "id": "ZooKeeper/Zab_GlobalPrimaryOrder.tla",
+      "name": "ZooKeeper/Zab_GlobalPrimaryOrder.tla",
+      "kind": "target",
+      "lineStart": 528,
+      "lineEnd": 551,
+      "proofLines": [
+        530,
+        531,
+        532,
+        533,
+        534,
+        537,
+        538,
+        539,
+        540,
+        541,
+        542,
+        543,
+        544,
+        545,
+        546,
+        547,
+        548,
+        549,
+        550,
+        551
+      ],
+      "proofRange": [
+        530,
+        551
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgentGlobalOrderFromEpochOrder",
+        "helper:AgentInitialHistoryFacts"
+      ]
+    },
+    "ZooKeeper/Zab_PrimaryIntegrity.tla": {
+      "id": "ZooKeeper/Zab_PrimaryIntegrity.tla",
+      "name": "ZooKeeper/Zab_PrimaryIntegrity.tla",
+      "kind": "target",
+      "lineStart": 554,
+      "lineEnd": 570,
+      "proofLines": [
+        556,
+        557,
+        558,
+        559,
+        560,
+        561,
+        562,
+        563,
+        564,
+        565,
+        566,
+        567,
+        568,
+        569,
+        570
+      ],
+      "proofRange": [
+        556,
+        570
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgentInitSafety"
+      ]
+    },
+    "helper:AgentCardinalityBridge": {
+      "id": "helper:AgentCardinalityBridge",
+      "name": "AgentCardinalityBridge",
+      "kind": "helper",
+      "lineStart": 8,
+      "lineEnd": 10,
+      "proofLines": [
+        10
+      ],
+      "proofRange": [
+        10,
+        10
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgentTxnSymmetric": {
+      "id": "helper:AgentTxnSymmetric",
+      "name": "AgentTxnSymmetric",
+      "kind": "helper",
+      "lineStart": 26,
+      "lineEnd": 27,
+      "proofLines": [
+        27
+      ],
+      "proofRange": [
+        27,
+        27
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgentTxnTransitive": {
+      "id": "helper:AgentTxnTransitive",
+      "name": "AgentTxnTransitive",
+      "kind": "helper",
+      "lineStart": 29,
+      "lineEnd": 31,
+      "proofLines": [
+        31
+      ],
+      "proofRange": [
+        31,
+        31
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgentMinimumPair": {
+      "id": "helper:AgentMinimumPair",
+      "name": "AgentMinimumPair",
+      "kind": "helper",
+      "lineStart": 33,
+      "lineEnd": 42,
+      "proofLines": [
+        39,
+        40,
+        41,
+        42
+      ],
+      "proofRange": [
+        39,
+        42
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgentInitSafety": {
+      "id": "helper:AgentInitSafety",
+      "name": "AgentInitSafety",
+      "kind": "helper",
+      "lineStart": 44,
+      "lineEnd": 71,
+      "proofLines": [
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        58,
+        59,
+        60,
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68,
+        69,
+        70,
+        71
+      ],
+      "proofRange": [
+        45,
+        71
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgentCardinalityBridge",
+        "helper:AgentMinimumPair"
+      ]
+    },
+    "helper:AgentTopologyInitially": {
+      "id": "helper:AgentTopologyInitially",
+      "name": "AgentTopologyInitially",
+      "kind": "helper",
+      "lineStart": 88,
+      "lineEnd": 92,
+      "proofLines": [
+        89,
+        90,
+        91,
+        92
+      ],
+      "proofRange": [
+        89,
+        92
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgentDropLeader": {
+      "id": "helper:AgentDropLeader",
+      "name": "AgentDropLeader",
+      "kind": "helper",
+      "lineStart": 94,
+      "lineEnd": 98,
+      "proofLines": [
+        97,
+        98
+      ],
+      "proofRange": [
+        97,
+        98
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgentDropFollower": {
+      "id": "helper:AgentDropFollower",
+      "name": "AgentDropFollower",
+      "kind": "helper",
+      "lineStart": 100,
+      "lineEnd": 107,
+      "proofLines": [
+        105,
+        106,
+        107
+      ],
+      "proofRange": [
+        105,
+        107
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgentDropUnconnectedFollower": {
+      "id": "helper:AgentDropUnconnectedFollower",
+      "name": "AgentDropUnconnectedFollower",
+      "kind": "helper",
+      "lineStart": 109,
+      "lineEnd": 115,
+      "proofLines": [
+        113,
+        114,
+        115
+      ],
+      "proofRange": [
+        113,
+        115
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgentTopologyPreserved": {
+      "id": "helper:AgentTopologyPreserved",
+      "name": "AgentTopologyPreserved",
+      "kind": "helper",
+      "lineStart": 117,
+      "lineEnd": 187,
+      "proofLines": [
+        119,
+        120,
+        121,
+        122,
+        123,
+        124,
+        125,
+        126,
+        127,
+        128,
+        129,
+        130,
+        131,
+        132,
+        133,
+        134,
+        135,
+        136,
+        137,
+        138,
+        139,
+        140,
+        141,
+        142,
+        143,
+        144,
+        145,
+        146,
+        147,
+        148,
+        149,
+        150,
+        151,
+        152,
+        153,
+        154,
+        155,
+        156,
+        157,
+        158,
+        159,
+        160,
+        161,
+        162,
+        163,
+        164,
+        165,
+        166,
+        167,
+        168,
+        169,
+        170,
+        171,
+        172,
+        173,
+        174,
+        175,
+        176,
+        177,
+        178,
+        179,
+        180,
+        181,
+        182,
+        183,
+        184,
+        185,
+        186,
+        187
+      ],
+      "proofRange": [
+        119,
+        187
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgentDropFollower",
+        "helper:AgentDropLeader",
+        "helper:AgentDropUnconnectedFollower"
+      ]
+    },
+    "helper:AgentInitialHistoryFacts": {
+      "id": "helper:AgentInitialHistoryFacts",
+      "name": "AgentInitialHistoryFacts",
+      "kind": "helper",
+      "lineStart": 224,
+      "lineEnd": 239,
+      "proofLines": [
+        230,
+        231,
+        232,
+        233,
+        234,
+        235,
+        236,
+        237,
+        238,
+        239
+      ],
+      "proofRange": [
+        230,
+        239
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgentCommonIndex": {
+      "id": "helper:AgentCommonIndex",
+      "name": "AgentCommonIndex",
+      "kind": "helper",
+      "lineStart": 242,
+      "lineEnd": 256,
+      "proofLines": [
+        248,
+        249,
+        250,
+        251,
+        252,
+        253,
+        254,
+        255,
+        256
+      ],
+      "proofRange": [
+        248,
+        256
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgentMinimumPair"
+      ]
+    },
+    "helper:AgentAgreementFromPrefix": {
+      "id": "helper:AgentAgreementFromPrefix",
+      "name": "AgentAgreementFromPrefix",
+      "kind": "helper",
+      "lineStart": 258,
+      "lineEnd": 281,
+      "proofLines": [
+        260,
+        261,
+        262,
+        263,
+        264,
+        265,
+        266,
+        267,
+        268,
+        269,
+        270,
+        271,
+        272,
+        273,
+        274,
+        275,
+        276,
+        277,
+        278,
+        279,
+        280,
+        281
+      ],
+      "proofRange": [
+        260,
+        281
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgentCommonIndex",
+        "helper:AgentTxnSymmetric"
+      ]
+    },
+    "helper:AgentEqualCommittedIndices": {
+      "id": "helper:AgentEqualCommittedIndices",
+      "name": "AgentEqualCommittedIndices",
+      "kind": "helper",
+      "lineStart": 285,
+      "lineEnd": 308,
+      "proofLines": [
+        292,
+        293,
+        294,
+        295,
+        296,
+        297,
+        298,
+        299,
+        300,
+        301,
+        302,
+        303,
+        304,
+        305,
+        306,
+        307,
+        308
+      ],
+      "proofRange": [
+        292,
+        308
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgentCommonIndex",
+        "helper:AgentTxnSymmetric",
+        "helper:AgentTxnTransitive"
+      ]
+    },
+    "helper:AgentTotalOrderFromPrefix": {
+      "id": "helper:AgentTotalOrderFromPrefix",
+      "name": "AgentTotalOrderFromPrefix",
+      "kind": "helper",
+      "lineStart": 310,
+      "lineEnd": 332,
+      "proofLines": [
+        312,
+        313,
+        314,
+        315,
+        316,
+        317,
+        318,
+        319,
+        320,
+        321,
+        322,
+        323,
+        324,
+        325,
+        326,
+        327,
+        328,
+        329,
+        330,
+        331,
+        332
+      ],
+      "proofRange": [
+        312,
+        332
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgentCommonIndex",
+        "helper:AgentEqualCommittedIndices"
+      ]
+    },
+    "helper:AgentGlobalOrderFromEpochOrder": {
+      "id": "helper:AgentGlobalOrderFromEpochOrder",
+      "name": "AgentGlobalOrderFromEpochOrder",
+      "kind": "helper",
+      "lineStart": 334,
+      "lineEnd": 338,
+      "proofLines": [
+        337,
+        338
+      ],
+      "proofRange": [
+        337,
+        338
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgentIntegrityFromAll": {
+      "id": "helper:AgentIntegrityFromAll",
+      "name": "AgentIntegrityFromAll",
+      "kind": "helper",
+      "lineStart": 340,
+      "lineEnd": 341,
+      "proofLines": [
+        341
+      ],
+      "proofRange": [
+        341,
+        341
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    }
+  }
+}

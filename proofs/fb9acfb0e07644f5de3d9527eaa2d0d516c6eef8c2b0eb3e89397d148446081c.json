@@ -1,0 +1,115 @@
+{
+  "schemaVersion": 1,
+  "specId": "CahillSSI/CahillSerializability.tla",
+  "sourceName": "CahillSerializability.tla",
+  "sourceSha256": "f095387393cc28579bff3ce4cb86365b2c60fcd523894414090a3df4a47dcf15",
+  "resultSha256": "7ef6e7b9a6a8d09ffdb9c2c78464fd7e84c1939f07a4ded2e883cb9b31d8b848",
+  "source": "---- MODULE CahillSerializability ----\nEXTENDS CahillSerializabilityDefs\n\n\\* BEGIN AGENT HELPERS\nLOCAL CSProof == INSTANCE TLAPS\n\nLEMMA CSEmptyGraphHasNoCycle ==\n    FindAllNodesInAnyCycle({}) = {}\nBY CSProof!SMTT(\"r10\") DEF FindAllNodesInAnyCycle\n\nLEMMA CSNoCommitsImpliesSerializable ==\n    \\A h : CommittedTxns(h) = {} => CahillSerializable(h)\n<1>1. ASSUME NEW h, CommittedTxns(h) = {}\n      PROVE CahillSerializable(h)\n  <2>1. CahillMVSG(h) = {}\n    BY <1>1, CSProof!SMTT(\"r10\") DEF CahillMVSG\n  <2>2. QED\n    BY <2>1, CSEmptyGraphHasNoCycle\n       DEF CahillSerializable, IsCycle\n<1>2. QED BY <1>1\n\nLEMMA CSInitiallySerializable ==\n    Init => CahillSerializable(history)\n<1>1. Init => CommittedTxns(history) = {}\n  BY CSProof!SMTT(\"r10\")\n     DEF Init, CommittedTxns, SelectEvents, Range\n<1>2. QED BY <1>1, CSNoCommitsImpliesSerializable\n\nLEMMA CSStutteringPreservesSerializability ==\n    CahillSerializable(history) /\\ UNCHANGED allvars\n      => CahillSerializable(history')\nBY CSProof!SMTT(\"r10\") DEF allvars\n\\* END AGENT HELPERS\n\nTHEOREM CahillSerializableCorrect == Spec => []CahillSerializable(history)\n\\* BEGIN AGENT PROOF CahillSSI/CahillSerializability_CahillSerializableCorrect.tla\n<1>1. Init => CahillSerializable(history)\n  BY CSInitiallySerializable\n<1>2. CahillSerializable(history) /\\ [Next]_allvars\n        => (CahillSerializable(history))'\n  BY CSStutteringPreservesSerializability, CSProof!SMTT(\"r30\")\n     DEF Next, Begin, Commit, ChooseToAbort, Read,\n         StartWriteMayBlock, FinishBlockedWrite, LegitimateTermination\n<1>3. QED\n  BY <1>1, <1>2, CSProof!PTL DEF Spec\n\\* END AGENT PROOF CahillSSI/CahillSerializability_CahillSerializableCorrect.tla\n====\n",
+  "units": {
+    "CahillSSI/CahillSerializability_CahillSerializableCorrect.tla": {
+      "id": "CahillSSI/CahillSerializability_CahillSerializableCorrect.tla",
+      "name": "CahillSerializableCorrect",
+      "kind": "target",
+      "lineStart": 35,
+      "lineEnd": 45,
+      "proofLines": [
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45
+      ],
+      "proofRange": [
+        37,
+        45
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:CSInitiallySerializable",
+        "helper:CSStutteringPreservesSerializability"
+      ]
+    },
+    "helper:CSEmptyGraphHasNoCycle": {
+      "id": "helper:CSEmptyGraphHasNoCycle",
+      "name": "CSEmptyGraphHasNoCycle",
+      "kind": "helper",
+      "lineStart": 7,
+      "lineEnd": 9,
+      "proofLines": [
+        9
+      ],
+      "proofRange": [
+        9,
+        9
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:CSNoCommitsImpliesSerializable": {
+      "id": "helper:CSNoCommitsImpliesSerializable",
+      "name": "CSNoCommitsImpliesSerializable",
+      "kind": "helper",
+      "lineStart": 11,
+      "lineEnd": 20,
+      "proofLines": [
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20
+      ],
+      "proofRange": [
+        13,
+        20
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:CSEmptyGraphHasNoCycle"
+      ]
+    },
+    "helper:CSInitiallySerializable": {
+      "id": "helper:CSInitiallySerializable",
+      "name": "CSInitiallySerializable",
+      "kind": "helper",
+      "lineStart": 22,
+      "lineEnd": 27,
+      "proofLines": [
+        24,
+        25,
+        26,
+        27
+      ],
+      "proofRange": [
+        24,
+        27
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:CSNoCommitsImpliesSerializable"
+      ]
+    },
+    "helper:CSStutteringPreservesSerializability": {
+      "id": "helper:CSStutteringPreservesSerializability",
+      "name": "CSStutteringPreservesSerializability",
+      "kind": "helper",
+      "lineStart": 29,
+      "lineEnd": 32,
+      "proofLines": [
+        32
+      ],
+      "proofRange": [
+        32,
+        32
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    }
+  }
+}

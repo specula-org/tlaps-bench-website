@@ -1,0 +1,1132 @@
+{
+  "schemaVersion": 1,
+  "specId": "ZooKeeper_LowLevel/ZkV3_7_0.tla",
+  "sourceName": "ZkV3_7_0.tla",
+  "sourceSha256": "7e94a56c37cae6b7067358395146e5f7da19f70dce9c8fda9a93298083334e2a",
+  "resultSha256": "ae88c0bf2972101583bfde8dfd9ac37d20d2adb47423806b428941008bfe7e87",
+  "source": "---- MODULE ZkV3_7_0 ----\nEXTENDS ZkV3_7_0Defs\n\n\\* BEGIN AGENT HELPERS\nLOCAL ZKProofFinite == INSTANCE FiniteSetTheorems\n\nZKProofCommitType == \\A s \\in Server : lastCommitted[s].index \\in Nat\n\nZKProofCommonPrefix ==\n  \\A i, j \\in Server :\n    \\A k \\in (1..lastCommitted[i].index) \\cap (1..lastCommitted[j].index) :\n      TxnEqual(history[i][k], history[j][k])\n\nZKProofUniquePositions ==\n  \\A i, j \\in Server :\n    \\A k \\in 1..lastCommitted[i].index :\n      \\A l \\in 1..lastCommitted[j].index :\n        TxnEqual(history[i][k], history[j][l]) => k = l\n\nLEMMA ZKProofTxnReflexive == \\A t : TxnEqual(t, t)\nBY SMTT(\"r1\") DEF TxnEqual, ZxidEqual\n\nLEMMA ZKProofTxnSymmetric ==\n  \\A t, u : TxnEqual(t, u) => TxnEqual(u, t)\nBY SMTT(\"r1\") DEF TxnEqual, ZxidEqual\n\nLEMMA ZKProofMinimumPair ==\n  ASSUME NEW a \\in Int, NEW b \\in Int\n  PROVE /\\ Minimum({a, b}) \\in {a, b}\n        /\\ Minimum({a, b}) <= a\n        /\\ Minimum({a, b}) <= b\n        /\\ (a <= b => Minimum({a, b}) = a)\n        /\\ (b <= a => Minimum({a, b}) = b)\n<1>1. \\E n \\in {a, b} : \\A m \\in {a, b} : n <= m\n  BY SMTT(\"r1\")\n<1>2. {a, b} # {}\n  BY SMTT(\"r1\")\n<1>3. /\\ Minimum({a, b}) \\in {a, b}\n       /\\ \\A m \\in {a, b} : Minimum({a, b}) <= m\n  BY <1>1, <1>2, SMTT(\"r2\") DEF Minimum\n<1>4. QED BY <1>3, SMTT(\"r1\")\n\nLEMMA ZKProofPrefixByIndex ==\n  ZKProofCommitType /\\ PrefixConsistency => ZKProofCommonPrefix\n<1>1. ASSUME ZKProofCommitType, PrefixConsistency,\n             NEW i \\in Server, NEW j \\in Server,\n             NEW k \\in (1..lastCommitted[i].index) \\cap\n                       (1..lastCommitted[j].index)\n      PROVE TxnEqual(history[i][k], history[j][k])\n  <2>1. lastCommitted[i].index \\in Nat /\\ lastCommitted[j].index \\in Nat\n    BY <1>1, SMTT(\"r2\") DEF ZKProofCommitType\n  <2>2. LET m == Minimum({lastCommitted[i].index, lastCommitted[j].index})\n        IN /\\ m \\in {lastCommitted[i].index, lastCommitted[j].index}\n           /\\ k \\in 1..m\n           /\\ m > 0\n    BY <1>1, <2>1, ZKProofMinimumPair, SMTT(\"r2\")\n  <2>3. QED BY <1>1, <2>2, SMTT(\"r2\") DEF PrefixConsistency\n<1>2. QED BY <1>1, SMTT(\"r2\") DEF ZKProofCommonPrefix\n\nLEMMA ZKProofPrefixAgreement ==\n  ZKProofCommitType /\\ ZKProofCommonPrefix => Agreement\n<1>1. ASSUME ZKProofCommitType, ZKProofCommonPrefix,\n             NEW i \\in Server, NEW j \\in Server,\n             IsFollower(i), lastCommitted[i].index > 0,\n             IsFollower(j), lastCommitted[j].index > 0,\n             NEW k \\in 1..lastCommitted[i].index,\n             NEW l \\in 1..lastCommitted[j].index\n      PROVE \\/ \\E n \\in 1..lastCommitted[j].index :\n                  TxnEqual(history[j][n], history[i][k])\n            \\/ \\E n \\in 1..lastCommitted[i].index :\n                  TxnEqual(history[i][n], history[j][l])\n  <2>1. lastCommitted[i].index \\in Nat /\\ lastCommitted[j].index \\in Nat\n    BY <1>1, SMTT(\"r2\") DEF ZKProofCommitType\n  <2>2. CASE lastCommitted[i].index <= lastCommitted[j].index\n    <3>1. k \\in (1..lastCommitted[j].index) \\cap\n                 (1..lastCommitted[i].index)\n      BY <1>1, <2>1, <2>2, SMTT(\"r1\")\n    <3>2. TxnEqual(history[j][k], history[i][k])\n      BY <1>1, <3>1, SMTT(\"r2\") DEF ZKProofCommonPrefix\n    <3>3. QED BY <3>1, <3>2, SMTT(\"r2\")\n  <2>3. CASE lastCommitted[j].index <= lastCommitted[i].index\n    <3>1. l \\in (1..lastCommitted[i].index) \\cap\n                 (1..lastCommitted[j].index)\n      BY <1>1, <2>1, <2>3, SMTT(\"r1\")\n    <3>2. TxnEqual(history[i][l], history[j][l])\n      BY <1>1, <3>1, SMTT(\"r2\") DEF ZKProofCommonPrefix\n    <3>3. QED BY <3>1, <3>2, SMTT(\"r2\")\n  <2>4. QED BY <2>1, <2>2, <2>3, SMTT(\"r1\")\n<1>2. QED BY <1>1, SMTT(\"r2\") DEF Agreement\n\nLEMMA ZKProofPrefixTotalOrder ==\n  ZKProofCommitType /\\ ZKProofCommonPrefix /\\ ZKProofUniquePositions\n  => TotalOrder\n<1>1. ASSUME ZKProofCommitType, ZKProofCommonPrefix, ZKProofUniquePositions,\n             NEW i \\in Server, NEW j \\in Server,\n             lastCommitted[i].index >= 2, lastCommitted[j].index >= 2,\n             NEW k \\in 1..(lastCommitted[i].index - 1),\n             NEW l \\in (k + 1)..lastCommitted[i].index,\n             \\E n \\in 1..lastCommitted[j].index :\n               TxnEqual(history[i][l], history[j][n])\n      PROVE \\E n \\in 1..lastCommitted[j].index :\n              /\\ TxnEqual(history[i][l], history[j][n])\n              /\\ \\E m \\in 1..(n - 1) :\n                   TxnEqual(history[i][k], history[j][m])\n  <2>1. lastCommitted[i].index \\in Nat /\\ lastCommitted[j].index \\in Nat\n    BY <1>1, SMTT(\"r2\") DEF ZKProofCommitType\n  <2>2. PICK n \\in 1..lastCommitted[j].index :\n          TxnEqual(history[i][l], history[j][n])\n    BY <1>1, SMTT(\"r2\")\n  <2>3. /\\ k \\in 1..lastCommitted[i].index\n         /\\ l \\in 1..lastCommitted[i].index\n         /\\ k \\in 1..(l - 1)\n    BY <1>1, <2>1, SMTT(\"r1\")\n  <2>4. n = l\n    BY <1>1, <2>2, <2>3, SMTT(\"r2\") DEF ZKProofUniquePositions\n  <2>5. k \\in (1..lastCommitted[i].index) \\cap\n               (1..lastCommitted[j].index)\n    BY <1>1, <2>1, <2>2, <2>3, <2>4, SMTT(\"r1\")\n  <2>6. TxnEqual(history[i][k], history[j][k])\n    BY <1>1, <2>5, SMTT(\"r2\") DEF ZKProofCommonPrefix\n  <2>7. QED BY <2>2, <2>3, <2>4, <2>6, SMTT(\"r2\")\n<1>2. QED BY <1>1, SMTT(\"r2\") DEF TotalOrder\n\nLEMMA ZKProofInitLeadership1 == Init => Leadership1\nBY SMTT(\"r2\") DEF Init, InitServerVars, InitServerVarsL,\n  Leadership1, IsLeader, LOOKING, LEADING\n\nLEMMA ZKProofCardinalityAgreement ==\n  \\A S : Cardinality(S) = ZKProofFinite!Cardinality(S)\nBY Isa DEF Cardinality, ZKProofFinite!Cardinality\n\nLEMMA ZKProofInitLeadership2 == Init => Leadership2\nBY ZKProofFinite!FS_EmptySet, ZKProofCardinalityAgreement, SMTT(\"r2\")\n  DEF Init, InitVerifyVars, Leadership2\n\nLEMMA ZKProofInitCommitType == Init => ZKProofCommitType\nBY SMTT(\"r2\") DEF Init, InitServerVars, ZKProofCommitType\n\nLEMMA ZKProofInitPrefix == Init => PrefixConsistency\n<1>1. ASSUME Init, NEW i \\in Server, NEW j \\in Server\n      PROVE LET smaller == Minimum({lastCommitted[i].index,\n                                     lastCommitted[j].index})\n            IN \\/ smaller = 0\n               \\/ /\\ smaller > 0\n                  /\\ \\A index \\in 1..smaller :\n                       TxnEqual(history[i][index], history[j][index])\n  <2>1. /\\ lastCommitted[i].index = 1\n         /\\ lastCommitted[j].index = 1\n         /\\ history[i] = <<BootstrapTxn>>\n         /\\ history[j] = <<BootstrapTxn>>\n    BY <1>1, SMTT(\"r2\") DEF Init, InitServerVars, InitServerVarsL\n  <2>2. Minimum({lastCommitted[i].index, lastCommitted[j].index}) = 1\n    BY <2>1, ZKProofMinimumPair, SMTT(\"r1\")\n  <2>3. QED BY <2>1, <2>2, ZKProofTxnReflexive, SMTT(\"r1\")\n<1>2. QED BY <1>1, SMTT(\"r2\") DEF PrefixConsistency\n\nLEMMA ZKProofInitIntegrity == Init => Integrity\nBY SMTT(\"r2\") DEF Init, InitServerVars, InitServerVarsL,\n  Integrity, IsFollower, LOOKING, FOLLOWING\n\nLEMMA ZKProofInitAgreement == Init => Agreement\nBY SMTT(\"r2\") DEF Init, InitServerVars, InitServerVarsL,\n  Agreement, IsFollower, LOOKING, FOLLOWING\n\nLEMMA ZKProofInitTotalOrder == Init => TotalOrder\nBY SMTT(\"r2\") DEF Init, InitServerVars, TotalOrder\n\nLEMMA ZKProofInitLocalOrder == Init => LocalPrimaryOrder\nBY SMTT(\"r2\") DEF Init, InitServerVars, InitServerVarsL, LocalPrimaryOrder\n\nLEMMA ZKProofInitGlobalOrder == Init => GlobalPrimaryOrder\nBY SMTT(\"r2\") DEF Init, InitServerVars, GlobalPrimaryOrder\n\nLEMMA ZKProofInitPrimaryIntegrity == Init => PrimaryIntegrity\nBY SMTT(\"r2\") DEF Init, InitServerVars, InitServerVarsL,\n  PrimaryIntegrity, IsLeader, LOOKING, LEADING\n\n\n\\* The frame lemmas isolate the actions that can affect each safety formula.\n\\* They do not assert preservation for the remaining (modifying) actions.\n\nZKProofLeadership1Vars == <<state, zabState, acceptedEpoch>>\n\nZKProofLeadership1Changes ==\n  \\/ \\E i \\in Server : FLEHandleNotmsg(i)\n  \\/ \\E i \\in Server : FLEWaitNewNotmsg(i)\n  \\/ \\E i, j \\in Server : PartitionStart(i, j)\n  \\/ \\E i \\in Server : NodeCrash(i)\n  \\/ \\E i, j \\in Server : LeaderProcessFOLLOWERINFO(i, j)\n  \\/ \\E i, j \\in Server : FollowerProcessLEADERINFO(i, j)\n  \\/ \\E i, j \\in Server : LeaderProcessACKEPOCH(i, j)\n  \\/ \\E i, j \\in Server : LeaderProcessACKLD(i, j)\n  \\/ \\E i, j \\in Server : FollowerProcessUPTODATE(i, j)\n\nLEMMA ZKProofLeadership1Stutter ==\n  UNCHANGED ZKProofLeadership1Vars => (Leadership1 <=> Leadership1')\nBY SMTT(\"r2\") DEF ZKProofLeadership1Vars, Leadership1, IsLeader\n\nLEMMA ZKProofLeadership1Frame ==\n  [Next]_vars => (UNCHANGED ZKProofLeadership1Vars \\/ ZKProofLeadership1Changes)\nBY SMTT(\"r5\") DEF Next, vars, serverVars, electionVars, leaderVars,\n  followerVars, verifyVars, msgVars, envVars, serverVarsL,\n  electionVarsL, leaderVarsL, varsL, ZKProofLeadership1Vars, ZKProofLeadership1Changes,\n  FLEReceiveNotmsg, FLENotmsgTimeout, PartitionRecover, NodeStart, ConnectAndFollowerSendFOLLOWERINFO,\n  LeaderSyncFollower, FollowerProcessSyncMessage, FollowerProcessPROPOSALInSync, FollowerProcessCOMMITInSync, FollowerProcessNEWLEADER,\n  LeaderProcessRequest, FollowerProcessPROPOSAL, LeaderProcessACK, FollowerProcessCOMMIT, ReceiveNotmsg,\n  NotmsgTimeout\n\nZKProofLeadership2Vars == <<epochLeader>>\n\nZKProofLeadership2Changes ==\n  \\/ \\E i, j \\in Server : LeaderProcessACKEPOCH(i, j)\n\nLEMMA ZKProofLeadership2Stutter ==\n  UNCHANGED ZKProofLeadership2Vars => (Leadership2 <=> Leadership2')\nBY SMTT(\"r2\") DEF ZKProofLeadership2Vars, Leadership2\n\nLEMMA ZKProofLeadership2Frame ==\n  [Next]_vars => (UNCHANGED ZKProofLeadership2Vars \\/ ZKProofLeadership2Changes)\nBY SMTT(\"r5\") DEF Next, vars, serverVars, electionVars, leaderVars,\n  followerVars, verifyVars, msgVars, envVars, serverVarsL,\n  electionVarsL, leaderVarsL, varsL, ZKProofLeadership2Vars, ZKProofLeadership2Changes,\n  FLEReceiveNotmsg, FLENotmsgTimeout, FLEHandleNotmsg, FLEWaitNewNotmsg, PartitionStart,\n  PartitionRecover, NodeCrash, NodeStart, ConnectAndFollowerSendFOLLOWERINFO, LeaderProcessFOLLOWERINFO,\n  FollowerProcessLEADERINFO, LeaderSyncFollower, FollowerProcessSyncMessage, FollowerProcessPROPOSALInSync, FollowerProcessCOMMITInSync,\n  FollowerProcessNEWLEADER, LeaderProcessACKLD, FollowerProcessUPTODATE, LeaderProcessRequest, FollowerProcessPROPOSAL,\n  LeaderProcessACK, FollowerProcessCOMMIT, ReceiveNotmsg, NotmsgTimeout\n\nZKProofPrefixConsistencyVars == <<history, lastCommitted>>\n\nZKProofPrefixConsistencyChanges ==\n  \\/ \\E i \\in Server : FLEHandleNotmsg(i)\n  \\/ \\E i \\in Server : FLEWaitNewNotmsg(i)\n  \\/ \\E i, j \\in Server : PartitionStart(i, j)\n  \\/ \\E i \\in Server : NodeCrash(i)\n  \\/ \\E i \\in Server : NodeStart(i)\n  \\/ \\E i, j \\in Server : FollowerProcessLEADERINFO(i, j)\n  \\/ \\E i, j \\in Server : LeaderProcessACKEPOCH(i, j)\n  \\/ \\E i, j \\in Server : LeaderSyncFollower(i, j)\n  \\/ \\E i, j \\in Server : FollowerProcessSyncMessage(i, j)\n  \\/ \\E i, j \\in Server : FollowerProcessCOMMITInSync(i, j)\n  \\/ \\E i, j \\in Server : FollowerProcessNEWLEADER(i, j)\n  \\/ \\E i, j \\in Server : LeaderProcessACKLD(i, j)\n  \\/ \\E i, j \\in Server : FollowerProcessUPTODATE(i, j)\n  \\/ \\E i \\in Server : LeaderProcessRequest(i)\n  \\/ \\E i, j \\in Server : FollowerProcessPROPOSAL(i, j)\n  \\/ \\E i, j \\in Server : LeaderProcessACK(i, j)\n  \\/ \\E i, j \\in Server : FollowerProcessCOMMIT(i, j)\n\nLEMMA ZKProofPrefixConsistencyStutter ==\n  UNCHANGED ZKProofPrefixConsistencyVars => (PrefixConsistency <=> PrefixConsistency')\nBY SMTT(\"r2\") DEF ZKProofPrefixConsistencyVars, PrefixConsistency\n\nLEMMA ZKProofPrefixConsistencyFrame ==\n  [Next]_vars => (UNCHANGED ZKProofPrefixConsistencyVars \\/ ZKProofPrefixConsistencyChanges)\nBY SMTT(\"r5\") DEF Next, vars, serverVars, electionVars, leaderVars,\n  followerVars, verifyVars, msgVars, envVars, serverVarsL,\n  electionVarsL, leaderVarsL, varsL, ZKProofPrefixConsistencyVars, ZKProofPrefixConsistencyChanges,\n  FLEReceiveNotmsg, FLENotmsgTimeout, PartitionRecover, ConnectAndFollowerSendFOLLOWERINFO, LeaderProcessFOLLOWERINFO,\n  FollowerProcessPROPOSALInSync, ReceiveNotmsg, NotmsgTimeout\n\nZKProofIntegrityVars == <<state, history, lastCommitted, proposalMsgsLog>>\n\nZKProofIntegrityChanges ==\n  \\/ \\E i \\in Server : FLEHandleNotmsg(i)\n  \\/ \\E i \\in Server : FLEWaitNewNotmsg(i)\n  \\/ \\E i, j \\in Server : PartitionStart(i, j)\n  \\/ \\E i \\in Server : NodeCrash(i)\n  \\/ \\E i \\in Server : NodeStart(i)\n  \\/ \\E i, j \\in Server : FollowerProcessLEADERINFO(i, j)\n  \\/ \\E i, j \\in Server : LeaderProcessACKEPOCH(i, j)\n  \\/ \\E i, j \\in Server : LeaderSyncFollower(i, j)\n  \\/ \\E i, j \\in Server : FollowerProcessSyncMessage(i, j)\n  \\/ \\E i, j \\in Server : FollowerProcessCOMMITInSync(i, j)\n  \\/ \\E i, j \\in Server : FollowerProcessNEWLEADER(i, j)\n  \\/ \\E i, j \\in Server : LeaderProcessACKLD(i, j)\n  \\/ \\E i, j \\in Server : FollowerProcessUPTODATE(i, j)\n  \\/ \\E i \\in Server : LeaderProcessRequest(i)\n  \\/ \\E i, j \\in Server : FollowerProcessPROPOSAL(i, j)\n  \\/ \\E i, j \\in Server : LeaderProcessACK(i, j)\n  \\/ \\E i, j \\in Server : FollowerProcessCOMMIT(i, j)\n\nLEMMA ZKProofIntegrityStutter ==\n  UNCHANGED ZKProofIntegrityVars => (Integrity <=> Integrity')\nBY SMTT(\"r2\") DEF ZKProofIntegrityVars, Integrity, IsFollower\n\nLEMMA ZKProofIntegrityFrame ==\n  [Next]_vars => (UNCHANGED ZKProofIntegrityVars \\/ ZKProofIntegrityChanges)\nBY SMTT(\"r5\") DEF Next, vars, serverVars, electionVars, leaderVars,\n  followerVars, verifyVars, msgVars, envVars, serverVarsL,\n  electionVarsL, leaderVarsL, varsL, ZKProofIntegrityVars, ZKProofIntegrityChanges,\n  FLEReceiveNotmsg, FLENotmsgTimeout, PartitionRecover, ConnectAndFollowerSendFOLLOWERINFO, LeaderProcessFOLLOWERINFO,\n  FollowerProcessPROPOSALInSync, ReceiveNotmsg, NotmsgTimeout\n\nZKProofAgreementVars == <<state, history, lastCommitted>>\n\nZKProofAgreementChanges ==\n  \\/ \\E i \\in Server : FLEHandleNotmsg(i)\n  \\/ \\E i \\in Server : FLEWaitNewNotmsg(i)\n  \\/ \\E i, j \\in Server : PartitionStart(i, j)\n  \\/ \\E i \\in Server : NodeCrash(i)\n  \\/ \\E i \\in Server : NodeStart(i)\n  \\/ \\E i, j \\in Server : FollowerProcessLEADERINFO(i, j)\n  \\/ \\E i, j \\in Server : LeaderProcessACKEPOCH(i, j)\n  \\/ \\E i, j \\in Server : LeaderSyncFollower(i, j)\n  \\/ \\E i, j \\in Server : FollowerProcessSyncMessage(i, j)\n  \\/ \\E i, j \\in Server : FollowerProcessCOMMITInSync(i, j)\n  \\/ \\E i, j \\in Server : FollowerProcessNEWLEADER(i, j)\n  \\/ \\E i, j \\in Server : LeaderProcessACKLD(i, j)\n  \\/ \\E i, j \\in Server : FollowerProcessUPTODATE(i, j)\n  \\/ \\E i \\in Server : LeaderProcessRequest(i)\n  \\/ \\E i, j \\in Server : FollowerProcessPROPOSAL(i, j)\n  \\/ \\E i, j \\in Server : LeaderProcessACK(i, j)\n  \\/ \\E i, j \\in Server : FollowerProcessCOMMIT(i, j)\n\nLEMMA ZKProofAgreementStutter ==\n  UNCHANGED ZKProofAgreementVars => (Agreement <=> Agreement')\nBY SMTT(\"r2\") DEF ZKProofAgreementVars, Agreement, IsFollower\n\nLEMMA ZKProofAgreementFrame ==\n  [Next]_vars => (UNCHANGED ZKProofAgreementVars \\/ ZKProofAgreementChanges)\nBY SMTT(\"r5\") DEF Next, vars, serverVars, electionVars, leaderVars,\n  followerVars, verifyVars, msgVars, envVars, serverVarsL,\n  electionVarsL, leaderVarsL, varsL, ZKProofAgreementVars, ZKProofAgreementChanges,\n  FLEReceiveNotmsg, FLENotmsgTimeout, PartitionRecover, ConnectAndFollowerSendFOLLOWERINFO, LeaderProcessFOLLOWERINFO,\n  FollowerProcessPROPOSALInSync, ReceiveNotmsg, NotmsgTimeout\n\nZKProofTotalOrderVars == <<history, lastCommitted>>\n\nZKProofTotalOrderChanges ==\n  \\/ \\E i \\in Server : FLEHandleNotmsg(i)\n  \\/ \\E i \\in Server : FLEWaitNewNotmsg(i)\n  \\/ \\E i, j \\in Server : PartitionStart(i, j)\n  \\/ \\E i \\in Server : NodeCrash(i)\n  \\/ \\E i \\in Server : NodeStart(i)\n  \\/ \\E i, j \\in Server : FollowerProcessLEADERINFO(i, j)\n  \\/ \\E i, j \\in Server : LeaderProcessACKEPOCH(i, j)\n  \\/ \\E i, j \\in Server : LeaderSyncFollower(i, j)\n  \\/ \\E i, j \\in Server : FollowerProcessSyncMessage(i, j)\n  \\/ \\E i, j \\in Server : FollowerProcessCOMMITInSync(i, j)\n  \\/ \\E i, j \\in Server : FollowerProcessNEWLEADER(i, j)\n  \\/ \\E i, j \\in Server : LeaderProcessACKLD(i, j)\n  \\/ \\E i, j \\in Server : FollowerProcessUPTODATE(i, j)\n  \\/ \\E i \\in Server : LeaderProcessRequest(i)\n  \\/ \\E i, j \\in Server : FollowerProcessPROPOSAL(i, j)\n  \\/ \\E i, j \\in Server : LeaderProcessACK(i, j)\n  \\/ \\E i, j \\in Server : FollowerProcessCOMMIT(i, j)\n\nLEMMA ZKProofTotalOrderStutter ==\n  UNCHANGED ZKProofTotalOrderVars => (TotalOrder <=> TotalOrder')\nBY SMTT(\"r2\") DEF ZKProofTotalOrderVars, TotalOrder\n\nLEMMA ZKProofTotalOrderFrame ==\n  [Next]_vars => (UNCHANGED ZKProofTotalOrderVars \\/ ZKProofTotalOrderChanges)\nBY SMTT(\"r5\") DEF Next, vars, serverVars, electionVars, leaderVars,\n  followerVars, verifyVars, msgVars, envVars, serverVarsL,\n  electionVarsL, leaderVarsL, varsL, ZKProofTotalOrderVars, ZKProofTotalOrderChanges,\n  FLEReceiveNotmsg, FLENotmsgTimeout, PartitionRecover, ConnectAndFollowerSendFOLLOWERINFO, LeaderProcessFOLLOWERINFO,\n  FollowerProcessPROPOSALInSync, ReceiveNotmsg, NotmsgTimeout\n\nZKProofLocalPrimaryOrderVars == <<currentEpoch, proposalMsgsLog, lastCommitted, history>>\n\nZKProofLocalPrimaryOrderChanges ==\n  \\/ \\E i \\in Server : FLEHandleNotmsg(i)\n  \\/ \\E i \\in Server : FLEWaitNewNotmsg(i)\n  \\/ \\E i, j \\in Server : PartitionStart(i, j)\n  \\/ \\E i \\in Server : NodeCrash(i)\n  \\/ \\E i \\in Server : NodeStart(i)\n  \\/ \\E i, j \\in Server : FollowerProcessLEADERINFO(i, j)\n  \\/ \\E i, j \\in Server : LeaderProcessACKEPOCH(i, j)\n  \\/ \\E i, j \\in Server : LeaderSyncFollower(i, j)\n  \\/ \\E i, j \\in Server : FollowerProcessSyncMessage(i, j)\n  \\/ \\E i, j \\in Server : FollowerProcessCOMMITInSync(i, j)\n  \\/ \\E i, j \\in Server : FollowerProcessNEWLEADER(i, j)\n  \\/ \\E i, j \\in Server : LeaderProcessACKLD(i, j)\n  \\/ \\E i, j \\in Server : FollowerProcessUPTODATE(i, j)\n  \\/ \\E i \\in Server : LeaderProcessRequest(i)\n  \\/ \\E i, j \\in Server : FollowerProcessPROPOSAL(i, j)\n  \\/ \\E i, j \\in Server : LeaderProcessACK(i, j)\n  \\/ \\E i, j \\in Server : FollowerProcessCOMMIT(i, j)\n\nLEMMA ZKProofLocalPrimaryOrderStutter ==\n  UNCHANGED ZKProofLocalPrimaryOrderVars => (LocalPrimaryOrder <=> LocalPrimaryOrder')\nBY SMTT(\"r2\") DEF ZKProofLocalPrimaryOrderVars, LocalPrimaryOrder\n\nLEMMA ZKProofLocalPrimaryOrderFrame ==\n  [Next]_vars => (UNCHANGED ZKProofLocalPrimaryOrderVars \\/ ZKProofLocalPrimaryOrderChanges)\nBY SMTT(\"r5\") DEF Next, vars, serverVars, electionVars, leaderVars,\n  followerVars, verifyVars, msgVars, envVars, serverVarsL,\n  electionVarsL, leaderVarsL, varsL, ZKProofLocalPrimaryOrderVars, ZKProofLocalPrimaryOrderChanges,\n  FLEReceiveNotmsg, FLENotmsgTimeout, PartitionRecover, ConnectAndFollowerSendFOLLOWERINFO, LeaderProcessFOLLOWERINFO,\n  FollowerProcessPROPOSALInSync, ReceiveNotmsg, NotmsgTimeout\n\nZKProofGlobalPrimaryOrderVars == <<history, lastCommitted>>\n\nZKProofGlobalPrimaryOrderChanges ==\n  \\/ \\E i \\in Server : FLEHandleNotmsg(i)\n  \\/ \\E i \\in Server : FLEWaitNewNotmsg(i)\n  \\/ \\E i, j \\in Server : PartitionStart(i, j)\n  \\/ \\E i \\in Server : NodeCrash(i)\n  \\/ \\E i \\in Server : NodeStart(i)\n  \\/ \\E i, j \\in Server : FollowerProcessLEADERINFO(i, j)\n  \\/ \\E i, j \\in Server : LeaderProcessACKEPOCH(i, j)\n  \\/ \\E i, j \\in Server : LeaderSyncFollower(i, j)\n  \\/ \\E i, j \\in Server : FollowerProcessSyncMessage(i, j)\n  \\/ \\E i, j \\in Server : FollowerProcessCOMMITInSync(i, j)\n  \\/ \\E i, j \\in Server : FollowerProcessNEWLEADER(i, j)\n  \\/ \\E i, j \\in Server : LeaderProcessACKLD(i, j)\n  \\/ \\E i, j \\in Server : FollowerProcessUPTODATE(i, j)\n  \\/ \\E i \\in Server : LeaderProcessRequest(i)\n  \\/ \\E i, j \\in Server : FollowerProcessPROPOSAL(i, j)\n  \\/ \\E i, j \\in Server : LeaderProcessACK(i, j)\n  \\/ \\E i, j \\in Server : FollowerProcessCOMMIT(i, j)\n\nLEMMA ZKProofGlobalPrimaryOrderStutter ==\n  UNCHANGED ZKProofGlobalPrimaryOrderVars => (GlobalPrimaryOrder <=> GlobalPrimaryOrder')\nBY SMTT(\"r2\") DEF ZKProofGlobalPrimaryOrderVars, GlobalPrimaryOrder\n\nLEMMA ZKProofGlobalPrimaryOrderFrame ==\n  [Next]_vars => (UNCHANGED ZKProofGlobalPrimaryOrderVars \\/ ZKProofGlobalPrimaryOrderChanges)\nBY SMTT(\"r5\") DEF Next, vars, serverVars, electionVars, leaderVars,\n  followerVars, verifyVars, msgVars, envVars, serverVarsL,\n  electionVarsL, leaderVarsL, varsL, ZKProofGlobalPrimaryOrderVars, ZKProofGlobalPrimaryOrderChanges,\n  FLEReceiveNotmsg, FLENotmsgTimeout, PartitionRecover, ConnectAndFollowerSendFOLLOWERINFO, LeaderProcessFOLLOWERINFO,\n  FollowerProcessPROPOSALInSync, ReceiveNotmsg, NotmsgTimeout\n\nZKProofPrimaryIntegrityVars == <<state, learners, connectInfo, zabState, lastCommitted, history, currentEpoch>>\n\nZKProofPrimaryIntegrityChanges ==\n  \\/ \\E i \\in Server : FLEHandleNotmsg(i)\n  \\/ \\E i \\in Server : FLEWaitNewNotmsg(i)\n  \\/ \\E i, j \\in Server : PartitionStart(i, j)\n  \\/ \\E i \\in Server : NodeCrash(i)\n  \\/ \\E i \\in Server : NodeStart(i)\n  \\/ \\E i, j \\in Server : ConnectAndFollowerSendFOLLOWERINFO(i, j)\n  \\/ \\E i, j \\in Server : FollowerProcessLEADERINFO(i, j)\n  \\/ \\E i, j \\in Server : LeaderProcessACKEPOCH(i, j)\n  \\/ \\E i, j \\in Server : LeaderSyncFollower(i, j)\n  \\/ \\E i, j \\in Server : FollowerProcessSyncMessage(i, j)\n  \\/ \\E i, j \\in Server : FollowerProcessCOMMITInSync(i, j)\n  \\/ \\E i, j \\in Server : FollowerProcessNEWLEADER(i, j)\n  \\/ \\E i, j \\in Server : LeaderProcessACKLD(i, j)\n  \\/ \\E i, j \\in Server : FollowerProcessUPTODATE(i, j)\n  \\/ \\E i \\in Server : LeaderProcessRequest(i)\n  \\/ \\E i, j \\in Server : FollowerProcessPROPOSAL(i, j)\n  \\/ \\E i, j \\in Server : LeaderProcessACK(i, j)\n  \\/ \\E i, j \\in Server : FollowerProcessCOMMIT(i, j)\n\nLEMMA ZKProofPrimaryIntegrityStutter ==\n  UNCHANGED ZKProofPrimaryIntegrityVars => (PrimaryIntegrity <=> PrimaryIntegrity')\nBY SMTT(\"r2\") DEF ZKProofPrimaryIntegrityVars, PrimaryIntegrity, IsLeader, IsFollower, IsMyLearner, IsMyLeader\n\nLEMMA ZKProofPrimaryIntegrityFrame ==\n  [Next]_vars => (UNCHANGED ZKProofPrimaryIntegrityVars \\/ ZKProofPrimaryIntegrityChanges)\nBY SMTT(\"r5\") DEF Next, vars, serverVars, electionVars, leaderVars,\n  followerVars, verifyVars, msgVars, envVars, serverVarsL,\n  electionVarsL, leaderVarsL, varsL, ZKProofPrimaryIntegrityVars, ZKProofPrimaryIntegrityChanges,\n  FLEReceiveNotmsg, FLENotmsgTimeout, PartitionRecover, LeaderProcessFOLLOWERINFO, FollowerProcessPROPOSALInSync,\n  ReceiveNotmsg, NotmsgTimeout\n\n\n\\* A protocol-wide typing invariant for the control and leader-log variables.\nZKProofControlType ==\n  /\\ state \\in [Server -> {LOOKING, FOLLOWING, LEADING}]\n  /\\ zabState \\in [Server -> {ELECTION, DISCOVERY, SYNCHRONIZATION, BROADCAST}]\n  /\\ learners \\in [Server -> SUBSET Server]\n  /\\ epochLeader \\in [1..MAXEPOCH -> SUBSET Server]\n\nLEMMA ZKProofControlInit == Init => ZKProofControlType\nBY SMTT(\"r3\") DEF Init, InitServerVars, InitServerVarsL, InitLeaderVars,\n  InitVerifyVars, ZKProofControlType\n\nLEMMA ZKProofControlNext ==\n  ZKProofControlType /\\ [Next]_vars => ZKProofControlType'\n<1>1. ASSUME ZKProofControlType, [Next]_vars\n      PROVE ZKProofControlType'\n  <2>1. CASE UNCHANGED vars\n    BY <1>1, <2>1, SMTT(\"r3\") DEF vars, serverVars, leaderVars, verifyVars,\n      ZKProofControlType\n  <2>2. CASE \\E i, j \\in Server : FLEReceiveNotmsg(i, j)\n    BY <1>1, <2>2, SMTT(\"r10\") DEF ZKProofControlType, FLEReceiveNotmsg, ReceiveNotmsg, varsL,\n      serverVarsL, serverVars, leaderVars, verifyVars\n  <2>3. CASE \\E i \\in Server : FLENotmsgTimeout(i)\n    BY <1>1, <2>3, SMTT(\"r10\") DEF ZKProofControlType, FLENotmsgTimeout, NotmsgTimeout, varsL,\n      serverVarsL, serverVars, leaderVars, verifyVars\n  <2>4. CASE \\E i \\in Server : FLEHandleNotmsg(i)\n    BY <1>1, <2>4, SMTT(\"r10\") DEF ZKProofControlType, FLEHandleNotmsg, HandleNotmsg, ReceivedFollowingAndLeadingNotification,\n      ZabTurnToLeading, ZabTurnToFollowing, varsL, serverVarsL,\n      serverVars, leaderVars, verifyVars\n  <2>5. CASE \\E i \\in Server : FLEWaitNewNotmsg(i)\n    BY <1>1, <2>5, SMTT(\"r10\") DEF ZKProofControlType, FLEWaitNewNotmsg, WaitNewNotmsg, ZabTurnToLeading,\n      ZabTurnToFollowing, varsL, serverVarsL, serverVars,\n      leaderVars, verifyVars\n  <2>6. CASE \\E i, j \\in Server : PartitionStart(i, j)\n    BY <1>1, <2>6, SMTT(\"r10\") DEF ZKProofControlType, PartitionStart, RemoveLearner, FollowerShutdown,\n      LeaderShutdown, ZabTimeout, ZabTimeoutInCluster, varsL,\n      serverVarsL, serverVars, leaderVars, verifyVars\n  <2>7. CASE \\E i, j \\in Server : PartitionRecover(i, j)\n    BY <1>1, <2>7, SMTT(\"r10\") DEF ZKProofControlType, PartitionRecover, varsL, serverVarsL,\n      serverVars, leaderVars, verifyVars\n  <2>8. CASE \\E i \\in Server : NodeCrash(i)\n    BY <1>1, <2>8, SMTT(\"r10\") DEF ZKProofControlType, NodeCrash, RemoveLearner, FollowerShutdown,\n      LeaderShutdown, ZabTimeout, ZabTimeoutInCluster, varsL,\n      serverVarsL, serverVars, leaderVars, verifyVars\n  <2>9. CASE \\E i \\in Server : NodeStart(i)\n    BY <1>1, <2>9, SMTT(\"r10\") DEF ZKProofControlType, NodeStart, varsL, serverVarsL,\n      serverVars, leaderVars, verifyVars\n  <2>10. CASE \\E i, j \\in Server : ConnectAndFollowerSendFOLLOWERINFO(i, j)\n    BY <1>1, <2>10, SMTT(\"r10\") DEF ZKProofControlType, ConnectAndFollowerSendFOLLOWERINFO, varsL, serverVarsL,\n      serverVars, leaderVars, verifyVars\n  <2>11. CASE \\E i, j \\in Server : LeaderProcessFOLLOWERINFO(i, j)\n    BY <1>1, <2>11, SMTT(\"r10\") DEF ZKProofControlType, LeaderProcessFOLLOWERINFO, varsL, serverVarsL,\n      serverVars, leaderVars, verifyVars\n  <2>12. CASE \\E i, j \\in Server : FollowerProcessLEADERINFO(i, j)\n    BY <1>1, <2>12, SMTT(\"r10\") DEF ZKProofControlType, FollowerProcessLEADERINFO, RemoveLearner, FollowerShutdown,\n      ZabTimeout, varsL, serverVarsL, serverVars,\n      leaderVars, verifyVars\n  <2>13. CASE \\E i, j \\in Server : LeaderProcessACKEPOCH(i, j)\n    BY <1>1, <2>13, SMTT(\"r10\") DEF ZKProofControlType, LeaderProcessACKEPOCH, LeaderTurnToSynchronization, LeaderShutdown,\n      ZabTimeoutInCluster, varsL, serverVarsL, serverVars,\n      leaderVars, verifyVars\n  <2>14. CASE \\E i, j \\in Server : LeaderSyncFollower(i, j)\n    BY <1>1, <2>14, SMTT(\"r10\") DEF ZKProofControlType, LeaderSyncFollower, varsL, serverVarsL,\n      serverVars, leaderVars, verifyVars\n  <2>15. CASE \\E i, j \\in Server : FollowerProcessSyncMessage(i, j)\n    BY <1>1, <2>15, SMTT(\"r10\") DEF ZKProofControlType, FollowerProcessSyncMessage, varsL, serverVarsL,\n      serverVars, leaderVars, verifyVars\n  <2>16. CASE \\E i, j \\in Server : FollowerProcessPROPOSALInSync(i, j)\n    BY <1>1, <2>16, SMTT(\"r10\") DEF ZKProofControlType, FollowerProcessPROPOSALInSync, varsL, serverVarsL,\n      serverVars, leaderVars, verifyVars\n  <2>17. CASE \\E i, j \\in Server : FollowerProcessCOMMITInSync(i, j)\n    BY <1>1, <2>17, SMTT(\"r10\") DEF ZKProofControlType, FollowerProcessCOMMITInSync, varsL, serverVarsL,\n      serverVars, leaderVars, verifyVars\n  <2>18. CASE \\E i, j \\in Server : FollowerProcessNEWLEADER(i, j)\n    BY <1>1, <2>18, SMTT(\"r10\") DEF ZKProofControlType, FollowerProcessNEWLEADER, varsL, serverVarsL,\n      serverVars, leaderVars, verifyVars\n  <2>19. CASE \\E i, j \\in Server : LeaderProcessACKLD(i, j)\n    BY <1>1, <2>19, SMTT(\"r10\") DEF ZKProofControlType, LeaderProcessACKLD, LeaderTurnToBroadcast, varsL,\n      serverVarsL, serverVars, leaderVars, verifyVars\n  <2>20. CASE \\E i, j \\in Server : FollowerProcessUPTODATE(i, j)\n    BY <1>1, <2>20, SMTT(\"r10\") DEF ZKProofControlType, FollowerProcessUPTODATE, varsL, serverVarsL,\n      serverVars, leaderVars, verifyVars\n  <2>21. CASE \\E i \\in Server : LeaderProcessRequest(i)\n    BY <1>1, <2>21, SMTT(\"r10\") DEF ZKProofControlType, LeaderProcessRequest, varsL, serverVarsL,\n      serverVars, leaderVars, verifyVars\n  <2>22. CASE \\E i, j \\in Server : FollowerProcessPROPOSAL(i, j)\n    BY <1>1, <2>22, SMTT(\"r10\") DEF ZKProofControlType, FollowerProcessPROPOSAL, varsL, serverVarsL,\n      serverVars, leaderVars, verifyVars\n  <2>23. CASE \\E i, j \\in Server : LeaderProcessACK(i, j)\n    BY <1>1, <2>23, SMTT(\"r10\") DEF ZKProofControlType, LeaderProcessACK, varsL, serverVarsL,\n      serverVars, leaderVars, verifyVars\n  <2>24. CASE \\E i, j \\in Server : FollowerProcessCOMMIT(i, j)\n    BY <1>1, <2>24, SMTT(\"r10\") DEF ZKProofControlType, FollowerProcessCOMMIT, varsL, serverVarsL,\n      serverVars, leaderVars, verifyVars\n  <2>25. QED\n    BY <1>1, <2>1, <2>2, <2>3, <2>4, <2>5, <2>6, <2>7, <2>8, <2>9, <2>10, <2>11, <2>12, <2>13, <2>14, <2>15, <2>16, <2>17, <2>18, <2>19, <2>20, <2>21, <2>22, <2>23, <2>24, SMTT(\"r3\") DEF Next\n<1>2. QED BY <1>1, SMTT(\"r1\")\n\nLEMMA ZKProofControlInvariant == Spec => []ZKProofControlType\nBY ZKProofControlInit, ZKProofControlNext, PTL DEF Spec\n\n\nLEMMA ZKProofInitUniquePositions == Init => ZKProofUniquePositions\nBY SMTT(\"r3\") DEF Init, InitServerVars, ZKProofUniquePositions\n\nZKProofPrefixInvariant == ZKProofCommitType /\\ ZKProofCommonPrefix\nZKProofOrderInvariant == ZKProofPrefixInvariant /\\ ZKProofUniquePositions\n\nLEMMA ZKProofInitPrefixInvariant == Init => ZKProofPrefixInvariant\nBY ZKProofInitCommitType, ZKProofInitPrefix, ZKProofPrefixByIndex, SMTT(\"r2\")\n  DEF ZKProofPrefixInvariant\n\nLEMMA ZKProofInitOrderInvariant == Init => ZKProofOrderInvariant\nBY ZKProofInitPrefixInvariant, ZKProofInitUniquePositions, SMTT(\"r2\")\n  DEF ZKProofOrderInvariant\n\nLEMMA ZKProofPrefixInvariantStutter ==\n  UNCHANGED <<history, lastCommitted>> =>\n    (ZKProofPrefixInvariant <=> ZKProofPrefixInvariant')\nBY SMTT(\"r2\") DEF ZKProofPrefixInvariant, ZKProofCommitType, ZKProofCommonPrefix\n\nLEMMA ZKProofOrderInvariantStutter ==\n  UNCHANGED <<history, lastCommitted>> =>\n    (ZKProofOrderInvariant <=> ZKProofOrderInvariant')\nBY SMTT(\"r2\") DEF ZKProofOrderInvariant, ZKProofPrefixInvariant,\n  ZKProofCommitType, ZKProofCommonPrefix, ZKProofUniquePositions\n\n\\* END AGENT HELPERS\n\nTHEOREM Spec => []Leadership1\n\\* BEGIN AGENT PROOF ZooKeeper_LowLevel/ZkV3_7_0_Leadership1.tla\n<1>1. Init => Leadership1\n  BY ZKProofInitLeadership1, SMTT(\"r1\")\n<1>2. ZKProofControlType /\\ Leadership1 /\\ [Next]_vars => Leadership1'\n  <2>1. ASSUME ZKProofControlType, Leadership1, [Next]_vars\n        PROVE Leadership1'\n    <3>1. CASE UNCHANGED ZKProofLeadership1Vars\n      BY <2>1, <3>1, ZKProofLeadership1Stutter, SMTT(\"r1\")\n    <3>2. CASE ZKProofLeadership1Changes\n      \\* This modifying-action case requires a strengthened protocol invariant.\n      BY <2>1, <3>2, SMTT(\"r5\")\n        DEF ZKProofLeadership1Changes, ZKProofControlType, Leadership1\n    <3>3. QED\n      BY <2>1, <3>1, <3>2, ZKProofLeadership1Frame, SMTT(\"r1\")\n  <2>2. QED BY <2>1, SMTT(\"r1\")\n<1>3. QED BY <1>1, <1>2, ZKProofControlInvariant, PTL DEF Spec\n\\* END AGENT PROOF ZooKeeper_LowLevel/ZkV3_7_0_Leadership1.tla\n\nTHEOREM Spec => []Leadership2\n\\* BEGIN AGENT PROOF ZooKeeper_LowLevel/ZkV3_7_0_Leadership2.tla\n<1>1. Init => Leadership2\n  BY ZKProofInitLeadership2, SMTT(\"r1\")\n<1>2. ZKProofControlType /\\ Leadership2 /\\ [Next]_vars => Leadership2'\n  <2>1. ASSUME ZKProofControlType, Leadership2, [Next]_vars\n        PROVE Leadership2'\n    <3>1. CASE UNCHANGED ZKProofLeadership2Vars\n      BY <2>1, <3>1, ZKProofLeadership2Stutter, SMTT(\"r1\")\n    <3>2. CASE ZKProofLeadership2Changes\n      \\* This modifying-action case requires a strengthened protocol invariant.\n      BY <2>1, <3>2, SMTT(\"r5\")\n        DEF ZKProofLeadership2Changes, ZKProofControlType, Leadership2\n    <3>3. QED\n      BY <2>1, <3>1, <3>2, ZKProofLeadership2Frame, SMTT(\"r1\")\n  <2>2. QED BY <2>1, SMTT(\"r1\")\n<1>3. QED BY <1>1, <1>2, ZKProofControlInvariant, PTL DEF Spec\n\\* END AGENT PROOF ZooKeeper_LowLevel/ZkV3_7_0_Leadership2.tla\n\nTHEOREM Spec => []PrefixConsistency\n\\* BEGIN AGENT PROOF ZooKeeper_LowLevel/ZkV3_7_0_PrefixConsistency.tla\n<1>1. Init => PrefixConsistency\n  BY ZKProofInitPrefix, SMTT(\"r1\")\n<1>2. ZKProofControlType /\\ PrefixConsistency /\\ [Next]_vars => PrefixConsistency'\n  <2>1. ASSUME ZKProofControlType, PrefixConsistency, [Next]_vars\n        PROVE PrefixConsistency'\n    <3>1. CASE UNCHANGED ZKProofPrefixConsistencyVars\n      BY <2>1, <3>1, ZKProofPrefixConsistencyStutter, SMTT(\"r1\")\n    <3>2. CASE ZKProofPrefixConsistencyChanges\n      \\* This modifying-action case requires a strengthened protocol invariant.\n      BY <2>1, <3>2, SMTT(\"r5\")\n        DEF ZKProofPrefixConsistencyChanges, ZKProofControlType, PrefixConsistency\n    <3>3. QED\n      BY <2>1, <3>1, <3>2, ZKProofPrefixConsistencyFrame, SMTT(\"r1\")\n  <2>2. QED BY <2>1, SMTT(\"r1\")\n<1>3. QED BY <1>1, <1>2, ZKProofControlInvariant, PTL DEF Spec\n\\* END AGENT PROOF ZooKeeper_LowLevel/ZkV3_7_0_PrefixConsistency.tla\n\nTHEOREM Spec => []Integrity\n\\* BEGIN AGENT PROOF ZooKeeper_LowLevel/ZkV3_7_0_Integrity.tla\n<1>1. Init => Integrity\n  BY ZKProofInitIntegrity, SMTT(\"r1\")\n<1>2. ZKProofControlType /\\ Integrity /\\ [Next]_vars => Integrity'\n  <2>1. ASSUME ZKProofControlType, Integrity, [Next]_vars\n        PROVE Integrity'\n    <3>1. CASE UNCHANGED ZKProofIntegrityVars\n      BY <2>1, <3>1, ZKProofIntegrityStutter, SMTT(\"r1\")\n    <3>2. CASE ZKProofIntegrityChanges\n      \\* This modifying-action case requires a strengthened protocol invariant.\n      BY <2>1, <3>2, SMTT(\"r5\")\n        DEF ZKProofIntegrityChanges, ZKProofControlType, Integrity\n    <3>3. QED\n      BY <2>1, <3>1, <3>2, ZKProofIntegrityFrame, SMTT(\"r1\")\n  <2>2. QED BY <2>1, SMTT(\"r1\")\n<1>3. QED BY <1>1, <1>2, ZKProofControlInvariant, PTL DEF Spec\n\\* END AGENT PROOF ZooKeeper_LowLevel/ZkV3_7_0_Integrity.tla\n\nTHEOREM Spec => []Agreement\n\\* BEGIN AGENT PROOF ZooKeeper_LowLevel/ZkV3_7_0_Agreement.tla\n<1>1. Init => ZKProofPrefixInvariant\n  BY ZKProofInitPrefixInvariant, SMTT(\"r1\")\n<1>2. ZKProofControlType /\\ ZKProofPrefixInvariant /\\ [Next]_vars => ZKProofPrefixInvariant'\n  <2>1. ASSUME ZKProofControlType, ZKProofPrefixInvariant, [Next]_vars\n        PROVE ZKProofPrefixInvariant'\n    <3>1. CASE UNCHANGED <<history, lastCommitted>>\n      BY <2>1, <3>1, ZKProofPrefixInvariantStutter, SMTT(\"r1\")\n    <3>2. CASE ZKProofPrefixConsistencyChanges\n      \\* The missing strengthening must relate messages, snapshots, and log prefixes.\n      BY <2>1, <3>2, SMTT(\"r5\")\n        DEF ZKProofPrefixConsistencyChanges, ZKProofPrefixInvariant,\n            ZKProofCommitType, ZKProofCommonPrefix, ZKProofUniquePositions\n    <3>3. QED\n      BY <2>1, <3>1, <3>2, ZKProofPrefixConsistencyFrame, SMTT(\"r1\")\n        DEF ZKProofPrefixConsistencyVars\n  <2>2. QED BY <2>1, SMTT(\"r1\")\n<1>3. ZKProofPrefixInvariant => Agreement\n  BY ZKProofPrefixAgreement, SMTT(\"r1\") DEF ZKProofPrefixInvariant\n<1>4. QED BY <1>1, <1>2, <1>3, ZKProofControlInvariant, PTL DEF Spec\n\\* END AGENT PROOF ZooKeeper_LowLevel/ZkV3_7_0_Agreement.tla\n\nTHEOREM Spec => []TotalOrder\n\\* BEGIN AGENT PROOF ZooKeeper_LowLevel/ZkV3_7_0_TotalOrder.tla\n<1>1. Init => ZKProofOrderInvariant\n  BY ZKProofInitOrderInvariant, SMTT(\"r1\")\n<1>2. ZKProofControlType /\\ ZKProofOrderInvariant /\\ [Next]_vars => ZKProofOrderInvariant'\n  <2>1. ASSUME ZKProofControlType, ZKProofOrderInvariant, [Next]_vars\n        PROVE ZKProofOrderInvariant'\n    <3>1. CASE UNCHANGED <<history, lastCommitted>>\n      BY <2>1, <3>1, ZKProofOrderInvariantStutter, SMTT(\"r1\")\n    <3>2. CASE ZKProofPrefixConsistencyChanges\n      \\* The missing strengthening must relate messages, snapshots, and log prefixes.\n      BY <2>1, <3>2, SMTT(\"r5\")\n        DEF ZKProofPrefixConsistencyChanges, ZKProofOrderInvariant, ZKProofPrefixInvariant,\n            ZKProofCommitType, ZKProofCommonPrefix, ZKProofUniquePositions\n    <3>3. QED\n      BY <2>1, <3>1, <3>2, ZKProofPrefixConsistencyFrame, SMTT(\"r1\")\n        DEF ZKProofPrefixConsistencyVars\n  <2>2. QED BY <2>1, SMTT(\"r1\")\n<1>3. ZKProofOrderInvariant => TotalOrder\n  BY ZKProofPrefixTotalOrder, SMTT(\"r1\") DEF ZKProofOrderInvariant, ZKProofPrefixInvariant\n<1>4. QED BY <1>1, <1>2, <1>3, ZKProofControlInvariant, PTL DEF Spec\n\\* END AGENT PROOF ZooKeeper_LowLevel/ZkV3_7_0_TotalOrder.tla\n\nTHEOREM Spec => []LocalPrimaryOrder\n\\* BEGIN AGENT PROOF ZooKeeper_LowLevel/ZkV3_7_0_LocalPrimaryOrder.tla\n<1>1. Init => LocalPrimaryOrder\n  BY ZKProofInitLocalOrder, SMTT(\"r1\")\n<1>2. ZKProofControlType /\\ LocalPrimaryOrder /\\ [Next]_vars => LocalPrimaryOrder'\n  <2>1. ASSUME ZKProofControlType, LocalPrimaryOrder, [Next]_vars\n        PROVE LocalPrimaryOrder'\n    <3>1. CASE UNCHANGED ZKProofLocalPrimaryOrderVars\n      BY <2>1, <3>1, ZKProofLocalPrimaryOrderStutter, SMTT(\"r1\")\n    <3>2. CASE ZKProofLocalPrimaryOrderChanges\n      \\* This modifying-action case requires a strengthened protocol invariant.\n      BY <2>1, <3>2, SMTT(\"r5\")\n        DEF ZKProofLocalPrimaryOrderChanges, ZKProofControlType, LocalPrimaryOrder\n    <3>3. QED\n      BY <2>1, <3>1, <3>2, ZKProofLocalPrimaryOrderFrame, SMTT(\"r1\")\n  <2>2. QED BY <2>1, SMTT(\"r1\")\n<1>3. QED BY <1>1, <1>2, ZKProofControlInvariant, PTL DEF Spec\n\\* END AGENT PROOF ZooKeeper_LowLevel/ZkV3_7_0_LocalPrimaryOrder.tla\n\nTHEOREM Spec => []GlobalPrimaryOrder\n\\* BEGIN AGENT PROOF ZooKeeper_LowLevel/ZkV3_7_0_GlobalPrimaryOrder.tla\n<1>1. Init => GlobalPrimaryOrder\n  BY ZKProofInitGlobalOrder, SMTT(\"r1\")\n<1>2. ZKProofControlType /\\ GlobalPrimaryOrder /\\ [Next]_vars => GlobalPrimaryOrder'\n  <2>1. ASSUME ZKProofControlType, GlobalPrimaryOrder, [Next]_vars\n        PROVE GlobalPrimaryOrder'\n    <3>1. CASE UNCHANGED ZKProofGlobalPrimaryOrderVars\n      BY <2>1, <3>1, ZKProofGlobalPrimaryOrderStutter, SMTT(\"r1\")\n    <3>2. CASE ZKProofGlobalPrimaryOrderChanges\n      \\* This modifying-action case requires a strengthened protocol invariant.\n      BY <2>1, <3>2, SMTT(\"r5\")\n        DEF ZKProofGlobalPrimaryOrderChanges, ZKProofControlType, GlobalPrimaryOrder\n    <3>3. QED\n      BY <2>1, <3>1, <3>2, ZKProofGlobalPrimaryOrderFrame, SMTT(\"r1\")\n  <2>2. QED BY <2>1, SMTT(\"r1\")\n<1>3. QED BY <1>1, <1>2, ZKProofControlInvariant, PTL DEF Spec\n\\* END AGENT PROOF ZooKeeper_LowLevel/ZkV3_7_0_GlobalPrimaryOrder.tla\n\nTHEOREM Spec => []PrimaryIntegrity\n\\* BEGIN AGENT PROOF ZooKeeper_LowLevel/ZkV3_7_0_PrimaryIntegrity.tla\n<1>1. Init => PrimaryIntegrity\n  BY ZKProofInitPrimaryIntegrity, SMTT(\"r1\")\n<1>2. ZKProofControlType /\\ PrimaryIntegrity /\\ [Next]_vars => PrimaryIntegrity'\n  <2>1. ASSUME ZKProofControlType, PrimaryIntegrity, [Next]_vars\n        PROVE PrimaryIntegrity'\n    <3>1. CASE UNCHANGED ZKProofPrimaryIntegrityVars\n      BY <2>1, <3>1, ZKProofPrimaryIntegrityStutter, SMTT(\"r1\")\n    <3>2. CASE ZKProofPrimaryIntegrityChanges\n      \\* This modifying-action case requires a strengthened protocol invariant.\n      BY <2>1, <3>2, SMTT(\"r5\")\n        DEF ZKProofPrimaryIntegrityChanges, ZKProofControlType, PrimaryIntegrity\n    <3>3. QED\n      BY <2>1, <3>1, <3>2, ZKProofPrimaryIntegrityFrame, SMTT(\"r1\")\n  <2>2. QED BY <2>1, SMTT(\"r1\")\n<1>3. QED BY <1>1, <1>2, ZKProofControlInvariant, PTL DEF Spec\n\\* END AGENT PROOF ZooKeeper_LowLevel/ZkV3_7_0_PrimaryIntegrity.tla\n====\n",
+  "units": {
+    "ZooKeeper_LowLevel/ZkV3_7_0_Leadership1.tla": {
+      "id": "ZooKeeper_LowLevel/ZkV3_7_0_Leadership1.tla",
+      "name": "ZooKeeper_LowLevel/ZkV3_7_0_Leadership1.tla",
+      "kind": "target",
+      "lineStart": 590,
+      "lineEnd": 606,
+      "proofLines": [
+        592,
+        593,
+        594,
+        595,
+        596,
+        597,
+        598,
+        599,
+        601,
+        602,
+        603,
+        604,
+        605,
+        606
+      ],
+      "proofRange": [
+        592,
+        606
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:ZKProofControlInvariant",
+        "helper:ZKProofInitLeadership1",
+        "helper:ZKProofLeadership1Frame",
+        "helper:ZKProofLeadership1Stutter"
+      ]
+    },
+    "ZooKeeper_LowLevel/ZkV3_7_0_Leadership2.tla": {
+      "id": "ZooKeeper_LowLevel/ZkV3_7_0_Leadership2.tla",
+      "name": "ZooKeeper_LowLevel/ZkV3_7_0_Leadership2.tla",
+      "kind": "target",
+      "lineStart": 609,
+      "lineEnd": 625,
+      "proofLines": [
+        611,
+        612,
+        613,
+        614,
+        615,
+        616,
+        617,
+        618,
+        620,
+        621,
+        622,
+        623,
+        624,
+        625
+      ],
+      "proofRange": [
+        611,
+        625
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:ZKProofControlInvariant",
+        "helper:ZKProofInitLeadership2",
+        "helper:ZKProofLeadership2Frame",
+        "helper:ZKProofLeadership2Stutter"
+      ]
+    },
+    "ZooKeeper_LowLevel/ZkV3_7_0_PrefixConsistency.tla": {
+      "id": "ZooKeeper_LowLevel/ZkV3_7_0_PrefixConsistency.tla",
+      "name": "ZooKeeper_LowLevel/ZkV3_7_0_PrefixConsistency.tla",
+      "kind": "target",
+      "lineStart": 628,
+      "lineEnd": 644,
+      "proofLines": [
+        630,
+        631,
+        632,
+        633,
+        634,
+        635,
+        636,
+        637,
+        639,
+        640,
+        641,
+        642,
+        643,
+        644
+      ],
+      "proofRange": [
+        630,
+        644
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:ZKProofControlInvariant",
+        "helper:ZKProofInitPrefix",
+        "helper:ZKProofPrefixConsistencyFrame",
+        "helper:ZKProofPrefixConsistencyStutter"
+      ]
+    },
+    "ZooKeeper_LowLevel/ZkV3_7_0_Integrity.tla": {
+      "id": "ZooKeeper_LowLevel/ZkV3_7_0_Integrity.tla",
+      "name": "ZooKeeper_LowLevel/ZkV3_7_0_Integrity.tla",
+      "kind": "target",
+      "lineStart": 647,
+      "lineEnd": 663,
+      "proofLines": [
+        649,
+        650,
+        651,
+        652,
+        653,
+        654,
+        655,
+        656,
+        658,
+        659,
+        660,
+        661,
+        662,
+        663
+      ],
+      "proofRange": [
+        649,
+        663
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:ZKProofControlInvariant",
+        "helper:ZKProofInitIntegrity",
+        "helper:ZKProofIntegrityFrame",
+        "helper:ZKProofIntegrityStutter"
+      ]
+    },
+    "ZooKeeper_LowLevel/ZkV3_7_0_Agreement.tla": {
+      "id": "ZooKeeper_LowLevel/ZkV3_7_0_Agreement.tla",
+      "name": "ZooKeeper_LowLevel/ZkV3_7_0_Agreement.tla",
+      "kind": "target",
+      "lineStart": 666,
+      "lineEnd": 686,
+      "proofLines": [
+        668,
+        669,
+        670,
+        671,
+        672,
+        673,
+        674,
+        675,
+        677,
+        678,
+        679,
+        680,
+        681,
+        682,
+        683,
+        684,
+        685,
+        686
+      ],
+      "proofRange": [
+        668,
+        686
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:ZKProofControlInvariant",
+        "helper:ZKProofInitPrefixInvariant",
+        "helper:ZKProofPrefixAgreement",
+        "helper:ZKProofPrefixConsistencyFrame",
+        "helper:ZKProofPrefixInvariantStutter"
+      ]
+    },
+    "ZooKeeper_LowLevel/ZkV3_7_0_TotalOrder.tla": {
+      "id": "ZooKeeper_LowLevel/ZkV3_7_0_TotalOrder.tla",
+      "name": "ZooKeeper_LowLevel/ZkV3_7_0_TotalOrder.tla",
+      "kind": "target",
+      "lineStart": 689,
+      "lineEnd": 709,
+      "proofLines": [
+        691,
+        692,
+        693,
+        694,
+        695,
+        696,
+        697,
+        698,
+        700,
+        701,
+        702,
+        703,
+        704,
+        705,
+        706,
+        707,
+        708,
+        709
+      ],
+      "proofRange": [
+        691,
+        709
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:ZKProofControlInvariant",
+        "helper:ZKProofInitOrderInvariant",
+        "helper:ZKProofOrderInvariantStutter",
+        "helper:ZKProofPrefixConsistencyFrame",
+        "helper:ZKProofPrefixTotalOrder"
+      ]
+    },
+    "ZooKeeper_LowLevel/ZkV3_7_0_LocalPrimaryOrder.tla": {
+      "id": "ZooKeeper_LowLevel/ZkV3_7_0_LocalPrimaryOrder.tla",
+      "name": "ZooKeeper_LowLevel/ZkV3_7_0_LocalPrimaryOrder.tla",
+      "kind": "target",
+      "lineStart": 712,
+      "lineEnd": 728,
+      "proofLines": [
+        714,
+        715,
+        716,
+        717,
+        718,
+        719,
+        720,
+        721,
+        723,
+        724,
+        725,
+        726,
+        727,
+        728
+      ],
+      "proofRange": [
+        714,
+        728
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:ZKProofControlInvariant",
+        "helper:ZKProofInitLocalOrder",
+        "helper:ZKProofLocalPrimaryOrderFrame",
+        "helper:ZKProofLocalPrimaryOrderStutter"
+      ]
+    },
+    "ZooKeeper_LowLevel/ZkV3_7_0_GlobalPrimaryOrder.tla": {
+      "id": "ZooKeeper_LowLevel/ZkV3_7_0_GlobalPrimaryOrder.tla",
+      "name": "ZooKeeper_LowLevel/ZkV3_7_0_GlobalPrimaryOrder.tla",
+      "kind": "target",
+      "lineStart": 731,
+      "lineEnd": 747,
+      "proofLines": [
+        733,
+        734,
+        735,
+        736,
+        737,
+        738,
+        739,
+        740,
+        742,
+        743,
+        744,
+        745,
+        746,
+        747
+      ],
+      "proofRange": [
+        733,
+        747
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:ZKProofControlInvariant",
+        "helper:ZKProofGlobalPrimaryOrderFrame",
+        "helper:ZKProofGlobalPrimaryOrderStutter",
+        "helper:ZKProofInitGlobalOrder"
+      ]
+    },
+    "ZooKeeper_LowLevel/ZkV3_7_0_PrimaryIntegrity.tla": {
+      "id": "ZooKeeper_LowLevel/ZkV3_7_0_PrimaryIntegrity.tla",
+      "name": "ZooKeeper_LowLevel/ZkV3_7_0_PrimaryIntegrity.tla",
+      "kind": "target",
+      "lineStart": 750,
+      "lineEnd": 766,
+      "proofLines": [
+        752,
+        753,
+        754,
+        755,
+        756,
+        757,
+        758,
+        759,
+        761,
+        762,
+        763,
+        764,
+        765,
+        766
+      ],
+      "proofRange": [
+        752,
+        766
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:ZKProofControlInvariant",
+        "helper:ZKProofInitPrimaryIntegrity",
+        "helper:ZKProofPrimaryIntegrityFrame",
+        "helper:ZKProofPrimaryIntegrityStutter"
+      ]
+    },
+    "helper:ZKProofTxnReflexive": {
+      "id": "helper:ZKProofTxnReflexive",
+      "name": "ZKProofTxnReflexive",
+      "kind": "helper",
+      "lineStart": 20,
+      "lineEnd": 21,
+      "proofLines": [
+        21
+      ],
+      "proofRange": [
+        21,
+        21
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:ZKProofMinimumPair": {
+      "id": "helper:ZKProofMinimumPair",
+      "name": "ZKProofMinimumPair",
+      "kind": "helper",
+      "lineStart": 27,
+      "lineEnd": 41,
+      "proofLines": [
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41
+      ],
+      "proofRange": [
+        34,
+        41
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:ZKProofPrefixByIndex": {
+      "id": "helper:ZKProofPrefixByIndex",
+      "name": "ZKProofPrefixByIndex",
+      "kind": "helper",
+      "lineStart": 43,
+      "lineEnd": 58,
+      "proofLines": [
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        58
+      ],
+      "proofRange": [
+        45,
+        58
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:ZKProofMinimumPair"
+      ]
+    },
+    "helper:ZKProofPrefixAgreement": {
+      "id": "helper:ZKProofPrefixAgreement",
+      "name": "ZKProofPrefixAgreement",
+      "kind": "helper",
+      "lineStart": 60,
+      "lineEnd": 89,
+      "proofLines": [
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68,
+        69,
+        70,
+        71,
+        72,
+        73,
+        74,
+        75,
+        76,
+        77,
+        78,
+        79,
+        80,
+        81,
+        82,
+        83,
+        84,
+        85,
+        86,
+        87,
+        88,
+        89
+      ],
+      "proofRange": [
+        62,
+        89
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:ZKProofPrefixTotalOrder": {
+      "id": "helper:ZKProofPrefixTotalOrder",
+      "name": "ZKProofPrefixTotalOrder",
+      "kind": "helper",
+      "lineStart": 91,
+      "lineEnd": 122,
+      "proofLines": [
+        94,
+        95,
+        96,
+        97,
+        98,
+        99,
+        100,
+        101,
+        102,
+        103,
+        104,
+        105,
+        106,
+        107,
+        108,
+        109,
+        110,
+        111,
+        112,
+        113,
+        114,
+        115,
+        116,
+        117,
+        118,
+        119,
+        120,
+        121,
+        122
+      ],
+      "proofRange": [
+        94,
+        122
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:ZKProofInitLeadership1": {
+      "id": "helper:ZKProofInitLeadership1",
+      "name": "ZKProofInitLeadership1",
+      "kind": "helper",
+      "lineStart": 124,
+      "lineEnd": 126,
+      "proofLines": [
+        125,
+        126
+      ],
+      "proofRange": [
+        125,
+        126
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:ZKProofCardinalityAgreement": {
+      "id": "helper:ZKProofCardinalityAgreement",
+      "name": "ZKProofCardinalityAgreement",
+      "kind": "helper",
+      "lineStart": 128,
+      "lineEnd": 130,
+      "proofLines": [
+        130
+      ],
+      "proofRange": [
+        130,
+        130
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:ZKProofInitLeadership2": {
+      "id": "helper:ZKProofInitLeadership2",
+      "name": "ZKProofInitLeadership2",
+      "kind": "helper",
+      "lineStart": 132,
+      "lineEnd": 134,
+      "proofLines": [
+        133,
+        134
+      ],
+      "proofRange": [
+        133,
+        134
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:ZKProofCardinalityAgreement"
+      ]
+    },
+    "helper:ZKProofInitCommitType": {
+      "id": "helper:ZKProofInitCommitType",
+      "name": "ZKProofInitCommitType",
+      "kind": "helper",
+      "lineStart": 136,
+      "lineEnd": 137,
+      "proofLines": [
+        137
+      ],
+      "proofRange": [
+        137,
+        137
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:ZKProofInitPrefix": {
+      "id": "helper:ZKProofInitPrefix",
+      "name": "ZKProofInitPrefix",
+      "kind": "helper",
+      "lineStart": 139,
+      "lineEnd": 155,
+      "proofLines": [
+        140,
+        141,
+        142,
+        143,
+        144,
+        145,
+        146,
+        147,
+        148,
+        149,
+        150,
+        151,
+        152,
+        153,
+        154,
+        155
+      ],
+      "proofRange": [
+        140,
+        155
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:ZKProofMinimumPair",
+        "helper:ZKProofTxnReflexive"
+      ]
+    },
+    "helper:ZKProofInitIntegrity": {
+      "id": "helper:ZKProofInitIntegrity",
+      "name": "ZKProofInitIntegrity",
+      "kind": "helper",
+      "lineStart": 157,
+      "lineEnd": 159,
+      "proofLines": [
+        158,
+        159
+      ],
+      "proofRange": [
+        158,
+        159
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:ZKProofInitLocalOrder": {
+      "id": "helper:ZKProofInitLocalOrder",
+      "name": "ZKProofInitLocalOrder",
+      "kind": "helper",
+      "lineStart": 168,
+      "lineEnd": 169,
+      "proofLines": [
+        169
+      ],
+      "proofRange": [
+        169,
+        169
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:ZKProofInitGlobalOrder": {
+      "id": "helper:ZKProofInitGlobalOrder",
+      "name": "ZKProofInitGlobalOrder",
+      "kind": "helper",
+      "lineStart": 171,
+      "lineEnd": 172,
+      "proofLines": [
+        172
+      ],
+      "proofRange": [
+        172,
+        172
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:ZKProofInitPrimaryIntegrity": {
+      "id": "helper:ZKProofInitPrimaryIntegrity",
+      "name": "ZKProofInitPrimaryIntegrity",
+      "kind": "helper",
+      "lineStart": 174,
+      "lineEnd": 176,
+      "proofLines": [
+        175,
+        176
+      ],
+      "proofRange": [
+        175,
+        176
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:ZKProofLeadership1Stutter": {
+      "id": "helper:ZKProofLeadership1Stutter",
+      "name": "ZKProofLeadership1Stutter",
+      "kind": "helper",
+      "lineStart": 195,
+      "lineEnd": 197,
+      "proofLines": [
+        197
+      ],
+      "proofRange": [
+        197,
+        197
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:ZKProofLeadership1Frame": {
+      "id": "helper:ZKProofLeadership1Frame",
+      "name": "ZKProofLeadership1Frame",
+      "kind": "helper",
+      "lineStart": 199,
+      "lineEnd": 207,
+      "proofLines": [
+        201,
+        202,
+        203,
+        204,
+        205,
+        206,
+        207
+      ],
+      "proofRange": [
+        201,
+        207
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:ZKProofLeadership2Stutter": {
+      "id": "helper:ZKProofLeadership2Stutter",
+      "name": "ZKProofLeadership2Stutter",
+      "kind": "helper",
+      "lineStart": 214,
+      "lineEnd": 216,
+      "proofLines": [
+        216
+      ],
+      "proofRange": [
+        216,
+        216
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:ZKProofLeadership2Frame": {
+      "id": "helper:ZKProofLeadership2Frame",
+      "name": "ZKProofLeadership2Frame",
+      "kind": "helper",
+      "lineStart": 218,
+      "lineEnd": 227,
+      "proofLines": [
+        220,
+        221,
+        222,
+        223,
+        224,
+        225,
+        226,
+        227
+      ],
+      "proofRange": [
+        220,
+        227
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:ZKProofPrefixConsistencyStutter": {
+      "id": "helper:ZKProofPrefixConsistencyStutter",
+      "name": "ZKProofPrefixConsistencyStutter",
+      "kind": "helper",
+      "lineStart": 250,
+      "lineEnd": 252,
+      "proofLines": [
+        252
+      ],
+      "proofRange": [
+        252,
+        252
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:ZKProofPrefixConsistencyFrame": {
+      "id": "helper:ZKProofPrefixConsistencyFrame",
+      "name": "ZKProofPrefixConsistencyFrame",
+      "kind": "helper",
+      "lineStart": 254,
+      "lineEnd": 260,
+      "proofLines": [
+        256,
+        257,
+        258,
+        259,
+        260
+      ],
+      "proofRange": [
+        256,
+        260
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:ZKProofIntegrityStutter": {
+      "id": "helper:ZKProofIntegrityStutter",
+      "name": "ZKProofIntegrityStutter",
+      "kind": "helper",
+      "lineStart": 283,
+      "lineEnd": 285,
+      "proofLines": [
+        285
+      ],
+      "proofRange": [
+        285,
+        285
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:ZKProofIntegrityFrame": {
+      "id": "helper:ZKProofIntegrityFrame",
+      "name": "ZKProofIntegrityFrame",
+      "kind": "helper",
+      "lineStart": 287,
+      "lineEnd": 293,
+      "proofLines": [
+        289,
+        290,
+        291,
+        292,
+        293
+      ],
+      "proofRange": [
+        289,
+        293
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:ZKProofLocalPrimaryOrderStutter": {
+      "id": "helper:ZKProofLocalPrimaryOrderStutter",
+      "name": "ZKProofLocalPrimaryOrderStutter",
+      "kind": "helper",
+      "lineStart": 382,
+      "lineEnd": 384,
+      "proofLines": [
+        384
+      ],
+      "proofRange": [
+        384,
+        384
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:ZKProofLocalPrimaryOrderFrame": {
+      "id": "helper:ZKProofLocalPrimaryOrderFrame",
+      "name": "ZKProofLocalPrimaryOrderFrame",
+      "kind": "helper",
+      "lineStart": 386,
+      "lineEnd": 392,
+      "proofLines": [
+        388,
+        389,
+        390,
+        391,
+        392
+      ],
+      "proofRange": [
+        388,
+        392
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:ZKProofGlobalPrimaryOrderStutter": {
+      "id": "helper:ZKProofGlobalPrimaryOrderStutter",
+      "name": "ZKProofGlobalPrimaryOrderStutter",
+      "kind": "helper",
+      "lineStart": 415,
+      "lineEnd": 417,
+      "proofLines": [
+        417
+      ],
+      "proofRange": [
+        417,
+        417
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:ZKProofGlobalPrimaryOrderFrame": {
+      "id": "helper:ZKProofGlobalPrimaryOrderFrame",
+      "name": "ZKProofGlobalPrimaryOrderFrame",
+      "kind": "helper",
+      "lineStart": 419,
+      "lineEnd": 425,
+      "proofLines": [
+        421,
+        422,
+        423,
+        424,
+        425
+      ],
+      "proofRange": [
+        421,
+        425
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:ZKProofPrimaryIntegrityStutter": {
+      "id": "helper:ZKProofPrimaryIntegrityStutter",
+      "name": "ZKProofPrimaryIntegrityStutter",
+      "kind": "helper",
+      "lineStart": 449,
+      "lineEnd": 451,
+      "proofLines": [
+        451
+      ],
+      "proofRange": [
+        451,
+        451
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:ZKProofPrimaryIntegrityFrame": {
+      "id": "helper:ZKProofPrimaryIntegrityFrame",
+      "name": "ZKProofPrimaryIntegrityFrame",
+      "kind": "helper",
+      "lineStart": 453,
+      "lineEnd": 459,
+      "proofLines": [
+        455,
+        456,
+        457,
+        458,
+        459
+      ],
+      "proofRange": [
+        455,
+        459
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:ZKProofControlInit": {
+      "id": "helper:ZKProofControlInit",
+      "name": "ZKProofControlInit",
+      "kind": "helper",
+      "lineStart": 469,
+      "lineEnd": 471,
+      "proofLines": [
+        470,
+        471
+      ],
+      "proofRange": [
+        470,
+        471
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:ZKProofControlNext": {
+      "id": "helper:ZKProofControlNext",
+      "name": "ZKProofControlNext",
+      "kind": "helper",
+      "lineStart": 473,
+      "lineEnd": 557,
+      "proofLines": [
+        475,
+        476,
+        477,
+        478,
+        479,
+        480,
+        481,
+        482,
+        483,
+        484,
+        485,
+        486,
+        487,
+        488,
+        489,
+        490,
+        491,
+        492,
+        493,
+        494,
+        495,
+        496,
+        497,
+        498,
+        499,
+        500,
+        501,
+        502,
+        503,
+        504,
+        505,
+        506,
+        507,
+        508,
+        509,
+        510,
+        511,
+        512,
+        513,
+        514,
+        515,
+        516,
+        517,
+        518,
+        519,
+        520,
+        521,
+        522,
+        523,
+        524,
+        525,
+        526,
+        527,
+        528,
+        529,
+        530,
+        531,
+        532,
+        533,
+        534,
+        535,
+        536,
+        537,
+        538,
+        539,
+        540,
+        541,
+        542,
+        543,
+        544,
+        545,
+        546,
+        547,
+        548,
+        549,
+        550,
+        551,
+        552,
+        553,
+        554,
+        555,
+        556,
+        557
+      ],
+      "proofRange": [
+        475,
+        557
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:ZKProofControlInvariant": {
+      "id": "helper:ZKProofControlInvariant",
+      "name": "ZKProofControlInvariant",
+      "kind": "helper",
+      "lineStart": 559,
+      "lineEnd": 560,
+      "proofLines": [
+        560
+      ],
+      "proofRange": [
+        560,
+        560
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:ZKProofControlInit",
+        "helper:ZKProofControlNext"
+      ]
+    },
+    "helper:ZKProofInitUniquePositions": {
+      "id": "helper:ZKProofInitUniquePositions",
+      "name": "ZKProofInitUniquePositions",
+      "kind": "helper",
+      "lineStart": 563,
+      "lineEnd": 564,
+      "proofLines": [
+        564
+      ],
+      "proofRange": [
+        564,
+        564
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:ZKProofInitPrefixInvariant": {
+      "id": "helper:ZKProofInitPrefixInvariant",
+      "name": "ZKProofInitPrefixInvariant",
+      "kind": "helper",
+      "lineStart": 569,
+      "lineEnd": 571,
+      "proofLines": [
+        570,
+        571
+      ],
+      "proofRange": [
+        570,
+        571
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:ZKProofInitCommitType",
+        "helper:ZKProofInitPrefix",
+        "helper:ZKProofPrefixByIndex"
+      ]
+    },
+    "helper:ZKProofInitOrderInvariant": {
+      "id": "helper:ZKProofInitOrderInvariant",
+      "name": "ZKProofInitOrderInvariant",
+      "kind": "helper",
+      "lineStart": 573,
+      "lineEnd": 575,
+      "proofLines": [
+        574,
+        575
+      ],
+      "proofRange": [
+        574,
+        575
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:ZKProofInitPrefixInvariant",
+        "helper:ZKProofInitUniquePositions"
+      ]
+    },
+    "helper:ZKProofPrefixInvariantStutter": {
+      "id": "helper:ZKProofPrefixInvariantStutter",
+      "name": "ZKProofPrefixInvariantStutter",
+      "kind": "helper",
+      "lineStart": 577,
+      "lineEnd": 580,
+      "proofLines": [
+        580
+      ],
+      "proofRange": [
+        580,
+        580
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:ZKProofOrderInvariantStutter": {
+      "id": "helper:ZKProofOrderInvariantStutter",
+      "name": "ZKProofOrderInvariantStutter",
+      "kind": "helper",
+      "lineStart": 582,
+      "lineEnd": 586,
+      "proofLines": [
+        585,
+        586
+      ],
+      "proofRange": [
+        585,
+        586
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    }
+  }
+}

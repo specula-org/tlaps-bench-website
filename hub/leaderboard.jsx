@@ -11,8 +11,8 @@ const toggleSet = (current, id) => {
 const rowClick = (event, action) => {
   if (!event.target.closest("button, a, input, select")) action();
 };
-const fmt = (value, formatter) => value == null ? "—" : formatter(value);
-const checkTime = (value) => value == null ? "—" : String(Math.max(1, Math.round(value)));
+const fmt = (value, formatter, missing = "—") => value == null ? missing : formatter(value);
+const checkTime = (value, missing = "—") => value == null ? missing : String(Math.max(1, Math.round(value)));
 
 function Collapse({ open, children }) {
   const [visited, setVisited] = useState(open);
@@ -43,6 +43,7 @@ function metricValue(row, key) {
   if (key === "specsInv") return row.total;
   if (key === "name" || key === "level") return row[key];
   const text = row.metrics[key];
+  if (text == null || text === "") return null;
   if (key === "tokensInOutPerInvM") return text.split("/").reduce((sum, value) => sum + Number(value.trim()), 0);
   return Number(text.replace(/[$,<]/g, ""));
 }
@@ -157,9 +158,9 @@ function Invariants({ model, group }) {
         <th scope="row" className="inv-name" data-label="Invariant / property" title={task.id}>{task.name}{group.specCount > 1 && <small className="inv-spec-name">{task.specName}</small>}</th>
         <td data-label="Result"><span className={`verdict verdict-${task.verdict.toLowerCase()}`}>{task.verdict}</span></td>
         <td className="numeric" data-label="Proof size (lines)" title={UNIT_COLUMNS[2].description}>{formatTokens(task.proofSize)}</td>
-        <td className="numeric" data-label="Obligations proved / total" title={UNIT_COLUMNS[3].description}>{task.obligationsProved == null ? "—" : `${formatTokens(task.obligationsProved)} / ${formatTokens(task.obligations)}`}</td>
-        <td className="numeric" data-label="Helpers used">{fmt(task.helperCount, formatTokens)}</td>
-        <td className="numeric" data-label="Check time (s)" title={UNIT_COLUMNS[5].description}>{checkTime(task.checkTimeSecs)}</td>
+        <td className="numeric" data-label="Obligations proved / total" title={UNIT_COLUMNS[3].description}>{task.obligationsProved == null ? (model.missingMetricDisplay ?? "—") : `${formatTokens(task.obligationsProved)} / ${formatTokens(task.obligations)}`}</td>
+        <td className="numeric" data-label="Helpers used">{fmt(task.helperCount, formatTokens, model.missingMetricDisplay)}</td>
+        <td className="numeric" data-label="Check time (s)" title={UNIT_COLUMNS[5].description}>{checkTime(task.checkTimeSecs, model.missingMetricDisplay)}</td>
         <td className="proof-cell"><button type="button" className="view-proof" aria-label={`View ${task.name} proof`} onClick={() => setProofTask(task)}>View proof</button></td>
       </tr>)}</tbody>
     </table>

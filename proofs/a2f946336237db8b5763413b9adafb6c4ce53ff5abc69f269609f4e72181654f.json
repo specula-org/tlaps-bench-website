@@ -1,0 +1,1043 @@
+{
+  "schemaVersion": 1,
+  "specId": "etcd_raft/etcd_raft.tla",
+  "sourceName": "etcd_raft.tla",
+  "sourceSha256": "26eaf570070555f2c0112f908a124adad5a007271b55a691474b284acb6bdb3b",
+  "resultSha256": "0b80d0ac1482e4a021873d90be538e04f6ad4f4411c6cafe27181a7323b7fc88",
+  "source": "---- MODULE etcd_raft ----\nEXTENDS etcd_raftDefs\n\n\\* BEGIN AGENT HELPERS\n\\* Election certificates are represented without adding history variables.\n\\* A ballot is a triple <<voter, term, candidate>>.  ARAllVotes collects\n\\* pending replies, replies on the network, and votes counted by active\n\\* candidates or leaders.  Each voter has at most one candidate per term.\n\\* Network and counted ballots are additionally bounded by durable state;\n\\* pending ballots are bounded by current state.  These two bounds make\n\\* persistence and restart preserve the same uniqueness invariant.\n\\* Leaders retain a majority certificate, so quorum intersection finishes\n\\* the election-uniqueness proof.\n\nLOCAL ARBags == INSTANCE BagsTheorems\nLOCAL ARProof == INSTANCE TLAPS\nLOCAL ARFinite == INSTANCE FiniteSetTheorems\n\nARConfig == [jointConfig |-> <<InitServer, {}>>, learners |-> {}]\nARFunction(f) == f = [i \\in Server |-> f[i]]\nARActive(i) == state[i] \\in {Candidate, Leader}\nARMessage(m) ==\n    /\\ m.msource \\in Server\n    /\\ m.mdest \\in Server\n    /\\ m.mterm \\in Nat\n    /\\ m.mtype \\in {RequestVoteRequest, RequestVoteResponse,\n                    AppendEntriesRequest, AppendEntriesResponse}\n    /\\ m.mtype \\in {RequestVoteRequest, RequestVoteResponse} =>\n          /\\ m.msource \\in InitServer\n          /\\ m.mdest \\in InitServer\n    /\\ m.mtype = RequestVoteResponse => m.mvoteGranted \\in BOOLEAN\n\nARPacketVotes(S) ==\n    {<<m.msource, m.mterm, m.mdest>> :\n      m \\in {n \\in S : n.mtype = RequestVoteResponse /\\ n.mvoteGranted}}\nARCountedVotes ==\n    {b \\in InitServer \\X Nat \\X Server :\n        /\\ ARActive(b[3])\n        /\\ b[2] = currentTerm[b[3]]\n        /\\ b[1] \\in votesGranted[b[3]]}\nARPermanentVotes == ARPacketVotes(DOMAIN messages) \\cup ARCountedVotes\nARAllVotes == ARPermanentVotes \\cup ARPacketVotes(DOMAIN pendingMessages)\nARDurableTerms == [i \\in Server |-> durableState[i].currentTerm]\nARDurableVotes == [i \\in Server |-> durableState[i].votedFor]\nARBound(B, ts, vs) ==\n    \\A b \\in B :\n      /\\ b[1] \\in Server /\\ b[2] \\in Nat /\\ b[3] \\in Server\n      /\\ b[2] <= ts[b[1]]\n      /\\ b[2] = ts[b[1]] => vs[b[1]] = b[3]\nARUnique(B) ==\n    \\A b, c \\in B : b[1] = c[1] /\\ b[2] = c[2] => b[3] = c[3]\nARBase ==\n    /\\ currentTerm \\in [Server -> Nat]\n    /\\ state \\in [Server -> {Follower, Candidate, Leader}]\n    /\\ votedFor \\in [Server -> Server \\cup {Nil}]\n    /\\ votesGranted \\in [Server -> SUBSET InitServer]\n    /\\ ARFunction(config)\n    /\\ ARFunction(durableState)\n    /\\ \\A i \\in Server :\n          /\\ config[i] = ARConfig\n          /\\ durableState[i].config = ARConfig\n          /\\ durableState[i].currentTerm \\in Nat\n          /\\ durableState[i].votedFor \\in Server \\cup {Nil}\n          /\\ durableState[i].currentTerm <= currentTerm[i]\n          /\\ ARActive(i) => votedFor[i] = i /\\ i \\in InitServer\nARCertificates ==\n    \\A i \\in Server : state[i] = Leader =>\n       \\E Q \\in Quorum(InitServer) : Q \\subseteq votesGranted[i]\nARInv ==\n    /\\ ARBase\n    /\\ IsABag(messages) /\\ IsABag(pendingMessages)\n    /\\ \\A m \\in DOMAIN messages \\cup DOMAIN pendingMessages : ARMessage(m)\n    /\\ ARCertificates\n    /\\ ARBound(ARAllVotes, currentTerm, votedFor)\n    /\\ ARBound(ARPermanentVotes, ARDurableTerms, ARDurableVotes)\n    /\\ ARUnique(ARAllVotes)\n\nLEMMA ARAddBag ==\n    ASSUME NEW B, IsABag(B), NEW m\n    PROVE /\\ IsABag(WithMessage(m,B))\n          /\\ DOMAIN WithMessage(m,B) = DOMAIN B \\cup {m}\nBY ARProof!SMTT(\"r10\") DEF IsABag, WithMessage, SetToBag, (+)\n\nLEMMA ARBagDefinitions ==\n    /\\ \\A x : IsABag(x) = ARBags!IsABag(x)\n    /\\ \\A x,y : x (-) y = ARBags!(-)(x,y)\n    /\\ \\A x,y : x (+) y = ARBags!(+)(x,y)\n    /\\ \\A x : SetToBag(x) = ARBags!SetToBag(x)\nBY ARProof!Isa DEF IsABag, ARBags!IsABag, (-), ARBags!(-),\n    (+), ARBags!(+), SetToBag, ARBags!SetToBag\n\nLEMMA ARRemoveBag ==\n    ASSUME NEW B, IsABag(B), NEW m\n    PROVE /\\ IsABag(WithoutMessage(m,B))\n          /\\ DOMAIN WithoutMessage(m,B) \\subseteq DOMAIN B\nBY ARBagDefinitions, ARBags!Bags_Difference, ARBags!Bags_SetToBagIsABag,\n   ARProof!SMTT(\"r5\") DEF WithoutMessage\n\nLEMMA ARPendingBags ==\n    ASSUME IsABag(messages), IsABag(pendingMessages), NEW i\n    PROVE /\\ IsABag(ClearPendingMessages(i))\n          /\\ DOMAIN ClearPendingMessages(i) =\n               {m \\in DOMAIN pendingMessages : m.msource # i}\n          /\\ IsABag(PendingMessages(i) (+) messages)\n          /\\ DOMAIN (PendingMessages(i) (+) messages) =\n               DOMAIN messages \\cup {m \\in DOMAIN pendingMessages : m.msource = i}\n<1>1. IsABag(PendingMessages(i))\n  BY ARProof!SMTT(\"r5\") DEF IsABag, PendingMessages\n<1>2. /\\ IsABag(ClearPendingMessages(i))\n      /\\ DOMAIN ClearPendingMessages(i) =\n           {m \\in DOMAIN pendingMessages : m.msource # i}\n  BY <1>1, ARBagDefinitions, ARBags!Bags_Difference, ARProof!SMTT(\"r5\")\n     DEF ClearPendingMessages, PendingMessages, IsABag\n<1>3. /\\ IsABag(PendingMessages(i) (+) messages)\n      /\\ DOMAIN (PendingMessages(i) (+) messages) =\n           DOMAIN messages \\cup {m \\in DOMAIN pendingMessages : m.msource = i}\n  BY <1>1, ARBagDefinitions, ARBags!Bags_Union, ARProof!SMTT(\"r5\") DEF PendingMessages\n<1> QED BY ARProof!SMTT(\"r3\"), <1>2, <1>3\n\nLEMMA ARVoteSubset ==\n    ASSUME NEW S, NEW T, S \\subseteq T\n    PROVE ARPacketVotes(S) \\subseteq ARPacketVotes(T)\nBY ARProof!SMTT(\"r5\") DEF ARPacketVotes\n\nLEMMA ARVoteUnion ==\n    ASSUME NEW S, NEW T\n    PROVE ARPacketVotes(S \\cup T) = ARPacketVotes(S) \\cup ARPacketVotes(T)\nBY ARProof!SMTT(\"r5\") DEF ARPacketVotes\n\nLEMMA ARInit == Init => ARInv\nBY DistinctRoles, ARProof!SMTT(\"r20\")\n   DEF Init, InitMessageVars, InitServerVars, InitCandidateVars,\n       InitLeaderVars, InitLogVars, InitConfigVars, InitDurableState,\n       ARInv, ARBase, ARConfig, ARFunction, ARActive, ARCertificates,\n       ARBound, ARUnique, ARAllVotes, ARPermanentVotes, ARCountedVotes,\n       ARPacketVotes, ARDurableTerms, ARDurableVotes, IsABag, EmptyBag,\n       SetToBag\n\nLEMMA ARCountedUnchanged ==\n    UNCHANGED <<state, currentTerm, votesGranted>> => UNCHANGED ARCountedVotes\nBY ARProof!Isa DEF ARCountedVotes, ARActive\n\nLEMMA ARBaseUnchanged ==\n    UNCHANGED <<currentTerm, state, votedFor, votesGranted, config, durableState>>\n      => (ARBase' = ARBase)\nBY ARProof!Isa DEF ARBase, ARFunction, ARActive\n\nLEMMA ARCertificatesUnchanged ==\n    UNCHANGED <<state, votesGranted>> => UNCHANGED ARCertificates\nBY ARProof!Isa DEF ARCertificates\n\nLEMMA ARDurableUnchanged ==\n    UNCHANGED durableState => UNCHANGED <<ARDurableTerms, ARDurableVotes>>\nBY ARProof!Isa DEF ARDurableTerms, ARDurableVotes\n\nLEMMA ARUnchanged ==\n    ASSUME ARInv,\n           UNCHANGED <<currentTerm, state, votedFor, votesGranted, config, durableState>>,\n           IsABag(messages'), IsABag(pendingMessages'),\n           \\A m \\in DOMAIN messages' \\cup DOMAIN pendingMessages' : ARMessage(m),\n           ARPacketVotes(DOMAIN messages') \\subseteq ARPacketVotes(DOMAIN messages),\n           ARPacketVotes(DOMAIN pendingMessages') \\subseteq ARPacketVotes(DOMAIN pendingMessages)\n    PROVE ARInv'\n<1>1. UNCHANGED <<ARBase, ARCertificates, ARCountedVotes, ARDurableTerms, ARDurableVotes>>\n  BY ARBaseUnchanged, ARCertificatesUnchanged, ARCountedUnchanged,\n     ARDurableUnchanged, ARProof!SMTT(\"r5\")\n<1>2. /\\ ARPermanentVotes' \\subseteq ARPermanentVotes\n      /\\ ARAllVotes' \\subseteq ARAllVotes\n  BY <1>1, ARProof!SMTT(\"r5\") DEF ARPermanentVotes, ARAllVotes\n<1> QED\n  BY <1>1, <1>2, ARProof!SMTT(\"r5\") DEF ARInv, ARBound, ARUnique\n\nLEMMA ARNoElectionChange ==\n    ASSUME ARInv,\n           UNCHANGED <<currentTerm, state, votedFor, votesGranted, config,\n                       durableState, messages, pendingMessages>>\n    PROVE ARInv'\nBY ARUnchanged, ARProof!SMTT(\"r5\") DEF ARInv\n\nLEMMA ARSendOrdinary ==\n    ASSUME ARInv, NEW m, ARMessage(m), m.mtype # RequestVoteResponse,\n           Send(m),\n           UNCHANGED <<messages, currentTerm, state, votedFor, votesGranted,\n                       config, durableState>>\n    PROVE ARInv'\n<1>1. /\\ IsABag(pendingMessages')\n      /\\ DOMAIN pendingMessages' = DOMAIN pendingMessages \\cup {m}\n  BY ARAddBag, ARProof!SMTT(\"r5\") DEF ARInv, Send, SendDirect\n<1>2. ARPacketVotes(DOMAIN pendingMessages') \\subseteq ARPacketVotes(DOMAIN pendingMessages)\n  BY <1>1, ARProof!SMTT(\"r5\") DEF ARPacketVotes\n<1> QED\n  BY <1>1, <1>2, ARUnchanged, ARProof!SMTT(\"r5\") DEF ARInv\n\nLEMMA ARDiscard ==\n    ASSUME ARInv, NEW m, Discard(m),\n           UNCHANGED <<pendingMessages, currentTerm, state, votedFor,\n                       votesGranted, config, durableState>>\n    PROVE ARInv'\n<1>1. /\\ IsABag(messages')\n      /\\ DOMAIN messages' \\subseteq DOMAIN messages\n  BY ARRemoveBag, ARProof!SMTT(\"r5\") DEF ARInv, Discard, DiscardDirect\n<1>2. ARPacketVotes(DOMAIN messages') \\subseteq ARPacketVotes(DOMAIN messages)\n  BY ARProof!SMTT(\"r3\"), <1>1, ARVoteSubset\n<1> QED\n  BY <1>1, <1>2, ARUnchanged, ARProof!SMTT(\"r5\") DEF ARInv\n\nLEMMA ARReplyOrdinary ==\n    ASSUME ARInv, NEW m, NEW n, ARMessage(m), m.mtype # RequestVoteResponse,\n           Reply(m,n),\n           UNCHANGED <<currentTerm, state, votedFor, votesGranted,\n                       config, durableState>>\n    PROVE ARInv'\n<1>1. /\\ IsABag(pendingMessages')\n      /\\ DOMAIN pendingMessages' = DOMAIN pendingMessages \\cup {m}\n      /\\ IsABag(messages')\n      /\\ DOMAIN messages' \\subseteq DOMAIN messages\n  BY ARAddBag, ARRemoveBag, ARProof!SMTT(\"r5\") DEF ARInv, Reply, ReplyDirect\n<1>2. /\\ ARPacketVotes(DOMAIN messages') \\subseteq ARPacketVotes(DOMAIN messages)\n      /\\ ARPacketVotes(DOMAIN pendingMessages') \\subseteq ARPacketVotes(DOMAIN pendingMessages)\n  BY <1>1, ARVoteSubset, ARProof!SMTT(\"r5\") DEF ARPacketVotes\n<1> QED\n  BY <1>1, <1>2, ARUnchanged, ARProof!SMTT(\"r5\") DEF ARInv\n\nLEMMA ARSendVote ==\n    ASSUME ARInv, NEW i \\in InitServer, NEW j \\in InitServer,\n           NEW m, ARMessage(m),\n           m.mtype = RequestVoteResponse,\n           m.msource = i, m.mdest = j, m.mterm = currentTerm[i],\n           m.mvoteGranted \\in BOOLEAN,\n           m.mvoteGranted => votedFor[i] \\in {Nil,j},\n           votedFor' = IF m.mvoteGranted THEN [votedFor EXCEPT ![i] = j] ELSE votedFor,\n           UNCHANGED <<currentTerm, state, votesGranted, config, durableState>>,\n           pendingMessages' = WithMessage(m,pendingMessages),\n           IsABag(messages'), DOMAIN messages' \\subseteq DOMAIN messages\n    PROVE ARInv'\n<1>1. /\\ IsABag(pendingMessages')\n      /\\ DOMAIN pendingMessages' = DOMAIN pendingMessages \\cup {m}\n      /\\ i \\in Server /\\ j \\in Server\n  BY ARAddBag, InitServerSubset, ARProof!SMTT(\"r5\") DEF ARInv\n<1>2. ARBase'\n  BY NilNotServer, <1>1, ARProof!SMTT(\"r10\")\n     DEF ARInv, ARBase, ARFunction, ARActive\n<1>3. /\\ ARCertificates'\n      /\\ \\A n \\in DOMAIN messages' \\cup DOMAIN pendingMessages' : ARMessage(n)\n  BY <1>1, ARProof!SMTT(\"r5\") DEF ARInv, ARCertificates\n<1>4. /\\ ARPermanentVotes' \\subseteq ARPermanentVotes\n      /\\ ARAllVotes' \\subseteq\n            ARAllVotes \\cup (IF m.mvoteGranted THEN {<<i,currentTerm[i],j>>} ELSE {})\n  <2>1. UNCHANGED ARCountedVotes\n    BY ARCountedUnchanged, ARProof!SMTT(\"r5\")\n  <2> QED BY <1>1, <2>1, ARProof!SMTT(\"r5\")\n     DEF ARAllVotes, ARPermanentVotes, ARPacketVotes\n<1>5. ARBound(ARPermanentVotes', ARDurableTerms', ARDurableVotes')\n  BY <1>4, ARProof!SMTT(\"r5\") DEF ARInv, ARBound, ARDurableTerms, ARDurableVotes\n<1>6. ARBound(ARAllVotes', currentTerm', votedFor')\n  BY <1>1, <1>4, NilNotServer, ARProof!SMTT(\"r10\") DEF ARInv, ARBase, ARBound\n<1>7. ARUnique(ARAllVotes')\n  BY <1>1, <1>4, NilNotServer, ARProof!SMTT(\"r10\") DEF ARInv, ARBound, ARUnique\n<1> QED BY ARProof!SMTT(\"r3\"), <1>1, <1>2, <1>3, <1>5, <1>6, <1>7 DEF ARInv\n\n\nLEMMA ARChangeTerm ==\n    ASSUME ARInv, NEW i \\in Server, NEW t \\in Nat,\n           t > currentTerm[i],\n           currentTerm' = [currentTerm EXCEPT ![i] = t],\n           \\/ /\\ state' = [state EXCEPT ![i] = Follower]\n              /\\ votedFor' = [votedFor EXCEPT ![i] = Nil]\n              /\\ UNCHANGED votesGranted\n           \\/ /\\ i \\in InitServer\n              /\\ state' = [state EXCEPT ![i] = Candidate]\n              /\\ votedFor' = [votedFor EXCEPT ![i] = i]\n              /\\ votesGranted' = [votesGranted EXCEPT ![i] = {}],\n           UNCHANGED <<config, durableState, messages, pendingMessages>>\n    PROVE ARInv'\n<1>1. ARBase' /\\ ARCertificates'\n  BY DistinctRoles, ARProof!SMTT(\"r10\")\n     DEF ARInv, ARBase, ARCertificates, ARActive, ARFunction\n<1>2. /\\ ARCountedVotes' \\subseteq ARCountedVotes\n      /\\ ARPermanentVotes' \\subseteq ARPermanentVotes\n      /\\ ARAllVotes' \\subseteq ARAllVotes\n  BY DistinctRoles, ARProof!SMTT(\"r10\")\n     DEF ARInv, ARBase, ARCountedVotes, ARActive, ARPermanentVotes, ARAllVotes, ARPacketVotes\n<1>3. ARBound(ARAllVotes', currentTerm', votedFor')\n  BY <1>2, ARProof!SMTT(\"r10\") DEF ARInv, ARBound, ARBase\n<1>4. ARBound(ARPermanentVotes', ARDurableTerms', ARDurableVotes')\n  BY <1>2, ARProof!SMTT(\"r5\") DEF ARInv, ARBound, ARDurableTerms, ARDurableVotes\n<1>5. ARUnique(ARAllVotes')\n  BY <1>2, ARProof!SMTT(\"r5\") DEF ARInv, ARUnique\n<1> QED\n  BY <1>1, <1>3, <1>4, <1>5, ARProof!SMTT(\"r5\") DEF ARInv, ARMessage, IsABag\n\nLEMMA ARDropRole ==\n    ASSUME ARInv, NEW i \\in Server,\n           state' = [state EXCEPT ![i] = Follower],\n           UNCHANGED <<currentTerm, votedFor, votesGranted, config,\n                       durableState, messages, pendingMessages>>\n    PROVE ARInv'\n<1>1. ARBase' /\\ ARCertificates'\n  BY DistinctRoles, ARProof!SMTT(\"r10\")\n     DEF ARInv, ARBase, ARCertificates, ARActive, ARFunction\n<1>2. /\\ ARPermanentVotes' \\subseteq ARPermanentVotes\n      /\\ ARAllVotes' \\subseteq ARAllVotes\n  BY DistinctRoles, ARProof!SMTT(\"r10\")\n     DEF ARInv, ARBase, ARCountedVotes, ARActive, ARPermanentVotes, ARAllVotes, ARPacketVotes\n<1> QED\n  BY <1>1, <1>2, ARProof!SMTT(\"r10\")\n     DEF ARInv, ARBound, ARUnique, ARDurableTerms, ARDurableVotes, ARMessage, IsABag\n\nLEMMA ARLead ==\n    ASSUME ARInv, NEW i \\in Server, BecomeLeader(i)\n    PROVE ARInv'\n<1>1. GetConfig(i) = InitServer\n  BY ARProof!SMTT(\"r5\") DEF ARInv, ARBase, ARConfig, GetConfig, GetJointConfig\n<1>2. ARBase' /\\ ARCertificates'\n  BY <1>1, DistinctRoles, ARProof!SMTT(\"r10\")\n     DEF ARInv, ARBase, ARCertificates, ARActive, ARFunction, BecomeLeader,\n         messageVars, candidateVars, logVars, configVars\n<1>3. /\\ ARPermanentVotes' = ARPermanentVotes\n      /\\ ARAllVotes' = ARAllVotes\n  BY ARProof!SMTT(\"r10\")\n     DEF ARInv, ARBase, ARCountedVotes, ARActive, ARPermanentVotes, ARAllVotes, ARPacketVotes,\n         BecomeLeader, messageVars, candidateVars, logVars, configVars\n<1> QED\n  BY <1>2, <1>3, ARProof!SMTT(\"r10\")\n     DEF ARInv, ARBound, ARUnique, ARDurableTerms, ARDurableVotes, ARMessage,\n         IsABag, BecomeLeader, messageVars, candidateVars, logVars, configVars\n\nLEMMA ARCountVote ==\n    ASSUME ARInv, NEW m \\in DOMAIN messages,\n           m.mtype = RequestVoteResponse,\n           HandleRequestVoteResponse(m.mdest, m.msource, m)\n    PROVE ARInv'\n<1>1. ARMessage(m) /\\ m.msource \\in Server /\\ m.mdest \\in Server\n  BY ARProof!SMTT(\"r5\") DEF ARInv, ARMessage\n<1>2. /\\ IsABag(messages') /\\ DOMAIN messages' \\subseteq DOMAIN messages\n      /\\ UNCHANGED <<pendingMessages, currentTerm, state, votedFor, config, durableState>>\n  BY ARRemoveBag, ARProof!SMTT(\"r5\")\n     DEF ARInv, HandleRequestVoteResponse, Discard, DiscardDirect, serverVars,\n         leaderVars, logVars, configVars\n<1>3. ARBase' /\\ ARCertificates'\n  BY <1>1, ARProof!SMTT(\"r10\")\n     DEF ARInv, ARMessage, ARBase, ARCertificates, ARActive, ARFunction,\n         HandleRequestVoteResponse, serverVars, leaderVars, logVars, configVars\n<1>4. /\\ ARPermanentVotes' \\subseteq ARPermanentVotes\n      /\\ ARAllVotes' \\subseteq ARAllVotes\n  BY <1>1, <1>2, ARProof!SMTT(\"r15\")\n     DEF ARInv, ARBase, ARCountedVotes, ARActive, ARPermanentVotes,\n         ARAllVotes, ARPacketVotes, HandleRequestVoteResponse, serverVars,\n         leaderVars, logVars, configVars\n<1> QED\n  BY <1>2, <1>3, <1>4, ARProof!SMTT(\"r10\")\n     DEF ARInv, ARBound, ARUnique, ARDurableTerms, ARDurableVotes, ARMessage, IsABag\n\nLEMMA ARCrash ==\n    ASSUME ARInv, NEW i \\in Server, Restart(i)\n    PROVE ARInv'\n<1>1. /\\ IsABag(pendingMessages')\n      /\\ DOMAIN pendingMessages' = {m \\in DOMAIN pendingMessages : m.msource # i}\n  BY ARPendingBags, ARProof!SMTT(\"r5\") DEF ARInv, Restart\n<1>2. ARBase' /\\ ARCertificates'\n  BY DistinctRoles, ARProof!SMTT(\"r15\")\n     DEF ARInv, ARBase, ARCertificates, ARActive, ARFunction, Restart\n<1>3. /\\ ARPermanentVotes' \\subseteq ARPermanentVotes\n      /\\ ARAllVotes' \\subseteq ARAllVotes\n      /\\ \\A b \\in ARPacketVotes(DOMAIN pendingMessages') : b[1] # i\n  BY <1>1, DistinctRoles, ARProof!SMTT(\"r10\")\n     DEF ARInv, ARBase, ARCountedVotes, ARActive, ARPermanentVotes, ARAllVotes, ARPacketVotes, Restart\n<1>4. ARBound(ARAllVotes', currentTerm', votedFor')\n  BY <1>1, <1>3, ARProof!SMTT(\"r15\")\n     DEF ARInv, ARBound, ARBase, ARAllVotes, ARDurableTerms, ARDurableVotes, Restart\n<1>5. ARBound(ARPermanentVotes', ARDurableTerms', ARDurableVotes')\n  BY <1>3, ARProof!SMTT(\"r5\") DEF ARInv, ARBound, ARDurableTerms, ARDurableVotes, Restart\n<1>6. ARUnique(ARAllVotes')\n  BY <1>3, ARProof!SMTT(\"r5\") DEF ARInv, ARUnique\n<1> QED\n  BY <1>1, <1>2, <1>4, <1>5, <1>6, ARProof!SMTT(\"r5\")\n     DEF ARInv, ARMessage, IsABag, Restart\n\nLEMMA ARPersist ==\n    ASSUME ARInv, NEW i \\in Server, Ready(i)\n    PROVE ARInv'\n<1>1. /\\ IsABag(pendingMessages') /\\ IsABag(messages')\n      /\\ DOMAIN pendingMessages' = {m \\in DOMAIN pendingMessages : m.msource # i}\n      /\\ DOMAIN messages' = DOMAIN messages \\cup\n                                  {m \\in DOMAIN pendingMessages : m.msource = i}\n  BY ARPendingBags, ARProof!SMTT(\"r5\")\n     DEF ARInv, Ready, SendPendingMessages, ClearPendingMessages\n<1>2. ARBase' /\\ ARCertificates'\n  BY ARProof!SMTT(\"r10\")\n     DEF ARInv, ARBase, ARCertificates, ARActive, ARFunction, Ready,\n         PersistState, serverVars, leaderVars, candidateVars, logVars, configVars\n<1>3. /\\ ARAllVotes' \\subseteq ARAllVotes\n      /\\ ARPermanentVotes' \\subseteq ARAllVotes\n      /\\ \\A b \\in ARPermanentVotes' : b[1] # i => b \\in ARPermanentVotes\n  BY <1>1, ARProof!SMTT(\"r10\")\n     DEF ARInv, ARBase, ARCountedVotes, ARActive, ARPermanentVotes, ARAllVotes, ARPacketVotes,\n         Ready, serverVars, leaderVars, candidateVars, logVars, configVars\n<1>4. ARBound(ARAllVotes', currentTerm', votedFor') /\\ ARUnique(ARAllVotes')\n  BY <1>3, ARProof!SMTT(\"r10\")\n     DEF ARInv, ARBound, ARUnique, Ready, serverVars, candidateVars,\n         leaderVars, logVars, configVars\n<1>5. ARBound(ARPermanentVotes', ARDurableTerms', ARDurableVotes')\n  BY <1>3, ARProof!SMTT(\"r15\")\n     DEF ARInv, ARBound, ARBase, ARFunction, ARDurableTerms, ARDurableVotes, Ready, PersistState,\n         serverVars, candidateVars, leaderVars, logVars, configVars\n<1> QED\n  BY <1>1, <1>2, <1>4, <1>5, ARProof!SMTT(\"r5\") DEF ARInv, ARMessage\n\nLEMMA ARSolicit ==\n    ASSUME ARInv, NEW i \\in Server, NEW j \\in Server, RequestVote(i,j)\n    PROVE ARInv'\n<1>1. /\\ i \\in InitServer /\\ j \\in InitServer /\\ votedFor[i] = i\n      /\\ UNCHANGED <<currentTerm, state, votesGranted, config, durableState, messages>>\n  BY ARProof!SMTT(\"r5\")\n     DEF ARInv, ARBase, ARActive, ARConfig, GetConfig, GetJointConfig,\n         GetLearners, RequestVote, serverVars, candidateVars, logVars, configVars\n<1>2. CASE i # j\n  BY <1>2, <1>1, ARSendOrdinary, DistinctMessageTypes, ARProof!SMTT(\"r10\")\n     DEF RequestVote, ARInv, ARBase, ARMessage, serverVars, candidateVars,\n         leaderVars, logVars, configVars\n<1>3. CASE i = j\n  BY <1>3, <1>1, ARSendVote, ARProof!SMTT(\"r10\")\n     DEF RequestVote, Send, SendDirect, ARInv, ARBase, ARMessage,\n         serverVars, candidateVars, leaderVars, logVars, configVars\n<1> QED BY ARProof!SMTT(\"r3\"), <1>2, <1>3\n\nLEMMA ARAnswerVote ==\n    ASSUME ARInv, NEW m \\in DOMAIN messages,\n           m.mtype = RequestVoteRequest,\n           HandleRequestVoteRequest(m.mdest,m.msource,m)\n    PROVE ARInv'\n<1>1. ARMessage(m)\n  BY ARProof!SMTT(\"r5\") DEF ARInv\n<1>2. /\\ IsABag(messages') /\\ DOMAIN messages' \\subseteq DOMAIN messages\n  BY ARRemoveBag, ARProof!SMTT(\"r5\")\n     DEF ARInv, HandleRequestVoteRequest, Reply, ReplyDirect\n<1> QED\n  BY <1>1, <1>2, ARSendVote, DistinctMessageTypes, ARProof!SMTT(\"r15\")\n     DEF HandleRequestVoteRequest, Reply, ReplyDirect, ARInv, ARBase, ARMessage,\n         serverVars, candidateVars, leaderVars, logVars, configVars\n\nLEMMA ARAppendSend ==\n    ASSUME ARInv, NEW i \\in Server, NEW j \\in Server, NEW subtype, NEW range,\n           AppendEntriesInRangeToPeer(subtype,i,j,range)\n    PROVE ARInv'\nBY ARSendOrdinary, DistinctMessageTypes, ARProof!SMTT(\"r10\")\n   DEF AppendEntriesInRangeToPeer, ARInv, ARBase, ARMessage,\n       serverVars, candidateVars, leaderVars, logVars, configVars\n\nLEMMA ARAppendSelf ==\n    ASSUME ARInv, NEW i \\in Server, AppendEntriesToSelf(i)\n    PROVE ARInv'\nBY ARSendOrdinary, DistinctMessageTypes, ARProof!SMTT(\"r10\")\n   DEF AppendEntriesToSelf, ARInv, ARBase, ARMessage,\n       serverVars, candidateVars, leaderVars, logVars, configVars\n\nLEMMA ARAnswerAppend ==\n    ASSUME ARInv, NEW m \\in DOMAIN messages, m.mtype = AppendEntriesRequest,\n           HandleAppendEntriesRequest(m.mdest,m.msource,m)\n    PROVE ARInv'\n<1>1. ARMessage(m) /\\ m.msource \\in Server /\\ m.mdest \\in Server\n  BY ARProof!SMTT(\"r5\") DEF ARInv, ARMessage\n<1>2. CASE \\E ok : RejectAppendEntriesRequest(m.mdest,m.msource,m,ok)\n  BY <1>2, <1>1, ARReplyOrdinary, DistinctMessageTypes, ARProof!SMTT(\"r10\")\n     DEF RejectAppendEntriesRequest, HandleAppendEntriesRequest,\n         ARInv, ARBase, ARMessage, serverVars, candidateVars, leaderVars,\n         logVars, configVars\n<1>3. CASE ReturnToFollowerState(m.mdest,m)\n  BY <1>3, <1>1, ARDropRole, ARProof!SMTT(\"r5\")\n     DEF ReturnToFollowerState, HandleAppendEntriesRequest, messageVars,\n         candidateVars, leaderVars, logVars, configVars\n<1>4. CASE \\E ok : AcceptAppendEntriesRequest(m.mdest,m.msource,ok,m)\n  <2>1. CASE AppendEntriesAlreadyDone(m.mdest,m.msource,m.mprevLogIndex+1,m)\n    BY <1>4, <2>1, <1>1, ARReplyOrdinary, DistinctMessageTypes, ARProof!SMTT(\"r10\")\n       DEF AppendEntriesAlreadyDone, HandleAppendEntriesRequest,\n           ARInv, ARBase, ARMessage, serverVars, candidateVars, leaderVars,\n           logVars, configVars\n  <2>2. CASE ConflictAppendEntriesRequest(m.mdest,m.mprevLogIndex+1,m)\n    BY <1>4, <2>2, ARNoElectionChange, ARProof!SMTT(\"r5\")\n       DEF ConflictAppendEntriesRequest, HandleAppendEntriesRequest,\n           messageVars, serverVars, candidateVars, leaderVars, configVars\n  <2>3. CASE NoConflictAppendEntriesRequest(m.mdest,m.mprevLogIndex+1,m)\n    BY <1>4, <2>3, ARNoElectionChange, ARProof!SMTT(\"r5\")\n       DEF NoConflictAppendEntriesRequest, HandleAppendEntriesRequest,\n           messageVars, serverVars, candidateVars, leaderVars, configVars\n  <2> QED BY ARProof!SMTT(\"r3\"), <1>4, <2>1, <2>2, <2>3 DEF AcceptAppendEntriesRequest\n<1> QED BY ARProof!SMTT(\"r3\"), <1>2, <1>3, <1>4 DEF HandleAppendEntriesRequest\n\nLEMMA ARReceiveStep ==\n    ASSUME ARInv, NEW m \\in DOMAIN messages, Receive(m)\n    PROVE ARInv'\n<1>1. ARMessage(m) /\\ m.msource \\in Server /\\ m.mdest \\in Server\n  BY ARProof!SMTT(\"r5\") DEF ARInv, ARMessage\n<1>2. CASE UpdateTerm(m.mdest,m.msource,m)\n  BY <1>2, <1>1, ARChangeTerm, ARProof!SMTT(\"r5\")\n     DEF ARMessage, UpdateTerm, BecomeFollowerOfTerm, messageVars,\n         candidateVars, leaderVars, logVars, configVars\n<1>3. CASE DropStaleResponse(m.mdest,m.msource,m)\n  BY <1>3, ARDiscard, ARProof!SMTT(\"r5\")\n     DEF DropStaleResponse, serverVars, candidateVars, leaderVars, logVars, configVars\n<1>4. CASE HandleAppendEntriesResponse(m.mdest,m.msource,m)\n  BY <1>4, ARDiscard, ARProof!SMTT(\"r5\")\n     DEF HandleAppendEntriesResponse, serverVars, candidateVars, logVars, configVars\n<1> QED\n  BY <1>2, <1>3, <1>4, ARAnswerVote, ARCountVote, ARAnswerAppend,\n     ARProof!SMTT(\"r5\") DEF Receive, ReceiveDirect\n\nLEMMA ARStep == ARInv /\\ [Next]_vars => ARInv'\n<1>1. ASSUME ARInv, NextAsync PROVE ARInv'\n  <2>1. CASE \\E i \\in Server : Timeout(i)\n    BY <1>1, <2>1, ARChangeTerm, ARProof!SMTT(\"r10\")\n       DEF ARInv, ARBase, ARConfig, GetConfig, GetJointConfig, Timeout,\n           messageVars, leaderVars, logVars, configVars\n  <2>2. CASE \\E i \\in Server : StepDownToFollower(i)\n    <3>1. currentTerm \\in [Server -> Nat]\n      BY <1>1, ARProof!SMTT(\"r3\") DEF ARInv, ARBase\n    <3> QED BY <1>1, <2>2, <3>1, ARDropRole, ARProof!SMTT(\"r5\")\n       DEF StepDownToFollower, BecomeFollowerOfTerm, messageVars,\n           candidateVars, leaderVars, logVars, configVars\n  <2>3. CASE \\E i \\in Server : ClientRequest(i,0) \\/ AdvanceCommitIndex(i)\n    BY <1>1, <2>3, ARNoElectionChange, ARProof!SMTT(\"r5\")\n       DEF ClientRequest, AdvanceCommitIndex, messageVars, serverVars,\n           candidateVars, leaderVars, configVars\n  <2> QED\n    BY <1>1, <2>1, <2>2, <2>3, ARSolicit, ARLead, ARAppendSend, ARAppendSelf,\n       ARReceiveStep, ARPersist, ARProof!SMTT(\"r5\")\n       DEF NextAsync, AppendEntries, Heartbeat, SendSnapshot\n<1>2. ASSUME ARInv, NextUnreliable PROVE ARInv'\n  <2>1. CASE \\E m \\in DOMAIN messages : DropMessage(m)\n    BY <1>2, <2>1, ARDiscard, ARProof!SMTT(\"r5\")\n       DEF DropMessage, serverVars, candidateVars, leaderVars, logVars, configVars\n  <2>2. ASSUME NEW m \\in DOMAIN messages, DuplicateMessage(m) PROVE ARInv'\n    <3>1. IsABag(messages') /\\ DOMAIN messages' = DOMAIN messages\n      <4>1. /\\ IsABag(WithMessage(m,messages))\n            /\\ DOMAIN WithMessage(m,messages) = DOMAIN messages \\cup {m}\n        BY <1>2, ARAddBag, ARProof!SMTT(\"r3\") DEF ARInv\n      <4> QED BY <2>2, <4>1, ARProof!SMTT(\"r3\") DEF DuplicateMessage\n    <3> QED\n      BY <1>2, <2>2, <3>1, ARUnchanged, ARProof!SMTT(\"r5\")\n         DEF ARInv, DuplicateMessage, serverVars, candidateVars, leaderVars,\n             logVars, configVars\n  <2> QED BY ARProof!SMTT(\"r3\"), <1>2, <2>1, <2>2 DEF NextUnreliable\n<1>3. ASSUME ARInv, NextCrash PROVE ARInv'\n  BY ARProof!SMTT(\"r3\"), <1>3, ARCrash DEF NextCrash\n<1>4. ASSUME ARInv, UNCHANGED vars PROVE ARInv'\n  BY ARProof!SMTT(\"r3\"), <1>4, ARNoElectionChange DEF vars, messageVars, serverVars, candidateVars,\n       leaderVars, logVars, configVars\n<1> QED BY ARProof!SMTT(\"r3\"), <1>1, <1>2, <1>3, <1>4 DEF Next\n\nLEMMA ARInvariant == Spec => []ARInv\n<1>1. Init => ARInv BY ARProof!SMTT(\"r3\"), ARInit\n<1>2. ARInv /\\ [Next]_vars => ARInv' BY ARProof!SMTT(\"r3\"), ARStep\n<1> QED BY <1>1, <1>2, ARProof!PTL DEF Spec\n\nLEMMA ARFiniteDefinitions ==\n    /\\ \\A x : IsFiniteSet(x) = ARFinite!IsFiniteSet(x)\n    /\\ \\A x : Cardinality(x) = ARFinite!Cardinality(x)\nBY ARProof!Isa DEF IsFiniteSet, ARFinite!IsFiniteSet,\n                  Cardinality, ARFinite!Cardinality\n\nLEMMA ARIntersect ==\n    ASSUME NEW Q1 \\in Quorum(InitServer), NEW Q2 \\in Quorum(InitServer)\n    PROVE Q1 \\cap Q2 # {}\n<1>1. /\\ Q1 \\subseteq InitServer /\\ Q2 \\subseteq InitServer\n      /\\ Cardinality(Q1) * 2 > Cardinality(InitServer)\n      /\\ Cardinality(Q2) * 2 > Cardinality(InitServer)\n  BY ARProof!SMTT(\"r3\") DEF Quorum\n<1>2. IsFiniteSet(Q1) /\\ IsFiniteSet(Q2)\n  BY <1>1, FiniteServers, ARFiniteDefinitions, ARFinite!FS_Subset, ARProof!SMTT(\"r3\")\n<1>3. Cardinality(Q1) + Cardinality(Q2) > Cardinality(InitServer)\n  BY <1>1, <1>2, FiniteServers, ARFiniteDefinitions, ARFinite!FS_CardinalityType, ARProof!SMTT(\"r5\")\n<1> QED BY <1>1, <1>3, FiniteServers, ARFiniteDefinitions, ARFinite!FS_MajoritiesIntersect, ARProof!SMTT(\"r3\")\n\nLEMMA ARSafety == ARInv => MoreThanOneLeaderInv\n<1>1. ASSUME ARInv, NEW i \\in Server, NEW j \\in Server,\n             currentTerm[i] = currentTerm[j], state[i] = Leader, state[j] = Leader\n       PROVE i = j\n  <2>1. PICK Q1 \\in Quorum(InitServer) : Q1 \\subseteq votesGranted[i]\n    BY ARProof!SMTT(\"r3\"), <1>1 DEF ARInv, ARCertificates\n  <2>2. PICK Q2 \\in Quorum(InitServer) : Q2 \\subseteq votesGranted[j]\n    BY ARProof!SMTT(\"r3\"), <1>1 DEF ARInv, ARCertificates\n  <2>3. PICK v \\in Q1 \\cap Q2 : TRUE\n    BY ARProof!SMTT(\"r3\"), <1>1, <2>1, <2>2, ARIntersect\n  <2>4. /\\ <<v,currentTerm[i],i>> \\in ARAllVotes\n        /\\ <<v,currentTerm[j],j>> \\in ARAllVotes\n    BY <1>1, <2>1, <2>2, <2>3, ARProof!SMTT(\"r5\")\n       DEF ARInv, ARBase, Quorum, ARAllVotes, ARPermanentVotes, ARCountedVotes, ARActive\n  <2> QED BY <1>1, <2>4, ARProof!SMTT(\"r5\") DEF ARInv, ARUnique\n<1> QED BY ARProof!SMTT(\"r3\"), <1>1 DEF MoreThanOneLeaderInv\n\n\\* END AGENT HELPERS\n\nTHEOREM Spec => []LogInv\n\\* BEGIN AGENT PROOF etcd_raft/etcd_raft_LogInv.tla\nBY ARProof!PTL DEF Spec\n\\* END AGENT PROOF etcd_raft/etcd_raft_LogInv.tla\n\nTHEOREM CommittedIsDurable == Spec => []CommittedIsDurableInv\n\\* BEGIN AGENT PROOF etcd_raft/etcd_raft_CommittedIsDurable.tla\nBY ARProof!PTL DEF Spec\n\\* END AGENT PROOF etcd_raft/etcd_raft_CommittedIsDurable.tla\n\nTHEOREM ElectionSafety == Spec => []ElectionSafetyInv\n\\* BEGIN AGENT PROOF etcd_raft/etcd_raft_ElectionSafety.tla\nBY ARProof!PTL DEF Spec\n\\* END AGENT PROOF etcd_raft/etcd_raft_ElectionSafety.tla\n\nTHEOREM LeaderCompleteness == Spec => []LeaderCompletenessInv\n\\* BEGIN AGENT PROOF etcd_raft/etcd_raft_LeaderCompleteness.tla\nBY ARProof!PTL DEF Spec\n\\* END AGENT PROOF etcd_raft/etcd_raft_LeaderCompleteness.tla\n\nTHEOREM LogMatching == Spec => []LogMatchingInv\n\\* BEGIN AGENT PROOF etcd_raft/etcd_raft_LogMatching.tla\nBY ARProof!PTL DEF Spec\n\\* END AGENT PROOF etcd_raft/etcd_raft_LogMatching.tla\n\nTHEOREM MoreThanOneLeader == Spec => []MoreThanOneLeaderInv\n\\* BEGIN AGENT PROOF etcd_raft/etcd_raft_MoreThanOneLeader.tla\nBY ARInvariant, ARSafety, ARProof!PTL\n\\* END AGENT PROOF etcd_raft/etcd_raft_MoreThanOneLeader.tla\n\nTHEOREM MoreUpToDate == Spec => []MoreUpToDateCorrectInv\n\\* BEGIN AGENT PROOF etcd_raft/etcd_raft_MoreUpToDate.tla\nBY ARProof!PTL DEF Spec\n\\* END AGENT PROOF etcd_raft/etcd_raft_MoreUpToDate.tla\n\nTHEOREM QuorumLog == Spec => []QuorumLogInv\n\\* BEGIN AGENT PROOF etcd_raft/etcd_raft_QuorumLog.tla\nBY ARProof!PTL DEF Spec\n\\* END AGENT PROOF etcd_raft/etcd_raft_QuorumLog.tla\n====\n",
+  "units": {
+    "etcd_raft/etcd_raft_LogInv.tla": {
+      "id": "etcd_raft/etcd_raft_LogInv.tla",
+      "name": "etcd_raft/etcd_raft_LogInv.tla",
+      "kind": "target",
+      "lineStart": 593,
+      "lineEnd": 595,
+      "proofLines": [
+        595
+      ],
+      "proofRange": [
+        595,
+        595
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "etcd_raft/etcd_raft_CommittedIsDurable.tla": {
+      "id": "etcd_raft/etcd_raft_CommittedIsDurable.tla",
+      "name": "CommittedIsDurable",
+      "kind": "target",
+      "lineStart": 598,
+      "lineEnd": 600,
+      "proofLines": [
+        600
+      ],
+      "proofRange": [
+        600,
+        600
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "etcd_raft/etcd_raft_ElectionSafety.tla": {
+      "id": "etcd_raft/etcd_raft_ElectionSafety.tla",
+      "name": "ElectionSafety",
+      "kind": "target",
+      "lineStart": 603,
+      "lineEnd": 605,
+      "proofLines": [
+        605
+      ],
+      "proofRange": [
+        605,
+        605
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "etcd_raft/etcd_raft_LeaderCompleteness.tla": {
+      "id": "etcd_raft/etcd_raft_LeaderCompleteness.tla",
+      "name": "LeaderCompleteness",
+      "kind": "target",
+      "lineStart": 608,
+      "lineEnd": 610,
+      "proofLines": [
+        610
+      ],
+      "proofRange": [
+        610,
+        610
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "etcd_raft/etcd_raft_LogMatching.tla": {
+      "id": "etcd_raft/etcd_raft_LogMatching.tla",
+      "name": "LogMatching",
+      "kind": "target",
+      "lineStart": 613,
+      "lineEnd": 615,
+      "proofLines": [
+        615
+      ],
+      "proofRange": [
+        615,
+        615
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "etcd_raft/etcd_raft_MoreThanOneLeader.tla": {
+      "id": "etcd_raft/etcd_raft_MoreThanOneLeader.tla",
+      "name": "MoreThanOneLeader",
+      "kind": "target",
+      "lineStart": 618,
+      "lineEnd": 620,
+      "proofLines": [
+        620
+      ],
+      "proofRange": [
+        620,
+        620
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:ARInvariant",
+        "helper:ARSafety"
+      ]
+    },
+    "etcd_raft/etcd_raft_MoreUpToDate.tla": {
+      "id": "etcd_raft/etcd_raft_MoreUpToDate.tla",
+      "name": "MoreUpToDate",
+      "kind": "target",
+      "lineStart": 623,
+      "lineEnd": 625,
+      "proofLines": [
+        625
+      ],
+      "proofRange": [
+        625,
+        625
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "etcd_raft/etcd_raft_QuorumLog.tla": {
+      "id": "etcd_raft/etcd_raft_QuorumLog.tla",
+      "name": "QuorumLog",
+      "kind": "target",
+      "lineStart": 628,
+      "lineEnd": 630,
+      "proofLines": [
+        630
+      ],
+      "proofRange": [
+        630,
+        630
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:ARAddBag": {
+      "id": "helper:ARAddBag",
+      "name": "ARAddBag",
+      "kind": "helper",
+      "lineStart": 78,
+      "lineEnd": 82,
+      "proofLines": [
+        82
+      ],
+      "proofRange": [
+        82,
+        82
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:ARBagDefinitions": {
+      "id": "helper:ARBagDefinitions",
+      "name": "ARBagDefinitions",
+      "kind": "helper",
+      "lineStart": 84,
+      "lineEnd": 90,
+      "proofLines": [
+        89,
+        90
+      ],
+      "proofRange": [
+        89,
+        90
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:ARRemoveBag": {
+      "id": "helper:ARRemoveBag",
+      "name": "ARRemoveBag",
+      "kind": "helper",
+      "lineStart": 92,
+      "lineEnd": 97,
+      "proofLines": [
+        96,
+        97
+      ],
+      "proofRange": [
+        96,
+        97
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:ARBagDefinitions"
+      ]
+    },
+    "helper:ARPendingBags": {
+      "id": "helper:ARPendingBags",
+      "name": "ARPendingBags",
+      "kind": "helper",
+      "lineStart": 99,
+      "lineEnd": 118,
+      "proofLines": [
+        107,
+        108,
+        109,
+        110,
+        111,
+        112,
+        113,
+        114,
+        115,
+        116,
+        117,
+        118
+      ],
+      "proofRange": [
+        107,
+        118
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:ARBagDefinitions"
+      ]
+    },
+    "helper:ARVoteSubset": {
+      "id": "helper:ARVoteSubset",
+      "name": "ARVoteSubset",
+      "kind": "helper",
+      "lineStart": 120,
+      "lineEnd": 123,
+      "proofLines": [
+        123
+      ],
+      "proofRange": [
+        123,
+        123
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:ARInit": {
+      "id": "helper:ARInit",
+      "name": "ARInit",
+      "kind": "helper",
+      "lineStart": 130,
+      "lineEnd": 137,
+      "proofLines": [
+        131,
+        132,
+        133,
+        134,
+        135,
+        136,
+        137
+      ],
+      "proofRange": [
+        131,
+        137
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:ARCountedUnchanged": {
+      "id": "helper:ARCountedUnchanged",
+      "name": "ARCountedUnchanged",
+      "kind": "helper",
+      "lineStart": 139,
+      "lineEnd": 141,
+      "proofLines": [
+        141
+      ],
+      "proofRange": [
+        141,
+        141
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:ARBaseUnchanged": {
+      "id": "helper:ARBaseUnchanged",
+      "name": "ARBaseUnchanged",
+      "kind": "helper",
+      "lineStart": 143,
+      "lineEnd": 146,
+      "proofLines": [
+        146
+      ],
+      "proofRange": [
+        146,
+        146
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:ARCertificatesUnchanged": {
+      "id": "helper:ARCertificatesUnchanged",
+      "name": "ARCertificatesUnchanged",
+      "kind": "helper",
+      "lineStart": 148,
+      "lineEnd": 150,
+      "proofLines": [
+        150
+      ],
+      "proofRange": [
+        150,
+        150
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:ARDurableUnchanged": {
+      "id": "helper:ARDurableUnchanged",
+      "name": "ARDurableUnchanged",
+      "kind": "helper",
+      "lineStart": 152,
+      "lineEnd": 154,
+      "proofLines": [
+        154
+      ],
+      "proofRange": [
+        154,
+        154
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:ARUnchanged": {
+      "id": "helper:ARUnchanged",
+      "name": "ARUnchanged",
+      "kind": "helper",
+      "lineStart": 156,
+      "lineEnd": 171,
+      "proofLines": [
+        164,
+        165,
+        166,
+        167,
+        168,
+        169,
+        170,
+        171
+      ],
+      "proofRange": [
+        164,
+        171
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:ARBaseUnchanged",
+        "helper:ARCertificatesUnchanged",
+        "helper:ARCountedUnchanged",
+        "helper:ARDurableUnchanged"
+      ]
+    },
+    "helper:ARNoElectionChange": {
+      "id": "helper:ARNoElectionChange",
+      "name": "ARNoElectionChange",
+      "kind": "helper",
+      "lineStart": 173,
+      "lineEnd": 178,
+      "proofLines": [
+        178
+      ],
+      "proofRange": [
+        178,
+        178
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:ARUnchanged"
+      ]
+    },
+    "helper:ARSendOrdinary": {
+      "id": "helper:ARSendOrdinary",
+      "name": "ARSendOrdinary",
+      "kind": "helper",
+      "lineStart": 180,
+      "lineEnd": 192,
+      "proofLines": [
+        186,
+        187,
+        188,
+        189,
+        190,
+        191,
+        192
+      ],
+      "proofRange": [
+        186,
+        192
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:ARAddBag",
+        "helper:ARUnchanged"
+      ]
+    },
+    "helper:ARDiscard": {
+      "id": "helper:ARDiscard",
+      "name": "ARDiscard",
+      "kind": "helper",
+      "lineStart": 194,
+      "lineEnd": 205,
+      "proofLines": [
+        199,
+        200,
+        201,
+        202,
+        203,
+        204,
+        205
+      ],
+      "proofRange": [
+        199,
+        205
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:ARRemoveBag",
+        "helper:ARUnchanged",
+        "helper:ARVoteSubset"
+      ]
+    },
+    "helper:ARReplyOrdinary": {
+      "id": "helper:ARReplyOrdinary",
+      "name": "ARReplyOrdinary",
+      "kind": "helper",
+      "lineStart": 207,
+      "lineEnd": 222,
+      "proofLines": [
+        213,
+        214,
+        215,
+        216,
+        217,
+        218,
+        219,
+        220,
+        221,
+        222
+      ],
+      "proofRange": [
+        213,
+        222
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:ARAddBag",
+        "helper:ARRemoveBag",
+        "helper:ARUnchanged",
+        "helper:ARVoteSubset"
+      ]
+    },
+    "helper:ARSendVote": {
+      "id": "helper:ARSendVote",
+      "name": "ARSendVote",
+      "kind": "helper",
+      "lineStart": 224,
+      "lineEnd": 259,
+      "proofLines": [
+        236,
+        237,
+        238,
+        239,
+        240,
+        241,
+        242,
+        243,
+        244,
+        245,
+        246,
+        247,
+        248,
+        249,
+        250,
+        251,
+        252,
+        253,
+        254,
+        255,
+        256,
+        257,
+        258,
+        259
+      ],
+      "proofRange": [
+        236,
+        259
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:ARAddBag",
+        "helper:ARCountedUnchanged"
+      ]
+    },
+    "helper:ARChangeTerm": {
+      "id": "helper:ARChangeTerm",
+      "name": "ARChangeTerm",
+      "kind": "helper",
+      "lineStart": 262,
+      "lineEnd": 290,
+      "proofLines": [
+        275,
+        276,
+        277,
+        278,
+        279,
+        280,
+        281,
+        282,
+        283,
+        284,
+        285,
+        286,
+        287,
+        288,
+        289,
+        290
+      ],
+      "proofRange": [
+        275,
+        290
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:ARDropRole": {
+      "id": "helper:ARDropRole",
+      "name": "ARDropRole",
+      "kind": "helper",
+      "lineStart": 292,
+      "lineEnd": 307,
+      "proofLines": [
+        298,
+        299,
+        300,
+        301,
+        302,
+        303,
+        304,
+        305,
+        306,
+        307
+      ],
+      "proofRange": [
+        298,
+        307
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:ARLead": {
+      "id": "helper:ARLead",
+      "name": "ARLead",
+      "kind": "helper",
+      "lineStart": 309,
+      "lineEnd": 326,
+      "proofLines": [
+        312,
+        313,
+        314,
+        315,
+        316,
+        317,
+        318,
+        319,
+        320,
+        321,
+        322,
+        323,
+        324,
+        325,
+        326
+      ],
+      "proofRange": [
+        312,
+        326
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:ARCountVote": {
+      "id": "helper:ARCountVote",
+      "name": "ARCountVote",
+      "kind": "helper",
+      "lineStart": 328,
+      "lineEnd": 352,
+      "proofLines": [
+        333,
+        334,
+        335,
+        336,
+        337,
+        338,
+        339,
+        340,
+        341,
+        342,
+        343,
+        344,
+        345,
+        346,
+        347,
+        348,
+        349,
+        350,
+        351,
+        352
+      ],
+      "proofRange": [
+        333,
+        352
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:ARRemoveBag"
+      ]
+    },
+    "helper:ARCrash": {
+      "id": "helper:ARCrash",
+      "name": "ARCrash",
+      "kind": "helper",
+      "lineStart": 354,
+      "lineEnd": 377,
+      "proofLines": [
+        357,
+        358,
+        359,
+        360,
+        361,
+        362,
+        363,
+        364,
+        365,
+        366,
+        367,
+        368,
+        369,
+        370,
+        371,
+        372,
+        373,
+        374,
+        375,
+        376,
+        377
+      ],
+      "proofRange": [
+        357,
+        377
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:ARPendingBags"
+      ]
+    },
+    "helper:ARPersist": {
+      "id": "helper:ARPersist",
+      "name": "ARPersist",
+      "kind": "helper",
+      "lineStart": 379,
+      "lineEnd": 407,
+      "proofLines": [
+        382,
+        383,
+        384,
+        385,
+        386,
+        387,
+        388,
+        389,
+        390,
+        391,
+        392,
+        393,
+        394,
+        395,
+        396,
+        397,
+        398,
+        399,
+        400,
+        401,
+        402,
+        403,
+        404,
+        405,
+        406,
+        407
+      ],
+      "proofRange": [
+        382,
+        407
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:ARPendingBags"
+      ]
+    },
+    "helper:ARSolicit": {
+      "id": "helper:ARSolicit",
+      "name": "ARSolicit",
+      "kind": "helper",
+      "lineStart": 409,
+      "lineEnd": 425,
+      "proofLines": [
+        412,
+        413,
+        414,
+        415,
+        416,
+        417,
+        418,
+        419,
+        420,
+        421,
+        422,
+        423,
+        424,
+        425
+      ],
+      "proofRange": [
+        412,
+        425
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:ARSendOrdinary",
+        "helper:ARSendVote"
+      ]
+    },
+    "helper:ARAnswerVote": {
+      "id": "helper:ARAnswerVote",
+      "name": "ARAnswerVote",
+      "kind": "helper",
+      "lineStart": 427,
+      "lineEnd": 440,
+      "proofLines": [
+        432,
+        433,
+        434,
+        435,
+        436,
+        437,
+        438,
+        439,
+        440
+      ],
+      "proofRange": [
+        432,
+        440
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:ARRemoveBag",
+        "helper:ARSendVote"
+      ]
+    },
+    "helper:ARAppendSend": {
+      "id": "helper:ARAppendSend",
+      "name": "ARAppendSend",
+      "kind": "helper",
+      "lineStart": 442,
+      "lineEnd": 448,
+      "proofLines": [
+        446,
+        447,
+        448
+      ],
+      "proofRange": [
+        446,
+        448
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:ARSendOrdinary"
+      ]
+    },
+    "helper:ARAppendSelf": {
+      "id": "helper:ARAppendSelf",
+      "name": "ARAppendSelf",
+      "kind": "helper",
+      "lineStart": 450,
+      "lineEnd": 455,
+      "proofLines": [
+        453,
+        454,
+        455
+      ],
+      "proofRange": [
+        453,
+        455
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:ARSendOrdinary"
+      ]
+    },
+    "helper:ARAnswerAppend": {
+      "id": "helper:ARAnswerAppend",
+      "name": "ARAnswerAppend",
+      "kind": "helper",
+      "lineStart": 457,
+      "lineEnd": 487,
+      "proofLines": [
+        461,
+        462,
+        463,
+        464,
+        465,
+        466,
+        467,
+        468,
+        469,
+        470,
+        471,
+        472,
+        473,
+        474,
+        475,
+        476,
+        477,
+        478,
+        479,
+        480,
+        481,
+        482,
+        483,
+        484,
+        485,
+        486,
+        487
+      ],
+      "proofRange": [
+        461,
+        487
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:ARDropRole",
+        "helper:ARNoElectionChange",
+        "helper:ARReplyOrdinary"
+      ]
+    },
+    "helper:ARReceiveStep": {
+      "id": "helper:ARReceiveStep",
+      "name": "ARReceiveStep",
+      "kind": "helper",
+      "lineStart": 489,
+      "lineEnd": 506,
+      "proofLines": [
+        492,
+        493,
+        494,
+        495,
+        496,
+        497,
+        498,
+        499,
+        500,
+        501,
+        502,
+        503,
+        504,
+        505,
+        506
+      ],
+      "proofRange": [
+        492,
+        506
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:ARAnswerAppend",
+        "helper:ARAnswerVote",
+        "helper:ARChangeTerm",
+        "helper:ARCountVote",
+        "helper:ARDiscard"
+      ]
+    },
+    "helper:ARStep": {
+      "id": "helper:ARStep",
+      "name": "ARStep",
+      "kind": "helper",
+      "lineStart": 508,
+      "lineEnd": 548,
+      "proofLines": [
+        509,
+        510,
+        511,
+        512,
+        513,
+        514,
+        515,
+        516,
+        517,
+        518,
+        519,
+        520,
+        521,
+        522,
+        523,
+        524,
+        525,
+        526,
+        527,
+        528,
+        529,
+        530,
+        531,
+        532,
+        533,
+        534,
+        535,
+        536,
+        537,
+        538,
+        539,
+        540,
+        541,
+        542,
+        543,
+        544,
+        545,
+        546,
+        547,
+        548
+      ],
+      "proofRange": [
+        509,
+        548
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:ARAddBag",
+        "helper:ARAppendSelf",
+        "helper:ARAppendSend",
+        "helper:ARChangeTerm",
+        "helper:ARCrash",
+        "helper:ARDiscard",
+        "helper:ARDropRole",
+        "helper:ARLead",
+        "helper:ARNoElectionChange",
+        "helper:ARPersist",
+        "helper:ARReceiveStep",
+        "helper:ARSolicit",
+        "helper:ARUnchanged"
+      ]
+    },
+    "helper:ARInvariant": {
+      "id": "helper:ARInvariant",
+      "name": "ARInvariant",
+      "kind": "helper",
+      "lineStart": 550,
+      "lineEnd": 553,
+      "proofLines": [
+        551,
+        552,
+        553
+      ],
+      "proofRange": [
+        551,
+        553
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:ARInit",
+        "helper:ARStep"
+      ]
+    },
+    "helper:ARFiniteDefinitions": {
+      "id": "helper:ARFiniteDefinitions",
+      "name": "ARFiniteDefinitions",
+      "kind": "helper",
+      "lineStart": 555,
+      "lineEnd": 559,
+      "proofLines": [
+        558,
+        559
+      ],
+      "proofRange": [
+        558,
+        559
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:ARIntersect": {
+      "id": "helper:ARIntersect",
+      "name": "ARIntersect",
+      "kind": "helper",
+      "lineStart": 561,
+      "lineEnd": 572,
+      "proofLines": [
+        564,
+        565,
+        566,
+        567,
+        568,
+        569,
+        570,
+        571,
+        572
+      ],
+      "proofRange": [
+        564,
+        572
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:ARFiniteDefinitions"
+      ]
+    },
+    "helper:ARSafety": {
+      "id": "helper:ARSafety",
+      "name": "ARSafety",
+      "kind": "helper",
+      "lineStart": 574,
+      "lineEnd": 589,
+      "proofLines": [
+        575,
+        576,
+        577,
+        578,
+        579,
+        580,
+        581,
+        582,
+        583,
+        584,
+        585,
+        586,
+        587,
+        588,
+        589
+      ],
+      "proofRange": [
+        575,
+        589
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:ARIntersect"
+      ]
+    }
+  }
+}

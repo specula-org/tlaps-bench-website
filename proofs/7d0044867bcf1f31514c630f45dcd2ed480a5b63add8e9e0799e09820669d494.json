@@ -1,0 +1,3062 @@
+{
+  "schemaVersion": 1,
+  "specId": "ZooKeeper_LowLevel/ZkV3_7_0.tla",
+  "sourceName": "ZkV3_7_0.tla",
+  "sourceSha256": "dab797460eb95b99f5ec6a75276e516b1ae839fb9af5fc2010cc2ffedbd02384",
+  "resultSha256": "b3c8a37420477395cc2b23966b37b6b1ea90d2966d06e205fe1020dd3627be5d",
+  "source": "---- MODULE ZkV3_7_0 ----\nEXTENDS ZkV3_7_0Defs\n\n\\* BEGIN AGENT HELPERS\n\\* Leadership is proved using a projection that retains roles, epoch promises,\n\\* handshake tables, and the shapes of the pre-election message queues.\n\\* Once a leader has a quorum, payload actions need only preserve that\n\\* projection; the transaction histories are not assumptions of this proof.\n\\*\n\\* A claim is either a sticky election vote or an eligible acknowledgement\n\\* in transit. A newly acquired claim strictly raises its server's epoch\n\\* promise. Intersecting quorums therefore exclude different leaders for\n\\* the same epoch. Historical quorum certificates also cover epochLeader.\nLOCAL AGFinite == INSTANCE FiniteSetTheorems\n\nAGDomain(f, S) == f = [x \\in S |-> f[x]]\nAGMatrix(f) == f = [x \\in Server |-> [y \\in Server |-> f[x][y]]]\nAGSids(S) == {x.sid : x \\in S}\nAGVoters(S) == {x.sid : x \\in {r \\in S : r.inQuorum = TRUE}}\nAGUnique(S) == \\A x, y \\in S : x.sid = y.sid => x = y\nAGReady(i) == IsLeader(i) /\\ i \\in AGSids(connecting[i])\n              /\\ AGSids(connecting[i]) \\in Quorums\nAGDone(i) == IsLeader(i) /\\ i \\in AGVoters(electing[i])\n             /\\ AGVoters(electing[i]) \\in Quorums\nAGLink(i,j) == \\/ /\\ IsLeader(i) /\\ IsFollower(j)\n                   /\\ connectInfo[j].sid = i /\\ j \\in learners[i]\n               \\/ /\\ IsLeader(j) /\\ IsFollower(i)\n                   /\\ connectInfo[i].sid = j /\\ i \\in learners[j]\n\nAGDown(i,j) ==\n  \\/ msgs[i][j] = << >>\n  \\/ /\\ msgs[i][j] = <<msgs[i][j][1]>>\n     /\\ msgs[i][j][1].mtype = LEADERINFO\n     /\\ msgs[i][j][1].mzxid = <<acceptedEpoch[i],0>>\n     /\\ AGReady(i)\n\nAGUp(i,j) ==\n  \\/ msgs[j][i] = << >>\n  \\/ /\\ msgs[j][i] = <<msgs[j][i][1]>>\n     /\\ \\/ /\\ msgs[j][i][1].mtype = FOLLOWERINFO\n           /\\ msgs[j][i][1].mzxid = <<acceptedEpoch[j],0>>\n           /\\ zabState[j] = DISCOVERY\n        \\/ /\\ msgs[j][i][1].mtype = ACKEPOCH\n           /\\ msgs[j][i][1].mepoch \\in Nat \\union {-1}\n           /\\ zabState[j] = SYNCHRONIZATION\n           /\\ acceptedEpoch[j] = acceptedEpoch[i]\n           /\\ AGReady(i)\n\nAGControlTypes ==\n  /\\ state \\in [Server -> {LOOKING, FOLLOWING, LEADING}]\n  /\\ zabState \\in [Server -> {ELECTION, DISCOVERY, SYNCHRONIZATION, BROADCAST}]\n  /\\ learners \\in [Server -> SUBSET Server]\n  /\\ connectInfo \\in [Server ->\n       [sid : Server \\union {NullPoint}, syncMode : {NONE, DIFF, TRUNC, SNAP},\n        nlRcv : BOOLEAN]]\n  /\\ AGMatrix(msgs)\n\nAGNode(i) ==\n  /\\ IF IsLeader(i) THEN i \\in learners[i] ELSE learners[i] = {}\n  /\\ ~IsFollower(i) => connectInfo[i].sid = NullPoint\n  /\\ (IsLeader(i) \\/ IsFollower(i)) => zabState[i] # ELECTION\n  /\\ (IsFollower(i) /\\ connectInfo[i].sid # NullPoint) =>\n       /\\ IsLeader(connectInfo[i].sid)\n       /\\ i \\in learners[connectInfo[i].sid]\n  /\\ \\A j \\in learners[i] \\ {i} :\n       /\\ IsLeader(i) /\\ IsFollower(j) /\\ connectInfo[j].sid = i\n\nAGStructure ==\n  /\\ AGControlTypes\n  /\\ (\\A i \\in Server : AGNode(i))\n  /\\ (\\A i,j \\in Server : msgs[i][j] # << >> => AGLink(i,j))\n\nAGPhaseTypes ==\n  /\\ acceptedEpoch \\in [Server -> Nat]\n  /\\ currentEpoch \\in [Server -> Nat]\n  /\\ tempMaxEpoch \\in [Server -> Nat]\n  /\\ AGDomain(connecting, Server)\n  /\\ AGDomain(electing, Server)\n  /\\ AGDomain(ackldRecv, Server)\n  /\\ forwarding \\in [Server -> SUBSET Server]\n\nAGPhaseNode(i) ==\n  /\\ AGSids(connecting[i]) \\subseteq Server\n  /\\ AGUnique(connecting[i])\n  /\\ AGSids(electing[i]) \\subseteq Server\n  /\\ AGUnique(electing[i])\n  /\\ AGUnique(ackldRecv[i])\n  /\\ AGSids(ackldRecv[i]) \\subseteq Server\n  /\\ (\\A r \\in electing[i] : r.inQuorum \\in BOOLEAN)\n  /\\ IsLeader(i) =>\n       /\\ i \\in AGSids(connecting[i])\n       /\\ i \\in AGVoters(electing[i])\n       /\\ forwarding[i] \\subseteq learners[i]\n       /\\ \\A j \\in forwarding[i] \\ {i} :\n            zabState[j] \\in {SYNCHRONIZATION, BROADCAST}\n       /\\ \\A c \\in connecting[i] :\n            (c.sid # i /\\ c.connected = TRUE) =>\n              /\\ c.sid \\in learners[i]\n              /\\ (zabState[c.sid] = DISCOVERY => msgs[c.sid][i] = << >>)\n       /\\ \\A a \\in ackldRecv[i] :\n            (a.sid # i /\\ a.connected = TRUE) =>\n              /\\ a.sid \\in learners[i]\n              /\\ zabState[a.sid] \\in {SYNCHRONIZATION, BROADCAST}\n       /\\ ~AGReady(i) =>\n            /\\ tempMaxEpoch[i] > acceptedEpoch[i]\n            /\\ AGVoters(electing[i]) = {i}\n       /\\ zabState[i] \\in {SYNCHRONIZATION, BROADCAST} => AGDone(i)\n       /\\ \\A r \\in electing[i] :\n            ~ZxidEqual(r.peerLastZxid, <<-1,-1>>) =>\n              /\\ r.sid # i /\\ r.sid \\in learners[i]\n              /\\ zabState[r.sid] \\in {SYNCHRONIZATION, BROADCAST}\n  /\\ (IsFollower(i) /\\ zabState[i] # DISCOVERY) =>\n       /\\ connectInfo[i].sid # NullPoint\n       /\\ AGReady(connectInfo[i].sid)\n       /\\ (zabState[i] = BROADCAST => AGDone(connectInfo[i].sid))\n\nAGTableAttrs(i) ==\n  /\\ AGSids(connecting[i]) \\subseteq Server\n  /\\ AGUnique(connecting[i])\n  /\\ AGSids(electing[i]) \\subseteq Server\n  /\\ AGUnique(electing[i])\n  /\\ AGUnique(ackldRecv[i])\n  /\\ AGSids(ackldRecv[i]) \\subseteq Server\n  /\\ (\\A r \\in electing[i] : r.inQuorum \\in BOOLEAN)\n\nAGLeaderAttrs(i) ==\n  IsLeader(i) =>\n       /\\ i \\in AGSids(connecting[i])\n       /\\ i \\in AGVoters(electing[i])\n       /\\ forwarding[i] \\subseteq learners[i]\n       /\\ \\A j \\in forwarding[i] \\ {i} :\n            zabState[j] \\in {SYNCHRONIZATION, BROADCAST}\n       /\\ \\A c \\in connecting[i] :\n            (c.sid # i /\\ c.connected = TRUE) =>\n              /\\ c.sid \\in learners[i]\n              /\\ (zabState[c.sid] = DISCOVERY => msgs[c.sid][i] = << >>)\n       /\\ \\A a \\in ackldRecv[i] :\n            (a.sid # i /\\ a.connected = TRUE) =>\n              /\\ a.sid \\in learners[i]\n              /\\ zabState[a.sid] \\in {SYNCHRONIZATION, BROADCAST}\n       /\\ ~AGReady(i) =>\n            /\\ tempMaxEpoch[i] > acceptedEpoch[i]\n            /\\ AGVoters(electing[i]) = {i}\n       /\\ zabState[i] \\in {SYNCHRONIZATION, BROADCAST} => AGDone(i)\n       /\\ \\A r \\in electing[i] :\n            ~ZxidEqual(r.peerLastZxid, <<-1,-1>>) =>\n              /\\ r.sid # i /\\ r.sid \\in learners[i]\n              /\\ zabState[r.sid] \\in {SYNCHRONIZATION, BROADCAST}\n\nAGFollowerAttrs(i) ==\n  (IsFollower(i) /\\ zabState[i] # DISCOVERY) =>\n       /\\ connectInfo[i].sid # NullPoint\n       /\\ AGReady(connectInfo[i].sid)\n       /\\ (zabState[i] = BROADCAST => AGDone(connectInfo[i].sid))\n\nAGPhaseMessages(i,j) ==\n  (IsLeader(i) /\\ IsFollower(j) /\\ connectInfo[j].sid = i /\\\n   (~AGDone(i) \\/ zabState[j] = DISCOVERY)) =>\n     /\\ AGDown(i,j) /\\ AGUp(i,j)\n     /\\ (msgs[i][j] = << >> \\/ msgs[j][i] = << >>)\n\nAGPhases ==\n  /\\ AGPhaseTypes\n  /\\ (\\A i \\in Server : AGPhaseNode(i))\n  /\\ (\\A i,j \\in Server : AGPhaseMessages(i,j))\n\nAGControl == AGStructure /\\ AGPhases\n\nAGClaims(i) ==\n  IF AGReady(i) THEN AGVoters(electing[i]) \\union\n      {s \\in Server : /\\ ~AGDone(i)\n                       /\\ msgs[s][i] # << >>\n                       /\\ msgs[s][i][1].mtype = ACKEPOCH\n                       /\\ msgs[s][i][1].mepoch > -1}\n  ELSE {}\n\nAGClaimSafety ==\n  /\\ \\A i \\in Server : \\A s \\in AGClaims(i) :\n       /\\ s \\in Server /\\ acceptedEpoch[s] >= acceptedEpoch[i]\n  /\\ \\A i,j \\in Server :\n       (i # j /\\ acceptedEpoch[i] = acceptedEpoch[j]) =>\n         AGClaims(i) \\intersect AGClaims(j) = {}\n\nAGEpochCertificate ==\n  /\\ epochLeader \\in [1..MAXEPOCH -> SUBSET Server]\n  /\\ \\A e \\in 1..MAXEPOCH :\n       \\/ epochLeader[e] = {}\n       \\/ \\E l \\in Server, Q \\in Quorums :\n            /\\ epochLeader[e] = {l}\n            /\\ \\A s \\in Q :\n                 /\\ acceptedEpoch[s] >= e\n                 /\\ \\A i \\in Server :\n                      (acceptedEpoch[i] = e /\\ s \\in AGClaims(i)) => i = l\n\nAGLeadershipInvariant == AGControl /\\ AGClaimSafety /\\ AGEpochCertificate\n\nAGClaimAdvance ==\n  /\\ (\\A s \\in Server : acceptedEpoch'[s] >= acceptedEpoch[s])\n  /\\ \\E owner \\in Server \\union {NullPoint} :\n       \\A i \\in Server : \\A s \\in AGClaims(i)' :\n         \\/ /\\ acceptedEpoch'[i] = acceptedEpoch[i] /\\ s \\in AGClaims(i)\n         \\/ /\\ i = owner /\\ acceptedEpoch[s] < acceptedEpoch'[i]\n            /\\ s \\in Server /\\ acceptedEpoch'[s] >= acceptedEpoch'[i]\n\nLEMMA AGUpdateConnectingSids ==\n  ASSUME NEW S, NEW s\n  PROVE AGSids(UpdateConnectingOrAckldRecv(S,s)) = AGSids(S) \\union {s}\nBY SMTT(\"r10\") DEF AGSids, UpdateConnectingOrAckldRecv\n\nLEMMA AGRemoveConnectingSids ==\n  ASSUME NEW S, NEW s\n  PROVE AGSids(RemoveConnectingOrAckldRecv(S,s)) = AGSids(S)\nBY SMTT(\"r10\") DEF AGSids, RemoveConnectingOrAckldRecv\n\nLEMMA AGUpdateElectingSets ==\n  ASSUME NEW S, NEW s, NEW z, NEW b \\in BOOLEAN,\n         \\A r \\in S : r.inQuorum \\in BOOLEAN\n  PROVE /\\ AGSids(UpdateElecting(S,s,z,b)) = AGSids(S) \\union {s}\n        /\\ AGVoters(UpdateElecting(S,s,z,b)) =\n             AGVoters(S) \\union (IF b THEN {s} ELSE {})\n        /\\ (\\A r \\in UpdateElecting(S,s,z,b) : r.inQuorum \\in BOOLEAN)\n        /\\ (AGUnique(S) => AGUnique(UpdateElecting(S,s,z,b)))\nBY SMTT(\"r20\") DEF AGSids, AGVoters, AGUnique, UpdateElecting\n\nLEMMA AGRemoveElectingSets ==\n  ASSUME NEW S, NEW s,\n         \\A r \\in S : r.inQuorum \\in BOOLEAN\n  PROVE /\\ AGSids(RemoveElecting(S,s)) = AGSids(S)\n        /\\ AGVoters(RemoveElecting(S,s)) = AGVoters(S)\n        /\\ (\\A r \\in RemoveElecting(S,s) : r.inQuorum \\in BOOLEAN)\n        /\\ (AGUnique(S) => AGUnique(RemoveElecting(S,s)))\nBY SMTT(\"r20\") DEF AGSids, AGVoters, AGUnique, RemoveElecting\n\nLEMMA AGControlInit == Init => AGControl\nBY SMTT(\"r20\") DEF Init, InitServerVars, InitServerVarsL, InitLeaderVars,\n  InitLeaderVarsL, InitFollowerVars, InitMsgVars, AGControl, AGStructure, AGControlTypes, AGNode,\n  AGPhases, AGPhaseTypes, AGPhaseNode, AGPhaseMessages, AGDomain, AGMatrix, AGSids, AGVoters, AGUnique, AGReady, AGDone,\n  AGLink, AGDown, AGUp, IsLeader, IsFollower,\n  LOOKING, FOLLOWING, LEADING, ELECTION, DISCOVERY, SYNCHRONIZATION, BROADCAST,\n  NONE, DIFF, TRUNC, SNAP\n\nLEMMA AGFiniteBridge ==\n  \\A S : /\\ AGFinite!Cardinality(S) = Cardinality(S)\n         /\\ AGFinite!IsFiniteSet(S) = IsFiniteSet(S)\nBY Zenon DEF AGFinite!Cardinality, Cardinality, AGFinite!IsFiniteSet, IsFiniteSet\n\nLEMMA AGSingletonNotQuorum ==\n  ASSUME Cardinality(Server) >= 2, NEW i\n  PROVE {i} \\notin Quorums\n<1>1. Cardinality(Server) \\in Nat\n  BY ServerFinite, AGFiniteBridge, AGFinite!FS_CardinalityType\n<1>2. Cardinality({i}) = 1\n  BY AGFiniteBridge, AGFinite!FS_Singleton\n<1>3. QED\n  BY <1>1, <1>2, SMTT(\"r5\") DEF Quorums\n\nLEMMA AGDoneReady ==\n  ASSUME Cardinality(Server) >= 2, AGPhases, NEW i \\in Server, AGDone(i)\n  PROVE AGReady(i)\nBY AGSingletonNotQuorum, SMTT(\"r5\") DEF AGPhases, AGPhaseTypes, AGPhaseNode, AGPhaseMessages, AGDone\n\nLEMMA AGFLEFrame ==\n  ASSUME NEW i \\in Server, state[i] = LOOKING,\n         state \\in [Server -> {LOOKING, FOLLOWING, LEADING}],\n         HandleNotmsg(i) \\/ WaitNewNotmsg(i)\n  PROVE /\\ state' = [state EXCEPT ![i] = state'[i]]\n        /\\ state'[i] \\in {LOOKING, FOLLOWING, LEADING}\n        /\\ currentEpoch' = currentEpoch\nBY SMTT(\"r20\") DEF HandleNotmsg, WaitNewNotmsg,\n  ReceivedFollowingAndLeadingNotification, serverVarsL,\n  LOOKING, FOLLOWING, LEADING\n\nAGControlElectionShape(i) ==\n  /\\ state[i] = LOOKING\n  /\\ state'[i] \\in {LOOKING, LEADING, FOLLOWING}\n  /\\ state' = [state EXCEPT ![i] = state'[i]]\n  /\\ UNCHANGED <<currentEpoch, acceptedEpoch, connectInfo, msgs>>\n  /\\ zabState' = IF state'[i] = LOOKING THEN zabState\n                   ELSE [zabState EXCEPT ![i] = DISCOVERY]\n  /\\ learners' = IF state'[i] = LEADING THEN [learners EXCEPT ![i] = {i}]\n                   ELSE learners\n  /\\ connecting' = IF state'[i] = LEADING THEN\n          [connecting EXCEPT ![i] = {[sid |-> i, connected |-> TRUE]}]\n          ELSE connecting\n  /\\ electing' = IF state'[i] = LEADING THEN\n          [electing EXCEPT ![i] =\n            {[sid |-> i, peerLastZxid |-> <<-1,-1>>, inQuorum |-> TRUE]}]\n          ELSE electing\n  /\\ ackldRecv' = IF state'[i] = LEADING THEN\n          [ackldRecv EXCEPT ![i] = {[sid |-> i, connected |-> TRUE]}]\n          ELSE ackldRecv\n  /\\ forwarding' = IF state'[i] = LEADING THEN [forwarding EXCEPT ![i] = {}]\n                    ELSE forwarding\n  /\\ tempMaxEpoch' = IF state'[i] = LEADING THEN\n          [tempMaxEpoch EXCEPT ![i] = acceptedEpoch[i] + 1]\n          ELSE tempMaxEpoch\n\nLEMMA AGControlElectionProject ==\n  ASSUME NEW i \\in Server, AGControl,\n         FLEHandleNotmsg(i) \\/ FLEWaitNewNotmsg(i)\n  PROVE AGControlElectionShape(i)\n<1>1. state[i] = LOOKING\n  BY SMTT(\"r2\") DEF FLEHandleNotmsg, FLEWaitNewNotmsg,\n    HandleNotmsg, WaitNewNotmsg\n<1>2. /\\ state' = [state EXCEPT ![i] = state'[i]]\n      /\\ state'[i] \\in {LOOKING, FOLLOWING, LEADING}\n      /\\ currentEpoch' = currentEpoch\n  BY <1>1, AGFLEFrame DEF FLEHandleNotmsg, FLEWaitNewNotmsg, AGControl, AGStructure, AGControlTypes, AGNode\n<1>3. QED\n  BY <1>1, <1>2, SMTT(\"r3\")\n    DEF AGControlElectionShape, FLEHandleNotmsg, FLEWaitNewNotmsg,\n    ZabTurnToLeading, ZabTurnToFollowing, LOOKING, FOLLOWING, LEADING\n\nLEMMA AGControlElection ==\n  ASSUME Cardinality(Server) >= 2, NEW i \\in Server, AGControl,\n         FLEHandleNotmsg(i) \\/ FLEWaitNewNotmsg(i)\n  PROVE AGControl'\n<1>1. AGControlElectionShape(i)\n  BY AGControlElectionProject\n<1>2. {i} \\notin Quorums\n  BY AGSingletonNotQuorum\n<1>3. AGControlTypes'\n  <2>1. state' \\in [Server -> {LOOKING, FOLLOWING, LEADING}]\n    BY <1>1, SMTT(\"r2\") DEF AGControlElectionShape, AGControl, AGStructure,\n      AGControlTypes\n  <2>2. zabState' \\in [Server -> {ELECTION, DISCOVERY, SYNCHRONIZATION, BROADCAST}]\n    BY <1>1, SMTT(\"r2\") DEF AGControlElectionShape, AGControl, AGStructure,\n      AGControlTypes\n  <2>3. learners' \\in [Server -> SUBSET Server]\n    BY <1>1, SMTT(\"r2\") DEF AGControlElectionShape, AGControl, AGStructure,\n      AGControlTypes\n  <2>4. QED\n    BY <1>1, <2>1, <2>2, <2>3, SMTT(\"r2\")\n      DEF AGControlElectionShape, AGControl, AGStructure, AGControlTypes, AGMatrix\n<1>4. \\A s \\in Server : AGNode(s)'\n  <2>1. TAKE s \\in Server\n  <2>2. CASE s = i\n    BY <1>1, <1>3, <2>2, NullPointNotServer, SMTT(\"r3\")\n      DEF AGControlElectionShape, AGControl, AGStructure, AGControlTypes,\n      AGNode, IsLeader, IsFollower, LOOKING, FOLLOWING, LEADING,\n      ELECTION, DISCOVERY, SYNCHRONIZATION, BROADCAST\n  <2>3. CASE s # i\n    BY <1>1, <1>3, <2>3, NullPointNotServer, SMTT(\"r3\")\n      DEF AGControlElectionShape, AGControl, AGStructure, AGControlTypes,\n      AGNode, IsLeader, IsFollower, LOOKING, FOLLOWING, LEADING,\n      ELECTION, DISCOVERY, SYNCHRONIZATION, BROADCAST\n  <2>4. QED BY <2>2, <2>3\n<1>5. \\A s,t \\in Server : msgs'[s][t] # << >> => AGLink(s,t)'\n  <2>1. TAKE s \\in Server, t \\in Server\n  <2>2. QED\n    BY <1>1, <1>3, SMTT(\"r3\")\n      DEF AGControlElectionShape, AGControl, AGStructure, AGControlTypes,\n      AGLink, IsLeader, IsFollower, LOOKING, FOLLOWING, LEADING\n<1>6. AGStructure'\n  BY <1>3, <1>4, <1>5 DEF AGStructure\n<1>7. \\A s \\in Server \\ {i} :\n        /\\ state'[s] = state[s] /\\ zabState'[s] = zabState[s]\n        /\\ learners'[s] = learners[s] /\\ connecting'[s] = connecting[s]\n        /\\ electing'[s] = electing[s] /\\ ackldRecv'[s] = ackldRecv[s]\n        /\\ forwarding'[s] = forwarding[s] /\\ tempMaxEpoch'[s] = tempMaxEpoch[s]\n        /\\ AGReady(s)' = AGReady(s)\n        /\\ AGDone(s)' = AGDone(s)\n  BY <1>1, SMTT(\"r3\")\n    DEF AGControlElectionShape, AGControl, AGStructure, AGControlTypes,\n    AGPhases, AGPhaseTypes, AGDomain, AGReady, AGDone, IsLeader\n<1>8. state'[i] = LEADING =>\n        /\\ AGSids(connecting'[i]) = {i}\n        /\\ AGVoters(electing'[i]) = {i}\n  BY <1>1, SMTT(\"r3\")\n    DEF AGControlElectionShape, AGControl, AGStructure, AGControlTypes,\n    AGPhases, AGPhaseTypes, AGDomain, AGSids, AGVoters\n<1>9. /\\ ~AGReady(i)' /\\ ~AGDone(i)'\n  BY <1>1, <1>2, <1>8, SMTT(\"r2\")\n    DEF AGControlElectionShape, AGReady, AGDone, IsLeader\n<1>10. AGPhaseTypes'\n  BY <1>1, SMTT(\"r3\")\n    DEF AGControlElectionShape, AGControl, AGPhases, AGPhaseTypes, AGDomain\n<1>11. \\A s \\in Server : AGPhaseNode(s)'\n  <2>1. TAKE s \\in Server\n  <2>2. CASE s = i\n    BY <1>1, <1>2, <1>3, <1>7, <1>8, <1>9, <1>10, <2>2,\n       NullPointNotServer, SMTT(\"r5\")\n      DEF AGControlElectionShape, AGControl, AGStructure, AGControlTypes,\n      AGNode, AGPhases, AGPhaseTypes, AGPhaseNode, AGDomain,\n      AGSids, AGVoters, AGUnique, IsLeader, IsFollower, ZxidEqual,\n      LOOKING, FOLLOWING, LEADING, ELECTION, DISCOVERY, SYNCHRONIZATION, BROADCAST\n  <2>3. CASE s # i\n    <3>1. IsLeader(s) => i \\notin learners[s]\n      BY <1>1, <2>3, SMTT(\"r2\")\n        DEF AGControlElectionShape, AGControl, AGStructure, AGControlTypes,\n        AGNode, IsLeader, IsFollower, LOOKING, FOLLOWING, LEADING\n    <3>2. (IsFollower(s) /\\ connectInfo[s].sid # NullPoint) =>\n             connectInfo[s].sid # i\n      BY <1>1, <2>3, SMTT(\"r2\")\n        DEF AGControlElectionShape, AGControl, AGStructure, AGControlTypes,\n        AGNode, IsLeader, LOOKING, LEADING\n    <3>3. /\\ AGPhaseNode(s) /\\ AGPhaseTypes /\\ AGControlTypes\n           /\\ s \\in Server /\\ s # i\n      BY <2>3 DEF AGControl, AGStructure, AGPhases\n    <3>4. QED\n      BY ONLY <1>1, <1>7, <3>1, <3>2, <3>3, SMTT(\"r5\")\n        DEF AGControlElectionShape, AGControlTypes,\n        AGPhaseTypes, AGPhaseNode, AGDomain, AGReady, AGDone,\n        AGSids, AGVoters, IsLeader, IsFollower\n  <2>4. QED BY <2>2, <2>3\n<1>12. \\A s,t \\in Server : AGPhaseMessages(s,t)'\n  <2>1. TAKE s \\in Server, t \\in Server\n  <2>2. QED\n    BY <1>1, <1>3, <1>7, <1>9, NullPointNotServer, SMTT(\"r5\")\n      DEF AGControlElectionShape, AGControl, AGStructure, AGControlTypes,\n      AGNode, AGPhases, AGPhaseMessages, AGLink, AGUp, AGDown,\n      IsLeader, IsFollower, LOOKING, FOLLOWING, LEADING\n<1>13. QED\n  BY <1>6, <1>10, <1>11, <1>12 DEF AGControl, AGPhases\n\nLEMMA AGQuorumsMeet ==\n  ASSUME NEW Q \\in Quorums, NEW R \\in Quorums\n  PROVE Q \\intersect R # {}\n<1>1. /\\ Q \\subseteq Server /\\ R \\subseteq Server\n      /\\ IsFiniteSet(Q) /\\ IsFiniteSet(R)\n  BY ServerFinite, AGFiniteBridge, AGFinite!FS_Subset, SMTT(\"r2\") DEF Quorums\n<1>2. /\\ Cardinality(Q) \\in Nat /\\ Cardinality(R) \\in Nat\n      /\\ Cardinality(Server) \\in Nat\n  BY <1>1, ServerFinite, AGFiniteBridge, AGFinite!FS_CardinalityType\n<1>3. Cardinality(Q) + Cardinality(R) > Cardinality(Server)\n  BY <1>2, SMTT(\"r2\") DEF Quorums\n<1>4. QED\n  BY <1>1, <1>3, ServerFinite, AGFiniteBridge, AGFinite!FS_MajoritiesIntersect\n\nLEMMA AGClaimsRemainSafe ==\n  ASSUME acceptedEpoch \\in [Server -> Nat],\n         acceptedEpoch' \\in [Server -> Nat], AGClaimSafety, AGClaimAdvance\n  PROVE AGClaimSafety'\n<1>1. PICK owner \\in Server \\union {NullPoint} :\n       \\A i \\in Server : \\A s \\in AGClaims(i)' :\n         \\/ /\\ acceptedEpoch'[i] = acceptedEpoch[i] /\\ s \\in AGClaims(i)\n         \\/ /\\ i = owner /\\ acceptedEpoch[s] < acceptedEpoch'[i]\n            /\\ s \\in Server /\\ acceptedEpoch'[s] >= acceptedEpoch'[i]\n  BY DEF AGClaimAdvance\n<1>2. \\A i \\in Server : \\A s \\in AGClaims(i)' :\n        /\\ s \\in Server /\\ acceptedEpoch'[s] >= acceptedEpoch'[i]\n  BY <1>1, SMTT(\"r3\") DEF AGClaimSafety, AGClaimAdvance\n<1>3. \\A i,j \\in Server :\n       (i # j /\\ acceptedEpoch'[i] = acceptedEpoch'[j]) =>\n         (AGClaims(i)') \\intersect (AGClaims(j)') = {}\n  <2>1. TAKE i \\in Server, j \\in Server\n  <2>2. QED\n    BY <1>1, SMTT(\"r3\") DEF AGClaimSafety, AGClaimAdvance\n<1>4. QED BY <1>2, <1>3 DEF AGClaimSafety\n\nLEMMA AGCertificatesPersist ==\n  ASSUME acceptedEpoch \\in [Server -> Nat],\n         acceptedEpoch' \\in [Server -> Nat], AGEpochCertificate, AGClaimAdvance\n  PROVE \\A e \\in 1..MAXEPOCH : epochLeader[e] # {} =>\n          \\E l \\in Server, Q \\in Quorums :\n            /\\ epochLeader[e] = {l}\n            /\\ \\A s \\in Q :\n                 /\\ acceptedEpoch'[s] >= e\n                 /\\ \\A i \\in Server :\n                      (acceptedEpoch'[i] = e /\\ s \\in AGClaims(i)') => i = l\n<1>1. TAKE e \\in 1..MAXEPOCH\n<1>2. ASSUME epochLeader[e] # {}\n      PROVE \\E l \\in Server, Q \\in Quorums :\n              /\\ epochLeader[e] = {l}\n              /\\ \\A s \\in Q :\n                   /\\ acceptedEpoch'[s] >= e\n                   /\\ \\A i \\in Server :\n                        (acceptedEpoch'[i] = e /\\ s \\in AGClaims(i)') => i = l\n  <2>1. PICK l \\in Server, Q \\in Quorums :\n           /\\ epochLeader[e] = {l}\n           /\\ \\A s \\in Q :\n                /\\ acceptedEpoch[s] >= e\n                /\\ \\A i \\in Server :\n                     (acceptedEpoch[i] = e /\\ s \\in AGClaims(i)) => i = l\n    BY <1>2 DEF AGEpochCertificate\n  <2>2. \\A s \\in Q :\n           /\\ acceptedEpoch'[s] >= e\n           /\\ \\A i \\in Server :\n                (acceptedEpoch'[i] = e /\\ s \\in AGClaims(i)') => i = l\n    BY <2>1, SMTT(\"r3\") DEF AGClaimAdvance, Quorums\n  <2>3. QED BY <2>1, <2>2\n<1>3. QED BY <1>2\n\nLEMMA AGCertificateLeadership2 == AGEpochCertificate => Leadership2\nBY AGFiniteBridge, AGFinite!FS_EmptySet, AGFinite!FS_Singleton,\n   SMTT(\"r3\") DEF AGEpochCertificate, Leadership2\n\nLEMMA AGClaimsLeadership1 ==\n  ASSUME Cardinality(Server) >= 2, AGControl, AGClaimSafety\n  PROVE Leadership1\n<1> USE DEF Leadership1\n<1>1. TAKE i \\in Server, j \\in Server\n<1>2. ASSUME /\\ IsLeader(i) /\\ zabState[i] \\in {SYNCHRONIZATION, BROADCAST}\n             /\\ IsLeader(j) /\\ zabState[j] \\in {SYNCHRONIZATION, BROADCAST}\n             /\\ acceptedEpoch[i] = acceptedEpoch[j]\n      PROVE i = j\n  <2>1. /\\ AGDone(i) /\\ AGDone(j) /\\ AGReady(i) /\\ AGReady(j)\n    BY <1>2, AGDoneReady DEF AGControl, AGPhases, AGPhaseNode\n  <2>2. /\\ AGVoters(electing[i]) \\in Quorums\n         /\\ AGVoters(electing[j]) \\in Quorums\n         /\\ AGVoters(electing[i]) \\subseteq AGClaims(i)\n         /\\ AGVoters(electing[j]) \\subseteq AGClaims(j)\n    BY <2>1 DEF AGDone, AGClaims\n  <2>3. AGVoters(electing[i]) \\intersect AGVoters(electing[j]) # {}\n    BY <2>2, AGQuorumsMeet\n  <2>4. QED BY <1>2, <2>2, <2>3 DEF AGClaimSafety\n<1>3. QED BY <1>2 DEF Leadership1\n\nLEMMA AGControlClusterFacts ==\n  ASSUME AGStructure\n  PROVE /\\ \\A i \\in Server : msgs[i][i] = << >>\n        /\\ \\A i \\in Server : state[i] = LOOKING =>\n             /\\ learners[i] = {} /\\ connectInfo[i].sid = NullPoint\n             /\\ (\\A j \\in Server : msgs[i][j] = << >> /\\ msgs[j][i] = << >>)\n        /\\ \\A i,j \\in Server :\n             (IsLeader(i) /\\ IsLeader(j) /\\ i # j) =>\n               learners[i] \\intersect learners[j] = {}\n        /\\ \\A i \\in Server : (IsFollower(i) /\\ connectInfo[i].sid = NullPoint) =>\n             \\A j \\in Server : msgs[i][j] = << >> /\\ msgs[j][i] = << >>\nBY NullPointNotServer, SMTT(\"r3\") DEF AGStructure, AGControlTypes,\n   AGNode, AGLink, IsLeader, IsFollower, LOOKING, FOLLOWING, LEADING\n\nLEMMA AGConnectionUniqueness ==\n  ASSUME NEW S, NEW s, AGUnique(S)\n  PROVE /\\ AGUnique(UpdateConnectingOrAckldRecv(S,s))\n        /\\ AGUnique(RemoveConnectingOrAckldRecv(S,s))\nBY SMTT(\"r3\") DEF AGUnique, UpdateConnectingOrAckldRecv,\n  RemoveConnectingOrAckldRecv\n\nUSE DEF LOOKING, FOLLOWING, LEADING, ELECTION, DISCOVERY, SYNCHRONIZATION,\n  BROADCAST, NONE, DIFF, TRUNC, SNAP, FOLLOWERINFO, LEADERINFO, ACKEPOCH,\n  NEWLEADER, ACKLD, UPTODATE, PROPOSAL, ACK, COMMIT,\n  IsLeader, IsFollower, IsLooking, IsMyLeader, IsMyLearner, HasNoLeader, HasLeader,\n  serverVars, electionVars, leaderVars, followerVars, verifyVars, msgVars,\n  envVars, serverVarsL, electionVarsL, leaderVarsL, varsL\n\nLEMMA AGQueueBasics ==\n  \\A m : /\\ Append(<< >>,m) = <<m>>\n         /\\ Tail(<<m>>) = << >> /\\ <<m>> # << >>\nBY SMTT(\"r2\")\n\nAGControlConnectShape(i,j) ==\n  /\\ IsLeader(i) /\\ IsFollower(j) /\\ i # j\n  /\\ j \\notin learners[i] /\\ connectInfo[j].sid = NullPoint\n  /\\ zabState[j] = DISCOVERY\n  /\\ (\\A s \\in Server : msgs[j][s] = << >> /\\ msgs[s][j] = << >>)\n  /\\ UNCHANGED <<state, zabState, acceptedEpoch, currentEpoch, connecting,\n                  electing, ackldRecv, forwarding, tempMaxEpoch>>\n  /\\ learners' = [learners EXCEPT ![i] = @ \\union {j}]\n  /\\ connectInfo' = [connectInfo EXCEPT ![j].sid = i]\n  /\\ msgs' = [msgs EXCEPT ![j][i] =\n                  <<[mtype |-> FOLLOWERINFO, mzxid |-> <<acceptedEpoch[j],0>>]>>]\n\nLEMMA AGControlConnectProject ==\n  ASSUME NEW i \\in Server, NEW j \\in Server, AGControl,\n         ConnectAndFollowerSendFOLLOWERINFO(i,j)\n  PROVE AGControlConnectShape(i,j)\nBY AGControlClusterFacts, AGQueueBasics, SMTT(\"r3\")\n  DEF ConnectAndFollowerSendFOLLOWERINFO, Send, AGControlConnectShape,\n  AGControl, AGStructure, AGControlTypes, AGPhases, AGPhaseNode\n\nLEMMA AGNoNewClaimsAdvance ==\n  ASSUME acceptedEpoch \\in [Server -> Nat], UNCHANGED acceptedEpoch,\n         \\A i \\in Server : AGClaims(i)' \\subseteq AGClaims(i)\n  PROVE AGClaimAdvance\n<1>1. \\A s \\in Server : acceptedEpoch'[s] >= acceptedEpoch[s]\n  BY SMTT(\"r2\")\n<1>2. \\A i \\in Server : \\A s \\in AGClaims(i)' :\n        /\\ acceptedEpoch'[i] = acceptedEpoch[i] /\\ s \\in AGClaims(i)\n  BY SMTT(\"r2\")\n<1>3. NullPoint \\in Server \\union {NullPoint}\n  OBVIOUS\n<1>4. QED BY <1>1, <1>2, <1>3 DEF AGClaimAdvance\n\nLEMMA AGControlConnect ==\n  ASSUME NEW i \\in Server, NEW j \\in Server, AGControl,\n         ConnectAndFollowerSendFOLLOWERINFO(i,j)\n  PROVE AGControl' /\\ AGClaimAdvance\n<1>1. AGControlConnectShape(i,j)\n  BY AGControlConnectProject\n<1>2. /\\ AGControlTypes' /\\ AGPhaseTypes'\n  <2>1. learners' \\in [Server -> SUBSET Server]\n    BY <1>1, SMTT(\"r2\") DEF AGControlConnectShape, AGControl, AGStructure, AGControlTypes\n  <2>2. connectInfo' \\in [Server ->\n          [sid : Server \\union {NullPoint}, syncMode : {NONE, DIFF, TRUNC, SNAP}, nlRcv : BOOLEAN]]\n    BY <1>1, SMTT(\"r2\") DEF AGControlConnectShape, AGControl, AGStructure, AGControlTypes\n  <2>3. AGMatrix(msgs')\n    BY <1>1, SMTT(\"r2\") DEF AGControlConnectShape, AGControl, AGStructure, AGControlTypes, AGMatrix\n  <2>4. QED\n    BY <1>1, <2>1, <2>2, <2>3, SMTT(\"r2\")\n      DEF AGControlConnectShape, AGControl, AGStructure, AGControlTypes, AGPhases, AGPhaseTypes\n<1>3. \\A s \\in Server :\n        /\\ state'[s] = state[s] /\\ zabState'[s] = zabState[s]\n        /\\ connectInfo'[s].sid = IF s = j THEN i ELSE connectInfo[s].sid\n        /\\ learners'[s] = IF s = i THEN learners[s] \\union {j} ELSE learners[s]\n        /\\ AGReady(s)' = AGReady(s) /\\ AGDone(s)' = AGDone(s)\n  BY <1>1, SMTT(\"r2\")\n    DEF AGControlConnectShape, AGControl, AGStructure, AGControlTypes,\n    AGReady, AGDone\n<1>4. \\A s,t \\in Server : msgs'[s][t] =\n        IF s = j /\\ t = i\n        THEN <<[mtype |-> FOLLOWERINFO, mzxid |-> <<acceptedEpoch[j],0>>]>>\n        ELSE msgs[s][t]\n  BY <1>1, SMTT(\"r2\")\n    DEF AGControlConnectShape, AGControl, AGStructure, AGControlTypes, AGMatrix\n<1>5. \\A s \\in Server : AGNode(s)'\n  <2>1. TAKE s \\in Server\n  <2>2. QED\n    BY <1>1, <1>2, <1>3, NullPointNotServer, SMTT(\"r3\")\n      DEF AGControlConnectShape, AGControl, AGStructure, AGControlTypes, AGNode\n<1>6. \\A s,t \\in Server : msgs'[s][t] # << >> => AGLink(s,t)'\n  <2>1. TAKE s \\in Server, t \\in Server\n  <2>2. QED\n    BY <1>1, <1>2, <1>3, <1>4, SMTT(\"r3\")\n      DEF AGControlConnectShape, AGControl, AGStructure, AGControlTypes, AGNode, AGLink\n<1>7. \\A s \\in Server : AGPhaseNode(s)'\n  <2>1. TAKE s \\in Server\n  <2>2. QED\n    BY <1>1, <1>2, <1>3, <1>4, NullPointNotServer, SMTT(\"r5\")\n      DEF AGControlConnectShape, AGControl, AGStructure, AGControlTypes, AGNode,\n      AGPhases, AGPhaseTypes, AGPhaseNode, AGReady, AGDone\n<1>8. \\A s,t \\in Server : AGPhaseMessages(s,t)'\n  <2>1. TAKE s \\in Server, t \\in Server\n  <2>2. QED\n    BY <1>1, <1>2, <1>3, <1>4, NullPointNotServer, SMTT(\"r3\")\n      DEF AGControlConnectShape, AGControl, AGStructure, AGControlTypes, AGNode,\n      AGPhases, AGPhaseMessages, AGUp, AGDown, AGReady, AGDone\n<1>9. \\A s \\in Server : AGClaims(s)' \\subseteq AGClaims(s)\n  <2>1. TAKE s \\in Server\n  <2>2. CASE s = i\n    BY ONLY <1>1, <1>3, <1>4, <2>2, s \\in Server, SMTT(\"r3\")\n      DEF AGControlConnectShape, AGClaims, AGReady, AGDone, AGSids, AGVoters\n  <2>3. CASE s # i\n    BY ONLY <1>1, <1>3, <1>4, <2>3, s \\in Server, SMTT(\"r3\")\n      DEF AGControlConnectShape, AGClaims, AGReady, AGDone, AGSids, AGVoters\n  <2>4. QED BY <2>2, <2>3\n<1>10. AGClaimAdvance\n  BY <1>1, <1>9, AGNoNewClaimsAdvance DEF AGControlConnectShape,\n    AGControl, AGPhases, AGPhaseTypes\n<1>11. QED\n  BY <1>2, <1>5, <1>6, <1>7, <1>8, <1>10 DEF AGControl, AGStructure, AGPhases\n\nLEMMA AGRemoveConnectingShape ==\n  ASSUME NEW S, NEW s, AGUnique(S)\n  PROVE \\A r \\in RemoveConnectingOrAckldRecv(S,s) :\n          \\/ /\\ r \\in S /\\ r.sid # s\n          \\/ /\\ r.sid = s /\\ r.connected = FALSE\nBY SMTT(\"r3\") DEF AGUnique, RemoveConnectingOrAckldRecv\n\nLEMMA AGRemoveElectingShape ==\n  ASSUME NEW S, NEW s, AGUnique(S)\n  PROVE \\A r \\in RemoveElecting(S,s) :\n          \\/ /\\ r \\in S /\\ r.sid # s\n          \\/ /\\ r.sid = s /\\ ZxidEqual(r.peerLastZxid, <<-1,-1>>)\nBY SMTT(\"r3\") DEF AGUnique, RemoveElecting, ZxidEqual\n\nLEMMA AGUpdateConnectingShape ==\n  ASSUME NEW S, NEW s, AGUnique(S)\n  PROVE \\A r \\in UpdateConnectingOrAckldRecv(S,s) :\n          \\/ /\\ r \\in S /\\ r.sid # s\n          \\/ /\\ r.sid = s /\\ r.connected = TRUE\nBY SMTT(\"r3\") DEF AGUnique, UpdateConnectingOrAckldRecv\n\nLEMMA AGUpdateElectingShape ==\n  ASSUME NEW S, NEW s, NEW z, NEW b, AGUnique(S)\n  PROVE \\A r \\in UpdateElecting(S,s,z,b) :\n          \\/ /\\ r \\in S /\\ r.sid # s\n          \\/ r.sid = s\nBY SMTT(\"r3\") DEF AGUnique, UpdateElecting\n\nLEMMA AGMatrixUpdate ==\n  ASSUME NEW f, AGMatrix(f), NEW i \\in Server, NEW j \\in Server, NEW v\n  PROVE AGMatrix([f EXCEPT ![i][j] = v])\nBY SMTT(\"r4\") DEF AGMatrix\n\nLEMMA AGDomainUpdate ==\n  ASSUME NEW f, NEW S, AGDomain(f,S), NEW i \\in S, NEW v\n  PROVE AGDomain([f EXCEPT ![i] = v],S)\nBY SMTT(\"r2\") DEF AGDomain\n\nAGDropShape(i,j) ==\n  /\\ IsLeader(i) /\\ IsFollower(j) /\\ i # j\n  /\\ j \\in learners[i] /\\ connectInfo[j].sid = i\n  /\\ UNCHANGED <<acceptedEpoch, currentEpoch, tempMaxEpoch>>\n  /\\ state' = [state EXCEPT ![j] = LOOKING]\n  /\\ zabState' = [zabState EXCEPT ![j] = ELECTION]\n  /\\ connectInfo' = [connectInfo EXCEPT ![j] = InitialConnectInfo]\n  /\\ learners' = [learners EXCEPT ![i] = @ \\ {j}]\n  /\\ forwarding' = [forwarding EXCEPT ![i] = @ \\ {j}]\n  /\\ connecting' = [connecting EXCEPT ![i] = RemoveConnectingOrAckldRecv(@,j)]\n  /\\ electing' = [electing EXCEPT ![i] = RemoveElecting(@,j)]\n  /\\ ackldRecv' = [ackldRecv EXCEPT ![i] = RemoveConnectingOrAckldRecv(@,j)]\n  /\\ msgs' = [msgs EXCEPT ![j][i] = << >>, ![i][j] = << >>]\n\nLEMMA AGDropProject ==\n  ASSUME NEW i \\in Server, NEW j \\in Server, AGControl,\n         IsLeader(i), IsFollower(j), IsMyLeader(j,i),\n         FollowerShutdown(j), RemoveLearner(i,j), Clean(i,j),\n         UNCHANGED <<acceptedEpoch, tempMaxEpoch>>\n  PROVE AGDropShape(i,j)\n<1>1. forwarding' = [forwarding EXCEPT ![i] = forwarding[i] \\ {j}]\n  <2>1. forwarding[i] \\in SUBSET Server\n    BY SMTT(\"r2\") DEF AGControl, AGPhases, AGPhaseTypes\n  <2>2. (IF j \\in forwarding[i] THEN forwarding[i] \\ {j} ELSE forwarding[i])\n          = forwarding[i] \\ {j}\n    BY ONLY <2>1, SMTT(\"r3\")\n  <2>3. QED BY ONLY <2>2, RemoveLearner(i,j), SMTT(\"r2\") DEF RemoveLearner\n<1>2. /\\ j \\in learners[i] /\\ i # j\n  BY NullPointNotServer, SMTT(\"r2\") DEF AGControl, AGStructure, AGNode\n<1>3. QED\n  BY <1>1, <1>2, SMTT(\"r3\") DEF AGDropShape, FollowerShutdown, ZabTimeout, RemoveLearner, Clean\n\nLEMMA AGControlDrop ==\n  ASSUME NEW i \\in Server, NEW j \\in Server, AGControl, AGDropShape(i,j)\n  PROVE AGControl' /\\ AGClaimAdvance\n<1>1. /\\ AGControlTypes' /\\ AGPhaseTypes'\n  <2>1. state' \\in [Server -> {LOOKING, FOLLOWING, LEADING}]\n    BY SMTT(\"r2\") DEF AGDropShape, AGControl, AGStructure, AGControlTypes\n  <2>2. zabState' \\in [Server -> {ELECTION, DISCOVERY, SYNCHRONIZATION, BROADCAST}]\n    BY SMTT(\"r2\") DEF AGDropShape, AGControl, AGStructure, AGControlTypes\n  <2>3. learners' \\in [Server -> SUBSET Server]\n    BY SMTT(\"r2\") DEF AGDropShape, AGControl, AGStructure, AGControlTypes\n  <2>4. connectInfo' \\in [Server ->\n          [sid : Server \\union {NullPoint}, syncMode : {NONE, DIFF, TRUNC, SNAP}, nlRcv : BOOLEAN]]\n    BY SMTT(\"r2\") DEF AGDropShape, InitialConnectInfo, AGControl, AGStructure, AGControlTypes\n  <2>5. AGMatrix(msgs')\n    BY AGMatrixUpdate, SMTT(\"r3\") DEF AGDropShape, AGControl, AGStructure, AGControlTypes\n  <2>6. forwarding' \\in [Server -> SUBSET Server]\n    BY SMTT(\"r3\") DEF AGDropShape, AGControl, AGPhases, AGPhaseTypes\n  <2>7. /\\ AGDomain(connecting',Server)\n         /\\ AGDomain(electing',Server) /\\ AGDomain(ackldRecv',Server)\n    BY AGDomainUpdate, SMTT(\"r3\") DEF AGDropShape, AGControl, AGPhases, AGPhaseTypes\n  <2>8. QED\n    BY <2>1, <2>2, <2>3, <2>4, <2>5, <2>6, <2>7, SMTT(\"r2\")\n      DEF AGDropShape, AGControl, AGStructure, AGControlTypes, AGPhases, AGPhaseTypes\n<1>2. \\A s \\in Server :\n        /\\ AGSids(connecting'[s]) = AGSids(connecting[s])\n        /\\ AGVoters(electing'[s]) = AGVoters(electing[s])\n  BY AGRemoveConnectingSids, AGRemoveElectingSets, SMTT(\"r3\")\n    DEF AGDropShape, AGControl, AGPhases, AGPhaseTypes, AGPhaseNode, AGDomain\n<1>3. \\A s \\in Server :\n        /\\ AGReady(s)' = AGReady(s) /\\ AGDone(s)' = AGDone(s)\n  BY <1>2, SMTT(\"r3\") DEF AGDropShape, AGControl, AGStructure,\n    AGControlTypes, AGReady, AGDone\n<1>4. \\A s,t \\in Server : msgs'[s][t] \\in {msgs[s][t], << >>}\n  BY SMTT(\"r2\") DEF AGDropShape, AGControl, AGStructure, AGControlTypes, AGMatrix\n<1>5. \\A s \\in Server :\n        /\\ state'[s] = IF s = j THEN LOOKING ELSE state[s]\n        /\\ zabState'[s] = IF s = j THEN ELECTION ELSE zabState[s]\n        /\\ connectInfo'[s].sid = IF s = j THEN NullPoint ELSE connectInfo[s].sid\n        /\\ learners'[s] = IF s = i THEN learners[s] \\ {j} ELSE learners[s]\n        /\\ forwarding'[s] = IF s = i THEN forwarding[s] \\ {j} ELSE forwarding[s]\n        /\\ (s # i => /\\ connecting'[s] = connecting[s]\n                      /\\ electing'[s] = electing[s]\n                      /\\ ackldRecv'[s] = ackldRecv[s])\n  BY SMTT(\"r3\") DEF AGDropShape, InitialConnectInfo, AGControl,\n    AGStructure, AGControlTypes, AGPhases, AGPhaseTypes, AGDomain\n<1>6. \\A s \\in Server : AGNode(s)'\n  <2>1. TAKE s \\in Server\n  <2>2. QED\n    BY <1>1, <1>5, NullPointNotServer, SMTT(\"r3\")\n      DEF AGDropShape, AGControl, AGStructure, AGControlTypes, AGNode\n<1>7. \\A s,t \\in Server : msgs'[s][t] # << >> => AGLink(s,t)'\n  <2>1. TAKE s \\in Server, t \\in Server\n  <2>2. QED\n    BY <1>1, <1>4, <1>5, SMTT(\"r3\")\n      DEF AGDropShape, AGControl, AGStructure, AGControlTypes, AGMatrix, AGNode, AGLink\n<1>8. \\A s \\in Server : AGPhaseNode(s)'\n  <2>1. TAKE s \\in Server\n  <2>2. CASE s = i\n    <3>1. /\\ AGPhaseNode(i) /\\ AGNode(i) /\\ AGControlTypes /\\ AGPhaseTypes\n      BY DEF AGControl, AGStructure, AGPhases\n    <3>tab. AGTableAttrs(s)'\n      BY ONLY <1>1, <1>2, <1>3, <1>4, <1>5, <2>2, <3>1,\n        AGDropShape(i,j), i \\in Server, j \\in Server,\n        AGRemoveConnectingSids, AGRemoveElectingSets, AGConnectionUniqueness,\n        AGRemoveConnectingShape, AGRemoveElectingShape, SMTT(\"r5\")\n      DEF AGTableAttrs, AGDropShape, AGControlTypes, AGNode,\n        AGPhaseTypes, AGPhaseNode, AGDomain, AGReady, AGDone, AGSids, AGVoters, AGUnique\n    <3>lead. AGLeaderAttrs(s)'\n      BY ONLY <1>1, <1>2, <1>3, <1>4, <1>5, <2>2, <3>1,\n        AGDropShape(i,j), i \\in Server, j \\in Server,\n        AGRemoveConnectingSids, AGRemoveElectingSets, AGConnectionUniqueness,\n        AGRemoveConnectingShape, AGRemoveElectingShape, SMTT(\"r5\")\n      DEF AGLeaderAttrs, AGDropShape, AGControlTypes, AGNode,\n        AGPhaseTypes, AGPhaseNode, AGDomain, AGReady, AGDone\n    <3>fol. AGFollowerAttrs(s)'\n      BY ONLY <1>1, <1>2, <1>3, <1>4, <1>5, <2>2, <3>1,\n        AGDropShape(i,j), i \\in Server, j \\in Server,\n        AGRemoveConnectingSids, AGRemoveElectingSets, AGConnectionUniqueness,\n        AGRemoveConnectingShape, AGRemoveElectingShape, SMTT(\"r5\")\n      DEF AGFollowerAttrs, AGDropShape, AGControlTypes, AGNode,\n        AGPhaseTypes, AGPhaseNode, AGDomain, AGReady, AGDone\n    <3>done. QED BY <3>tab, <3>lead, <3>fol\n      DEF AGPhaseNode, AGTableAttrs, AGLeaderAttrs, AGFollowerAttrs\n  <2>3. CASE s = j\n    BY <1>1, <1>2, <1>3, <1>4, <1>5, <2>3, SMTT(\"r3\")\n      DEF AGDropShape, AGControl, AGStructure, AGControlTypes, AGNode,\n      AGPhases, AGPhaseTypes, AGPhaseNode, AGDomain, AGReady, AGDone\n  <2>4. CASE s # i /\\ s # j\n    <3>1. /\\ AGPhaseNode(s) /\\ AGNode(s) /\\ AGControlTypes /\\ AGPhaseTypes\n      BY DEF AGControl, AGStructure, AGPhases\n    <3>2. IsLeader(s) => j \\notin learners[s]\n      BY <2>4, AGControlClusterFacts, SMTT(\"r2\") DEF AGControl, AGDropShape\n    <3>tab. AGTableAttrs(s)'\n      BY ONLY <1>1, <1>2, <1>3, <1>4, <1>5, <2>4, <3>1, <3>2,\n        AGDropShape(i,j), s \\in Server, i \\in Server, j \\in Server,\n        NullPointNotServer, SMTT(\"r5\")\n      DEF AGTableAttrs, AGDropShape, AGControlTypes, AGNode,\n        AGPhaseTypes, AGPhaseNode, AGDomain, AGReady, AGDone, AGSids, AGVoters, AGUnique\n    <3>lead. AGLeaderAttrs(s)'\n      BY ONLY <1>1, <1>2, <1>3, <1>4, <1>5, <2>4, <3>1, <3>2,\n        AGDropShape(i,j), s \\in Server, i \\in Server, j \\in Server,\n        NullPointNotServer, SMTT(\"r5\")\n      DEF AGLeaderAttrs, AGDropShape, AGControlTypes, AGNode,\n        AGPhaseTypes, AGPhaseNode, AGDomain, AGReady, AGDone\n    <3>fol. AGFollowerAttrs(s)'\n      BY ONLY <1>1, <1>2, <1>3, <1>4, <1>5, <2>4, <3>1, <3>2,\n        AGDropShape(i,j), s \\in Server, i \\in Server, j \\in Server,\n        NullPointNotServer, SMTT(\"r5\")\n      DEF AGFollowerAttrs, AGDropShape, AGControlTypes, AGNode,\n        AGPhaseTypes, AGPhaseNode, AGDomain, AGReady, AGDone\n    <3>done. QED BY <3>tab, <3>lead, <3>fol\n      DEF AGPhaseNode, AGTableAttrs, AGLeaderAttrs, AGFollowerAttrs\n  <2>5. QED BY <2>2, <2>3, <2>4\n<1>9. \\A s,t \\in Server : AGPhaseMessages(s,t)'\n  <2>1. TAKE s \\in Server, t \\in Server\n  <2>2. QED\n    BY <1>1, <1>3, <1>4, <1>5, NullPointNotServer, SMTT(\"r3\")\n      DEF AGDropShape, AGControl, AGStructure, AGControlTypes, AGNode,\n      AGPhases, AGPhaseMessages, AGDown, AGUp, AGReady, AGDone\n<1>10. \\A s \\in Server : AGClaims(s)' \\subseteq AGClaims(s)\n  <2>1. TAKE s \\in Server\n  <2>2. QED\n    BY ONLY <1>2, <1>3, <1>4, s \\in Server, SMTT(\"r3\")\n      DEF AGClaims, AGReady, AGDone, AGSids, AGVoters\n<1>11. AGClaimAdvance\n  BY <1>10, AGNoNewClaimsAdvance DEF AGDropShape, AGControl, AGPhases, AGPhaseTypes\n<1>12. QED\n  BY <1>1, <1>6, <1>7, <1>8, <1>9, <1>11 DEF AGControl, AGStructure, AGPhases\n\nAGControlVars == <<state, zabState, learners, connectInfo, msgs, acceptedEpoch,\n                    currentEpoch, tempMaxEpoch, connecting, electing, ackldRecv, forwarding>>\n\nLEMMA AGControlUnchanged ==\n  ASSUME AGControl, UNCHANGED AGControlVars\n  PROVE AGControl' /\\ AGClaimAdvance\n<1>1. AGControl'\n  BY SMTT(\"r2\") DEF AGControlVars, AGControl, AGStructure, AGControlTypes,\n    AGNode, AGLink, AGPhases, AGPhaseTypes, AGPhaseNode, AGPhaseMessages,\n    AGReady, AGDone, AGUp, AGDown\n<1>2. \\A s \\in Server : AGClaims(s)' \\subseteq AGClaims(s)\n  BY SMTT(\"r2\") DEF AGControlVars, AGClaims, AGReady, AGDone, AGSids, AGVoters\n<1>3. AGClaimAdvance\n  BY <1>2, AGNoNewClaimsAdvance DEF AGControlVars, AGControl, AGPhases, AGPhaseTypes\n<1>4. QED BY <1>1, <1>3\n\nAGStopShape(i) ==\n  /\\ IsLeader(i)\n  /\\ UNCHANGED <<acceptedEpoch, currentEpoch, tempMaxEpoch, connecting, electing, ackldRecv>>\n  /\\ state' = [s \\in Server |-> IF s \\in learners[i] THEN LOOKING ELSE state[s]]\n  /\\ zabState' = [s \\in Server |-> IF s \\in learners[i] THEN ELECTION ELSE zabState[s]]\n  /\\ connectInfo' = [s \\in Server |-> IF s \\in learners[i] THEN InitialConnectInfo\n                                      ELSE connectInfo[s]]\n  /\\ learners' = [learners EXCEPT ![i] = {}]\n  /\\ forwarding' = [forwarding EXCEPT ![i] = {}]\n  /\\ msgs' = [s \\in Server |-> [t \\in Server |->\n                   IF t \\in learners[i] THEN << >> ELSE msgs[s][t]]]\n\nLEMMA AGStopProject ==\n  ASSUME NEW i \\in Server, AGControl, IsLeader(i), LeaderShutdown(i),\n         UNCHANGED <<acceptedEpoch, tempMaxEpoch, connecting, electing, ackldRecv>>\n  PROVE AGStopShape(i)\n<1>1. {i} \\union learners[i] = learners[i]\n  BY DEF AGControl, AGStructure, AGNode\n<1>2. QED\n  BY <1>1, SMTT(\"r3\") DEF AGStopShape, LeaderShutdown, ZabTimeoutInCluster,\n    CleanInputBufferInCluster\n\nLEMMA AGControlStop ==\n  ASSUME NEW i \\in Server, AGControl, AGStopShape(i)\n  PROVE AGControl' /\\ AGClaimAdvance\n<1>1. /\\ AGControlTypes' /\\ AGPhaseTypes'\n  <2>1. state' \\in [Server -> {LOOKING, FOLLOWING, LEADING}]\n    BY SMTT(\"r2\") DEF AGStopShape, AGControl, AGStructure, AGControlTypes\n  <2>2. zabState' \\in [Server -> {ELECTION, DISCOVERY, SYNCHRONIZATION, BROADCAST}]\n    BY SMTT(\"r2\") DEF AGStopShape, AGControl, AGStructure, AGControlTypes\n  <2>3. learners' \\in [Server -> SUBSET Server]\n    BY SMTT(\"r2\") DEF AGStopShape, AGControl, AGStructure, AGControlTypes\n  <2>4. connectInfo' \\in [Server ->\n          [sid : Server \\union {NullPoint}, syncMode : {NONE, DIFF, TRUNC, SNAP}, nlRcv : BOOLEAN]]\n    BY SMTT(\"r2\") DEF AGStopShape, InitialConnectInfo, AGControl, AGStructure, AGControlTypes\n  <2>5. AGMatrix(msgs')\n    BY SMTT(\"r2\") DEF AGStopShape, AGControl, AGStructure, AGControlTypes, AGMatrix\n  <2>6. forwarding' \\in [Server -> SUBSET Server]\n    BY SMTT(\"r3\") DEF AGStopShape, AGControl, AGPhases, AGPhaseTypes\n  <2>7. /\\ AGDomain(connecting',Server)\n         /\\ AGDomain(electing',Server) /\\ AGDomain(ackldRecv',Server)\n    BY AGDomainUpdate, SMTT(\"r3\") DEF AGStopShape, AGControl, AGPhases, AGPhaseTypes\n  <2>8. QED\n    BY <2>1, <2>2, <2>3, <2>4, <2>5, <2>6, <2>7, SMTT(\"r2\")\n      DEF AGStopShape, AGControl, AGStructure, AGControlTypes, AGPhases, AGPhaseTypes\n<1>2. \\A s \\in Server :\n        /\\ AGReady(s)' = (s \\notin learners[i] /\\ AGReady(s))\n        /\\ AGDone(s)' = (s \\notin learners[i] /\\ AGDone(s))\n        /\\ connectInfo'[s].sid = IF s \\in learners[i] THEN NullPoint\n                                 ELSE connectInfo[s].sid\n  BY SMTT(\"r2\") DEF AGStopShape, InitialConnectInfo, AGControl, AGStructure,\n    AGControlTypes, AGReady, AGDone\n<1>3. /\\ i \\in learners[i]\n       /\\ (\\A s \\in learners[i] \\ {i} : IsFollower(s) /\\ connectInfo[s].sid = i)\n       /\\ \\A s \\in Server \\ learners[i] :\n            /\\ (IsLeader(s) => learners[s] \\intersect learners[i] = {})\n            /\\ ((IsFollower(s) /\\ connectInfo[s].sid # NullPoint) =>\n                   connectInfo[s].sid \\notin learners[i])\n  BY AGControlClusterFacts, NullPointNotServer, SMTT(\"r3\")\n    DEF AGStopShape, AGControl, AGStructure, AGControlTypes, AGNode\n<1>frames. \\A s \\in Server \\ learners[i] :\n        /\\ state'[s] = state[s] /\\ zabState'[s] = zabState[s]\n        /\\ connectInfo'[s] = connectInfo[s]\n        /\\ learners'[s] = learners[s] /\\ forwarding'[s] = forwarding[s]\n        /\\ (\\A t \\in Server : msgs'[t][s] = msgs[t][s])\n  BY <1>3, SMTT(\"r2\") DEF AGStopShape, AGControl, AGStructure,\n    AGControlTypes, AGPhases, AGPhaseTypes\n<1>4. \\A s \\in Server : AGNode(s)'\n  <2>1. TAKE s \\in Server\n  <2>2. CASE s \\in learners[i]\n    BY <1>1, <1>2, <1>3, <2>2, SMTT(\"r3\")\n      DEF AGStopShape, AGControl, AGStructure, AGControlTypes, AGNode\n  <2>3. CASE s \\notin learners[i]\n    BY <1>1, <1>2, <1>3, <2>3, NullPointNotServer, SMTT(\"r3\")\n      DEF AGStopShape, AGControl, AGStructure, AGControlTypes, AGNode\n  <2>4. QED BY <2>2, <2>3\n<1>5. \\A s,t \\in Server : msgs'[s][t] # << >> => AGLink(s,t)'\n  <2>1. TAKE s \\in Server, t \\in Server\n  <2>2. QED\n    BY <1>1, <1>2, <1>3, SMTT(\"r3\")\n      DEF AGStopShape, AGControl, AGStructure, AGControlTypes, AGNode, AGLink\n<1>6. \\A s \\in Server : AGPhaseNode(s)'\n  <2>1. TAKE s \\in Server\n  <2>2. CASE s \\in learners[i]\n    BY <1>1, <1>2, <1>3, <2>2, SMTT(\"r3\")\n      DEF AGStopShape, AGControl, AGStructure, AGControlTypes,\n      AGPhases, AGPhaseTypes, AGPhaseNode, AGReady, AGDone\n  <2>3. CASE s \\notin learners[i]\n    <3>1. /\\ AGPhaseNode(s) /\\ AGNode(s) /\\ AGControlTypes /\\ AGPhaseTypes\n      BY DEF AGControl, AGStructure, AGPhases\n    <3>tab. AGTableAttrs(s)'\n      BY ONLY <1>1, <1>2, <1>3, <1>frames, <2>3, <3>1, AGStopShape(i),\n        s \\in Server, i \\in Server, NullPointNotServer, SMTT(\"r5\")\n      DEF AGTableAttrs, AGStopShape, AGControlTypes, AGNode, AGPhaseTypes, AGPhaseNode,\n        AGReady, AGDone, AGSids, AGVoters\n    <3>lead. AGLeaderAttrs(s)'\n      <4>1. IsLeader(s)' => IsLeader(s)\n        BY ONLY <1>frames, <2>3, s \\in Server, SMTT(\"r2\")\n      <4>2. IsLeader(s) =>\n              \\A t \\in learners[s] : /\\ t \\in Server /\\ zabState'[t] = zabState[t]\n        BY ONLY <1>3, <1>frames, <3>1, <2>3, s \\in Server, SMTT(\"r2\")\n          DEF AGControlTypes\n      <4>3. \\A t \\in Server : msgs'[t][s] = msgs[t][s]\n        BY <1>frames, <2>3\n      <4>4. QED\n        BY ONLY <1>2, <1>frames, <2>3, <3>1, <4>1, <4>2, <4>3,\n          AGStopShape(i), s \\in Server, i \\in Server, SMTT(\"r4\")\n          DEF AGLeaderAttrs, AGPhaseNode, AGControlTypes, AGPhaseTypes, AGStopShape,\n            AGReady, AGDone\n    <3>fol. AGFollowerAttrs(s)'\n      BY ONLY <1>1, <1>2, <1>3, <1>frames, <2>3, <3>1, AGStopShape(i),\n        s \\in Server, i \\in Server, NullPointNotServer, SMTT(\"r5\")\n      DEF AGFollowerAttrs, AGStopShape, AGControlTypes, AGNode, AGPhaseTypes, AGPhaseNode,\n        AGReady, AGDone\n    <3>done. QED BY <3>tab, <3>lead, <3>fol\n      DEF AGPhaseNode, AGTableAttrs, AGLeaderAttrs, AGFollowerAttrs\n  <2>4. QED BY <2>2, <2>3\n<1>7. \\A s,t \\in Server : AGPhaseMessages(s,t)'\n  <2>1. TAKE s \\in Server, t \\in Server\n  <2>2. QED\n    BY <1>1, <1>2, <1>3, NullPointNotServer, SMTT(\"r3\")\n      DEF AGStopShape, AGControl, AGStructure, AGControlTypes,\n      AGPhases, AGPhaseMessages, AGDown, AGUp, AGReady, AGDone\n<1>8. \\A s \\in Server : AGClaims(s)' \\subseteq AGClaims(s)\n  BY <1>2, SMTT(\"r3\")\n    DEF AGStopShape, AGControl, AGStructure, AGControlTypes, AGClaims, AGReady, AGDone\n<1>9. AGClaimAdvance\n  BY <1>8, AGNoNewClaimsAdvance DEF AGStopShape, AGControl, AGPhases, AGPhaseTypes\n<1>10. QED\n  BY <1>1, <1>4, <1>5, <1>6, <1>7, <1>9 DEF AGControl, AGStructure, AGPhases\n\nAGEstablished(i,s) == /\\ IsFollower(s) /\\ s \\in learners[i]\n                       /\\ connectInfo[s].sid = i\n                       /\\ zabState[s] \\in {SYNCHRONIZATION, BROADCAST}\nAGCompletedLink(i,s,t) == (s = i /\\ AGEstablished(i,t))\n                          \\/ (t = i /\\ AGEstablished(i,s))\n\nLEMMA AGFollowerDataEnabled ==\n  ASSUME NEW i \\in Server, NEW j \\in Server, AGControl,\n         IsFollower(i), IsMyLeader(i,j), msgs[j][i] # << >>,\n         msgs[j][i][1].mtype # LEADERINFO\n  PROVE AGDone(j) /\\ AGEstablished(j,i)\nBY SMTT(\"r3\") DEF AGControl, AGStructure, AGControlTypes, AGNode, AGLink,\n  AGPhases, AGPhaseMessages, AGDown, AGEstablished\n\nLEMMA AGLeaderDataEnabled ==\n  ASSUME NEW i \\in Server, NEW j \\in Server, AGControl,\n         IsLeader(i), msgs[j][i] # << >>,\n         msgs[j][i][1].mtype \\notin {FOLLOWERINFO, ACKEPOCH}\n  PROVE AGDone(i) /\\ AGEstablished(i,j)\nBY SMTT(\"r3\") DEF AGControl, AGStructure, AGControlTypes, AGNode, AGLink,\n  AGPhases, AGPhaseMessages, AGUp, AGEstablished\n\nAGDataShape(i) ==\n  /\\ AGDone(i)\n  /\\ UNCHANGED <<state, learners, acceptedEpoch, connecting, tempMaxEpoch>>\n  /\\ currentEpoch' \\in [Server -> Nat]\n  /\\ zabState' \\in [Server -> {ELECTION, DISCOVERY, SYNCHRONIZATION, BROADCAST}]\n  /\\ connectInfo' \\in [Server ->\n       [sid : Server \\union {NullPoint}, syncMode : {NONE, DIFF, TRUNC, SNAP}, nlRcv : BOOLEAN]]\n  /\\ \\A s \\in Server :\n       /\\ connectInfo'[s].sid = connectInfo[s].sid\n       /\\ (zabState'[s] # zabState[s] =>\n             /\\ (s = i \\/ AGEstablished(i,s)) /\\ zabState'[s] = BROADCAST)\n  /\\ AGMatrix(msgs')\n  /\\ (\\A s,t \\in Server : msgs'[s][t] # msgs[s][t] => AGCompletedLink(i,s,t))\n  /\\ AGDomain(electing', Server) /\\ AGDomain(ackldRecv', Server)\n  /\\ forwarding' \\in [Server -> SUBSET Server]\n  /\\ \\A s \\in Server :\n       /\\ AGSids(electing'[s]) \\subseteq Server /\\ AGUnique(electing'[s])\n       /\\ (\\A r \\in electing'[s] : r.inQuorum \\in BOOLEAN)\n       /\\ AGVoters(electing'[s]) = AGVoters(electing[s])\n       /\\ AGSids(ackldRecv'[s]) \\subseteq Server /\\ AGUnique(ackldRecv'[s])\n       /\\ (s # i => /\\ electing'[s] = electing[s]\n                     /\\ ackldRecv'[s] = ackldRecv[s]\n                     /\\ forwarding'[s] = forwarding[s])\n  /\\ forwarding'[i] \\subseteq learners[i]\n  /\\ (\\A s \\in forwarding'[i] \\ {i} : AGEstablished(i,s))\n  /\\ \\A a \\in ackldRecv'[i] :\n       (a.sid # i /\\ a.connected = TRUE) => AGEstablished(i,a.sid)\n  /\\ \\A r \\in electing'[i] :\n       ~ZxidEqual(r.peerLastZxid, <<-1,-1>>) => AGEstablished(i,r.sid)\n\nLEMMA AGDataControl ==\n  ASSUME Cardinality(Server) >= 2, NEW i \\in Server, AGControl, AGDataShape(i)\n  PROVE AGControl' /\\ AGClaimAdvance\n<1>1. AGReady(i)\n  BY AGDoneReady DEF AGControl, AGDataShape\n<1>2. /\\ AGControlTypes' /\\ AGPhaseTypes'\n  BY SMTT(\"r2\") DEF AGDataShape, AGControl, AGStructure, AGControlTypes,\n    AGPhases, AGPhaseTypes, AGDomain\n<1>3. \\A s \\in Server :\n        /\\ AGReady(s)' = AGReady(s) /\\ AGDone(s)' = AGDone(s)\n        /\\ (zabState[s] \\in {SYNCHRONIZATION, BROADCAST} =>\n              zabState'[s] \\in {SYNCHRONIZATION, BROADCAST})\n        /\\ (zabState'[s] = DISCOVERY => zabState[s] = DISCOVERY)\n  BY SMTT(\"r2\") DEF AGDataShape, AGReady, AGDone\n<1>4. \\A s,t \\in Server :\n        (IsLeader(s) /\\ IsFollower(t) /\\ connectInfo[t].sid = s /\\\n         (~AGDone(s) \\/ zabState[t] = DISCOVERY)) =>\n          /\\ msgs'[s][t] = msgs[s][t] /\\ msgs'[t][s] = msgs[t][s]\n  BY SMTT(\"r3\") DEF AGDataShape, AGCompletedLink, AGEstablished\n<1>5. \\A s \\in Server : AGNode(s)'\n  <2>1. TAKE s \\in Server\n  <2>2. QED\n    BY <1>2, SMTT(\"r2\")\n      DEF AGDataShape, AGControl, AGStructure, AGControlTypes, AGNode\n<1>6. \\A s,t \\in Server : msgs'[s][t] # << >> => AGLink(s,t)'\n  <2>1. TAKE s \\in Server, t \\in Server\n  <2>2. QED\n    BY <1>2, SMTT(\"r3\") DEF AGDataShape, AGControl, AGStructure, AGControlTypes,\n      AGLink, AGDone, AGCompletedLink, AGEstablished\n<1>7. \\A s \\in Server : AGPhaseNode(s)'\n  <2>1. TAKE s \\in Server\n  <2>2. CASE s = i\n    BY <1>1, <1>2, <1>3, <1>4, <2>2, SMTT(\"r4\")\n      DEF AGDataShape, AGControl, AGStructure, AGControlTypes, AGNode,\n      AGPhases, AGPhaseTypes, AGPhaseNode, AGDomain,\n      AGReady, AGDone, AGEstablished\n  <2>3. CASE s # i\n    BY <1>1, <1>2, <1>3, <1>4, <2>3, NullPointNotServer, SMTT(\"r4\")\n      DEF AGDataShape, AGControl, AGStructure, AGControlTypes, AGNode,\n      AGPhases, AGPhaseTypes, AGPhaseNode, AGDomain,\n      AGReady, AGDone, AGEstablished\n  <2>4. QED BY <2>2, <2>3\n<1>8. \\A s,t \\in Server : AGPhaseMessages(s,t)'\n  <2>1. TAKE s \\in Server, t \\in Server\n  <2>2. AGPhaseMessages(s,t)\n    BY DEF AGControl, AGPhases\n  <2>3. QED\n    BY ONLY <1>2, <1>3, <1>4, <2>2, AGDataShape(i),\n      s \\in Server, t \\in Server, SMTT(\"r4\")\n      DEF AGDataShape, AGPhaseMessages, AGUp, AGDown, AGEstablished, AGDone\n<1>9. \\A s \\in Server : AGClaims(s)' \\subseteq AGClaims(s)\n  <2>1. TAKE s \\in Server\n  <2>2. CASE s = i\n    BY ONLY <1>3, <2>2, AGDataShape(i), s \\in Server, SMTT(\"r2\")\n      DEF AGClaims, AGDataShape\n  <2>3. CASE s # i\n    <3>1. AGReady(s) => \\A t \\in Server : msgs'[t][s] = msgs[t][s]\n      BY ONLY <2>3, AGDataShape(i), s \\in Server, SMTT(\"r2\")\n        DEF AGDataShape, AGCompletedLink, AGEstablished, AGReady\n    <3>2. QED\n      BY ONLY <1>3, <3>1, AGDataShape(i), s \\in Server, SMTT(\"r2\")\n        DEF AGClaims, AGDataShape\n  <2>4. QED BY <2>2, <2>3\n<1>10. AGClaimAdvance\n  BY <1>9, AGNoNewClaimsAdvance DEF AGDataShape, AGControl, AGPhases, AGPhaseTypes\n<1>11. QED\n  BY <1>2, <1>5, <1>6, <1>7, <1>8, <1>10 DEF AGControl, AGStructure, AGPhases\n\n\nLEMMA AGMatrixRowUpdate ==\n  ASSUME NEW f, AGMatrix(f), NEW i \\in Server, NEW r, AGDomain(r,Server)\n  PROVE AGMatrix([f EXCEPT ![i] = r])\nBY SMTT(\"r3\") DEF AGMatrix, AGDomain\n\nAGPairWrites(i,j) ==\n  /\\ AGMatrix(msgs')\n  /\\ \\A s,t \\in Server :\n       (<<s,t>> # <<i,j>> /\\ <<s,t>> # <<j,i>>) => msgs'[s][t] = msgs[s][t]\n\nLEMMA AGPairMessageEffects ==\n  ASSUME NEW i \\in Server, NEW j \\in Server, AGMatrix(msgs)\n  PROVE /\\ (UNCHANGED msgs => AGPairWrites(i,j))\n        /\\ (Discard(i,j) => AGPairWrites(i,j))\n        /\\ \\A m : (Send(i,j,m) \\/ Reply(i,j,m) \\/ SendPackets(i,j,m)\n                    \\/ DiscardAndSendPackets(i,j,m)) => AGPairWrites(i,j)\n<1>1. (UNCHANGED msgs \\/ Discard(i,j)) => AGPairWrites(i,j)\n  BY AGMatrixUpdate, SMTT(\"r3\") DEF AGPairWrites, Discard, AGMatrix\n<1>2. \\A m : (Send(i,j,m) \\/ Reply(i,j,m) \\/ SendPackets(i,j,m)\n              \\/ DiscardAndSendPackets(i,j,m)) => AGMatrix(msgs')\n  BY AGMatrixUpdate, SMTT(\"r3\") DEF Send, Reply, SendPackets, DiscardAndSendPackets\n<1>3. \\A m : (Send(i,j,m) \\/ Reply(i,j,m) \\/ SendPackets(i,j,m)\n              \\/ DiscardAndSendPackets(i,j,m)) =>\n        \\A s,t \\in Server :\n          (<<s,t>> # <<i,j>> /\\ <<s,t>> # <<j,i>>) => msgs'[s][t] = msgs[s][t]\n  BY SMTT(\"r3\") DEF Send, Reply, SendPackets, DiscardAndSendPackets, AGMatrix\n<1>4. QED BY <1>1, <1>2, <1>3 DEF AGPairWrites\n\nLEMMA AGBroadcastEffects ==\n  ASSUME NEW i \\in Server, NEW j \\in Server, AGMatrix(msgs)\n  PROVE /\\ \\A m : Broadcast(i,m) =>\n                    /\\ AGMatrix(msgs')\n                    /\\ \\A s,t \\in Server : msgs'[s][t] # msgs[s][t] =>\n                         s = i /\\ t \\in forwarding[i] \\ {i}\n        /\\ \\A m : (DiscardAndBroadcast(i,j,m) \\/ Discard(j,i)) =>\n                    /\\ AGMatrix(msgs')\n                    /\\ \\A s,t \\in Server : msgs'[s][t] # msgs[s][t] =>\n                         (s = i /\\ t \\in forwarding[i] \\ {i}) \\/ (s = j /\\ t = i)\nBY AGMatrixUpdate, AGMatrixRowUpdate, SMTT(\"r4\")\n  DEF Broadcast, Discard, DiscardAndBroadcast, AGMatrix, AGDomain\n\nLEMMA AGUpToDateEffects ==\n  ASSUME NEW i \\in Server, NEW j \\in Server, NEW m, AGMatrix(msgs),\n         DiscardAndBroadcastUPTODATE(i,j,m)\n  PROVE /\\ AGMatrix(msgs')\n        /\\ \\A s,t \\in Server : msgs'[s][t] # msgs[s][t] =>\n             \\/ s = j /\\ t = i\n             \\/ /\\ s = i /\\ t \\in learners[i] \\ {i}\n                /\\ \\E a \\in ackldRecv'[i] : a.sid = t /\\ a.connected = TRUE\nBY AGMatrixUpdate, AGMatrixRowUpdate, SMTT(\"r4\")\n  DEF DiscardAndBroadcastUPTODATE, AGMatrix, AGDomain\n\nLEMMA AGInfoBroadcastEffects ==\n  ASSUME NEW i \\in Server, NEW j \\in Server, NEW m, AGMatrix(msgs),\n         DiscardAndBroadcastLEADERINFO(i,j,m)\n  PROVE /\\ AGMatrix(msgs')\n        /\\ \\A s,t \\in Server : msgs'[s][t] # msgs[s][t] =>\n             \\/ s = j /\\ t = i\n             \\/ /\\ s = i /\\ t \\in learners[i] \\ {i}\n                /\\ \\E a \\in connecting'[i] : a.sid = t /\\ a.connected = TRUE\nBY AGMatrixUpdate, AGMatrixRowUpdate, SMTT(\"r4\")\n  DEF DiscardAndBroadcastLEADERINFO, AGMatrix, AGDomain\n\nLEMMA AGSyncSend ==\n  ASSUME NEW i, NEW j, NEW z, SyncFollower(i,j,z,FALSE)\n  PROVE \\E q : SendPackets(i,j,q)\nBY SMTT(\"r3\") DEF SyncFollower, SendSyncMsgs\n\nAGDataBase(i) ==\n  /\\ AGDone(i)\n  /\\ UNCHANGED <<state, learners, acceptedEpoch, connecting, tempMaxEpoch>>\n  /\\ currentEpoch' \\in [Server -> Nat]\n  /\\ zabState' \\in [Server -> {ELECTION, DISCOVERY, SYNCHRONIZATION, BROADCAST}]\n  /\\ connectInfo' \\in [Server ->\n       [sid : Server \\union {NullPoint}, syncMode : {NONE, DIFF, TRUNC, SNAP}, nlRcv : BOOLEAN]]\n  /\\ \\A s \\in Server :\n       /\\ connectInfo'[s].sid = connectInfo[s].sid\n       /\\ (zabState'[s] # zabState[s] =>\n             /\\ (s = i \\/ AGEstablished(i,s)) /\\ zabState'[s] = BROADCAST)\n  /\\ AGMatrix(msgs')\n  /\\ (\\A s,t \\in Server : msgs'[s][t] # msgs[s][t] => AGCompletedLink(i,s,t))\n\nLEMMA AGEstablishedTables ==\n  ASSUME NEW i \\in Server, AGControl, AGDone(i)\n  PROVE /\\ \\A s \\in forwarding[i] \\ {i} : AGEstablished(i,s)\n        /\\ \\A a \\in ackldRecv[i] :\n             (a.sid # i /\\ a.connected = TRUE) => AGEstablished(i,a.sid)\n        /\\ \\A r \\in electing[i] :\n             ~ZxidEqual(r.peerLastZxid, <<-1,-1>>) => AGEstablished(i,r.sid)\nBY SMTT(\"r3\") DEF AGControl, AGStructure, AGControlTypes, AGNode,\n  AGPhases, AGPhaseNode, AGDone, AGEstablished\n\nLEMMA AGUnchangedDataTables ==\n  ASSUME NEW i \\in Server, AGControl, AGDataBase(i),\n         UNCHANGED <<electing, ackldRecv, forwarding>>\n  PROVE AGDataShape(i)\nBY AGEstablishedTables, SMTT(\"r3\")\n  DEF AGDataShape, AGDataBase, AGControl, AGStructure, AGControlTypes,\n    AGPhases, AGPhaseTypes, AGPhaseNode, AGDone\n\nAGFollowerPayload(i,j) ==\n  \\/ FollowerProcessSyncMessage(i,j)\n  \\/ FollowerProcessPROPOSALInSync(i,j)\n  \\/ FollowerProcessCOMMITInSync(i,j)\n  \\/ FollowerProcessNEWLEADER(i,j)\n  \\/ FollowerProcessUPTODATE(i,j)\n  \\/ FollowerProcessPROPOSAL(i,j)\n  \\/ FollowerProcessCOMMIT(i,j)\n\nLEMMA AGFollowerPayloadProject ==\n  ASSUME NEW i \\in Server, NEW j \\in Server, AGControl, AGFollowerPayload(i,j)\n  PROVE AGDataShape(j)\n<1>1. /\\ IsFollower(i) /\\ IsMyLeader(i,j)\n       /\\ msgs[j][i] # << >> /\\ msgs[j][i][1].mtype # LEADERINFO\n  BY SMTT(\"r2\") DEF AGFollowerPayload, FollowerProcessSyncMessage,\n    FollowerProcessPROPOSALInSync, FollowerProcessCOMMITInSync,\n    FollowerProcessNEWLEADER, FollowerProcessUPTODATE, FollowerProcessPROPOSAL,\n    FollowerProcessCOMMIT, PendingPROPOSAL, PendingCOMMIT, PendingNEWLEADER, PendingUPTODATE\n<1>2. AGDone(j) /\\ AGEstablished(j,i)\n  BY <1>1, AGFollowerDataEnabled\n<1>3. UNCHANGED <<state, learners, acceptedEpoch, connecting, tempMaxEpoch,\n                   electing, ackldRecv, forwarding>>\n  BY SMTT(\"r2\") DEF AGFollowerPayload, FollowerProcessSyncMessage,\n    FollowerProcessPROPOSALInSync, FollowerProcessCOMMITInSync,\n    FollowerProcessNEWLEADER, FollowerProcessUPTODATE, FollowerProcessPROPOSAL,\n    FollowerProcessCOMMIT\n<1>4. currentEpoch' \\in [Server -> Nat]\n  BY SMTT(\"r2\") DEF AGFollowerPayload, FollowerProcessSyncMessage,\n    FollowerProcessPROPOSALInSync, FollowerProcessCOMMITInSync,\n    FollowerProcessNEWLEADER, FollowerProcessUPTODATE, FollowerProcessPROPOSAL,\n    FollowerProcessCOMMIT, AGControl, AGPhases, AGPhaseTypes\n<1>5. /\\ zabState' \\in [Server -> {ELECTION, DISCOVERY, SYNCHRONIZATION, BROADCAST}]\n       /\\ connectInfo' \\in [Server ->\n           [sid : Server \\union {NullPoint}, syncMode : {NONE, DIFF, TRUNC, SNAP}, nlRcv : BOOLEAN]]\n       /\\ \\A s \\in Server :\n            /\\ connectInfo'[s].sid = connectInfo[s].sid\n            /\\ (zabState'[s] # zabState[s] =>\n                  /\\ (s = j \\/ AGEstablished(j,s)) /\\ zabState'[s] = BROADCAST)\n  BY <1>2, SMTT(\"r3\") DEF AGFollowerPayload, FollowerProcessSyncMessage,\n    FollowerProcessPROPOSALInSync, FollowerProcessCOMMITInSync,\n    FollowerProcessNEWLEADER, FollowerProcessUPTODATE, FollowerProcessPROPOSAL,\n    FollowerProcessCOMMIT, AGControl, AGStructure, AGControlTypes\n<1>6. /\\ AGMatrix(msgs')\n       /\\ \\A s,t \\in Server : msgs'[s][t] # msgs[s][t] => AGCompletedLink(j,s,t)\n  <2>1. AGPairWrites(j,i)\n    BY AGPairMessageEffects, SMTT(\"r4\") DEF AGFollowerPayload, FollowerProcessSyncMessage,\n      FollowerProcessPROPOSALInSync, FollowerProcessCOMMITInSync,\n      FollowerProcessNEWLEADER, FollowerProcessUPTODATE, FollowerProcessPROPOSAL,\n      FollowerProcessCOMMIT, FollowerLogRequestInBatches,\n      AGControl, AGStructure, AGControlTypes, AGPairWrites\n  <2>2. QED BY ONLY <1>2, <2>1, SMTT(\"r2\") DEF AGPairWrites, AGCompletedLink\n<1>7. AGDataBase(j)\n  BY <1>2, <1>3, <1>4, <1>5, <1>6 DEF AGDataBase\n<1>8. QED BY <1>3, <1>7, AGUnchangedDataTables\n\nLEMMA AGLeaderPayloadProject ==\n  ASSUME NEW i \\in Server, NEW j \\in Server, AGControl,\n         LeaderProcessRequest(i) \\/ LeaderProcessACK(i,j)\n  PROVE AGDataShape(i)\n<1>1. AGDone(i)\n  BY AGLeaderDataEnabled, SMTT(\"r3\") DEF LeaderProcessRequest, LeaderProcessACK,\n    PendingACK, AGControl, AGPhases, AGPhaseNode\n<1>2. LeaderProcessACK(i,j) => AGEstablished(i,j)\n  BY AGLeaderDataEnabled DEF LeaderProcessACK, PendingACK\n<1>3. UNCHANGED <<state, learners, acceptedEpoch, connecting, tempMaxEpoch,\n                   electing, ackldRecv, forwarding, zabState, currentEpoch, connectInfo>>\n  BY SMTT(\"r2\") DEF LeaderProcessRequest, LeaderProcessACK\n<1>4. /\\ AGMatrix(msgs')\n       /\\ \\A s,t \\in Server : msgs'[s][t] # msgs[s][t] => AGCompletedLink(i,s,t)\n  <2>1. \\A t \\in forwarding[i] \\ {i} : AGEstablished(i,t)\n    BY <1>1, AGEstablishedTables\n  <2>2. CASE LeaderProcessRequest(i)\n    <3>1. \\E m : Broadcast(i,m)\n      BY <2>2 DEF LeaderProcessRequest\n    <3>2. QED\n      BY ONLY <3>1, <2>1, AGBroadcastEffects, AGControl,\n        i \\in Server, j \\in Server, SMTT(\"r3\")\n        DEF AGCompletedLink, AGControl, AGStructure, AGControlTypes\n  <2>3. CASE ~LeaderProcessRequest(i)\n    <3>1. /\\ AGEstablished(i,j)\n           /\\ (Discard(j,i) \\/ \\E m : DiscardAndBroadcast(i,j,m))\n      BY <1>2, <2>3, SMTT(\"r3\")\n        DEF LeaderProcessACK, LeaderTryToCommit, LeaderCommit\n    <3>2. QED\n      BY ONLY <3>1, <2>1, AGBroadcastEffects, AGPairMessageEffects, AGControl,\n        i \\in Server, j \\in Server, SMTT(\"r3\")\n        DEF AGCompletedLink, AGPairWrites, AGControl, AGStructure, AGControlTypes\n  <2>4. QED BY <2>2, <2>3\n<1>5. AGDataBase(i)\n  BY <1>1, <1>3, <1>4, SMTT(\"r2\") DEF AGDataBase, AGControl, AGStructure,\n    AGControlTypes, AGPhases, AGPhaseTypes\n<1>6. QED BY <1>3, <1>5, AGUnchangedDataTables\n\nAGResetPeerSet(S,r) == (S \\ {r}) \\union\n  {[sid |-> r.sid, peerLastZxid |-> <<-1,-1>>, inQuorum |-> r.inQuorum]}\n\nLEMMA AGResetPeerProperties ==\n  ASSUME NEW S, NEW r \\in S, AGUnique(S),\n         \\A x \\in S : x.inQuorum \\in BOOLEAN\n  PROVE /\\ AGSids(AGResetPeerSet(S,r)) = AGSids(S)\n        /\\ AGVoters(AGResetPeerSet(S,r)) = AGVoters(S)\n        /\\ AGUnique(AGResetPeerSet(S,r))\n        /\\ (\\A x \\in AGResetPeerSet(S,r) : x.inQuorum \\in BOOLEAN)\n        /\\ \\A x \\in AGResetPeerSet(S,r) :\n             ~ZxidEqual(x.peerLastZxid, <<-1,-1>>) => x \\in S\nBY SMTT(\"r4\") DEF AGResetPeerSet, AGSids, AGVoters, AGUnique, ZxidEqual\n\nLEMMA AGSyncProject ==\n  ASSUME NEW i \\in Server, NEW j \\in Server, AGControl, LeaderSyncFollower(i,j)\n  PROVE AGDataShape(i)\n<1>1. AGDone(i)\n  BY DEF LeaderSyncFollower, ElectionFinished, IsQuorum, AGDone, AGVoters\n<1>2. PICK r \\in electing[i] :\n        /\\ r.sid = j /\\ ~ZxidEqual(r.peerLastZxid, <<-1,-1>>)\n        /\\ SyncFollower(i,j,r.peerLastZxid,FALSE)\n        /\\ electing' = [electing EXCEPT ![i] = AGResetPeerSet(@,r)]\n  BY SMTT(\"r3\") DEF LeaderSyncFollower, AGResetPeerSet\n<1>3. AGEstablished(i,j)\n  BY <1>1, <1>2, AGEstablishedTables\n<1>4. AGDataBase(i)\n  <2>1. AGPairWrites(i,j)\n    BY <1>2, AGSyncSend, AGPairMessageEffects, SMTT(\"r3\")\n      DEF AGControl, AGStructure, AGControlTypes\n  <2>2. UNCHANGED <<state, learners, acceptedEpoch, connecting, tempMaxEpoch,\n                     currentEpoch, zabState, connectInfo>>\n    BY DEF LeaderSyncFollower\n  <2>3. QED\n    BY <1>1, <1>3, <2>1, <2>2, SMTT(\"r3\")\n      DEF AGDataBase, AGCompletedLink, AGPairWrites, AGControl,\n        AGStructure, AGControlTypes, AGPhases, AGPhaseTypes\n<1>5. /\\ forwarding' = [forwarding EXCEPT ![i] = @ \\union {j}]\n       /\\ UNCHANGED ackldRecv\n  BY <1>2, SMTT(\"r3\") DEF LeaderSyncFollower, SyncFollower, SendSyncMsgs\n<1>6. /\\ AGSids(AGResetPeerSet(electing[i],r)) = AGSids(electing[i])\n       /\\ AGVoters(AGResetPeerSet(electing[i],r)) = AGVoters(electing[i])\n       /\\ AGUnique(AGResetPeerSet(electing[i],r))\n       /\\ (\\A x \\in AGResetPeerSet(electing[i],r) : x.inQuorum \\in BOOLEAN)\n       /\\ \\A x \\in AGResetPeerSet(electing[i],r) :\n            ~ZxidEqual(x.peerLastZxid, <<-1,-1>>) => x \\in electing[i]\n  BY <1>2, AGResetPeerProperties, SMTT(\"r3\")\n    DEF AGControl, AGPhases, AGPhaseNode\n<1>7. /\\ AGDomain(electing',Server)\n       /\\ \\A v \\in Server :\n            /\\ AGSids(electing'[v]) \\subseteq Server /\\ AGUnique(electing'[v])\n            /\\ (\\A x \\in electing'[v] : x.inQuorum \\in BOOLEAN)\n            /\\ AGVoters(electing'[v]) = AGVoters(electing[v])\n            /\\ (v # i => electing'[v] = electing[v])\n       /\\ \\A x \\in electing'[i] :\n            ~ZxidEqual(x.peerLastZxid, <<-1,-1>>) => AGEstablished(i,x.sid)\n  <2>1. AGDomain(electing',Server)\n    BY <1>2, AGDomainUpdate DEF AGControl, AGPhases, AGPhaseTypes\n  <2>2. \\A v \\in Server :\n          /\\ AGSids(electing'[v]) \\subseteq Server /\\ AGUnique(electing'[v])\n          /\\ (\\A x \\in electing'[v] : x.inQuorum \\in BOOLEAN)\n          /\\ AGVoters(electing'[v]) = AGVoters(electing[v])\n          /\\ (v # i => electing'[v] = electing[v])\n    <3>1. TAKE v \\in Server\n    <3>2. AGTableAttrs(v) /\\ AGDomain(electing,Server)\n      BY DEF AGControl, AGPhases, AGPhaseTypes, AGPhaseNode, AGTableAttrs\n    <3>3. QED\n      BY ONLY <1>2, <1>6, <3>2, v \\in Server, i \\in Server, SMTT(\"r3\")\n        DEF AGTableAttrs, AGDomain\n  <2>3. \\A x \\in electing'[i] :\n          ~ZxidEqual(x.peerLastZxid, <<-1,-1>>) => AGEstablished(i,x.sid)\n    BY <1>1, <1>2, <1>6, AGEstablishedTables, SMTT(\"r3\")\n      DEF AGControl, AGPhases, AGPhaseTypes, AGDomain\n  <2>4. QED BY <2>1, <2>2, <2>3\n<1>8. /\\ forwarding' \\in [Server -> SUBSET Server]\n       /\\ forwarding'[i] \\subseteq learners[i]\n       /\\ (\\A v \\in forwarding'[i] \\ {i} : AGEstablished(i,v))\n       /\\ (\\A v \\in Server \\ {i} : forwarding'[v] = forwarding[v])\n  BY ONLY <1>1, <1>3, <1>5, AGControl, i \\in Server, j \\in Server,\n    AGEstablishedTables, SMTT(\"r3\")\n    DEF AGControl, AGPhases, AGPhaseTypes, AGPhaseNode, AGEstablished, AGDone\n<1>9. QED\n  BY ONLY <1>4, <1>5, <1>7, <1>8, AGControl, i \\in Server,\n    AGEstablishedTables, SMTT(\"r3\")\n    DEF AGDataShape, AGDataBase, AGControl, AGPhases, AGPhaseTypes, AGPhaseNode, AGDone\n\nLEMMA AGAckldProject ==\n  ASSUME NEW i \\in Server, NEW j \\in Server, AGControl, LeaderProcessACKLD(i,j)\n  PROVE AGDataShape(i)\n<1>1. AGDone(i) /\\ AGEstablished(i,j)\n  BY AGLeaderDataEnabled DEF LeaderProcessACKLD, PendingACKLD\n<1>2. \\/ ackldRecv' = ackldRecv\n       \\/ ackldRecv' = [ackldRecv EXCEPT ![i] = UpdateConnectingOrAckldRecv(@,j)]\n  BY SMTT(\"r2\") DEF LeaderProcessACKLD\n<1>3. /\\ AGDomain(ackldRecv',Server)\n       /\\ \\A s \\in Server :\n            /\\ AGSids(ackldRecv'[s]) \\subseteq Server /\\ AGUnique(ackldRecv'[s])\n            /\\ (s # i => ackldRecv'[s] = ackldRecv[s])\n       /\\ \\A a \\in ackldRecv'[i] :\n            (a.sid # i /\\ a.connected = TRUE) => AGEstablished(i,a.sid)\n  BY <1>1, <1>2, AGUpdateConnectingSids, AGConnectionUniqueness,\n     AGUpdateConnectingShape, AGEstablishedTables, SMTT(\"r4\")\n    DEF AGControl, AGStructure, AGControlTypes,\n      AGPhases, AGPhaseTypes, AGPhaseNode, AGDomain\n<1>4. UNCHANGED <<state, learners, acceptedEpoch, currentEpoch, connecting,\n                   tempMaxEpoch, electing, forwarding, connectInfo>>\n  BY DEF LeaderProcessACKLD\n<1>5. zabState' = zabState \\/ zabState' = [zabState EXCEPT ![i] = BROADCAST]\n  BY SMTT(\"r2\") DEF LeaderProcessACKLD, LeaderTurnToBroadcast\n<1>6. AGDataBase(i)\n  <2>1. /\\ AGMatrix(msgs')\n         /\\ \\A s,t \\in Server : msgs'[s][t] # msgs[s][t] => AGCompletedLink(i,s,t)\n    BY <1>1, <1>3, AGPairMessageEffects, AGUpToDateEffects, SMTT(\"r4\")\n      DEF LeaderProcessACKLD, AGPairWrites, AGCompletedLink,\n        AGControl, AGStructure, AGControlTypes\n  <2>2. QED\n    BY <1>1, <1>4, <1>5, <2>1, SMTT(\"r3\")\n      DEF AGDataBase, AGControl, AGStructure, AGControlTypes, AGPhases, AGPhaseTypes\n<1>7. QED\n  BY ONLY <1>1, <1>3, <1>4, <1>6, AGControl, i \\in Server, j \\in Server, AGEstablishedTables, SMTT(\"r4\")\n    DEF AGDataShape, AGDataBase, AGControl, AGStructure, AGControlTypes,\n      AGPhases, AGPhaseTypes, AGPhaseNode, AGEstablished, AGDone\n\nAGStatic == <<state, zabState, learners, connectInfo, acceptedEpoch,\n              currentEpoch, tempMaxEpoch, connecting, electing, ackldRecv, forwarding>>\nAGQueueShrink ==\n  /\\ AGMatrix(msgs')\n  /\\ \\A s,t \\in Server :\n       (msgs[s][t] = << >> \\/ msgs[s][t] = <<msgs[s][t][1]>>) =>\n         msgs'[s][t] \\in {msgs[s][t], << >>}\n\nLEMMA AGShrinkControl ==\n  ASSUME AGControl, UNCHANGED AGStatic, AGQueueShrink\n  PROVE AGControl' /\\ AGClaimAdvance\n<1>1. /\\ AGControlTypes' /\\ AGPhaseTypes'\n       /\\ (\\A s \\in Server : AGNode(s)')\n       /\\ (\\A s \\in Server : AGPhaseNode(s)')\n  <2>1. /\\ AGControlTypes' /\\ AGPhaseTypes' /\\ (\\A s \\in Server : AGNode(s)')\n    BY SMTT(\"r3\") DEF AGStatic, AGQueueShrink, AGControl, AGStructure,\n      AGControlTypes, AGNode, AGPhases, AGPhaseTypes\n  <2>2. \\A s \\in Server : AGPhaseNode(s)'\n    <3>1. TAKE s \\in Server\n    <3>2. AGPhaseNode(s)\n      BY DEF AGControl, AGPhases\n    <3>3. QED\n      BY ONLY <3>2, AGControl, UNCHANGED AGStatic, AGQueueShrink,\n        s \\in Server, SMTT(\"r4\")\n        DEF AGStatic, AGQueueShrink, AGPhaseNode, AGReady, AGDone,\n          AGControl, AGStructure, AGControlTypes, AGPhases, AGPhaseTypes, AGSids\n  <2>3. QED BY <2>1, <2>2\n<1>2. \\A s,t \\in Server : msgs'[s][t] # << >> => AGLink(s,t)'\n  BY SMTT(\"r3\") DEF AGStatic, AGQueueShrink, AGControl, AGStructure, AGLink\n<1>3. \\A s,t \\in Server : AGPhaseMessages(s,t)'\n  <2>1. TAKE s \\in Server, t \\in Server\n  <2>2. AGPhaseMessages(s,t)\n    BY DEF AGControl, AGPhases\n  <2>3. QED\n    BY ONLY <2>2, UNCHANGED AGStatic, AGQueueShrink,\n      s \\in Server, t \\in Server, SMTT(\"r3\")\n      DEF AGStatic, AGQueueShrink, AGPhaseMessages, AGReady, AGDone, AGUp, AGDown\n<1>4. \\A s \\in Server : AGClaims(s)' \\subseteq AGClaims(s)\n  <2>1. TAKE s \\in Server\n  <2>2. ASSUME NEW t \\in AGClaims(s)'\n        PROVE t \\in AGClaims(s)\n    <3>1. CASE t \\in AGVoters(electing[s])\n      BY <3>1, SMTT(\"r2\") DEF AGStatic, AGClaims, AGReady, AGDone\n    <3>2. CASE t \\notin AGVoters(electing[s])\n      <4>1. /\\ t \\in Server /\\ AGReady(s) /\\ ~AGDone(s)\n             /\\ msgs'[t][s] # << >> /\\ msgs[t][s] # << >>\n        BY <3>2, SMTT(\"r2\") DEF AGStatic, AGQueueShrink, AGClaims, AGReady, AGDone\n      <4>2. msgs'[t][s] = msgs[t][s]\n        BY <4>1, SMTT(\"r3\") DEF AGControl, AGStructure, AGLink,\n          AGPhases, AGPhaseMessages, AGUp, AGQueueShrink, AGReady\n      <4>3. QED\n        BY <4>1, <4>2, SMTT(\"r2\") DEF AGStatic, AGClaims, AGReady, AGDone\n    <3>3. QED BY <3>1, <3>2\n  <2>3. QED BY <2>2\n<1>5. AGClaimAdvance\n  BY <1>4, AGNoNewClaimsAdvance DEF AGStatic, AGControl, AGPhases, AGPhaseTypes\n<1>6. QED BY <1>1, <1>2, <1>3, <1>5 DEF AGControl, AGStructure, AGPhases\n\nLEMMA AGDiscardShrink ==\n  ASSUME NEW i \\in Server, NEW j \\in Server, AGMatrix(msgs), Discard(i,j)\n  PROVE AGQueueShrink\nBY AGQueueBasics, AGMatrixUpdate, SMTT(\"r3\") DEF AGQueueShrink, Discard, AGMatrix\n\nAGResetShape(i) ==\n  /\\ IsFollower(i) /\\ connectInfo[i].sid = NullPoint\n  /\\ UNCHANGED <<acceptedEpoch, currentEpoch, tempMaxEpoch, learners,\n                   connecting, electing, ackldRecv, forwarding>>\n  /\\ state' = [state EXCEPT ![i] = LOOKING]\n  /\\ zabState' = [zabState EXCEPT ![i] = ELECTION]\n  /\\ connectInfo' = [connectInfo EXCEPT ![i] = InitialConnectInfo]\n  /\\ AGMatrix(msgs')\n  /\\ (\\A s,t \\in Server : msgs'[s][t] \\in {msgs[s][t], << >>})\n\nLEMMA AGResetControl ==\n  ASSUME NEW i \\in Server, AGControl, AGResetShape(i)\n  PROVE AGControl' /\\ AGClaimAdvance\n<1>1. /\\ zabState[i] = DISCOVERY /\\ learners[i] = {}\n       /\\ (\\A s \\in Server : i \\notin learners[s])\n       /\\ (\\A s \\in Server : msgs[s][i] = << >> /\\ msgs[i][s] = << >>)\n  BY AGControlClusterFacts, NullPointNotServer, SMTT(\"r3\")\n    DEF AGResetShape, AGControl, AGStructure, AGControlTypes, AGNode,\n      AGPhases, AGPhaseNode\n<1>2. /\\ AGControlTypes' /\\ AGPhaseTypes'\n       /\\ \\A s \\in Server :\n            /\\ AGReady(s)' = AGReady(s) /\\ AGDone(s)' = AGDone(s)\n            /\\ (s # i => /\\ state'[s] = state[s] /\\ zabState'[s] = zabState[s]\n                          /\\ connectInfo'[s] = connectInfo[s])\n  BY SMTT(\"r3\") DEF AGResetShape, AGControl, AGStructure, AGControlTypes,\n    AGPhases, AGPhaseTypes, InitialConnectInfo, AGReady, AGDone\n<1>3. \\A s \\in Server : AGNode(s)'\n  <2>1. TAKE s \\in Server\n  <2>2. QED\n    BY <1>1, <1>2, NullPointNotServer, SMTT(\"r3\")\n      DEF AGResetShape, AGControl, AGStructure, AGControlTypes, AGNode, InitialConnectInfo\n<1>4. \\A s,t \\in Server : msgs'[s][t] # << >> => AGLink(s,t)'\n  BY <1>1, <1>2, SMTT(\"r3\")\n    DEF AGResetShape, AGControl, AGStructure, AGControlTypes, AGLink\n<1>5. \\A s \\in Server : AGPhaseNode(s)'\n  <2>1. TAKE s \\in Server\n  <2>2. CASE s = i\n    BY <1>1, <1>2, <2>2, SMTT(\"r2\") DEF AGResetShape, AGControl, AGStructure, AGControlTypes, InitialConnectInfo,\n      AGPhases, AGPhaseTypes, AGPhaseNode, AGReady, AGDone\n  <2>3. CASE s # i\n    <3>1. /\\ AGPhaseNode(s) /\\ AGNode(s) /\\ AGControlTypes\n      BY DEF AGControl, AGStructure, AGPhases\n    <3>2. QED\n      BY ONLY <1>1, <1>2, <2>3, <3>1, AGResetShape(i),\n        s \\in Server, i \\in Server, NullPointNotServer, SMTT(\"r4\")\n        DEF AGResetShape, AGPhaseNode, AGNode, AGControlTypes, AGReady, AGDone\n  <2>4. QED BY <2>2, <2>3\n<1>6. \\A s,t \\in Server : AGPhaseMessages(s,t)'\n  <2>1. TAKE s \\in Server, t \\in Server\n  <2>2. QED\n    BY <1>1, <1>2, SMTT(\"r3\") DEF AGResetShape, AGControl, AGStructure,\n      AGControlTypes, AGPhases, AGPhaseMessages, AGReady, AGDone, AGDown, AGUp\n<1>7. \\A s \\in Server : AGClaims(s)' \\subseteq AGClaims(s)\n  BY <1>2, SMTT(\"r2\") DEF AGResetShape, AGClaims, AGReady, AGDone\n<1>8. AGClaimAdvance\n  BY <1>7, AGNoNewClaimsAdvance DEF AGResetShape, AGControl, AGPhases, AGPhaseTypes\n<1>9. QED\n  BY <1>2, <1>3, <1>4, <1>5, <1>6, <1>8 DEF AGControl, AGStructure, AGPhases\n\nLEMMA AGCleanSymmetry ==\n  ASSUME NEW i \\in Server, NEW j \\in Server, AGMatrix(msgs), Clean(i,j)\n  PROVE Clean(j,i)\nBY SMTT(\"r3\") DEF Clean, AGMatrix\n\nLEMMA AGEnvironmentControl ==\n  ASSUME NEW i \\in Server, NEW j \\in Server, AGControl,\n         PartitionStart(i,j) \\/ NodeCrash(i)\n  PROVE AGControl' /\\ AGClaimAdvance\n<1>1. \\/ UNCHANGED AGControlVars\n       \\/ AGResetShape(i)\n       \\/ AGDropShape(i,j)\n       \\/ AGStopShape(i)\n       \\/ \\E l \\in Server : AGDropShape(l,i) \\/ AGStopShape(l)\n  BY AGDropProject, AGStopProject, AGCleanSymmetry, NullPointNotServer, SMTT(\"r8\")\n    DEF PartitionStart, NodeCrash, FollowerShutdown, ZabTimeout,\n      CleanInputBuffer, AGResetShape, AGControlVars,\n      AGControl, AGStructure, AGControlTypes, AGNode, AGMatrix\n<1>2. QED\n  BY <1>1, AGControlUnchanged, AGResetControl, AGControlDrop, AGControlStop\n\nLEMMA AGElectionAdvance ==\n  ASSUME Cardinality(Server) >= 2, NEW i \\in Server, AGControl, AGControlElectionShape(i)\n  PROVE AGClaimAdvance\n<1>1. \\A s \\in Server : AGClaims(s)' \\subseteq AGClaims(s)\n  <2>1. TAKE s \\in Server\n  <2>2. CASE s = i\n    <3>1. state'[i] = LEADING => AGSids(connecting'[i]) = {i}\n      BY SMTT(\"r3\") DEF AGControlElectionShape, AGControl, AGPhases,\n        AGPhaseTypes, AGDomain, AGSids\n    <3>2. ~AGReady(i)'\n      BY ONLY <3>1, AGSingletonNotQuorum, AGControlElectionShape(i),\n        Cardinality(Server) >= 2, i \\in Server, SMTT(\"r2\")\n        DEF AGControlElectionShape, AGReady\n    <3>3. QED BY <2>2, <3>2 DEF AGClaims\n  <2>3. CASE s # i\n    BY <2>3, SMTT(\"r3\")\n      DEF AGControlElectionShape, AGClaims, AGReady, AGDone, AGSids, AGVoters,\n        AGControl, AGStructure, AGControlTypes, AGPhases, AGPhaseTypes, AGDomain\n  <2>4. QED BY <2>2, <2>3\n<1>2. QED\n  BY <1>1, AGNoNewClaimsAdvance DEF AGControlElectionShape, AGControl, AGPhases, AGPhaseTypes\n\nAGAcceptShape(i,j) ==\n  /\\ IsLeader(i) /\\ IsFollower(j) /\\ i # j\n  /\\ j \\in learners[i] /\\ connectInfo[j].sid = i /\\ zabState[j] = DISCOVERY\n  /\\ AGReady(i) /\\ acceptedEpoch[i] >= acceptedEpoch[j]\n  /\\ UNCHANGED <<state, learners, currentEpoch, tempMaxEpoch, connecting,\n                   electing, ackldRecv, forwarding, connectInfo>>\n  /\\ acceptedEpoch' = [acceptedEpoch EXCEPT ![j] = acceptedEpoch[i]]\n  /\\ zabState' = [zabState EXCEPT ![j] = SYNCHRONIZATION]\n  /\\ msgs' = [msgs EXCEPT ![i][j] = << >>,\n                  ![j][i] = <<[mtype |-> ACKEPOCH,\n                               mzxid |-> lastProcessed[j].zxid,\n                               mepoch |-> IF acceptedEpoch[j] < acceptedEpoch[i]\n                                          THEN currentEpoch[j] ELSE -1]>>]\n\nLEMMA AGAcceptProject ==\n  ASSUME NEW i \\in Server, NEW j \\in Server, AGControl,\n         FollowerProcessLEADERINFO(j,i), zabState[j] = DISCOVERY,\n         msgs[i][j][1].mzxid[1] >= acceptedEpoch[j]\n  PROVE AGAcceptShape(i,j)\n<1>1. /\\ IsLeader(i) /\\ IsFollower(j) /\\ i # j\n       /\\ j \\in learners[i] /\\ connectInfo[j].sid = i\n       /\\ msgs[i][j] = <<msgs[i][j][1]>>\n       /\\ msgs[i][j][1].mzxid = <<acceptedEpoch[i],0>>\n       /\\ AGReady(i) /\\ msgs[j][i] = << >>\n  BY SMTT(\"r3\") DEF FollowerProcessLEADERINFO, PendingLEADERINFO,\n    AGControl, AGStructure, AGControlTypes, AGNode, AGLink,\n    AGPhases, AGPhaseMessages, AGDown\n<1>2. QED\n  BY <1>1, AGQueueBasics, SMTT(\"r4\")\n    DEF AGAcceptShape, FollowerProcessLEADERINFO, Reply,\n      AGControl, AGStructure, AGControlTypes, AGPhases, AGPhaseTypes\n\nLEMMA AGAcceptControl ==\n  ASSUME NEW i \\in Server, NEW j \\in Server, AGControl, AGAcceptShape(i,j)\n  PROVE AGControl' /\\ AGClaimAdvance\n<1>1. /\\ AGControlTypes' /\\ AGPhaseTypes'\n  <2>1. AGMatrix(msgs')\n    BY AGMatrixUpdate, SMTT(\"r3\") DEF AGAcceptShape, AGControl, AGStructure, AGControlTypes\n  <2>2. QED\n    BY <2>1, SMTT(\"r3\") DEF AGAcceptShape, AGControl, AGStructure, AGControlTypes,\n      AGPhases, AGPhaseTypes\n<1>2. \\A s \\in Server :\n        /\\ AGReady(s)' = AGReady(s) /\\ AGDone(s)' = AGDone(s)\n        /\\ zabState'[s] = IF s = j THEN SYNCHRONIZATION ELSE zabState[s]\n        /\\ acceptedEpoch'[s] = IF s = j THEN acceptedEpoch[i] ELSE acceptedEpoch[s]\n  BY SMTT(\"r2\") DEF AGAcceptShape, AGControl, AGStructure, AGControlTypes,\n    AGPhases, AGPhaseTypes, AGReady, AGDone\n<1>3. \\A s,t \\in Server :\n        /\\ ((<<s,t>> # <<i,j>> /\\ <<s,t>> # <<j,i>>) => msgs'[s][t] = msgs[s][t])\n        /\\ msgs'[i][j] = << >>\n        /\\ msgs'[j][i] = <<[mtype |-> ACKEPOCH,\n                            mzxid |-> lastProcessed[j].zxid,\n                            mepoch |-> IF acceptedEpoch[j] < acceptedEpoch[i]\n                                       THEN currentEpoch[j] ELSE -1]>>\n  BY SMTT(\"r3\") DEF AGAcceptShape, AGControl, AGStructure, AGControlTypes, AGMatrix\n<1>4. \\A s \\in Server : AGNode(s)'\n  BY <1>1, <1>2, SMTT(\"r3\") DEF AGAcceptShape, AGControl, AGStructure, AGControlTypes, AGNode\n<1>5. \\A s,t \\in Server : msgs'[s][t] # << >> => AGLink(s,t)'\n  BY <1>1, <1>3, SMTT(\"r3\") DEF AGAcceptShape, AGControl, AGStructure, AGControlTypes, AGLink\n<1>6. \\A s \\in Server : AGPhaseNode(s)'\n  <2>1. TAKE s \\in Server\n  <2>2. CASE s = j\n    BY <1>1, <1>2, <2>2, NullPointNotServer, SMTT(\"r3\")\n      DEF AGAcceptShape, AGControl, AGPhases, AGPhaseTypes, AGPhaseNode\n  <2>3. CASE s # j\n    <3>1. /\\ AGPhaseNode(s) /\\ AGControlTypes /\\ AGPhaseTypes\n      BY DEF AGControl, AGStructure, AGPhases\n    <3>2. QED\n      BY ONLY <1>1, <1>2, <1>3, <2>3, <3>1, AGAcceptShape(i,j),\n        s \\in Server, i \\in Server, j \\in Server, SMTT(\"r4\")\n        DEF AGAcceptShape, AGPhaseNode, AGControlTypes, AGPhaseTypes, AGReady, AGDone\n  <2>4. QED BY <2>2, <2>3\n<1>7. \\A s,t \\in Server : AGPhaseMessages(s,t)'\n  <2>1. TAKE s \\in Server, t \\in Server\n  <2>2. CASE s = i /\\ t = j\n    BY <1>1, <1>2, <1>3, <2>2, SMTT(\"r3\")\n      DEF AGAcceptShape, AGPhaseMessages, AGUp, AGDown,\n        AGControl, AGPhases, AGPhaseTypes\n  <2>3. CASE s # i \\/ t # j\n    <3>1. AGPhaseMessages(s,t)\n      BY DEF AGControl, AGPhases\n    <3>2. QED\n      BY <1>1, <1>2, <1>3, <2>3, <3>1, SMTT(\"r4\")\n        DEF AGAcceptShape, AGPhaseMessages, AGUp, AGDown,\n          AGControl, AGStructure, AGControlTypes, AGNode\n  <2>4. QED BY <2>2, <2>3\n<1>8. \\A s \\in Server :\n        /\\ acceptedEpoch'[s] >= acceptedEpoch[s]\n        /\\ (AGReady(s)' => acceptedEpoch'[s] = acceptedEpoch[s])\n        /\\ AGClaims(s)' \\subseteq AGClaims(s) \\union\n             (IF s = i /\\ acceptedEpoch[j] < acceptedEpoch[i] THEN {j} ELSE {})\n  <2>1. TAKE s \\in Server\n  <2>2. QED\n    BY <1>1, <1>2, <1>3, SMTT(\"r4\")\n      DEF AGAcceptShape, AGClaims, AGReady, AGDone, AGControl, AGPhases, AGPhaseTypes\n<1>9. AGClaimAdvance\n  <2>1. \\A s \\in Server : acceptedEpoch'[s] >= acceptedEpoch[s]\n    BY <1>8\n  <2>2. \\A l \\in Server : \\A s \\in AGClaims(l)' :\n          \\/ /\\ acceptedEpoch'[l] = acceptedEpoch[l] /\\ s \\in AGClaims(l)\n          \\/ /\\ l = i /\\ acceptedEpoch[s] < acceptedEpoch'[l]\n             /\\ s \\in Server /\\ acceptedEpoch'[s] >= acceptedEpoch'[l]\n    BY ONLY <1>2, <1>8, AGAcceptShape(i,j), i \\in Server, j \\in Server, SMTT(\"r3\")\n      DEF AGAcceptShape, AGClaims\n  <2>3. \\E owner \\in Server \\union {NullPoint} :\n          \\A l \\in Server : \\A s \\in AGClaims(l)' :\n            \\/ /\\ acceptedEpoch'[l] = acceptedEpoch[l] /\\ s \\in AGClaims(l)\n            \\/ /\\ l = owner /\\ acceptedEpoch[s] < acceptedEpoch'[l]\n               /\\ s \\in Server /\\ acceptedEpoch'[s] >= acceptedEpoch'[l]\n    BY <2>2\n  <2>4. QED BY <2>1, <2>3 DEF AGClaimAdvance\n<1>10. QED\n  BY <1>1, <1>4, <1>5, <1>6, <1>7, <1>9 DEF AGControl, AGStructure, AGPhases\n\nLEMMA AGFollowerLeaderInfoControl ==\n  ASSUME NEW i \\in Server, NEW j \\in Server, AGControl, FollowerProcessLEADERINFO(i,j)\n  PROVE AGControl' /\\ AGClaimAdvance\n<1>1. /\\ IsFollower(i) /\\ IsLeader(j) /\\ IsMyLeader(i,j)\n  BY SMTT(\"r3\") DEF FollowerProcessLEADERINFO, PendingLEADERINFO,\n    AGControl, AGStructure, AGLink\n<1>2. CASE ~(msgs[j][i][1].mzxid[1] >= acceptedEpoch[i])\n  <2>1. AGDropShape(j,i)\n    BY <1>1, <1>2, AGDropProject, AGCleanSymmetry, SMTT(\"r3\")\n      DEF FollowerProcessLEADERINFO, AGControl, AGStructure, AGControlTypes\n  <2>2. QED BY <2>1, AGControlDrop\n<1>3. CASE msgs[j][i][1].mzxid[1] >= acceptedEpoch[i] /\\ zabState[i] # DISCOVERY\n  <2>1. UNCHANGED AGStatic /\\ Discard(j,i)\n    BY <1>3, SMTT(\"r3\") DEF FollowerProcessLEADERINFO, AGStatic\n  <2>2. QED BY <2>1, AGDiscardShrink, AGShrinkControl\n    DEF AGControl, AGStructure, AGControlTypes\n<1>4. CASE msgs[j][i][1].mzxid[1] >= acceptedEpoch[i] /\\ zabState[i] = DISCOVERY\n  BY <1>4, AGAcceptProject, AGAcceptControl\n<1>5. QED BY <1>2, <1>3, <1>4\n\nAGVoteShape(i,j) ==\n  /\\ IsLeader(i) /\\ AGReady(i) /\\ AGEstablished(i,j)\n  /\\ UNCHANGED <<state, learners, acceptedEpoch, tempMaxEpoch, connecting,\n                   ackldRecv, forwarding, connectInfo>>\n  /\\ currentEpoch' \\in [Server -> Nat]\n  /\\ (zabState' = zabState \\/ zabState' = [zabState EXCEPT ![i] = SYNCHRONIZATION])\n  /\\ \\E b \\in BOOLEAN :\n       /\\ electing' = [electing EXCEPT ![i] = UpdateElecting(@,j,msgs[j][i][1].mzxid,b)]\n       /\\ (b => j \\in AGClaims(i))\n  /\\ (\\A s \\in Server : AGDone(s) => AGDone(s)')\n  /\\ (zabState'[i] \\in {SYNCHRONIZATION,BROADCAST} => AGDone(i)')\n  /\\ Discard(j,i)\n\nLEMMA AGShutdownLooking ==\n  ASSUME NEW i \\in Server, LeaderShutdown(i)\n  PROVE state'[i] = LOOKING\nBY SMTT(\"r2\") DEF LeaderShutdown, ZabTimeoutInCluster\n\nLEMMA AGVoteProject ==\n  ASSUME Cardinality(Server) >= 2, NEW i \\in Server, NEW j \\in Server,\n         AGControl, LeaderProcessACKEPOCH(i,j), state'[i] # LOOKING\n  PROVE AGVoteShape(i,j)\n<1>1. /\\ IsLeader(i) /\\ AGReady(i) /\\ AGEstablished(i,j)\n  BY AGDoneReady, SMTT(\"r4\")\n    DEF LeaderProcessACKEPOCH, PendingACKEPOCH, AGControl, AGStructure,\n      AGControlTypes, AGNode, AGLink, AGPhases, AGPhaseNode,\n      AGPhaseMessages, AGUp, AGEstablished\n<1>2. /\\ UNCHANGED <<state, learners, acceptedEpoch, tempMaxEpoch, connecting,\n                     ackldRecv, forwarding, connectInfo>>\n       /\\ currentEpoch' \\in [Server -> Nat]\n       /\\ (zabState' = zabState \\/ zabState' = [zabState EXCEPT ![i] = SYNCHRONIZATION])\n       /\\ Discard(j,i)\n  BY AGShutdownLooking, SMTT(\"r3\")\n    DEF LeaderProcessACKEPOCH, LeaderTurnToSynchronization,\n      AGControl, AGPhases, AGPhaseTypes\n<1>3. \\E b \\in BOOLEAN :\n        /\\ electing' = [electing EXCEPT ![i] = UpdateElecting(@,j,msgs[j][i][1].mzxid,b)]\n        /\\ (b => j \\in AGClaims(i))\n  BY <1>1, AGShutdownLooking, SMTT(\"r4\")\n    DEF LeaderProcessACKEPOCH, PendingACKEPOCH, AGClaims, AGDone, AGVoters, ElectionFinished, IsQuorum\n<1>4. \\A s \\in Server : AGDone(s) => AGDone(s)'\n  BY <1>2, AGUpdateElectingSets, AGShutdownLooking, SMTT(\"r4\")\n    DEF LeaderProcessACKEPOCH, AGDone, AGVoters, ElectionFinished, IsQuorum,\n      AGControl, AGPhases, AGPhaseTypes, AGPhaseNode, AGDomain\n<1>5. zabState'[i] \\in {SYNCHRONIZATION,BROADCAST} => AGDone(i)'\n  BY <1>2, <1>4, AGShutdownLooking, SMTT(\"r4\")\n    DEF LeaderProcessACKEPOCH, LeaderTurnToSynchronization, AGDone, AGVoters, ElectionFinished, IsQuorum,\n      AGControl, AGStructure, AGControlTypes, AGPhases, AGPhaseNode\n<1>6. QED BY <1>1, <1>2, <1>3, <1>4, <1>5 DEF AGVoteShape\n\nLEMMA AGVoteControl ==\n  ASSUME NEW i \\in Server, NEW j \\in Server, AGControl, AGVoteShape(i,j)\n  PROVE AGControl' /\\ AGClaimAdvance\n<1>1. PICK b \\in BOOLEAN :\n        /\\ electing' = [electing EXCEPT ![i] = UpdateElecting(@,j,msgs[j][i][1].mzxid,b)]\n        /\\ (b => j \\in AGClaims(i))\n  BY DEF AGVoteShape\n<1>2. /\\ AGControlTypes' /\\ AGPhaseTypes' /\\ AGQueueShrink\n  BY AGDiscardShrink, AGDomainUpdate, SMTT(\"r3\")\n    DEF AGVoteShape, AGControl, AGStructure, AGControlTypes, AGPhases, AGPhaseTypes, AGQueueShrink\n<1>3. \\A s \\in Server :\n        /\\ AGReady(s)' = AGReady(s)\n        /\\ (s # i => /\\ AGDone(s)' = AGDone(s)\n                      /\\ electing'[s] = electing[s] /\\ zabState'[s] = zabState[s])\n        /\\ (zabState[s] \\in {SYNCHRONIZATION,BROADCAST} =>\n              zabState'[s] \\in {SYNCHRONIZATION,BROADCAST})\n  BY <1>1, SMTT(\"r3\") DEF AGVoteShape, AGReady, AGDone, AGControl,\n    AGStructure, AGControlTypes, AGPhases, AGPhaseTypes, AGDomain\n<1>4. /\\ AGSids(electing'[i]) = AGSids(electing[i]) \\union {j}\n       /\\ AGVoters(electing'[i]) = AGVoters(electing[i]) \\union (IF b THEN {j} ELSE {})\n       /\\ AGUnique(electing'[i])\n       /\\ (\\A r \\in electing'[i] : r.inQuorum \\in BOOLEAN)\n       /\\ (\\A r \\in electing'[i] : r \\in electing[i] \\/ r.sid = j)\n  BY <1>1, AGUpdateElectingSets, AGUpdateElectingShape, SMTT(\"r3\")\n    DEF AGControl, AGPhases, AGPhaseTypes, AGPhaseNode, AGDomain\n<1>5. \\A s \\in Server : AGNode(s)'\n  BY <1>2, <1>3, SMTT(\"r3\")\n    DEF AGVoteShape, AGControl, AGStructure, AGControlTypes, AGNode\n<1>6. \\A s,t \\in Server : msgs'[s][t] # << >> => AGLink(s,t)'\n  BY <1>2, SMTT(\"r3\") DEF AGVoteShape, AGQueueShrink, AGControl, AGStructure, AGLink\n<1>7. \\A s \\in Server : AGPhaseNode(s)'\n  <2>1. TAKE s \\in Server\n  <2>2. CASE s = i\n    <3>1. /\\ AGPhaseNode(i) /\\ AGNode(i) /\\ AGControlTypes /\\ AGPhaseTypes\n      BY DEF AGControl, AGStructure, AGPhases\n    <3>2. QED\n      BY ONLY <1>2, <1>3, <1>4, <2>2, <3>1, AGVoteShape(i,j),\n        s \\in Server, i \\in Server, j \\in Server, SMTT(\"r4\")\n        DEF AGVoteShape, AGPhaseNode, AGNode, AGControlTypes, AGPhaseTypes,\n          AGQueueShrink, AGEstablished, AGReady, AGDone\n  <2>3. CASE s # i\n    <3>1. /\\ AGPhaseNode(s) /\\ AGNode(s) /\\ AGControlTypes /\\ AGPhaseTypes\n      BY DEF AGControl, AGStructure, AGPhases\n    <3>2. QED\n      BY ONLY <1>2, <1>3, <2>3, <3>1, AGVoteShape(i,j),\n        s \\in Server, i \\in Server, j \\in Server, NullPointNotServer, SMTT(\"r4\")\n        DEF AGVoteShape, AGPhaseNode, AGNode, AGControlTypes, AGPhaseTypes,\n          AGQueueShrink, AGEstablished, AGReady, AGDone\n  <2>4. QED BY <2>2, <2>3\n<1>8. \\A s,t \\in Server : AGPhaseMessages(s,t)'\n  <2>1. TAKE s \\in Server, t \\in Server\n  <2>2. AGPhaseMessages(s,t)\n    BY DEF AGControl, AGPhases\n  <2>3. QED\n    BY ONLY <1>2, <1>3, <2>2, AGVoteShape(i,j),\n      s \\in Server, t \\in Server, i \\in Server, SMTT(\"r4\")\n      DEF AGVoteShape, AGPhaseMessages, AGUp, AGDown, AGQueueShrink, AGReady, AGDone\n<1>9. \\A s \\in Server : AGClaims(s)' \\subseteq AGClaims(s)\n  <2>1. TAKE s \\in Server\n  <2>2. ASSUME NEW t \\in AGClaims(s)'\n        PROVE t \\in AGClaims(s)\n    <3>1. CASE t \\in AGVoters(electing'[s])\n      BY <1>1, <1>3, <1>4, <3>1, SMTT(\"r3\") DEF AGVoteShape, AGClaims\n    <3>2. CASE t \\notin AGVoters(electing'[s])\n      <4>1. /\\ t \\in Server /\\ AGReady(s) /\\ ~AGDone(s)\n             /\\ msgs'[t][s] # << >> /\\ msgs[t][s] # << >>\n        BY <1>2, <1>3, <3>2, SMTT(\"r3\") DEF AGVoteShape, AGQueueShrink, AGClaims\n      <4>2. msgs'[t][s] = msgs[t][s]\n        BY <1>2, <4>1, SMTT(\"r3\") DEF AGControl, AGStructure, AGLink,\n          AGPhases, AGPhaseMessages, AGUp, AGQueueShrink, AGReady\n      <4>3. QED\n        BY ONLY <4>1, <4>2, <3>2, t \\in AGClaims(s)', s \\in Server,\n          SMTT(\"r2\") DEF AGClaims\n    <3>3. QED BY <3>1, <3>2\n  <2>3. QED BY <2>2\n<1>10. AGClaimAdvance\n  BY <1>9, AGNoNewClaimsAdvance DEF AGVoteShape, AGControl, AGPhases, AGPhaseTypes\n<1>11. QED\n  BY <1>2, <1>5, <1>6, <1>7, <1>8, <1>10 DEF AGControl, AGStructure, AGPhases\n\nLEMMA AGLeaderAckEpochControl ==\n  ASSUME Cardinality(Server) >= 2, NEW i \\in Server, NEW j \\in Server,\n         AGControl, LeaderProcessACKEPOCH(i,j)\n  PROVE AGControl' /\\ AGClaimAdvance\n<1>1. CASE state'[i] = LOOKING\n  <2>1. /\\ LeaderShutdown(i)\n         /\\ UNCHANGED <<acceptedEpoch, tempMaxEpoch, connecting, electing, ackldRecv>>\n         /\\ IsLeader(i)\n    BY <1>1, SMTT(\"r3\") DEF LeaderProcessACKEPOCH\n  <2>2. QED BY <2>1, AGStopProject, AGControlStop\n<1>2. CASE state'[i] # LOOKING\n  BY <1>2, AGVoteProject, AGVoteControl\n<1>3. QED BY <1>1, <1>2\n\nLEMMA AGUnreadyChannels ==\n  ASSUME Cardinality(Server) >= 2, NEW i \\in Server, AGControl,\n         IsLeader(i), ~AGReady(i)\n  PROVE /\\ ~AGDone(i)\n        /\\ AGVoters(electing[i]) = {i}\n        /\\ (\\A t \\in learners[i] \\ {i} : zabState[t] = DISCOVERY)\n        /\\ \\A t \\in Server :\n             /\\ msgs[i][t] = << >>\n             /\\ (msgs[t][i] # << >> => msgs[t][i][1].mtype = FOLLOWERINFO)\n<1>1. ~AGDone(i)\n  BY AGDoneReady DEF AGControl\n<1>2. QED\n  BY <1>1, SMTT(\"r4\") DEF AGControl, AGStructure, AGControlTypes, AGNode, AGLink,\n    AGPhases, AGPhaseNode, AGPhaseMessages, AGDown, AGUp\n\nAGSelectShape(i,j) ==\n  /\\ IsLeader(i) /\\ IsFollower(j) /\\ i # j\n  /\\ j \\in learners[i] /\\ connectInfo[j].sid = i /\\ zabState[j] = DISCOVERY\n  /\\ UNCHANGED <<state, learners, currentEpoch, zabState, connectInfo,\n                   electing, ackldRecv, forwarding>>\n  /\\ acceptedEpoch' \\in [Server -> Nat] /\\ tempMaxEpoch' \\in [Server -> Nat]\n  /\\ \\A s \\in Server \\ {i} :\n       /\\ acceptedEpoch'[s] = acceptedEpoch[s] /\\ tempMaxEpoch'[s] = tempMaxEpoch[s]\n  /\\ (connecting' = connecting \\/\n       connecting' = [connecting EXCEPT ![i] = UpdateConnectingOrAckldRecv(@,j)])\n  /\\ (AGReady(i) => /\\ AGReady(i)' /\\ acceptedEpoch'[i] = acceptedEpoch[i])\n  /\\ (~AGReady(i)' => tempMaxEpoch'[i] > acceptedEpoch'[i])\n  /\\ acceptedEpoch'[i] >= acceptedEpoch[i]\n  /\\ (~AGReady(i) /\\ AGReady(i)' => acceptedEpoch'[i] > acceptedEpoch[i])\n  /\\ AGMatrix(msgs')\n  /\\ msgs'[j][i] = << >>\n  /\\ \\A s,t \\in Server :\n       (s # i /\\ (s # j \\/ t # i)) => msgs'[s][t] = msgs[s][t]\n  /\\ \\A t \\in Server :\n       \\/ msgs'[i][t] = msgs[i][t]\n       \\/ /\\ t \\in learners[i] \\ {i} /\\ msgs[i][t] = << >>\n          /\\ AGReady(i)'\n          /\\ msgs'[i][t] = <<[mtype |-> LEADERINFO, mzxid |-> <<acceptedEpoch'[i],0>>]>>\n          /\\ msgs'[t][i] = << >>\n\nLEMMA AGSelectProject ==\n  ASSUME Cardinality(Server) >= 2, NEW i \\in Server, NEW j \\in Server,\n         AGControl, LeaderProcessFOLLOWERINFO(i,j), zabState[j] = DISCOVERY\n  PROVE AGSelectShape(i,j)\n<1>1. /\\ IsLeader(i) /\\ IsFollower(j) /\\ i # j\n       /\\ j \\in learners[i] /\\ connectInfo[j].sid = i\n       /\\ msgs[j][i] = <<msgs[j][i][1]>>\n       /\\ msgs[j][i][1].mzxid = <<acceptedEpoch[j],0>>\n       /\\ msgs[i][j] = << >>\n  BY SMTT(\"r3\") DEF LeaderProcessFOLLOWERINFO, PendingFOLLOWERINFO,\n    AGControl, AGStructure, AGControlTypes, AGNode, AGLink,\n    AGPhases, AGPhaseMessages, AGUp\n<1>2. /\\ UNCHANGED <<state, learners, currentEpoch, zabState, connectInfo,\n                     electing, ackldRecv, forwarding>>\n       /\\ (connecting' = connecting \\/\n             connecting' = [connecting EXCEPT ![i] = UpdateConnectingOrAckldRecv(@,j)])\n  BY DEF LeaderProcessFOLLOWERINFO\n<1>3. /\\ acceptedEpoch' \\in [Server -> Nat] /\\ tempMaxEpoch' \\in [Server -> Nat]\n       /\\ \\A s \\in Server \\ {i} :\n            /\\ acceptedEpoch'[s] = acceptedEpoch[s] /\\ tempMaxEpoch'[s] = tempMaxEpoch[s]\n       /\\ (AGReady(i) => /\\ AGReady(i)' /\\ acceptedEpoch'[i] = acceptedEpoch[i])\n       /\\ (~AGReady(i)' => tempMaxEpoch'[i] > acceptedEpoch'[i])\n       /\\ acceptedEpoch'[i] >= acceptedEpoch[i]\n       /\\ (~AGReady(i) /\\ AGReady(i)' => acceptedEpoch'[i] > acceptedEpoch[i])\n  <2>1. tempMaxEpoch' \\in [Server -> Nat]\n    BY <1>1, SMTT(\"r3\") DEF LeaderProcessFOLLOWERINFO, AGControl, AGPhases, AGPhaseTypes\n  <2>2. \\A v \\in Server \\ {i} :\n           /\\ acceptedEpoch'[v] = acceptedEpoch[v] /\\ tempMaxEpoch'[v] = tempMaxEpoch[v]\n    BY <1>1, SMTT(\"r3\") DEF LeaderProcessFOLLOWERINFO,\n      AGControl, AGPhases, AGPhaseTypes\n  <2>3. AGReady(i) =>\n          /\\ UNCHANGED <<connecting, acceptedEpoch, tempMaxEpoch>> /\\ AGReady(i)'\n    BY <1>2, SMTT(\"r3\") DEF LeaderProcessFOLLOWERINFO, WaitingForNewEpoch,\n      IsQuorum, AGReady, AGSids\n  <2>4. ~AGReady(i) => tempMaxEpoch'[i] > acceptedEpoch[i]\n    BY <1>1, SMTT(\"r3\") DEF LeaderProcessFOLLOWERINFO, WaitingForNewEpoch,\n      IsQuorum, AGReady, AGSids, AGControl, AGPhases, AGPhaseTypes, AGPhaseNode\n  <2>5. acceptedEpoch' = IF ~AGReady(i) /\\ AGReady(i)'\n                         THEN [acceptedEpoch EXCEPT ![i] = tempMaxEpoch'[i]]\n                         ELSE acceptedEpoch\n    BY <1>2, SMTT(\"r3\") DEF LeaderProcessFOLLOWERINFO, WaitingForNewEpoch,\n      WaitingForNewEpochTurnToFalse, IsQuorum, AGReady, AGSids\n  <2>6. QED\n    BY ONLY <1>1, <2>1, <2>2, <2>3, <2>4, <2>5, AGControl,\n      i \\in Server, SMTT(\"r3\") DEF AGControl, AGPhases, AGPhaseTypes\n<1>4. AGMatrix(msgs')\n  BY AGInfoBroadcastEffects, AGPairMessageEffects, SMTT(\"r3\")\n    DEF LeaderProcessFOLLOWERINFO, AGPairWrites, AGControl, AGStructure, AGControlTypes\n<1>5. /\\ msgs'[j][i] = << >>\n       /\\ \\A s,t \\in Server :\n            (s # i /\\ (s # j \\/ t # i)) => msgs'[s][t] = msgs[s][t]\n  BY <1>1, AGQueueBasics, SMTT(\"r4\")\n    DEF LeaderProcessFOLLOWERINFO, Reply, Discard, DiscardAndBroadcastLEADERINFO,\n      AGControl, AGStructure, AGControlTypes, AGMatrix\n<1>6. \\A t \\in Server :\n       \\/ msgs'[i][t] = msgs[i][t]\n       \\/ /\\ t \\in learners[i] \\ {i} /\\ msgs[i][t] = << >>\n          /\\ AGReady(i)'\n          /\\ msgs'[i][t] = <<[mtype |-> LEADERINFO, mzxid |-> <<acceptedEpoch'[i],0>>]>>\n          /\\ msgs'[t][i] = << >>\n  <2>1. TAKE t \\in Server\n  <2>2. CASE AGReady(i)\n    BY <1>1, <1>2, <1>3, <1>5, <2>2, AGQueueBasics, SMTT(\"r3\")\n      DEF LeaderProcessFOLLOWERINFO, WaitingForNewEpoch, IsQuorum,\n        AGReady, AGSids, Reply, AGControl, AGStructure, AGControlTypes, AGMatrix\n  <2>3. CASE ~AGReady(i)\n    <3>1. /\\ msgs[i][t] = << >> /\\ AGPhaseNode(i)\n      BY <1>1, <2>3, AGUnreadyChannels DEF AGControl, AGPhases\n    <3>2. \\A v \\in learners[i] \\ {i} : zabState[v] = DISCOVERY\n      BY <1>1, <2>3, AGUnreadyChannels\n    <3>3. \\A c \\in connecting'[i] :\n            (c.sid \\in learners[i] \\ {i} /\\ c.connected = TRUE) => msgs'[c.sid][i] = << >>\n      BY <1>1, <1>2, <1>5, <3>1, <3>2, AGUpdateConnectingShape, SMTT(\"r4\")\n        DEF AGPhaseNode, AGControl, AGStructure, AGControlTypes,\n          AGPhases, AGPhaseTypes, AGDomain\n    <3>4. QED\n      BY <1>1, <1>2, <1>3, <1>5, <2>3, <3>1, <3>3,\n        AGQueueBasics, SMTT(\"r4\")\n        DEF LeaderProcessFOLLOWERINFO, WaitingForNewEpoch, WaitingForNewEpochTurnToFalse,\n          IsQuorum, AGReady, AGSids, Discard, DiscardAndBroadcastLEADERINFO,\n          AGControl, AGStructure, AGControlTypes, AGMatrix\n  <2>4. QED BY <2>2, <2>3\n<1>7. QED BY <1>1, <1>2, <1>3, <1>4, <1>5, <1>6 DEF AGSelectShape\n\nLEMMA AGSelectControl ==\n  ASSUME Cardinality(Server) >= 2, NEW i \\in Server, NEW j \\in Server,\n         AGControl, AGSelectShape(i,j)\n  PROVE AGControl' /\\ AGClaimAdvance\n<1>1. /\\ AGControlTypes' /\\ AGPhaseTypes'\n  BY AGDomainUpdate, SMTT(\"r3\") DEF AGSelectShape, AGControl,\n    AGStructure, AGControlTypes, AGPhases, AGPhaseTypes\n<1>2. \\A s \\in Server :\n        /\\ AGDone(s)' = AGDone(s)\n        /\\ (AGReady(s) => AGReady(s)')\n        /\\ (s # i => /\\ AGReady(s)' = AGReady(s)\n                      /\\ connecting'[s] = connecting[s])\n  BY SMTT(\"r3\") DEF AGSelectShape, AGReady, AGDone, AGControl,\n    AGPhases, AGPhaseTypes, AGDomain\n<1>3. /\\ AGSids(connecting'[i]) \\subseteq Server /\\ AGUnique(connecting'[i])\n       /\\ i \\in AGSids(connecting'[i])\n       /\\ \\A c \\in connecting'[i] :\n            \\/ /\\ c \\in connecting[i] /\\ c.sid # j\n            \\/ c.sid = j\n  BY AGUpdateConnectingSids, AGConnectionUniqueness, AGUpdateConnectingShape, SMTT(\"r3\")\n    DEF AGSelectShape, AGControl, AGPhases, AGPhaseTypes, AGPhaseNode, AGDomain\n<1>4. ~AGReady(i) =>\n        /\\ ~AGDone(i) /\\ AGVoters(electing[i]) = {i}\n        /\\ \\A t \\in Server :\n             /\\ msgs[i][t] = << >>\n             /\\ (msgs[t][i] # << >> => msgs[t][i][1].mtype = FOLLOWERINFO)\n  BY AGUnreadyChannels DEF AGSelectShape\n<1>5. \\A s \\in Server : AGNode(s)'\n  BY SMTT(\"r2\") DEF AGSelectShape, AGControl, AGStructure, AGNode\n<1>6. \\A s,t \\in Server : msgs'[s][t] # << >> => AGLink(s,t)'\n  BY SMTT(\"r4\") DEF AGSelectShape, AGControl, AGStructure, AGControlTypes, AGNode, AGLink\n<1>7. \\A s \\in Server : AGPhaseNode(s)'\n  <2>1. TAKE s \\in Server\n  <2>2. CASE s = i\n    <3>1. /\\ AGPhaseNode(i) /\\ AGNode(i) /\\ AGControlTypes /\\ AGPhaseTypes\n      BY DEF AGControl, AGStructure, AGPhases\n    <3>2. QED\n      BY ONLY <1>1, <1>2, <1>3, <1>4, <2>2, <3>1, AGSelectShape(i,j),\n        s \\in Server, i \\in Server, j \\in Server, SMTT(\"r5\")\n        DEF AGSelectShape, AGPhaseNode, AGNode, AGControlTypes, AGPhaseTypes,\n          AGReady, AGDone, AGDomain\n  <2>3. CASE s # i\n    <3>1. /\\ AGPhaseNode(s) /\\ AGNode(s) /\\ AGControlTypes /\\ AGPhaseTypes\n      BY DEF AGControl, AGStructure, AGPhases\n    <3>2. QED\n      BY ONLY <1>1, <1>2, <2>3, <3>1, AGSelectShape(i,j),\n        s \\in Server, i \\in Server, j \\in Server, NullPointNotServer, SMTT(\"r4\")\n        DEF AGSelectShape, AGPhaseNode, AGNode, AGControlTypes, AGPhaseTypes,\n          AGReady, AGDone\n  <2>4. QED BY <2>2, <2>3\n<1>8. \\A s,t \\in Server : AGPhaseMessages(s,t)'\n  <2>1. TAKE s \\in Server, t \\in Server\n  <2>2. AGPhaseMessages(s,t)\n    BY DEF AGControl, AGPhases\n  <2>3. CASE s = i\n    BY <1>1, <1>2, <1>4, <2>2, <2>3, SMTT(\"r4\")\n      DEF AGSelectShape, AGPhaseMessages, AGUp, AGDown,\n        AGControl, AGStructure, AGControlTypes, AGNode\n  <2>4. CASE s # i\n    BY <1>1, <1>2, <2>2, <2>4, SMTT(\"r4\")\n      DEF AGSelectShape, AGPhaseMessages, AGUp, AGDown,\n        AGControl, AGStructure, AGControlTypes, AGNode\n  <2>5. QED BY <2>3, <2>4\n<1>9. \\A s \\in Server :\n        /\\ acceptedEpoch'[s] >= acceptedEpoch[s]\n        /\\ (s # i => AGClaims(s)' \\subseteq AGClaims(s))\n        /\\ (AGReady(i) => AGClaims(i)' \\subseteq AGClaims(i))\n        /\\ (~AGReady(i) => AGClaims(i)' \\subseteq {i})\n  <2>1. TAKE s \\in Server\n  <2>2. QED\n    BY <1>2, <1>4, SMTT(\"r4\") DEF AGSelectShape, AGClaims, AGReady, AGDone,\n      AGControl, AGStructure, AGControlTypes, AGNode, AGLink\n<1>10. AGClaimAdvance\n  <2>1. \\A s \\in Server : acceptedEpoch'[s] >= acceptedEpoch[s]\n    BY <1>9\n  <2>2. \\A l \\in Server : \\A s \\in AGClaims(l)' :\n          \\/ /\\ acceptedEpoch'[l] = acceptedEpoch[l] /\\ s \\in AGClaims(l)\n          \\/ /\\ l = i /\\ acceptedEpoch[s] < acceptedEpoch'[l]\n             /\\ s \\in Server /\\ acceptedEpoch'[s] >= acceptedEpoch'[l]\n    BY ONLY <1>9, AGSelectShape(i,j), i \\in Server, j \\in Server, SMTT(\"r3\")\n      DEF AGSelectShape, AGClaims\n  <2>3. \\E owner \\in Server \\union {NullPoint} :\n          \\A l \\in Server : \\A s \\in AGClaims(l)' :\n            \\/ /\\ acceptedEpoch'[l] = acceptedEpoch[l] /\\ s \\in AGClaims(l)\n            \\/ /\\ l = owner /\\ acceptedEpoch[s] < acceptedEpoch'[l]\n               /\\ s \\in Server /\\ acceptedEpoch'[s] >= acceptedEpoch'[l]\n    BY <2>2\n  <2>4. QED BY <2>1, <2>3 DEF AGClaimAdvance\n<1>11. QED\n  BY <1>1, <1>5, <1>6, <1>7, <1>8, <1>10 DEF AGControl, AGStructure, AGPhases\n\nLEMMA AGFollowerInfoControl ==\n  ASSUME Cardinality(Server) >= 2, NEW i \\in Server, NEW j \\in Server,\n         AGControl, LeaderProcessFOLLOWERINFO(i,j)\n  PROVE AGControl' /\\ AGClaimAdvance\n<1>1. CASE zabState[j] = DISCOVERY\n  BY <1>1, AGSelectProject, AGSelectControl\n<1>2. CASE zabState[j] # DISCOVERY\n  <2>1. /\\ AGDone(i) /\\ AGEstablished(i,j) /\\ AGReady(i)\n    BY <1>2, AGDoneReady, SMTT(\"r3\")\n      DEF LeaderProcessFOLLOWERINFO, PendingFOLLOWERINFO, AGControl, AGStructure,\n        AGControlTypes, AGNode, AGLink, AGPhases, AGPhaseMessages, AGUp, AGEstablished\n  <2>2. /\\ UNCHANGED <<state, learners, acceptedEpoch, connecting, tempMaxEpoch,\n                       electing, ackldRecv, forwarding, zabState, currentEpoch, connectInfo>>\n         /\\ Reply(i,j,[mtype |-> LEADERINFO, mzxid |-> <<acceptedEpoch[i],0>>])\n    BY <2>1, SMTT(\"r3\")\n      DEF LeaderProcessFOLLOWERINFO, WaitingForNewEpoch, IsQuorum, AGReady, AGSids\n  <2>3. AGDataBase(i)\n    <3>1. AGPairWrites(i,j)\n      BY <2>2, AGPairMessageEffects DEF AGControl, AGStructure, AGControlTypes\n    <3>2. QED\n      BY <2>1, <2>2, <3>1, SMTT(\"r3\") DEF AGDataBase, AGCompletedLink,\n        AGPairWrites, AGControl, AGStructure, AGControlTypes, AGPhases, AGPhaseTypes\n  <2>4. QED BY <2>2, <2>3, AGUnchangedDataTables, AGDataControl\n<1>3. QED BY <1>1, <1>2\n\nLEMMA AGIdleControlFrame ==\n  ASSUME NEW i \\in Server, NEW j \\in Server,\n         FLEReceiveNotmsg(i,j) \\/ FLENotmsgTimeout(i) \\/ PartitionRecover(i,j) \\/ NodeStart(i)\n  PROVE UNCHANGED AGControlVars\nBY SMTT(\"r3\") DEF AGControlVars, FLEReceiveNotmsg, FLENotmsgTimeout,\n  ReceiveNotmsg, NotmsgTimeout, PartitionRecover, NodeStart\n\nLEMMA AGControlNext ==\n  ASSUME Cardinality(Server) >= 2, AGControl, Next\n  PROVE AGControl' /\\ AGClaimAdvance\n<1>1. \\A i,j \\in Server :\n        (FLEReceiveNotmsg(i,j) \\/ FLENotmsgTimeout(i) \\/ PartitionRecover(i,j) \\/ NodeStart(i)) =>\n          (AGControl' /\\ AGClaimAdvance)\n  BY AGIdleControlFrame, AGControlUnchanged\n<1>2. \\A i \\in Server :\n        (FLEHandleNotmsg(i) \\/ FLEWaitNewNotmsg(i)) => (AGControl' /\\ AGClaimAdvance)\n  BY AGControlElectionProject, AGControlElection, AGElectionAdvance\n<1>3. \\A i,j \\in Server :\n        (PartitionStart(i,j) \\/ NodeCrash(i) \\/ ConnectAndFollowerSendFOLLOWERINFO(i,j)\n         \\/ LeaderProcessFOLLOWERINFO(i,j) \\/ FollowerProcessLEADERINFO(i,j)\n         \\/ LeaderProcessACKEPOCH(i,j)) => (AGControl' /\\ AGClaimAdvance)\n  BY AGEnvironmentControl, AGControlConnect, AGFollowerInfoControl,\n    AGFollowerLeaderInfoControl, AGLeaderAckEpochControl\n<1>4. \\A i,j \\in Server :\n        (AGFollowerPayload(i,j) \\/ LeaderSyncFollower(i,j) \\/ LeaderProcessACKLD(i,j)\n         \\/ LeaderProcessRequest(i) \\/ LeaderProcessACK(i,j)) => (AGControl' /\\ AGClaimAdvance)\n  BY AGFollowerPayloadProject, AGLeaderPayloadProject, AGSyncProject, AGAckldProject, AGDataControl\n<1>5. QED BY <1>1, <1>2, <1>3, <1>4, SMTT(\"r3\") DEF Next, AGFollowerPayload\n\nAGLogStep ==\n  \\/ epochLeader' = epochLeader\n  \\/ \\E i \\in Server :\n       /\\ epochLeader' = [epochLeader EXCEPT ![acceptedEpoch[i]] = @ \\union {i}]\n       /\\ acceptedEpoch' = acceptedEpoch\n       /\\ IsLeader(i)' /\\ zabState' = [zabState EXCEPT ![i] = SYNCHRONIZATION]\n\nLEMMA AGAckEpochLogFrame ==\n  ASSUME NEW i \\in Server, NEW j \\in Server, LeaderProcessACKEPOCH(i,j)\n  PROVE AGLogStep\n<1>1. \\/ epochLeader' = epochLeader\n       \\/ /\\ epochLeader' = [epochLeader EXCEPT ![acceptedEpoch[i]] = @ \\union {i}]\n          /\\ acceptedEpoch' = acceptedEpoch\n          /\\ IsLeader(i)' /\\ zabState' = [zabState EXCEPT ![i] = SYNCHRONIZATION]\n  BY SMTT(\"r3\") DEF LeaderProcessACKEPOCH, LeaderTurnToSynchronization\n<1>2. QED BY <1>1 DEF AGLogStep\n\nLEMMA AGLogNext == Next => AGLogStep\nBY AGAckEpochLogFrame, SMTT(\"r4\") DEF Next, AGLogStep,\n  FLEReceiveNotmsg, FLENotmsgTimeout, FLEHandleNotmsg, FLEWaitNewNotmsg,\n  PartitionStart, PartitionRecover, NodeCrash, NodeStart,\n  ConnectAndFollowerSendFOLLOWERINFO, LeaderProcessFOLLOWERINFO, FollowerProcessLEADERINFO,\n  LeaderSyncFollower, FollowerProcessSyncMessage, FollowerProcessPROPOSALInSync,\n  FollowerProcessCOMMITInSync, FollowerProcessNEWLEADER, LeaderProcessACKLD,\n  FollowerProcessUPTODATE, LeaderProcessRequest, FollowerProcessPROPOSAL,\n  LeaderProcessACK, FollowerProcessCOMMIT\n\nLEMMA AGPostQuorumCertificate ==\n  ASSUME Cardinality(Server) >= 2, AGControl', AGClaimSafety',\n         NEW i \\in Server, IsLeader(i)', zabState'[i] = SYNCHRONIZATION\n  PROVE /\\ AGVoters(electing'[i]) \\in Quorums\n        /\\ AGVoters(electing'[i]) \\subseteq AGClaims(i)'\n        /\\ \\A s \\in AGVoters(electing'[i]) :\n             /\\ acceptedEpoch'[s] >= acceptedEpoch'[i]\n             /\\ \\A l \\in Server :\n                  (acceptedEpoch'[l] = acceptedEpoch'[i] /\\ s \\in AGClaims(l)') => l = i\n<1>1. AGDone(i)'\n  BY DEF AGControl, AGPhases, AGPhaseNode\n<1>2. AGReady(i)'\n  BY <1>1, AGSingletonNotQuorum, SMTT(\"r3\")\n    DEF AGControl, AGPhases, AGPhaseNode, AGDone\n<1>3. QED\n  BY <1>1, <1>2, SMTT(\"r3\") DEF AGDone, AGClaims, AGClaimSafety\n\nLEMMA AGLeadershipAdvance ==\n  ASSUME Cardinality(Server) >= 2, AGLeadershipInvariant,\n         AGControl', AGClaimAdvance, AGLogStep\n  PROVE AGLeadershipInvariant'\n<1>1. AGClaimSafety'\n  BY AGClaimsRemainSafe DEF AGLeadershipInvariant, AGControl, AGPhases, AGPhaseTypes\n<1>2. \\A e \\in 1..MAXEPOCH : epochLeader[e] # {} =>\n          \\E l \\in Server, Q \\in Quorums :\n            /\\ epochLeader[e] = {l}\n            /\\ \\A s \\in Q :\n                 /\\ acceptedEpoch'[s] >= e\n                 /\\ \\A i \\in Server :\n                      (acceptedEpoch'[i] = e /\\ s \\in AGClaims(i)') => i = l\n  BY AGCertificatesPersist DEF AGLeadershipInvariant, AGControl, AGPhases, AGPhaseTypes\n<1>3. CASE epochLeader' = epochLeader\n  BY <1>1, <1>2, <1>3 DEF AGLeadershipInvariant, AGEpochCertificate\n<1>4. CASE \\E i \\in Server :\n       /\\ epochLeader' = [epochLeader EXCEPT ![acceptedEpoch[i]] = @ \\union {i}]\n       /\\ acceptedEpoch' = acceptedEpoch\n       /\\ IsLeader(i)' /\\ zabState' = [zabState EXCEPT ![i] = SYNCHRONIZATION]\n  <2>1. PICK i \\in Server :\n       /\\ epochLeader' = [epochLeader EXCEPT ![acceptedEpoch[i]] = @ \\union {i}]\n       /\\ acceptedEpoch' = acceptedEpoch\n       /\\ IsLeader(i)' /\\ zabState' = [zabState EXCEPT ![i] = SYNCHRONIZATION]\n    BY <1>4\n  <2>2. epochLeader' \\in [1..MAXEPOCH -> SUBSET Server]\n    BY <2>1, SMTT(\"r2\") DEF AGLeadershipInvariant, AGEpochCertificate\n  <2>3. /\\ AGVoters(electing'[i]) \\in Quorums\n         /\\ AGVoters(electing'[i]) \\subseteq AGClaims(i)'\n         /\\ \\A s \\in AGVoters(electing'[i]) :\n              /\\ acceptedEpoch'[s] >= acceptedEpoch'[i]\n              /\\ \\A l \\in Server :\n                   (acceptedEpoch'[l] = acceptedEpoch'[i] /\\ s \\in AGClaims(l)') => l = i\n    BY <1>1, <2>1, AGPostQuorumCertificate, SMTT(\"r2\")\n      DEF AGLeadershipInvariant, AGControl, AGStructure, AGControlTypes\n  <2>4. \\A e \\in 1..MAXEPOCH :\n          \\/ epochLeader'[e] = {}\n          \\/ \\E l \\in Server, Q \\in Quorums :\n               /\\ epochLeader'[e] = {l}\n               /\\ \\A s \\in Q :\n                    /\\ acceptedEpoch'[s] >= e\n                    /\\ \\A k \\in Server :\n                         (acceptedEpoch'[k] = e /\\ s \\in AGClaims(k)') => k = l\n    <3>1. TAKE e \\in 1..MAXEPOCH\n    <3>2. CASE e # acceptedEpoch'[i]\n      <4>1. epochLeader'[e] = epochLeader[e]\n        BY ONLY <2>1, <3>2, e \\in 1..MAXEPOCH, AGLeadershipInvariant,\n          SMTT(\"r2\") DEF AGLeadershipInvariant, AGEpochCertificate\n      <4>2. QED BY ONLY <1>2, <4>1, e \\in 1..MAXEPOCH, Zenon\n    <3>3. CASE e = acceptedEpoch'[i]\n      <4>1. epochLeader[e] \\subseteq {i}\n        <5>1. CASE epochLeader[e] = {}\n          BY <5>1\n        <5>2. CASE epochLeader[e] # {}\n          <6>1. PICK l \\in Server, Q \\in Quorums :\n                 /\\ epochLeader[e] = {l}\n                 /\\ \\A s \\in Q :\n                      /\\ acceptedEpoch'[s] >= e\n                      /\\ \\A k \\in Server :\n                           (acceptedEpoch'[k] = e /\\ s \\in AGClaims(k)') => k = l\n            BY <1>2, <5>2\n          <6>2. Q \\intersect AGVoters(electing'[i]) # {}\n            BY <2>3, AGQuorumsMeet\n          <6>3. i = l\n            BY <2>3, <3>3, <6>1, <6>2\n          <6>4. QED BY <6>1, <6>3\n        <5>3. QED BY <5>1, <5>2\n      <4>2. epochLeader'[e] = {i}\n        BY <2>1, <3>3, <4>1, SMTT(\"r2\") DEF AGLeadershipInvariant, AGEpochCertificate\n      <4>3. QED BY <2>3, <3>3, <4>2\n    <3>4. QED BY <3>2, <3>3\n  <2>5. QED BY <1>1, <2>2, <2>4 DEF AGLeadershipInvariant, AGEpochCertificate\n<1>5. QED BY <1>3, <1>4 DEF AGLogStep\n\nLEMMA AGLeadershipInit == Init => AGLeadershipInvariant\n<1>1. Init => AGControl\n  BY AGControlInit\n<1>2. Init => AGClaimSafety /\\ AGEpochCertificate\n  BY SMTT(\"r3\") DEF Init, InitServerVars, InitServerVarsL, InitVerifyVars,\n    AGClaimSafety, AGClaims, AGReady, AGEpochCertificate\n<1>3. QED BY <1>1, <1>2 DEF AGLeadershipInvariant\n\nLEMMA AGLeadershipStep ==\n  ASSUME Cardinality(Server) >= 2, AGLeadershipInvariant, [Next]_vars\n  PROVE AGLeadershipInvariant'\n<1>1. CASE Next\n  BY <1>1, AGControlNext, AGLogNext, AGLeadershipAdvance DEF AGLeadershipInvariant\n<1>2. CASE UNCHANGED vars\n  <2>1. /\\ UNCHANGED AGControlVars /\\ AGLogStep\n    BY <1>2 DEF vars, AGControlVars, AGLogStep\n  <2>2. QED\n    BY <2>1, AGControlUnchanged, AGLeadershipAdvance DEF AGLeadershipInvariant\n<1>3. QED BY <1>1, <1>2\n\nLEMMA AGLeadershipAlways ==\n  Cardinality(Server) >= 2 => (Spec => []AGLeadershipInvariant)\n<1>1. CASE Cardinality(Server) >= 2\n  <2>1. Init => AGLeadershipInvariant BY AGLeadershipInit\n  <2>2. AGLeadershipInvariant /\\ [Next]_vars => AGLeadershipInvariant'\n    BY <1>1, AGLeadershipStep, SMTT(\"r1\")\n  <2>3. QED BY <2>1, <2>2, PTL DEF Spec\n<1>2. CASE ~(Cardinality(Server) >= 2)\n  BY <1>2\n<1>3. QED BY <1>1, <1>2\n\nAGLogType == epochLeader \\in [1..MAXEPOCH -> SUBSET Server]\n\nLEMMA AGLogTypeAlways == Spec => []AGLogType\n<1>1. Init => AGLogType\n  BY SMTT(\"r2\") DEF Init, InitVerifyVars, AGLogType\n<1>2. AGLogType /\\ [Next]_vars => AGLogType'\n  BY AGLogNext, SMTT(\"r3\") DEF AGLogType, AGLogStep, vars\n<1>3. QED BY <1>1, <1>2, PTL DEF Spec\n\nLEMMA AGSmallServer ==\n  ~(Cardinality(Server) >= 2) => \\A i,j \\in Server : i = j\n<1>1. Cardinality(Server) \\in Nat\n  BY ServerFinite, AGFiniteBridge, AGFinite!FS_CardinalityType\n<1>2. ~(Cardinality(Server) >= 2) =>\n        (Server = {} \\/ \\E s : Server = {s})\n  BY <1>1, ServerFinite, AGFiniteBridge, AGFinite!FS_EmptySet, AGFinite!FS_Singleton, SMTT(\"r2\")\n<1>3. QED BY <1>2\n\nLEMMA AGSmallLeadership2 ==\n  ASSUME ~(Cardinality(Server) >= 2), AGLogType\n  PROVE Leadership2\n<1>1. Cardinality(Server) \\in Nat\n  BY ServerFinite, AGFiniteBridge, AGFinite!FS_CardinalityType\n<1>2. \\A e \\in 1..MAXEPOCH :\n        /\\ Cardinality(epochLeader[e]) \\in Nat\n        /\\ Cardinality(epochLeader[e]) <= Cardinality(Server)\n  BY ServerFinite, AGFiniteBridge, AGFinite!FS_Subset, AGFinite!FS_CardinalityType,\n    SMTT(\"r3\") DEF AGLogType\n<1>3. QED BY <1>1, <1>2, SMTT(\"r1\") DEF Leadership2\n\n\\* END AGENT HELPERS\n\nTHEOREM Spec => []Leadership1\n\\* BEGIN AGENT PROOF ZooKeeper_LowLevel/ZkV3_7_0_Leadership1.tla\n<1>1. CASE Cardinality(Server) >= 2\n  <2>1. Spec => []AGLeadershipInvariant\n    BY <1>1, AGLeadershipAlways\n  <2>2. AGLeadershipInvariant => Leadership1\n    BY <1>1, AGClaimsLeadership1 DEF AGLeadershipInvariant\n  <2>3. QED BY <2>1, <2>2, PTL\n<1>2. CASE ~(Cardinality(Server) >= 2)\n  <2>1. \\A i,j \\in Server : i = j\n    BY <1>2, AGSmallServer\n  <2>2. Leadership1 BY <2>1 DEF Leadership1\n  <2>3. QED BY <2>2, PTL\n<1>3. QED BY <1>1, <1>2\n\\* END AGENT PROOF ZooKeeper_LowLevel/ZkV3_7_0_Leadership1.tla\n\nTHEOREM Spec => []Leadership2\n\\* BEGIN AGENT PROOF ZooKeeper_LowLevel/ZkV3_7_0_Leadership2.tla\n<1>1. CASE Cardinality(Server) >= 2\n  <2>1. Spec => []AGLeadershipInvariant\n    BY <1>1, AGLeadershipAlways\n  <2>2. AGLeadershipInvariant => Leadership2\n    BY AGCertificateLeadership2 DEF AGLeadershipInvariant\n  <2>3. QED BY <2>1, <2>2, PTL\n<1>2. CASE ~(Cardinality(Server) >= 2)\n  <2>1. Spec => []AGLogType BY AGLogTypeAlways\n  <2>2. AGLogType => Leadership2 BY <1>2, AGSmallLeadership2\n  <2>3. QED BY <2>1, <2>2, PTL\n<1>3. QED BY <1>1, <1>2\n\\* END AGENT PROOF ZooKeeper_LowLevel/ZkV3_7_0_Leadership2.tla\n\nTHEOREM Spec => []PrefixConsistency\n\\* BEGIN AGENT PROOF ZooKeeper_LowLevel/ZkV3_7_0_PrefixConsistency.tla\n\\* Initialization is discharged; preservation remains the open obligation.\n<1>1. Init => PrefixConsistency\n  BY SMTT(\"r3\") DEF Init, InitServerVars, InitServerVarsL, InitVerifyVars,\n    PrefixConsistency, Minimum, TxnEqual, ZxidEqual, BootstrapTxn, BootstrapZxid\n<1>2. PrefixConsistency /\\ [Next]_vars => PrefixConsistency'\n  BY SMTT(\"r1\") DEF PrefixConsistency, Next, vars\n<1>3. QED BY <1>1, <1>2, PTL DEF Spec\n\\* END AGENT PROOF ZooKeeper_LowLevel/ZkV3_7_0_PrefixConsistency.tla\n\nTHEOREM Spec => []Integrity\n\\* BEGIN AGENT PROOF ZooKeeper_LowLevel/ZkV3_7_0_Integrity.tla\n\\* Initialization is discharged; preservation remains the open obligation.\n<1>1. Init => Integrity\n  BY SMTT(\"r3\") DEF Init, InitServerVars, InitServerVarsL, InitVerifyVars,\n    Integrity, Minimum, TxnEqual, ZxidEqual, BootstrapTxn, BootstrapZxid\n<1>2. Integrity /\\ [Next]_vars => Integrity'\n  BY SMTT(\"r1\") DEF Integrity, Next, vars\n<1>3. QED BY <1>1, <1>2, PTL DEF Spec\n\\* END AGENT PROOF ZooKeeper_LowLevel/ZkV3_7_0_Integrity.tla\n\nTHEOREM Spec => []Agreement\n\\* BEGIN AGENT PROOF ZooKeeper_LowLevel/ZkV3_7_0_Agreement.tla\n\\* Initialization is discharged; preservation remains the open obligation.\n<1>1. Init => Agreement\n  BY SMTT(\"r3\") DEF Init, InitServerVars, InitServerVarsL, InitVerifyVars,\n    Agreement, Minimum, TxnEqual, ZxidEqual, BootstrapTxn, BootstrapZxid\n<1>2. Agreement /\\ [Next]_vars => Agreement'\n  BY SMTT(\"r1\") DEF Agreement, Next, vars\n<1>3. QED BY <1>1, <1>2, PTL DEF Spec\n\\* END AGENT PROOF ZooKeeper_LowLevel/ZkV3_7_0_Agreement.tla\n\nTHEOREM Spec => []TotalOrder\n\\* BEGIN AGENT PROOF ZooKeeper_LowLevel/ZkV3_7_0_TotalOrder.tla\n\\* Initialization is discharged; preservation remains the open obligation.\n<1>1. Init => TotalOrder\n  BY SMTT(\"r3\") DEF Init, InitServerVars, InitServerVarsL, InitVerifyVars,\n    TotalOrder, Minimum, TxnEqual, ZxidEqual, BootstrapTxn, BootstrapZxid\n<1>2. TotalOrder /\\ [Next]_vars => TotalOrder'\n  BY SMTT(\"r1\") DEF TotalOrder, Next, vars\n<1>3. QED BY <1>1, <1>2, PTL DEF Spec\n\\* END AGENT PROOF ZooKeeper_LowLevel/ZkV3_7_0_TotalOrder.tla\n\nTHEOREM Spec => []LocalPrimaryOrder\n\\* BEGIN AGENT PROOF ZooKeeper_LowLevel/ZkV3_7_0_LocalPrimaryOrder.tla\n\\* Initialization is discharged; preservation remains the open obligation.\n<1>1. Init => LocalPrimaryOrder\n  BY SMTT(\"r3\") DEF Init, InitServerVars, InitServerVarsL, InitVerifyVars,\n    LocalPrimaryOrder, Minimum, TxnEqual, ZxidEqual, BootstrapTxn, BootstrapZxid\n<1>2. LocalPrimaryOrder /\\ [Next]_vars => LocalPrimaryOrder'\n  BY SMTT(\"r1\") DEF LocalPrimaryOrder, Next, vars\n<1>3. QED BY <1>1, <1>2, PTL DEF Spec\n\\* END AGENT PROOF ZooKeeper_LowLevel/ZkV3_7_0_LocalPrimaryOrder.tla\n\nTHEOREM Spec => []GlobalPrimaryOrder\n\\* BEGIN AGENT PROOF ZooKeeper_LowLevel/ZkV3_7_0_GlobalPrimaryOrder.tla\n\\* Initialization is discharged; preservation remains the open obligation.\n<1>1. Init => GlobalPrimaryOrder\n  BY SMTT(\"r3\") DEF Init, InitServerVars, InitServerVarsL, InitVerifyVars,\n    GlobalPrimaryOrder, Minimum, TxnEqual, ZxidEqual, BootstrapTxn, BootstrapZxid\n<1>2. GlobalPrimaryOrder /\\ [Next]_vars => GlobalPrimaryOrder'\n  BY SMTT(\"r1\") DEF GlobalPrimaryOrder, Next, vars\n<1>3. QED BY <1>1, <1>2, PTL DEF Spec\n\\* END AGENT PROOF ZooKeeper_LowLevel/ZkV3_7_0_GlobalPrimaryOrder.tla\n\nTHEOREM Spec => []PrimaryIntegrity\n\\* BEGIN AGENT PROOF ZooKeeper_LowLevel/ZkV3_7_0_PrimaryIntegrity.tla\n\\* Initialization is discharged; preservation remains the open obligation.\n<1>1. Init => PrimaryIntegrity\n  BY SMTT(\"r3\") DEF Init, InitServerVars, InitServerVarsL, InitVerifyVars,\n    PrimaryIntegrity, Minimum, TxnEqual, ZxidEqual, BootstrapTxn, BootstrapZxid\n<1>2. PrimaryIntegrity /\\ [Next]_vars => PrimaryIntegrity'\n  BY SMTT(\"r1\") DEF PrimaryIntegrity, Next, vars\n<1>3. QED BY <1>1, <1>2, PTL DEF Spec\n\\* END AGENT PROOF ZooKeeper_LowLevel/ZkV3_7_0_PrimaryIntegrity.tla\n====\n",
+  "units": {
+    "ZooKeeper_LowLevel/ZkV3_7_0_Leadership1.tla": {
+      "id": "ZooKeeper_LowLevel/ZkV3_7_0_Leadership1.tla",
+      "name": "ZooKeeper_LowLevel/ZkV3_7_0_Leadership1.tla",
+      "kind": "target",
+      "lineStart": 2319,
+      "lineEnd": 2332,
+      "proofLines": [
+        2321,
+        2322,
+        2323,
+        2324,
+        2325,
+        2326,
+        2327,
+        2328,
+        2329,
+        2330,
+        2331,
+        2332
+      ],
+      "proofRange": [
+        2321,
+        2332
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AGClaimsLeadership1",
+        "helper:AGLeadershipAlways",
+        "helper:AGSmallServer"
+      ]
+    },
+    "ZooKeeper_LowLevel/ZkV3_7_0_Leadership2.tla": {
+      "id": "ZooKeeper_LowLevel/ZkV3_7_0_Leadership2.tla",
+      "name": "ZooKeeper_LowLevel/ZkV3_7_0_Leadership2.tla",
+      "kind": "target",
+      "lineStart": 2335,
+      "lineEnd": 2347,
+      "proofLines": [
+        2337,
+        2338,
+        2339,
+        2340,
+        2341,
+        2342,
+        2343,
+        2344,
+        2345,
+        2346,
+        2347
+      ],
+      "proofRange": [
+        2337,
+        2347
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AGCertificateLeadership2",
+        "helper:AGLeadershipAlways",
+        "helper:AGLogTypeAlways",
+        "helper:AGSmallLeadership2"
+      ]
+    },
+    "ZooKeeper_LowLevel/ZkV3_7_0_PrefixConsistency.tla": {
+      "id": "ZooKeeper_LowLevel/ZkV3_7_0_PrefixConsistency.tla",
+      "name": "ZooKeeper_LowLevel/ZkV3_7_0_PrefixConsistency.tla",
+      "kind": "target",
+      "lineStart": 2350,
+      "lineEnd": 2358,
+      "proofLines": [
+        2353,
+        2354,
+        2355,
+        2356,
+        2357,
+        2358
+      ],
+      "proofRange": [
+        2353,
+        2358
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "ZooKeeper_LowLevel/ZkV3_7_0_Integrity.tla": {
+      "id": "ZooKeeper_LowLevel/ZkV3_7_0_Integrity.tla",
+      "name": "ZooKeeper_LowLevel/ZkV3_7_0_Integrity.tla",
+      "kind": "target",
+      "lineStart": 2361,
+      "lineEnd": 2369,
+      "proofLines": [
+        2364,
+        2365,
+        2366,
+        2367,
+        2368,
+        2369
+      ],
+      "proofRange": [
+        2364,
+        2369
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "ZooKeeper_LowLevel/ZkV3_7_0_Agreement.tla": {
+      "id": "ZooKeeper_LowLevel/ZkV3_7_0_Agreement.tla",
+      "name": "ZooKeeper_LowLevel/ZkV3_7_0_Agreement.tla",
+      "kind": "target",
+      "lineStart": 2372,
+      "lineEnd": 2380,
+      "proofLines": [
+        2375,
+        2376,
+        2377,
+        2378,
+        2379,
+        2380
+      ],
+      "proofRange": [
+        2375,
+        2380
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "ZooKeeper_LowLevel/ZkV3_7_0_TotalOrder.tla": {
+      "id": "ZooKeeper_LowLevel/ZkV3_7_0_TotalOrder.tla",
+      "name": "ZooKeeper_LowLevel/ZkV3_7_0_TotalOrder.tla",
+      "kind": "target",
+      "lineStart": 2383,
+      "lineEnd": 2391,
+      "proofLines": [
+        2386,
+        2387,
+        2388,
+        2389,
+        2390,
+        2391
+      ],
+      "proofRange": [
+        2386,
+        2391
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "ZooKeeper_LowLevel/ZkV3_7_0_LocalPrimaryOrder.tla": {
+      "id": "ZooKeeper_LowLevel/ZkV3_7_0_LocalPrimaryOrder.tla",
+      "name": "ZooKeeper_LowLevel/ZkV3_7_0_LocalPrimaryOrder.tla",
+      "kind": "target",
+      "lineStart": 2394,
+      "lineEnd": 2402,
+      "proofLines": [
+        2397,
+        2398,
+        2399,
+        2400,
+        2401,
+        2402
+      ],
+      "proofRange": [
+        2397,
+        2402
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "ZooKeeper_LowLevel/ZkV3_7_0_GlobalPrimaryOrder.tla": {
+      "id": "ZooKeeper_LowLevel/ZkV3_7_0_GlobalPrimaryOrder.tla",
+      "name": "ZooKeeper_LowLevel/ZkV3_7_0_GlobalPrimaryOrder.tla",
+      "kind": "target",
+      "lineStart": 2405,
+      "lineEnd": 2413,
+      "proofLines": [
+        2408,
+        2409,
+        2410,
+        2411,
+        2412,
+        2413
+      ],
+      "proofRange": [
+        2408,
+        2413
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "ZooKeeper_LowLevel/ZkV3_7_0_PrimaryIntegrity.tla": {
+      "id": "ZooKeeper_LowLevel/ZkV3_7_0_PrimaryIntegrity.tla",
+      "name": "ZooKeeper_LowLevel/ZkV3_7_0_PrimaryIntegrity.tla",
+      "kind": "target",
+      "lineStart": 2416,
+      "lineEnd": 2424,
+      "proofLines": [
+        2419,
+        2420,
+        2421,
+        2422,
+        2423,
+        2424
+      ],
+      "proofRange": [
+        2419,
+        2424
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AGUpdateConnectingSids": {
+      "id": "helper:AGUpdateConnectingSids",
+      "name": "AGUpdateConnectingSids",
+      "kind": "helper",
+      "lineStart": 205,
+      "lineEnd": 208,
+      "proofLines": [
+        208
+      ],
+      "proofRange": [
+        208,
+        208
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AGRemoveConnectingSids": {
+      "id": "helper:AGRemoveConnectingSids",
+      "name": "AGRemoveConnectingSids",
+      "kind": "helper",
+      "lineStart": 210,
+      "lineEnd": 213,
+      "proofLines": [
+        213
+      ],
+      "proofRange": [
+        213,
+        213
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AGUpdateElectingSets": {
+      "id": "helper:AGUpdateElectingSets",
+      "name": "AGUpdateElectingSets",
+      "kind": "helper",
+      "lineStart": 215,
+      "lineEnd": 223,
+      "proofLines": [
+        223
+      ],
+      "proofRange": [
+        223,
+        223
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AGRemoveElectingSets": {
+      "id": "helper:AGRemoveElectingSets",
+      "name": "AGRemoveElectingSets",
+      "kind": "helper",
+      "lineStart": 225,
+      "lineEnd": 232,
+      "proofLines": [
+        232
+      ],
+      "proofRange": [
+        232,
+        232
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AGControlInit": {
+      "id": "helper:AGControlInit",
+      "name": "AGControlInit",
+      "kind": "helper",
+      "lineStart": 234,
+      "lineEnd": 240,
+      "proofLines": [
+        235,
+        236,
+        237,
+        238,
+        239,
+        240
+      ],
+      "proofRange": [
+        235,
+        240
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AGFiniteBridge": {
+      "id": "helper:AGFiniteBridge",
+      "name": "AGFiniteBridge",
+      "kind": "helper",
+      "lineStart": 242,
+      "lineEnd": 245,
+      "proofLines": [
+        245
+      ],
+      "proofRange": [
+        245,
+        245
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AGSingletonNotQuorum": {
+      "id": "helper:AGSingletonNotQuorum",
+      "name": "AGSingletonNotQuorum",
+      "kind": "helper",
+      "lineStart": 247,
+      "lineEnd": 255,
+      "proofLines": [
+        250,
+        251,
+        252,
+        253,
+        254,
+        255
+      ],
+      "proofRange": [
+        250,
+        255
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AGFiniteBridge"
+      ]
+    },
+    "helper:AGDoneReady": {
+      "id": "helper:AGDoneReady",
+      "name": "AGDoneReady",
+      "kind": "helper",
+      "lineStart": 257,
+      "lineEnd": 260,
+      "proofLines": [
+        260
+      ],
+      "proofRange": [
+        260,
+        260
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AGSingletonNotQuorum"
+      ]
+    },
+    "helper:AGFLEFrame": {
+      "id": "helper:AGFLEFrame",
+      "name": "AGFLEFrame",
+      "kind": "helper",
+      "lineStart": 262,
+      "lineEnd": 271,
+      "proofLines": [
+        269,
+        270,
+        271
+      ],
+      "proofRange": [
+        269,
+        271
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AGControlElectionProject": {
+      "id": "helper:AGControlElectionProject",
+      "name": "AGControlElectionProject",
+      "kind": "helper",
+      "lineStart": 298,
+      "lineEnd": 312,
+      "proofLines": [
+        302,
+        303,
+        304,
+        305,
+        306,
+        307,
+        308,
+        309,
+        310,
+        311,
+        312
+      ],
+      "proofRange": [
+        302,
+        312
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AGFLEFrame"
+      ]
+    },
+    "helper:AGControlElection": {
+      "id": "helper:AGControlElection",
+      "name": "AGControlElection",
+      "kind": "helper",
+      "lineStart": 314,
+      "lineEnd": 414,
+      "proofLines": [
+        318,
+        319,
+        320,
+        321,
+        322,
+        323,
+        324,
+        325,
+        326,
+        327,
+        328,
+        329,
+        330,
+        331,
+        332,
+        333,
+        334,
+        335,
+        336,
+        337,
+        338,
+        339,
+        340,
+        341,
+        342,
+        343,
+        344,
+        345,
+        346,
+        347,
+        348,
+        349,
+        350,
+        351,
+        352,
+        353,
+        354,
+        355,
+        356,
+        357,
+        358,
+        359,
+        360,
+        361,
+        362,
+        363,
+        364,
+        365,
+        366,
+        367,
+        368,
+        369,
+        370,
+        371,
+        372,
+        373,
+        374,
+        375,
+        376,
+        377,
+        378,
+        379,
+        380,
+        381,
+        382,
+        383,
+        384,
+        385,
+        386,
+        387,
+        388,
+        389,
+        390,
+        391,
+        392,
+        393,
+        394,
+        395,
+        396,
+        397,
+        398,
+        399,
+        400,
+        401,
+        402,
+        403,
+        404,
+        405,
+        406,
+        407,
+        408,
+        409,
+        410,
+        411,
+        412,
+        413,
+        414
+      ],
+      "proofRange": [
+        318,
+        414
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AGControlElectionProject",
+        "helper:AGSingletonNotQuorum"
+      ]
+    },
+    "helper:AGQuorumsMeet": {
+      "id": "helper:AGQuorumsMeet",
+      "name": "AGQuorumsMeet",
+      "kind": "helper",
+      "lineStart": 416,
+      "lineEnd": 428,
+      "proofLines": [
+        419,
+        420,
+        421,
+        422,
+        423,
+        424,
+        425,
+        426,
+        427,
+        428
+      ],
+      "proofRange": [
+        419,
+        428
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AGFiniteBridge"
+      ]
+    },
+    "helper:AGClaimsRemainSafe": {
+      "id": "helper:AGClaimsRemainSafe",
+      "name": "AGClaimsRemainSafe",
+      "kind": "helper",
+      "lineStart": 430,
+      "lineEnd": 449,
+      "proofLines": [
+        434,
+        435,
+        436,
+        437,
+        438,
+        439,
+        440,
+        441,
+        442,
+        443,
+        444,
+        445,
+        446,
+        447,
+        448,
+        449
+      ],
+      "proofRange": [
+        434,
+        449
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AGCertificatesPersist": {
+      "id": "helper:AGCertificatesPersist",
+      "name": "AGCertificatesPersist",
+      "kind": "helper",
+      "lineStart": 451,
+      "lineEnd": 482,
+      "proofLines": [
+        461,
+        462,
+        463,
+        464,
+        465,
+        466,
+        467,
+        468,
+        469,
+        470,
+        471,
+        472,
+        473,
+        474,
+        475,
+        476,
+        477,
+        478,
+        479,
+        480,
+        481,
+        482
+      ],
+      "proofRange": [
+        461,
+        482
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AGCertificateLeadership2": {
+      "id": "helper:AGCertificateLeadership2",
+      "name": "AGCertificateLeadership2",
+      "kind": "helper",
+      "lineStart": 484,
+      "lineEnd": 486,
+      "proofLines": [
+        485,
+        486
+      ],
+      "proofRange": [
+        485,
+        486
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AGFiniteBridge"
+      ]
+    },
+    "helper:AGClaimsLeadership1": {
+      "id": "helper:AGClaimsLeadership1",
+      "name": "AGClaimsLeadership1",
+      "kind": "helper",
+      "lineStart": 488,
+      "lineEnd": 507,
+      "proofLines": [
+        491,
+        492,
+        493,
+        494,
+        495,
+        496,
+        497,
+        498,
+        499,
+        500,
+        501,
+        502,
+        503,
+        504,
+        505,
+        506,
+        507
+      ],
+      "proofRange": [
+        491,
+        507
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AGDoneReady",
+        "helper:AGQuorumsMeet"
+      ]
+    },
+    "helper:AGControlClusterFacts": {
+      "id": "helper:AGControlClusterFacts",
+      "name": "AGControlClusterFacts",
+      "kind": "helper",
+      "lineStart": 509,
+      "lineEnd": 521,
+      "proofLines": [
+        520,
+        521
+      ],
+      "proofRange": [
+        520,
+        521
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AGConnectionUniqueness": {
+      "id": "helper:AGConnectionUniqueness",
+      "name": "AGConnectionUniqueness",
+      "kind": "helper",
+      "lineStart": 523,
+      "lineEnd": 528,
+      "proofLines": [
+        527,
+        528
+      ],
+      "proofRange": [
+        527,
+        528
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AGQueueBasics": {
+      "id": "helper:AGQueueBasics",
+      "name": "AGQueueBasics",
+      "kind": "helper",
+      "lineStart": 537,
+      "lineEnd": 540,
+      "proofLines": [
+        540
+      ],
+      "proofRange": [
+        540,
+        540
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AGControlConnectProject": {
+      "id": "helper:AGControlConnectProject",
+      "name": "AGControlConnectProject",
+      "kind": "helper",
+      "lineStart": 554,
+      "lineEnd": 560,
+      "proofLines": [
+        558,
+        559,
+        560
+      ],
+      "proofRange": [
+        558,
+        560
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AGControlClusterFacts",
+        "helper:AGQueueBasics"
+      ]
+    },
+    "helper:AGNoNewClaimsAdvance": {
+      "id": "helper:AGNoNewClaimsAdvance",
+      "name": "AGNoNewClaimsAdvance",
+      "kind": "helper",
+      "lineStart": 562,
+      "lineEnd": 573,
+      "proofLines": [
+        566,
+        567,
+        568,
+        569,
+        570,
+        571,
+        572,
+        573
+      ],
+      "proofRange": [
+        566,
+        573
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AGControlConnect": {
+      "id": "helper:AGControlConnect",
+      "name": "AGControlConnect",
+      "kind": "helper",
+      "lineStart": 575,
+      "lineEnd": 641,
+      "proofLines": [
+        579,
+        580,
+        581,
+        582,
+        583,
+        584,
+        585,
+        586,
+        587,
+        588,
+        589,
+        590,
+        591,
+        592,
+        593,
+        594,
+        595,
+        596,
+        597,
+        598,
+        599,
+        600,
+        601,
+        602,
+        603,
+        604,
+        605,
+        606,
+        607,
+        608,
+        609,
+        610,
+        611,
+        612,
+        613,
+        614,
+        615,
+        616,
+        617,
+        618,
+        619,
+        620,
+        621,
+        622,
+        623,
+        624,
+        625,
+        626,
+        627,
+        628,
+        629,
+        630,
+        631,
+        632,
+        633,
+        634,
+        635,
+        636,
+        637,
+        638,
+        639,
+        640,
+        641
+      ],
+      "proofRange": [
+        579,
+        641
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AGControlConnectProject",
+        "helper:AGNoNewClaimsAdvance"
+      ]
+    },
+    "helper:AGRemoveConnectingShape": {
+      "id": "helper:AGRemoveConnectingShape",
+      "name": "AGRemoveConnectingShape",
+      "kind": "helper",
+      "lineStart": 643,
+      "lineEnd": 648,
+      "proofLines": [
+        648
+      ],
+      "proofRange": [
+        648,
+        648
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AGRemoveElectingShape": {
+      "id": "helper:AGRemoveElectingShape",
+      "name": "AGRemoveElectingShape",
+      "kind": "helper",
+      "lineStart": 650,
+      "lineEnd": 655,
+      "proofLines": [
+        655
+      ],
+      "proofRange": [
+        655,
+        655
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AGUpdateConnectingShape": {
+      "id": "helper:AGUpdateConnectingShape",
+      "name": "AGUpdateConnectingShape",
+      "kind": "helper",
+      "lineStart": 657,
+      "lineEnd": 662,
+      "proofLines": [
+        662
+      ],
+      "proofRange": [
+        662,
+        662
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AGUpdateElectingShape": {
+      "id": "helper:AGUpdateElectingShape",
+      "name": "AGUpdateElectingShape",
+      "kind": "helper",
+      "lineStart": 664,
+      "lineEnd": 669,
+      "proofLines": [
+        669
+      ],
+      "proofRange": [
+        669,
+        669
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AGMatrixUpdate": {
+      "id": "helper:AGMatrixUpdate",
+      "name": "AGMatrixUpdate",
+      "kind": "helper",
+      "lineStart": 671,
+      "lineEnd": 674,
+      "proofLines": [
+        674
+      ],
+      "proofRange": [
+        674,
+        674
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AGDomainUpdate": {
+      "id": "helper:AGDomainUpdate",
+      "name": "AGDomainUpdate",
+      "kind": "helper",
+      "lineStart": 676,
+      "lineEnd": 679,
+      "proofLines": [
+        679
+      ],
+      "proofRange": [
+        679,
+        679
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AGDropProject": {
+      "id": "helper:AGDropProject",
+      "name": "AGDropProject",
+      "kind": "helper",
+      "lineStart": 695,
+      "lineEnd": 711,
+      "proofLines": [
+        701,
+        702,
+        703,
+        704,
+        705,
+        706,
+        707,
+        708,
+        709,
+        710,
+        711
+      ],
+      "proofRange": [
+        701,
+        711
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AGControlDrop": {
+      "id": "helper:AGControlDrop",
+      "name": "AGControlDrop",
+      "kind": "helper",
+      "lineStart": 713,
+      "lineEnd": 840,
+      "proofLines": [
+        716,
+        717,
+        718,
+        719,
+        720,
+        721,
+        722,
+        723,
+        724,
+        725,
+        726,
+        727,
+        728,
+        729,
+        730,
+        731,
+        732,
+        733,
+        734,
+        735,
+        736,
+        737,
+        738,
+        739,
+        740,
+        741,
+        742,
+        743,
+        744,
+        745,
+        746,
+        747,
+        748,
+        749,
+        750,
+        751,
+        752,
+        753,
+        754,
+        755,
+        756,
+        757,
+        758,
+        759,
+        760,
+        761,
+        762,
+        763,
+        764,
+        765,
+        766,
+        767,
+        768,
+        769,
+        770,
+        771,
+        772,
+        773,
+        774,
+        775,
+        776,
+        777,
+        778,
+        779,
+        780,
+        781,
+        782,
+        783,
+        784,
+        785,
+        786,
+        787,
+        788,
+        789,
+        790,
+        791,
+        792,
+        793,
+        794,
+        795,
+        796,
+        797,
+        798,
+        799,
+        800,
+        801,
+        802,
+        803,
+        804,
+        805,
+        806,
+        807,
+        808,
+        809,
+        810,
+        811,
+        812,
+        813,
+        814,
+        815,
+        816,
+        817,
+        818,
+        819,
+        820,
+        821,
+        822,
+        823,
+        824,
+        825,
+        826,
+        827,
+        828,
+        829,
+        830,
+        831,
+        832,
+        833,
+        834,
+        835,
+        836,
+        837,
+        838,
+        839,
+        840
+      ],
+      "proofRange": [
+        716,
+        840
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AGConnectionUniqueness",
+        "helper:AGControlClusterFacts",
+        "helper:AGDomainUpdate",
+        "helper:AGMatrixUpdate",
+        "helper:AGNoNewClaimsAdvance",
+        "helper:AGRemoveConnectingShape",
+        "helper:AGRemoveConnectingSids",
+        "helper:AGRemoveElectingSets",
+        "helper:AGRemoveElectingShape"
+      ]
+    },
+    "helper:AGControlUnchanged": {
+      "id": "helper:AGControlUnchanged",
+      "name": "AGControlUnchanged",
+      "kind": "helper",
+      "lineStart": 845,
+      "lineEnd": 856,
+      "proofLines": [
+        848,
+        849,
+        850,
+        851,
+        852,
+        853,
+        854,
+        855,
+        856
+      ],
+      "proofRange": [
+        848,
+        856
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AGNoNewClaimsAdvance"
+      ]
+    },
+    "helper:AGStopProject": {
+      "id": "helper:AGStopProject",
+      "name": "AGStopProject",
+      "kind": "helper",
+      "lineStart": 870,
+      "lineEnd": 878,
+      "proofLines": [
+        874,
+        875,
+        876,
+        877,
+        878
+      ],
+      "proofRange": [
+        874,
+        878
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AGControlStop": {
+      "id": "helper:AGControlStop",
+      "name": "AGControlStop",
+      "kind": "helper",
+      "lineStart": 880,
+      "lineEnd": 987,
+      "proofLines": [
+        883,
+        884,
+        885,
+        886,
+        887,
+        888,
+        889,
+        890,
+        891,
+        892,
+        893,
+        894,
+        895,
+        896,
+        897,
+        898,
+        899,
+        900,
+        901,
+        902,
+        903,
+        904,
+        905,
+        906,
+        907,
+        908,
+        909,
+        910,
+        911,
+        912,
+        913,
+        914,
+        915,
+        916,
+        917,
+        918,
+        919,
+        920,
+        921,
+        922,
+        923,
+        924,
+        925,
+        926,
+        927,
+        928,
+        929,
+        930,
+        931,
+        932,
+        933,
+        934,
+        935,
+        936,
+        937,
+        938,
+        939,
+        940,
+        941,
+        942,
+        943,
+        944,
+        945,
+        946,
+        947,
+        948,
+        949,
+        950,
+        951,
+        952,
+        953,
+        954,
+        955,
+        956,
+        957,
+        958,
+        959,
+        960,
+        961,
+        962,
+        963,
+        964,
+        965,
+        966,
+        967,
+        968,
+        969,
+        970,
+        971,
+        972,
+        973,
+        974,
+        975,
+        976,
+        977,
+        978,
+        979,
+        980,
+        981,
+        982,
+        983,
+        984,
+        985,
+        986,
+        987
+      ],
+      "proofRange": [
+        883,
+        987
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AGControlClusterFacts",
+        "helper:AGDomainUpdate",
+        "helper:AGNoNewClaimsAdvance"
+      ]
+    },
+    "helper:AGFollowerDataEnabled": {
+      "id": "helper:AGFollowerDataEnabled",
+      "name": "AGFollowerDataEnabled",
+      "kind": "helper",
+      "lineStart": 995,
+      "lineEnd": 1001,
+      "proofLines": [
+        1000,
+        1001
+      ],
+      "proofRange": [
+        1000,
+        1001
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AGLeaderDataEnabled": {
+      "id": "helper:AGLeaderDataEnabled",
+      "name": "AGLeaderDataEnabled",
+      "kind": "helper",
+      "lineStart": 1003,
+      "lineEnd": 1009,
+      "proofLines": [
+        1008,
+        1009
+      ],
+      "proofRange": [
+        1008,
+        1009
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AGDataControl": {
+      "id": "helper:AGDataControl",
+      "name": "AGDataControl",
+      "kind": "helper",
+      "lineStart": 1041,
+      "lineEnd": 1107,
+      "proofLines": [
+        1044,
+        1045,
+        1046,
+        1047,
+        1048,
+        1049,
+        1050,
+        1051,
+        1052,
+        1053,
+        1054,
+        1055,
+        1056,
+        1057,
+        1058,
+        1059,
+        1060,
+        1061,
+        1062,
+        1063,
+        1064,
+        1065,
+        1066,
+        1067,
+        1068,
+        1069,
+        1070,
+        1071,
+        1072,
+        1073,
+        1074,
+        1075,
+        1076,
+        1077,
+        1078,
+        1079,
+        1080,
+        1081,
+        1082,
+        1083,
+        1084,
+        1085,
+        1086,
+        1087,
+        1088,
+        1089,
+        1090,
+        1091,
+        1092,
+        1093,
+        1094,
+        1095,
+        1096,
+        1097,
+        1098,
+        1099,
+        1100,
+        1101,
+        1102,
+        1103,
+        1104,
+        1105,
+        1106,
+        1107
+      ],
+      "proofRange": [
+        1044,
+        1107
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AGDoneReady",
+        "helper:AGNoNewClaimsAdvance"
+      ]
+    },
+    "helper:AGMatrixRowUpdate": {
+      "id": "helper:AGMatrixRowUpdate",
+      "name": "AGMatrixRowUpdate",
+      "kind": "helper",
+      "lineStart": 1110,
+      "lineEnd": 1113,
+      "proofLines": [
+        1113
+      ],
+      "proofRange": [
+        1113,
+        1113
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AGPairMessageEffects": {
+      "id": "helper:AGPairMessageEffects",
+      "name": "AGPairMessageEffects",
+      "kind": "helper",
+      "lineStart": 1120,
+      "lineEnd": 1136,
+      "proofLines": [
+        1126,
+        1127,
+        1128,
+        1129,
+        1130,
+        1131,
+        1132,
+        1133,
+        1134,
+        1135,
+        1136
+      ],
+      "proofRange": [
+        1126,
+        1136
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AGMatrixUpdate"
+      ]
+    },
+    "helper:AGBroadcastEffects": {
+      "id": "helper:AGBroadcastEffects",
+      "name": "AGBroadcastEffects",
+      "kind": "helper",
+      "lineStart": 1138,
+      "lineEnd": 1149,
+      "proofLines": [
+        1148,
+        1149
+      ],
+      "proofRange": [
+        1148,
+        1149
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AGMatrixRowUpdate",
+        "helper:AGMatrixUpdate"
+      ]
+    },
+    "helper:AGUpToDateEffects": {
+      "id": "helper:AGUpToDateEffects",
+      "name": "AGUpToDateEffects",
+      "kind": "helper",
+      "lineStart": 1151,
+      "lineEnd": 1160,
+      "proofLines": [
+        1159,
+        1160
+      ],
+      "proofRange": [
+        1159,
+        1160
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AGMatrixRowUpdate",
+        "helper:AGMatrixUpdate"
+      ]
+    },
+    "helper:AGInfoBroadcastEffects": {
+      "id": "helper:AGInfoBroadcastEffects",
+      "name": "AGInfoBroadcastEffects",
+      "kind": "helper",
+      "lineStart": 1162,
+      "lineEnd": 1171,
+      "proofLines": [
+        1170,
+        1171
+      ],
+      "proofRange": [
+        1170,
+        1171
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AGMatrixRowUpdate",
+        "helper:AGMatrixUpdate"
+      ]
+    },
+    "helper:AGSyncSend": {
+      "id": "helper:AGSyncSend",
+      "name": "AGSyncSend",
+      "kind": "helper",
+      "lineStart": 1173,
+      "lineEnd": 1176,
+      "proofLines": [
+        1176
+      ],
+      "proofRange": [
+        1176,
+        1176
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AGEstablishedTables": {
+      "id": "helper:AGEstablishedTables",
+      "name": "AGEstablishedTables",
+      "kind": "helper",
+      "lineStart": 1192,
+      "lineEnd": 1200,
+      "proofLines": [
+        1199,
+        1200
+      ],
+      "proofRange": [
+        1199,
+        1200
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AGUnchangedDataTables": {
+      "id": "helper:AGUnchangedDataTables",
+      "name": "AGUnchangedDataTables",
+      "kind": "helper",
+      "lineStart": 1202,
+      "lineEnd": 1208,
+      "proofLines": [
+        1206,
+        1207,
+        1208
+      ],
+      "proofRange": [
+        1206,
+        1208
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AGEstablishedTables"
+      ]
+    },
+    "helper:AGFollowerPayloadProject": {
+      "id": "helper:AGFollowerPayloadProject",
+      "name": "AGFollowerPayloadProject",
+      "kind": "helper",
+      "lineStart": 1219,
+      "lineEnd": 1263,
+      "proofLines": [
+        1222,
+        1223,
+        1224,
+        1225,
+        1226,
+        1227,
+        1228,
+        1229,
+        1230,
+        1231,
+        1232,
+        1233,
+        1234,
+        1235,
+        1236,
+        1237,
+        1238,
+        1239,
+        1240,
+        1241,
+        1242,
+        1243,
+        1244,
+        1245,
+        1246,
+        1247,
+        1248,
+        1249,
+        1250,
+        1251,
+        1252,
+        1253,
+        1254,
+        1255,
+        1256,
+        1257,
+        1258,
+        1259,
+        1260,
+        1261,
+        1262,
+        1263
+      ],
+      "proofRange": [
+        1222,
+        1263
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AGFollowerDataEnabled",
+        "helper:AGPairMessageEffects",
+        "helper:AGUnchangedDataTables"
+      ]
+    },
+    "helper:AGLeaderPayloadProject": {
+      "id": "helper:AGLeaderPayloadProject",
+      "name": "AGLeaderPayloadProject",
+      "kind": "helper",
+      "lineStart": 1265,
+      "lineEnd": 1301,
+      "proofLines": [
+        1269,
+        1270,
+        1271,
+        1272,
+        1273,
+        1274,
+        1275,
+        1276,
+        1277,
+        1278,
+        1279,
+        1280,
+        1281,
+        1282,
+        1283,
+        1284,
+        1285,
+        1286,
+        1287,
+        1288,
+        1289,
+        1290,
+        1291,
+        1292,
+        1293,
+        1294,
+        1295,
+        1296,
+        1297,
+        1298,
+        1299,
+        1300,
+        1301
+      ],
+      "proofRange": [
+        1269,
+        1301
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AGBroadcastEffects",
+        "helper:AGEstablishedTables",
+        "helper:AGLeaderDataEnabled",
+        "helper:AGPairMessageEffects",
+        "helper:AGUnchangedDataTables"
+      ]
+    },
+    "helper:AGResetPeerProperties": {
+      "id": "helper:AGResetPeerProperties",
+      "name": "AGResetPeerProperties",
+      "kind": "helper",
+      "lineStart": 1306,
+      "lineEnd": 1315,
+      "proofLines": [
+        1315
+      ],
+      "proofRange": [
+        1315,
+        1315
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AGSyncProject": {
+      "id": "helper:AGSyncProject",
+      "name": "AGSyncProject",
+      "kind": "helper",
+      "lineStart": 1317,
+      "lineEnd": 1387,
+      "proofLines": [
+        1320,
+        1321,
+        1322,
+        1323,
+        1324,
+        1325,
+        1326,
+        1327,
+        1328,
+        1329,
+        1330,
+        1331,
+        1332,
+        1333,
+        1334,
+        1335,
+        1336,
+        1337,
+        1338,
+        1339,
+        1340,
+        1341,
+        1342,
+        1343,
+        1344,
+        1345,
+        1346,
+        1347,
+        1348,
+        1349,
+        1350,
+        1351,
+        1352,
+        1353,
+        1354,
+        1355,
+        1356,
+        1357,
+        1358,
+        1359,
+        1360,
+        1361,
+        1362,
+        1363,
+        1364,
+        1365,
+        1366,
+        1367,
+        1368,
+        1369,
+        1370,
+        1371,
+        1372,
+        1373,
+        1374,
+        1375,
+        1376,
+        1377,
+        1378,
+        1379,
+        1380,
+        1381,
+        1382,
+        1383,
+        1384,
+        1385,
+        1386,
+        1387
+      ],
+      "proofRange": [
+        1320,
+        1387
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AGDomainUpdate",
+        "helper:AGEstablishedTables",
+        "helper:AGPairMessageEffects",
+        "helper:AGResetPeerProperties",
+        "helper:AGSyncSend"
+      ]
+    },
+    "helper:AGAckldProject": {
+      "id": "helper:AGAckldProject",
+      "name": "AGAckldProject",
+      "kind": "helper",
+      "lineStart": 1389,
+      "lineEnd": 1424,
+      "proofLines": [
+        1392,
+        1393,
+        1394,
+        1395,
+        1396,
+        1397,
+        1398,
+        1399,
+        1400,
+        1401,
+        1402,
+        1403,
+        1404,
+        1405,
+        1406,
+        1407,
+        1408,
+        1409,
+        1410,
+        1411,
+        1412,
+        1413,
+        1414,
+        1415,
+        1416,
+        1417,
+        1418,
+        1419,
+        1420,
+        1421,
+        1422,
+        1423,
+        1424
+      ],
+      "proofRange": [
+        1392,
+        1424
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AGConnectionUniqueness",
+        "helper:AGEstablishedTables",
+        "helper:AGLeaderDataEnabled",
+        "helper:AGPairMessageEffects",
+        "helper:AGUpToDateEffects",
+        "helper:AGUpdateConnectingShape",
+        "helper:AGUpdateConnectingSids"
+      ]
+    },
+    "helper:AGShrinkControl": {
+      "id": "helper:AGShrinkControl",
+      "name": "AGShrinkControl",
+      "kind": "helper",
+      "lineStart": 1434,
+      "lineEnd": 1482,
+      "proofLines": [
+        1437,
+        1438,
+        1439,
+        1440,
+        1441,
+        1442,
+        1443,
+        1444,
+        1445,
+        1446,
+        1447,
+        1448,
+        1449,
+        1450,
+        1451,
+        1452,
+        1453,
+        1454,
+        1455,
+        1456,
+        1457,
+        1458,
+        1459,
+        1460,
+        1461,
+        1462,
+        1463,
+        1464,
+        1465,
+        1466,
+        1467,
+        1468,
+        1469,
+        1470,
+        1471,
+        1472,
+        1473,
+        1474,
+        1475,
+        1476,
+        1477,
+        1478,
+        1479,
+        1480,
+        1481,
+        1482
+      ],
+      "proofRange": [
+        1437,
+        1482
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AGNoNewClaimsAdvance"
+      ]
+    },
+    "helper:AGDiscardShrink": {
+      "id": "helper:AGDiscardShrink",
+      "name": "AGDiscardShrink",
+      "kind": "helper",
+      "lineStart": 1484,
+      "lineEnd": 1487,
+      "proofLines": [
+        1487
+      ],
+      "proofRange": [
+        1487,
+        1487
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AGMatrixUpdate",
+        "helper:AGQueueBasics"
+      ]
+    },
+    "helper:AGResetControl": {
+      "id": "helper:AGResetControl",
+      "name": "AGResetControl",
+      "kind": "helper",
+      "lineStart": 1499,
+      "lineEnd": 1546,
+      "proofLines": [
+        1502,
+        1503,
+        1504,
+        1505,
+        1506,
+        1507,
+        1508,
+        1509,
+        1510,
+        1511,
+        1512,
+        1513,
+        1514,
+        1515,
+        1516,
+        1517,
+        1518,
+        1519,
+        1520,
+        1521,
+        1522,
+        1523,
+        1524,
+        1525,
+        1526,
+        1527,
+        1528,
+        1529,
+        1530,
+        1531,
+        1532,
+        1533,
+        1534,
+        1535,
+        1536,
+        1537,
+        1538,
+        1539,
+        1540,
+        1541,
+        1542,
+        1543,
+        1544,
+        1545,
+        1546
+      ],
+      "proofRange": [
+        1502,
+        1546
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AGControlClusterFacts",
+        "helper:AGNoNewClaimsAdvance"
+      ]
+    },
+    "helper:AGCleanSymmetry": {
+      "id": "helper:AGCleanSymmetry",
+      "name": "AGCleanSymmetry",
+      "kind": "helper",
+      "lineStart": 1548,
+      "lineEnd": 1551,
+      "proofLines": [
+        1551
+      ],
+      "proofRange": [
+        1551,
+        1551
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AGEnvironmentControl": {
+      "id": "helper:AGEnvironmentControl",
+      "name": "AGEnvironmentControl",
+      "kind": "helper",
+      "lineStart": 1553,
+      "lineEnd": 1567,
+      "proofLines": [
+        1557,
+        1558,
+        1559,
+        1560,
+        1561,
+        1562,
+        1563,
+        1564,
+        1565,
+        1566,
+        1567
+      ],
+      "proofRange": [
+        1557,
+        1567
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AGCleanSymmetry",
+        "helper:AGControlDrop",
+        "helper:AGControlStop",
+        "helper:AGControlUnchanged",
+        "helper:AGDropProject",
+        "helper:AGResetControl",
+        "helper:AGStopProject"
+      ]
+    },
+    "helper:AGElectionAdvance": {
+      "id": "helper:AGElectionAdvance",
+      "name": "AGElectionAdvance",
+      "kind": "helper",
+      "lineStart": 1569,
+      "lineEnd": 1589,
+      "proofLines": [
+        1572,
+        1573,
+        1574,
+        1575,
+        1576,
+        1577,
+        1578,
+        1579,
+        1580,
+        1581,
+        1582,
+        1583,
+        1584,
+        1585,
+        1586,
+        1587,
+        1588,
+        1589
+      ],
+      "proofRange": [
+        1572,
+        1589
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AGNoNewClaimsAdvance",
+        "helper:AGSingletonNotQuorum"
+      ]
+    },
+    "helper:AGAcceptProject": {
+      "id": "helper:AGAcceptProject",
+      "name": "AGAcceptProject",
+      "kind": "helper",
+      "lineStart": 1605,
+      "lineEnd": 1621,
+      "proofLines": [
+        1610,
+        1611,
+        1612,
+        1613,
+        1614,
+        1615,
+        1616,
+        1617,
+        1618,
+        1619,
+        1620,
+        1621
+      ],
+      "proofRange": [
+        1610,
+        1621
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AGQueueBasics"
+      ]
+    },
+    "helper:AGAcceptControl": {
+      "id": "helper:AGAcceptControl",
+      "name": "AGAcceptControl",
+      "kind": "helper",
+      "lineStart": 1623,
+      "lineEnd": 1703,
+      "proofLines": [
+        1626,
+        1627,
+        1628,
+        1629,
+        1630,
+        1631,
+        1632,
+        1633,
+        1634,
+        1635,
+        1636,
+        1637,
+        1638,
+        1639,
+        1640,
+        1641,
+        1642,
+        1643,
+        1644,
+        1645,
+        1646,
+        1647,
+        1648,
+        1649,
+        1650,
+        1651,
+        1652,
+        1653,
+        1654,
+        1655,
+        1656,
+        1657,
+        1658,
+        1659,
+        1660,
+        1661,
+        1662,
+        1663,
+        1664,
+        1665,
+        1666,
+        1667,
+        1668,
+        1669,
+        1670,
+        1671,
+        1672,
+        1673,
+        1674,
+        1675,
+        1676,
+        1677,
+        1678,
+        1679,
+        1680,
+        1681,
+        1682,
+        1683,
+        1684,
+        1685,
+        1686,
+        1687,
+        1688,
+        1689,
+        1690,
+        1691,
+        1692,
+        1693,
+        1694,
+        1695,
+        1696,
+        1697,
+        1698,
+        1699,
+        1700,
+        1701,
+        1702,
+        1703
+      ],
+      "proofRange": [
+        1626,
+        1703
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AGMatrixUpdate"
+      ]
+    },
+    "helper:AGFollowerLeaderInfoControl": {
+      "id": "helper:AGFollowerLeaderInfoControl",
+      "name": "AGFollowerLeaderInfoControl",
+      "kind": "helper",
+      "lineStart": 1705,
+      "lineEnd": 1723,
+      "proofLines": [
+        1708,
+        1709,
+        1710,
+        1711,
+        1712,
+        1713,
+        1714,
+        1715,
+        1716,
+        1717,
+        1718,
+        1719,
+        1720,
+        1721,
+        1722,
+        1723
+      ],
+      "proofRange": [
+        1708,
+        1723
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AGAcceptControl",
+        "helper:AGAcceptProject",
+        "helper:AGCleanSymmetry",
+        "helper:AGControlDrop",
+        "helper:AGDiscardShrink",
+        "helper:AGDropProject",
+        "helper:AGShrinkControl"
+      ]
+    },
+    "helper:AGShutdownLooking": {
+      "id": "helper:AGShutdownLooking",
+      "name": "AGShutdownLooking",
+      "kind": "helper",
+      "lineStart": 1738,
+      "lineEnd": 1741,
+      "proofLines": [
+        1741
+      ],
+      "proofRange": [
+        1741,
+        1741
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AGVoteProject": {
+      "id": "helper:AGVoteProject",
+      "name": "AGVoteProject",
+      "kind": "helper",
+      "lineStart": 1743,
+      "lineEnd": 1773,
+      "proofLines": [
+        1747,
+        1748,
+        1749,
+        1750,
+        1751,
+        1752,
+        1753,
+        1754,
+        1755,
+        1756,
+        1757,
+        1758,
+        1759,
+        1760,
+        1761,
+        1762,
+        1763,
+        1764,
+        1765,
+        1766,
+        1767,
+        1768,
+        1769,
+        1770,
+        1771,
+        1772,
+        1773
+      ],
+      "proofRange": [
+        1747,
+        1773
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AGDoneReady",
+        "helper:AGShutdownLooking",
+        "helper:AGUpdateElectingSets"
+      ]
+    },
+    "helper:AGVoteControl": {
+      "id": "helper:AGVoteControl",
+      "name": "AGVoteControl",
+      "kind": "helper",
+      "lineStart": 1775,
+      "lineEnd": 1853,
+      "proofLines": [
+        1778,
+        1779,
+        1780,
+        1781,
+        1782,
+        1783,
+        1784,
+        1785,
+        1786,
+        1787,
+        1788,
+        1789,
+        1790,
+        1791,
+        1792,
+        1793,
+        1794,
+        1795,
+        1796,
+        1797,
+        1798,
+        1799,
+        1800,
+        1801,
+        1802,
+        1803,
+        1804,
+        1805,
+        1806,
+        1807,
+        1808,
+        1809,
+        1810,
+        1811,
+        1812,
+        1813,
+        1814,
+        1815,
+        1816,
+        1817,
+        1818,
+        1819,
+        1820,
+        1821,
+        1822,
+        1823,
+        1824,
+        1825,
+        1826,
+        1827,
+        1828,
+        1829,
+        1830,
+        1831,
+        1832,
+        1833,
+        1834,
+        1835,
+        1836,
+        1837,
+        1838,
+        1839,
+        1840,
+        1841,
+        1842,
+        1843,
+        1844,
+        1845,
+        1846,
+        1847,
+        1848,
+        1849,
+        1850,
+        1851,
+        1852,
+        1853
+      ],
+      "proofRange": [
+        1778,
+        1853
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AGDiscardShrink",
+        "helper:AGDomainUpdate",
+        "helper:AGNoNewClaimsAdvance",
+        "helper:AGUpdateElectingSets",
+        "helper:AGUpdateElectingShape"
+      ]
+    },
+    "helper:AGLeaderAckEpochControl": {
+      "id": "helper:AGLeaderAckEpochControl",
+      "name": "AGLeaderAckEpochControl",
+      "kind": "helper",
+      "lineStart": 1855,
+      "lineEnd": 1867,
+      "proofLines": [
+        1859,
+        1860,
+        1861,
+        1862,
+        1863,
+        1864,
+        1865,
+        1866,
+        1867
+      ],
+      "proofRange": [
+        1859,
+        1867
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AGControlStop",
+        "helper:AGStopProject",
+        "helper:AGVoteControl",
+        "helper:AGVoteProject"
+      ]
+    },
+    "helper:AGUnreadyChannels": {
+      "id": "helper:AGUnreadyChannels",
+      "name": "AGUnreadyChannels",
+      "kind": "helper",
+      "lineStart": 1869,
+      "lineEnd": 1882,
+      "proofLines": [
+        1878,
+        1879,
+        1880,
+        1881,
+        1882
+      ],
+      "proofRange": [
+        1878,
+        1882
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AGDoneReady"
+      ]
+    },
+    "helper:AGSelectProject": {
+      "id": "helper:AGSelectProject",
+      "name": "AGSelectProject",
+      "kind": "helper",
+      "lineStart": 1909,
+      "lineEnd": 1991,
+      "proofLines": [
+        1913,
+        1914,
+        1915,
+        1916,
+        1917,
+        1918,
+        1919,
+        1920,
+        1921,
+        1922,
+        1923,
+        1924,
+        1925,
+        1926,
+        1927,
+        1928,
+        1929,
+        1930,
+        1931,
+        1932,
+        1933,
+        1934,
+        1935,
+        1936,
+        1937,
+        1938,
+        1939,
+        1940,
+        1941,
+        1942,
+        1943,
+        1944,
+        1945,
+        1946,
+        1947,
+        1948,
+        1949,
+        1950,
+        1951,
+        1952,
+        1953,
+        1954,
+        1955,
+        1956,
+        1957,
+        1958,
+        1959,
+        1960,
+        1961,
+        1962,
+        1963,
+        1964,
+        1965,
+        1966,
+        1967,
+        1968,
+        1969,
+        1970,
+        1971,
+        1972,
+        1973,
+        1974,
+        1975,
+        1976,
+        1977,
+        1978,
+        1979,
+        1980,
+        1981,
+        1982,
+        1983,
+        1984,
+        1985,
+        1986,
+        1987,
+        1988,
+        1989,
+        1990,
+        1991
+      ],
+      "proofRange": [
+        1913,
+        1991
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AGInfoBroadcastEffects",
+        "helper:AGPairMessageEffects",
+        "helper:AGQueueBasics",
+        "helper:AGUnreadyChannels",
+        "helper:AGUpdateConnectingShape"
+      ]
+    },
+    "helper:AGSelectControl": {
+      "id": "helper:AGSelectControl",
+      "name": "AGSelectControl",
+      "kind": "helper",
+      "lineStart": 1993,
+      "lineEnd": 2082,
+      "proofLines": [
+        1997,
+        1998,
+        1999,
+        2000,
+        2001,
+        2002,
+        2003,
+        2004,
+        2005,
+        2006,
+        2007,
+        2008,
+        2009,
+        2010,
+        2011,
+        2012,
+        2013,
+        2014,
+        2015,
+        2016,
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025,
+        2026,
+        2027,
+        2028,
+        2029,
+        2030,
+        2031,
+        2032,
+        2033,
+        2034,
+        2035,
+        2036,
+        2037,
+        2038,
+        2039,
+        2040,
+        2041,
+        2042,
+        2043,
+        2044,
+        2045,
+        2046,
+        2047,
+        2048,
+        2049,
+        2050,
+        2051,
+        2052,
+        2053,
+        2054,
+        2055,
+        2056,
+        2057,
+        2058,
+        2059,
+        2060,
+        2061,
+        2062,
+        2063,
+        2064,
+        2065,
+        2066,
+        2067,
+        2068,
+        2069,
+        2070,
+        2071,
+        2072,
+        2073,
+        2074,
+        2075,
+        2076,
+        2077,
+        2078,
+        2079,
+        2080,
+        2081,
+        2082
+      ],
+      "proofRange": [
+        1997,
+        2082
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AGConnectionUniqueness",
+        "helper:AGDomainUpdate",
+        "helper:AGUnreadyChannels",
+        "helper:AGUpdateConnectingShape",
+        "helper:AGUpdateConnectingSids"
+      ]
+    },
+    "helper:AGFollowerInfoControl": {
+      "id": "helper:AGFollowerInfoControl",
+      "name": "AGFollowerInfoControl",
+      "kind": "helper",
+      "lineStart": 2084,
+      "lineEnd": 2107,
+      "proofLines": [
+        2088,
+        2089,
+        2090,
+        2091,
+        2092,
+        2093,
+        2094,
+        2095,
+        2096,
+        2097,
+        2098,
+        2099,
+        2100,
+        2101,
+        2102,
+        2103,
+        2104,
+        2105,
+        2106,
+        2107
+      ],
+      "proofRange": [
+        2088,
+        2107
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AGDataControl",
+        "helper:AGDoneReady",
+        "helper:AGPairMessageEffects",
+        "helper:AGSelectControl",
+        "helper:AGSelectProject",
+        "helper:AGUnchangedDataTables"
+      ]
+    },
+    "helper:AGIdleControlFrame": {
+      "id": "helper:AGIdleControlFrame",
+      "name": "AGIdleControlFrame",
+      "kind": "helper",
+      "lineStart": 2109,
+      "lineEnd": 2114,
+      "proofLines": [
+        2113,
+        2114
+      ],
+      "proofRange": [
+        2113,
+        2114
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AGControlNext": {
+      "id": "helper:AGControlNext",
+      "name": "AGControlNext",
+      "kind": "helper",
+      "lineStart": 2116,
+      "lineEnd": 2136,
+      "proofLines": [
+        2119,
+        2120,
+        2121,
+        2122,
+        2123,
+        2124,
+        2125,
+        2126,
+        2127,
+        2128,
+        2129,
+        2130,
+        2131,
+        2132,
+        2133,
+        2134,
+        2135,
+        2136
+      ],
+      "proofRange": [
+        2119,
+        2136
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AGAckldProject",
+        "helper:AGControlConnect",
+        "helper:AGControlElection",
+        "helper:AGControlElectionProject",
+        "helper:AGControlUnchanged",
+        "helper:AGDataControl",
+        "helper:AGElectionAdvance",
+        "helper:AGEnvironmentControl",
+        "helper:AGFollowerInfoControl",
+        "helper:AGFollowerLeaderInfoControl",
+        "helper:AGFollowerPayloadProject",
+        "helper:AGIdleControlFrame",
+        "helper:AGLeaderAckEpochControl",
+        "helper:AGLeaderPayloadProject",
+        "helper:AGSyncProject"
+      ]
+    },
+    "helper:AGAckEpochLogFrame": {
+      "id": "helper:AGAckEpochLogFrame",
+      "name": "AGAckEpochLogFrame",
+      "kind": "helper",
+      "lineStart": 2145,
+      "lineEnd": 2153,
+      "proofLines": [
+        2148,
+        2149,
+        2150,
+        2151,
+        2152,
+        2153
+      ],
+      "proofRange": [
+        2148,
+        2153
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AGLogNext": {
+      "id": "helper:AGLogNext",
+      "name": "AGLogNext",
+      "kind": "helper",
+      "lineStart": 2155,
+      "lineEnd": 2163,
+      "proofLines": [
+        2156,
+        2157,
+        2158,
+        2159,
+        2160,
+        2161,
+        2162,
+        2163
+      ],
+      "proofRange": [
+        2156,
+        2163
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AGAckEpochLogFrame"
+      ]
+    },
+    "helper:AGPostQuorumCertificate": {
+      "id": "helper:AGPostQuorumCertificate",
+      "name": "AGPostQuorumCertificate",
+      "kind": "helper",
+      "lineStart": 2165,
+      "lineEnd": 2180,
+      "proofLines": [
+        2174,
+        2175,
+        2176,
+        2177,
+        2178,
+        2179,
+        2180
+      ],
+      "proofRange": [
+        2174,
+        2180
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AGSingletonNotQuorum"
+      ]
+    },
+    "helper:AGLeadershipAdvance": {
+      "id": "helper:AGLeadershipAdvance",
+      "name": "AGLeadershipAdvance",
+      "kind": "helper",
+      "lineStart": 2182,
+      "lineEnd": 2254,
+      "proofLines": [
+        2186,
+        2187,
+        2188,
+        2189,
+        2190,
+        2191,
+        2192,
+        2193,
+        2194,
+        2195,
+        2196,
+        2197,
+        2198,
+        2199,
+        2200,
+        2201,
+        2202,
+        2203,
+        2204,
+        2205,
+        2206,
+        2207,
+        2208,
+        2209,
+        2210,
+        2211,
+        2212,
+        2213,
+        2214,
+        2215,
+        2216,
+        2217,
+        2218,
+        2219,
+        2220,
+        2221,
+        2222,
+        2223,
+        2224,
+        2225,
+        2226,
+        2227,
+        2228,
+        2229,
+        2230,
+        2231,
+        2232,
+        2233,
+        2234,
+        2235,
+        2236,
+        2237,
+        2238,
+        2239,
+        2240,
+        2241,
+        2242,
+        2243,
+        2244,
+        2245,
+        2246,
+        2247,
+        2248,
+        2249,
+        2250,
+        2251,
+        2252,
+        2253,
+        2254
+      ],
+      "proofRange": [
+        2186,
+        2254
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AGCertificatesPersist",
+        "helper:AGClaimsRemainSafe",
+        "helper:AGPostQuorumCertificate",
+        "helper:AGQuorumsMeet"
+      ]
+    },
+    "helper:AGLeadershipInit": {
+      "id": "helper:AGLeadershipInit",
+      "name": "AGLeadershipInit",
+      "kind": "helper",
+      "lineStart": 2256,
+      "lineEnd": 2262,
+      "proofLines": [
+        2257,
+        2258,
+        2259,
+        2260,
+        2261,
+        2262
+      ],
+      "proofRange": [
+        2257,
+        2262
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AGControlInit"
+      ]
+    },
+    "helper:AGLeadershipStep": {
+      "id": "helper:AGLeadershipStep",
+      "name": "AGLeadershipStep",
+      "kind": "helper",
+      "lineStart": 2264,
+      "lineEnd": 2274,
+      "proofLines": [
+        2267,
+        2268,
+        2269,
+        2270,
+        2271,
+        2272,
+        2273,
+        2274
+      ],
+      "proofRange": [
+        2267,
+        2274
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AGControlNext",
+        "helper:AGControlUnchanged",
+        "helper:AGLeadershipAdvance",
+        "helper:AGLogNext"
+      ]
+    },
+    "helper:AGLeadershipAlways": {
+      "id": "helper:AGLeadershipAlways",
+      "name": "AGLeadershipAlways",
+      "kind": "helper",
+      "lineStart": 2276,
+      "lineEnd": 2285,
+      "proofLines": [
+        2278,
+        2279,
+        2280,
+        2281,
+        2282,
+        2283,
+        2284,
+        2285
+      ],
+      "proofRange": [
+        2278,
+        2285
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AGLeadershipInit",
+        "helper:AGLeadershipStep"
+      ]
+    },
+    "helper:AGLogTypeAlways": {
+      "id": "helper:AGLogTypeAlways",
+      "name": "AGLogTypeAlways",
+      "kind": "helper",
+      "lineStart": 2289,
+      "lineEnd": 2294,
+      "proofLines": [
+        2290,
+        2291,
+        2292,
+        2293,
+        2294
+      ],
+      "proofRange": [
+        2290,
+        2294
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AGLogNext"
+      ]
+    },
+    "helper:AGSmallServer": {
+      "id": "helper:AGSmallServer",
+      "name": "AGSmallServer",
+      "kind": "helper",
+      "lineStart": 2296,
+      "lineEnd": 2303,
+      "proofLines": [
+        2298,
+        2299,
+        2300,
+        2301,
+        2302,
+        2303
+      ],
+      "proofRange": [
+        2298,
+        2303
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AGFiniteBridge"
+      ]
+    },
+    "helper:AGSmallLeadership2": {
+      "id": "helper:AGSmallLeadership2",
+      "name": "AGSmallLeadership2",
+      "kind": "helper",
+      "lineStart": 2305,
+      "lineEnd": 2315,
+      "proofLines": [
+        2308,
+        2309,
+        2310,
+        2311,
+        2312,
+        2313,
+        2314,
+        2315
+      ],
+      "proofRange": [
+        2308,
+        2315
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AGFiniteBridge"
+      ]
+    }
+  }
+}

@@ -28,7 +28,8 @@ for (const family of suite.families) {
       new Set(family.taskIds).size !== family.taskCount) fail(`invalid v1.0 task manifest: ${family.id}`);
   families.set(family.id, family);
 }
-const sum = (rows, field) => rows.reduce((total, row) => total + row[field], 0);
+const sum = (rows, field) => rows.some((row) => row[field] == null)
+  ? null : rows.reduce((total, row) => total + row[field], 0);
 if (sum(suite.families, "taskCount") !== suite.taskCount ||
     sum(suite.families, "specCount") !== suite.specCount) fail("suite totals do not match families");
 if (suite.specCount !== 9 || suite.taskCount !== 56 ||
@@ -52,7 +53,12 @@ if (!Array.isArray(cohort.models) || !cohort.models.length) fail("missing models
 const modelIds = new Set();
 let canonicalTaskIds;
 const usageFields = ["timeSecs", "inputTokens", "outputTokens", "turns", "costUsd"];
+const optionalUsageFields = new Set(["timeSecs", "turns", "costUsd"]);
+const optionalSummaryFields = new Set(["totalHours", "minutesPerTask", "turnsPerTask"]);
 const close = (a, b) => Math.abs(a - b) <= 1e-8 * Math.max(1, Math.abs(a), Math.abs(b));
+const equalMetric = (a, b) => a === null || b === null ? a === b : Number.isFinite(a) && Number.isFinite(b) && close(a, b);
+const mapMetric = (value, formatter) => value === null ? null : formatter(value);
+const displayMetric = (value, formatter) => value === null ? "" : formatter(value);
 for (const model of cohort.models) {
   if (!model.id || !model.name || modelIds.has(model.id)) fail("invalid or duplicate model");
   modelIds.add(model.id);
@@ -74,9 +80,10 @@ for (const model of cohort.models) {
   if (sum(model.results, "passed") !== model.passed || sum(model.results, "total") !== model.total ||
       model.total !== cohort.taskCount) fail(`model total does not match results: ${model.id}`);
   for (const field of ["totalHours", "minutesPerTask", "turnsPerTask", "inputTokensPerTaskM", "outputTokensPerTaskM"]) {
+    if (optionalSummaryFields.has(field) && model[field] === null) continue;
     if (!Number.isFinite(model[field]) || model[field] < 0) fail(`invalid ${field}: ${model.id}`);
   }
-  if (!model.costLabel || !Array.isArray(model.specs) || model.specs.length !== cohort.specCount) {
+  if ((!model.costLabel && model.usage?.costUsd !== null) || !Array.isArray(model.specs) || model.specs.length !== cohort.specCount) {
     fail(`missing specification details: ${model.id}`);
   }
   const specIds = new Set();
@@ -140,6 +147,7 @@ for (const model of cohort.models) {
       fail(`task verdicts disagree with specification score: ${spec.id}`);
     }
     for (const field of usageFields) {
+      if (optionalUsageFields.has(field) && spec[field] === null) continue;
       if (!Number.isFinite(spec[field]) || spec[field] < 0) fail(`invalid ${field}: ${spec.id}`);
     }
     if (spec.cacheReadInputTokens != null && (!Number.isFinite(spec.cacheReadInputTokens) ||
@@ -157,13 +165,13 @@ for (const model of cohort.models) {
         sum(specs, "total") !== result.total) fail(`family details disagree with summary: ${model.id}/${result.family}`);
   }
   for (const field of usageFields) {
-    if (!Number.isFinite(model.usage?.[field]) || !close(sum(model.specs, field), model.usage[field])) {
+    if (!equalMetric(sum(model.specs, field), model.usage?.[field])) {
       fail(`usage details disagree with summary: ${model.id}/${field}`);
     }
   }
-  if (!close(Number((model.usage.timeSecs / 3600).toFixed(1)), model.totalHours) ||
-      Math.ceil(model.usage.timeSecs / 60 / model.total) !== model.minutesPerTask ||
-      Math.ceil(model.usage.turns / model.total) !== model.turnsPerTask ||
+  if (!equalMetric(mapMetric(model.usage.timeSecs, (value) => Number((value / 3600).toFixed(1))), model.totalHours) ||
+      mapMetric(model.usage.timeSecs, (value) => Math.ceil(value / 60 / model.total)) !== model.minutesPerTask ||
+      mapMetric(model.usage.turns, (value) => Math.ceil(value / model.total)) !== model.turnsPerTask ||
       !close(Number((model.usage.inputTokens / model.total / 1e6).toFixed(1)), model.inputTokensPerTaskM) ||
       !close(Number((model.usage.outputTokens / model.total / 1e6).toFixed(3)), model.outputTokensPerTaskM)) {
     fail(`usage details disagree with the reported rounded metrics: ${model.id}`);
@@ -198,10 +206,11 @@ for (const table of documentMetrics.tables) {
     const score = `${passed}/${total} (${Number.isInteger(rate) ? rate : rate.toFixed(1)}%)`;
     const expected = [
       family?.name ?? "Total / average", family?.level ?? "", `${specs.length} / ${total}`, score,
-      (usage.timeSecs / 3600).toFixed(1), String(Math.ceil(usage.timeSecs / 60 / total)),
-      Math.ceil(usage.turns / total).toLocaleString("en-US"),
+      displayMetric(usage.timeSecs, (value) => (value / 3600).toFixed(1)),
+      displayMetric(usage.timeSecs, (value) => String(Math.ceil(value / 60 / total))),
+      displayMetric(usage.turns, (value) => Math.ceil(value / total).toLocaleString("en-US")),
       `${(usage.inputTokens / total / 1e6).toFixed(1)} / ${(usage.outputTokens / total / 1e6).toFixed(3)}`,
-      money(usage.costUsd / total), money(usage.costUsd),
+      displayMetric(usage.costUsd, (value) => money(value / total)), displayMetric(usage.costUsd, money),
     ];
     if (JSON.stringify(row) !== JSON.stringify(expected)) {
       fail(`document metrics disagree with recorded results: ${model.id}/${family?.id ?? "total"}\nDocument: ${JSON.stringify(row)}\nComputed: ${JSON.stringify(expected)}`);

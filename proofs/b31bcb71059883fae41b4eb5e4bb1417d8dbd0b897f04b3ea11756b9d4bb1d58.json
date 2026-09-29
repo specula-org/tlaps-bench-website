@@ -1,0 +1,196 @@
+{
+  "schemaVersion": 1,
+  "specId": "HashicorpRaft/HashicorpRaft.tla",
+  "sourceName": "HashicorpRaft.tla",
+  "sourceSha256": "d0b81331a634ef79c327c26764b29846b0068e02e341f30b750535efcd1f453e",
+  "resultSha256": "0aff202d1d723c682da32cab4ad9749a17b96b3b4354bd6cb6a7833cab2465de",
+  "source": "---- MODULE HashicorpRaft ----\nEXTENDS HashicorpRaftDefs\n\n\\* BEGIN AGENT HELPERS\nLOCAL RaftProof == INSTANCE TLAPS\nLOCAL RaftFinite == INSTANCE FiniteSetTheorems\nLOCAL RaftSequences == INSTANCE SequenceTheorems\n\\* END AGENT HELPERS\n\nTHEOREM LeaderCompletenessCorrect == Spec => []LeaderCompleteness\n\\* BEGIN AGENT PROOF HashicorpRaft/HashicorpRaft_LeaderCompletenessCorrect.tla\n<1>1. Init => LeaderCompleteness\n  BY RaftProof!SMTT(\"r5\") DEF Init, LeaderCompleteness\n<1>2. LeaderCompleteness /\\ UNCHANGED vars => LeaderCompleteness'\n  BY RaftProof!SMTT(\"r5\")\n    DEF LeaderCompleteness, vars, protocolVars, historyVars,\n        serverVars, logVars, leaderVars, candidateVars,\n        leaseVars, diskVars, configVars, persistVars, IsPrefix, Min, Max\n\\* Remaining obligation: protocol-step preservation needs strengthening.\n<1>3. LeaderCompleteness /\\ Next => LeaderCompleteness'\n  BY RaftProof!SMTT(\"r5\")\n    DEF LeaderCompleteness, Next, RecordEvents, ProtocolNext\n<1>4. LeaderCompleteness /\\ [Next]_vars => LeaderCompleteness'\n  BY <1>2, <1>3, RaftProof!SMTT(\"r5\")\n<1> QED\n  BY <1>1, <1>4, RaftProof!PTL DEF Spec\n\\* END AGENT PROOF HashicorpRaft/HashicorpRaft_LeaderCompletenessCorrect.tla\n\nTHEOREM StateMachineSafetyCorrect == Spec => []StateMachineSafety\n\\* BEGIN AGENT PROOF HashicorpRaft/HashicorpRaft_StateMachineSafetyCorrect.tla\n<1>1. Init => StateMachineSafety\n  BY RaftProof!SMTT(\"r5\") DEF Init, StateMachineSafety\n<1>2. StateMachineSafety /\\ UNCHANGED vars => StateMachineSafety'\n  BY RaftProof!SMTT(\"r5\")\n    DEF StateMachineSafety, vars, protocolVars, historyVars,\n        serverVars, logVars, leaderVars, candidateVars,\n        leaseVars, diskVars, configVars, persistVars, IsPrefix, Min, Max\n\\* Remaining obligation: protocol-step preservation needs strengthening.\n<1>3. StateMachineSafety /\\ Next => StateMachineSafety'\n  BY RaftProof!SMTT(\"r5\")\n    DEF StateMachineSafety, Next, RecordEvents, ProtocolNext\n<1>4. StateMachineSafety /\\ [Next]_vars => StateMachineSafety'\n  BY <1>2, <1>3, RaftProof!SMTT(\"r5\")\n<1> QED\n  BY <1>1, <1>4, RaftProof!PTL DEF Spec\n\\* END AGENT PROOF HashicorpRaft/HashicorpRaft_StateMachineSafetyCorrect.tla\n\nTHEOREM CommittedEntriesPreservedCorrect == Spec => []CommittedEntriesPreserved\n\\* BEGIN AGENT PROOF HashicorpRaft/HashicorpRaft_CommittedEntriesPreservedCorrect.tla\n<1>1. Init => CommittedEntriesPreserved\n  BY RaftProof!SMTT(\"r5\") DEF Init, CommittedEntriesPreserved\n<1>2. CommittedEntriesPreserved /\\ UNCHANGED vars => CommittedEntriesPreserved'\n  BY RaftProof!SMTT(\"r5\")\n    DEF CommittedEntriesPreserved, vars, protocolVars, historyVars,\n        serverVars, logVars, leaderVars, candidateVars,\n        leaseVars, diskVars, configVars, persistVars, IsPrefix, Min, Max\n\\* Remaining obligation: protocol-step preservation needs strengthening.\n<1>3. CommittedEntriesPreserved /\\ Next => CommittedEntriesPreserved'\n  BY RaftProof!SMTT(\"r5\")\n    DEF CommittedEntriesPreserved, Next, RecordEvents, ProtocolNext\n<1>4. CommittedEntriesPreserved /\\ [Next]_vars => CommittedEntriesPreserved'\n  BY <1>2, <1>3, RaftProof!SMTT(\"r5\")\n<1> QED\n  BY <1>1, <1>4, RaftProof!PTL DEF Spec\n\\* END AGENT PROOF HashicorpRaft/HashicorpRaft_CommittedEntriesPreservedCorrect.tla\n\nTHEOREM LogMatchingCorrect == Spec => []LogMatching\n\\* BEGIN AGENT PROOF HashicorpRaft/HashicorpRaft_LogMatchingCorrect.tla\n<1>1. Init => LogMatching\n  BY RaftSequences!EmptySeq, RaftProof!SMTT(\"r30\") DEF Init, LogMatching, ProtocolInit, Min, Max\n<1>2. LogMatching /\\ UNCHANGED vars => LogMatching'\n  BY RaftProof!SMTT(\"r5\")\n    DEF LogMatching, vars, protocolVars, historyVars,\n        serverVars, logVars, leaderVars, candidateVars,\n        leaseVars, diskVars, configVars, persistVars, IsPrefix, Min, Max\n\\* Remaining obligation: protocol-step preservation needs strengthening.\n<1>3. LogMatching /\\ Next => LogMatching'\n  BY RaftProof!SMTT(\"r5\")\n    DEF LogMatching, Next, RecordEvents, ProtocolNext\n<1>4. LogMatching /\\ [Next]_vars => LogMatching'\n  BY <1>2, <1>3, RaftProof!SMTT(\"r5\")\n<1> QED\n  BY <1>1, <1>4, RaftProof!PTL DEF Spec\n\\* END AGENT PROOF HashicorpRaft/HashicorpRaft_LogMatchingCorrect.tla\n\nTHEOREM ElectionSafetyCorrect == Spec => []ElectionSafety\n\\* BEGIN AGENT PROOF HashicorpRaft/HashicorpRaft_ElectionSafetyCorrect.tla\n<1>1. Init => ElectionSafety\n  BY RaftProof!SMTT(\"r5\") DEF Init, ElectionSafety\n<1>2. ElectionSafety /\\ UNCHANGED vars => ElectionSafety'\n  BY RaftProof!SMTT(\"r5\")\n    DEF ElectionSafety, vars, protocolVars, historyVars,\n        serverVars, logVars, leaderVars, candidateVars,\n        leaseVars, diskVars, configVars, persistVars, IsPrefix, Min, Max\n\\* Remaining obligation: protocol-step preservation needs strengthening.\n<1>3. ElectionSafety /\\ Next => ElectionSafety'\n  BY RaftProof!SMTT(\"r5\")\n    DEF ElectionSafety, Next, RecordEvents, ProtocolNext\n<1>4. ElectionSafety /\\ [Next]_vars => ElectionSafety'\n  BY <1>2, <1>3, RaftProof!SMTT(\"r5\")\n<1> QED\n  BY <1>1, <1>4, RaftProof!PTL DEF Spec\n\\* END AGENT PROOF HashicorpRaft/HashicorpRaft_ElectionSafetyCorrect.tla\n\nTHEOREM ConfigurationSafetyCorrect == Spec => []ConfigurationSafety\n\\* BEGIN AGENT PROOF HashicorpRaft/HashicorpRaft_ConfigurationSafetyCorrect.tla\n<1>1. Init => ConfigurationSafety\n  <2>1. Len(<<>>) = 0\n    BY RaftSequences!EmptySeq, RaftProof!SMTT(\"r5\")\n  <2>2. ASSUME Init\n        PROVE \\A s \\in Server :\n          {k \\in (Max(commitIndex[s], committedConfigIndex[s])+1)..Len(log[s]) :\n             log[s][k].type = ConfigEntry} = {}\n    BY <2>1, RaftProof!SMTT(\"r30\") DEF Init, ProtocolInit, Max\n  <2> QED\n    BY <2>2, RaftFinite!FS_EmptySet, RaftProof!SMTT(\"r30\")\n      DEF ConfigurationSafety\n<1>2. ConfigurationSafety /\\ UNCHANGED vars => ConfigurationSafety'\n  <2>1. UNCHANGED vars =>\n          UNCHANGED <<state, log, commitIndex, committedConfigIndex>>\n    BY RaftProof!SMTT(\"r30\")\n      DEF vars, protocolVars, historyVars, serverVars, logVars,\n          leaderVars, candidateVars, leaseVars, diskVars, configVars, persistVars\n  <2> QED\n    BY <2>1, RaftProof!SMTT(\"r30\") DEF ConfigurationSafety, Max\n\\* Remaining obligation: protocol-step preservation needs strengthening.\n<1>3. ConfigurationSafety /\\ Next => ConfigurationSafety'\n  BY RaftProof!SMTT(\"r5\")\n    DEF ConfigurationSafety, Next, RecordEvents, ProtocolNext\n<1>4. ConfigurationSafety /\\ [Next]_vars => ConfigurationSafety'\n  BY <1>2, <1>3, RaftProof!SMTT(\"r5\")\n<1> QED\n  BY <1>1, <1>4, RaftProof!PTL DEF Spec\n\\* END AGENT PROOF HashicorpRaft/HashicorpRaft_ConfigurationSafetyCorrect.tla\n====\n",
+  "units": {
+    "HashicorpRaft/HashicorpRaft_LeaderCompletenessCorrect.tla": {
+      "id": "HashicorpRaft/HashicorpRaft_LeaderCompletenessCorrect.tla",
+      "name": "LeaderCompletenessCorrect",
+      "kind": "target",
+      "lineStart": 10,
+      "lineEnd": 26,
+      "proofLines": [
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26
+      ],
+      "proofRange": [
+        12,
+        26
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "HashicorpRaft/HashicorpRaft_StateMachineSafetyCorrect.tla": {
+      "id": "HashicorpRaft/HashicorpRaft_StateMachineSafetyCorrect.tla",
+      "name": "StateMachineSafetyCorrect",
+      "kind": "target",
+      "lineStart": 29,
+      "lineEnd": 45,
+      "proofLines": [
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45
+      ],
+      "proofRange": [
+        31,
+        45
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "HashicorpRaft/HashicorpRaft_CommittedEntriesPreservedCorrect.tla": {
+      "id": "HashicorpRaft/HashicorpRaft_CommittedEntriesPreservedCorrect.tla",
+      "name": "CommittedEntriesPreservedCorrect",
+      "kind": "target",
+      "lineStart": 48,
+      "lineEnd": 64,
+      "proofLines": [
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        58,
+        59,
+        60,
+        61,
+        62,
+        63,
+        64
+      ],
+      "proofRange": [
+        50,
+        64
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "HashicorpRaft/HashicorpRaft_LogMatchingCorrect.tla": {
+      "id": "HashicorpRaft/HashicorpRaft_LogMatchingCorrect.tla",
+      "name": "LogMatchingCorrect",
+      "kind": "target",
+      "lineStart": 67,
+      "lineEnd": 83,
+      "proofLines": [
+        69,
+        70,
+        71,
+        72,
+        73,
+        74,
+        75,
+        77,
+        78,
+        79,
+        80,
+        81,
+        82,
+        83
+      ],
+      "proofRange": [
+        69,
+        83
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "HashicorpRaft/HashicorpRaft_ElectionSafetyCorrect.tla": {
+      "id": "HashicorpRaft/HashicorpRaft_ElectionSafetyCorrect.tla",
+      "name": "ElectionSafetyCorrect",
+      "kind": "target",
+      "lineStart": 86,
+      "lineEnd": 102,
+      "proofLines": [
+        88,
+        89,
+        90,
+        91,
+        92,
+        93,
+        94,
+        96,
+        97,
+        98,
+        99,
+        100,
+        101,
+        102
+      ],
+      "proofRange": [
+        88,
+        102
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "HashicorpRaft/HashicorpRaft_ConfigurationSafetyCorrect.tla": {
+      "id": "HashicorpRaft/HashicorpRaft_ConfigurationSafetyCorrect.tla",
+      "name": "ConfigurationSafetyCorrect",
+      "kind": "target",
+      "lineStart": 105,
+      "lineEnd": 133,
+      "proofLines": [
+        107,
+        108,
+        109,
+        110,
+        111,
+        112,
+        113,
+        114,
+        115,
+        116,
+        117,
+        118,
+        119,
+        120,
+        121,
+        122,
+        123,
+        124,
+        125,
+        127,
+        128,
+        129,
+        130,
+        131,
+        132,
+        133
+      ],
+      "proofRange": [
+        107,
+        133
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    }
+  }
+}

@@ -1,0 +1,497 @@
+{
+  "schemaVersion": 1,
+  "specId": "ZooKeeper_LowLevel/ZkV3_7_0.tla",
+  "sourceName": "ZkV3_7_0.tla",
+  "sourceSha256": "53bd49d8ce75d8c9b9da44eb282efd26f39ea31988dd1af2fd47473be6cff068",
+  "resultSha256": "3c8868ce45370e8dc9b668d094d6ce8d4492bd858379d377b8bc8d135830ea5b",
+  "source": "---- MODULE ZkV3_7_0 ----\nEXTENDS ZkV3_7_0Defs\n\n\\* BEGIN AGENT HELPERS\n\nLOCAL AGFinite == INSTANCE FiniteSetTheorems\n\nAGProperties == /\\ Leadership1\n                /\\ Leadership2\n                /\\ PrefixConsistency\n                /\\ Integrity\n                /\\ Agreement\n                /\\ TotalOrder\n                /\\ LocalPrimaryOrder\n                /\\ GlobalPrimaryOrder\n                /\\ PrimaryIntegrity\n\nLEMMA AGCardinalityAlias == \\A S: Cardinality(S) = AGFinite!Cardinality(S)\nBY DEF Cardinality, AGFinite!Cardinality\n\nLEMMA AGMinimumSingleton == Minimum({1}) = 1\nBY SMTT(\"r3\") DEF Minimum\n\nLEMMA AGInitialSafety == Init => AGProperties\n<1>1. Init => Leadership1\n  BY SMTT(\"r3\") DEF Init, InitServerVars, InitServerVarsL,\n    Leadership1, IsLeader, LOOKING, LEADING\n<1>2. Init => Leadership2\n  <2>1. Cardinality({}) = 0\n    BY AGFinite!FS_EmptySet, AGCardinalityAlias, SMTT(\"r3\")\n  <2>2. ASSUME Init, NEW e \\in 1..MAXEPOCH\n        PROVE Cardinality(epochLeader[e]) <= 1\n    <3>1. epochLeader[e] = {}\n      BY <2>2, SMTT(\"r3\") DEF Init, InitVerifyVars\n    <3> QED BY <2>1, <3>1, SMTT(\"r3\")\n  <2> QED BY <2>2 DEF Leadership2\n<1>3. Init => PrefixConsistency\n  <2>1. ASSUME Init, NEW i \\in Server, NEW j \\in Server\n        PROVE LET smaller == Minimum({lastCommitted[i].index,\n                                      lastCommitted[j].index})\n              IN \\/ smaller = 0\n                 \\/ /\\ smaller > 0\n                    /\\ \\A index \\in 1..smaller:\n                        TxnEqual(history[i][index], history[j][index])\n    <3>1. /\\ lastCommitted[i].index = 1\n           /\\ lastCommitted[j].index = 1\n           /\\ history[i] = history[j]\n      BY <2>1, SMTT(\"r3\") DEF Init, InitServerVars, InitServerVarsL\n    <3>2. {lastCommitted[i].index, lastCommitted[j].index} = {1}\n      BY <3>1, SMTT(\"r3\")\n    <3>3. Minimum({lastCommitted[i].index, lastCommitted[j].index}) = 1\n      BY <3>2, AGMinimumSingleton, SMTT(\"r3\")\n    <3> QED BY <3>1, <3>3, SMTT(\"r3\") DEF TxnEqual, ZxidEqual\n  <2> QED BY <2>1 DEF PrefixConsistency\n<1>4. Init => Integrity\n  BY SMTT(\"r3\") DEF Init, InitServerVars, InitServerVarsL,\n    Integrity, IsFollower, LOOKING, FOLLOWING\n<1>5. Init => Agreement\n  BY SMTT(\"r3\") DEF Init, InitServerVars, InitServerVarsL,\n    Agreement, IsFollower, LOOKING, FOLLOWING\n<1>6. Init => TotalOrder\n  BY SMTT(\"r3\") DEF Init, InitServerVars, TotalOrder\n<1>7. Init => LocalPrimaryOrder\n  BY SMTT(\"r3\") DEF Init, InitServerVars, InitServerVarsL,\n    LocalPrimaryOrder\n<1>8. Init => GlobalPrimaryOrder\n  BY SMTT(\"r3\") DEF Init, InitServerVars, GlobalPrimaryOrder\n<1>9. Init => PrimaryIntegrity\n  BY SMTT(\"r3\") DEF Init, InitServerVars, InitServerVarsL,\n    PrimaryIntegrity, IsLeader, LOOKING, LEADING\n<1> QED BY <1>1, <1>2, <1>3, <1>4, <1>5, <1>6, <1>7, <1>8, <1>9\n  DEF AGProperties\n\n\\* Only processing ACKEPOCH can add a leader to the epoch registry.\nAGRegistryUnchangedSteps ==\n  \\/ \\E i, j \\in Server: FLEReceiveNotmsg(i, j)\n  \\/ \\E i \\in Server: FLENotmsgTimeout(i)\n  \\/ \\E i \\in Server: FLEHandleNotmsg(i)\n  \\/ \\E i \\in Server: FLEWaitNewNotmsg(i)\n  \\/ \\E i, j \\in Server: PartitionStart(i, j)\n  \\/ \\E i, j \\in Server: PartitionRecover(i, j)\n  \\/ \\E i \\in Server: NodeCrash(i)\n  \\/ \\E i \\in Server: NodeStart(i)\n  \\/ \\E i, j \\in Server: ConnectAndFollowerSendFOLLOWERINFO(i, j)\n  \\/ \\E i, j \\in Server: LeaderProcessFOLLOWERINFO(i, j)\n  \\/ \\E i, j \\in Server: FollowerProcessLEADERINFO(i, j)\n  \\/ \\E i, j \\in Server: LeaderSyncFollower(i, j)\n  \\/ \\E i, j \\in Server: FollowerProcessSyncMessage(i, j)\n  \\/ \\E i, j \\in Server: FollowerProcessPROPOSALInSync(i, j)\n  \\/ \\E i, j \\in Server: FollowerProcessCOMMITInSync(i, j)\n  \\/ \\E i, j \\in Server: FollowerProcessNEWLEADER(i, j)\n  \\/ \\E i, j \\in Server: LeaderProcessACKLD(i, j)\n  \\/ \\E i, j \\in Server: FollowerProcessUPTODATE(i, j)\n  \\/ \\E i \\in Server: LeaderProcessRequest(i)\n  \\/ \\E i, j \\in Server: FollowerProcessPROPOSAL(i, j)\n  \\/ \\E i, j \\in Server: LeaderProcessACK(i, j)\n  \\/ \\E i, j \\in Server: FollowerProcessCOMMIT(i, j)\n\nLEMMA AGRegistryFrame == AGRegistryUnchangedSteps => UNCHANGED epochLeader\n<1>1. (\\E i, j \\in Server: FLEReceiveNotmsg(i, j)) => UNCHANGED epochLeader\n  BY SMTT(\"r3\") DEF FLEReceiveNotmsg, verifyVars\n<1>2. (\\E i \\in Server: FLENotmsgTimeout(i)) => UNCHANGED epochLeader\n  BY SMTT(\"r3\") DEF FLENotmsgTimeout, verifyVars\n<1>3. (\\E i \\in Server: FLEHandleNotmsg(i)) => UNCHANGED epochLeader\n  BY SMTT(\"r3\") DEF FLEHandleNotmsg, verifyVars\n<1>4. (\\E i \\in Server: FLEWaitNewNotmsg(i)) => UNCHANGED epochLeader\n  BY SMTT(\"r3\") DEF FLEWaitNewNotmsg, verifyVars\n<1>5. (\\E i, j \\in Server: PartitionStart(i, j)) => UNCHANGED epochLeader\n  BY SMTT(\"r3\") DEF PartitionStart, verifyVars\n<1>6. (\\E i, j \\in Server: PartitionRecover(i, j)) => UNCHANGED epochLeader\n  BY SMTT(\"r3\") DEF PartitionRecover, verifyVars\n<1>7. (\\E i \\in Server: NodeCrash(i)) => UNCHANGED epochLeader\n  BY SMTT(\"r3\") DEF NodeCrash, verifyVars\n<1>8. (\\E i \\in Server: NodeStart(i)) => UNCHANGED epochLeader\n  BY SMTT(\"r3\") DEF NodeStart, verifyVars\n<1>9. (\\E i, j \\in Server: ConnectAndFollowerSendFOLLOWERINFO(i, j)) => UNCHANGED epochLeader\n  BY SMTT(\"r3\") DEF ConnectAndFollowerSendFOLLOWERINFO, verifyVars\n<1>10. (\\E i, j \\in Server: LeaderProcessFOLLOWERINFO(i, j)) => UNCHANGED epochLeader\n  BY SMTT(\"r3\") DEF LeaderProcessFOLLOWERINFO, verifyVars\n<1>11. (\\E i, j \\in Server: FollowerProcessLEADERINFO(i, j)) => UNCHANGED epochLeader\n  BY SMTT(\"r3\") DEF FollowerProcessLEADERINFO, verifyVars\n<1>12. (\\E i, j \\in Server: LeaderSyncFollower(i, j)) => UNCHANGED epochLeader\n  BY SMTT(\"r3\") DEF LeaderSyncFollower, verifyVars\n<1>13. (\\E i, j \\in Server: FollowerProcessSyncMessage(i, j)) => UNCHANGED epochLeader\n  BY SMTT(\"r3\") DEF FollowerProcessSyncMessage, verifyVars\n<1>14. (\\E i, j \\in Server: FollowerProcessPROPOSALInSync(i, j)) => UNCHANGED epochLeader\n  BY SMTT(\"r3\") DEF FollowerProcessPROPOSALInSync, verifyVars\n<1>15. (\\E i, j \\in Server: FollowerProcessCOMMITInSync(i, j)) => UNCHANGED epochLeader\n  BY SMTT(\"r3\") DEF FollowerProcessCOMMITInSync, verifyVars\n<1>16. (\\E i, j \\in Server: FollowerProcessNEWLEADER(i, j)) => UNCHANGED epochLeader\n  BY SMTT(\"r3\") DEF FollowerProcessNEWLEADER, verifyVars\n<1>17. (\\E i, j \\in Server: LeaderProcessACKLD(i, j)) => UNCHANGED epochLeader\n  BY SMTT(\"r3\") DEF LeaderProcessACKLD, verifyVars\n<1>18. (\\E i, j \\in Server: FollowerProcessUPTODATE(i, j)) => UNCHANGED epochLeader\n  BY SMTT(\"r3\") DEF FollowerProcessUPTODATE, verifyVars\n<1>19. (\\E i \\in Server: LeaderProcessRequest(i)) => UNCHANGED epochLeader\n  BY SMTT(\"r3\") DEF LeaderProcessRequest, verifyVars\n<1>20. (\\E i, j \\in Server: FollowerProcessPROPOSAL(i, j)) => UNCHANGED epochLeader\n  BY SMTT(\"r3\") DEF FollowerProcessPROPOSAL, verifyVars\n<1>21. (\\E i, j \\in Server: LeaderProcessACK(i, j)) => UNCHANGED epochLeader\n  BY SMTT(\"r3\") DEF LeaderProcessACK, verifyVars\n<1>22. (\\E i, j \\in Server: FollowerProcessCOMMIT(i, j)) => UNCHANGED epochLeader\n  BY SMTT(\"r3\") DEF FollowerProcessCOMMIT, verifyVars\n<1> QED BY <1>1, <1>2, <1>3, <1>4, <1>5, <1>6, <1>7, <1>8, <1>9, <1>10, <1>11, <1>12, <1>13, <1>14, <1>15, <1>16, <1>17, <1>18, <1>19, <1>20, <1>21, <1>22\n  DEF AGRegistryUnchangedSteps\n\nAGRegistryType == epochLeader \\in [1..MAXEPOCH -> SUBSET Server]\n\nLEMMA AGRegistryTypeInit == Init => AGRegistryType\nBY SMTT(\"r3\") DEF Init, InitVerifyVars, AGRegistryType\n\nLEMMA AGRegistryTypeStep == AGRegistryType /\\ [Next]_vars => AGRegistryType'\n<1>1. AGRegistryType /\\ UNCHANGED epochLeader => AGRegistryType'\n  BY SMTT(\"r3\") DEF AGRegistryType\n<1>2. ASSUME AGRegistryType,\n             NEW i \\in Server, NEW j \\in Server,\n             LeaderProcessACKEPOCH(i, j)\n      PROVE AGRegistryType'\n  BY <1>2, SMTT(\"r10\") DEF AGRegistryType, LeaderProcessACKEPOCH\n<1>3. AGRegistryType /\\ Next => AGRegistryType'\n  BY <1>1, <1>2, AGRegistryFrame, SMTT(\"r3\")\n    DEF Next, AGRegistryUnchangedSteps\n<1>4. UNCHANGED vars => UNCHANGED epochLeader\n  BY SMTT(\"r3\") DEF vars, verifyVars\n<1> QED BY <1>1, <1>3, <1>4\n\nLEMMA AGRegistryInvariant == Spec => []AGRegistryType\nBY AGRegistryTypeInit, AGRegistryTypeStep, PTL DEF Spec\n\\* END AGENT HELPERS\n\nTHEOREM Spec => []Leadership1\n\\* BEGIN AGENT PROOF ZooKeeper_LowLevel/ZkV3_7_0_Leadership1.tla\n<1>1. Init => Leadership1\n  BY AGInitialSafety DEF AGProperties\n<1>2. Leadership1 /\\ Next => Leadership1'\n  BY SMTT(\"r3\") DEF Leadership1, Next\n<1>3. Leadership1 /\\ UNCHANGED vars => Leadership1'\n  BY SMTT(\"r3\") DEF Leadership1, vars, serverVars, electionVars,\n    leaderVars, followerVars, verifyVars, msgVars, envVars,\n    IsLeader, IsFollower, IsMyLeader, IsMyLearner\n<1>4. Leadership1 /\\ [Next]_vars => Leadership1'\n  BY <1>2, <1>3\n<1> QED BY <1>1, <1>4, PTL DEF Spec\n\\* END AGENT PROOF ZooKeeper_LowLevel/ZkV3_7_0_Leadership1.tla\n\nTHEOREM Spec => []Leadership2\n\\* BEGIN AGENT PROOF ZooKeeper_LowLevel/ZkV3_7_0_Leadership2.tla\n<1>1. Init => Leadership2\n  BY AGInitialSafety DEF AGProperties\n<1>2. AGRegistryType /\\ Leadership2 /\\ Next => Leadership2'\n  <2>1. Leadership2 /\\ AGRegistryUnchangedSteps => Leadership2'\n    BY AGRegistryFrame, SMTT(\"r3\") DEF Leadership2\n  <2>2. ASSUME AGRegistryType, Leadership2,\n               NEW i \\in Server, NEW j \\in Server,\n               LeaderProcessACKEPOCH(i, j)\n        PROVE Leadership2'\n    BY <2>2, SMTT(\"r3\") DEF AGRegistryType, Leadership2, LeaderProcessACKEPOCH,\n      LeaderTurnToSynchronization, LeaderShutdown, ZabTimeoutInCluster,\n      varsL, serverVarsL\n  <2> QED BY <2>1, <2>2 DEF Next, AGRegistryUnchangedSteps\n<1>3. Leadership2 /\\ UNCHANGED vars => Leadership2'\n  BY SMTT(\"r3\") DEF Leadership2, vars, serverVars, electionVars,\n    leaderVars, followerVars, verifyVars, msgVars, envVars,\n    IsLeader, IsFollower, IsMyLeader, IsMyLearner\n<1>4. AGRegistryType /\\ Leadership2 /\\ [Next]_vars => Leadership2'\n  BY <1>2, <1>3\n<1> QED BY <1>1, <1>4, AGRegistryInvariant, PTL DEF Spec\n\\* END AGENT PROOF ZooKeeper_LowLevel/ZkV3_7_0_Leadership2.tla\n\nTHEOREM Spec => []PrefixConsistency\n\\* BEGIN AGENT PROOF ZooKeeper_LowLevel/ZkV3_7_0_PrefixConsistency.tla\n<1>1. Init => PrefixConsistency\n  BY AGInitialSafety DEF AGProperties\n<1>2. PrefixConsistency /\\ Next => PrefixConsistency'\n  BY SMTT(\"r3\") DEF PrefixConsistency, Next\n<1>3. PrefixConsistency /\\ UNCHANGED vars => PrefixConsistency'\n  BY SMTT(\"r3\") DEF PrefixConsistency, vars, serverVars, electionVars,\n    leaderVars, followerVars, verifyVars, msgVars, envVars,\n    IsLeader, IsFollower, IsMyLeader, IsMyLearner\n<1>4. PrefixConsistency /\\ [Next]_vars => PrefixConsistency'\n  BY <1>2, <1>3\n<1> QED BY <1>1, <1>4, PTL DEF Spec\n\\* END AGENT PROOF ZooKeeper_LowLevel/ZkV3_7_0_PrefixConsistency.tla\n\nTHEOREM Spec => []Integrity\n\\* BEGIN AGENT PROOF ZooKeeper_LowLevel/ZkV3_7_0_Integrity.tla\n<1>1. Init => Integrity\n  BY AGInitialSafety DEF AGProperties\n<1>2. Integrity /\\ Next => Integrity'\n  BY SMTT(\"r3\") DEF Integrity, Next\n<1>3. Integrity /\\ UNCHANGED vars => Integrity'\n  BY SMTT(\"r3\") DEF Integrity, vars, serverVars, electionVars,\n    leaderVars, followerVars, verifyVars, msgVars, envVars,\n    IsLeader, IsFollower, IsMyLeader, IsMyLearner\n<1>4. Integrity /\\ [Next]_vars => Integrity'\n  BY <1>2, <1>3\n<1> QED BY <1>1, <1>4, PTL DEF Spec\n\\* END AGENT PROOF ZooKeeper_LowLevel/ZkV3_7_0_Integrity.tla\n\nTHEOREM Spec => []Agreement\n\\* BEGIN AGENT PROOF ZooKeeper_LowLevel/ZkV3_7_0_Agreement.tla\n<1>1. Init => Agreement\n  BY AGInitialSafety DEF AGProperties\n<1>2. Agreement /\\ Next => Agreement'\n  BY SMTT(\"r3\") DEF Agreement, Next\n<1>3. Agreement /\\ UNCHANGED vars => Agreement'\n  BY SMTT(\"r3\") DEF Agreement, vars, serverVars, electionVars,\n    leaderVars, followerVars, verifyVars, msgVars, envVars,\n    IsLeader, IsFollower, IsMyLeader, IsMyLearner\n<1>4. Agreement /\\ [Next]_vars => Agreement'\n  BY <1>2, <1>3\n<1> QED BY <1>1, <1>4, PTL DEF Spec\n\\* END AGENT PROOF ZooKeeper_LowLevel/ZkV3_7_0_Agreement.tla\n\nTHEOREM Spec => []TotalOrder\n\\* BEGIN AGENT PROOF ZooKeeper_LowLevel/ZkV3_7_0_TotalOrder.tla\n<1>1. Init => TotalOrder\n  BY AGInitialSafety DEF AGProperties\n<1>2. TotalOrder /\\ Next => TotalOrder'\n  BY SMTT(\"r3\") DEF TotalOrder, Next\n<1>3. TotalOrder /\\ UNCHANGED vars => TotalOrder'\n  BY SMTT(\"r3\") DEF TotalOrder, vars, serverVars, electionVars,\n    leaderVars, followerVars, verifyVars, msgVars, envVars,\n    IsLeader, IsFollower, IsMyLeader, IsMyLearner\n<1>4. TotalOrder /\\ [Next]_vars => TotalOrder'\n  BY <1>2, <1>3\n<1> QED BY <1>1, <1>4, PTL DEF Spec\n\\* END AGENT PROOF ZooKeeper_LowLevel/ZkV3_7_0_TotalOrder.tla\n\nTHEOREM Spec => []LocalPrimaryOrder\n\\* BEGIN AGENT PROOF ZooKeeper_LowLevel/ZkV3_7_0_LocalPrimaryOrder.tla\n<1>1. Init => LocalPrimaryOrder\n  BY AGInitialSafety DEF AGProperties\n<1>2. LocalPrimaryOrder /\\ Next => LocalPrimaryOrder'\n  BY SMTT(\"r3\") DEF LocalPrimaryOrder, Next\n<1>3. LocalPrimaryOrder /\\ UNCHANGED vars => LocalPrimaryOrder'\n  BY SMTT(\"r3\") DEF LocalPrimaryOrder, vars, serverVars, electionVars,\n    leaderVars, followerVars, verifyVars, msgVars, envVars,\n    IsLeader, IsFollower, IsMyLeader, IsMyLearner\n<1>4. LocalPrimaryOrder /\\ [Next]_vars => LocalPrimaryOrder'\n  BY <1>2, <1>3\n<1> QED BY <1>1, <1>4, PTL DEF Spec\n\\* END AGENT PROOF ZooKeeper_LowLevel/ZkV3_7_0_LocalPrimaryOrder.tla\n\nTHEOREM Spec => []GlobalPrimaryOrder\n\\* BEGIN AGENT PROOF ZooKeeper_LowLevel/ZkV3_7_0_GlobalPrimaryOrder.tla\n<1>1. Init => GlobalPrimaryOrder\n  BY AGInitialSafety DEF AGProperties\n<1>2. GlobalPrimaryOrder /\\ Next => GlobalPrimaryOrder'\n  BY SMTT(\"r3\") DEF GlobalPrimaryOrder, Next\n<1>3. GlobalPrimaryOrder /\\ UNCHANGED vars => GlobalPrimaryOrder'\n  BY SMTT(\"r3\") DEF GlobalPrimaryOrder, vars, serverVars, electionVars,\n    leaderVars, followerVars, verifyVars, msgVars, envVars,\n    IsLeader, IsFollower, IsMyLeader, IsMyLearner\n<1>4. GlobalPrimaryOrder /\\ [Next]_vars => GlobalPrimaryOrder'\n  BY <1>2, <1>3\n<1> QED BY <1>1, <1>4, PTL DEF Spec\n\\* END AGENT PROOF ZooKeeper_LowLevel/ZkV3_7_0_GlobalPrimaryOrder.tla\n\nTHEOREM Spec => []PrimaryIntegrity\n\\* BEGIN AGENT PROOF ZooKeeper_LowLevel/ZkV3_7_0_PrimaryIntegrity.tla\n<1>1. Init => PrimaryIntegrity\n  BY AGInitialSafety DEF AGProperties\n<1>2. PrimaryIntegrity /\\ Next => PrimaryIntegrity'\n  BY SMTT(\"r3\") DEF PrimaryIntegrity, Next\n<1>3. PrimaryIntegrity /\\ UNCHANGED vars => PrimaryIntegrity'\n  BY SMTT(\"r3\") DEF PrimaryIntegrity, vars, serverVars, electionVars,\n    leaderVars, followerVars, verifyVars, msgVars, envVars,\n    IsLeader, IsFollower, IsMyLeader, IsMyLearner\n<1>4. PrimaryIntegrity /\\ [Next]_vars => PrimaryIntegrity'\n  BY <1>2, <1>3\n<1> QED BY <1>1, <1>4, PTL DEF Spec\n\\* END AGENT PROOF ZooKeeper_LowLevel/ZkV3_7_0_PrimaryIntegrity.tla\n====\n",
+  "units": {
+    "ZooKeeper_LowLevel/ZkV3_7_0_Leadership1.tla": {
+      "id": "ZooKeeper_LowLevel/ZkV3_7_0_Leadership1.tla",
+      "name": "ZooKeeper_LowLevel/ZkV3_7_0_Leadership1.tla",
+      "kind": "target",
+      "lineStart": 171,
+      "lineEnd": 183,
+      "proofLines": [
+        173,
+        174,
+        175,
+        176,
+        177,
+        178,
+        179,
+        180,
+        181,
+        182,
+        183
+      ],
+      "proofRange": [
+        173,
+        183
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AGInitialSafety"
+      ]
+    },
+    "ZooKeeper_LowLevel/ZkV3_7_0_Leadership2.tla": {
+      "id": "ZooKeeper_LowLevel/ZkV3_7_0_Leadership2.tla",
+      "name": "ZooKeeper_LowLevel/ZkV3_7_0_Leadership2.tla",
+      "kind": "target",
+      "lineStart": 186,
+      "lineEnd": 207,
+      "proofLines": [
+        188,
+        189,
+        190,
+        191,
+        192,
+        193,
+        194,
+        195,
+        196,
+        197,
+        198,
+        199,
+        200,
+        201,
+        202,
+        203,
+        204,
+        205,
+        206,
+        207
+      ],
+      "proofRange": [
+        188,
+        207
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AGInitialSafety",
+        "helper:AGRegistryFrame",
+        "helper:AGRegistryInvariant"
+      ]
+    },
+    "ZooKeeper_LowLevel/ZkV3_7_0_PrefixConsistency.tla": {
+      "id": "ZooKeeper_LowLevel/ZkV3_7_0_PrefixConsistency.tla",
+      "name": "ZooKeeper_LowLevel/ZkV3_7_0_PrefixConsistency.tla",
+      "kind": "target",
+      "lineStart": 210,
+      "lineEnd": 222,
+      "proofLines": [
+        212,
+        213,
+        214,
+        215,
+        216,
+        217,
+        218,
+        219,
+        220,
+        221,
+        222
+      ],
+      "proofRange": [
+        212,
+        222
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AGInitialSafety"
+      ]
+    },
+    "ZooKeeper_LowLevel/ZkV3_7_0_Integrity.tla": {
+      "id": "ZooKeeper_LowLevel/ZkV3_7_0_Integrity.tla",
+      "name": "ZooKeeper_LowLevel/ZkV3_7_0_Integrity.tla",
+      "kind": "target",
+      "lineStart": 225,
+      "lineEnd": 237,
+      "proofLines": [
+        227,
+        228,
+        229,
+        230,
+        231,
+        232,
+        233,
+        234,
+        235,
+        236,
+        237
+      ],
+      "proofRange": [
+        227,
+        237
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AGInitialSafety"
+      ]
+    },
+    "ZooKeeper_LowLevel/ZkV3_7_0_Agreement.tla": {
+      "id": "ZooKeeper_LowLevel/ZkV3_7_0_Agreement.tla",
+      "name": "ZooKeeper_LowLevel/ZkV3_7_0_Agreement.tla",
+      "kind": "target",
+      "lineStart": 240,
+      "lineEnd": 252,
+      "proofLines": [
+        242,
+        243,
+        244,
+        245,
+        246,
+        247,
+        248,
+        249,
+        250,
+        251,
+        252
+      ],
+      "proofRange": [
+        242,
+        252
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AGInitialSafety"
+      ]
+    },
+    "ZooKeeper_LowLevel/ZkV3_7_0_TotalOrder.tla": {
+      "id": "ZooKeeper_LowLevel/ZkV3_7_0_TotalOrder.tla",
+      "name": "ZooKeeper_LowLevel/ZkV3_7_0_TotalOrder.tla",
+      "kind": "target",
+      "lineStart": 255,
+      "lineEnd": 267,
+      "proofLines": [
+        257,
+        258,
+        259,
+        260,
+        261,
+        262,
+        263,
+        264,
+        265,
+        266,
+        267
+      ],
+      "proofRange": [
+        257,
+        267
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AGInitialSafety"
+      ]
+    },
+    "ZooKeeper_LowLevel/ZkV3_7_0_LocalPrimaryOrder.tla": {
+      "id": "ZooKeeper_LowLevel/ZkV3_7_0_LocalPrimaryOrder.tla",
+      "name": "ZooKeeper_LowLevel/ZkV3_7_0_LocalPrimaryOrder.tla",
+      "kind": "target",
+      "lineStart": 270,
+      "lineEnd": 282,
+      "proofLines": [
+        272,
+        273,
+        274,
+        275,
+        276,
+        277,
+        278,
+        279,
+        280,
+        281,
+        282
+      ],
+      "proofRange": [
+        272,
+        282
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AGInitialSafety"
+      ]
+    },
+    "ZooKeeper_LowLevel/ZkV3_7_0_GlobalPrimaryOrder.tla": {
+      "id": "ZooKeeper_LowLevel/ZkV3_7_0_GlobalPrimaryOrder.tla",
+      "name": "ZooKeeper_LowLevel/ZkV3_7_0_GlobalPrimaryOrder.tla",
+      "kind": "target",
+      "lineStart": 285,
+      "lineEnd": 297,
+      "proofLines": [
+        287,
+        288,
+        289,
+        290,
+        291,
+        292,
+        293,
+        294,
+        295,
+        296,
+        297
+      ],
+      "proofRange": [
+        287,
+        297
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AGInitialSafety"
+      ]
+    },
+    "ZooKeeper_LowLevel/ZkV3_7_0_PrimaryIntegrity.tla": {
+      "id": "ZooKeeper_LowLevel/ZkV3_7_0_PrimaryIntegrity.tla",
+      "name": "ZooKeeper_LowLevel/ZkV3_7_0_PrimaryIntegrity.tla",
+      "kind": "target",
+      "lineStart": 300,
+      "lineEnd": 312,
+      "proofLines": [
+        302,
+        303,
+        304,
+        305,
+        306,
+        307,
+        308,
+        309,
+        310,
+        311,
+        312
+      ],
+      "proofRange": [
+        302,
+        312
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AGInitialSafety"
+      ]
+    },
+    "helper:AGCardinalityAlias": {
+      "id": "helper:AGCardinalityAlias",
+      "name": "AGCardinalityAlias",
+      "kind": "helper",
+      "lineStart": 18,
+      "lineEnd": 19,
+      "proofLines": [
+        19
+      ],
+      "proofRange": [
+        19,
+        19
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AGMinimumSingleton": {
+      "id": "helper:AGMinimumSingleton",
+      "name": "AGMinimumSingleton",
+      "kind": "helper",
+      "lineStart": 21,
+      "lineEnd": 22,
+      "proofLines": [
+        22
+      ],
+      "proofRange": [
+        22,
+        22
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AGInitialSafety": {
+      "id": "helper:AGInitialSafety",
+      "name": "AGInitialSafety",
+      "kind": "helper",
+      "lineStart": 24,
+      "lineEnd": 72,
+      "proofLines": [
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        58,
+        59,
+        60,
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68,
+        69,
+        70,
+        71,
+        72
+      ],
+      "proofRange": [
+        25,
+        72
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AGCardinalityAlias",
+        "helper:AGMinimumSingleton"
+      ]
+    },
+    "helper:AGRegistryFrame": {
+      "id": "helper:AGRegistryFrame",
+      "name": "AGRegistryFrame",
+      "kind": "helper",
+      "lineStart": 99,
+      "lineEnd": 145,
+      "proofLines": [
+        100,
+        101,
+        102,
+        103,
+        104,
+        105,
+        106,
+        107,
+        108,
+        109,
+        110,
+        111,
+        112,
+        113,
+        114,
+        115,
+        116,
+        117,
+        118,
+        119,
+        120,
+        121,
+        122,
+        123,
+        124,
+        125,
+        126,
+        127,
+        128,
+        129,
+        130,
+        131,
+        132,
+        133,
+        134,
+        135,
+        136,
+        137,
+        138,
+        139,
+        140,
+        141,
+        142,
+        143,
+        144,
+        145
+      ],
+      "proofRange": [
+        100,
+        145
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AGRegistryTypeInit": {
+      "id": "helper:AGRegistryTypeInit",
+      "name": "AGRegistryTypeInit",
+      "kind": "helper",
+      "lineStart": 149,
+      "lineEnd": 150,
+      "proofLines": [
+        150
+      ],
+      "proofRange": [
+        150,
+        150
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AGRegistryTypeStep": {
+      "id": "helper:AGRegistryTypeStep",
+      "name": "AGRegistryTypeStep",
+      "kind": "helper",
+      "lineStart": 152,
+      "lineEnd": 165,
+      "proofLines": [
+        153,
+        154,
+        155,
+        156,
+        157,
+        158,
+        159,
+        160,
+        161,
+        162,
+        163,
+        164,
+        165
+      ],
+      "proofRange": [
+        153,
+        165
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AGRegistryFrame"
+      ]
+    },
+    "helper:AGRegistryInvariant": {
+      "id": "helper:AGRegistryInvariant",
+      "name": "AGRegistryInvariant",
+      "kind": "helper",
+      "lineStart": 167,
+      "lineEnd": 168,
+      "proofLines": [
+        168
+      ],
+      "proofRange": [
+        168,
+        168
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AGRegistryTypeInit",
+        "helper:AGRegistryTypeStep"
+      ]
+    }
+  }
+}

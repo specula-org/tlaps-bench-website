@@ -1,0 +1,1096 @@
+{
+  "schemaVersion": 1,
+  "specId": "etcd_raft/etcd_raft.tla",
+  "sourceName": "etcd_raft.tla",
+  "sourceSha256": "e3241d8b8dd3ceaa9cb2c82a9f9ed21d2de720d26275940e1a775b76a15b5810",
+  "resultSha256": "d2130b8d119b29ae06816d9ccebc8f4bfa05e1e27145456775193cb100dbbc91",
+  "source": "---- MODULE etcd_raft ----\nEXTENDS etcd_raftDefs\n\n\\* BEGIN AGENT HELPERS\n\n\\* Certificates record <<voter, term, candidate>>.  Pending certificates\n\\* are bounded by volatile votes; transmitted certificates are also\n\\* bounded by persisted votes, so a crash cannot enable a second vote.\nAG_MessageCerts(M) ==\n  {<<m.msource, m.mterm, m.mdest>> :\n    m \\in {x \\in M : x.mtype = RequestVoteResponse /\\ x.mvoteGranted}}\nAG_Active == {i \\in Server : state[i] \\in {Candidate, Leader}}\nAG_Counted == {e \\in Server \\X Nat \\X Server :\n  e[3] \\in AG_Active /\\ e[2] = currentTerm[e[3]] /\\ e[1] \\in votesGranted[e[3]]}\nAG_Stable == AG_MessageCerts(DOMAIN messages) \\cup AG_Counted\nAG_All == AG_Stable \\cup AG_MessageCerts(DOMAIN pendingMessages)\nAG_DTerm == [i \\in Server |-> durableState[i].currentTerm]\nAG_DVote == [i \\in Server |-> durableState[i].votedFor]\nAG_Config == [jointConfig |-> <<InitServer, {}>>, learners |-> {}]\nAG_MessageType(M) ==\n  \\A m \\in M : /\\ m.msource \\in Server\n                /\\ m.mdest \\in Server\n                /\\ m.mterm \\in Nat\nAG_Bound(E, ts, vs) ==\n  \\A e \\in E : /\\ e[2] <= ts[e[1]]\n               /\\ (e[2] = ts[e[1]] => vs[e[1]] = e[3])\nAG_Consistent(E) ==\n  \\A e, f \\in E : e[1] = f[1] /\\ e[2] = f[2] => e[3] = f[3]\nAG_Types ==\n  /\\ currentTerm \\in [Server -> Nat]\n  /\\ state \\in [Server -> {Follower, Candidate, Leader}]\n  /\\ votedFor \\in [Server -> Server \\cup {Nil}]\n  /\\ votesGranted \\in [Server -> SUBSET Server]\n  /\\ durableState = [i \\in Server |-> durableState[i]]\n  /\\ AG_DTerm \\in [Server -> Nat]\n  /\\ AG_DVote \\in [Server -> Server \\cup {Nil}]\n  /\\ config = [i \\in Server |-> AG_Config]\n  /\\ \\A i \\in Server : durableState[i].config = AG_Config\n  /\\ IsABag(messages) /\\ IsABag(pendingMessages)\n  /\\ AG_MessageType(DOMAIN messages)\n  /\\ AG_MessageType(DOMAIN pendingMessages)\nAG_Persistence ==\n  \\A i \\in Server :\n    /\\ AG_DTerm[i] <= currentTerm[i]\n    /\\ (AG_DTerm[i] = currentTerm[i] /\\ AG_DVote[i] # Nil\n        => votedFor[i] = AG_DVote[i])\nAG_SelfVote == \\A i \\in AG_Active : votedFor[i] = i\nAG_LeaderQuorums ==\n  \\A i \\in Server : state[i] = Leader =>\n    \\E Q \\in Quorum(InitServer) : Q \\subseteq votesGranted[i]\nAG_ElectionInv ==\n  /\\ AG_Types\n  /\\ AG_Persistence\n  /\\ AG_SelfVote\n  /\\ AG_LeaderQuorums\n  /\\ AG_Bound(AG_All, currentTerm, votedFor)\n  /\\ AG_Bound(AG_Stable, AG_DTerm, AG_DVote)\n  /\\ AG_Consistent(AG_All)\n\nLOCAL AG_FS == INSTANCE FiniteSetTheorems\n\nLEMMA AG_FiniteBridge == \\A S :\n  /\\ IsFiniteSet(S) = AG_FS!IsFiniteSet(S)\n  /\\ Cardinality(S) = AG_FS!Cardinality(S)\n  BY Isa DEF IsFiniteSet, AG_FS!IsFiniteSet,\n                     Cardinality, AG_FS!Cardinality\n\nLEMMA AG_QuorumIntersection ==\n  \\A Q, R \\in Quorum(InitServer) : Q \\cap R # {}\nPROOF\n  <1>1. ASSUME NEW Q \\in Quorum(InitServer), NEW R \\in Quorum(InitServer)\n        PROVE Q \\cap R # {}\n    <2>1. IsFiniteSet(Q) /\\ IsFiniteSet(R)\n      BY AG_FS!FS_Subset, FiniteServers, AG_FiniteBridge, SMTT(\"r2\") DEF Quorum\n    <2>2. Cardinality(Q) \\in Nat /\\ Cardinality(R) \\in Nat\n          /\\ Cardinality(InitServer) \\in Nat\n      BY <2>1, AG_FS!FS_CardinalityType, FiniteServers, AG_FiniteBridge, SMTT(\"r2\")\n    <2>3. Cardinality(Q) + Cardinality(R) > Cardinality(InitServer)\n      BY <2>2, SMTT(\"r2\") DEF Quorum\n    <2> QED BY <2>1, <2>3, AG_FS!FS_MajoritiesIntersect, FiniteServers, AG_FiniteBridge, SMTT(\"r2\") DEF Quorum\n  <1> QED BY <1>1, SMTT(\"r2\")\n\nLEMMA AG_ElectionConsequence == AG_ElectionInv => MoreThanOneLeaderInv\nPROOF\n  <1>1. ASSUME AG_ElectionInv, NEW i \\in Server, NEW j \\in Server,\n               currentTerm[i] = currentTerm[j], state[i] = Leader, state[j] = Leader\n        PROVE i = j\n    <2>1. PICK Q \\in Quorum(InitServer) : Q \\subseteq votesGranted[i]\n      BY <1>1, SMTT(\"r2\") DEF AG_ElectionInv, AG_LeaderQuorums\n    <2>2. PICK R \\in Quorum(InitServer) : R \\subseteq votesGranted[j]\n      BY <1>1, SMTT(\"r2\") DEF AG_ElectionInv, AG_LeaderQuorums\n    <2>3. PICK v \\in Q \\cap R : TRUE\n      BY <1>1, <2>1, <2>2, AG_QuorumIntersection, SMTT(\"r2\")\n    <2>4. <<v, currentTerm[i], i>> \\in AG_All /\\ <<v, currentTerm[j], j>> \\in AG_All\n      BY <1>1, <2>1, <2>2, <2>3, SMTT(\"r2\") DEF AG_ElectionInv, AG_Types, AG_All, AG_Stable, AG_Counted, AG_Active\n    <2> QED BY <1>1, <2>4, SMTT(\"r2\") DEF AG_ElectionInv, AG_Consistent\n  <1> QED BY <1>1, SMTT(\"r2\") DEF MoreThanOneLeaderInv\n\nLEMMA AG_ElectionInit == Init => AG_ElectionInv\n  BY DistinctRoles, SMTT(\"r5\")\n  DEF Init, InitMessageVars, InitServerVars, InitCandidateVars,\n      InitLeaderVars, InitLogVars, InitConfigVars, InitDurableState,\n      AG_ElectionInv, AG_Types, AG_Persistence, AG_SelfVote,\n      AG_LeaderQuorums, AG_Bound, AG_Consistent, AG_MessageType,\n      AG_Config, AG_DTerm, AG_DVote, AG_All, AG_Stable, AG_Counted,\n      AG_Active, AG_MessageCerts, EmptyBag, SetToBag, IsABag\n\n\nLOCAL AG_BT == INSTANCE BagsTheorems\n\nLEMMA AG_BagBridge == \\A A, C :\n  /\\ IsABag(A) = AG_BT!IsABag(A)\n  /\\ A (-) C = AG_BT!(-)(A,C)\n  BY Isa DEF IsABag, AG_BT!IsABag, (-), AG_BT!(-)\n\nLEMMA AG_BagDifferenceFacts ==\n  ASSUME NEW A, NEW C, IsABag(A), IsABag(C)\n  PROVE /\\ IsABag(A (-) C)\n        /\\ DOMAIN (A (-) C) =\n           {e \\in DOMAIN A : e \\notin DOMAIN C \\/ A[e] > C[e]}\n  BY AG_BagBridge, AG_BT!Bags_Difference, SMTT(\"r2\")\n\nLEMMA AG_BagAdd ==\n  ASSUME NEW B, NEW m, IsABag(B)\n  PROVE /\\ IsABag(WithMessage(m, B))\n        /\\ DOMAIN WithMessage(m, B) = (DOMAIN B) \\cup {m}\n  BY SMTT(\"r3\") DEF WithMessage, SetToBag, (+), IsABag\n\nLEMMA AG_BagRemove ==\n  ASSUME NEW B, NEW m, IsABag(B)\n  PROVE /\\ IsABag(WithoutMessage(m, B))\n        /\\ DOMAIN WithoutMessage(m, B) \\subseteq DOMAIN B\n  BY AG_BagDifferenceFacts, SMTT(\"r3\") DEF WithoutMessage, SetToBag, IsABag\n\nLEMMA AG_BagClear ==\n  ASSUME NEW i, IsABag(pendingMessages)\n  PROVE /\\ IsABag(ClearPendingMessages(i))\n        /\\ DOMAIN ClearPendingMessages(i) =\n            {m \\in DOMAIN pendingMessages : m.msource # i}\n  BY AG_BagDifferenceFacts, SMTT(\"r3\") DEF ClearPendingMessages, PendingMessages, IsABag\n\nLEMMA AG_BagSend ==\n  ASSUME NEW i, IsABag(messages), IsABag(pendingMessages), SendPendingMessages(i)\n  PROVE /\\ IsABag(messages') /\\ IsABag(pendingMessages')\n        /\\ DOMAIN messages' = DOMAIN messages \\cup\n                {m \\in DOMAIN pendingMessages : m.msource = i}\n        /\\ DOMAIN pendingMessages' =\n                {m \\in DOMAIN pendingMessages : m.msource # i}\n  BY AG_BagDifferenceFacts, SMTT(\"r3\") DEF SendPendingMessages, PendingMessages, (+), IsABag\n\nLEMMA AG_CertificateTypes == AG_Types => AG_All \\subseteq (Server \\X Nat \\X Server)\n  BY SMTT(\"r3\") DEF AG_Types, AG_All, AG_Stable, AG_Counted, AG_Active,\n                       AG_MessageCerts, AG_MessageType\n\nLEMMA AG_Shrink ==\n  ASSUME AG_ElectionInv,\n         UNCHANGED <<currentTerm, state, votedFor, votesGranted, config, durableState>>,\n         IsABag(messages'), IsABag(pendingMessages'),\n         DOMAIN messages' \\subseteq DOMAIN messages,\n         DOMAIN pendingMessages' \\subseteq DOMAIN pendingMessages\n  PROVE AG_ElectionInv'\nPROOF\n  <1>1. AG_All' \\subseteq AG_All /\\ AG_Stable' \\subseteq AG_Stable\n    BY SMTT(\"r3\") DEF AG_All, AG_Stable, AG_Counted, AG_Active, AG_MessageCerts\n  <1>2. AG_Types' /\\ AG_Persistence' /\\ AG_SelfVote' /\\ AG_LeaderQuorums'\n    BY SMTT(\"r3\") DEF AG_ElectionInv, AG_Types, AG_MessageType,\n       AG_DTerm, AG_DVote, AG_Persistence, AG_SelfVote, AG_Active, AG_LeaderQuorums\n  <1> QED BY <1>1, <1>2, SMTT(\"r3\")\n    DEF AG_ElectionInv, AG_Bound, AG_Consistent, AG_DTerm, AG_DVote\n\n\nLEMMA AG_Timeout ==\n  ASSUME AG_ElectionInv, NEW i \\in Server,\n         Timeout(i)\n  PROVE AG_ElectionInv'\nPROOF\n  <1>1. AG_All' \\subseteq AG_All /\\ AG_Stable' \\subseteq AG_Stable\n    BY DistinctRoles, NilNotServer, SMTT(\"r5\")\n    DEF AG_ElectionInv, AG_Types, AG_DTerm, AG_DVote, AG_MessageType, AG_All, AG_Stable, AG_Counted, AG_Active, AG_MessageCerts, Timeout, messageVars, serverVars, candidateVars, leaderVars, logVars, configVars\n  <1>2. AG_Types'\n    BY DistinctRoles, NilNotServer, SMTT(\"r5\")\n    DEF AG_ElectionInv, AG_Types, AG_DTerm, AG_DVote, AG_MessageType, Timeout, messageVars, serverVars, candidateVars, leaderVars, logVars, configVars\n  <1>3. AG_Persistence'\n    BY DistinctRoles, NilNotServer, SMTT(\"r5\")\n    DEF AG_ElectionInv, AG_Types, AG_DTerm, AG_DVote, AG_MessageType, AG_Persistence, Timeout, messageVars, serverVars, candidateVars, leaderVars, logVars, configVars\n  <1>4. AG_SelfVote'\n    BY DistinctRoles, NilNotServer, SMTT(\"r5\")\n    DEF AG_ElectionInv, AG_Types, AG_DTerm, AG_DVote, AG_MessageType, AG_SelfVote, AG_Active, Timeout, messageVars, serverVars, candidateVars, leaderVars, logVars, configVars\n  <1>5. AG_LeaderQuorums'\n    BY DistinctRoles, NilNotServer, SMTT(\"r5\")\n    DEF AG_ElectionInv, AG_Types, AG_DTerm, AG_DVote, AG_MessageType, AG_LeaderQuorums, Timeout, messageVars, serverVars, candidateVars, leaderVars, logVars, configVars\n  <1>6. AG_Bound(AG_All, currentTerm, votedFor)\n          /\\ AG_Bound(AG_Stable, AG_DTerm, AG_DVote)\n    BY SMTT(\"r1\") DEF AG_ElectionInv\n  <1>7. AG_Bound(AG_All', currentTerm', votedFor')\n    BY <1>1, <1>6, AG_CertificateTypes, DistinctRoles, NilNotServer, SMTT(\"r5\")\n    DEF AG_ElectionInv, AG_Types, AG_DTerm, AG_DVote, AG_MessageType, AG_Bound, AG_Persistence, Timeout, messageVars, serverVars, candidateVars, leaderVars, logVars, configVars\n  <1>8. AG_Bound(AG_Stable', AG_DTerm', AG_DVote')\n    BY <1>1, <1>6, DistinctRoles, NilNotServer, SMTT(\"r5\")\n    DEF AG_ElectionInv, AG_Types, AG_DTerm, AG_DVote, AG_MessageType, AG_Bound, Timeout, messageVars, serverVars, candidateVars, leaderVars, logVars, configVars\n  <1>9. AG_Consistent(AG_All')\n    BY <1>1, SMTT(\"r2\") DEF AG_ElectionInv, AG_Consistent\n  <1> QED BY <1>2, <1>3, <1>4, <1>5, <1>7, <1>8, <1>9, SMTT(\"r1\") DEF AG_ElectionInv\n\nLEMMA AG_BecomeLeader ==\n  ASSUME AG_ElectionInv, NEW i \\in Server,\n         BecomeLeader(i)\n  PROVE AG_ElectionInv'\nPROOF\n  <1>1. AG_All' \\subseteq AG_All /\\ AG_Stable' \\subseteq AG_Stable\n    BY DistinctRoles, NilNotServer, SMTT(\"r5\")\n    DEF AG_ElectionInv, AG_Types, AG_DTerm, AG_DVote, AG_MessageType, AG_All, AG_Stable, AG_Counted, AG_Active, AG_MessageCerts, BecomeLeader, GetConfig, GetJointConfig, AG_Config, messageVars, serverVars, candidateVars, leaderVars, logVars, configVars\n  <1>2. AG_Types'\n    BY DistinctRoles, NilNotServer, SMTT(\"r5\")\n    DEF AG_ElectionInv, AG_Types, AG_DTerm, AG_DVote, AG_MessageType, BecomeLeader, GetConfig, GetJointConfig, AG_Config, messageVars, serverVars, candidateVars, leaderVars, logVars, configVars\n  <1>3. AG_Persistence'\n    BY DistinctRoles, NilNotServer, SMTT(\"r5\")\n    DEF AG_ElectionInv, AG_Types, AG_DTerm, AG_DVote, AG_MessageType, AG_Persistence, BecomeLeader, GetConfig, GetJointConfig, AG_Config, messageVars, serverVars, candidateVars, leaderVars, logVars, configVars\n  <1>4. AG_SelfVote'\n    BY DistinctRoles, NilNotServer, SMTT(\"r5\")\n    DEF AG_ElectionInv, AG_Types, AG_DTerm, AG_DVote, AG_MessageType, AG_SelfVote, AG_Active, BecomeLeader, GetConfig, GetJointConfig, AG_Config, messageVars, serverVars, candidateVars, leaderVars, logVars, configVars\n  <1>5. AG_LeaderQuorums'\n    BY DistinctRoles, NilNotServer, SMTT(\"r5\")\n    DEF AG_ElectionInv, AG_Types, AG_DTerm, AG_DVote, AG_MessageType, AG_LeaderQuorums, BecomeLeader, GetConfig, GetJointConfig, AG_Config, messageVars, serverVars, candidateVars, leaderVars, logVars, configVars\n  <1>6. AG_Bound(AG_All, currentTerm, votedFor)\n          /\\ AG_Bound(AG_Stable, AG_DTerm, AG_DVote)\n    BY SMTT(\"r1\") DEF AG_ElectionInv\n  <1>7. AG_Bound(AG_All', currentTerm', votedFor')\n    BY <1>1, <1>6, DistinctRoles, NilNotServer, SMTT(\"r5\")\n    DEF AG_ElectionInv, AG_Types, AG_DTerm, AG_DVote, AG_MessageType, AG_Bound, AG_Persistence, BecomeLeader, GetConfig, GetJointConfig, AG_Config, messageVars, serverVars, candidateVars, leaderVars, logVars, configVars\n  <1>8. AG_Bound(AG_Stable', AG_DTerm', AG_DVote')\n    BY <1>1, <1>6, DistinctRoles, NilNotServer, SMTT(\"r5\")\n    DEF AG_ElectionInv, AG_Types, AG_DTerm, AG_DVote, AG_MessageType, AG_Bound, BecomeLeader, GetConfig, GetJointConfig, AG_Config, messageVars, serverVars, candidateVars, leaderVars, logVars, configVars\n  <1>9. AG_Consistent(AG_All')\n    BY <1>1, SMTT(\"r2\") DEF AG_ElectionInv, AG_Consistent\n  <1> QED BY <1>2, <1>3, <1>4, <1>5, <1>7, <1>8, <1>9, SMTT(\"r1\") DEF AG_ElectionInv\n\nLEMMA AG_StepDown ==\n  ASSUME AG_ElectionInv, NEW i \\in Server,\n         StepDownToFollower(i)\n  PROVE AG_ElectionInv'\nPROOF\n  <1>1. AG_All' \\subseteq AG_All /\\ AG_Stable' \\subseteq AG_Stable\n    BY DistinctRoles, NilNotServer, SMTT(\"r5\")\n    DEF AG_ElectionInv, AG_Types, AG_DTerm, AG_DVote, AG_MessageType, AG_All, AG_Stable, AG_Counted, AG_Active, AG_MessageCerts, StepDownToFollower, BecomeFollowerOfTerm, messageVars, serverVars, candidateVars, leaderVars, logVars, configVars\n  <1>2. AG_Types'\n    BY DistinctRoles, NilNotServer, SMTT(\"r5\")\n    DEF AG_ElectionInv, AG_Types, AG_DTerm, AG_DVote, AG_MessageType, StepDownToFollower, BecomeFollowerOfTerm, messageVars, serverVars, candidateVars, leaderVars, logVars, configVars\n  <1>3. AG_Persistence'\n    BY DistinctRoles, NilNotServer, SMTT(\"r5\")\n    DEF AG_ElectionInv, AG_Types, AG_DTerm, AG_DVote, AG_MessageType, AG_Persistence, StepDownToFollower, BecomeFollowerOfTerm, messageVars, serverVars, candidateVars, leaderVars, logVars, configVars\n  <1>4. AG_SelfVote'\n    BY DistinctRoles, NilNotServer, SMTT(\"r5\")\n    DEF AG_ElectionInv, AG_Types, AG_DTerm, AG_DVote, AG_MessageType, AG_SelfVote, AG_Active, StepDownToFollower, BecomeFollowerOfTerm, messageVars, serverVars, candidateVars, leaderVars, logVars, configVars\n  <1>5. AG_LeaderQuorums'\n    BY DistinctRoles, NilNotServer, SMTT(\"r5\")\n    DEF AG_ElectionInv, AG_Types, AG_DTerm, AG_DVote, AG_MessageType, AG_LeaderQuorums, StepDownToFollower, BecomeFollowerOfTerm, messageVars, serverVars, candidateVars, leaderVars, logVars, configVars\n  <1>6. AG_Bound(AG_All, currentTerm, votedFor)\n          /\\ AG_Bound(AG_Stable, AG_DTerm, AG_DVote)\n    BY SMTT(\"r1\") DEF AG_ElectionInv\n  <1>7. AG_Bound(AG_All', currentTerm', votedFor')\n    BY <1>1, <1>6, DistinctRoles, NilNotServer, SMTT(\"r5\")\n    DEF AG_ElectionInv, AG_Types, AG_DTerm, AG_DVote, AG_MessageType, AG_Bound, AG_Persistence, StepDownToFollower, BecomeFollowerOfTerm, messageVars, serverVars, candidateVars, leaderVars, logVars, configVars\n  <1>8. AG_Bound(AG_Stable', AG_DTerm', AG_DVote')\n    BY <1>1, <1>6, DistinctRoles, NilNotServer, SMTT(\"r5\")\n    DEF AG_ElectionInv, AG_Types, AG_DTerm, AG_DVote, AG_MessageType, AG_Bound, StepDownToFollower, BecomeFollowerOfTerm, messageVars, serverVars, candidateVars, leaderVars, logVars, configVars\n  <1>9. AG_Consistent(AG_All')\n    BY <1>1, SMTT(\"r2\") DEF AG_ElectionInv, AG_Consistent\n  <1> QED BY <1>2, <1>3, <1>4, <1>5, <1>7, <1>8, <1>9, SMTT(\"r1\") DEF AG_ElectionInv\n\nLEMMA AG_UpdateTerm ==\n  ASSUME AG_ElectionInv, NEW i \\in Server, NEW j, NEW m,\n         UpdateTerm(i,j,m), m.mterm \\in Nat\n  PROVE AG_ElectionInv'\nPROOF\n  <1>1. AG_All' \\subseteq AG_All /\\ AG_Stable' \\subseteq AG_Stable\n    BY DistinctRoles, NilNotServer, SMTT(\"r5\")\n    DEF AG_ElectionInv, AG_Types, AG_DTerm, AG_DVote, AG_MessageType, AG_All, AG_Stable, AG_Counted, AG_Active, AG_MessageCerts, UpdateTerm, BecomeFollowerOfTerm, messageVars, serverVars, candidateVars, leaderVars, logVars, configVars\n  <1>2. AG_Types'\n    BY DistinctRoles, NilNotServer, SMTT(\"r5\")\n    DEF AG_ElectionInv, AG_Types, AG_DTerm, AG_DVote, AG_MessageType, UpdateTerm, BecomeFollowerOfTerm, messageVars, serverVars, candidateVars, leaderVars, logVars, configVars\n  <1>3. AG_Persistence'\n    BY DistinctRoles, NilNotServer, SMTT(\"r5\")\n    DEF AG_ElectionInv, AG_Types, AG_DTerm, AG_DVote, AG_MessageType, AG_Persistence, UpdateTerm, BecomeFollowerOfTerm, messageVars, serverVars, candidateVars, leaderVars, logVars, configVars\n  <1>4. AG_SelfVote'\n    BY DistinctRoles, NilNotServer, SMTT(\"r5\")\n    DEF AG_ElectionInv, AG_Types, AG_DTerm, AG_DVote, AG_MessageType, AG_SelfVote, AG_Active, UpdateTerm, BecomeFollowerOfTerm, messageVars, serverVars, candidateVars, leaderVars, logVars, configVars\n  <1>5. AG_LeaderQuorums'\n    BY DistinctRoles, NilNotServer, SMTT(\"r5\")\n    DEF AG_ElectionInv, AG_Types, AG_DTerm, AG_DVote, AG_MessageType, AG_LeaderQuorums, UpdateTerm, BecomeFollowerOfTerm, messageVars, serverVars, candidateVars, leaderVars, logVars, configVars\n  <1>6. AG_Bound(AG_All, currentTerm, votedFor)\n          /\\ AG_Bound(AG_Stable, AG_DTerm, AG_DVote)\n    BY SMTT(\"r1\") DEF AG_ElectionInv\n  <1>7. AG_Bound(AG_All', currentTerm', votedFor')\n    BY <1>1, <1>6, AG_CertificateTypes, DistinctRoles, NilNotServer, SMTT(\"r5\")\n    DEF AG_ElectionInv, AG_Types, AG_DTerm, AG_DVote, AG_MessageType, AG_Bound, AG_Persistence, UpdateTerm, BecomeFollowerOfTerm, messageVars, serverVars, candidateVars, leaderVars, logVars, configVars\n  <1>8. AG_Bound(AG_Stable', AG_DTerm', AG_DVote')\n    BY <1>1, <1>6, DistinctRoles, NilNotServer, SMTT(\"r5\")\n    DEF AG_ElectionInv, AG_Types, AG_DTerm, AG_DVote, AG_MessageType, AG_Bound, UpdateTerm, BecomeFollowerOfTerm, messageVars, serverVars, candidateVars, leaderVars, logVars, configVars\n  <1>9. AG_Consistent(AG_All')\n    BY <1>1, SMTT(\"r2\") DEF AG_ElectionInv, AG_Consistent\n  <1> QED BY <1>2, <1>3, <1>4, <1>5, <1>7, <1>8, <1>9, SMTT(\"r1\") DEF AG_ElectionInv\n\nLEMMA AG_ReturnFollower ==\n  ASSUME AG_ElectionInv, NEW i \\in Server, NEW m,\n         ReturnToFollowerState(i,m) /\\ UNCHANGED candidateVars\n  PROVE AG_ElectionInv'\nPROOF\n  <1>1. AG_All' \\subseteq AG_All /\\ AG_Stable' \\subseteq AG_Stable\n    BY DistinctRoles, NilNotServer, SMTT(\"r5\")\n    DEF AG_ElectionInv, AG_Types, AG_DTerm, AG_DVote, AG_MessageType, AG_All, AG_Stable, AG_Counted, AG_Active, AG_MessageCerts, ReturnToFollowerState, messageVars, serverVars, candidateVars, leaderVars, logVars, configVars\n  <1>2. AG_Types'\n    BY DistinctRoles, NilNotServer, SMTT(\"r5\")\n    DEF AG_ElectionInv, AG_Types, AG_DTerm, AG_DVote, AG_MessageType, ReturnToFollowerState, messageVars, serverVars, candidateVars, leaderVars, logVars, configVars\n  <1>3. AG_Persistence'\n    BY DistinctRoles, NilNotServer, SMTT(\"r5\")\n    DEF AG_ElectionInv, AG_Types, AG_DTerm, AG_DVote, AG_MessageType, AG_Persistence, ReturnToFollowerState, messageVars, serverVars, candidateVars, leaderVars, logVars, configVars\n  <1>4. AG_SelfVote'\n    BY DistinctRoles, NilNotServer, SMTT(\"r5\")\n    DEF AG_ElectionInv, AG_Types, AG_DTerm, AG_DVote, AG_MessageType, AG_SelfVote, AG_Active, ReturnToFollowerState, messageVars, serverVars, candidateVars, leaderVars, logVars, configVars\n  <1>5. AG_LeaderQuorums'\n    BY DistinctRoles, NilNotServer, SMTT(\"r5\")\n    DEF AG_ElectionInv, AG_Types, AG_DTerm, AG_DVote, AG_MessageType, AG_LeaderQuorums, ReturnToFollowerState, messageVars, serverVars, candidateVars, leaderVars, logVars, configVars\n  <1>6. AG_Bound(AG_All, currentTerm, votedFor)\n          /\\ AG_Bound(AG_Stable, AG_DTerm, AG_DVote)\n    BY SMTT(\"r1\") DEF AG_ElectionInv\n  <1>7. AG_Bound(AG_All', currentTerm', votedFor')\n    BY <1>1, <1>6, DistinctRoles, NilNotServer, SMTT(\"r5\")\n    DEF AG_ElectionInv, AG_Types, AG_DTerm, AG_DVote, AG_MessageType, AG_Bound, AG_Persistence, ReturnToFollowerState, messageVars, serverVars, candidateVars, leaderVars, logVars, configVars\n  <1>8. AG_Bound(AG_Stable', AG_DTerm', AG_DVote')\n    BY <1>1, <1>6, DistinctRoles, NilNotServer, SMTT(\"r5\")\n    DEF AG_ElectionInv, AG_Types, AG_DTerm, AG_DVote, AG_MessageType, AG_Bound, ReturnToFollowerState, messageVars, serverVars, candidateVars, leaderVars, logVars, configVars\n  <1>9. AG_Consistent(AG_All')\n    BY <1>1, SMTT(\"r2\") DEF AG_ElectionInv, AG_Consistent\n  <1> QED BY <1>2, <1>3, <1>4, <1>5, <1>7, <1>8, <1>9, SMTT(\"r1\") DEF AG_ElectionInv\n\nLEMMA AG_VoteResponse ==\n  ASSUME AG_ElectionInv, NEW m \\in DOMAIN messages, NEW i \\in Server, NEW j \\in Server, i = m.mdest, j = m.msource, m.mtype = RequestVoteResponse,\n         HandleRequestVoteResponse(i,j,m)\n  PROVE AG_ElectionInv'\nPROOF\n  <1>1. AG_All' \\subseteq AG_All /\\ AG_Stable' \\subseteq AG_Stable\n    BY DistinctRoles, NilNotServer, AG_BagRemove, SMTT(\"r5\")\n    DEF AG_ElectionInv, AG_Types, AG_DTerm, AG_DVote, AG_MessageType, AG_All, AG_Stable, AG_Counted, AG_Active, AG_MessageCerts, HandleRequestVoteResponse, Discard, DiscardDirect, messageVars, serverVars, candidateVars, leaderVars, logVars, configVars\n  <1>2. AG_Types'\n    BY DistinctRoles, NilNotServer, AG_BagRemove, SMTT(\"r5\")\n    DEF AG_ElectionInv, AG_Types, AG_DTerm, AG_DVote, AG_MessageType, HandleRequestVoteResponse, Discard, DiscardDirect, messageVars, serverVars, candidateVars, leaderVars, logVars, configVars\n  <1>3. AG_Persistence'\n    BY DistinctRoles, NilNotServer, AG_BagRemove, SMTT(\"r5\")\n    DEF AG_ElectionInv, AG_Types, AG_DTerm, AG_DVote, AG_MessageType, AG_Persistence, HandleRequestVoteResponse, Discard, DiscardDirect, messageVars, serverVars, candidateVars, leaderVars, logVars, configVars\n  <1>4. AG_SelfVote'\n    BY DistinctRoles, NilNotServer, AG_BagRemove, SMTT(\"r5\")\n    DEF AG_ElectionInv, AG_Types, AG_DTerm, AG_DVote, AG_MessageType, AG_SelfVote, AG_Active, HandleRequestVoteResponse, Discard, DiscardDirect, messageVars, serverVars, candidateVars, leaderVars, logVars, configVars\n  <1>5. AG_LeaderQuorums'\n    BY DistinctRoles, NilNotServer, AG_BagRemove, SMTT(\"r5\")\n    DEF AG_ElectionInv, AG_Types, AG_DTerm, AG_DVote, AG_MessageType, AG_LeaderQuorums, HandleRequestVoteResponse, Discard, DiscardDirect, messageVars, serverVars, candidateVars, leaderVars, logVars, configVars\n  <1>6. AG_Bound(AG_All, currentTerm, votedFor)\n          /\\ AG_Bound(AG_Stable, AG_DTerm, AG_DVote)\n    BY SMTT(\"r1\") DEF AG_ElectionInv\n  <1>7. AG_Bound(AG_All', currentTerm', votedFor')\n    BY <1>1, <1>6, DistinctRoles, NilNotServer, AG_BagRemove, SMTT(\"r5\")\n    DEF AG_ElectionInv, AG_Types, AG_DTerm, AG_DVote, AG_MessageType, AG_Bound, AG_Persistence, HandleRequestVoteResponse, Discard, DiscardDirect, messageVars, serverVars, candidateVars, leaderVars, logVars, configVars\n  <1>8. AG_Bound(AG_Stable', AG_DTerm', AG_DVote')\n    BY <1>1, <1>6, DistinctRoles, NilNotServer, AG_BagRemove, SMTT(\"r5\")\n    DEF AG_ElectionInv, AG_Types, AG_DTerm, AG_DVote, AG_MessageType, AG_Bound, HandleRequestVoteResponse, Discard, DiscardDirect, messageVars, serverVars, candidateVars, leaderVars, logVars, configVars\n  <1>9. AG_Consistent(AG_All')\n    BY <1>1, SMTT(\"r2\") DEF AG_ElectionInv, AG_Consistent\n  <1> QED BY <1>2, <1>3, <1>4, <1>5, <1>7, <1>8, <1>9, SMTT(\"r1\") DEF AG_ElectionInv\n\nLEMMA AG_Restart ==\n  ASSUME AG_ElectionInv, NEW i \\in Server,\n         Restart(i)\n  PROVE AG_ElectionInv'\nPROOF\n  <1>1. AG_All' \\subseteq AG_All /\\ AG_Stable' \\subseteq AG_Stable\n          /\\ (\\A e \\in AG_All' : e[1] = i => e \\in AG_Stable)\n    BY DistinctRoles, NilNotServer, AG_BagClear, SMTT(\"r5\")\n    DEF AG_ElectionInv, AG_Types, AG_DTerm, AG_DVote, AG_MessageType, AG_All, AG_Stable, AG_Counted, AG_Active, AG_MessageCerts, Restart, messageVars, serverVars, candidateVars, leaderVars, logVars, configVars\n  <1>2. AG_Types'\n    BY DistinctRoles, NilNotServer, AG_BagClear, SMTT(\"r5\")\n    DEF AG_ElectionInv, AG_Types, AG_DTerm, AG_DVote, AG_MessageType, Restart, messageVars, serverVars, candidateVars, leaderVars, logVars, configVars\n  <1>3. AG_Persistence'\n    BY DistinctRoles, NilNotServer, AG_BagClear, SMTT(\"r5\")\n    DEF AG_ElectionInv, AG_Types, AG_DTerm, AG_DVote, AG_MessageType, AG_Persistence, Restart, messageVars, serverVars, candidateVars, leaderVars, logVars, configVars\n  <1>4. AG_SelfVote'\n    BY DistinctRoles, NilNotServer, AG_BagClear, SMTT(\"r5\")\n    DEF AG_ElectionInv, AG_Types, AG_DTerm, AG_DVote, AG_MessageType, AG_SelfVote, AG_Active, Restart, messageVars, serverVars, candidateVars, leaderVars, logVars, configVars\n  <1>5. AG_LeaderQuorums'\n    BY DistinctRoles, NilNotServer, AG_BagClear, SMTT(\"r5\")\n    DEF AG_ElectionInv, AG_Types, AG_DTerm, AG_DVote, AG_MessageType, AG_LeaderQuorums, Restart, messageVars, serverVars, candidateVars, leaderVars, logVars, configVars\n  <1>6. AG_Bound(AG_All, currentTerm, votedFor)\n          /\\ AG_Bound(AG_Stable, AG_DTerm, AG_DVote)\n    BY SMTT(\"r1\") DEF AG_ElectionInv\n  <1>7. AG_Bound(AG_All', currentTerm', votedFor')\n    BY <1>1, <1>6, AG_CertificateTypes, DistinctRoles, NilNotServer, AG_BagClear, SMTT(\"r5\")\n    DEF AG_ElectionInv, AG_Types, AG_DTerm, AG_DVote, AG_MessageType, AG_Bound, AG_Persistence, Restart, messageVars, serverVars, candidateVars, leaderVars, logVars, configVars\n  <1>8. AG_Bound(AG_Stable', AG_DTerm', AG_DVote')\n    BY <1>1, <1>6, DistinctRoles, NilNotServer, AG_BagClear, SMTT(\"r5\")\n    DEF AG_ElectionInv, AG_Types, AG_DTerm, AG_DVote, AG_MessageType, AG_Bound, Restart, messageVars, serverVars, candidateVars, leaderVars, logVars, configVars\n  <1>9. AG_Consistent(AG_All')\n    BY <1>1, SMTT(\"r2\") DEF AG_ElectionInv, AG_Consistent\n  <1> QED BY <1>2, <1>3, <1>4, <1>5, <1>7, <1>8, <1>9, SMTT(\"r1\") DEF AG_ElectionInv\n\nLEMMA AG_Ready ==\n  ASSUME AG_ElectionInv, NEW i \\in Server,\n         Ready(i)\n  PROVE AG_ElectionInv'\nPROOF\n  <1>1. AG_All' = AG_All /\\ AG_Stable' \\subseteq AG_All\n          /\\ (\\A e \\in AG_Stable' : e \\in AG_Stable \\/ e[1] = i)\n    BY DistinctRoles, NilNotServer, AG_BagSend, SMTT(\"r5\")\n    DEF AG_ElectionInv, AG_Types, AG_DTerm, AG_DVote, AG_MessageType, AG_All, AG_Stable, AG_Counted, AG_Active, AG_MessageCerts, Ready, PersistState, messageVars, serverVars, candidateVars, leaderVars, logVars, configVars\n  <1>2. AG_Types'\n    BY DistinctRoles, NilNotServer, AG_BagSend, SMTT(\"r5\")\n    DEF AG_ElectionInv, AG_Types, AG_DTerm, AG_DVote, AG_MessageType, Ready, PersistState, messageVars, serverVars, candidateVars, leaderVars, logVars, configVars\n  <1>3. AG_Persistence'\n    BY DistinctRoles, NilNotServer, AG_BagSend, SMTT(\"r5\")\n    DEF AG_ElectionInv, AG_Types, AG_DTerm, AG_DVote, AG_MessageType, AG_Persistence, Ready, PersistState, messageVars, serverVars, candidateVars, leaderVars, logVars, configVars\n  <1>4. AG_SelfVote'\n    BY DistinctRoles, NilNotServer, AG_BagSend, SMTT(\"r5\")\n    DEF AG_ElectionInv, AG_Types, AG_DTerm, AG_DVote, AG_MessageType, AG_SelfVote, AG_Active, Ready, PersistState, messageVars, serverVars, candidateVars, leaderVars, logVars, configVars\n  <1>5. AG_LeaderQuorums'\n    BY DistinctRoles, NilNotServer, AG_BagSend, SMTT(\"r5\")\n    DEF AG_ElectionInv, AG_Types, AG_DTerm, AG_DVote, AG_MessageType, AG_LeaderQuorums, Ready, PersistState, messageVars, serverVars, candidateVars, leaderVars, logVars, configVars\n  <1>6. AG_Bound(AG_All, currentTerm, votedFor)\n          /\\ AG_Bound(AG_Stable, AG_DTerm, AG_DVote)\n    BY SMTT(\"r1\") DEF AG_ElectionInv\n  <1>7. AG_Bound(AG_All', currentTerm', votedFor')\n    BY <1>1, <1>6, DistinctRoles, NilNotServer, AG_BagSend, SMTT(\"r5\")\n    DEF AG_ElectionInv, AG_Types, AG_DTerm, AG_DVote, AG_MessageType, AG_Bound, AG_Persistence, Ready, PersistState, messageVars, serverVars, candidateVars, leaderVars, logVars, configVars\n  <1>8. AG_Bound(AG_Stable', AG_DTerm', AG_DVote')\n    BY <1>1, <1>6, AG_CertificateTypes, DistinctRoles, NilNotServer, AG_BagSend, SMTT(\"r5\")\n    DEF AG_ElectionInv, AG_Types, AG_DTerm, AG_DVote, AG_MessageType, AG_Bound, Ready, PersistState, messageVars, serverVars, candidateVars, leaderVars, logVars, configVars\n  <1>9. AG_Consistent(AG_All')\n    BY <1>1, SMTT(\"r2\") DEF AG_ElectionInv, AG_Consistent\n  <1> QED BY <1>2, <1>3, <1>4, <1>5, <1>7, <1>8, <1>9, SMTT(\"r1\") DEF AG_ElectionInv\n\n\\* A newly generated positive response records the current vote.  All\n\\* other message generation is a special case with no new certificate.\nLEMMA AG_SendCertificate ==\n  ASSUME AG_ElectionInv, NEW n,\n    UNCHANGED <<currentTerm, state, votesGranted, config, durableState>>,\n    votedFor' \\in [Server -> Server \\cup {Nil}],\n    \\A i \\in Server : votedFor[i] # Nil => votedFor'[i] = votedFor[i],\n    IsABag(messages'), DOMAIN messages' \\subseteq DOMAIN messages,\n    pendingMessages' = WithMessage(n, pendingMessages),\n    AG_MessageType({n}),\n    n.mtype = RequestVoteResponse /\\ n.mvoteGranted =>\n      /\\ n.mterm = currentTerm[n.msource]\n      /\\ votedFor'[n.msource] = n.mdest\n  PROVE AG_ElectionInv'\nPROOF\n  <1>1. AG_All' \\subseteq AG_All \\cup AG_MessageCerts({n})\n        /\\ AG_Stable' \\subseteq AG_Stable\n    BY AG_BagAdd, SMTT(\"r5\")\n    DEF AG_ElectionInv, AG_Types, AG_All, AG_Stable, AG_Counted,\n        AG_Active, AG_MessageCerts\n  <1>2. AG_Types'\n    BY AG_BagAdd, SMTT(\"r5\")\n    DEF AG_ElectionInv, AG_Types, AG_MessageType, AG_DTerm, AG_DVote\n  <1>3. AG_Persistence' /\\ AG_SelfVote' /\\ AG_LeaderQuorums'\n    BY NilNotServer, SMTT(\"r5\")\n    DEF AG_ElectionInv, AG_Persistence, AG_DTerm, AG_DVote,\n        AG_SelfVote, AG_Active, AG_LeaderQuorums\n  <1>4. AG_All \\subseteq (Server \\X Nat \\X Server)\n    BY AG_CertificateTypes, SMTT(\"r1\") DEF AG_ElectionInv\n  <1>5. AG_Bound(AG_All, currentTerm, votedFor)\n        /\\ AG_Bound(AG_Stable, AG_DTerm, AG_DVote)\n        /\\ AG_Consistent(AG_All)\n    BY SMTT(\"r1\") DEF AG_ElectionInv\n  <1>6. AG_Bound(AG_All', currentTerm', votedFor')\n    BY <1>1, <1>4, <1>5, NilNotServer, SMTT(\"r5\")\n    DEF AG_Bound, AG_MessageCerts, AG_MessageType\n  <1>7. AG_Bound(AG_Stable', AG_DTerm', AG_DVote')\n    BY <1>1, <1>5, SMTT(\"r2\") DEF AG_Bound, AG_DTerm, AG_DVote\n  <1>8. AG_Consistent(AG_All')\n    BY <1>1, <1>4, <1>5, NilNotServer, SMTT(\"r5\")\n    DEF AG_Consistent, AG_Bound, AG_MessageCerts, AG_MessageType\n  <1> QED BY <1>2, <1>3, <1>6, <1>7, <1>8, SMTT(\"r1\") DEF AG_ElectionInv\n\nLEMMA AG_RequestVote ==\n  ASSUME AG_ElectionInv, NEW i \\in Server, NEW j \\in Server, RequestVote(i,j)\n  PROVE AG_ElectionInv'\n  BY AG_SendCertificate, DistinctMessageTypes, SMTT(\"r5\")\n  DEF AG_ElectionInv, AG_Types, AG_SelfVote, AG_Active, AG_MessageType,\n      RequestVote, Send, SendDirect, messageVars, serverVars, candidateVars,\n      leaderVars, logVars, configVars\n\nLEMMA AG_SendAppend ==\n  ASSUME AG_ElectionInv, NEW i \\in Server, NEW j \\in Server,\n         NEW subtype, NEW range, AppendEntriesInRangeToPeer(subtype,i,j,range)\n  PROVE AG_ElectionInv'\n  BY AG_SendCertificate, DistinctMessageTypes, SMTT(\"r5\")\n  DEF AG_ElectionInv, AG_Types, AG_MessageType, AppendEntriesInRangeToPeer,\n      Send, SendDirect, messageVars, serverVars, candidateVars,\n      leaderVars, logVars, configVars\n\nLEMMA AG_AppendSelf ==\n  ASSUME AG_ElectionInv, NEW i \\in Server, AppendEntriesToSelf(i)\n  PROVE AG_ElectionInv'\n  BY AG_SendCertificate, DistinctMessageTypes, SMTT(\"r5\")\n  DEF AG_ElectionInv, AG_Types, AG_MessageType, AppendEntriesToSelf,\n      Send, SendDirect, messageVars, serverVars, candidateVars,\n      leaderVars, logVars, configVars\n\nLEMMA AG_VoteRequest ==\n  ASSUME AG_ElectionInv, NEW i \\in Server, NEW j \\in Server, NEW m,\n         HandleRequestVoteRequest(i,j,m)\n  PROVE AG_ElectionInv'\n  BY AG_SendCertificate, AG_BagRemove, SMTT(\"r5\")\n  DEF AG_ElectionInv, AG_Types, AG_MessageType, HandleRequestVoteRequest,\n      Reply, ReplyDirect, messageVars, serverVars, candidateVars,\n      leaderVars, logVars, configVars\n\nLEMMA AG_RejectAppend ==\n  ASSUME AG_ElectionInv, NEW i \\in Server, NEW j \\in Server, NEW m, NEW ok,\n         RejectAppendEntriesRequest(i,j,m,ok), UNCHANGED candidateVars\n  PROVE AG_ElectionInv'\n  BY AG_SendCertificate, AG_BagRemove, DistinctMessageTypes, SMTT(\"r5\")\n  DEF AG_ElectionInv, AG_Types, AG_MessageType, RejectAppendEntriesRequest,\n      Reply, ReplyDirect, messageVars, serverVars, candidateVars,\n      leaderVars, logVars, configVars\n\nLEMMA AG_AppendDone ==\n  ASSUME AG_ElectionInv, NEW i \\in Server, NEW j \\in Server, NEW m, NEW index,\n         AppendEntriesAlreadyDone(i,j,index,m), UNCHANGED candidateVars\n  PROVE AG_ElectionInv'\n  BY AG_SendCertificate, AG_BagRemove, DistinctMessageTypes, SMTT(\"r5\")\n  DEF AG_ElectionInv, AG_Types, AG_MessageType, AppendEntriesAlreadyDone,\n      Reply, ReplyDirect, messageVars, serverVars, candidateVars,\n      leaderVars, logVars, configVars\n\nLEMMA AG_OtherLocal ==\n  ASSUME AG_ElectionInv, NEW i \\in Server,\n    \\/ ClientRequest(i,0)\n    \\/ AdvanceCommitIndex(i)\n  PROVE AG_ElectionInv'\n  BY AG_Shrink, SMTT(\"r3\")\n  DEF AG_ElectionInv, AG_Types, ClientRequest, AdvanceCommitIndex,\n      messageVars, serverVars, candidateVars, leaderVars, logVars, configVars\n\nLEMMA AG_LogChange ==\n  ASSUME AG_ElectionInv, NEW i, NEW index, NEW m,\n    UNCHANGED <<candidateVars, configVars>>,\n    \\/ ConflictAppendEntriesRequest(i,index,m)\n    \\/ NoConflictAppendEntriesRequest(i,index,m)\n  PROVE AG_ElectionInv'\n  BY AG_Shrink, SMTT(\"r3\")\n  DEF AG_ElectionInv, AG_Types, ConflictAppendEntriesRequest, NoConflictAppendEntriesRequest,\n      messageVars, serverVars, candidateVars, leaderVars, logVars, configVars\n\nLEMMA AG_OtherReceive ==\n  ASSUME AG_ElectionInv, NEW i, NEW j, NEW m,\n    \\/ HandleAppendEntriesResponse(i,j,m)\n    \\/ DropStaleResponse(i,j,m)\n  PROVE AG_ElectionInv'\n  BY AG_Shrink, AG_BagRemove, SMTT(\"r3\")\n  DEF AG_ElectionInv, AG_Types, HandleAppendEntriesResponse, DropStaleResponse,\n      Discard, DiscardDirect, messageVars, serverVars, candidateVars,\n      leaderVars, logVars, configVars\n\nLEMMA AG_Unreliable ==\n  ASSUME AG_ElectionInv, NEW m \\in DOMAIN messages,\n    \\/ DuplicateMessage(m)\n    \\/ DropMessage(m)\n  PROVE AG_ElectionInv'\n  BY AG_Shrink, AG_BagAdd, AG_BagRemove, SMTT(\"r3\")\n  DEF AG_ElectionInv, AG_Types, DuplicateMessage, DropMessage,\n      Discard, DiscardDirect, messageVars, serverVars, candidateVars,\n      leaderVars, logVars, configVars\n\nLEMMA AG_ReceiveAppend ==\n  ASSUME AG_ElectionInv, NEW i \\in Server, NEW j \\in Server, NEW m,\n         HandleAppendEntriesRequest(i,j,m)\n  PROVE AG_ElectionInv'\n  BY AG_RejectAppend, AG_ReturnFollower, AG_AppendDone, AG_LogChange, SMTT(\"r3\")\n  DEF HandleAppendEntriesRequest, AcceptAppendEntriesRequest\n\nLEMMA AG_Receive ==\n  ASSUME AG_ElectionInv, NEW m \\in DOMAIN messages, Receive(m)\n  PROVE AG_ElectionInv'\nPROOF\n  <1>1. m.mdest \\in Server /\\ m.msource \\in Server /\\ m.mterm \\in Nat\n    BY SMTT(\"r2\") DEF AG_ElectionInv, AG_Types, AG_MessageType\n  <1> QED BY <1>1, AG_UpdateTerm, AG_VoteRequest, AG_VoteResponse,\n      AG_ReceiveAppend, AG_OtherReceive, SMTT(\"r5\") DEF Receive, ReceiveDirect\n\nLEMMA AG_ElectionStep == AG_ElectionInv /\\ [Next]_vars => AG_ElectionInv'\nPROOF\n  <1>1. ASSUME AG_ElectionInv, NextAsync PROVE AG_ElectionInv'\n    BY <1>1, AG_RequestVote, AG_BecomeLeader, AG_OtherLocal, AG_SendAppend,\n       AG_AppendSelf, AG_Receive, AG_Timeout, AG_Ready, AG_StepDown, SMTT(\"r5\")\n    DEF NextAsync, AppendEntries, Heartbeat, SendSnapshot\n  <1>2. ASSUME AG_ElectionInv, NextCrash PROVE AG_ElectionInv'\n    BY <1>2, AG_Restart, SMTT(\"r2\") DEF NextCrash\n  <1>3. ASSUME AG_ElectionInv, NextUnreliable PROVE AG_ElectionInv'\n    BY <1>3, AG_Unreliable, SMTT(\"r2\") DEF NextUnreliable\n  <1>4. ASSUME AG_ElectionInv, UNCHANGED vars PROVE AG_ElectionInv'\n    BY <1>4, AG_Shrink, SMTT(\"r3\")\n    DEF vars, messageVars, serverVars, candidateVars, leaderVars,\n        logVars, configVars, AG_ElectionInv, AG_Types\n  <1> QED BY <1>1, <1>2, <1>3, <1>4, SMTT(\"r2\") DEF Next\n\n\\* END AGENT HELPERS\n\nTHEOREM Spec => []LogInv\n\\* BEGIN AGENT PROOF etcd_raft/etcd_raft_LogInv.tla\nBY PTL DEF Spec\n\\* END AGENT PROOF etcd_raft/etcd_raft_LogInv.tla\n\nTHEOREM CommittedIsDurable == Spec => []CommittedIsDurableInv\n\\* BEGIN AGENT PROOF etcd_raft/etcd_raft_CommittedIsDurable.tla\nBY PTL DEF Spec\n\\* END AGENT PROOF etcd_raft/etcd_raft_CommittedIsDurable.tla\n\nTHEOREM ElectionSafety == Spec => []ElectionSafetyInv\n\\* BEGIN AGENT PROOF etcd_raft/etcd_raft_ElectionSafety.tla\nBY PTL DEF Spec\n\\* END AGENT PROOF etcd_raft/etcd_raft_ElectionSafety.tla\n\nTHEOREM LeaderCompleteness == Spec => []LeaderCompletenessInv\n\\* BEGIN AGENT PROOF etcd_raft/etcd_raft_LeaderCompleteness.tla\nBY PTL DEF Spec\n\\* END AGENT PROOF etcd_raft/etcd_raft_LeaderCompleteness.tla\n\nTHEOREM LogMatching == Spec => []LogMatchingInv\n\\* BEGIN AGENT PROOF etcd_raft/etcd_raft_LogMatching.tla\nBY PTL DEF Spec\n\\* END AGENT PROOF etcd_raft/etcd_raft_LogMatching.tla\n\nTHEOREM MoreThanOneLeader == Spec => []MoreThanOneLeaderInv\n\\* BEGIN AGENT PROOF etcd_raft/etcd_raft_MoreThanOneLeader.tla\nPROOF\n  <1>1. Spec => []AG_ElectionInv\n    BY AG_ElectionInit, AG_ElectionStep, PTL DEF Spec\n  <1> QED BY <1>1, AG_ElectionConsequence, PTL\n\\* END AGENT PROOF etcd_raft/etcd_raft_MoreThanOneLeader.tla\n\nTHEOREM MoreUpToDate == Spec => []MoreUpToDateCorrectInv\n\\* BEGIN AGENT PROOF etcd_raft/etcd_raft_MoreUpToDate.tla\nBY PTL DEF Spec\n\\* END AGENT PROOF etcd_raft/etcd_raft_MoreUpToDate.tla\n\nTHEOREM QuorumLog == Spec => []QuorumLogInv\n\\* BEGIN AGENT PROOF etcd_raft/etcd_raft_QuorumLog.tla\nBY PTL DEF Spec\n\\* END AGENT PROOF etcd_raft/etcd_raft_QuorumLog.tla\n====\n",
+  "units": {
+    "etcd_raft/etcd_raft_LogInv.tla": {
+      "id": "etcd_raft/etcd_raft_LogInv.tla",
+      "name": "etcd_raft/etcd_raft_LogInv.tla",
+      "kind": "target",
+      "lineStart": 606,
+      "lineEnd": 608,
+      "proofLines": [
+        608
+      ],
+      "proofRange": [
+        608,
+        608
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "etcd_raft/etcd_raft_CommittedIsDurable.tla": {
+      "id": "etcd_raft/etcd_raft_CommittedIsDurable.tla",
+      "name": "CommittedIsDurable",
+      "kind": "target",
+      "lineStart": 611,
+      "lineEnd": 613,
+      "proofLines": [
+        613
+      ],
+      "proofRange": [
+        613,
+        613
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "etcd_raft/etcd_raft_ElectionSafety.tla": {
+      "id": "etcd_raft/etcd_raft_ElectionSafety.tla",
+      "name": "ElectionSafety",
+      "kind": "target",
+      "lineStart": 616,
+      "lineEnd": 618,
+      "proofLines": [
+        618
+      ],
+      "proofRange": [
+        618,
+        618
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "etcd_raft/etcd_raft_LeaderCompleteness.tla": {
+      "id": "etcd_raft/etcd_raft_LeaderCompleteness.tla",
+      "name": "LeaderCompleteness",
+      "kind": "target",
+      "lineStart": 621,
+      "lineEnd": 623,
+      "proofLines": [
+        623
+      ],
+      "proofRange": [
+        623,
+        623
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "etcd_raft/etcd_raft_LogMatching.tla": {
+      "id": "etcd_raft/etcd_raft_LogMatching.tla",
+      "name": "LogMatching",
+      "kind": "target",
+      "lineStart": 626,
+      "lineEnd": 628,
+      "proofLines": [
+        628
+      ],
+      "proofRange": [
+        628,
+        628
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "etcd_raft/etcd_raft_MoreThanOneLeader.tla": {
+      "id": "etcd_raft/etcd_raft_MoreThanOneLeader.tla",
+      "name": "MoreThanOneLeader",
+      "kind": "target",
+      "lineStart": 631,
+      "lineEnd": 636,
+      "proofLines": [
+        633,
+        634,
+        635,
+        636
+      ],
+      "proofRange": [
+        633,
+        636
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AG_ElectionConsequence",
+        "helper:AG_ElectionInit",
+        "helper:AG_ElectionStep"
+      ]
+    },
+    "etcd_raft/etcd_raft_MoreUpToDate.tla": {
+      "id": "etcd_raft/etcd_raft_MoreUpToDate.tla",
+      "name": "MoreUpToDate",
+      "kind": "target",
+      "lineStart": 639,
+      "lineEnd": 641,
+      "proofLines": [
+        641
+      ],
+      "proofRange": [
+        641,
+        641
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "etcd_raft/etcd_raft_QuorumLog.tla": {
+      "id": "etcd_raft/etcd_raft_QuorumLog.tla",
+      "name": "QuorumLog",
+      "kind": "target",
+      "lineStart": 644,
+      "lineEnd": 646,
+      "proofLines": [
+        646
+      ],
+      "proofRange": [
+        646,
+        646
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AG_FiniteBridge": {
+      "id": "helper:AG_FiniteBridge",
+      "name": "AG_FiniteBridge",
+      "kind": "helper",
+      "lineStart": 62,
+      "lineEnd": 66,
+      "proofLines": [
+        65,
+        66
+      ],
+      "proofRange": [
+        65,
+        66
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AG_QuorumIntersection": {
+      "id": "helper:AG_QuorumIntersection",
+      "name": "AG_QuorumIntersection",
+      "kind": "helper",
+      "lineStart": 68,
+      "lineEnd": 81,
+      "proofLines": [
+        70,
+        71,
+        72,
+        73,
+        74,
+        75,
+        76,
+        77,
+        78,
+        79,
+        80,
+        81
+      ],
+      "proofRange": [
+        70,
+        81
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AG_FiniteBridge"
+      ]
+    },
+    "helper:AG_ElectionConsequence": {
+      "id": "helper:AG_ElectionConsequence",
+      "name": "AG_ElectionConsequence",
+      "kind": "helper",
+      "lineStart": 83,
+      "lineEnd": 97,
+      "proofLines": [
+        84,
+        85,
+        86,
+        87,
+        88,
+        89,
+        90,
+        91,
+        92,
+        93,
+        94,
+        95,
+        96,
+        97
+      ],
+      "proofRange": [
+        84,
+        97
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AG_QuorumIntersection"
+      ]
+    },
+    "helper:AG_ElectionInit": {
+      "id": "helper:AG_ElectionInit",
+      "name": "AG_ElectionInit",
+      "kind": "helper",
+      "lineStart": 99,
+      "lineEnd": 106,
+      "proofLines": [
+        100,
+        101,
+        102,
+        103,
+        104,
+        105,
+        106
+      ],
+      "proofRange": [
+        100,
+        106
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AG_BagBridge": {
+      "id": "helper:AG_BagBridge",
+      "name": "AG_BagBridge",
+      "kind": "helper",
+      "lineStart": 111,
+      "lineEnd": 114,
+      "proofLines": [
+        114
+      ],
+      "proofRange": [
+        114,
+        114
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AG_BagDifferenceFacts": {
+      "id": "helper:AG_BagDifferenceFacts",
+      "name": "AG_BagDifferenceFacts",
+      "kind": "helper",
+      "lineStart": 116,
+      "lineEnd": 121,
+      "proofLines": [
+        121
+      ],
+      "proofRange": [
+        121,
+        121
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AG_BagBridge"
+      ]
+    },
+    "helper:AG_BagAdd": {
+      "id": "helper:AG_BagAdd",
+      "name": "AG_BagAdd",
+      "kind": "helper",
+      "lineStart": 123,
+      "lineEnd": 127,
+      "proofLines": [
+        127
+      ],
+      "proofRange": [
+        127,
+        127
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AG_BagRemove": {
+      "id": "helper:AG_BagRemove",
+      "name": "AG_BagRemove",
+      "kind": "helper",
+      "lineStart": 129,
+      "lineEnd": 133,
+      "proofLines": [
+        133
+      ],
+      "proofRange": [
+        133,
+        133
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AG_BagDifferenceFacts"
+      ]
+    },
+    "helper:AG_BagClear": {
+      "id": "helper:AG_BagClear",
+      "name": "AG_BagClear",
+      "kind": "helper",
+      "lineStart": 135,
+      "lineEnd": 140,
+      "proofLines": [
+        140
+      ],
+      "proofRange": [
+        140,
+        140
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AG_BagDifferenceFacts"
+      ]
+    },
+    "helper:AG_BagSend": {
+      "id": "helper:AG_BagSend",
+      "name": "AG_BagSend",
+      "kind": "helper",
+      "lineStart": 142,
+      "lineEnd": 149,
+      "proofLines": [
+        149
+      ],
+      "proofRange": [
+        149,
+        149
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AG_BagDifferenceFacts"
+      ]
+    },
+    "helper:AG_CertificateTypes": {
+      "id": "helper:AG_CertificateTypes",
+      "name": "AG_CertificateTypes",
+      "kind": "helper",
+      "lineStart": 151,
+      "lineEnd": 153,
+      "proofLines": [
+        152,
+        153
+      ],
+      "proofRange": [
+        152,
+        153
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AG_Shrink": {
+      "id": "helper:AG_Shrink",
+      "name": "AG_Shrink",
+      "kind": "helper",
+      "lineStart": 155,
+      "lineEnd": 169,
+      "proofLines": [
+        162,
+        163,
+        164,
+        165,
+        166,
+        167,
+        168,
+        169
+      ],
+      "proofRange": [
+        162,
+        169
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AG_Timeout": {
+      "id": "helper:AG_Timeout",
+      "name": "AG_Timeout",
+      "kind": "helper",
+      "lineStart": 172,
+      "lineEnd": 203,
+      "proofLines": [
+        176,
+        177,
+        178,
+        179,
+        180,
+        181,
+        182,
+        183,
+        184,
+        185,
+        186,
+        187,
+        188,
+        189,
+        190,
+        191,
+        192,
+        193,
+        194,
+        195,
+        196,
+        197,
+        198,
+        199,
+        200,
+        201,
+        202,
+        203
+      ],
+      "proofRange": [
+        176,
+        203
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AG_CertificateTypes"
+      ]
+    },
+    "helper:AG_BecomeLeader": {
+      "id": "helper:AG_BecomeLeader",
+      "name": "AG_BecomeLeader",
+      "kind": "helper",
+      "lineStart": 205,
+      "lineEnd": 236,
+      "proofLines": [
+        209,
+        210,
+        211,
+        212,
+        213,
+        214,
+        215,
+        216,
+        217,
+        218,
+        219,
+        220,
+        221,
+        222,
+        223,
+        224,
+        225,
+        226,
+        227,
+        228,
+        229,
+        230,
+        231,
+        232,
+        233,
+        234,
+        235,
+        236
+      ],
+      "proofRange": [
+        209,
+        236
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AG_StepDown": {
+      "id": "helper:AG_StepDown",
+      "name": "AG_StepDown",
+      "kind": "helper",
+      "lineStart": 238,
+      "lineEnd": 269,
+      "proofLines": [
+        242,
+        243,
+        244,
+        245,
+        246,
+        247,
+        248,
+        249,
+        250,
+        251,
+        252,
+        253,
+        254,
+        255,
+        256,
+        257,
+        258,
+        259,
+        260,
+        261,
+        262,
+        263,
+        264,
+        265,
+        266,
+        267,
+        268,
+        269
+      ],
+      "proofRange": [
+        242,
+        269
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AG_UpdateTerm": {
+      "id": "helper:AG_UpdateTerm",
+      "name": "AG_UpdateTerm",
+      "kind": "helper",
+      "lineStart": 271,
+      "lineEnd": 302,
+      "proofLines": [
+        275,
+        276,
+        277,
+        278,
+        279,
+        280,
+        281,
+        282,
+        283,
+        284,
+        285,
+        286,
+        287,
+        288,
+        289,
+        290,
+        291,
+        292,
+        293,
+        294,
+        295,
+        296,
+        297,
+        298,
+        299,
+        300,
+        301,
+        302
+      ],
+      "proofRange": [
+        275,
+        302
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AG_CertificateTypes"
+      ]
+    },
+    "helper:AG_ReturnFollower": {
+      "id": "helper:AG_ReturnFollower",
+      "name": "AG_ReturnFollower",
+      "kind": "helper",
+      "lineStart": 304,
+      "lineEnd": 335,
+      "proofLines": [
+        308,
+        309,
+        310,
+        311,
+        312,
+        313,
+        314,
+        315,
+        316,
+        317,
+        318,
+        319,
+        320,
+        321,
+        322,
+        323,
+        324,
+        325,
+        326,
+        327,
+        328,
+        329,
+        330,
+        331,
+        332,
+        333,
+        334,
+        335
+      ],
+      "proofRange": [
+        308,
+        335
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AG_VoteResponse": {
+      "id": "helper:AG_VoteResponse",
+      "name": "AG_VoteResponse",
+      "kind": "helper",
+      "lineStart": 337,
+      "lineEnd": 368,
+      "proofLines": [
+        341,
+        342,
+        343,
+        344,
+        345,
+        346,
+        347,
+        348,
+        349,
+        350,
+        351,
+        352,
+        353,
+        354,
+        355,
+        356,
+        357,
+        358,
+        359,
+        360,
+        361,
+        362,
+        363,
+        364,
+        365,
+        366,
+        367,
+        368
+      ],
+      "proofRange": [
+        341,
+        368
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AG_BagRemove"
+      ]
+    },
+    "helper:AG_Restart": {
+      "id": "helper:AG_Restart",
+      "name": "AG_Restart",
+      "kind": "helper",
+      "lineStart": 370,
+      "lineEnd": 402,
+      "proofLines": [
+        374,
+        375,
+        376,
+        377,
+        378,
+        379,
+        380,
+        381,
+        382,
+        383,
+        384,
+        385,
+        386,
+        387,
+        388,
+        389,
+        390,
+        391,
+        392,
+        393,
+        394,
+        395,
+        396,
+        397,
+        398,
+        399,
+        400,
+        401,
+        402
+      ],
+      "proofRange": [
+        374,
+        402
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AG_BagClear",
+        "helper:AG_CertificateTypes"
+      ]
+    },
+    "helper:AG_Ready": {
+      "id": "helper:AG_Ready",
+      "name": "AG_Ready",
+      "kind": "helper",
+      "lineStart": 404,
+      "lineEnd": 436,
+      "proofLines": [
+        408,
+        409,
+        410,
+        411,
+        412,
+        413,
+        414,
+        415,
+        416,
+        417,
+        418,
+        419,
+        420,
+        421,
+        422,
+        423,
+        424,
+        425,
+        426,
+        427,
+        428,
+        429,
+        430,
+        431,
+        432,
+        433,
+        434,
+        435,
+        436
+      ],
+      "proofRange": [
+        408,
+        436
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AG_BagSend",
+        "helper:AG_CertificateTypes"
+      ]
+    },
+    "helper:AG_SendCertificate": {
+      "id": "helper:AG_SendCertificate",
+      "name": "AG_SendCertificate",
+      "kind": "helper",
+      "lineStart": 440,
+      "lineEnd": 479,
+      "proofLines": [
+        452,
+        453,
+        454,
+        455,
+        456,
+        457,
+        458,
+        459,
+        460,
+        461,
+        462,
+        463,
+        464,
+        465,
+        466,
+        467,
+        468,
+        469,
+        470,
+        471,
+        472,
+        473,
+        474,
+        475,
+        476,
+        477,
+        478,
+        479
+      ],
+      "proofRange": [
+        452,
+        479
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AG_BagAdd",
+        "helper:AG_CertificateTypes"
+      ]
+    },
+    "helper:AG_RequestVote": {
+      "id": "helper:AG_RequestVote",
+      "name": "AG_RequestVote",
+      "kind": "helper",
+      "lineStart": 481,
+      "lineEnd": 487,
+      "proofLines": [
+        484,
+        485,
+        486,
+        487
+      ],
+      "proofRange": [
+        484,
+        487
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AG_SendCertificate"
+      ]
+    },
+    "helper:AG_SendAppend": {
+      "id": "helper:AG_SendAppend",
+      "name": "AG_SendAppend",
+      "kind": "helper",
+      "lineStart": 489,
+      "lineEnd": 496,
+      "proofLines": [
+        493,
+        494,
+        495,
+        496
+      ],
+      "proofRange": [
+        493,
+        496
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AG_SendCertificate"
+      ]
+    },
+    "helper:AG_AppendSelf": {
+      "id": "helper:AG_AppendSelf",
+      "name": "AG_AppendSelf",
+      "kind": "helper",
+      "lineStart": 498,
+      "lineEnd": 504,
+      "proofLines": [
+        501,
+        502,
+        503,
+        504
+      ],
+      "proofRange": [
+        501,
+        504
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AG_SendCertificate"
+      ]
+    },
+    "helper:AG_VoteRequest": {
+      "id": "helper:AG_VoteRequest",
+      "name": "AG_VoteRequest",
+      "kind": "helper",
+      "lineStart": 506,
+      "lineEnd": 513,
+      "proofLines": [
+        510,
+        511,
+        512,
+        513
+      ],
+      "proofRange": [
+        510,
+        513
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AG_BagRemove",
+        "helper:AG_SendCertificate"
+      ]
+    },
+    "helper:AG_RejectAppend": {
+      "id": "helper:AG_RejectAppend",
+      "name": "AG_RejectAppend",
+      "kind": "helper",
+      "lineStart": 515,
+      "lineEnd": 522,
+      "proofLines": [
+        519,
+        520,
+        521,
+        522
+      ],
+      "proofRange": [
+        519,
+        522
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AG_BagRemove",
+        "helper:AG_SendCertificate"
+      ]
+    },
+    "helper:AG_AppendDone": {
+      "id": "helper:AG_AppendDone",
+      "name": "AG_AppendDone",
+      "kind": "helper",
+      "lineStart": 524,
+      "lineEnd": 531,
+      "proofLines": [
+        528,
+        529,
+        530,
+        531
+      ],
+      "proofRange": [
+        528,
+        531
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AG_BagRemove",
+        "helper:AG_SendCertificate"
+      ]
+    },
+    "helper:AG_OtherLocal": {
+      "id": "helper:AG_OtherLocal",
+      "name": "AG_OtherLocal",
+      "kind": "helper",
+      "lineStart": 533,
+      "lineEnd": 540,
+      "proofLines": [
+        538,
+        539,
+        540
+      ],
+      "proofRange": [
+        538,
+        540
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AG_Shrink"
+      ]
+    },
+    "helper:AG_LogChange": {
+      "id": "helper:AG_LogChange",
+      "name": "AG_LogChange",
+      "kind": "helper",
+      "lineStart": 542,
+      "lineEnd": 550,
+      "proofLines": [
+        548,
+        549,
+        550
+      ],
+      "proofRange": [
+        548,
+        550
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AG_Shrink"
+      ]
+    },
+    "helper:AG_OtherReceive": {
+      "id": "helper:AG_OtherReceive",
+      "name": "AG_OtherReceive",
+      "kind": "helper",
+      "lineStart": 552,
+      "lineEnd": 560,
+      "proofLines": [
+        557,
+        558,
+        559,
+        560
+      ],
+      "proofRange": [
+        557,
+        560
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AG_BagRemove",
+        "helper:AG_Shrink"
+      ]
+    },
+    "helper:AG_Unreliable": {
+      "id": "helper:AG_Unreliable",
+      "name": "AG_Unreliable",
+      "kind": "helper",
+      "lineStart": 562,
+      "lineEnd": 570,
+      "proofLines": [
+        567,
+        568,
+        569,
+        570
+      ],
+      "proofRange": [
+        567,
+        570
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AG_BagAdd",
+        "helper:AG_BagRemove",
+        "helper:AG_Shrink"
+      ]
+    },
+    "helper:AG_ReceiveAppend": {
+      "id": "helper:AG_ReceiveAppend",
+      "name": "AG_ReceiveAppend",
+      "kind": "helper",
+      "lineStart": 572,
+      "lineEnd": 577,
+      "proofLines": [
+        576,
+        577
+      ],
+      "proofRange": [
+        576,
+        577
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AG_AppendDone",
+        "helper:AG_LogChange",
+        "helper:AG_RejectAppend",
+        "helper:AG_ReturnFollower"
+      ]
+    },
+    "helper:AG_Receive": {
+      "id": "helper:AG_Receive",
+      "name": "AG_Receive",
+      "kind": "helper",
+      "lineStart": 579,
+      "lineEnd": 586,
+      "proofLines": [
+        582,
+        583,
+        584,
+        585,
+        586
+      ],
+      "proofRange": [
+        582,
+        586
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AG_OtherReceive",
+        "helper:AG_ReceiveAppend",
+        "helper:AG_UpdateTerm",
+        "helper:AG_VoteRequest",
+        "helper:AG_VoteResponse"
+      ]
+    },
+    "helper:AG_ElectionStep": {
+      "id": "helper:AG_ElectionStep",
+      "name": "AG_ElectionStep",
+      "kind": "helper",
+      "lineStart": 588,
+      "lineEnd": 602,
+      "proofLines": [
+        589,
+        590,
+        591,
+        592,
+        593,
+        594,
+        595,
+        596,
+        597,
+        598,
+        599,
+        600,
+        601,
+        602
+      ],
+      "proofRange": [
+        589,
+        602
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AG_AppendSelf",
+        "helper:AG_BecomeLeader",
+        "helper:AG_OtherLocal",
+        "helper:AG_Ready",
+        "helper:AG_Receive",
+        "helper:AG_RequestVote",
+        "helper:AG_Restart",
+        "helper:AG_SendAppend",
+        "helper:AG_Shrink",
+        "helper:AG_StepDown",
+        "helper:AG_Timeout",
+        "helper:AG_Unreliable"
+      ]
+    }
+  }
+}

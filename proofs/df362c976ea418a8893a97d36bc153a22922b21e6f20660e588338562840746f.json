@@ -1,0 +1,280 @@
+{
+  "schemaVersion": 1,
+  "specId": "CahillSSI/CahillSerializability.tla",
+  "sourceName": "CahillSerializability.tla",
+  "sourceSha256": "3def0efcc000230febf2ebaa00d8ab3d0b32b9469c13f0dd9909b7e6a7c38c03",
+  "resultSha256": "d4f34edd8e6768cc12deb4c6e02693d951ba3de650560f1b3671d005e9b58f50",
+  "source": "---- MODULE CahillSerializability ----\nEXTENDS CahillSerializabilityDefs\n\n\\* BEGIN AGENT HELPERS\nLOCAL CSProof == INSTANCE TLAPS\nLOCAL CSWF == INSTANCE WellFoundedInduction\n\nLEMMA CSEmptyGraph ==\n  FindAllNodesInAnyCycle({}) = {}\nBY CSProof!SMTT(\"r10\") DEF FindAllNodesInAnyCycle\n\nLEMMA CSNoCommittedTransactions ==\n  ASSUME NEW h, CommittedTxns(h) = {}\n  PROVE CahillSerializable(h)\n<1>1. CahillMVSG(h) = {}\n  BY CSProof!SMTT(\"r10\") DEF CahillMVSG\n<1> QED\n  BY <1>1, CSEmptyGraph DEF CahillSerializable, IsCycle\n\nLEMMA CSInitialSerializable ==\n  Init => CahillSerializable(history)\n<1>1. Init => CommittedTxns(history) = {}\n  BY CSProof!SMTT(\"r10\")\n    DEF Init, CommittedTxns, SelectEvents, Range\n<1> QED\n  BY <1>1, CSNoCommittedTransactions\n\nLEMMA CSStutteringPreservesSerializable ==\n  CahillSerializable(history) /\\ UNCHANGED allvars\n    => CahillSerializable(history')\nBY CSProof!SMTT(\"r10\") DEF allvars\n\nCSGraphVertices(edges) ==\n  UNION {{e[1], e[2]} : e \\in edges}\n\nCSGraphSuccessors(edges, n) ==\n  {e[2] : e \\in {edge \\in edges : edge[1] = n}}\n\nCSGraphDomain(edges) ==\n  CSGraphVertices(edges) \\X SUBSET CSGraphVertices(edges)\n\nCSGraphBody(edges, f, p) ==\n  IF p[1] \\in p[2] THEN {p[1]}\n  ELSE UNION {f[<<n, p[2] \\union {p[1]}>>] :\n                n \\in CSGraphSuccessors(edges, p[1])}\n\nCSGraphWalk(edges) ==\n  LET walk[p \\in CSGraphDomain(edges)] == CSGraphBody(edges, walk, p)\n  IN walk\n\nCSGraphRanked(edges, nodes, rank, bound) ==\n  /\\ bound \\in Nat\n  /\\ edges \\subseteq nodes \\X nodes\n  /\\ rank \\in [nodes -> 1..bound]\n  /\\ \\A e \\in edges : rank[e[1]] < rank[e[2]]\n\nCSGraphOrder(edges, rank, bound) ==\n  CSWF!PreImage(LAMBDA p : bound - rank[p[1]],\n    CSGraphDomain(edges), CSWF!OpToRel(<, Nat))\n\nLEMMA CSGraphEndpoints ==\n  ASSUME NEW edges, NEW nodes, edges \\subseteq nodes \\X nodes\n  PROVE /\\ CSGraphVertices(edges) \\subseteq nodes\n        /\\ \\A n \\in CSGraphVertices(edges) :\n             CSGraphSuccessors(edges, n) \\subseteq CSGraphVertices(edges)\n        /\\ \\A n \\in CSGraphVertices(edges) :\n             \\A m \\in CSGraphSuccessors(edges, n) : <<n,m>> \\in edges\nBY CSProof!SMTT(\"r10\") DEF CSGraphVertices, CSGraphSuccessors\n\nLEMMA CSGraphRecursionWellFounded ==\n  ASSUME NEW edges, NEW nodes, NEW rank, NEW bound,\n         CSGraphRanked(edges, nodes, rank, bound)\n  PROVE /\\ CSWF!IsWellFoundedOn(CSGraphOrder(edges, rank, bound),\n                               CSGraphDomain(edges))\n        /\\ CSWF!WFDefOn(CSGraphOrder(edges, rank, bound),\n                        CSGraphDomain(edges),\n                        LAMBDA f,p : CSGraphBody(edges, f, p))\n<1>1. \\A p \\in CSGraphDomain(edges) : bound - rank[p[1]] \\in Nat\n  BY CSGraphEndpoints, CSProof!SMTT(\"r10\")\n    DEF CSGraphDomain, CSGraphRanked\n<1>2. CSWF!IsWellFoundedOn(CSGraphOrder(edges, rank, bound),\n                           CSGraphDomain(edges))\n  BY <1>1, CSWF!PreImageWellFounded, CSWF!NatLessThanWellFounded, CSProof!IsaM(\"blast\")\n    DEF CSGraphOrder\n<1>3. CSWF!WFDefOn(CSGraphOrder(edges, rank, bound),\n                   CSGraphDomain(edges),\n                   LAMBDA f,p : CSGraphBody(edges, f, p))\n  <2>1. ASSUME NEW f, NEW g, NEW p \\in CSGraphDomain(edges),\n                \\A q \\in CSWF!SetLessThan(p,\n                  CSGraphOrder(edges, rank, bound), CSGraphDomain(edges)) :\n                    f[q] = g[q]\n         PROVE CSGraphBody(edges, f, p) = CSGraphBody(edges, g, p)\n    <3>1. \\A n \\in CSGraphSuccessors(edges, p[1]) :\n             <<n, p[2] \\union {p[1]}>> \\in\n               CSWF!SetLessThan(p, CSGraphOrder(edges, rank, bound),\n                                  CSGraphDomain(edges))\n      BY CSGraphEndpoints, CSProof!SMTT(\"r20\")\n        DEF CSGraphOrder, CSGraphDomain, CSGraphRanked,\n            CSWF!PreImage, CSWF!OpToRel, CSWF!SetLessThan\n    <3> QED\n      BY <2>1, <3>1, CSProof!SMTT(\"r10\") DEF CSGraphBody\n  <2> QED\n    BY <2>1 DEF CSWF!WFDefOn\n<1> QED\n  BY <1>2, <1>3\n\nLEMMA CSGraphRecursionEquation ==\n  ASSUME NEW edges, NEW nodes, NEW rank, NEW bound,\n         CSGraphRanked(edges, nodes, rank, bound)\n  PROVE CSGraphWalk(edges) =\n          [p \\in CSGraphDomain(edges) |-> CSGraphBody(edges, CSGraphWalk(edges), p)]\n<1>1. CSWF!OpDefinesFcn(CSGraphWalk(edges), CSGraphDomain(edges),\n                       LAMBDA f,p : CSGraphBody(edges, f, p))\n  BY DEF CSWF!OpDefinesFcn, CSGraphWalk\n<1>2. CSWF!IsWellFoundedOn(CSGraphOrder(edges, rank, bound),\n                           CSGraphDomain(edges))\n  BY CSGraphRecursionWellFounded\n<1>3. CSWF!WFDefOn(CSGraphOrder(edges, rank, bound),\n                   CSGraphDomain(edges),\n                   LAMBDA f,p : CSGraphBody(edges, f, p))\n  BY CSGraphRecursionWellFounded\n<1>4. CSWF!WFInductiveDefines(CSGraphWalk(edges), CSGraphDomain(edges),\n                             LAMBDA f,p : CSGraphBody(edges, f, p))\n  BY <1>1, <1>2, <1>3, CSWF!WFInductiveDef, CSProof!IsaM(\"blast\")\n<1> QED\n  BY <1>4 DEF CSWF!WFInductiveDefines\n\nLEMMA CSGraphWalkBound ==\n  ASSUME NEW edges, NEW nodes, NEW rank, NEW bound,\n         CSGraphRanked(edges, nodes, rank, bound)\n  PROVE \\A p \\in CSGraphDomain(edges) :\n          CSGraphWalk(edges)[p] \\subseteq\n            {v \\in p[2] : rank[p[1]] <= rank[v]}\n<1> DEFINE\n      Good(p) == CSGraphWalk(edges)[p] \\subseteq\n                   {v \\in p[2] : rank[p[1]] <= rank[v]}\n<1> HIDE DEF Good\n<1>1. CSGraphWalk(edges) =\n       [p \\in CSGraphDomain(edges) |-> CSGraphBody(edges, CSGraphWalk(edges), p)]\n  BY CSGraphRecursionEquation\n<1>2. CSWF!IsWellFoundedOn(CSGraphOrder(edges, rank, bound),\n                           CSGraphDomain(edges))\n  BY CSGraphRecursionWellFounded\n<1>3. \\A p \\in CSGraphDomain(edges) :\n         (\\A q \\in CSWF!SetLessThan(p,\n           CSGraphOrder(edges, rank, bound), CSGraphDomain(edges)) : Good(q))\n         => Good(p)\n  <2>1. ASSUME NEW p \\in CSGraphDomain(edges),\n               \\A q \\in CSWF!SetLessThan(p,\n                 CSGraphOrder(edges, rank, bound), CSGraphDomain(edges)) : Good(q)\n         PROVE Good(p)\n    <3>1. \\A n \\in CSGraphSuccessors(edges, p[1]) :\n             <<n, p[2] \\union {p[1]}>> \\in\n               CSWF!SetLessThan(p, CSGraphOrder(edges, rank, bound),\n                                  CSGraphDomain(edges))\n      BY CSGraphEndpoints, CSProof!SMTT(\"r20\")\n        DEF CSGraphOrder, CSGraphDomain, CSGraphRanked,\n            CSWF!PreImage, CSWF!OpToRel, CSWF!SetLessThan\n    <3>2. CSGraphWalk(edges)[p] = CSGraphBody(edges, CSGraphWalk(edges), p)\n      BY <1>1, CSProof!SMTT(\"r10\")\n    <3> QED\n      BY <2>1, <3>1, <3>2, CSGraphEndpoints, CSProof!SMTT(\"r20\")\n        DEF Good, CSGraphBody, CSGraphDomain, CSGraphRanked\n  <2> QED BY <2>1\n<1>4. \\A p \\in CSGraphDomain(edges) : Good(p)\n  BY <1>2, <1>3, CSWF!WFInduction, CSProof!IsaM(\"blast\")\n<1> QED BY <1>4 DEF Good\n\nLEMMA CSRankedNormalizedSearchEmpty ==\n  ASSUME NEW edges, NEW nodes, NEW rank, NEW bound,\n         CSGraphRanked(edges, nodes, rank, bound)\n  PROVE UNION {CSGraphWalk(edges)[<<n, {}>>] : n \\in {e[1] : e \\in edges}} = {}\n<1>1. \\A n \\in {e[1] : e \\in edges} :\n         <<n, {}>> \\in CSGraphDomain(edges)\n  BY CSProof!SMTT(\"r10\") DEF CSGraphDomain, CSGraphVertices\n<1>2. \\A n \\in {e[1] : e \\in edges} :\n         CSGraphWalk(edges)[<<n, {}>>] = {}\n  BY <1>1, CSGraphWalkBound, CSProof!SMTT(\"r10\")\n<1> QED\n  BY <1>2, CSProof!SMTT(\"r10\")\n\n\\* A sufficient certificate for the SSI serialization order.  A transaction\n\\* with an outgoing conflict is placed at its begin position; otherwise it\n\\* is placed at its commit position.  The absence of a committed pivot\n\\* having both conflict flags makes every certified edge increase this rank.\n\nCSBeginPosition(h, t) ==\n  IndexOfOpInHistory(h, [op |-> \"begin\", txnid |-> t])\n\nCSCommitPosition(h, t) ==\n  IndexOfOpInHistory(h, [op |-> \"commit\", txnid |-> t])\n\nCSHistoryRank(h, oc) ==\n  [t \\in CommittedTxns(h) |->\n    IF oc[t] THEN CSBeginPosition(h,t) ELSE CSCommitPosition(h,t)]\n\nCSIntervalCertificate(h, ic, oc) ==\n  /\\ Len(h) \\in Nat\n  /\\ \\A t \\in CommittedTxns(h) :\n       /\\ CSBeginPosition(h,t) \\in 1..Len(h)\n       /\\ CSCommitPosition(h,t) \\in 1..Len(h)\n       /\\ CSBeginPosition(h,t) < CSCommitPosition(h,t)\n       /\\ ic[t] \\in BOOLEAN\n       /\\ oc[t] \\in BOOLEAN\n       /\\ ~(ic[t] /\\ oc[t])\n  /\\ \\A e \\in CahillMVSG(h) :\n       \\/ CSCommitPosition(h,e[1]) < CSBeginPosition(h,e[2])\n       \\/ /\\ CSBeginPosition(h,e[1]) < CSCommitPosition(h,e[2])\n          /\\ oc[e[1]]\n          /\\ ic[e[2]]\n\nLEMMA CSIntervalCertificateRanks ==\n  ASSUME NEW h, NEW ic, NEW oc, CSIntervalCertificate(h,ic,oc)\n  PROVE CSGraphRanked(CahillMVSG(h), CommittedTxns(h),\n                      CSHistoryRank(h,oc), Len(h))\n<1>1. CahillMVSG(h) \\subseteq CommittedTxns(h) \\X CommittedTxns(h)\n  BY CSProof!SMTT(\"r10\") DEF CahillMVSG\n<1>2. CSHistoryRank(h,oc) \\in [CommittedTxns(h) -> 1..Len(h)]\n  BY CSProof!SMTT(\"r10\") DEF CSHistoryRank, CSIntervalCertificate\n<1>3. \\A e \\in CahillMVSG(h) :\n        CSHistoryRank(h,oc)[e[1]] < CSHistoryRank(h,oc)[e[2]]\n  BY <1>1, CSProof!SMTT(\"r10\") DEF CSHistoryRank, CSIntervalCertificate\n<1> QED\n  BY <1>1, <1>2, <1>3, CSProof!SMTT(\"r10\")\n    DEF CSGraphRanked, CSIntervalCertificate\n\nLEMMA CSInitialIntervalCertificate ==\n  Init => CSIntervalCertificate(history,inConflict,outConflict)\n<1>1. Init => /\\ Len(history) = 0\n              /\\ CommittedTxns(history) = {}\n  BY CSProof!SMTT(\"r10\") DEF Init, CommittedTxns, SelectEvents, Range\n<1>2. Init => CahillMVSG(history) = {}\n  BY <1>1, CSProof!SMTT(\"r10\") DEF CahillMVSG\n<1> QED\n  BY <1>1, <1>2, CSProof!SMTT(\"r10\") DEF CSIntervalCertificate\n\n\\* END AGENT HELPERS\n\nTHEOREM CahillSerializableCorrect == Spec => []CahillSerializable(history)\n\\* BEGIN AGENT PROOF CahillSSI/CahillSerializability_CahillSerializableCorrect.tla\nPROOF\n\\* The graph-theoretic part is reduced to the normalized, ranked search\n\\* proved above.  The conversion below still needs a backend-supported\n\\* proof for the model's multi-bound function constructor.\n<1>1.\n  ASSUME NEW edges\n  PROVE FindAllNodesInAnyCycle(edges) =\n          UNION {CSGraphWalk(edges)[<<n, {}>>] : n \\in {e[1] : e \\in edges}}\n<2>1. \\A f :\n         [n \\in CSGraphVertices(edges), v \\in SUBSET CSGraphVertices(edges) |->\n           IF n \\in v THEN {n}\n           ELSE UNION {f[neighbor, v \\union {n}] :\n                         neighbor \\in CSGraphSuccessors(edges, n)}]\n         = [p \\in CSGraphDomain(edges) |-> CSGraphBody(edges, f, p)]\n  BY CSProof!SMTT(\"r10\") DEF CSGraphDomain, CSGraphBody\n<2>2. CSGraphWalk(edges) =\n       (CHOOSE f : f =\n         [n \\in CSGraphVertices(edges), v \\in SUBSET CSGraphVertices(edges) |->\n           IF n \\in v THEN {n}\n           ELSE UNION {f[neighbor, v \\union {n}] :\n                         neighbor \\in CSGraphSuccessors(edges, n)}])\n  BY <2>1, CSProof!IsaM(\"(rule choose_det, auto)\") DEF CSGraphWalk\n<2> QED\n  BY <2>2, CSProof!Isa\n    DEF FindAllNodesInAnyCycle, CSGraphVertices, CSGraphSuccessors\n\n\n<1>2. CSIntervalCertificate(history,inConflict,outConflict)\n        => CahillSerializable(history)\n  BY <1>1, CSIntervalCertificateRanks, CSRankedNormalizedSearchEmpty,\n     CSProof!SMTT(\"r10\")\n    DEF CahillSerializable, IsCycle\n<1>3. Init => CSIntervalCertificate(history,inConflict,outConflict)\n  BY CSInitialIntervalCertificate\n<1>4. Spec => []CSIntervalCertificate(history,inConflict,outConflict)\n  \\* The remaining algorithmic obligation is to establish the certificate\n  \\* throughout executions, using history well-formedness, lock ownership,\n  \\* first-committer-wins, and completeness of the two conflict flags.\n  BY <1>3, CSProof!PTL DEF Spec\n<1> QED\n  BY <1>2, <1>4, CSProof!PTL\n\\* END AGENT PROOF CahillSSI/CahillSerializability_CahillSerializableCorrect.tla\n====\n",
+  "units": {
+    "CahillSSI/CahillSerializability_CahillSerializableCorrect.tla": {
+      "id": "CahillSSI/CahillSerializability_CahillSerializableCorrect.tla",
+      "name": "CahillSerializableCorrect",
+      "kind": "target",
+      "lineStart": 239,
+      "lineEnd": 281,
+      "proofLines": [
+        241,
+        245,
+        246,
+        247,
+        248,
+        249,
+        250,
+        251,
+        252,
+        253,
+        254,
+        255,
+        256,
+        257,
+        258,
+        259,
+        260,
+        261,
+        262,
+        263,
+        264,
+        265,
+        268,
+        269,
+        270,
+        271,
+        272,
+        273,
+        274,
+        275,
+        279,
+        280,
+        281
+      ],
+      "proofRange": [
+        241,
+        281
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:CSInitialIntervalCertificate",
+        "helper:CSIntervalCertificateRanks",
+        "helper:CSRankedNormalizedSearchEmpty"
+      ]
+    },
+    "helper:CSGraphEndpoints": {
+      "id": "helper:CSGraphEndpoints",
+      "name": "CSGraphEndpoints",
+      "kind": "helper",
+      "lineStart": 61,
+      "lineEnd": 68,
+      "proofLines": [
+        68
+      ],
+      "proofRange": [
+        68,
+        68
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:CSGraphRecursionWellFounded": {
+      "id": "helper:CSGraphRecursionWellFounded",
+      "name": "CSGraphRecursionWellFounded",
+      "kind": "helper",
+      "lineStart": 70,
+      "lineEnd": 105,
+      "proofLines": [
+        78,
+        79,
+        80,
+        81,
+        82,
+        83,
+        84,
+        85,
+        86,
+        87,
+        88,
+        89,
+        90,
+        91,
+        92,
+        93,
+        94,
+        95,
+        96,
+        97,
+        98,
+        99,
+        100,
+        101,
+        102,
+        103,
+        104,
+        105
+      ],
+      "proofRange": [
+        78,
+        105
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:CSGraphEndpoints"
+      ]
+    },
+    "helper:CSGraphRecursionEquation": {
+      "id": "helper:CSGraphRecursionEquation",
+      "name": "CSGraphRecursionEquation",
+      "kind": "helper",
+      "lineStart": 107,
+      "lineEnd": 126,
+      "proofLines": [
+        112,
+        113,
+        114,
+        115,
+        116,
+        117,
+        118,
+        119,
+        120,
+        121,
+        122,
+        123,
+        124,
+        125,
+        126
+      ],
+      "proofRange": [
+        112,
+        126
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:CSGraphRecursionWellFounded"
+      ]
+    },
+    "helper:CSGraphWalkBound": {
+      "id": "helper:CSGraphWalkBound",
+      "name": "CSGraphWalkBound",
+      "kind": "helper",
+      "lineStart": 128,
+      "lineEnd": 167,
+      "proofLines": [
+        134,
+        135,
+        136,
+        137,
+        138,
+        139,
+        140,
+        141,
+        142,
+        143,
+        144,
+        145,
+        146,
+        147,
+        148,
+        149,
+        150,
+        151,
+        152,
+        153,
+        154,
+        155,
+        156,
+        157,
+        158,
+        159,
+        160,
+        161,
+        162,
+        163,
+        164,
+        165,
+        166,
+        167
+      ],
+      "proofRange": [
+        134,
+        167
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:CSGraphEndpoints",
+        "helper:CSGraphRecursionEquation",
+        "helper:CSGraphRecursionWellFounded"
+      ]
+    },
+    "helper:CSRankedNormalizedSearchEmpty": {
+      "id": "helper:CSRankedNormalizedSearchEmpty",
+      "name": "CSRankedNormalizedSearchEmpty",
+      "kind": "helper",
+      "lineStart": 169,
+      "lineEnd": 180,
+      "proofLines": [
+        173,
+        174,
+        175,
+        176,
+        177,
+        178,
+        179,
+        180
+      ],
+      "proofRange": [
+        173,
+        180
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:CSGraphWalkBound"
+      ]
+    },
+    "helper:CSIntervalCertificateRanks": {
+      "id": "helper:CSIntervalCertificateRanks",
+      "name": "CSIntervalCertificateRanks",
+      "kind": "helper",
+      "lineStart": 212,
+      "lineEnd": 225,
+      "proofLines": [
+        216,
+        217,
+        218,
+        219,
+        220,
+        221,
+        222,
+        223,
+        224,
+        225
+      ],
+      "proofRange": [
+        216,
+        225
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:CSInitialIntervalCertificate": {
+      "id": "helper:CSInitialIntervalCertificate",
+      "name": "CSInitialIntervalCertificate",
+      "kind": "helper",
+      "lineStart": 227,
+      "lineEnd": 235,
+      "proofLines": [
+        229,
+        230,
+        231,
+        232,
+        233,
+        234,
+        235
+      ],
+      "proofRange": [
+        229,
+        235
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    }
+  }
+}

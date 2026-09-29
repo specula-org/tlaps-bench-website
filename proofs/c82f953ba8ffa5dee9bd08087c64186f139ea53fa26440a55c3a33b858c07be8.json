@@ -1,0 +1,1086 @@
+{
+  "schemaVersion": 1,
+  "specId": "MongoDB/MultiShardTxnSnapshot.tla",
+  "sourceName": "MultiShardTxnSnapshot.tla",
+  "sourceSha256": "e44c00c70e8ef209e9415532203d283281cbebf9285bf93b95aeff3608b98404",
+  "resultSha256": "f50a08567086f030162c114e9c1bf6ea871a5cf37563d42c0068df49fff5e6d6",
+  "source": "---- MODULE MultiShardTxnSnapshot ----\nEXTENDS MultiShardTxnSnapshotDefs\n\n\\* BEGIN AGENT HELPERS\nLOCAL MSSProof == INSTANCE TLAPS\nLOCAL MSSSeq == INSTANCE SequenceTheorems\nLOCAL MSSFinite == INSTANCE FiniteSetTheorems\nLOCAL MSSNat == INSTANCE NaturalsInduction\nLOCAL MSSFiniteExt == INSTANCE FiniteSetsExtTheorems\n\nLEMMA MSSEmptyTransactions ==\n    Init => SnapshotTransactions = {}\nBY MSSProof!SMTT(\"r10\") DEF Init, SnapshotTransactions\n\nLEMMA MSSEmptyOrder ==\n    <<>> \\in SI!Orders({})\n<1>1. SUBSET {} = {{}}\n    BY MSSProof!SMTT(\"r10\")\n<1>2. DEFINE F == [ss \\in SUBSET {} |-> {<<>>}]\n<1>F. HIDE DEF F\n<1>3. F = [ss \\in SUBSET {} |->\n               IF ss = {} THEN {<<>>}\n               ELSE UNION {{Append(sq, x) : sq \\in F[ss \\ {x}]} : x \\in ss}]\n    BY <1>1, MSSProof!SMTT(\"r10\") DEF F\n<1>4. \\E perms :\n           perms = [ss \\in SUBSET {} |->\n                       IF ss = {} THEN {<<>>}\n                       ELSE UNION {{Append(sq, x) : sq \\in perms[ss \\ {x}]} : x \\in ss}]\n    BY <1>3, MSSProof!Zenon\n<1>5. DEFINE G == CHOOSE perms :\n           perms = [ss \\in SUBSET {} |->\n                       IF ss = {} THEN {<<>>}\n                       ELSE UNION {{Append(sq, x) : sq \\in perms[ss \\ {x}]} : x \\in ss}]\n<1>G. HIDE DEF G\n<1>6. G = [ss \\in SUBSET {} |->\n               IF ss = {} THEN {<<>>}\n               ELSE UNION {{Append(sq, x) : sq \\in G[ss \\ {x}]} : x \\in ss}]\n    BY <1>4, MSSProof!Zenon DEF G\n<1>7. G[{}] = {<<>>}\n    BY <1>1, <1>6, MSSProof!SMTT(\"r10\")\n<1>8. QED\n    BY <1>7, MSSProof!Zenon DEF SI!Orders, SI!PermSeqs, G\n\nLEMMA MSSFiniteBridge ==\n    \\A S : SI!IsFiniteSet(S) = MSSFinite!IsFiniteSet(S)\nBY MSSProof!SMTT(\"r10\") DEF SI!IsFiniteSet, MSSFinite!IsFiniteSet\n\nLEMMA MSSInitialSnapshot ==\n    Init => SnapshotIsolation\n<1>1. Init => SI!WellFormed(InitialState, SnapshotTransactions)\n    BY MSSEmptyTransactions, MSSFinite!FS_EmptySet, MSSFiniteBridge,\n       MSSProof!SMTT(\"r10\")\n    DEF SI!WellFormed, InitialState\n<1>2. SI!ExecutionSatisfiesSI(InitialState, <<>>)\n    BY MSSProof!SMTT(\"r10\") DEF SI!ExecutionSatisfiesSI\n<1>3. QED\n    BY <1>1, <1>2, MSSEmptyTransactions, MSSEmptyOrder,\n       MSSProof!SMTT(\"r10\") DEF SnapshotIsolation, SI!SnapshotIsolation\nMSSSupport(f) == {t \\in TxId : f[t] # <<>>}\n\nMSSHist(f, h) ==\n    /\\ f \\in [TxId -> Seq(SI!Operation)]\n    /\\ h \\in [Shard -> [TxId -> Seq(SI!Operation)]]\n    /\\ MSSFinite!IsFiniteSet(MSSSupport(f))\n\nMSSHistoryType == MSSHist(ops, shardOps)\n\nMSSHistoryStep ==\n    \\/ UNCHANGED <<ops, shardOps>>\n    \\/ \\E s \\in Shard, t \\in TxId, k \\in Keys, v \\in TxId \\cup {NoValue} :\n          /\\ ops' = ops\n          /\\ shardOps' = [shardOps EXCEPT ![s][t] = shardOps[s][t] \\o <<rOp(k,v)>>]\n    \\/ \\E s \\in Shard, t \\in TxId, k \\in Keys :\n          /\\ ops' = ops\n          /\\ shardOps' = [shardOps EXCEPT ![s][t] = Append(shardOps[s][t], wOp(k,t))]\n    \\/ \\E s \\in Shard, t \\in TxId :\n          /\\ ops' = ops\n          /\\ shardOps' = [shardOps EXCEPT ![s][t] = <<>>]\n    \\/ \\E s \\in Shard, t \\in TxId :\n          /\\ ops' = [ops EXCEPT ![t] = ops[t] \\o shardOps[s][t]]\n          /\\ shardOps' = shardOps\n\nLEMMA MSSOperationType ==\n    \\A k \\in Keys, t \\in TxId, v \\in TxId \\cup {NoValue} :\n        /\\ rOp(k,v) \\in SI!Operation\n        /\\ wOp(k,t) \\in SI!Operation\nBY MSSProof!SMTT(\"r10\") DEF rOp, wOp, CC!r, CC!w, SI!Operation\n\nLEMMA MSSSupportUpdate ==\n    \\A f, sq : \\A t \\in TxId :\n        f \\in [TxId -> Seq(SI!Operation)] =>\n          MSSSupport([f EXCEPT ![t] = sq]) \\subseteq MSSSupport(f) \\cup {t}\nBY MSSProof!SMTT(\"r10\") DEF MSSSupport\n\nLEMMA MSSHistUpdateOps ==\n    \\A f, h : \\A t \\in TxId, sq \\in Seq(SI!Operation) :\n        MSSHist(f,h) => MSSHist([f EXCEPT ![t] = sq],h)\n<1>1. ASSUME NEW f, NEW h, NEW t \\in TxId, NEW sq \\in Seq(SI!Operation),\n             MSSHist(f,h)\n      PROVE MSSHist([f EXCEPT ![t] = sq],h)\n    <2>1. MSSFinite!IsFiniteSet(MSSSupport(f) \\cup {t})\n        BY <1>1, MSSFinite!FS_AddElement, MSSProof!SMTT(\"r10\") DEF MSSHist\n    <2>2. MSSFinite!IsFiniteSet(MSSSupport([f EXCEPT ![t] = sq]))\n        BY <1>1, <2>1, MSSSupportUpdate, MSSFinite!FS_Subset, MSSProof!SMTT(\"r10\") DEF MSSHist\n    <2>3. QED\n        BY <1>1, <2>2, MSSProof!SMTT(\"r10\") DEF MSSHist\n<1>2. QED BY <1>1, MSSProof!SMTT(\"r10\")\n\nLEMMA MSSHistUpdateShard ==\n    \\A f, h : \\A s \\in Shard, t \\in TxId, sq \\in Seq(SI!Operation) :\n        MSSHist(f,h) => MSSHist(f,[h EXCEPT ![s][t] = sq])\nBY MSSProof!SMTT(\"r10\") DEF MSSHist\n\nLEMMA MSSHistoryInit == Init => MSSHistoryType\n<1>1. Init => MSSSupport(ops) = {}\n    BY MSSProof!SMTT(\"r10\") DEF Init, MSSSupport\n<1>2. QED\n    BY <1>1, MSSFinite!FS_EmptySet, MSSSeq!EmptySeq, MSSProof!SMTT(\"r10\")\n    DEF Init, MSSHistoryType, MSSHist\n\nLEMMA MSSHistoryProjection == [Next]_vars => MSSHistoryStep\nBY MSSProof!SMTT(\"r30\")\n   DEF Next, vars, MSSHistoryStep, RouterTxnStart, RouterTxnOp,\n       RouterTxnCoordinateCommit, RouterTxnCommitReadOnly, RouterTxnCommitSingleShard,\n       ShardTxnStart, ShardTxnRead, ShardTxnWrite, ShardTxnCoordinateCommit,\n       ShardTxnCoordinatorRecvCommitVote, ShardTxnCoordinatorDecideCommit,\n       ShardTxnPrepare, ShardTxnCommit, ShardTxnAbort\n\nLEMMA MSSHistoryPreserved == MSSHistoryType /\\ MSSHistoryStep => MSSHistoryType'\n<1>0. SUFFICES ASSUME MSSHistoryType, MSSHistoryStep PROVE MSSHistoryType'\n    BY MSSProof!SMTT(\"r10\")\n<1>1. \\A s \\in Shard, t \\in TxId :\n        MSSHistoryType => ops[t] \\o shardOps[s][t] \\in Seq(SI!Operation)\n    BY MSSSeq!ConcatProperties, MSSProof!SMTT(\"r10\") DEF MSSHistoryType, MSSHist\n<1>2. \\A s \\in Shard, t \\in TxId, k \\in Keys, v \\in TxId \\cup {NoValue} :\n        MSSHistoryType =>\n          /\\ shardOps[s][t] \\o <<rOp(k,v)>> \\in Seq(SI!Operation)\n          /\\ Append(shardOps[s][t],wOp(k,t)) \\in Seq(SI!Operation)\n    BY MSSOperationType, MSSSeq!ConcatProperties, MSSSeq!AppendProperties,\n       MSSProof!SMTT(\"r30\") DEF MSSHistoryType, MSSHist\n<1>3. CASE UNCHANGED <<ops, shardOps>>\n    BY <1>0, <1>3, MSSProof!SMTT(\"r10\") DEF MSSHistoryType\n<1>4. CASE \\E s \\in Shard, t \\in TxId, k \\in Keys, v \\in TxId \\cup {NoValue} :\n          /\\ ops' = ops\n          /\\ shardOps' = [shardOps EXCEPT ![s][t] = shardOps[s][t] \\o <<rOp(k,v)>>]\n    <2>1. PICK s \\in Shard, t \\in TxId, k \\in Keys, v \\in TxId \\cup {NoValue} :\n          /\\ ops' = ops\n          /\\ shardOps' = [shardOps EXCEPT ![s][t] = shardOps[s][t] \\o <<rOp(k,v)>>]\n        BY <1>4, MSSProof!SMTT(\"r10\")\n    <2>2. shardOps[s][t] \\o <<rOp(k,v)>> \\in Seq(SI!Operation)\n        BY <1>0, <1>2, <2>1, MSSProof!SMTT(\"r10\")\n    <2>3. QED\n        BY <1>0, <2>1, <2>2, MSSHistUpdateShard, MSSProof!SMTT(\"r10\") DEF MSSHistoryType\n<1>5. CASE \\E s \\in Shard, t \\in TxId, k \\in Keys :\n          /\\ ops' = ops\n          /\\ shardOps' = [shardOps EXCEPT ![s][t] = Append(shardOps[s][t], wOp(k,t))]\n    <2>1. PICK s \\in Shard, t \\in TxId, k \\in Keys :\n          /\\ ops' = ops\n          /\\ shardOps' = [shardOps EXCEPT ![s][t] = Append(shardOps[s][t], wOp(k,t))]\n        BY <1>5, MSSProof!SMTT(\"r10\")\n    <2>2. Append(shardOps[s][t],wOp(k,t)) \\in Seq(SI!Operation)\n        BY <1>0, <1>2, <2>1, MSSProof!SMTT(\"r10\")\n    <2>3. QED\n        BY <1>0, <2>1, <2>2, MSSHistUpdateShard, MSSProof!SMTT(\"r10\") DEF MSSHistoryType\n<1>6. CASE \\E s \\in Shard, t \\in TxId :\n          /\\ ops' = ops\n          /\\ shardOps' = [shardOps EXCEPT ![s][t] = <<>>]\n    <2>1. PICK s \\in Shard, t \\in TxId :\n          /\\ ops' = ops\n          /\\ shardOps' = [shardOps EXCEPT ![s][t] = <<>>]\n        BY <1>6, MSSProof!SMTT(\"r10\")\n    <2>2. <<>> \\in Seq(SI!Operation)\n        BY MSSSeq!EmptySeq, MSSProof!SMTT(\"r10\")\n    <2>3. QED\n        BY <1>0, <2>1, <2>2, MSSHistUpdateShard, MSSProof!SMTT(\"r10\") DEF MSSHistoryType\n<1>7. CASE \\E s \\in Shard, t \\in TxId :\n          /\\ ops' = [ops EXCEPT ![t] = ops[t] \\o shardOps[s][t]]\n          /\\ shardOps' = shardOps\n    <2>1. PICK s \\in Shard, t \\in TxId :\n          /\\ ops' = [ops EXCEPT ![t] = ops[t] \\o shardOps[s][t]]\n          /\\ shardOps' = shardOps\n        BY <1>7, MSSProof!SMTT(\"r10\")\n    <2>2. ops[t] \\o shardOps[s][t] \\in Seq(SI!Operation)\n        BY <1>0, <1>1, <2>1, MSSProof!SMTT(\"r10\")\n    <2>3. QED\n        BY <1>0, <2>1, <2>2, MSSHistUpdateOps, MSSProof!SMTT(\"r10\") DEF MSSHistoryType\n<1>8. QED\n    BY <1>0, <1>3, <1>4, <1>5, <1>6, <1>7, MSSProof!SMTT(\"r10\") DEF MSSHistoryStep\n\nLEMMA MSSHistoryAlways == Spec => []MSSHistoryType\n<1>1. Init => MSSHistoryType BY MSSHistoryInit, MSSProof!SMTT(\"r10\")\n<1>2. MSSHistoryType /\\ [Next]_vars => MSSHistoryType'\n    BY MSSHistoryProjection, MSSHistoryPreserved, MSSProof!SMTT(\"r10\")\n<1>3. QED BY <1>1, <1>2, MSSProof!PTL DEF Spec\n\nLEMMA MSSHistoryWellFormed ==\n    MSSHistoryType => SI!WellFormed(InitialState,SnapshotTransactions)\n<1>1. MSSHistoryType =>\n        SnapshotTransactions = {[id |-> t, ops |-> ops[t]] : t \\in MSSSupport(ops)}\n    BY MSSProof!SMTT(\"r10\") DEF MSSHistoryType, MSSHist, MSSSupport, SnapshotTransactions\n<1>2. MSSHistoryType => MSSFinite!IsFiniteSet(SnapshotTransactions)\n    BY <1>1, MSSFinite!FS_Image, MSSProof!Isa DEF MSSHistoryType, MSSHist\n<1>3. QED\n    BY <1>2, MSSFiniteBridge, MSSProof!SMTT(\"r10\")\n    DEF MSSHistoryType, MSSHist, SI!WellFormed, SnapshotTransactions, InitialState\nMSSApplyOperation(state, operation) ==\n    IF operation.op = \"write\"\n    THEN [state EXCEPT ![operation.key] = operation.value]\n    ELSE state\n\nMSSWritesOwned(operationSequence, t) ==\n    \\A i \\in 1..Len(operationSequence) :\n        operationSequence[i].op = \"write\" => operationSequence[i].value = t\n\nMSSWritten(operationSequence, i) ==\n    {operationSequence[j].key :\n        j \\in {h \\in 1..i : operationSequence[h].op = \"write\"}}\n\nMSSOwnView(snapshot, t, operationSequence, i) ==\n    [k \\in Keys |-> IF k \\in MSSWritten(operationSequence,i) THEN t ELSE snapshot[k]]\n\nLEMMA MSSOperationRecursion ==\n    ASSUME NEW initial, NEW operationSequence \\in Seq(SI!Operation)\n    PROVE SI!OperationStates(initial,operationSequence) =\n        [i \\in 0..Len(operationSequence) |->\n            IF i = 0 THEN initial\n            ELSE MSSApplyOperation(SI!OperationStates(initial,operationSequence)[i-1],\n                                   operationSequence[i])]\n<1>1. DEFINE Step(state, i) == MSSApplyOperation(state,operationSequence[i])\n<1>S. HIDE DEF Step\n<1>2. MSSNat!FiniteNatInductiveDefHypothesis(\n          SI!OperationStates(initial,operationSequence), initial, Step, 0, Len(operationSequence))\n    BY MSSProof!Zenon\n    DEF MSSNat!FiniteNatInductiveDefHypothesis, SI!OperationStates, Step, MSSApplyOperation\n<1>3. Len(operationSequence) \\in Nat\n    BY MSSSeq!LenProperties, MSSProof!SMTT(\"r10\")\n<1>4. MSSNat!FiniteNatInductiveDefConclusion(\n          SI!OperationStates(initial,operationSequence), initial, Step, 0, Len(operationSequence))\n    BY <1>2, <1>3, MSSNat!FiniteNatInductiveDef, MSSProof!Isa\n<1>5. QED\n    BY <1>4, MSSProof!SMTT(\"r10\") DEF MSSNat!FiniteNatInductiveDefConclusion, Step\n\nLEMMA MSSWrittenStep ==\n    \\A operationSequence \\in Seq(SI!Operation) :\n      \\A i \\in 0..(Len(operationSequence)-1) :\n        MSSWritten(operationSequence,i+1) =\n          IF operationSequence[i+1].op = \"write\"\n          THEN MSSWritten(operationSequence,i) \\cup {operationSequence[i+1].key}\n          ELSE MSSWritten(operationSequence,i)\nBY MSSSeq!LenProperties, MSSProof!SMTT(\"r10\") DEF MSSWritten\n\nLEMMA MSSOwnViewStep ==\n    ASSUME NEW snapshot \\in [Keys -> TxId \\cup {NoValue}],\n           NEW t \\in TxId,\n           NEW operationSequence \\in Seq(SI!Operation),\n           MSSWritesOwned(operationSequence,t),\n           NEW i \\in 0..(Len(operationSequence)-1)\n    PROVE MSSOwnView(snapshot,t,operationSequence,i+1) =\n          MSSApplyOperation(MSSOwnView(snapshot,t,operationSequence,i),operationSequence[i+1])\nBY MSSWrittenStep, MSSSeq!LenProperties, MSSSeq!ElementOfSeq, MSSProof!SMTT(\"r30\")\n   DEF MSSOwnView, MSSApplyOperation, MSSWritesOwned, SI!Operation\n\nLEMMA MSSOwnOperationState ==\n    ASSUME NEW snapshot \\in [Keys -> TxId \\cup {NoValue}],\n           NEW t \\in TxId,\n           NEW operationSequence \\in Seq(SI!Operation),\n           MSSWritesOwned(operationSequence,t)\n    PROVE \\A i \\in 0..Len(operationSequence) :\n        SI!OperationStates(snapshot,operationSequence)[i] = MSSOwnView(snapshot,t,operationSequence,i)\n<1>1. DEFINE P(i) == i \\in 0..Len(operationSequence) =>\n        SI!OperationStates(snapshot,operationSequence)[i] = MSSOwnView(snapshot,t,operationSequence,i)\n<1>P. HIDE DEF P\n<1>2. P(0)\n    BY MSSOperationRecursion, MSSSeq!LenProperties, MSSProof!SMTT(\"r10\")\n    DEF P, MSSOwnView, MSSWritten\n<1>3. \\A i \\in Nat : P(i) => P(i+1)\n    BY MSSOwnViewStep, MSSOperationRecursion, MSSSeq!LenProperties, MSSProof!SMTT(\"r30\") DEF P\n<1>4. \\A i \\in Nat : P(i)\n    BY <1>2, <1>3, MSSNat!NatInduction, MSSProof!Isa\n<1>5. QED\n    BY <1>4, MSSSeq!LenProperties, MSSProof!SMTT(\"r10\") DEF P\n\nLEMMA MSSOwnEffects ==\n    ASSUME NEW snapshot \\in [Keys -> TxId \\cup {NoValue}],\n           NEW t \\in TxId,\n           NEW operationSequence \\in Seq(SI!Operation),\n           MSSWritesOwned(operationSequence,t)\n    PROVE SI!Effects(snapshot,operationSequence) =\n          MSSOwnView(snapshot,t,operationSequence,Len(operationSequence))\nBY MSSOwnOperationState, MSSSeq!LenProperties, MSSProof!SMTT(\"r10\") DEF SI!Effects\n\nLEMMA MSSOwnComplete ==\n    ASSUME NEW snapshot \\in [Keys -> TxId \\cup {NoValue}],\n           NEW t \\in TxId,\n           NEW operationSequence \\in Seq(SI!Operation),\n           MSSWritesOwned(operationSequence,t)\n    PROVE SI!Complete(snapshot,operationSequence) <=>\n          \\A i \\in 1..Len(operationSequence) :\n            operationSequence[i].op = \"read\" =>\n              operationSequence[i].value =\n                IF operationSequence[i].key \\in MSSWritten(operationSequence,i-1)\n                THEN t ELSE snapshot[operationSequence[i].key]\nBY MSSOwnOperationState, MSSSeq!LenProperties, MSSSeq!ElementOfSeq, MSSProof!SMTT(\"r30\")\n   DEF SI!Complete, MSSOwnView, SI!Operation\n\nMSSReadTime(t) ==\n    CHOOSE ts \\in Timestamps :\n        \\E s \\in Shard : /\\ \"ts\" \\in DOMAIN txnSnapshots[s][t]\n                         /\\ txnSnapshots[s][t].ts = ts\n\nMSSWriteEntries(t) ==\n    UNION {{e \\in Range(log[s]) : /\\ \"data\" \\in DOMAIN e\n                                 /\\ e.tid = t\n                                 /\\ DOMAIN e.data # {}} : s \\in Shard}\n\nMSSCommitTime(t) ==\n    IF MSSWriteEntries(t) = {} THEN MSSReadTime(t)+1\n    ELSE max({e.ts : e \\in MSSWriteEntries(t)})\n\nMSSKeyWrites(t) == SI!WriteKeys(ops[t])\n\nMSSVisibleWriters(k, ts) ==\n    {t \\in MSSSupport(ops) : k \\in MSSKeyWrites(t) /\\ MSSCommitTime(t) <= ts}\n\nMSSReadMatches(t, i) ==\n    LET k == ops[t][i].key\n        visible == MSSVisibleWriters(k,MSSReadTime(t))\n    IN IF k \\in MSSWritten(ops[t],i-1) THEN ops[t][i].value = t\n       ELSE IF visible = {} THEN ops[t][i].value = NoValue\n       ELSE /\\ ops[t][i].value \\in visible\n            /\\ \\A u \\in visible : MSSCommitTime(u) <= MSSCommitTime(ops[t][i].value)\n\nMSSSnapshotCertificate ==\n    /\\ \\A t \\in MSSSupport(ops) :\n         /\\ MSSReadTime(t) \\in Nat\n         /\\ MSSCommitTime(t) \\in Nat\n         /\\ MSSCommitTime(t) > MSSReadTime(t)\n         /\\ \\A e \\in MSSWriteEntries(t) : e.ts = MSSCommitTime(t)\n         /\\ MSSWritesOwned(ops[t],t)\n         /\\ \\A i \\in 1..Len(ops[t]) : ops[t][i].op = \"read\" => MSSReadMatches(t,i)\n    /\\ \\A t,u \\in MSSSupport(ops) :\n         t # u /\\ MSSKeyWrites(t) \\cap MSSKeyWrites(u) # {} =>\n           \\/ MSSCommitTime(t) <= MSSReadTime(u)\n           \\/ MSSCommitTime(u) <= MSSReadTime(t)\n\nLEMMA MSSCertificateInit == Init => MSSSnapshotCertificate\n<1>1. Init => MSSSupport(ops) = {}\n    BY MSSProof!SMTT(\"r10\") DEF Init, MSSSupport\n<1>2. QED\n    BY <1>1, MSSProof!SMTT(\"r10\") DEF MSSSnapshotCertificate\n\nMSSPermutationStep(p, S) ==\n    IF S = {} THEN {<<>>}\n    ELSE UNION {{Append(q,x) : q \\in p[S \\ {x}]} : x \\in S}\n\nMSSPermutations(S) ==\n    CHOOSE p : p = [T \\in SUBSET S |-> MSSPermutationStep(p,T)]\n\nLEMMA MSSPermutationRecursion ==\n    ASSUME NEW S, MSSFinite!IsFiniteSet(S)\n    PROVE MSSPermutations(S) =\n          [T \\in SUBSET S |-> MSSPermutationStep(MSSPermutations(S),T)]\n<1>1. MSSFinite!IsWellFoundedOn(MSSFinite!StrictSubsetOrdering(S), SUBSET S)\n    BY MSSFinite!FS_StrictSubsetOrderingWellFounded, MSSFinite!FS_FiniteSubsetsOfFinite,\n       MSSProof!SMTT(\"r10\")\n<1>2. MSSFinite!WFDefOn(MSSFinite!StrictSubsetOrdering(S), SUBSET S, MSSPermutationStep)\n    BY MSSProof!SMTT(\"r30\")\n    DEF MSSFinite!WFDefOn, MSSFinite!SetLessThan, MSSFinite!StrictSubsetOrdering,\n        MSSPermutationStep\n<1>3. MSSFinite!OpDefinesFcn(MSSPermutations(S), SUBSET S, MSSPermutationStep)\n    BY MSSProof!Zenon DEF MSSFinite!OpDefinesFcn, MSSPermutations\n<1>4. MSSFinite!WFInductiveDefines(MSSPermutations(S), SUBSET S, MSSPermutationStep)\n    BY <1>1, <1>2, <1>3, MSSFinite!WFInductiveDef, MSSProof!Isa\n<1>5. QED\n    BY <1>4, MSSProof!SMTT(\"r10\") DEF MSSFinite!WFInductiveDefines\n\nLEMMA MSSPermutationOrders ==\n    \\A S : SI!Orders(S) = MSSPermutations(S)[S]\nBY MSSProof!Zenon DEF SI!Orders, SI!PermSeqs, MSSPermutations, MSSPermutationStep\n\nLEMMA MSSRankMaximum ==\n    ASSUME NEW S, MSSFinite!IsFiniteSet(S), S # {}, NEW rank,\n           \\A x \\in S : rank[x] \\in Nat\n    PROVE \\E x \\in S : \\A y \\in S : rank[y] <= rank[x]\n<1>1. MSSFinite!IsFiniteSet({rank[x] : x \\in S})\n    BY MSSFinite!FS_Image, MSSProof!Isa\n<1>2. MSSFiniteExt!IsFiniteSet({rank[x] : x \\in S})\n    BY <1>1, MSSProof!SMTT(\"r10\") DEF MSSFiniteExt!IsFiniteSet, MSSFinite!IsFiniteSet\n<1>3. {rank[x] : x \\in S} \\subseteq Int /\\ {rank[x] : x \\in S} # {}\n    BY MSSProof!SMTT(\"r10\")\n<1>4. MSSFiniteExt!Max({rank[x] : x \\in S}) \\in {rank[x] : x \\in S}\n       /\\ \\A n \\in {rank[x] : x \\in S} : n <= MSSFiniteExt!Max({rank[x] : x \\in S})\n    BY <1>2, <1>3, MSSFiniteExt!MaxIntFinite, MSSProof!SMTT(\"r10\")\n<1>5. QED BY <1>4, MSSProof!SMTT(\"r10\")\n\nMSSSorted(q, S, rank) ==\n    /\\ q \\in Seq(S)\n    /\\ Range(q) = S\n    /\\ \\A i,j \\in 1..Len(q) :\n         i < j => q[i] # q[j] /\\ rank[q[i]] <= rank[q[j]]\n\nLEMMA MSSRangeBridge == \\A f : MSSSeq!Range(f) = Range(f)\nBY MSSProof!SMTT(\"r10\") DEF MSSSeq!Range, Range\n\nLEMMA MSSSortedAppend ==\n    ASSUME NEW S, NEW x \\in S, NEW rank, NEW q,\n           MSSSorted(q,S \\ {x},rank),\n           \\A y \\in S : rank[y] \\in Nat /\\ rank[y] <= rank[x]\n    PROVE MSSSorted(Append(q,x),S,rank)\n<1>1. q \\in Seq(S)\n    BY MSSSeq!SeqMonotonic, MSSProof!SMTT(\"r10\") DEF MSSSorted\n<1>A. /\\ Append(q,x) \\in Seq(S)\n      /\\ Len(Append(q,x)) = Len(q)+1\n      /\\ MSSSeq!Range(Append(q,x)) = MSSSeq!Range(q) \\cup {x}\n      /\\ (\\A i \\in 1..Len(q) : Append(q,x)[i] = q[i])\n      /\\ Append(q,x)[Len(q)+1] = x\n    <2>1. Append(q,x) \\in Seq(S)\n        BY <1>1, MSSSeq!AppendProperties, MSSProof!SMTT(\"r10\")\n    <2>2. Len(Append(q,x)) = Len(q)+1\n        BY <1>1, MSSSeq!AppendProperties, MSSProof!SMTT(\"r10\")\n    <2>3. MSSSeq!Range(Append(q,x)) = MSSSeq!Range(q) \\cup {x}\n        BY <1>1, MSSSeq!AppendProperties, MSSProof!SMTT(\"r10\")\n    <2>4. \\A i \\in 1..Len(q) : Append(q,x)[i] = q[i]\n        BY <1>1, MSSSeq!AppendProperties, MSSProof!SMTT(\"r10\")\n    <2>5. Append(q,x)[Len(q)+1] = x\n        BY <1>1, MSSSeq!AppendProperties, MSSProof!SMTT(\"r10\")\n    <2>6. QED BY <2>1, <2>2, <2>3, <2>4, <2>5, MSSProof!SMTT(\"r10\")\n<1>B. Range(Append(q,x)) = Range(q) \\cup {x}\n    BY ONLY <1>A, MSSRangeBridge, MSSProof!Zenon\n<1>C. Range(q) = S \\ {x}\n    BY MSSProof!SMTT(\"r3\") DEF MSSSorted\n<1>D. Range(q) \\cup {x} = S\n    BY ONLY <1>C, x \\in S, MSSProof!SMTT(\"r3\")\n<1>2. /\\ Append(q,x) \\in Seq(S)\n      /\\ Len(Append(q,x)) = Len(q)+1\n      /\\ Range(Append(q,x)) = S\n      /\\ (\\A i \\in 1..Len(q) : Append(q,x)[i] = q[i])\n      /\\ Append(q,x)[Len(q)+1] = x\n    BY ONLY <1>A, <1>B, <1>D, MSSProof!SMTT(\"r3\")\n<1>3. \\A i \\in 1..Len(q) : q[i] \\in S \\ {x}\n    BY MSSSeq!ElementOfSeq, MSSProof!SMTT(\"r10\") DEF MSSSorted\n<1>4. QED\n    BY <1>1, <1>2, <1>3, MSSSeq!LenProperties, MSSProof!SMTT(\"r30\") DEF MSSSorted\n\nLEMMA MSSSortedOrderExists ==\n    ASSUME NEW S, MSSFinite!IsFiniteSet(S), NEW rank,\n           \\A x \\in S : rank[x] \\in Nat\n    PROVE \\E q \\in SI!Orders(S) : MSSSorted(q,S,rank)\n<1>1. DEFINE P(T) == \\E q \\in MSSPermutations(S)[T] : MSSSorted(q,T,rank)\n<1>P. HIDE DEF P\n<1>2. ASSUME NEW T \\in SUBSET S,\n             \\A U \\in (SUBSET T) \\ {T} : P(U)\n      PROVE P(T)\n    <2>1. MSSPermutations(S)[T] = MSSPermutationStep(MSSPermutations(S),T)\n        BY <1>2, MSSPermutationRecursion, MSSProof!SMTT(\"r10\")\n    <2>2. CASE T = {}\n        BY <1>2, <2>1, <2>2, MSSSeq!EmptySeq, MSSProof!SMTT(\"r10\")\n        DEF P, MSSPermutationStep, MSSSorted, Range\n    <2>3. CASE T # {}\n        <3>1. MSSFinite!IsFiniteSet(T) /\\ \\A x \\in T : rank[x] \\in Nat\n            BY <1>2, MSSFinite!FS_Subset, MSSProof!SMTT(\"r10\")\n        <3>2. PICK x \\in T : \\A y \\in T : rank[y] <= rank[x]\n            BY <2>3, <3>1, MSSRankMaximum, MSSProof!SMTT(\"r10\")\n        <3>3. P(T \\ {x})\n            BY <1>2, <3>2, MSSProof!SMTT(\"r10\")\n        <3>4. PICK q \\in MSSPermutations(S)[T \\ {x}] : MSSSorted(q,T \\ {x},rank)\n            BY <3>3, MSSProof!SMTT(\"r10\") DEF P\n        <3>5. MSSSorted(Append(q,x),T,rank)\n            BY <3>1, <3>2, <3>4, MSSSortedAppend, MSSProof!SMTT(\"r10\")\n        <3>6. Append(q,x) \\in MSSPermutations(S)[T]\n            BY <2>1, <2>3, <3>2, <3>4, MSSProof!SMTT(\"r10\") DEF MSSPermutationStep\n        <3>7. QED\n            BY <3>5, <3>6, MSSProof!SMTT(\"r10\") DEF P\n    <2>4. QED BY <2>2, <2>3, MSSProof!SMTT(\"r10\")\n<1>3. P(S)\n    BY ONLY MSSFinite!IsFiniteSet(S), <1>2, MSSFinite!FS_WFInduction, MSSProof!IsaM(\"blast\")\n<1>4. QED\n    BY <1>3, MSSPermutationOrders, MSSProof!SMTT(\"r10\") DEF P\n\nLEMMA MSSSortedCut ==\n    ASSUME NEW S, NEW q, NEW rank, MSSSorted(q,S,rank),\n           \\A x \\in S : rank[x] \\in Nat,\n           NEW j \\in 1..Len(q), NEW ts \\in Nat, ts < rank[q[j]]\n    PROVE \\E cut \\in 0..(j-1) :\n        \\A i \\in 1..Len(q) : (i <= cut) <=> (rank[q[i]] <= ts)\n<1>1. DEFINE P(n) == n \\in 1..Len(q) /\\ ts < rank[q[n]]\n<1>P. HIDE DEF P\n<1>2. P(j) /\\ j \\in Nat\n    BY MSSSeq!LenProperties, MSSProof!SMTT(\"r10\") DEF P, MSSSorted\n<1>3. \\E m \\in Nat : P(m) /\\ \\A k \\in 0..(m-1) : ~P(k)\n    BY <1>2, MSSNat!SmallestNatural, MSSProof!Isa\n<1>4. PICK m \\in Nat : P(m) /\\ \\A k \\in 0..(m-1) : ~P(k)\n    BY <1>3, MSSProof!SMTT(\"r10\")\n<1>5. m \\in 1..j /\\ m-1 \\in 0..(j-1)\n    BY <1>2, <1>4, MSSSeq!LenProperties, MSSProof!SMTT(\"r10\") DEF P, MSSSorted\n<1>6. \\A i \\in 1..Len(q) : (i <= m-1) <=> (rank[q[i]] <= ts)\n    <2>1. ASSUME NEW i \\in 1..Len(q) PROVE (i <= m-1) <=> (rank[q[i]] <= ts)\n        <3>1. i \\in Nat /\\ rank[q[i]] \\in Nat /\\ rank[q[m]] \\in Nat /\\ Len(q) \\in Nat\n            BY <1>4, <2>1, MSSSeq!LenProperties, MSSSeq!ElementOfSeq, MSSProof!SMTT(\"r10\") DEF P, MSSSorted\n        <3>2. CASE i < m\n            BY <1>4, <1>5, <2>1, <3>1, <3>2, MSSProof!SMTT(\"r10\") DEF P\n        <3>3. CASE i = m\n            BY <1>4, <2>1, <3>1, <3>3, MSSProof!SMTT(\"r10\") DEF P\n        <3>4. CASE i > m\n            <4>1. rank[q[m]] <= rank[q[i]] /\\ ts < rank[q[m]]\n                BY <1>4, <2>1, <3>4, MSSProof!SMTT(\"r10\") DEF P, MSSSorted\n            <4>2. QED\n                BY <1>4, <3>1, <3>4, <4>1, MSSProof!SMTT(\"r10\")\n        <3>5. QED BY <1>4, <3>1, <3>2, <3>3, <3>4, MSSProof!SMTT(\"r10\")\n    <2>2. QED BY <2>1, MSSProof!SMTT(\"r10\")\n<1>7. QED BY <1>5, <1>6, MSSProof!SMTT(\"r10\")\n\nLEMMA MSSWrittenKeys ==\n    \\A operationSequence : MSSWritten(operationSequence,Len(operationSequence)) =\n                            SI!WriteKeys(operationSequence)\nBY MSSProof!SMTT(\"r10\") DEF MSSWritten, SI!WriteKeys\n\nMSSOrderElements == [id : TxId, ops : Seq(SI!Operation)]\n\nMSSOrderOwnWrites(q) ==\n    \\A j \\in 1..Len(q) : MSSWritesOwned(q[j].ops,q[j].id)\n\nMSSPrefixState(q, states, j) ==\n    /\\ states[j] \\in [Keys -> TxId \\cup {NoValue}]\n    /\\ \\A k \\in Keys :\n         /\\ (\\A i \\in 1..j : k \\notin SI!WriteKeys(q[i].ops)) => states[j][k] = NoValue\n         /\\ \\A i \\in 1..j :\n              (/\\ k \\in SI!WriteKeys(q[i].ops)\n               /\\ \\A h \\in (i+1)..j : k \\notin SI!WriteKeys(q[h].ops)) =>\n                states[j][k] = q[i].id\n\nLEMMA MSSExecutionRecursion ==\n    ASSUME NEW q \\in Seq(MSSOrderElements)\n    PROVE SI!ExecutionStates(InitialState,q) =\n        [j \\in 0..Len(q) |-> IF j = 0 THEN InitialState\n          ELSE SI!Effects(SI!ExecutionStates(InitialState,q)[j-1],q[j].ops)]\n<1>1. DEFINE Step(state, j) == SI!Effects(state,q[j].ops)\n<1>S. HIDE DEF Step\n<1>2. MSSNat!FiniteNatInductiveDefHypothesis(\n          SI!ExecutionStates(InitialState,q), InitialState, Step, 0, Len(q))\n    BY MSSProof!Zenon DEF MSSNat!FiniteNatInductiveDefHypothesis, SI!ExecutionStates, Step\n<1>3. Len(q) \\in Nat\n    BY MSSSeq!LenProperties, MSSProof!SMTT(\"r10\")\n<1>4. MSSNat!FiniteNatInductiveDefConclusion(\n          SI!ExecutionStates(InitialState,q), InitialState, Step, 0, Len(q))\n    BY <1>2, <1>3, MSSNat!FiniteNatInductiveDef, MSSProof!Isa\n<1>5. QED\n    BY <1>4, MSSProof!SMTT(\"r10\") DEF MSSNat!FiniteNatInductiveDefConclusion, Step\n\nLEMMA MSSPrefixStep ==\n    ASSUME NEW q \\in Seq(MSSOrderElements), MSSOrderOwnWrites(q),\n           NEW states, NEW j \\in 0..(Len(q)-1), MSSPrefixState(q,states,j),\n           states[j+1] = SI!Effects(states[j],q[j+1].ops)\n    PROVE MSSPrefixState(q,states,j+1)\n<1>1. /\\ q[j+1].ops \\in Seq(SI!Operation)\n       /\\ q[j+1].id \\in TxId\n       /\\ MSSWritesOwned(q[j+1].ops,q[j+1].id)\n       /\\ states[j] \\in [Keys -> TxId \\cup {NoValue}]\n    BY MSSSeq!LenProperties, MSSSeq!ElementOfSeq, MSSProof!SMTT(\"r10\")\n    DEF MSSOrderElements, MSSOrderOwnWrites, MSSPrefixState\n<1>2. states[j+1] = [k \\in Keys |->\n          IF k \\in SI!WriteKeys(q[j+1].ops) THEN q[j+1].id ELSE states[j][k]]\n    BY <1>1, MSSOwnEffects, MSSWrittenKeys, MSSProof!SMTT(\"r10\") DEF MSSOwnView\n<1>3. QED\n    BY <1>1, <1>2, MSSSeq!LenProperties, MSSProof!SMTT(\"r30\") DEF MSSPrefixState\n\nLEMMA MSSExecutionPrefix ==\n    ASSUME NEW q \\in Seq(MSSOrderElements), MSSOrderOwnWrites(q)\n    PROVE \\A j \\in 0..Len(q) : MSSPrefixState(q,SI!ExecutionStates(InitialState,q),j)\n<1>1. DEFINE P(j) == j \\in 0..Len(q) => MSSPrefixState(q,SI!ExecutionStates(InitialState,q),j)\n<1>P. HIDE DEF P\n<1>2. P(0)\n    BY MSSExecutionRecursion, MSSSeq!LenProperties, MSSProof!SMTT(\"r10\")\n    DEF P, MSSPrefixState, InitialState\n<1>3. \\A j \\in Nat : P(j) => P(j+1)\n    BY MSSExecutionRecursion, MSSPrefixStep, MSSSeq!LenProperties, MSSProof!SMTT(\"r30\") DEF P\n<1>4. \\A j \\in Nat : P(j)\n    BY <1>2, <1>3, MSSNat!NatInduction, MSSProof!Isa\n<1>5. QED\n    BY <1>4, MSSSeq!LenProperties, MSSProof!SMTT(\"r10\") DEF P\n\nMSSOrderRanks == [t \\in SnapshotTransactions |-> MSSCommitTime(t.id)]\n\nMSSOrderFacts(q) ==\n    /\\ q \\in Seq(MSSOrderElements)\n    /\\ MSSOrderOwnWrites(q)\n    /\\ Range(q) = SnapshotTransactions\n    /\\ \\A i \\in 1..Len(q) :\n         /\\ q[i].id \\in MSSSupport(ops)\n         /\\ q[i].ops = ops[q[i].id]\n         /\\ MSSCommitTime(q[i].id) \\in Nat\n         /\\ MSSReadTime(q[i].id) \\in Nat\n         /\\ MSSReadTime(q[i].id) < MSSCommitTime(q[i].id)\n    /\\ \\A i,j \\in 1..Len(q) : i < j =>\n         /\\ q[i].id # q[j].id\n         /\\ MSSCommitTime(q[i].id) <= MSSCommitTime(q[j].id)\n\nLEMMA MSSSnapshotMembers == MSSHistoryType =>\n    /\\ SnapshotTransactions \\subseteq MSSOrderElements\n    /\\ (\\A t \\in SnapshotTransactions :\n          t.id \\in MSSSupport(ops) /\\ t.ops = ops[t.id])\n    /\\ \\A t \\in MSSSupport(ops) : [id |-> t, ops |-> ops[t]] \\in SnapshotTransactions\nBY MSSProof!SMTT(\"r10\")\n   DEF MSSHistoryType, MSSHist, MSSOrderElements, SnapshotTransactions, MSSSupport\n\nLEMMA MSSOrderedFacts ==\n    ASSUME MSSHistoryType, MSSSnapshotCertificate, NEW q,\n           MSSSorted(q,SnapshotTransactions,MSSOrderRanks)\n    PROVE MSSOrderFacts(q)\n<1>1. q \\in Seq(MSSOrderElements) /\\ Range(q) = SnapshotTransactions\n    BY MSSSnapshotMembers, MSSSeq!SeqMonotonic, MSSProof!SMTT(\"r10\") DEF MSSSorted\n<1>2. \\A i \\in 1..Len(q) : q[i] \\in SnapshotTransactions\n    BY MSSSeq!ElementOfSeq, MSSProof!SMTT(\"r10\") DEF MSSSorted\n<1>3. QED\n    BY <1>1, <1>2, MSSSnapshotMembers, MSSHistoryWellFormed, MSSProof!SMTT(\"r30\")\n    DEF MSSOrderFacts, MSSOrderOwnWrites, MSSSorted, MSSOrderRanks,\n        MSSSnapshotCertificate, SI!WellFormed\n\nLEMMA MSSCertificateNoConflict ==\n    ASSUME MSSSnapshotCertificate, NEW q, MSSOrderFacts(q),\n           NEW j \\in 1..Len(q), NEW cut \\in 0..(j-1),\n           \\A i \\in 1..Len(q) : (i <= cut) <=>\n             (MSSCommitTime(q[i].id) <= MSSReadTime(q[j].id))\n    PROVE SI!NoConf(q,j,cut)\n<1>1. ASSUME NEW i \\in (cut+1)..(j-1)\n      PROVE SI!WriteKeys(q[i].ops) \\cap SI!WriteKeys(q[j].ops) = {}\n    <2>1. /\\ i \\in 1..Len(q)\n          /\\ MSSCommitTime(q[i].id) <= MSSCommitTime(q[j].id)\n          /\\ MSSCommitTime(q[i].id) > MSSReadTime(q[j].id)\n          /\\ MSSReadTime(q[i].id) < MSSCommitTime(q[i].id)\n          /\\ q[i].id # q[j].id\n        BY <1>1, MSSSeq!LenProperties, MSSProof!SMTT(\"r10\") DEF MSSOrderFacts\n    <2>2. QED\n        BY <1>1, <2>1, MSSProof!SMTT(\"r10\")\n        DEF MSSSnapshotCertificate, MSSOrderFacts, MSSKeyWrites\n<1>2. QED BY <1>1, MSSProof!SMTT(\"r10\") DEF SI!NoConf\n\nLEMMA MSSVisiblePrefixValue ==\n    ASSUME MSSHistoryType, MSSSnapshotCertificate, NEW q, MSSOrderFacts(q),\n           NEW cut \\in 0..Len(q), NEW ts \\in Nat,\n           \\A i \\in 1..Len(q) : (i <= cut) <=> (MSSCommitTime(q[i].id) <= ts),\n           NEW k \\in Keys, NEW v,\n           \\/ /\\ MSSVisibleWriters(k,ts) = {} /\\ v = NoValue\n           \\/ /\\ v \\in MSSVisibleWriters(k,ts)\n              /\\ \\A u \\in MSSVisibleWriters(k,ts) : MSSCommitTime(u) <= MSSCommitTime(v)\n    PROVE SI!ExecutionStates(InitialState,q)[cut][k] = v\n<1>1. MSSPrefixState(q,SI!ExecutionStates(InitialState,q),cut)\n    BY MSSExecutionPrefix, MSSProof!SMTT(\"r10\") DEF MSSOrderFacts\n<1>2. CASE MSSVisibleWriters(k,ts) = {}\n    <2>1. \\A i \\in 1..cut : k \\notin SI!WriteKeys(q[i].ops)\n        BY <1>2, MSSSeq!LenProperties, MSSProof!SMTT(\"r10\")\n        DEF MSSOrderFacts, MSSVisibleWriters, MSSKeyWrites\n    <2>2. QED\n        BY <1>1, <1>2, <2>1, MSSProof!SMTT(\"r10\") DEF MSSPrefixState\n<1>3. CASE MSSVisibleWriters(k,ts) # {}\n    <2>1. /\\ v \\in MSSVisibleWriters(k,ts)\n          /\\ \\A u \\in MSSVisibleWriters(k,ts) : MSSCommitTime(u) <= MSSCommitTime(v)\n        BY <1>3, MSSProof!SMTT(\"r10\")\n    <2>2. PICK h \\in 1..Len(q) : q[h] = [id |-> v, ops |-> ops[v]]\n        BY <2>1, MSSSnapshotMembers, MSSSeq!LenProperties, MSSProof!SMTT(\"r10\")\n        DEF MSSOrderFacts, MSSVisibleWriters, Range\n    <2>3. h \\in 1..cut /\\ k \\in SI!WriteKeys(q[h].ops)\n        BY <2>1, <2>2, MSSProof!SMTT(\"r10\") DEF MSSVisibleWriters, MSSKeyWrites\n    <2>4. \\A i \\in (h+1)..cut : k \\notin SI!WriteKeys(q[i].ops)\n        <3>1. ASSUME NEW i \\in (h+1)..cut, k \\in SI!WriteKeys(q[i].ops) PROVE FALSE\n            <4>1. /\\ i \\in 1..Len(q)\n                  /\\ q[i].id \\in MSSVisibleWriters(k,ts)\n                  /\\ MSSCommitTime(v) <= MSSCommitTime(q[i].id)\n                  /\\ q[i].id # v\n                BY <2>2, <2>3, <3>1, MSSSeq!LenProperties, MSSProof!SMTT(\"r10\")\n                DEF MSSOrderFacts, MSSVisibleWriters, MSSKeyWrites\n            <4>2. MSSCommitTime(q[i].id) = MSSCommitTime(v)\n                BY <2>1, <2>2, <4>1, MSSProof!SMTT(\"r10\") DEF MSSOrderFacts\n            <4>3. QED\n                BY <2>1, <2>2, <2>3, <3>1, <4>1, <4>2, MSSProof!SMTT(\"r10\")\n                DEF MSSSnapshotCertificate, MSSVisibleWriters, MSSKeyWrites, MSSOrderFacts\n        <3>2. QED BY <3>1, MSSProof!SMTT(\"r10\")\n    <2>5. QED\n        BY <1>1, <2>2, <2>3, <2>4, MSSProof!SMTT(\"r10\") DEF MSSPrefixState\n<1>4. QED BY <1>2, <1>3, MSSProof!SMTT(\"r10\")\n\nLEMMA MSSCertificateComplete ==\n    ASSUME MSSHistoryType, MSSSnapshotCertificate, NEW q, MSSOrderFacts(q),\n           NEW j \\in 1..Len(q), NEW cut \\in 0..(j-1),\n           \\A i \\in 1..Len(q) : (i <= cut) <=>\n             (MSSCommitTime(q[i].id) <= MSSReadTime(q[j].id))\n    PROVE SI!Complete(SI!ExecutionStates(InitialState,q)[cut],q[j].ops)\n<1>1. /\\ cut \\in 0..Len(q)\n       /\\ q[j].id \\in TxId\n       /\\ q[j].ops \\in Seq(SI!Operation)\n       /\\ MSSWritesOwned(q[j].ops,q[j].id)\n       /\\ MSSReadTime(q[j].id) \\in Nat\n    BY MSSSeq!LenProperties, MSSSeq!ElementOfSeq, MSSProof!SMTT(\"r10\")\n    DEF MSSOrderFacts, MSSOrderOwnWrites, MSSOrderElements\n<1>2. SI!ExecutionStates(InitialState,q)[cut] \\in [Keys -> TxId \\cup {NoValue}]\n    BY <1>1, MSSExecutionPrefix, MSSProof!SMTT(\"r10\") DEF MSSOrderFacts, MSSPrefixState\n<1>F. q[j].ops = ops[q[j].id]\n    BY MSSProof!SMTT(\"r10\") DEF MSSOrderFacts\n<1>3. ASSUME NEW i \\in 1..Len(q[j].ops), q[j].ops[i].op = \"read\"\n      PROVE q[j].ops[i].value =\n        IF q[j].ops[i].key \\in MSSWritten(q[j].ops,i-1)\n        THEN q[j].id ELSE SI!ExecutionStates(InitialState,q)[cut][q[j].ops[i].key]\n    <2>1. q[j].ops[i].key \\in Keys /\\ MSSReadMatches(q[j].id,i)\n        BY <1>1, <1>3, MSSSeq!ElementOfSeq, MSSProof!SMTT(\"r10\")\n        DEF MSSOrderFacts, MSSSnapshotCertificate, SI!Operation\n    <2>2. CASE q[j].ops[i].key \\in MSSWritten(q[j].ops,i-1)\n        BY <1>F, <1>3, <2>1, <2>2, MSSProof!SMTT(\"r10\") DEF MSSReadMatches\n    <2>3. CASE q[j].ops[i].key \\notin MSSWritten(q[j].ops,i-1)\n        <3>1. \\/ /\\ MSSVisibleWriters(q[j].ops[i].key,MSSReadTime(q[j].id)) = {}\n                  /\\ q[j].ops[i].value = NoValue\n               \\/ /\\ q[j].ops[i].value \\in MSSVisibleWriters(q[j].ops[i].key,MSSReadTime(q[j].id))\n                  /\\ \\A u \\in MSSVisibleWriters(q[j].ops[i].key,MSSReadTime(q[j].id)) :\n                       MSSCommitTime(u) <= MSSCommitTime(q[j].ops[i].value)\n            BY <1>F, <2>1, <2>3, MSSProof!SMTT(\"r10\") DEF MSSReadMatches\n        <3>2. SI!ExecutionStates(InitialState,q)[cut][q[j].ops[i].key] = q[j].ops[i].value\n            BY <1>1, <2>1, <3>1, MSSVisiblePrefixValue, MSSProof!SMTT(\"r10\")\n        <3>3. QED BY <2>3, <3>2, MSSProof!SMTT(\"r10\")\n    <2>4. QED BY <2>2, <2>3, MSSProof!SMTT(\"r10\")\n<1>4. QED\n    BY <1>1, <1>2, <1>3, MSSOwnComplete, MSSProof!SMTT(\"r10\")\n\nLEMMA MSSCertificateSound ==\n    MSSHistoryType /\\ MSSSnapshotCertificate => SnapshotIsolation\n<1>0. SUFFICES ASSUME MSSHistoryType, MSSSnapshotCertificate PROVE SnapshotIsolation\n    BY MSSProof!SMTT(\"r10\")\n<1>1. /\\ MSSFinite!IsFiniteSet(SnapshotTransactions)\n       /\\ \\A t \\in SnapshotTransactions : MSSOrderRanks[t] \\in Nat\n    BY <1>0, MSSHistoryWellFormed, MSSFiniteBridge, MSSSnapshotMembers,\n       MSSProof!SMTT(\"r10\") DEF SI!WellFormed, MSSOrderRanks, MSSSnapshotCertificate\n<1>2. PICK q \\in SI!Orders(SnapshotTransactions) : MSSSorted(q,SnapshotTransactions,MSSOrderRanks)\n    BY <1>1, MSSSortedOrderExists, MSSProof!SMTT(\"r10\")\n<1>3. MSSOrderFacts(q)\n    BY <1>0, <1>2, MSSOrderedFacts, MSSProof!SMTT(\"r10\")\n<1>4. ASSUME NEW j \\in 1..Len(q)\n      PROVE \\E cut \\in 0..(j-1) : SI!SnapshotAt(SI!ExecutionStates(InitialState,q),q,j,cut)\n    <2>1. PICK cut \\in 0..(j-1) :\n        \\A i \\in 1..Len(q) : (i <= cut) <=>\n           (MSSCommitTime(q[i].id) <= MSSReadTime(q[j].id))\n        BY <1>1, <1>2, <1>3, <1>4, MSSSortedCut, MSSSeq!ElementOfSeq,\n           MSSProof!SMTT(\"r30\") DEF MSSOrderFacts, MSSOrderRanks, MSSSorted\n    <2>2. SI!Complete(SI!ExecutionStates(InitialState,q)[cut],q[j].ops)\n              /\\ SI!NoConf(q,j,cut)\n        BY <1>0, <1>3, <1>4, <2>1, MSSCertificateComplete, MSSCertificateNoConflict,\n           MSSProof!SMTT(\"r10\")\n    <2>3. QED BY <2>1, <2>2, MSSProof!SMTT(\"r10\") DEF SI!SnapshotAt\n<1>5. QED\n    BY <1>0, <1>2, <1>4, MSSHistoryWellFormed, MSSProof!SMTT(\"r10\")\n    DEF SnapshotIsolation, SI!SnapshotIsolation, SI!ExecutionSatisfiesSI\n\\* END AGENT HELPERS\n\nTHEOREM SnapshotIsolationCorrect ==\n    (Spec /\\ []SingleWritePerKey) => []SnapshotIsolation\n\\* BEGIN AGENT PROOF MongoDB/MultiShardTxnSnapshot_SnapshotIsolationCorrect.tla\n<1>1. Init => SnapshotIsolation\n    BY MSSInitialSnapshot, MSSProof!SMTT(\"r10\")\n<1>2. Spec => []MSSHistoryType\n    BY MSSHistoryAlways, MSSProof!PTL\n<1>3. Spec => []SI!WellFormed(InitialState,SnapshotTransactions)\n    BY MSSHistoryAlways, MSSHistoryWellFormed, MSSProof!PTL\n\\* Remaining protocol obligation: establish the timestamp certificate\n\\* throughout executions, including partially committed transactions.\n<1>4. (Spec /\\ []SingleWritePerKey) => []MSSSnapshotCertificate\n    BY <1>1, <1>2, MSSCertificateInit, MSSProof!PTL DEF Spec\n\\* The certificate supplies a finite order by commit time, with each\n\\* transaction's read time determining its snapshot cut.\n<1>5. MSSHistoryType /\\ MSSSnapshotCertificate => SnapshotIsolation\n    BY MSSCertificateSound, MSSProof!SMTT(\"r10\")\n<1>6. QED\n    BY <1>2, <1>3, <1>4, <1>5, MSSProof!PTL\n\\* END AGENT PROOF MongoDB/MultiShardTxnSnapshot_SnapshotIsolationCorrect.tla\n====\n",
+  "units": {
+    "MongoDB/MultiShardTxnSnapshot_SnapshotIsolationCorrect.tla": {
+      "id": "MongoDB/MultiShardTxnSnapshot_SnapshotIsolationCorrect.tla",
+      "name": "SnapshotIsolationCorrect",
+      "kind": "target",
+      "lineStart": 751,
+      "lineEnd": 769,
+      "proofLines": [
+        754,
+        755,
+        756,
+        757,
+        758,
+        759,
+        762,
+        763,
+        766,
+        767,
+        768,
+        769
+      ],
+      "proofRange": [
+        754,
+        769
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:MSSCertificateInit",
+        "helper:MSSCertificateSound",
+        "helper:MSSHistoryAlways",
+        "helper:MSSHistoryWellFormed",
+        "helper:MSSInitialSnapshot"
+      ]
+    },
+    "helper:MSSEmptyTransactions": {
+      "id": "helper:MSSEmptyTransactions",
+      "name": "MSSEmptyTransactions",
+      "kind": "helper",
+      "lineStart": 11,
+      "lineEnd": 13,
+      "proofLines": [
+        13
+      ],
+      "proofRange": [
+        13,
+        13
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:MSSEmptyOrder": {
+      "id": "helper:MSSEmptyOrder",
+      "name": "MSSEmptyOrder",
+      "kind": "helper",
+      "lineStart": 15,
+      "lineEnd": 42,
+      "proofLines": [
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42
+      ],
+      "proofRange": [
+        17,
+        42
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:MSSFiniteBridge": {
+      "id": "helper:MSSFiniteBridge",
+      "name": "MSSFiniteBridge",
+      "kind": "helper",
+      "lineStart": 44,
+      "lineEnd": 46,
+      "proofLines": [
+        46
+      ],
+      "proofRange": [
+        46,
+        46
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:MSSInitialSnapshot": {
+      "id": "helper:MSSInitialSnapshot",
+      "name": "MSSInitialSnapshot",
+      "kind": "helper",
+      "lineStart": 48,
+      "lineEnd": 58,
+      "proofLines": [
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        58
+      ],
+      "proofRange": [
+        50,
+        58
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:MSSEmptyOrder",
+        "helper:MSSEmptyTransactions",
+        "helper:MSSFiniteBridge"
+      ]
+    },
+    "helper:MSSOperationType": {
+      "id": "helper:MSSOperationType",
+      "name": "MSSOperationType",
+      "kind": "helper",
+      "lineStart": 83,
+      "lineEnd": 87,
+      "proofLines": [
+        87
+      ],
+      "proofRange": [
+        87,
+        87
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:MSSSupportUpdate": {
+      "id": "helper:MSSSupportUpdate",
+      "name": "MSSSupportUpdate",
+      "kind": "helper",
+      "lineStart": 89,
+      "lineEnd": 93,
+      "proofLines": [
+        93
+      ],
+      "proofRange": [
+        93,
+        93
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:MSSHistUpdateOps": {
+      "id": "helper:MSSHistUpdateOps",
+      "name": "MSSHistUpdateOps",
+      "kind": "helper",
+      "lineStart": 95,
+      "lineEnd": 107,
+      "proofLines": [
+        98,
+        99,
+        100,
+        101,
+        102,
+        103,
+        104,
+        105,
+        106,
+        107
+      ],
+      "proofRange": [
+        98,
+        107
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:MSSSupportUpdate"
+      ]
+    },
+    "helper:MSSHistUpdateShard": {
+      "id": "helper:MSSHistUpdateShard",
+      "name": "MSSHistUpdateShard",
+      "kind": "helper",
+      "lineStart": 109,
+      "lineEnd": 112,
+      "proofLines": [
+        112
+      ],
+      "proofRange": [
+        112,
+        112
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:MSSHistoryInit": {
+      "id": "helper:MSSHistoryInit",
+      "name": "MSSHistoryInit",
+      "kind": "helper",
+      "lineStart": 114,
+      "lineEnd": 119,
+      "proofLines": [
+        115,
+        116,
+        117,
+        118,
+        119
+      ],
+      "proofRange": [
+        115,
+        119
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:MSSHistoryProjection": {
+      "id": "helper:MSSHistoryProjection",
+      "name": "MSSHistoryProjection",
+      "kind": "helper",
+      "lineStart": 121,
+      "lineEnd": 127,
+      "proofLines": [
+        122,
+        123,
+        124,
+        125,
+        126,
+        127
+      ],
+      "proofRange": [
+        122,
+        127
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:MSSHistoryPreserved": {
+      "id": "helper:MSSHistoryPreserved",
+      "name": "MSSHistoryPreserved",
+      "kind": "helper",
+      "lineStart": 129,
+      "lineEnd": 188,
+      "proofLines": [
+        130,
+        131,
+        132,
+        133,
+        134,
+        135,
+        136,
+        137,
+        138,
+        139,
+        140,
+        141,
+        142,
+        143,
+        144,
+        145,
+        146,
+        147,
+        148,
+        149,
+        150,
+        151,
+        152,
+        153,
+        154,
+        155,
+        156,
+        157,
+        158,
+        159,
+        160,
+        161,
+        162,
+        163,
+        164,
+        165,
+        166,
+        167,
+        168,
+        169,
+        170,
+        171,
+        172,
+        173,
+        174,
+        175,
+        176,
+        177,
+        178,
+        179,
+        180,
+        181,
+        182,
+        183,
+        184,
+        185,
+        186,
+        187,
+        188
+      ],
+      "proofRange": [
+        130,
+        188
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:MSSHistUpdateOps",
+        "helper:MSSHistUpdateShard",
+        "helper:MSSOperationType"
+      ]
+    },
+    "helper:MSSHistoryAlways": {
+      "id": "helper:MSSHistoryAlways",
+      "name": "MSSHistoryAlways",
+      "kind": "helper",
+      "lineStart": 190,
+      "lineEnd": 194,
+      "proofLines": [
+        191,
+        192,
+        193,
+        194
+      ],
+      "proofRange": [
+        191,
+        194
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:MSSHistoryInit",
+        "helper:MSSHistoryPreserved",
+        "helper:MSSHistoryProjection"
+      ]
+    },
+    "helper:MSSHistoryWellFormed": {
+      "id": "helper:MSSHistoryWellFormed",
+      "name": "MSSHistoryWellFormed",
+      "kind": "helper",
+      "lineStart": 196,
+      "lineEnd": 205,
+      "proofLines": [
+        198,
+        199,
+        200,
+        201,
+        202,
+        203,
+        204,
+        205
+      ],
+      "proofRange": [
+        198,
+        205
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:MSSFiniteBridge"
+      ]
+    },
+    "helper:MSSOperationRecursion": {
+      "id": "helper:MSSOperationRecursion",
+      "name": "MSSOperationRecursion",
+      "kind": "helper",
+      "lineStart": 222,
+      "lineEnd": 241,
+      "proofLines": [
+        229,
+        230,
+        231,
+        232,
+        233,
+        234,
+        235,
+        236,
+        237,
+        238,
+        239,
+        240,
+        241
+      ],
+      "proofRange": [
+        229,
+        241
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:MSSWrittenStep": {
+      "id": "helper:MSSWrittenStep",
+      "name": "MSSWrittenStep",
+      "kind": "helper",
+      "lineStart": 243,
+      "lineEnd": 250,
+      "proofLines": [
+        250
+      ],
+      "proofRange": [
+        250,
+        250
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:MSSOwnViewStep": {
+      "id": "helper:MSSOwnViewStep",
+      "name": "MSSOwnViewStep",
+      "kind": "helper",
+      "lineStart": 252,
+      "lineEnd": 261,
+      "proofLines": [
+        260,
+        261
+      ],
+      "proofRange": [
+        260,
+        261
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:MSSWrittenStep"
+      ]
+    },
+    "helper:MSSOwnOperationState": {
+      "id": "helper:MSSOwnOperationState",
+      "name": "MSSOwnOperationState",
+      "kind": "helper",
+      "lineStart": 263,
+      "lineEnd": 281,
+      "proofLines": [
+        270,
+        271,
+        272,
+        273,
+        274,
+        275,
+        276,
+        277,
+        278,
+        279,
+        280,
+        281
+      ],
+      "proofRange": [
+        270,
+        281
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:MSSOperationRecursion",
+        "helper:MSSOwnViewStep"
+      ]
+    },
+    "helper:MSSOwnEffects": {
+      "id": "helper:MSSOwnEffects",
+      "name": "MSSOwnEffects",
+      "kind": "helper",
+      "lineStart": 283,
+      "lineEnd": 290,
+      "proofLines": [
+        290
+      ],
+      "proofRange": [
+        290,
+        290
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:MSSOwnOperationState"
+      ]
+    },
+    "helper:MSSOwnComplete": {
+      "id": "helper:MSSOwnComplete",
+      "name": "MSSOwnComplete",
+      "kind": "helper",
+      "lineStart": 292,
+      "lineEnd": 304,
+      "proofLines": [
+        303,
+        304
+      ],
+      "proofRange": [
+        303,
+        304
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:MSSOwnOperationState"
+      ]
+    },
+    "helper:MSSCertificateInit": {
+      "id": "helper:MSSCertificateInit",
+      "name": "MSSCertificateInit",
+      "kind": "helper",
+      "lineStart": 346,
+      "lineEnd": 350,
+      "proofLines": [
+        347,
+        348,
+        349,
+        350
+      ],
+      "proofRange": [
+        347,
+        350
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:MSSPermutationRecursion": {
+      "id": "helper:MSSPermutationRecursion",
+      "name": "MSSPermutationRecursion",
+      "kind": "helper",
+      "lineStart": 359,
+      "lineEnd": 375,
+      "proofLines": [
+        363,
+        364,
+        365,
+        366,
+        367,
+        368,
+        369,
+        370,
+        371,
+        372,
+        373,
+        374,
+        375
+      ],
+      "proofRange": [
+        363,
+        375
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:MSSPermutationOrders": {
+      "id": "helper:MSSPermutationOrders",
+      "name": "MSSPermutationOrders",
+      "kind": "helper",
+      "lineStart": 377,
+      "lineEnd": 379,
+      "proofLines": [
+        379
+      ],
+      "proofRange": [
+        379,
+        379
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:MSSRankMaximum": {
+      "id": "helper:MSSRankMaximum",
+      "name": "MSSRankMaximum",
+      "kind": "helper",
+      "lineStart": 381,
+      "lineEnd": 394,
+      "proofLines": [
+        385,
+        386,
+        387,
+        388,
+        389,
+        390,
+        391,
+        392,
+        393,
+        394
+      ],
+      "proofRange": [
+        385,
+        394
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:MSSRangeBridge": {
+      "id": "helper:MSSRangeBridge",
+      "name": "MSSRangeBridge",
+      "kind": "helper",
+      "lineStart": 402,
+      "lineEnd": 403,
+      "proofLines": [
+        403
+      ],
+      "proofRange": [
+        403,
+        403
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:MSSSortedAppend": {
+      "id": "helper:MSSSortedAppend",
+      "name": "MSSSortedAppend",
+      "kind": "helper",
+      "lineStart": 405,
+      "lineEnd": 443,
+      "proofLines": [
+        410,
+        411,
+        412,
+        413,
+        414,
+        415,
+        416,
+        417,
+        418,
+        419,
+        420,
+        421,
+        422,
+        423,
+        424,
+        425,
+        426,
+        427,
+        428,
+        429,
+        430,
+        431,
+        432,
+        433,
+        434,
+        435,
+        436,
+        437,
+        438,
+        439,
+        440,
+        441,
+        442,
+        443
+      ],
+      "proofRange": [
+        410,
+        443
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:MSSRangeBridge"
+      ]
+    },
+    "helper:MSSSortedOrderExists": {
+      "id": "helper:MSSSortedOrderExists",
+      "name": "MSSSortedOrderExists",
+      "kind": "helper",
+      "lineStart": 445,
+      "lineEnd": 478,
+      "proofLines": [
+        449,
+        450,
+        451,
+        452,
+        453,
+        454,
+        455,
+        456,
+        457,
+        458,
+        459,
+        460,
+        461,
+        462,
+        463,
+        464,
+        465,
+        466,
+        467,
+        468,
+        469,
+        470,
+        471,
+        472,
+        473,
+        474,
+        475,
+        476,
+        477,
+        478
+      ],
+      "proofRange": [
+        449,
+        478
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:MSSPermutationOrders",
+        "helper:MSSPermutationRecursion",
+        "helper:MSSRankMaximum",
+        "helper:MSSSortedAppend"
+      ]
+    },
+    "helper:MSSSortedCut": {
+      "id": "helper:MSSSortedCut",
+      "name": "MSSSortedCut",
+      "kind": "helper",
+      "lineStart": 480,
+      "lineEnd": 511,
+      "proofLines": [
+        486,
+        487,
+        488,
+        489,
+        490,
+        491,
+        492,
+        493,
+        494,
+        495,
+        496,
+        497,
+        498,
+        499,
+        500,
+        501,
+        502,
+        503,
+        504,
+        505,
+        506,
+        507,
+        508,
+        509,
+        510,
+        511
+      ],
+      "proofRange": [
+        486,
+        511
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:MSSWrittenKeys": {
+      "id": "helper:MSSWrittenKeys",
+      "name": "MSSWrittenKeys",
+      "kind": "helper",
+      "lineStart": 513,
+      "lineEnd": 516,
+      "proofLines": [
+        516
+      ],
+      "proofRange": [
+        516,
+        516
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:MSSExecutionRecursion": {
+      "id": "helper:MSSExecutionRecursion",
+      "name": "MSSExecutionRecursion",
+      "kind": "helper",
+      "lineStart": 532,
+      "lineEnd": 548,
+      "proofLines": [
+        537,
+        538,
+        539,
+        540,
+        541,
+        542,
+        543,
+        544,
+        545,
+        546,
+        547,
+        548
+      ],
+      "proofRange": [
+        537,
+        548
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:MSSPrefixStep": {
+      "id": "helper:MSSPrefixStep",
+      "name": "MSSPrefixStep",
+      "kind": "helper",
+      "lineStart": 550,
+      "lineEnd": 565,
+      "proofLines": [
+        555,
+        556,
+        557,
+        558,
+        559,
+        560,
+        561,
+        562,
+        563,
+        564,
+        565
+      ],
+      "proofRange": [
+        555,
+        565
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:MSSOwnEffects",
+        "helper:MSSWrittenKeys"
+      ]
+    },
+    "helper:MSSExecutionPrefix": {
+      "id": "helper:MSSExecutionPrefix",
+      "name": "MSSExecutionPrefix",
+      "kind": "helper",
+      "lineStart": 567,
+      "lineEnd": 580,
+      "proofLines": [
+        570,
+        571,
+        572,
+        573,
+        574,
+        575,
+        576,
+        577,
+        578,
+        579,
+        580
+      ],
+      "proofRange": [
+        570,
+        580
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:MSSExecutionRecursion",
+        "helper:MSSPrefixStep"
+      ]
+    },
+    "helper:MSSSnapshotMembers": {
+      "id": "helper:MSSSnapshotMembers",
+      "name": "MSSSnapshotMembers",
+      "kind": "helper",
+      "lineStart": 598,
+      "lineEnd": 604,
+      "proofLines": [
+        603,
+        604
+      ],
+      "proofRange": [
+        603,
+        604
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:MSSOrderedFacts": {
+      "id": "helper:MSSOrderedFacts",
+      "name": "MSSOrderedFacts",
+      "kind": "helper",
+      "lineStart": 606,
+      "lineEnd": 617,
+      "proofLines": [
+        610,
+        611,
+        612,
+        613,
+        614,
+        615,
+        616,
+        617
+      ],
+      "proofRange": [
+        610,
+        617
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:MSSHistoryWellFormed",
+        "helper:MSSSnapshotMembers"
+      ]
+    },
+    "helper:MSSCertificateNoConflict": {
+      "id": "helper:MSSCertificateNoConflict",
+      "name": "MSSCertificateNoConflict",
+      "kind": "helper",
+      "lineStart": 619,
+      "lineEnd": 636,
+      "proofLines": [
+        625,
+        626,
+        627,
+        628,
+        629,
+        630,
+        631,
+        632,
+        633,
+        634,
+        635,
+        636
+      ],
+      "proofRange": [
+        625,
+        636
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:MSSVisiblePrefixValue": {
+      "id": "helper:MSSVisiblePrefixValue",
+      "name": "MSSVisiblePrefixValue",
+      "kind": "helper",
+      "lineStart": 638,
+      "lineEnd": 680,
+      "proofLines": [
+        647,
+        648,
+        649,
+        650,
+        651,
+        652,
+        653,
+        654,
+        655,
+        656,
+        657,
+        658,
+        659,
+        660,
+        661,
+        662,
+        663,
+        664,
+        665,
+        666,
+        667,
+        668,
+        669,
+        670,
+        671,
+        672,
+        673,
+        674,
+        675,
+        676,
+        677,
+        678,
+        679,
+        680
+      ],
+      "proofRange": [
+        647,
+        680
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:MSSExecutionPrefix",
+        "helper:MSSSnapshotMembers"
+      ]
+    },
+    "helper:MSSCertificateComplete": {
+      "id": "helper:MSSCertificateComplete",
+      "name": "MSSCertificateComplete",
+      "kind": "helper",
+      "lineStart": 682,
+      "lineEnd": 720,
+      "proofLines": [
+        688,
+        689,
+        690,
+        691,
+        692,
+        693,
+        694,
+        695,
+        696,
+        697,
+        698,
+        699,
+        700,
+        701,
+        702,
+        703,
+        704,
+        705,
+        706,
+        707,
+        708,
+        709,
+        710,
+        711,
+        712,
+        713,
+        714,
+        715,
+        716,
+        717,
+        718,
+        719,
+        720
+      ],
+      "proofRange": [
+        688,
+        720
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:MSSExecutionPrefix",
+        "helper:MSSOwnComplete",
+        "helper:MSSVisiblePrefixValue"
+      ]
+    },
+    "helper:MSSCertificateSound": {
+      "id": "helper:MSSCertificateSound",
+      "name": "MSSCertificateSound",
+      "kind": "helper",
+      "lineStart": 722,
+      "lineEnd": 748,
+      "proofLines": [
+        724,
+        725,
+        726,
+        727,
+        728,
+        729,
+        730,
+        731,
+        732,
+        733,
+        734,
+        735,
+        736,
+        737,
+        738,
+        739,
+        740,
+        741,
+        742,
+        743,
+        744,
+        745,
+        746,
+        747,
+        748
+      ],
+      "proofRange": [
+        724,
+        748
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:MSSCertificateComplete",
+        "helper:MSSCertificateNoConflict",
+        "helper:MSSFiniteBridge",
+        "helper:MSSHistoryWellFormed",
+        "helper:MSSOrderedFacts",
+        "helper:MSSSnapshotMembers",
+        "helper:MSSSortedCut",
+        "helper:MSSSortedOrderExists"
+      ]
+    }
+  }
+}

@@ -1,0 +1,416 @@
+{
+  "schemaVersion": 1,
+  "specId": "ZooKeeper/Zab.tla",
+  "sourceName": "Zab.tla",
+  "sourceSha256": "fe9c8d5c7ed983533c79782e87147e6048d8ffd1ee6b896df7a396f18a5d409d",
+  "resultSha256": "7317302403038305ba86d9d9b3241ae06ed3788bd9a55e614828a2908ccf77e8",
+  "source": "---- MODULE Zab ----\nEXTENDS ZabDefs\n\n\\* BEGIN AGENT HELPERS\n\nLOCAL AgentFinite == INSTANCE FiniteSetTheorems\n\nAgentSafety ==\n    /\\ Leadership1\n    /\\ Leadership2\n    /\\ PrefixConsistency\n    /\\ Integrity\n    /\\ Agreement\n    /\\ TotalOrder\n    /\\ LocalPrimaryOrder\n    /\\ GlobalPrimaryOrder\n    /\\ PrimaryIntegrity\n\nLEMMA AgentMinimumSingleton == \\A n \\in Int : Minimum({n}) = n\nBY SMTT(\"r5\") DEF Minimum\n\nLEMMA AgentInitialSafety == Init => AgentSafety\n<1>1. Init => Leadership1\n  BY SMTT(\"r5\") DEF Init, InitServerVars, Leadership1, IsLeader,\n                       LOOKING, LEADING\n<1>2. Init => Leadership2\n  <2>1. Cardinality({}) = 0\n    BY AgentFinite!FS_EmptySet DEF AgentFinite!FS_EmptySet,\n                                    AgentFinite!Cardinality, Cardinality\n  <2> QED BY <2>1, SMTT(\"r10\") DEF Init, InitVerifyVars, Leadership2\n<1>3. Init => PrefixConsistency\n  <2>1. Minimum({1, 1}) = 1\n    BY SMTT(\"r5\") DEF Minimum\n  <2> QED BY <2>1, SMTT(\"r10\")\n     DEF Init, InitServerVars, PrefixConsistency, TxnEqual, ZxidEqual\n<1>4. Init => Integrity\n  BY SMTT(\"r5\") DEF Init, InitServerVars, Integrity, IsFollower,\n                       LOOKING, FOLLOWING\n<1>5. Init => Agreement\n  BY SMTT(\"r5\") DEF Init, InitServerVars, Agreement, IsFollower,\n                       LOOKING, FOLLOWING\n<1>6. Init => TotalOrder\n  BY SMTT(\"r5\") DEF Init, InitServerVars, TotalOrder\n<1>7. Init => LocalPrimaryOrder\n  BY SMTT(\"r5\") DEF Init, InitServerVars, LocalPrimaryOrder\n<1>8. Init => GlobalPrimaryOrder\n  BY SMTT(\"r5\") DEF Init, InitServerVars, GlobalPrimaryOrder\n<1>9. Init => PrimaryIntegrity\n  BY SMTT(\"r5\") DEF Init, InitServerVars, PrimaryIntegrity, IsLeader,\n                       LOOKING, LEADING\n<1> QED\n  BY <1>1, <1>2, <1>3, <1>4, <1>5, <1>6, <1>7, <1>8, <1>9\n     DEF AgentSafety\n\nAgentCommitIndexType ==\n  \\A i \\in Server : lastCommitted[i].index \\in Nat\n\nAgentAgreementInvariant == AgentCommitIndexType /\\ PrefixConsistency\n\nLEMMA AgentPairMinimum ==\n  ASSUME NEW a \\in Int, NEW b \\in Int\n  PROVE Minimum({a, b}) = IF a <= b THEN a ELSE b\n<1>1. CASE a <= b\n  BY SMTT(\"r10\") DEF Minimum\n<1>2. CASE ~(a <= b)\n  BY SMTT(\"r10\") DEF Minimum\n<1> QED BY <1>1, <1>2\n\nLEMMA AgentPrefixToAgreement ==\n  AgentCommitIndexType /\\ PrefixConsistency => Agreement\n<1>1. ASSUME AgentCommitIndexType, PrefixConsistency,\n             NEW i \\in Server, NEW j \\in Server,\n             lastCommitted[i].index > 0,\n             lastCommitted[j].index > 0,\n             NEW x \\in 1..lastCommitted[i].index,\n             NEW y \\in 1..lastCommitted[j].index\n      PROVE \\/ \\E k \\in 1..lastCommitted[j].index :\n                 TxnEqual(history[j][k], history[i][x])\n            \\/ \\E k \\in 1..lastCommitted[i].index :\n                 TxnEqual(history[i][k], history[j][y])\n  <2>1. lastCommitted[i].index \\in Int /\\ lastCommitted[j].index \\in Int\n    BY <1>1, SMTT(\"r5\") DEF AgentCommitIndexType\n  <2>2. Minimum({lastCommitted[i].index, lastCommitted[j].index}) =\n          IF lastCommitted[i].index <= lastCommitted[j].index\n          THEN lastCommitted[i].index ELSE lastCommitted[j].index\n    BY <2>1, AgentPairMinimum\n  <2>3. CASE lastCommitted[i].index <= lastCommitted[j].index\n    <3>1. x \\in 1..lastCommitted[j].index\n      BY <1>1, <2>1, <2>3, SMTT(\"r5\")\n    <3>2. TxnEqual(history[j][x], history[i][x])\n      BY <1>1, <2>2, <2>3, SMTT(\"r5\") DEF PrefixConsistency, TxnEqual, ZxidEqual\n    <3> QED BY <3>1, <3>2\n  <2>4. CASE ~(lastCommitted[i].index <= lastCommitted[j].index)\n    <3>1. y \\in 1..lastCommitted[i].index\n      BY <1>1, <2>1, <2>4, SMTT(\"r5\")\n    <3>2. TxnEqual(history[i][y], history[j][y])\n      BY <1>1, <2>2, <2>4, SMTT(\"r5\") DEF PrefixConsistency\n    <3> QED BY <3>1, <3>2\n  <2> QED BY <2>3, <2>4\n<1> QED BY <1>1 DEF Agreement\n\n\n\\* All transitions other than ACKEPOCH leave the historical leader log alone.\nAgentOtherEpochSteps ==\n    \\/ \\E i \\in Server : UpdateLeader(i)\n    \\/ \\E i \\in Server : FollowLeader(i)\n    \\/ \\E i, j \\in Server : Timeout(i, j)\n    \\/ \\E i \\in Server : Restart(i)\n    \\/ \\E i, j \\in Server : ConnectAndFollowerSendCEPOCH(i, j)\n    \\/ \\E i, j \\in Server : LeaderProcessCEPOCH(i, j)\n    \\/ \\E i, j \\in Server : FollowerProcessNEWEPOCH(i, j)\n    \\/ \\E i, j \\in Server : FollowerProcessNEWLEADER(i, j)\n    \\/ \\E i, j \\in Server : LeaderProcessACKLD(i, j)\n    \\/ \\E i, j \\in Server : FollowerProcessCOMMITLD(i, j)\n    \\/ \\E i \\in Server : LeaderProcessRequest(i)\n    \\/ \\E i \\in Server : LeaderBroadcastPROPOSE(i)\n    \\/ \\E i, j \\in Server : FollowerProcessPROPOSE(i, j)\n    \\/ \\E i, j \\in Server : LeaderProcessACK(i, j)\n    \\/ \\E i, j \\in Server : FollowerProcessCOMMIT(i, j)\n\nLEMMA AgentEpochLogFrame ==\n  AgentOtherEpochSteps => UNCHANGED epochLeader\nBY SMTT(\"r10\") DEF AgentOtherEpochSteps, UpdateLeader, FollowLeader,\n   Timeout, Restart, ConnectAndFollowerSendCEPOCH, LeaderProcessCEPOCH,\n   FollowerProcessNEWEPOCH, FollowerProcessNEWLEADER, LeaderProcessACKLD,\n   FollowerProcessCOMMITLD, LeaderProcessRequest, LeaderBroadcastPROPOSE,\n   FollowerProcessPROPOSE, LeaderProcessACK, FollowerProcessCOMMIT, verifyVars\n\n\\* END AGENT HELPERS\n\nTHEOREM Spec => []Leadership1\n\\* BEGIN AGENT PROOF ZooKeeper/Zab_Leadership1.tla\n<1>1. Init => Leadership1\n  BY AgentInitialSafety DEF AgentSafety\n<1>2. Leadership1 /\\ Next => Leadership1'\n  BY SMTT(\"r5\") DEF Next, Leadership1\n<1>3. Leadership1 /\\ UNCHANGED vars => Leadership1'\n  BY SMTT(\"r5\") DEF Leadership1, vars, serverVars, leaderVars,\n                       followerVars, electionVars, msgVars, verifyVars,\n                       IsLeader, IsFollower, IsMyLearner, IsMyLeader\n<1>4. Leadership1 /\\ [Next]_vars => Leadership1'\n  BY <1>2, <1>3\n<1> QED\n  BY <1>1, <1>4, PTL DEF Spec\n\\* END AGENT PROOF ZooKeeper/Zab_Leadership1.tla\n\nTHEOREM Spec => []Leadership2\n\\* BEGIN AGENT PROOF ZooKeeper/Zab_Leadership2.tla\n<1>1. Init => Leadership2\n  BY AgentInitialSafety DEF AgentSafety\n<1>2. Leadership2 /\\ Next => Leadership2'\n  <2>1. Leadership2 /\\ AgentOtherEpochSteps => Leadership2'\n    BY AgentEpochLogFrame, SMTT(\"r5\") DEF Leadership2\n  \\* The remaining obligation requires an epoch-ownership invariant.\n  <2>2. ASSUME Leadership2, NEW i \\in Server, NEW j \\in Server,\n               LeaderProcessACKEPOCH(i, j)\n        PROVE Leadership2'\n    BY <2>2, SMTT(\"r5\") DEF LeaderProcessACKEPOCH, Leadership2\n  <2> QED BY <2>1, <2>2 DEF Next, AgentOtherEpochSteps\n<1>3. Leadership2 /\\ UNCHANGED vars => Leadership2'\n  BY SMTT(\"r5\") DEF Leadership2, vars, serverVars, leaderVars,\n                       followerVars, electionVars, msgVars, verifyVars,\n                       IsLeader, IsFollower, IsMyLearner, IsMyLeader\n<1>4. Leadership2 /\\ [Next]_vars => Leadership2'\n  BY <1>2, <1>3\n<1> QED\n  BY <1>1, <1>4, PTL DEF Spec\n\\* END AGENT PROOF ZooKeeper/Zab_Leadership2.tla\n\nTHEOREM Spec => []PrefixConsistency\n\\* BEGIN AGENT PROOF ZooKeeper/Zab_PrefixConsistency.tla\n<1>1. Init => PrefixConsistency\n  BY AgentInitialSafety DEF AgentSafety\n<1>2. PrefixConsistency /\\ Next => PrefixConsistency'\n  BY SMTT(\"r5\") DEF Next, PrefixConsistency\n<1>3. PrefixConsistency /\\ UNCHANGED vars => PrefixConsistency'\n  BY SMTT(\"r5\") DEF PrefixConsistency, vars, serverVars, leaderVars,\n                       followerVars, electionVars, msgVars, verifyVars,\n                       IsLeader, IsFollower, IsMyLearner, IsMyLeader\n<1>4. PrefixConsistency /\\ [Next]_vars => PrefixConsistency'\n  BY <1>2, <1>3\n<1> QED\n  BY <1>1, <1>4, PTL DEF Spec\n\\* END AGENT PROOF ZooKeeper/Zab_PrefixConsistency.tla\n\nTHEOREM Spec => []Integrity\n\\* BEGIN AGENT PROOF ZooKeeper/Zab_Integrity.tla\n<1>1. Init => Integrity\n  BY AgentInitialSafety DEF AgentSafety\n<1>2. Integrity /\\ Next => Integrity'\n  BY SMTT(\"r5\") DEF Next, Integrity\n<1>3. Integrity /\\ UNCHANGED vars => Integrity'\n  BY SMTT(\"r5\") DEF Integrity, vars, serverVars, leaderVars,\n                       followerVars, electionVars, msgVars, verifyVars,\n                       IsLeader, IsFollower, IsMyLearner, IsMyLeader\n<1>4. Integrity /\\ [Next]_vars => Integrity'\n  BY <1>2, <1>3\n<1> QED\n  BY <1>1, <1>4, PTL DEF Spec\n\\* END AGENT PROOF ZooKeeper/Zab_Integrity.tla\n\nTHEOREM Spec => []Agreement\n\\* BEGIN AGENT PROOF ZooKeeper/Zab_Agreement.tla\n<1>1. Init => AgentAgreementInvariant\n  BY AgentInitialSafety, SMTT(\"r5\")\n     DEF AgentAgreementInvariant, AgentCommitIndexType, AgentSafety,\n         Init, InitServerVars\n\\* Preservation needs invariants for the message and history contents.\n<1>2. AgentAgreementInvariant /\\ Next => AgentAgreementInvariant'\n  BY SMTT(\"r5\") DEF AgentAgreementInvariant, AgentCommitIndexType,\n                       PrefixConsistency, Next\n<1>3. AgentAgreementInvariant /\\ UNCHANGED vars => AgentAgreementInvariant'\n  BY SMTT(\"r5\") DEF AgentAgreementInvariant, AgentCommitIndexType,\n                       PrefixConsistency, vars, serverVars, leaderVars,\n                       followerVars, electionVars, msgVars, verifyVars\n<1>4. Spec => []AgentAgreementInvariant\n  BY <1>1, <1>2, <1>3, PTL DEF Spec\n<1>5. AgentAgreementInvariant => Agreement\n  BY AgentPrefixToAgreement DEF AgentAgreementInvariant\n<1> QED BY <1>4, <1>5, PTL\n\\* END AGENT PROOF ZooKeeper/Zab_Agreement.tla\n\nTHEOREM Spec => []TotalOrder\n\\* BEGIN AGENT PROOF ZooKeeper/Zab_TotalOrder.tla\n<1>1. Init => TotalOrder\n  BY AgentInitialSafety DEF AgentSafety\n<1>2. TotalOrder /\\ Next => TotalOrder'\n  BY SMTT(\"r5\") DEF Next, TotalOrder\n<1>3. TotalOrder /\\ UNCHANGED vars => TotalOrder'\n  BY SMTT(\"r5\") DEF TotalOrder, vars, serverVars, leaderVars,\n                       followerVars, electionVars, msgVars, verifyVars,\n                       IsLeader, IsFollower, IsMyLearner, IsMyLeader\n<1>4. TotalOrder /\\ [Next]_vars => TotalOrder'\n  BY <1>2, <1>3\n<1> QED\n  BY <1>1, <1>4, PTL DEF Spec\n\\* END AGENT PROOF ZooKeeper/Zab_TotalOrder.tla\n\nTHEOREM Spec => []LocalPrimaryOrder\n\\* BEGIN AGENT PROOF ZooKeeper/Zab_LocalPrimaryOrder.tla\n<1>1. Init => LocalPrimaryOrder\n  BY AgentInitialSafety DEF AgentSafety\n<1>2. LocalPrimaryOrder /\\ Next => LocalPrimaryOrder'\n  BY SMTT(\"r5\") DEF Next, LocalPrimaryOrder\n<1>3. LocalPrimaryOrder /\\ UNCHANGED vars => LocalPrimaryOrder'\n  BY SMTT(\"r5\") DEF LocalPrimaryOrder, vars, serverVars, leaderVars,\n                       followerVars, electionVars, msgVars, verifyVars,\n                       IsLeader, IsFollower, IsMyLearner, IsMyLeader\n<1>4. LocalPrimaryOrder /\\ [Next]_vars => LocalPrimaryOrder'\n  BY <1>2, <1>3\n<1> QED\n  BY <1>1, <1>4, PTL DEF Spec\n\\* END AGENT PROOF ZooKeeper/Zab_LocalPrimaryOrder.tla\n\nTHEOREM Spec => []GlobalPrimaryOrder\n\\* BEGIN AGENT PROOF ZooKeeper/Zab_GlobalPrimaryOrder.tla\n<1>1. Init => GlobalPrimaryOrder\n  BY AgentInitialSafety DEF AgentSafety\n<1>2. GlobalPrimaryOrder /\\ Next => GlobalPrimaryOrder'\n  BY SMTT(\"r5\") DEF Next, GlobalPrimaryOrder\n<1>3. GlobalPrimaryOrder /\\ UNCHANGED vars => GlobalPrimaryOrder'\n  BY SMTT(\"r5\") DEF GlobalPrimaryOrder, vars, serverVars, leaderVars,\n                       followerVars, electionVars, msgVars, verifyVars,\n                       IsLeader, IsFollower, IsMyLearner, IsMyLeader\n<1>4. GlobalPrimaryOrder /\\ [Next]_vars => GlobalPrimaryOrder'\n  BY <1>2, <1>3\n<1> QED\n  BY <1>1, <1>4, PTL DEF Spec\n\\* END AGENT PROOF ZooKeeper/Zab_GlobalPrimaryOrder.tla\n\nTHEOREM Spec => []PrimaryIntegrity\n\\* BEGIN AGENT PROOF ZooKeeper/Zab_PrimaryIntegrity.tla\n<1>1. Init => PrimaryIntegrity\n  BY AgentInitialSafety DEF AgentSafety\n<1>2. PrimaryIntegrity /\\ Next => PrimaryIntegrity'\n  BY SMTT(\"r5\") DEF Next, PrimaryIntegrity\n<1>3. PrimaryIntegrity /\\ UNCHANGED vars => PrimaryIntegrity'\n  BY SMTT(\"r5\") DEF PrimaryIntegrity, vars, serverVars, leaderVars,\n                       followerVars, electionVars, msgVars, verifyVars,\n                       IsLeader, IsFollower, IsMyLearner, IsMyLeader\n<1>4. PrimaryIntegrity /\\ [Next]_vars => PrimaryIntegrity'\n  BY <1>2, <1>3\n<1> QED\n  BY <1>1, <1>4, PTL DEF Spec\n\\* END AGENT PROOF ZooKeeper/Zab_PrimaryIntegrity.tla\n====\n",
+  "units": {
+    "ZooKeeper/Zab_Leadership1.tla": {
+      "id": "ZooKeeper/Zab_Leadership1.tla",
+      "name": "ZooKeeper/Zab_Leadership1.tla",
+      "kind": "target",
+      "lineStart": 131,
+      "lineEnd": 144,
+      "proofLines": [
+        133,
+        134,
+        135,
+        136,
+        137,
+        138,
+        139,
+        140,
+        141,
+        142,
+        143,
+        144
+      ],
+      "proofRange": [
+        133,
+        144
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgentInitialSafety"
+      ]
+    },
+    "ZooKeeper/Zab_Leadership2.tla": {
+      "id": "ZooKeeper/Zab_Leadership2.tla",
+      "name": "ZooKeeper/Zab_Leadership2.tla",
+      "kind": "target",
+      "lineStart": 147,
+      "lineEnd": 167,
+      "proofLines": [
+        149,
+        150,
+        151,
+        152,
+        153,
+        155,
+        156,
+        157,
+        158,
+        159,
+        160,
+        161,
+        162,
+        163,
+        164,
+        165,
+        166,
+        167
+      ],
+      "proofRange": [
+        149,
+        167
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgentEpochLogFrame",
+        "helper:AgentInitialSafety"
+      ]
+    },
+    "ZooKeeper/Zab_PrefixConsistency.tla": {
+      "id": "ZooKeeper/Zab_PrefixConsistency.tla",
+      "name": "ZooKeeper/Zab_PrefixConsistency.tla",
+      "kind": "target",
+      "lineStart": 170,
+      "lineEnd": 183,
+      "proofLines": [
+        172,
+        173,
+        174,
+        175,
+        176,
+        177,
+        178,
+        179,
+        180,
+        181,
+        182,
+        183
+      ],
+      "proofRange": [
+        172,
+        183
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgentInitialSafety"
+      ]
+    },
+    "ZooKeeper/Zab_Integrity.tla": {
+      "id": "ZooKeeper/Zab_Integrity.tla",
+      "name": "ZooKeeper/Zab_Integrity.tla",
+      "kind": "target",
+      "lineStart": 186,
+      "lineEnd": 199,
+      "proofLines": [
+        188,
+        189,
+        190,
+        191,
+        192,
+        193,
+        194,
+        195,
+        196,
+        197,
+        198,
+        199
+      ],
+      "proofRange": [
+        188,
+        199
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgentInitialSafety"
+      ]
+    },
+    "ZooKeeper/Zab_Agreement.tla": {
+      "id": "ZooKeeper/Zab_Agreement.tla",
+      "name": "ZooKeeper/Zab_Agreement.tla",
+      "kind": "target",
+      "lineStart": 202,
+      "lineEnd": 220,
+      "proofLines": [
+        204,
+        205,
+        206,
+        207,
+        209,
+        210,
+        211,
+        212,
+        213,
+        214,
+        215,
+        216,
+        217,
+        218,
+        219,
+        220
+      ],
+      "proofRange": [
+        204,
+        220
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgentInitialSafety",
+        "helper:AgentPrefixToAgreement"
+      ]
+    },
+    "ZooKeeper/Zab_TotalOrder.tla": {
+      "id": "ZooKeeper/Zab_TotalOrder.tla",
+      "name": "ZooKeeper/Zab_TotalOrder.tla",
+      "kind": "target",
+      "lineStart": 223,
+      "lineEnd": 236,
+      "proofLines": [
+        225,
+        226,
+        227,
+        228,
+        229,
+        230,
+        231,
+        232,
+        233,
+        234,
+        235,
+        236
+      ],
+      "proofRange": [
+        225,
+        236
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgentInitialSafety"
+      ]
+    },
+    "ZooKeeper/Zab_LocalPrimaryOrder.tla": {
+      "id": "ZooKeeper/Zab_LocalPrimaryOrder.tla",
+      "name": "ZooKeeper/Zab_LocalPrimaryOrder.tla",
+      "kind": "target",
+      "lineStart": 239,
+      "lineEnd": 252,
+      "proofLines": [
+        241,
+        242,
+        243,
+        244,
+        245,
+        246,
+        247,
+        248,
+        249,
+        250,
+        251,
+        252
+      ],
+      "proofRange": [
+        241,
+        252
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgentInitialSafety"
+      ]
+    },
+    "ZooKeeper/Zab_GlobalPrimaryOrder.tla": {
+      "id": "ZooKeeper/Zab_GlobalPrimaryOrder.tla",
+      "name": "ZooKeeper/Zab_GlobalPrimaryOrder.tla",
+      "kind": "target",
+      "lineStart": 255,
+      "lineEnd": 268,
+      "proofLines": [
+        257,
+        258,
+        259,
+        260,
+        261,
+        262,
+        263,
+        264,
+        265,
+        266,
+        267,
+        268
+      ],
+      "proofRange": [
+        257,
+        268
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgentInitialSafety"
+      ]
+    },
+    "ZooKeeper/Zab_PrimaryIntegrity.tla": {
+      "id": "ZooKeeper/Zab_PrimaryIntegrity.tla",
+      "name": "ZooKeeper/Zab_PrimaryIntegrity.tla",
+      "kind": "target",
+      "lineStart": 271,
+      "lineEnd": 284,
+      "proofLines": [
+        273,
+        274,
+        275,
+        276,
+        277,
+        278,
+        279,
+        280,
+        281,
+        282,
+        283,
+        284
+      ],
+      "proofRange": [
+        273,
+        284
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgentInitialSafety"
+      ]
+    },
+    "helper:AgentInitialSafety": {
+      "id": "helper:AgentInitialSafety",
+      "name": "AgentInitialSafety",
+      "kind": "helper",
+      "lineStart": 22,
+      "lineEnd": 53,
+      "proofLines": [
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53
+      ],
+      "proofRange": [
+        23,
+        53
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgentPairMinimum": {
+      "id": "helper:AgentPairMinimum",
+      "name": "AgentPairMinimum",
+      "kind": "helper",
+      "lineStart": 60,
+      "lineEnd": 67,
+      "proofLines": [
+        63,
+        64,
+        65,
+        66,
+        67
+      ],
+      "proofRange": [
+        63,
+        67
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:AgentPrefixToAgreement": {
+      "id": "helper:AgentPrefixToAgreement",
+      "name": "AgentPrefixToAgreement",
+      "kind": "helper",
+      "lineStart": 69,
+      "lineEnd": 100,
+      "proofLines": [
+        71,
+        72,
+        73,
+        74,
+        75,
+        76,
+        77,
+        78,
+        79,
+        80,
+        81,
+        82,
+        83,
+        84,
+        85,
+        86,
+        87,
+        88,
+        89,
+        90,
+        91,
+        92,
+        93,
+        94,
+        95,
+        96,
+        97,
+        98,
+        99,
+        100
+      ],
+      "proofRange": [
+        71,
+        100
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:AgentPairMinimum"
+      ]
+    },
+    "helper:AgentEpochLogFrame": {
+      "id": "helper:AgentEpochLogFrame",
+      "name": "AgentEpochLogFrame",
+      "kind": "helper",
+      "lineStart": 121,
+      "lineEnd": 127,
+      "proofLines": [
+        123,
+        124,
+        125,
+        126,
+        127
+      ],
+      "proofRange": [
+        123,
+        127
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    }
+  }
+}

@@ -1,0 +1,119 @@
+{
+  "schemaVersion": 1,
+  "specId": "MongoDB/MultiShardTxnSnapshot.tla",
+  "sourceName": "MultiShardTxnSnapshot.tla",
+  "sourceSha256": "d701342098f791480af8e58f9ac6650fb7f070459c1cd69b65e116e14b39860e",
+  "resultSha256": "6074a2f6a7d682afec3c5b3260022a14f5f3ff5101ddaf41638089e82b6578ca",
+  "source": "---- MODULE MultiShardTxnSnapshot ----\nEXTENDS MultiShardTxnSnapshotDefs\n\n\\* BEGIN AGENT HELPERS\nLOCAL SnapshotProofTools == INSTANCE TLAPS\n\nLEMMA SnapshotHistoryUnchanged ==\n    (UNCHANGED ops) => (SnapshotIsolation' <=> SnapshotIsolation)\nBY SnapshotProofTools!SMTT(\"r5\") DEF SnapshotIsolation\n\nSnapshotCommitAction == \\E s \\in Shard, tid \\in TxId : ShardTxnCommit(s, tid)\n\nLEMMA SnapshotNextHistory ==\n    Next => ((UNCHANGED ops) \\/ SnapshotCommitAction)\nBY SnapshotProofTools!SMTT(\"r15\") DEF\n    Next, SnapshotCommitAction,\n    RouterTxnStart, RouterTxnOp, RouterTxnCoordinateCommit,\n    RouterTxnCommitReadOnly, RouterTxnCommitSingleShard,\n    ShardTxnStart, ShardTxnRead, ShardTxnWrite, ShardTxnCoordinateCommit,\n    ShardTxnCoordinatorRecvCommitVote, ShardTxnCoordinatorDecideCommit,\n    ShardTxnPrepare, ShardTxnAbort\n\nLEMMA SnapshotNonCommitPreservation ==\n    SnapshotIsolation /\\ [Next]_vars /\\ ~SnapshotCommitAction\n        => SnapshotIsolation'\nBY SnapshotHistoryUnchanged, SnapshotNextHistory,\n   SnapshotProofTools!SMTT(\"r5\") DEF vars\n\nLEMMA SnapshotInitiallySingleWrite ==\n    Init => SingleWritePerKey\nPROOF\n<1>1. DOMAIN <<>> = {}\n    BY SnapshotProofTools!SMTT(\"r5\")\n<1>2. Init => ops = [s \\in TxId |-> <<>>]\n    BY SnapshotProofTools!SMTT(\"r5\") DEF Init\n<1>3. Init => Range(ops) \\subseteq {<<>>}\n    BY <1>2, SnapshotProofTools!SMTT(\"r5\") DEF Range\n<1> QED\n    BY <1>1, <1>3, SnapshotProofTools!SMTT(\"r5\") DEF\n        SingleWritePerKey, WritesEachKeyAtMostOnce\n\n\\* END AGENT HELPERS\n\nTHEOREM SnapshotIsolationCorrect ==\n    (Spec /\\ []SingleWritePerKey) => []SnapshotIsolation\n\\* BEGIN AGENT PROOF MongoDB/MultiShardTxnSnapshot_SnapshotIsolationCorrect.tla\nPROOF\n<1>1. Init => SingleWritePerKey\n    BY SnapshotInitiallySingleWrite\n<1>2. SnapshotIsolation /\\ [Next]_vars /\\ ~SnapshotCommitAction\n         => SnapshotIsolation'\n    BY SnapshotNonCommitPreservation\n\\* The final obligation is unresolved.  The current assumptions allow\n\\* NoValue = 100 and TxId = {1, 2, 3, 100}.  A one-shard history can be:\n\\*   1:   r(a,100), r(b,100), w(a,1)\n\\*   2:   r(a,100), r(b,100), w(b,2)\n\\*   100: r(a,1),   r(b,2),   w(a,100), w(b,100)\n\\*   3:   r(a,100), r(b,100), w(a,3)\n\\* Transactions 1 and 2 use timestamp 0 and commit at 1 and 2;\n\\* transactions 100 and 3 use timestamps 2 and 3 and commit at 3 and 4.\n\\* This satisfies SingleWritePerKey.  In the client-centric definition,\n\\* the only possible orders satisfying the read/value and NoConf tests\n\\* are (1,2,100,3) and (2,1,100,3).  Both have the initial state at parent\n\\* positions 1 and 4.  Index may choose position 4 for that state, since\n\\* it is defined by CHOOSE, not a minimum.  Then the second transaction\n\\* cannot use the initial state: beforeOrEqualInExecution requires 4 <= 2.\n\\* Selecting the greatest witness on finite sets of natural numbers is\n\\* a consistent choice interpretation.  Thus the missing final argument\n\\* cannot be supplied for all configurations allowed by the context.\n<1> QED\n    BY <1>1, <1>2, SnapshotProofTools!PTL DEF Spec\n\\* END AGENT PROOF MongoDB/MultiShardTxnSnapshot_SnapshotIsolationCorrect.tla\n====\n",
+  "units": {
+    "MongoDB/MultiShardTxnSnapshot_SnapshotIsolationCorrect.tla": {
+      "id": "MongoDB/MultiShardTxnSnapshot_SnapshotIsolationCorrect.tla",
+      "name": "SnapshotIsolationCorrect",
+      "kind": "target",
+      "lineStart": 44,
+      "lineEnd": 71,
+      "proofLines": [
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        70,
+        71
+      ],
+      "proofRange": [
+        47,
+        71
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:SnapshotInitiallySingleWrite",
+        "helper:SnapshotNonCommitPreservation"
+      ]
+    },
+    "helper:SnapshotHistoryUnchanged": {
+      "id": "helper:SnapshotHistoryUnchanged",
+      "name": "SnapshotHistoryUnchanged",
+      "kind": "helper",
+      "lineStart": 7,
+      "lineEnd": 9,
+      "proofLines": [
+        9
+      ],
+      "proofRange": [
+        9,
+        9
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:SnapshotNextHistory": {
+      "id": "helper:SnapshotNextHistory",
+      "name": "SnapshotNextHistory",
+      "kind": "helper",
+      "lineStart": 13,
+      "lineEnd": 21,
+      "proofLines": [
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21
+      ],
+      "proofRange": [
+        15,
+        21
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:SnapshotNonCommitPreservation": {
+      "id": "helper:SnapshotNonCommitPreservation",
+      "name": "SnapshotNonCommitPreservation",
+      "kind": "helper",
+      "lineStart": 23,
+      "lineEnd": 27,
+      "proofLines": [
+        26,
+        27
+      ],
+      "proofRange": [
+        26,
+        27
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:SnapshotHistoryUnchanged",
+        "helper:SnapshotNextHistory"
+      ]
+    },
+    "helper:SnapshotInitiallySingleWrite": {
+      "id": "helper:SnapshotInitiallySingleWrite",
+      "name": "SnapshotInitiallySingleWrite",
+      "kind": "helper",
+      "lineStart": 29,
+      "lineEnd": 40,
+      "proofLines": [
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40
+      ],
+      "proofRange": [
+        31,
+        40
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    }
+  }
+}

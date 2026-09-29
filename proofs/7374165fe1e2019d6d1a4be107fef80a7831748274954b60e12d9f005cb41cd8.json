@@ -1,0 +1,603 @@
+{
+  "schemaVersion": 1,
+  "specId": "CahillSSI/CahillSerializability.tla",
+  "sourceName": "CahillSerializability.tla",
+  "sourceSha256": "0d5e1334ac8f880cae3ce75163965057da310952d4c51a5fae5f5951fd013e02",
+  "resultSha256": "7415dfe5a9306eaab85d79b2f23f63042a41b45bb2c6106ce6048a6148864f73",
+  "source": "---- MODULE CahillSerializability ----\nEXTENDS CahillSerializabilityDefs\n\n\\* BEGIN AGENT HELPERS\nLOCAL CSAgentProvers == INSTANCE TLAPS\n\n\\* Basic properties of the serialization graph, independent of reachability.\nLEMMA CSAgentGraphEndpoints ==\n  \\A h : \\A e \\in CahillMVSG(h) :\n    /\\ e \\in CommittedTxns(h) \\X CommittedTxns(h)\n    /\\ e[1] /= e[2]\nBY CSAgentProvers!SMTT(\"r5\") DEF CahillMVSG\n\nLEMMA CSAgentEmptyCycles == FindAllNodesInAnyCycle({}) = {}\nBY CSAgentProvers!SMTT(\"r5\") DEF FindAllNodesInAnyCycle\n\nLEMMA CSAgentNoCommittedSafety ==\n  \\A h : CommittedTxns(h) = {} => CahillSerializable(h)\n<1>1. ASSUME NEW h, CommittedTxns(h) = {}\n      PROVE CahillSerializable(h)\n  <2>1. CahillMVSG(h) = {}\n    BY <1>1, CSAgentGraphEndpoints, CSAgentProvers!SMTT(\"r5\")\n  <2>2. QED\n    BY <2>1, CSAgentEmptyCycles, CSAgentProvers!SMTT(\"r5\")\n       DEF CahillSerializable, IsCycle\n<1>2. QED BY <1>1, CSAgentProvers!SMTT(\"r5\")\n\nLEMMA CSAgentOneCommittedSafety ==\n  \\A h, t : CommittedTxns(h) \\subseteq {t} => CahillSerializable(h)\n<1>1. ASSUME NEW h, NEW t, CommittedTxns(h) \\subseteq {t}\n      PROVE CahillSerializable(h)\n  <2>1. CahillMVSG(h) = {}\n    BY <1>1, CSAgentGraphEndpoints, CSAgentProvers!SMTT(\"r5\")\n  <2>2. QED\n    BY <2>1, CSAgentEmptyCycles, CSAgentProvers!SMTT(\"r5\")\n       DEF CahillSerializable, IsCycle\n<1>2. QED BY <1>1, CSAgentProvers!SMTT(\"r5\")\n\nLEMMA CSAgentNoCommittedEmpty == CommittedTxns(<<>>) = {}\nBY CSAgentProvers!SMTT(\"r5\") DEF CommittedTxns, SelectEvents, Range\n\nLEMMA CSAgentInitialSafety == Init => CahillSerializable(history)\nBY CSAgentNoCommittedEmpty, CSAgentNoCommittedSafety,\n   CSAgentProvers!SMTT(\"r5\") DEF Init\n\n\\* Typing of the lock manager and SSI bookkeeping.  This invariant does\n\\* not depend on finiteness assumptions about TxnId or Key.\nCSAgentMetadataType ==\n  /\\ holdingXLocks \\in [TxnId -> SUBSET Key]\n  /\\ waitingForXLock \\in [TxnId -> Key \\union {NoLock}]\n  /\\ inConflict \\in [TxnId -> BOOLEAN]\n  /\\ outConflict \\in [TxnId -> BOOLEAN]\n  /\\ holdingSIREADlocks \\in [TxnId -> SUBSET Key]\n\nLEMMA CSAgentInitialMetadata == Init => CSAgentMetadataType\nBY CSAgentProvers!SMTT(\"r5\") DEF Init, CSAgentMetadataType\n\nLEMMA CSAgentAbortMetadata ==\n  \\A txn, reason :\n    CSAgentMetadataType /\\ internalAbort(txn, reason)\n      => CSAgentMetadataType'\nBY CSAgentProvers!SMTT(\"r10\") DEF internalAbort, CSAgentMetadataType\n\nLEMMA CSAgentBeginMetadata ==\n  \\A txn : CSAgentMetadataType /\\ Begin(txn) => CSAgentMetadataType'\nBY CSAgentProvers!SMTT(\"r5\") DEF Begin, CSAgentMetadataType\n\nLEMMA CSAgentCommitMetadata ==\n  \\A txn \\in TxnId :\n    CSAgentMetadataType /\\ Commit(txn) => CSAgentMetadataType'\nBY CSAgentAbortMetadata, CSAgentProvers!SMTT(\"r10\")\n   DEF Commit, CSAgentMetadataType\n\nLEMMA CSAgentChooseAbortMetadata ==\n  \\A txn :\n    CSAgentMetadataType /\\ ChooseToAbort(txn) => CSAgentMetadataType'\nBY CSAgentAbortMetadata, CSAgentProvers!SMTT(\"r5\") DEF ChooseToAbort\n\nLEMMA CSAgentReadMetadata ==\n  \\A txn \\in TxnId : \\A key \\in Key :\n    CSAgentMetadataType /\\ Read(txn, key) => CSAgentMetadataType'\nBY CSAgentAbortMetadata, CSAgentProvers!SMTT(\"r10\")\n   DEF Read, CSAgentMetadataType\n\nLEMMA CSAgentAcquireMetadata ==\n  \\A txn \\in TxnId : \\A key \\in Key :\n    CSAgentMetadataType /\\ HelperWriteCanAcquireXLock(txn, key)\n      => CSAgentMetadataType'\nBY CSAgentAbortMetadata, CSAgentProvers!SMTT(\"r10\")\n   DEF HelperWriteCanAcquireXLock, snapshotIsolationWriteAction,\n       CSAgentMetadataType\n\nLEMMA CSAgentBlockedMetadata ==\n  \\A txn \\in TxnId : \\A key \\in Key :\n    CSAgentMetadataType /\\ HelperWriteConflictsWithXLock(txn, key)\n      => CSAgentMetadataType'\nBY CSAgentProvers!SMTT(\"r10\")\n   DEF HelperWriteConflictsWithXLock, CSAgentMetadataType\n\nLEMMA CSAgentStartWriteMetadata ==\n  \\A txn \\in TxnId : \\A key \\in Key :\n    CSAgentMetadataType /\\ StartWriteMayBlock(txn, key)\n      => CSAgentMetadataType'\nBY CSAgentAcquireMetadata, CSAgentBlockedMetadata,\n   CSAgentProvers!SMTT(\"r10\")\n   DEF StartWriteMayBlock, CSAgentMetadataType\n\nLEMMA CSAgentFinishWriteMetadata ==\n  \\A txn \\in TxnId :\n    CSAgentMetadataType /\\ FinishBlockedWrite(txn)\n      => CSAgentMetadataType'\nBY CSAgentAcquireMetadata, CSAgentProvers!SMTT(\"r10\")\n   DEF FinishBlockedWrite, CSAgentMetadataType\n\nLEMMA CSAgentMetadataStep ==\n  CSAgentMetadataType /\\ [Next]_allvars => CSAgentMetadataType'\nBY CSAgentBeginMetadata, CSAgentCommitMetadata,\n   CSAgentChooseAbortMetadata, CSAgentReadMetadata,\n   CSAgentStartWriteMetadata, CSAgentFinishWriteMetadata,\n   CSAgentProvers!SMTT(\"r10\") DEF Next, allvars, CSAgentMetadataType\n\nLEMMA CSAgentMetadataInvariant == Spec => []CSAgentMetadataType\nBY CSAgentInitialMetadata, CSAgentMetadataStep, CSAgentProvers!PTL DEF Spec\n\nLEMMA CSAgentUnchangedSafety ==\n  CahillSerializable(history) /\\ UNCHANGED history\n    => CahillSerializable(history)'\nBY CSAgentProvers!SMTT(\"r5\")\n   DEF CahillSerializable, IsCycle\n\nCSAgentExclusiveLocks ==\n  \\A t, u \\in TxnId : t /= u => holdingXLocks[t] \\intersect holdingXLocks[u] = {}\n\nLEMMA CSAgentInitialExclusive == Init => CSAgentExclusiveLocks\nBY CSAgentProvers!SMTT(\"r5\") DEF Init, CSAgentExclusiveLocks\n\nLEMMA CSAgentAbortExclusive ==\n  \\A txn, reason :\n    CSAgentMetadataType /\\ CSAgentExclusiveLocks /\\ internalAbort(txn, reason)\n      => CSAgentExclusiveLocks'\nBY CSAgentProvers!SMTT(\"r10\")\n   DEF internalAbort, CSAgentMetadataType, CSAgentExclusiveLocks\n\nLEMMA CSAgentCommitExclusive ==\n  \\A txn \\in TxnId :\n    CSAgentMetadataType /\\ CSAgentExclusiveLocks /\\ Commit(txn)\n      => CSAgentExclusiveLocks'\nBY CSAgentAbortExclusive, CSAgentProvers!SMTT(\"r10\")\n   DEF Commit, CSAgentExclusiveLocks\n\nLEMMA CSAgentReadExclusive ==\n  \\A txn \\in TxnId : \\A key \\in Key :\n    CSAgentMetadataType /\\ CSAgentExclusiveLocks /\\ Read(txn, key)\n      => CSAgentExclusiveLocks'\nBY CSAgentAbortExclusive, CSAgentProvers!SMTT(\"r10\")\n   DEF Read, CSAgentExclusiveLocks\n\nLEMMA CSAgentAcquireExclusive ==\n  \\A txn \\in TxnId : \\A key \\in Key :\n    /\\ CSAgentMetadataType\n    /\\ CSAgentExclusiveLocks\n    /\\ key \\notin KeysCurrentlyXLockedByAnyTxn\n    /\\ HelperWriteCanAcquireXLock(txn, key)\n    => CSAgentExclusiveLocks'\n<1>1. ASSUME NEW txn \\in TxnId, NEW key \\in Key,\n             CSAgentMetadataType, CSAgentExclusiveLocks,\n             key \\notin KeysCurrentlyXLockedByAnyTxn,\n             HelperWriteCanAcquireXLock(txn, key)\n      PROVE CSAgentExclusiveLocks'\n  <2>1. \\A t \\in TxnId : key \\notin holdingXLocks[t]\n    BY <1>1, CSAgentProvers!SMTT(\"r5\")\n       DEF CSAgentMetadataType, KeysCurrentlyXLockedByAnyTxn, Range\n  <2>2. internalAbort(txn, \"in attempted write, to preserve serializability\")\n          \\/ snapshotIsolationWriteAction(txn, key)\n    BY <1>1, CSAgentProvers!SMTT(\"r5\") DEF HelperWriteCanAcquireXLock\n  <2>3. CASE internalAbort(txn, \"in attempted write, to preserve serializability\")\n    BY <1>1, <2>3, CSAgentAbortExclusive, CSAgentProvers!SMTT(\"r5\")\n  <2>4. CASE snapshotIsolationWriteAction(txn, key)\n    <3>1. SUFFICES ASSUME NEW t \\in TxnId, NEW u \\in TxnId, t /= u\n                  PROVE holdingXLocks'[t] \\intersect holdingXLocks'[u] = {}\n      BY CSAgentProvers!SMTT(\"r5\") DEF CSAgentExclusiveLocks\n    <3>2. /\\ holdingXLocks'[t] =\n               IF t = txn THEN holdingXLocks[t] \\union {key} ELSE holdingXLocks[t]\n          /\\ holdingXLocks'[u] =\n               IF u = txn THEN holdingXLocks[u] \\union {key} ELSE holdingXLocks[u]\n      BY <1>1, <2>4, CSAgentProvers!SMTT(\"r5\")\n         DEF snapshotIsolationWriteAction, CSAgentMetadataType\n    <3>3. /\\ holdingXLocks[t] \\intersect holdingXLocks[u] = {}\n          /\\ key \\notin holdingXLocks[t]\n          /\\ key \\notin holdingXLocks[u]\n      BY <1>1, <2>1, <3>1, CSAgentProvers!SMTT(\"r5\") DEF CSAgentExclusiveLocks\n    <3>4. QED BY <3>1, <3>2, <3>3, CSAgentProvers!SMTT(\"r5\")\n  <2>5. QED BY <2>2, <2>3, <2>4, CSAgentProvers!SMTT(\"r5\")\n<1>2. QED BY <1>1, CSAgentProvers!SMTT(\"r5\")\n\nLEMMA CSAgentBlockedExclusive ==\n  \\A txn \\in TxnId : \\A key \\in Key :\n    CSAgentMetadataType /\\ CSAgentExclusiveLocks\n      /\\ HelperWriteConflictsWithXLock(txn, key)\n      => CSAgentExclusiveLocks'\nBY CSAgentProvers!SMTT(\"r10\")\n   DEF HelperWriteConflictsWithXLock, CSAgentMetadataType, CSAgentExclusiveLocks\n\nLEMMA CSAgentStartWriteExclusive ==\n  \\A txn \\in TxnId : \\A key \\in Key :\n    CSAgentMetadataType /\\ CSAgentExclusiveLocks /\\ StartWriteMayBlock(txn, key)\n      => CSAgentExclusiveLocks'\nBY CSAgentAcquireExclusive, CSAgentBlockedExclusive,\n   CSAgentProvers!SMTT(\"r10\")\n   DEF StartWriteMayBlock, CSAgentMetadataType, CSAgentExclusiveLocks\n\nLEMMA CSAgentFinishWriteExclusive ==\n  \\A txn \\in TxnId :\n    CSAgentMetadataType /\\ CSAgentExclusiveLocks /\\ FinishBlockedWrite(txn)\n      => CSAgentExclusiveLocks'\nBY CSAgentAcquireExclusive, CSAgentProvers!SMTT(\"r10\")\n   DEF FinishBlockedWrite, CSAgentMetadataType\n\nLEMMA CSAgentExclusiveStep ==\n  CSAgentMetadataType /\\ CSAgentExclusiveLocks /\\ [Next]_allvars\n    => CSAgentExclusiveLocks'\nBY CSAgentAbortExclusive, CSAgentCommitExclusive, CSAgentReadExclusive,\n   CSAgentStartWriteExclusive, CSAgentFinishWriteExclusive,\n   CSAgentProvers!SMTT(\"r10\")\n   DEF Next, allvars, Begin, ChooseToAbort, CSAgentExclusiveLocks\n\nLEMMA CSAgentExclusiveInvariant == Spec => []CSAgentExclusiveLocks\nBY CSAgentMetadataInvariant, CSAgentInitialExclusive, CSAgentExclusiveStep,\n   CSAgentProvers!PTL DEF Spec\n\\* END AGENT HELPERS\n\nTHEOREM CahillSerializableCorrect == Spec => []CahillSerializable(history)\n\\* BEGIN AGENT PROOF CahillSSI/CahillSerializability_CahillSerializableCorrect.tla\n<1>1. Spec => [](CSAgentMetadataType /\\ CSAgentExclusiveLocks)\n  BY CSAgentMetadataInvariant, CSAgentExclusiveInvariant, CSAgentProvers!PTL\n<1>2. Init => CahillSerializable(history)\n  BY CSAgentInitialSafety, CSAgentProvers!SMTT(\"r5\")\n<1>3. CSAgentMetadataType /\\ CSAgentExclusiveLocks\n       /\\ CahillSerializable(history) /\\ [Next]_allvars\n       => CahillSerializable(history)'\n  <2>1. CASE UNCHANGED allvars\n    BY <2>1, CSAgentUnchangedSafety, CSAgentProvers!SMTT(\"r5\") DEF allvars\n  \\* The remaining step requires strengthening with history/conflict facts.\n  <2>2. CASE Next\n    BY <2>2, CSAgentProvers!SMTT(\"r5\")\n       DEF Next, CahillSerializable, IsCycle\n  <2>3. QED BY <2>1, <2>2, CSAgentProvers!SMTT(\"r5\")\n<1>4. QED\n  BY <1>1, <1>2, <1>3, CSAgentProvers!PTL DEF Spec\n\\* END AGENT PROOF CahillSSI/CahillSerializability_CahillSerializableCorrect.tla\n====\n",
+  "units": {
+    "CahillSSI/CahillSerializability_CahillSerializableCorrect.tla": {
+      "id": "CahillSSI/CahillSerializability_CahillSerializableCorrect.tla",
+      "name": "CahillSerializableCorrect",
+      "kind": "target",
+      "lineStart": 232,
+      "lineEnd": 249,
+      "proofLines": [
+        234,
+        235,
+        236,
+        237,
+        238,
+        239,
+        240,
+        241,
+        242,
+        244,
+        245,
+        246,
+        247,
+        248,
+        249
+      ],
+      "proofRange": [
+        234,
+        249
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:CSAgentExclusiveInvariant",
+        "helper:CSAgentInitialSafety",
+        "helper:CSAgentMetadataInvariant",
+        "helper:CSAgentUnchangedSafety"
+      ]
+    },
+    "helper:CSAgentGraphEndpoints": {
+      "id": "helper:CSAgentGraphEndpoints",
+      "name": "CSAgentGraphEndpoints",
+      "kind": "helper",
+      "lineStart": 8,
+      "lineEnd": 12,
+      "proofLines": [
+        12
+      ],
+      "proofRange": [
+        12,
+        12
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:CSAgentEmptyCycles": {
+      "id": "helper:CSAgentEmptyCycles",
+      "name": "CSAgentEmptyCycles",
+      "kind": "helper",
+      "lineStart": 14,
+      "lineEnd": 15,
+      "proofLines": [
+        15
+      ],
+      "proofRange": [
+        15,
+        15
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:CSAgentNoCommittedSafety": {
+      "id": "helper:CSAgentNoCommittedSafety",
+      "name": "CSAgentNoCommittedSafety",
+      "kind": "helper",
+      "lineStart": 17,
+      "lineEnd": 26,
+      "proofLines": [
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26
+      ],
+      "proofRange": [
+        19,
+        26
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:CSAgentEmptyCycles",
+        "helper:CSAgentGraphEndpoints"
+      ]
+    },
+    "helper:CSAgentNoCommittedEmpty": {
+      "id": "helper:CSAgentNoCommittedEmpty",
+      "name": "CSAgentNoCommittedEmpty",
+      "kind": "helper",
+      "lineStart": 39,
+      "lineEnd": 40,
+      "proofLines": [
+        40
+      ],
+      "proofRange": [
+        40,
+        40
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:CSAgentInitialSafety": {
+      "id": "helper:CSAgentInitialSafety",
+      "name": "CSAgentInitialSafety",
+      "kind": "helper",
+      "lineStart": 42,
+      "lineEnd": 44,
+      "proofLines": [
+        43,
+        44
+      ],
+      "proofRange": [
+        43,
+        44
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:CSAgentNoCommittedEmpty",
+        "helper:CSAgentNoCommittedSafety"
+      ]
+    },
+    "helper:CSAgentInitialMetadata": {
+      "id": "helper:CSAgentInitialMetadata",
+      "name": "CSAgentInitialMetadata",
+      "kind": "helper",
+      "lineStart": 55,
+      "lineEnd": 56,
+      "proofLines": [
+        56
+      ],
+      "proofRange": [
+        56,
+        56
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:CSAgentAbortMetadata": {
+      "id": "helper:CSAgentAbortMetadata",
+      "name": "CSAgentAbortMetadata",
+      "kind": "helper",
+      "lineStart": 58,
+      "lineEnd": 62,
+      "proofLines": [
+        62
+      ],
+      "proofRange": [
+        62,
+        62
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:CSAgentBeginMetadata": {
+      "id": "helper:CSAgentBeginMetadata",
+      "name": "CSAgentBeginMetadata",
+      "kind": "helper",
+      "lineStart": 64,
+      "lineEnd": 66,
+      "proofLines": [
+        66
+      ],
+      "proofRange": [
+        66,
+        66
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:CSAgentCommitMetadata": {
+      "id": "helper:CSAgentCommitMetadata",
+      "name": "CSAgentCommitMetadata",
+      "kind": "helper",
+      "lineStart": 68,
+      "lineEnd": 72,
+      "proofLines": [
+        71,
+        72
+      ],
+      "proofRange": [
+        71,
+        72
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:CSAgentAbortMetadata"
+      ]
+    },
+    "helper:CSAgentChooseAbortMetadata": {
+      "id": "helper:CSAgentChooseAbortMetadata",
+      "name": "CSAgentChooseAbortMetadata",
+      "kind": "helper",
+      "lineStart": 74,
+      "lineEnd": 77,
+      "proofLines": [
+        77
+      ],
+      "proofRange": [
+        77,
+        77
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:CSAgentAbortMetadata"
+      ]
+    },
+    "helper:CSAgentReadMetadata": {
+      "id": "helper:CSAgentReadMetadata",
+      "name": "CSAgentReadMetadata",
+      "kind": "helper",
+      "lineStart": 79,
+      "lineEnd": 83,
+      "proofLines": [
+        82,
+        83
+      ],
+      "proofRange": [
+        82,
+        83
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:CSAgentAbortMetadata"
+      ]
+    },
+    "helper:CSAgentAcquireMetadata": {
+      "id": "helper:CSAgentAcquireMetadata",
+      "name": "CSAgentAcquireMetadata",
+      "kind": "helper",
+      "lineStart": 85,
+      "lineEnd": 91,
+      "proofLines": [
+        89,
+        90,
+        91
+      ],
+      "proofRange": [
+        89,
+        91
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:CSAgentAbortMetadata"
+      ]
+    },
+    "helper:CSAgentBlockedMetadata": {
+      "id": "helper:CSAgentBlockedMetadata",
+      "name": "CSAgentBlockedMetadata",
+      "kind": "helper",
+      "lineStart": 93,
+      "lineEnd": 98,
+      "proofLines": [
+        97,
+        98
+      ],
+      "proofRange": [
+        97,
+        98
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:CSAgentStartWriteMetadata": {
+      "id": "helper:CSAgentStartWriteMetadata",
+      "name": "CSAgentStartWriteMetadata",
+      "kind": "helper",
+      "lineStart": 100,
+      "lineEnd": 106,
+      "proofLines": [
+        104,
+        105,
+        106
+      ],
+      "proofRange": [
+        104,
+        106
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:CSAgentAcquireMetadata",
+        "helper:CSAgentBlockedMetadata"
+      ]
+    },
+    "helper:CSAgentFinishWriteMetadata": {
+      "id": "helper:CSAgentFinishWriteMetadata",
+      "name": "CSAgentFinishWriteMetadata",
+      "kind": "helper",
+      "lineStart": 108,
+      "lineEnd": 113,
+      "proofLines": [
+        112,
+        113
+      ],
+      "proofRange": [
+        112,
+        113
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:CSAgentAcquireMetadata"
+      ]
+    },
+    "helper:CSAgentMetadataStep": {
+      "id": "helper:CSAgentMetadataStep",
+      "name": "CSAgentMetadataStep",
+      "kind": "helper",
+      "lineStart": 115,
+      "lineEnd": 120,
+      "proofLines": [
+        117,
+        118,
+        119,
+        120
+      ],
+      "proofRange": [
+        117,
+        120
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:CSAgentBeginMetadata",
+        "helper:CSAgentChooseAbortMetadata",
+        "helper:CSAgentCommitMetadata",
+        "helper:CSAgentFinishWriteMetadata",
+        "helper:CSAgentReadMetadata",
+        "helper:CSAgentStartWriteMetadata"
+      ]
+    },
+    "helper:CSAgentMetadataInvariant": {
+      "id": "helper:CSAgentMetadataInvariant",
+      "name": "CSAgentMetadataInvariant",
+      "kind": "helper",
+      "lineStart": 122,
+      "lineEnd": 123,
+      "proofLines": [
+        123
+      ],
+      "proofRange": [
+        123,
+        123
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:CSAgentInitialMetadata",
+        "helper:CSAgentMetadataStep"
+      ]
+    },
+    "helper:CSAgentUnchangedSafety": {
+      "id": "helper:CSAgentUnchangedSafety",
+      "name": "CSAgentUnchangedSafety",
+      "kind": "helper",
+      "lineStart": 125,
+      "lineEnd": 129,
+      "proofLines": [
+        128,
+        129
+      ],
+      "proofRange": [
+        128,
+        129
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:CSAgentInitialExclusive": {
+      "id": "helper:CSAgentInitialExclusive",
+      "name": "CSAgentInitialExclusive",
+      "kind": "helper",
+      "lineStart": 134,
+      "lineEnd": 135,
+      "proofLines": [
+        135
+      ],
+      "proofRange": [
+        135,
+        135
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:CSAgentAbortExclusive": {
+      "id": "helper:CSAgentAbortExclusive",
+      "name": "CSAgentAbortExclusive",
+      "kind": "helper",
+      "lineStart": 137,
+      "lineEnd": 142,
+      "proofLines": [
+        141,
+        142
+      ],
+      "proofRange": [
+        141,
+        142
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:CSAgentCommitExclusive": {
+      "id": "helper:CSAgentCommitExclusive",
+      "name": "CSAgentCommitExclusive",
+      "kind": "helper",
+      "lineStart": 144,
+      "lineEnd": 149,
+      "proofLines": [
+        148,
+        149
+      ],
+      "proofRange": [
+        148,
+        149
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:CSAgentAbortExclusive"
+      ]
+    },
+    "helper:CSAgentReadExclusive": {
+      "id": "helper:CSAgentReadExclusive",
+      "name": "CSAgentReadExclusive",
+      "kind": "helper",
+      "lineStart": 151,
+      "lineEnd": 156,
+      "proofLines": [
+        155,
+        156
+      ],
+      "proofRange": [
+        155,
+        156
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:CSAgentAbortExclusive"
+      ]
+    },
+    "helper:CSAgentAcquireExclusive": {
+      "id": "helper:CSAgentAcquireExclusive",
+      "name": "CSAgentAcquireExclusive",
+      "kind": "helper",
+      "lineStart": 158,
+      "lineEnd": 194,
+      "proofLines": [
+        165,
+        166,
+        167,
+        168,
+        169,
+        170,
+        171,
+        172,
+        173,
+        174,
+        175,
+        176,
+        177,
+        178,
+        179,
+        180,
+        181,
+        182,
+        183,
+        184,
+        185,
+        186,
+        187,
+        188,
+        189,
+        190,
+        191,
+        192,
+        193,
+        194
+      ],
+      "proofRange": [
+        165,
+        194
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:CSAgentAbortExclusive"
+      ]
+    },
+    "helper:CSAgentBlockedExclusive": {
+      "id": "helper:CSAgentBlockedExclusive",
+      "name": "CSAgentBlockedExclusive",
+      "kind": "helper",
+      "lineStart": 196,
+      "lineEnd": 202,
+      "proofLines": [
+        201,
+        202
+      ],
+      "proofRange": [
+        201,
+        202
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:CSAgentStartWriteExclusive": {
+      "id": "helper:CSAgentStartWriteExclusive",
+      "name": "CSAgentStartWriteExclusive",
+      "kind": "helper",
+      "lineStart": 204,
+      "lineEnd": 210,
+      "proofLines": [
+        208,
+        209,
+        210
+      ],
+      "proofRange": [
+        208,
+        210
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:CSAgentAcquireExclusive",
+        "helper:CSAgentBlockedExclusive"
+      ]
+    },
+    "helper:CSAgentFinishWriteExclusive": {
+      "id": "helper:CSAgentFinishWriteExclusive",
+      "name": "CSAgentFinishWriteExclusive",
+      "kind": "helper",
+      "lineStart": 212,
+      "lineEnd": 217,
+      "proofLines": [
+        216,
+        217
+      ],
+      "proofRange": [
+        216,
+        217
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:CSAgentAcquireExclusive"
+      ]
+    },
+    "helper:CSAgentExclusiveStep": {
+      "id": "helper:CSAgentExclusiveStep",
+      "name": "CSAgentExclusiveStep",
+      "kind": "helper",
+      "lineStart": 219,
+      "lineEnd": 225,
+      "proofLines": [
+        222,
+        223,
+        224,
+        225
+      ],
+      "proofRange": [
+        222,
+        225
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:CSAgentAbortExclusive",
+        "helper:CSAgentCommitExclusive",
+        "helper:CSAgentFinishWriteExclusive",
+        "helper:CSAgentReadExclusive",
+        "helper:CSAgentStartWriteExclusive"
+      ]
+    },
+    "helper:CSAgentExclusiveInvariant": {
+      "id": "helper:CSAgentExclusiveInvariant",
+      "name": "CSAgentExclusiveInvariant",
+      "kind": "helper",
+      "lineStart": 227,
+      "lineEnd": 229,
+      "proofLines": [
+        228,
+        229
+      ],
+      "proofRange": [
+        228,
+        229
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:CSAgentExclusiveStep",
+        "helper:CSAgentInitialExclusive",
+        "helper:CSAgentMetadataInvariant"
+      ]
+    }
+  }
+}

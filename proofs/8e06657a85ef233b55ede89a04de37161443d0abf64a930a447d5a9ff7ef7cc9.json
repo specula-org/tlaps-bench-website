@@ -1,0 +1,1398 @@
+{
+  "schemaVersion": 1,
+  "specId": "CahillSSI/CahillSerializability.tla",
+  "sourceName": "CahillSerializability.tla",
+  "sourceSha256": "09224cee51732e58b54b139872177c443d5052eeaec44cff51c0e4d80fea9e65",
+  "resultSha256": "1813f3faa9aa234989845e523e3ea06e5ee5b7369beb68b2e16138f5bc4a4507",
+  "source": "---- MODULE CahillSerializability ----\nEXTENDS CahillSerializabilityDefs\n\n\\* BEGIN AGENT HELPERS\nLOCAL CSProof == INSTANCE TLAPS\nLOCAL CSNat == INSTANCE NaturalsInduction\nLOCAL CSSeq == INSTANCE SequenceTheorems\nLOCAL CSWF == INSTANCE WellFoundedInduction\n\nLEMMA CSEmptyCommitted == CommittedTxns(<<>>) = {}\n  BY CSProof!SMTT(\"r10\") DEF CommittedTxns, SelectEvents, Range\n\nLEMMA CSNoCommittedEdges ==\n  ASSUME NEW h, CommittedTxns(h) = {}\n  PROVE CahillMVSG(h) = {}\n  BY CSProof!SMTT(\"r10\") DEF CahillMVSG\n\nLEMMA CSEmptyCycles == FindAllNodesInAnyCycle({}) = {}\n  BY CSProof!SMTT(\"r10\") DEF FindAllNodesInAnyCycle\n\nLEMMA CSInitialSafety == Init => CahillSerializable(history)\n  BY CSEmptyCommitted, CSNoCommittedEdges, CSEmptyCycles,\n     CSProof!SMTT(\"r10\") DEF Init, CahillSerializable, IsCycle\n\nCSGraphNodes(es) == UNION {{e[1], e[2]} : e \\in es}\nCSNeighbors(es, n) == {e[2] : e \\in {e \\in es : e[1] = n}}\nCSCycleStep(es, f, n) ==\n  [v \\in SUBSET CSGraphNodes(es) |->\n    IF n \\in v THEN {n}\n    ELSE UNION {f[m][v \\union {n}] : m \\in CSNeighbors(es, n)}]\nCSCycleFn(es) ==\n  LET f[n \\in CSGraphNodes(es)] == CSCycleStep(es, f, n)\n  IN f\nCSReverseRank(es, r, b) ==\n  CSWF!PreImage(LAMBDA n : b - r[n], CSGraphNodes(es),\n               CSWF!OpToRel(<, Nat))\nCSRanked(es, r, b) ==\n  /\\ b \\in Nat\n  /\\ r \\in [CSGraphNodes(es) -> 0..b]\n  /\\ es \\subseteq CSGraphNodes(es) \\X CSGraphNodes(es)\n  /\\ \\A e \\in es : r[e[1]] < r[e[2]]\n\nLEMMA CSNeighborsInNodes ==\n  ASSUME NEW es, NEW n\n  PROVE CSNeighbors(es, n) \\subseteq CSGraphNodes(es)\n  BY CSProof!SMTT(\"r5\") DEF CSNeighbors, CSGraphNodes\n\nLEMMA CSRankRelationWellFounded ==\n  ASSUME NEW es, NEW r, NEW b, CSRanked(es,r,b)\n  PROVE CSWF!IsWellFoundedOn(CSReverseRank(es,r,b), CSGraphNodes(es))\n<1>1. \\A n \\in CSGraphNodes(es) : b - r[n] \\in Nat\n  BY CSProof!SMTT(\"r5\") DEF CSRanked\n<1>2. QED\n  BY <1>1, CSWF!NatLessThanWellFounded, CSWF!PreImageWellFounded,\n     CSProof!IsaM(\"blast\")\n     DEF CSReverseRank\n\nLEMMA CSNeighborRank ==\n  ASSUME NEW es, NEW r, NEW b, CSRanked(es,r,b),\n         NEW n \\in CSGraphNodes(es), NEW m \\in CSNeighbors(es,n)\n  PROVE /\\ r[n] < r[m]\n        /\\ m \\in CSWF!SetLessThan(n,CSReverseRank(es,r,b),CSGraphNodes(es))\n  BY CSNeighborsInNodes, CSProof!SMTT(\"r5\")\n     DEF CSRanked, CSNeighbors, CSReverseRank, CSWF!PreImage,\n         CSWF!OpToRel, CSWF!SetLessThan\n\nLEMMA CSCycleRecursion ==\n  ASSUME NEW es, NEW r, NEW b, CSRanked(es,r,b)\n  PROVE CSCycleFn(es) =\n          [n \\in CSGraphNodes(es) |-> CSCycleStep(es,CSCycleFn(es),n)]\n<1>1. CSWF!WFDefOn(CSReverseRank(es,r,b), CSGraphNodes(es),\n                   LAMBDA f,n : CSCycleStep(es,f,n))\n  <2>1. SUFFICES ASSUME NEW g, NEW h, NEW n \\in CSGraphNodes(es),\n            \\A m \\in CSWF!SetLessThan(n,CSReverseRank(es,r,b),CSGraphNodes(es)) :\n              g[m] = h[m]\n         PROVE CSCycleStep(es,g,n) = CSCycleStep(es,h,n)\n    BY CSProof!SMTT(\"r5\") DEF CSWF!WFDefOn\n  <2>2. \\A m \\in CSNeighbors(es,n) : g[m] = h[m]\n    BY <2>1, CSNeighborRank, CSProof!SMTT(\"r5\")\n  <2>3. QED\n    BY <2>2, CSProof!SMTT(\"r5\") DEF CSCycleStep\n<1>2. CSWF!OpDefinesFcn(CSCycleFn(es),CSGraphNodes(es),\n                       LAMBDA f,n : CSCycleStep(es,f,n))\n  BY CSProof!SMTT(\"r5\") DEF CSWF!OpDefinesFcn, CSCycleFn\n<1>3. CSWF!IsWellFoundedOn(CSReverseRank(es,r,b),CSGraphNodes(es))\n  BY CSRankRelationWellFounded, CSProof!SMTT(\"r5\")\n<1>4. CSWF!WFInductiveDefines(CSCycleFn(es),CSGraphNodes(es),\n                              LAMBDA f,n : CSCycleStep(es,f,n))\n  BY ONLY <1>1, <1>2, <1>3, CSWF!WFInductiveDef, CSProof!IsaM(\"blast\")\n<1>5. QED\n  BY <1>4, CSProof!SMTT(\"r5\") DEF CSWF!WFInductiveDefines\n\nLEMMA CSRankedGraphAcyclic ==\n  ASSUME NEW es, NEW r, NEW b, CSRanked(es,r,b)\n  PROVE FindAllNodesInAnyCycle(es) = {}\n<1>1. DEFINE Good(n) ==\n        \\A v \\in SUBSET CSGraphNodes(es) :\n          (\\A m \\in v : r[m] < r[n]) => CSCycleFn(es)[n][v] = {}\n<1>H. HIDE DEF Good\n<1>2. \\A n \\in CSGraphNodes(es) :\n        (\\A m \\in CSWF!SetLessThan(n,CSReverseRank(es,r,b),CSGraphNodes(es)) :\n            Good(m)) => Good(n)\n  <2>1. SUFFICES ASSUME NEW n \\in CSGraphNodes(es),\n          \\A m \\in CSWF!SetLessThan(n,CSReverseRank(es,r,b),CSGraphNodes(es)) :\n            Good(m),\n          NEW v \\in SUBSET CSGraphNodes(es),\n          \\A m \\in v : r[m] < r[n]\n        PROVE CSCycleFn(es)[n][v] = {}\n    BY CSProof!SMTT(\"r5\") DEF Good\n  <2>2. n \\notin v\n    BY <2>1, CSProof!SMTT(\"r5\") DEF CSRanked\n  <2>3. \\A m \\in CSNeighbors(es,n) : CSCycleFn(es)[m][v \\union {n}] = {}\n    BY <2>1, CSNeighborRank, CSNeighborsInNodes, CSProof!SMTT(\"r10\")\n       DEF Good, CSRanked\n  <2>4. CSCycleFn(es)[n] = CSCycleStep(es,CSCycleFn(es),n)\n    BY CSCycleRecursion, CSProof!SMTT(\"r5\")\n  <2>5. QED\n    BY <2>2, <2>3, <2>4, CSProof!SMTT(\"r5\") DEF CSCycleStep\n<1>W. CSWF!IsWellFoundedOn(CSReverseRank(es,r,b),CSGraphNodes(es))\n  BY CSRankRelationWellFounded, CSProof!SMTT(\"r5\")\n<1>3. \\A n \\in CSGraphNodes(es) : Good(n)\n  BY ONLY <1>2, <1>W, CSWF!WFInduction, CSProof!IsaM(\"blast\")\n<1>4. \\A n \\in CSGraphNodes(es) : CSCycleFn(es)[n][{}] = {}\n  BY <1>3, CSProof!SMTT(\"r5\") DEF Good\n<1>5. FindAllNodesInAnyCycle(es) =\n        UNION {CSCycleFn(es)[n][{}] : n \\in {e[1] : e \\in es}}\n  BY CSProof!IsaM(\"simp\") DEF FindAllNodesInAnyCycle, CSCycleFn, CSCycleStep, CSGraphNodes, CSNeighbors\n<1>6. QED\n  BY <1>4, <1>5, CSProof!SMTT(\"r5\") DEF CSGraphNodes\n\nCSCommittedHistory(h) ==\n  SelectSeq(h, LAMBDA e : e.txnid \\in CommittedTxns(h))\nCSBeginPosition(h,t) ==\n  IndexOfOpInHistory(CSCommittedHistory(h), [op |-> \"begin\", txnid |-> t])\nCSCommitPosition(h,t) ==\n  IndexOfOpInHistory(CSCommittedHistory(h), [op |-> \"commit\", txnid |-> t])\nCSWritePosition(h,t,k) ==\n  IndexOfOpInHistory(CSCommittedHistory(h), [op |-> \"write\", txnid |-> t, key |-> k])\nCSWriteWrite(h,s,t,k) ==\n  /\\ CSWritePosition(h,s,k) /= -1\n  /\\ CSWritePosition(h,t,k) /= -1\n  /\\ CSWritePosition(h,s,k) < CSWritePosition(h,t,k)\nCSReadWrite(h,s,t,k) ==\n  /\\ k \\in KeysThatTxnHasDoneOperationOn(h,s,\"read\")\n  /\\ CSWritePosition(h,t,k) /= -1\n  /\\ CSBeginPosition(h,s) < CSCommitPosition(h,t)\nCSBefore(h,s,t) == CSCommitPosition(h,s) < CSBeginPosition(h,t)\nCSCoreInvariant(h,ic,oc) ==\n  /\\ Len(CSCommittedHistory(h)) \\in Nat\n  /\\ \\A t \\in CommittedTxns(h) :\n       /\\ CSBeginPosition(h,t) \\in 1..Len(CSCommittedHistory(h))\n       /\\ CSCommitPosition(h,t) \\in 1..Len(CSCommittedHistory(h))\n       /\\ CSBeginPosition(h,t) < CSCommitPosition(h,t)\n       /\\ ~(ic[t] /\\ oc[t])\n  /\\ \\A s,t \\in CommittedTxns(h) : s /= t =>\n       /\\ \\A k \\in Key : CSWriteWrite(h,s,t,k) => CSBefore(h,s,t)\n       /\\ \\A k \\in Key : CSReadWrite(h,s,t,k) =>\n                            CSBefore(h,s,t) \\/ (oc[s] /\\ ic[t])\nCSTimestamp(h,oc,t) ==\n  IF oc[t] THEN CSBeginPosition(h,t) ELSE CSCommitPosition(h,t)\nCSHistoryRank(h,oc) ==\n  [t \\in CSGraphNodes(CahillMVSG(h)) |-> CSTimestamp(h,oc,t)]\n\nLEMMA CSMVSGNodes ==\n  ASSUME NEW h\n  PROVE /\\ CahillMVSG(h) \\subseteq CommittedTxns(h) \\X CommittedTxns(h)\n        /\\ CSGraphNodes(CahillMVSG(h)) \\subseteq CommittedTxns(h)\n        /\\ CahillMVSG(h) \\subseteq\n             CSGraphNodes(CahillMVSG(h)) \\X CSGraphNodes(CahillMVSG(h))\n  BY CSProof!SMTT(\"r5\") DEF CahillMVSG, CSGraphNodes\n\nLEMMA CSTimestampBounds ==\n  ASSUME NEW h, NEW ic, NEW oc, CSCoreInvariant(h,ic,oc),\n         NEW t \\in CommittedTxns(h)\n  PROVE /\\ CSTimestamp(h,oc,t) \\in 1..Len(CSCommittedHistory(h))\n        /\\ CSBeginPosition(h,t) <= CSTimestamp(h,oc,t)\n        /\\ CSTimestamp(h,oc,t) <= CSCommitPosition(h,t)\n  BY CSProof!SMTT(\"r5\") DEF CSCoreInvariant, CSTimestamp\n\nLEMMA CSEdgesIncreaseTimestamp ==\n  ASSUME NEW h, NEW ic, NEW oc, CSCoreInvariant(h,ic,oc),\n         NEW e \\in CahillMVSG(h)\n  PROVE CSTimestamp(h,oc,e[1]) < CSTimestamp(h,oc,e[2])\n<1>1. e[1] \\in CommittedTxns(h) /\\ e[2] \\in CommittedTxns(h) /\\ e[1] /= e[2]\n  BY CSProof!SMTT(\"r5\") DEF CahillMVSG\n<1>2. CSBefore(h,e[1],e[2]) \\/\n       (oc[e[1]] /\\ ic[e[2]] /\\ CSBeginPosition(h,e[1]) < CSCommitPosition(h,e[2]))\n  BY <1>1, CSProof!SMTT(\"r10\")\n     DEF CSCoreInvariant, CahillMVSG, CSWriteWrite, CSReadWrite, CSBefore,\n         CSBeginPosition, CSCommitPosition, CSWritePosition, CSCommittedHistory\n<1>3. QED\n  BY <1>1, <1>2, CSTimestampBounds, CSProof!SMTT(\"r5\")\n     DEF CSCoreInvariant, CSTimestamp, CSBefore\n\nLEMMA CSCoreGivesRank ==\n  ASSUME NEW h, NEW ic, NEW oc, CSCoreInvariant(h,ic,oc)\n  PROVE CSRanked(CahillMVSG(h),CSHistoryRank(h,oc),Len(CSCommittedHistory(h)))\n<1>1. CSHistoryRank(h,oc) \\in\n        [CSGraphNodes(CahillMVSG(h)) -> 0..Len(CSCommittedHistory(h))]\n  BY CSMVSGNodes, CSTimestampBounds, CSProof!SMTT(\"r5\")\n     DEF CSHistoryRank\n<1>2. \\A e \\in CahillMVSG(h) :\n       CSHistoryRank(h,oc)[e[1]] < CSHistoryRank(h,oc)[e[2]]\n  BY CSMVSGNodes, CSEdgesIncreaseTimestamp, CSProof!SMTT(\"r5\")\n     DEF CSHistoryRank\n<1>3. QED\n  BY <1>1, <1>2, CSMVSGNodes, CSProof!SMTT(\"r5\") DEF CSRanked, CSCoreInvariant\n\nLEMMA CSCoreImpliesSerializable ==\n  ASSUME NEW h, NEW ic, NEW oc, CSCoreInvariant(h,ic,oc)\n  PROVE CahillSerializable(h)\n<1>1. CSRanked(CahillMVSG(h),CSHistoryRank(h,oc),Len(CSCommittedHistory(h)))\n  BY CSCoreGivesRank, CSProof!SMTT(\"r5\")\n<1>2. QED\n  BY <1>1, CSRankedGraphAcyclic, CSProof!SMTT(\"r5\") DEF CahillSerializable, IsCycle\n\nLEMMA CSEmptySelect ==\n  ASSUME NEW Test(_)\n  PROVE SelectSeq(<<>>,Test) = <<>>\n<1>1. [i \\in 0..0 |-> <<>>] =\n        [i \\in 0..Len(<<>>) |->\n           IF i = 0 THEN <<>>\n           ELSE IF Test(<<>>[i])\n                THEN Append([j \\in 0..0 |-> <<>>][i-1],<<>>[i])\n                ELSE [j \\in 0..0 |-> <<>>][i-1]]\n  BY CSProof!SMTT(\"r5\")\n<1>2. QED\n  BY <1>1, CSProof!SMTT(\"r10\")\n\nLEMMA CSInitialCore == Init => CSCoreInvariant(history,inConflict,outConflict)\n<1>1. CSCommittedHistory(<<>>) = <<>>\n  BY CSEmptySelect, CSProof!IsaM(\"blast\") DEF CSCommittedHistory\n<1>2. QED\n  BY <1>1, CSEmptyCommitted, CSProof!SMTT(\"r5\") DEF CSCoreInvariant, Init\n\nCSStateCore == CSCoreInvariant(history,inConflict,outConflict)\n\nLEMMA CSCoreStuttering ==\n  CSStateCore /\\ UNCHANGED allvars => CSStateCore'\n  BY CSProof!SMTT(\"r5\") DEF CSStateCore, allvars\n\nLEMMA CSSelectAppend ==\n  ASSUME NEW S, NEW h \\in Seq(S), NEW e \\in S, NEW Test(_)\n  PROVE SelectSeq(Append(h,e),Test) =\n          IF Test(e) THEN Append(SelectSeq(h,Test),e) ELSE SelectSeq(h,Test)\n  BY CSProof!SMTT(\"r5\")\n\nLEMMA CSSelectType ==\n  ASSUME NEW S, NEW h \\in Seq(S), NEW Test(_)\n  PROVE SelectSeq(h,Test) \\in Seq(S)\n  BY CSProof!SMTT(\"r5\")\n\nLEMMA CSAppendRange ==\n  ASSUME NEW S, NEW h \\in Seq(S), NEW e\n  PROVE Range(Append(h,e)) = Range(h) \\union {e}\n<1>1. h \\in Seq(S \\union {e})\n  BY CSSeq!SeqMonotonic, CSProof!SMTT(\"r5\")\n<1>2. QED\n  BY <1>1, CSSeq!AppendProperties, CSProof!SMTT(\"r5\") DEF CSSeq!Range, Range\n\nLEMMA CSSelectRange ==\n  ASSUME NEW S, NEW Test(_)\n  PROVE \\A h \\in Seq(S) : Range(SelectSeq(h,Test)) = {e \\in Range(h) : Test(e)}\n<1>1. DEFINE Good(h) == Range(SelectSeq(h,Test)) = {e \\in Range(h) : Test(e)}\n<1>H. HIDE DEF Good\n<1>2. Good(<<>>)\n  BY CSEmptySelect, CSProof!SMTT(\"r5\") DEF Good, Range\n<1>3. \\A h \\in Seq(S), e \\in S : Good(h) => Good(Append(h,e))\n  BY CSSelectAppend, CSSelectType, CSAppendRange, CSProof!SMTT(\"r10\") DEF Good\n<1>4. \\A h \\in Seq(S) : Good(h)\n  BY ONLY <1>2, <1>3, CSSeq!SequencesInductionAppend, CSProof!IsaM(\"blast\")\n<1>5. QED\n  BY <1>4, CSProof!SMTT(\"r5\") DEF Good\n\nLEMMA CSCommittedAppend ==\n  ASSUME NEW S, NEW h \\in Seq(S), NEW e\n  PROVE CommittedTxns(Append(h,e)) =\n          IF e.op = \"commit\" THEN CommittedTxns(h) \\union {e.txnid}\n                             ELSE CommittedTxns(h)\n  BY CSAppendRange, CSProof!SMTT(\"r5\") DEF CommittedTxns, SelectEvents\n\nLEMMA CSKeysAppend ==\n  ASSUME NEW S, NEW h \\in Seq(S), NEW e, NEW t, NEW op\n  PROVE KeysThatTxnHasDoneOperationOn(Append(h,e),t,op) =\n          IF e.txnid = t /\\ e.op = op\n          THEN KeysThatTxnHasDoneOperationOn(h,t,op) \\union {e.key}\n          ELSE KeysThatTxnHasDoneOperationOn(h,t,op)\n  BY CSAppendRange, CSProof!SMTT(\"r5\") DEF KeysThatTxnHasDoneOperationOn, SelectEvents\n\nLEMMA CSUncommittedAppendView ==\n  ASSUME NEW S, NEW h \\in Seq(S), NEW e \\in S,\n         e.txnid \\notin CommittedTxns(h), e.op /= \"commit\"\n  PROVE /\\ CommittedTxns(Append(h,e)) = CommittedTxns(h)\n        /\\ CSCommittedHistory(Append(h,e)) = CSCommittedHistory(h)\n        /\\ \\A t \\in CommittedTxns(h) :\n             KeysThatTxnHasDoneOperationOn(Append(h,e),t,\"read\") =\n               KeysThatTxnHasDoneOperationOn(h,t,\"read\")\n<1>1. CommittedTxns(Append(h,e)) = CommittedTxns(h)\n  BY CSCommittedAppend, CSProof!SMTT(\"r5\")\n<1>2. QED\n  BY <1>1, CSSelectAppend, CSKeysAppend, CSProof!IsaM(\"auto\") DEF CSCommittedHistory\n\nLEMMA CSMVSGUncommittedAppend ==\n  ASSUME NEW S, NEW h \\in Seq(S), NEW e \\in S,\n         e.txnid \\notin CommittedTxns(h), e.op /= \"commit\"\n  PROVE CahillMVSG(Append(h,e)) = CahillMVSG(h)\n<1>1. /\\ CommittedTxns(Append(h,e)) = CommittedTxns(h)\n       /\\ CSCommittedHistory(Append(h,e)) = CSCommittedHistory(h)\n       /\\ \\A t \\in CommittedTxns(h) :\n             KeysThatTxnHasDoneOperationOn(Append(h,e),t,\"read\") =\n               KeysThatTxnHasDoneOperationOn(h,t,\"read\")\n  BY CSUncommittedAppendView, CSProof!SMTT(\"r5\")\n<1>2. QED\n  BY ONLY <1>1, CSProof!SMTT(\"r10\") DEF CahillMVSG, CSCommittedHistory\n\n\\* A change to an uncommitted transaction leaves the committed graph alone.\n\\* Incoming conflict flags may increase; outgoing flags of committed\n\\* transactions must remain fixed, and the commit conflict test must hold.\nLEMMA CSCoreViewChange ==\n  ASSUME NEW h, NEW hh, NEW ic, NEW oc, NEW ii, NEW oo,\n         CSCoreInvariant(h,ic,oc),\n         CommittedTxns(hh) = CommittedTxns(h),\n         CSCommittedHistory(hh) = CSCommittedHistory(h),\n         \\A t \\in CommittedTxns(h) :\n           KeysThatTxnHasDoneOperationOn(hh,t,\"read\") =\n             KeysThatTxnHasDoneOperationOn(h,t,\"read\"),\n         \\A t \\in CommittedTxns(h) :\n           /\\ oo[t] = oc[t]\n           /\\ ic[t] => ii[t]\n           /\\ ~(ii[t] /\\ oo[t])\n  PROVE CSCoreInvariant(hh,ii,oo)\n  BY CSProof!SMTT(\"r10\")\n     DEF CSCoreInvariant, CSBeginPosition, CSCommitPosition,\n         CSWritePosition, CSWriteWrite, CSReadWrite, CSBefore\n\nLEMMA CSCoreUncommittedAppend ==\n  ASSUME NEW S, NEW h \\in Seq(S), NEW e,\n         NEW ic, NEW oc, NEW ii, NEW oo,\n         CSCoreInvariant(h,ic,oc),\n         e.txnid \\notin CommittedTxns(h), e.op /= \"commit\",\n         \\A t \\in CommittedTxns(h) :\n           /\\ oo[t] = oc[t]\n           /\\ ic[t] => ii[t]\n           /\\ ~(ii[t] /\\ oo[t])\n  PROVE CSCoreInvariant(Append(h,e),ii,oo)\n<1>1. h \\in Seq(S \\union {e}) /\\ e \\in S \\union {e}\n  BY CSSeq!SeqMonotonic, CSProof!SMTT(\"r5\")\n<1>2. /\\ CommittedTxns(Append(h,e)) = CommittedTxns(h)\n       /\\ CSCommittedHistory(Append(h,e)) = CSCommittedHistory(h)\n       /\\ \\A t \\in CommittedTxns(h) :\n             KeysThatTxnHasDoneOperationOn(Append(h,e),t,\"read\") =\n               KeysThatTxnHasDoneOperationOn(h,t,\"read\")\n  BY <1>1, CSUncommittedAppendView, CSProof!SMTT(\"r5\")\n<1>3. QED\n  BY <1>2, CSCoreViewChange, CSProof!SMTT(\"r5\")\n\nLEMMA CSActiveNotCommitted ==\n  ASSUME NEW t, StartedAndCanDoPublicOperation(t)\n  PROVE t \\notin CommittedTxns(history)\n  BY CSProof!SMTT(\"r5\")\n     DEF StartedAndCanDoPublicOperation, ActiveTxns, FinalizedTxns\n\nLEMMA CSCoreInternalAbort ==\n  ASSUME NEW S, history \\in Seq(S), CSStateCore,\n         inConflict \\in [TxnId -> BOOLEAN], outConflict \\in [TxnId -> BOOLEAN],\n         CommittedTxns(history) \\subseteq TxnId,\n         NEW t, NEW reason, t \\notin CommittedTxns(history), internalAbort(t,reason)\n  PROVE CSStateCore'\n<1>1. \\A u \\in CommittedTxns(history) :\n        /\\ outConflict'[u] = outConflict[u]\n        /\\ inConflict[u] => inConflict'[u]\n        /\\ ~(inConflict'[u] /\\ outConflict'[u])\n  BY CSProof!SMTT(\"r5\") DEF internalAbort, CSStateCore, CSCoreInvariant\n<1>2. QED\n  BY <1>1, CSCoreUncommittedAppend, CSProof!SMTT(\"r5\") DEF internalAbort, CSStateCore\n\nLEMMA CSCoreBegin ==\n  ASSUME NEW S, history \\in Seq(S), CSStateCore, NEW t, Begin(t)\n  PROVE CSStateCore'\n<1>1. t \\notin CommittedTxns(history)\n  BY CSProof!SMTT(\"r5\") DEF Begin, CommittedTxns, ActiveOrFinalizedTxns, SelectEvents\n<1>2. \\A u \\in CommittedTxns(history) :\n        /\\ outConflict'[u] = outConflict[u]\n        /\\ inConflict[u] => inConflict'[u]\n        /\\ ~(inConflict'[u] /\\ outConflict'[u])\n  BY CSProof!SMTT(\"r5\") DEF Begin, CSStateCore, CSCoreInvariant\n<1>3. QED\n  BY <1>1, <1>2, CSCoreUncommittedAppend, CSProof!SMTT(\"r5\") DEF Begin, CSStateCore\n\nLEMMA CSCoreVoluntaryAbort ==\n  ASSUME NEW S, history \\in Seq(S), CSStateCore,\n         inConflict \\in [TxnId -> BOOLEAN], outConflict \\in [TxnId -> BOOLEAN],\n         CommittedTxns(history) \\subseteq TxnId, NEW t, ChooseToAbort(t)\n  PROVE CSStateCore'\n  BY CSActiveNotCommitted, CSCoreInternalAbort, CSProof!SMTT(\"r5\") DEF ChooseToAbort\n\nLEMMA CSCoreRead ==\n  ASSUME NEW S, history \\in Seq(S), CSStateCore,\n         inConflict \\in [TxnId -> BOOLEAN], outConflict \\in [TxnId -> BOOLEAN],\n         CommittedTxns(history) \\subseteq TxnId,\n         \\A u \\in CommittedTxns(history) : holdingXLocks[u] = {},\n         NEW t, NEW k, Read(t,k)\n  PROVE CSStateCore'\n<1>1. t \\notin CommittedTxns(history)\n  BY CSActiveNotCommitted, CSProof!SMTT(\"r5\") DEF Read\n<1>2. CASE internalAbort(t,\"in attempted read, to preserve serializability\")\n  BY <1>1, <1>2, CSCoreInternalAbort, CSProof!SMTT(\"r5\")\n<1>3. CASE ~internalAbort(t,\"in attempted read, to preserve serializability\")\n  <2>1. history' = Append(history,\n          [op |-> \"read\", txnid |-> t, key |-> k,\n           ver |-> CHOOSE v \\in VersionThatWouldBeReadBy(t,k) : TRUE])\n    BY <1>3, CSProof!SMTT(\"r5\") DEF Read\n  <2>2. \\A u \\in CommittedTxns(history) :\n          /\\ outConflict'[u] = outConflict[u]\n          /\\ inConflict[u] => inConflict'[u]\n          /\\ ~(inConflict'[u] /\\ outConflict'[u])\n    BY <1>1, <1>3, CSProof!SMTT(\"r10\") DEF Read, CSStateCore, CSCoreInvariant\n  <2>3. QED\n    BY <2>1, <2>2, <1>1, CSCoreUncommittedAppend, CSProof!SMTT(\"r5\") DEF CSStateCore\n<1>4. QED\n  BY <1>2, <1>3, CSProof!SMTT(\"r5\")\n\nLEMMA CSCoreAcquiringWrite ==\n  ASSUME NEW S, history \\in Seq(S), CSStateCore,\n         inConflict \\in [TxnId -> BOOLEAN], outConflict \\in [TxnId -> BOOLEAN],\n         CommittedTxns(history) \\subseteq TxnId,\n         NEW t, NEW k, t \\notin CommittedTxns(history), HelperWriteCanAcquireXLock(t,k)\n  PROVE CSStateCore'\n<1>1. CASE internalAbort(t,\"in attempted write, to preserve serializability\")\n  BY <1>1, CSCoreInternalAbort, CSProof!SMTT(\"r5\")\n<1>2. CASE ~internalAbort(t,\"in attempted write, to preserve serializability\")\n  <2>1. history' = Append(history,[op |-> \"write\", txnid |-> t, key |-> k])\n    BY <1>2, CSProof!SMTT(\"r5\") DEF HelperWriteCanAcquireXLock, snapshotIsolationWriteAction\n  <2>2. \\A u \\in CommittedTxns(history) :\n          /\\ outConflict'[u] = outConflict[u]\n          /\\ inConflict[u] => inConflict'[u]\n          /\\ ~(inConflict'[u] /\\ outConflict'[u])\n    BY <1>2, CSProof!SMTT(\"r10\")\n       DEF HelperWriteCanAcquireXLock, CSStateCore, CSCoreInvariant\n  <2>3. QED\n    BY <2>1, <2>2, CSCoreUncommittedAppend, CSProof!SMTT(\"r5\") DEF CSStateCore\n<1>3. QED\n  BY <1>1, <1>2, CSProof!SMTT(\"r5\")\n\nLEMMA CSCoreFinishingWrite ==\n  ASSUME NEW S, history \\in Seq(S), CSStateCore,\n         inConflict \\in [TxnId -> BOOLEAN], outConflict \\in [TxnId -> BOOLEAN],\n         CommittedTxns(history) \\subseteq TxnId,\n         \\A u \\in CommittedTxns(history) : waitingForXLock[u] = NoLock,\n         NEW t, FinishBlockedWrite(t)\n  PROVE CSStateCore'\n<1>1. t \\notin CommittedTxns(history)\n  BY CSProof!SMTT(\"r5\") DEF FinishBlockedWrite\n<1>2. QED\n  BY <1>1, CSCoreAcquiringWrite, CSProof!SMTT(\"r5\") DEF FinishBlockedWrite\n\nLOCAL CSFinite == INSTANCE FiniteSetTheorems\n\nLEMMA CSFiniteBridge == \\A S : CSFinite!IsFiniteSet(S) = IsFiniteSet(S)\n  BY CSProof!IsaM(\"simp\") DEF CSFinite!IsFiniteSet, IsFiniteSet\n\nLEMMA CSRangeBridge == \\A f : CSSeq!Range(f) = Range(f)\n  BY CSProof!SMTT(\"r5\") DEF CSSeq!Range, Range\n\nCSForcedAbort(t) ==\n  [op |-> \"abort\", txnid |-> t, reason |-> \"forced by First Committer Wins\"]\nCSOne(U) == CHOOSE t \\in U : TRUE\nCSAbortStep(f,U) ==\n  IF U = {} THEN <<>>\n  ELSE LET t == CSOne(U)\n       IN <<CSForcedAbort(t)>> \\o f[U \\ {t}]\nCSAbortFunction(T) ==\n  LET f[U \\in SUBSET T] == CSAbortStep(f,U)\n  IN f\nCSAbortList(T) == CSAbortFunction(T)[T]\nCSLosers(t) == {u \\in TxnId : waitingForXLock[u] \\in holdingXLocks[t]}\nCSWaiters == {u \\in TxnId : waitingForXLock[u] /= NoLock}\n\nLEMMA CSNoLockOutside == NoLock \\notin Key\n  BY CSProof!NoSetContainsEverything, CSProof!SMTT(\"r5\") DEF NoLock\n\nLEMMA CSAppendSequence ==\n  ASSUME NEW S, NEW h \\in Seq(S), NEW e\n  PROVE Append(h,e) \\in Seq(Range(Append(h,e)))\n<1>1. h \\in Seq(S \\union {e})\n  BY CSSeq!SeqMonotonic, CSProof!SMTT(\"r5\")\n<1>2. Append(h,e) \\in Seq(S \\union {e})\n  BY <1>1, CSSeq!AppendProperties, CSProof!SMTT(\"r5\")\n<1>3. QED\n  BY <1>2, CSSeq!SeqOfRange, CSProof!SMTT(\"r5\") DEF CSSeq!Range, Range\n\nLEMMA CSConcatSequences ==\n  ASSUME NEW S, NEW h \\in Seq(S), NEW T, NEW g \\in Seq(T)\n  PROVE /\\ h \\o g \\in Seq(Range(h \\o g))\n        /\\ Range(h \\o g) = Range(h) \\union Range(g)\n        /\\ CommittedTxns(h \\o g) = CommittedTxns(h) \\union CommittedTxns(g)\n<1>1. h \\in Seq(S \\union T) /\\ g \\in Seq(S \\union T)\n  BY CSSeq!SeqMonotonic, CSProof!SMTT(\"r5\")\n<1>2. h \\o g \\in Seq(S \\union T)\n  BY <1>1, CSSeq!ConcatProperties, CSProof!SMTT(\"r5\")\n<1>3. Range(h \\o g) = Range(h) \\union Range(g)\n  BY <1>1, CSSeq!RangeConcatenation, CSRangeBridge, CSProof!SMTT(\"r5\")\n<1>4. QED\n  BY <1>2, <1>3, CSSeq!SeqOfRange, CSProof!SMTT(\"r5\")\n     DEF CSSeq!Range, Range, CommittedTxns, SelectEvents\n\nLEMMA CSAbortRecursion ==\n  ASSUME NEW T, IsFiniteSet(T)\n  PROVE CSAbortFunction(T) = [U \\in SUBSET T |-> CSAbortStep(CSAbortFunction(T),U)]\n<1>1. CSFinite!IsWellFoundedOn(CSFinite!StrictSubsetOrdering(T),SUBSET T)\n  BY CSFiniteBridge, CSFinite!FS_FiniteSubsetsOfFinite, CSFinite!FS_StrictSubsetOrderingWellFounded,\n     CSProof!SMTT(\"r5\")\n<1>2. CSFinite!WFDefOn(CSFinite!StrictSubsetOrdering(T),SUBSET T,CSAbortStep)\n  <2>1. SUFFICES ASSUME NEW f, NEW g, NEW U \\in SUBSET T,\n                  \\A V \\in CSFinite!SetLessThan(U,CSFinite!StrictSubsetOrdering(T),SUBSET T) :\n                    f[V] = g[V]\n                PROVE CSAbortStep(f,U) = CSAbortStep(g,U)\n    BY CSProof!SMTT(\"r5\") DEF CSFinite!WFDefOn\n  <2>2. QED\n    BY <2>1, CSProof!SMTT(\"r10\")\n       DEF CSAbortStep, CSOne, CSFinite!SetLessThan, CSFinite!StrictSubsetOrdering\n<1>3. CSFinite!OpDefinesFcn(CSAbortFunction(T),SUBSET T,CSAbortStep)\n  BY CSProof!SMTT(\"r5\") DEF CSFinite!OpDefinesFcn, CSAbortFunction\n<1>4. CSFinite!WFInductiveDefines(CSAbortFunction(T),SUBSET T,CSAbortStep)\n  BY ONLY <1>1, <1>2, <1>3, CSFinite!WFInductiveDef, CSProof!IsaM(\"blast\")\n<1>5. QED\n  BY <1>4, CSProof!SMTT(\"r5\") DEF CSFinite!WFInductiveDefines\n\nLEMMA CSAbortListProperties ==\n  ASSUME NEW T, IsFiniteSet(T)\n  PROVE /\\ CSAbortList(T) \\in Seq({CSForcedAbort(t) : t \\in T})\n        /\\ Range(CSAbortList(T)) = {CSForcedAbort(t) : t \\in T}\n        /\\ CommittedTxns(CSAbortList(T)) = {}\n<1>E. CSAbortFunction(T) = [U \\in SUBSET T |-> CSAbortStep(CSAbortFunction(T),U)]\n  BY CSAbortRecursion, CSProof!SMTT(\"r5\")\n<1>1. DEFINE Good(U) ==\n       /\\ CSAbortFunction(T)[U] \\in Seq({CSForcedAbort(t) : t \\in T})\n       /\\ Range(CSAbortFunction(T)[U]) = {CSForcedAbort(t) : t \\in U}\n<1>D. DEFINE DS == SUBSET T\n<1>H. HIDE DEF Good, DS\n<1>2. \\A U \\in SUBSET T :\n        (\\A V \\in CSFinite!SetLessThan(U,CSFinite!StrictSubsetOrdering(T),SUBSET T) : Good(V))\n          => Good(U)\n  <2>1. SUFFICES ASSUME NEW U \\in SUBSET T,\n          \\A V \\in CSFinite!SetLessThan(U,CSFinite!StrictSubsetOrdering(T),SUBSET T) : Good(V)\n        PROVE Good(U)\n    BY CSProof!SMTT(\"r5\")\n  <2>2. CASE U = {}\n    BY <2>2, <1>E, CSProof!SMTT(\"r5\") DEF Good, CSAbortStep, Range\n  <2>3. CASE U /= {}\n    <3>1. DEFINE t == CSOne(U)\n    <3>2. t \\in U /\\ Good(U \\ {t})\n      BY <2>1, <2>3, CSProof!SMTT(\"r5\")\n         DEF t, CSOne, CSFinite!SetLessThan, CSFinite!StrictSubsetOrdering\n    <3>A. CSAbortFunction(T)[U] = CSAbortStep(CSAbortFunction(T),U)\n      BY <2>1, <1>E, CSProof!SMTT(\"r5\")\n    <3>3. CSAbortFunction(T)[U] = <<CSForcedAbort(t)>> \\o CSAbortFunction(T)[U \\ {t}]\n      BY ONLY <3>A, <2>3, CSProof!SMTT(\"r5\") DEF CSAbortStep, t\n    <3>4. <<CSForcedAbort(t)>> \\in Seq({CSForcedAbort(x) : x \\in T})\n      BY <3>2, CSProof!SMTT(\"r5\")\n    <3>5. CSAbortFunction(T)[U] \\in Seq({CSForcedAbort(x) : x \\in T})\n      BY <3>2, <3>3, <3>4, CSSeq!ConcatProperties, CSProof!SMTT(\"r5\") DEF Good\n    <3>6. Range(CSAbortFunction(T)[U]) =\n             Range(<<CSForcedAbort(t)>>) \\union Range(CSAbortFunction(T)[U \\ {t}])\n      BY <3>2, <3>3, <3>4, CSConcatSequences, CSProof!SMTT(\"r5\") DEF Good\n    <3>7. Range(<<CSForcedAbort(t)>>) = {CSForcedAbort(t)}\n      BY CSProof!SMTT(\"r5\") DEF Range\n    <3>8. QED\n      BY <3>2, <3>5, <3>6, <3>7, CSProof!SMTT(\"r5\") DEF Good\n  <2>4. QED\n    BY <2>2, <2>3, CSProof!SMTT(\"r5\")\n<1>3. CSFinite!IsWellFoundedOn(CSFinite!StrictSubsetOrdering(T),SUBSET T)\n  BY CSFiniteBridge, CSFinite!FS_FiniteSubsetsOfFinite, CSFinite!FS_StrictSubsetOrderingWellFounded,\n     CSProof!SMTT(\"r5\")\n<1>A. \\A U \\in DS :\n        (\\A V \\in CSFinite!SetLessThan(U,CSFinite!StrictSubsetOrdering(T),DS) : Good(V))\n          => Good(U)\n  BY <1>2, CSProof!SMTT(\"r5\") DEF DS\n<1>B. CSFinite!IsWellFoundedOn(CSFinite!StrictSubsetOrdering(T),DS)\n  BY <1>3, CSProof!SMTT(\"r5\") DEF DS\n<1>C. \\A U \\in DS : Good(U)\n  BY ONLY <1>A, <1>B, CSFinite!WFInduction, CSProof!IsaM(\"blast\")\n<1>4. \\A U \\in SUBSET T : Good(U)\n  BY <1>C, CSProof!SMTT(\"r5\") DEF DS\n<1>5. Good(T)\n  BY <1>4, CSProof!SMTT(\"r5\")\n<1>6. QED\n  BY <1>5, CSProof!SMTT(\"r5\")\n     DEF Good, CSAbortList, CSForcedAbort, CommittedTxns, SelectEvents\n\nLEMMA CSWaiterFiniteUpdate ==\n  ASSUME IsFiniteSet(CSWaiters), NEW t,\n         \\A u \\in TxnId \\ {t} :\n           waitingForXLock'[u] = waitingForXLock[u] \\/ waitingForXLock'[u] = NoLock\n  PROVE IsFiniteSet(CSWaiters')\n<1>1. CSWaiters' \\subseteq CSWaiters \\union {t}\n  BY CSProof!SMTT(\"r5\") DEF CSWaiters\n<1>2. IsFiniteSet(CSWaiters \\union {t})\n  BY CSFiniteBridge, CSFinite!FS_AddElement, CSProof!SMTT(\"r5\")\n<1>3. QED\n  BY <1>1, <1>2, CSFiniteBridge, CSFinite!FS_Subset, CSProof!SMTT(\"r5\")\n\nCSOperationalFacts ==\n  /\\ NoLock \\notin Key\n  /\\ holdingXLocks \\in [TxnId -> SUBSET Key]\n  /\\ waitingForXLock \\in [TxnId -> Key \\union {NoLock}]\n  /\\ holdingSIREADlocks \\in [TxnId -> SUBSET Key]\n  /\\ IsFiniteSet(CSWaiters)\n  /\\ history \\in Seq(Range(history))\n  /\\ CommittedTxns(history) \\subseteq TxnId\n  /\\ inConflict \\in [TxnId -> BOOLEAN]\n  /\\ outConflict \\in [TxnId -> BOOLEAN]\n  /\\ \\A u \\in CommittedTxns(history) :\n       /\\ holdingXLocks[u] = {}\n       /\\ waitingForXLock[u] = NoLock\n\nCSNoCommitHistoryStep ==\n  \\/ history' = history\n  \\/ \\E e : e.op /= \"commit\" /\\ history' = Append(history,e)\n\nLEMMA CSBasicHistoryStep ==\n  ASSUME history \\in Seq(Range(history)), CSNoCommitHistoryStep\n  PROVE /\\ history' \\in Seq(Range(history'))\n        /\\ CommittedTxns(history') = CommittedTxns(history)\n  BY CSAppendSequence, CSCommittedAppend, CSProof!SMTT(\"r5\") DEF CSNoCommitHistoryStep\n\nLEMMA CSInitialOperational == Init => CSOperationalFacts\n<1>1. Init => CSWaiters = {}\n  BY CSProof!SMTT(\"r5\") DEF Init, CSWaiters\n<1>2. QED\n  BY <1>1, CSNoLockOutside, CSEmptyCommitted, CSFiniteBridge, CSFinite!FS_EmptySet,\n     CSProof!SMTT(\"r10\") DEF Init, CSOperationalFacts, Range\n\nLEMMA CSLosersFinite ==\n  ASSUME CSOperationalFacts, NEW t \\in TxnId\n  PROVE IsFiniteSet(CSLosers(t))\n<1>1. CSLosers(t) \\subseteq CSWaiters\n  BY CSProof!SMTT(\"r5\") DEF CSOperationalFacts, CSLosers, CSWaiters\n<1>2. QED\n  BY <1>1, CSFiniteBridge, CSFinite!FS_Subset, CSProof!SMTT(\"r5\") DEF CSOperationalFacts\n\nLEMMA CSBasicInternalAbort ==\n  ASSUME CSOperationalFacts, NEW t, NEW reason, internalAbort(t,reason)\n  PROVE CSOperationalFacts'\n<1>1. CSNoCommitHistoryStep\n  BY CSProof!SMTT(\"r5\") DEF internalAbort, CSNoCommitHistoryStep\n<1>2. history' \\in Seq(Range(history')) /\\ CommittedTxns(history') = CommittedTxns(history)\n  BY <1>1, CSBasicHistoryStep, CSProof!SMTT(\"r5\") DEF CSOperationalFacts\n<1>3. IsFiniteSet(CSWaiters')\n  BY CSWaiterFiniteUpdate, CSProof!SMTT(\"r10\") DEF CSOperationalFacts, internalAbort\n<1>4. QED\n  BY <1>2, <1>3, CSProof!SMTT(\"r10\") DEF CSOperationalFacts, internalAbort\n\nLEMMA CSBasicBegin ==\n  ASSUME CSOperationalFacts, NEW t \\in TxnId, Begin(t)\n  PROVE CSOperationalFacts'\n<1>1. CSNoCommitHistoryStep\n  BY CSProof!SMTT(\"r5\") DEF Begin, CSNoCommitHistoryStep\n<1>2. history' \\in Seq(Range(history')) /\\ CommittedTxns(history') = CommittedTxns(history)\n  BY <1>1, CSBasicHistoryStep, CSProof!SMTT(\"r5\") DEF CSOperationalFacts\n<1>3. CSWaiters' = CSWaiters\n  BY CSProof!SMTT(\"r5\") DEF Begin, CSWaiters\n<1>4. IsFiniteSet(CSWaiters')\n  BY <1>3, CSProof!SMTT(\"r5\") DEF CSOperationalFacts\n<1>5. QED\n  BY <1>2, <1>4, CSProof!SMTT(\"r10\") DEF Begin, CSOperationalFacts\n\nLEMMA CSBasicRead ==\n  ASSUME CSOperationalFacts, NEW t \\in TxnId, NEW k \\in Key, Read(t,k)\n  PROVE CSOperationalFacts'\n<1>1. CASE internalAbort(t,\"in attempted read, to preserve serializability\")\n  BY <1>1, CSBasicInternalAbort, CSProof!SMTT(\"r5\")\n<1>2. CASE ~internalAbort(t,\"in attempted read, to preserve serializability\")\n  <2>1. CSNoCommitHistoryStep\n    BY <1>2, CSProof!SMTT(\"r5\") DEF Read, CSNoCommitHistoryStep\n  <2>2. history' \\in Seq(Range(history')) /\\ CommittedTxns(history') = CommittedTxns(history)\n    BY <2>1, CSBasicHistoryStep, CSProof!SMTT(\"r5\") DEF CSOperationalFacts\n  <2>3. CSWaiters' = CSWaiters\n    BY <1>2, CSProof!SMTT(\"r5\") DEF Read, CSWaiters\n  <2>4. IsFiniteSet(CSWaiters')\n    BY <2>3, CSProof!SMTT(\"r5\") DEF CSOperationalFacts\n  <2>5. QED\n    BY <1>2, <2>2, <2>4, CSProof!SMTT(\"r10\") DEF Read, CSOperationalFacts\n<1>3. QED\n  BY <1>1, <1>2, CSProof!SMTT(\"r5\")\n\nLEMMA CSBasicAcquiringWrite ==\n  ASSUME CSOperationalFacts, NEW t \\in TxnId, NEW k \\in Key,\n         t \\notin CommittedTxns(history), HelperWriteCanAcquireXLock(t,k)\n  PROVE CSOperationalFacts'\n<1>1. CASE internalAbort(t,\"in attempted write, to preserve serializability\")\n  BY <1>1, CSBasicInternalAbort, CSProof!SMTT(\"r5\")\n<1>2. CASE ~internalAbort(t,\"in attempted write, to preserve serializability\")\n  <2>1. CSNoCommitHistoryStep\n    BY <1>2, CSProof!SMTT(\"r5\")\n       DEF HelperWriteCanAcquireXLock, snapshotIsolationWriteAction, CSNoCommitHistoryStep\n  <2>2. history' \\in Seq(Range(history')) /\\ CommittedTxns(history') = CommittedTxns(history)\n    BY <2>1, CSBasicHistoryStep, CSProof!SMTT(\"r5\") DEF CSOperationalFacts\n  <2>3. IsFiniteSet(CSWaiters')\n    BY <1>2, CSWaiterFiniteUpdate, CSProof!SMTT(\"r10\")\n       DEF CSOperationalFacts, HelperWriteCanAcquireXLock, snapshotIsolationWriteAction\n  <2>4. QED\n    BY <1>2, <2>2, <2>3, CSProof!SMTT(\"r10\")\n       DEF CSOperationalFacts, HelperWriteCanAcquireXLock, snapshotIsolationWriteAction\n<1>3. QED\n  BY <1>1, <1>2, CSProof!SMTT(\"r5\")\n\nLEMMA CSBasicLockConflict ==\n  ASSUME CSOperationalFacts, NEW t \\in TxnId, NEW k \\in Key,\n         t \\notin CommittedTxns(history), HelperWriteConflictsWithXLock(t,k)\n  PROVE CSOperationalFacts'\n<1>1. CSNoCommitHistoryStep\n  BY CSProof!SMTT(\"r10\") DEF HelperWriteConflictsWithXLock, CSNoCommitHistoryStep\n<1>2. history' \\in Seq(Range(history')) /\\ CommittedTxns(history') = CommittedTxns(history)\n  BY <1>1, CSBasicHistoryStep, CSProof!SMTT(\"r5\") DEF CSOperationalFacts\n<1>A. \\A u \\in TxnId \\ {t} :\n         waitingForXLock'[u] = waitingForXLock[u] \\/ waitingForXLock'[u] = NoLock\n  BY CSProof!SMTT(\"r10\") DEF CSOperationalFacts, HelperWriteConflictsWithXLock\n<1>3. IsFiniteSet(CSWaiters')\n  BY <1>A, CSWaiterFiniteUpdate, CSProof!SMTT(\"r5\") DEF CSOperationalFacts\n<1>4. QED\n  BY <1>2, <1>3, CSProof!SMTT(\"r10\") DEF CSOperationalFacts, HelperWriteConflictsWithXLock\n\nLEMMA CSBasicStartingWrite ==\n  ASSUME CSOperationalFacts, NEW t \\in TxnId, NEW k \\in Key, StartWriteMayBlock(t,k)\n  PROVE CSOperationalFacts'\n<1>1. t \\notin CommittedTxns(history)\n  BY CSActiveNotCommitted, CSProof!SMTT(\"r5\") DEF StartWriteMayBlock\n<1>2. CASE WritersCommittedToKeySinceTxnBegan(t,k) /= {}\n  <2>1. internalAbort(t,\"forced by First Committer Wins\")\n    BY <1>2, CSProof!SMTT(\"r10\")\n       DEF StartWriteMayBlock, internalAbort, CSOperationalFacts, StartedAndCanDoPublicOperation\n  <2>2. QED\n    BY <2>1, CSBasicInternalAbort, CSProof!SMTT(\"r5\")\n<1>3. CASE WritersCommittedToKeySinceTxnBegan(t,k) = {}\n  BY <1>1, <1>3, CSBasicAcquiringWrite, CSBasicLockConflict, CSProof!SMTT(\"r5\")\n     DEF StartWriteMayBlock\n<1>4. QED\n  BY <1>2, <1>3, CSProof!SMTT(\"r5\")\n\nLEMMA CSBasicFinishingWrite ==\n  ASSUME CSOperationalFacts, NEW t \\in TxnId, FinishBlockedWrite(t)\n  PROVE CSOperationalFacts'\n<1>1. t \\notin CommittedTxns(history) /\\ waitingForXLock[t] \\in Key\n  BY CSProof!SMTT(\"r5\") DEF CSOperationalFacts, FinishBlockedWrite\n<1>2. QED\n  BY <1>1, CSBasicAcquiringWrite, CSProof!SMTT(\"r5\") DEF FinishBlockedWrite\n\nLEMMA CSNormalCommitHistory ==\n  ASSUME NEW t, Commit(t), ~(inConflict[t] /\\ outConflict[t])\n  PROVE history' = Append(history,[op |-> \"commit\", txnid |-> t]) \\o CSAbortList(CSLosers(t))\n  BY CSProof!IsaM(\"auto\")\n     DEF Commit, KeysCurrentlyXLockedByActiveTxn, CSLosers,\n         CSAbortList, CSAbortFunction, CSAbortStep, CSOne, CSForcedAbort\n\nLEMMA CSBasicCommit ==\n  ASSUME CSOperationalFacts, NEW t \\in TxnId, Commit(t)\n  PROVE CSOperationalFacts'\n<1>1. CASE inConflict[t] /\\ outConflict[t]\n  BY <1>1, CSBasicInternalAbort, CSProof!SMTT(\"r5\") DEF Commit\n<1>2. CASE ~(inConflict[t] /\\ outConflict[t])\n  <2>1. IsFiniteSet(CSLosers(t))\n    BY CSLosersFinite, CSProof!SMTT(\"r5\")\n  <2>2. /\\ CSAbortList(CSLosers(t)) \\in Seq({CSForcedAbort(u) : u \\in CSLosers(t)})\n         /\\ CommittedTxns(CSAbortList(CSLosers(t))) = {}\n    BY <2>1, CSAbortListProperties, CSProof!SMTT(\"r5\")\n  <2>3. history' = Append(history,[op |-> \"commit\", txnid |-> t]) \\o CSAbortList(CSLosers(t))\n    BY <1>2, CSNormalCommitHistory, CSProof!SMTT(\"r5\")\n  <2>4. LET h == Append(history,[op |-> \"commit\", txnid |-> t])\n        IN /\\ h \\in Seq(Range(h))\n           /\\ CommittedTxns(h) = CommittedTxns(history) \\union {t}\n    BY CSAppendSequence, CSCommittedAppend, CSProof!SMTT(\"r5\") DEF CSOperationalFacts\n  <2>5. /\\ history' \\in Seq(Range(history'))\n         /\\ CommittedTxns(history') = CommittedTxns(history) \\union {t}\n    BY <2>2, <2>3, <2>4, CSConcatSequences, CSProof!IsaM(\"blast\")\n  <2>6. IsFiniteSet(CSWaiters')\n    BY <1>2, CSWaiterFiniteUpdate, CSProof!SMTT(\"r10\") DEF CSOperationalFacts, Commit\n  <2>7. QED\n    BY <1>2, <2>5, <2>6, CSProof!SMTT(\"r10\")\n       DEF CSOperationalFacts, Commit, StartedAndCanDoPublicOperation\n<1>3. QED\n  BY <1>1, <1>2, CSProof!SMTT(\"r5\")\n\nLEMMA CSOperationalStutter ==\n  CSOperationalFacts /\\ UNCHANGED allvars => CSOperationalFacts'\n  BY CSProof!IsaM(\"auto\") DEF CSOperationalFacts, CSWaiters, allvars\n\nLEMMA CSOperationalNext == CSOperationalFacts /\\ [Next]_allvars => CSOperationalFacts'\n<1>1. ASSUME CSOperationalFacts, NEW t \\in TxnId,\n             \\/ Begin(t)\n             \\/ Commit(t)\n             \\/ ChooseToAbort(t)\n             \\/ \\E k \\in Key : Read(t,k) \\/ StartWriteMayBlock(t,k)\n             \\/ FinishBlockedWrite(t)\n      PROVE CSOperationalFacts'\n  BY <1>1, CSBasicBegin, CSBasicCommit, CSBasicInternalAbort, CSBasicRead,\n     CSBasicStartingWrite, CSBasicFinishingWrite, CSProof!SMTT(\"r10\") DEF ChooseToAbort\n<1>2. QED\n  BY <1>1, CSOperationalStutter, CSProof!SMTT(\"r5\") DEF Next\n\nCSDeferredSteps ==\n  /\\ \\A t \\in TxnId : CSStateCore /\\ Commit(t) => CSStateCore'\n  /\\ \\A t \\in TxnId, k \\in Key :\n       CSStateCore /\\ StartWriteMayBlock(t,k) /\\ HelperWriteConflictsWithXLock(t,k)\n         => CSStateCore'\n\nLEMMA CSCoreStartingWrite ==\n  ASSUME CSOperationalFacts, CSStateCore, CSDeferredSteps,\n         NEW t \\in TxnId, NEW k \\in Key, StartWriteMayBlock(t,k)\n  PROVE CSStateCore'\n<1>1. t \\notin CommittedTxns(history)\n  BY CSActiveNotCommitted, CSProof!SMTT(\"r5\") DEF StartWriteMayBlock\n<1>2. CASE WritersCommittedToKeySinceTxnBegan(t,k) /= {}\n  <2>1. history' = Append(history,\n            [op |-> \"abort\", txnid |-> t, reason |-> \"forced by First Committer Wins\"])\n    BY <1>2, CSProof!SMTT(\"r5\") DEF StartWriteMayBlock\n  <2>2. \\A u \\in CommittedTxns(history) :\n          /\\ outConflict'[u] = outConflict[u]\n          /\\ inConflict[u] => inConflict'[u]\n          /\\ ~(inConflict'[u] /\\ outConflict'[u])\n    BY <1>1, <1>2, CSProof!SMTT(\"r5\")\n       DEF StartWriteMayBlock, CSOperationalFacts, CSStateCore, CSCoreInvariant\n  <2>3. QED\n    BY <1>1, <2>1, <2>2, CSCoreUncommittedAppend, CSProof!SMTT(\"r5\")\n       DEF CSOperationalFacts, CSStateCore\n<1>3. CASE WritersCommittedToKeySinceTxnBegan(t,k) = {}\n           /\\ k \\in KeysCurrentlyXLockedByAnyTxn\n  BY <1>3, CSProof!SMTT(\"r5\") DEF StartWriteMayBlock, CSDeferredSteps\n<1>4. CASE WritersCommittedToKeySinceTxnBegan(t,k) = {}\n           /\\ k \\notin KeysCurrentlyXLockedByAnyTxn\n  BY <1>1, <1>4, CSCoreAcquiringWrite, CSProof!SMTT(\"r5\")\n     DEF StartWriteMayBlock, CSOperationalFacts\n<1>5. QED\n  BY <1>2, <1>3, <1>4, CSProof!SMTT(\"r5\")\n\nLEMMA CSCoreNextUnderConditions ==\n  CSStateCore /\\ CSOperationalFacts /\\ [CSDeferredSteps]_allvars /\\ [Next]_allvars\n    => CSStateCore'\n<1>1. ASSUME CSStateCore, CSOperationalFacts, CSDeferredSteps, Next\n      PROVE CSStateCore'\n  <2>1. CASE LegitimateTermination /\\ UNCHANGED allvars\n    BY <1>1, <2>1, CSCoreStuttering, CSProof!SMTT(\"r5\")\n  <2>2. CASE \\E t \\in TxnId :\n              \\/ Begin(t)\n              \\/ Commit(t)\n              \\/ ChooseToAbort(t)\n              \\/ \\E k \\in Key : Read(t,k) \\/ StartWriteMayBlock(t,k)\n              \\/ FinishBlockedWrite(t)\n    <3>1. PICK t \\in TxnId :\n              \\/ Begin(t)\n              \\/ Commit(t)\n              \\/ ChooseToAbort(t)\n              \\/ \\E k \\in Key : Read(t,k) \\/ StartWriteMayBlock(t,k)\n              \\/ FinishBlockedWrite(t)\n      BY <2>2, CSProof!SMTT(\"r5\")\n    <3>2. QED\n      BY <1>1, <3>1, CSCoreBegin, CSCoreVoluntaryAbort,\n         CSCoreRead, CSCoreStartingWrite, CSCoreFinishingWrite, CSProof!SMTT(\"r10\")\n         DEF CSOperationalFacts, CSDeferredSteps\n  <2>3. QED\n    BY <1>1, <2>1, <2>2, CSProof!SMTT(\"r5\") DEF Next\n<1>2. QED\n  BY <1>1, CSCoreStuttering, CSProof!SMTT(\"r5\") DEF allvars\n\n\\* END AGENT HELPERS\n\nTHEOREM CahillSerializableCorrect == Spec => []CahillSerializable(history)\n\\* BEGIN AGENT PROOF CahillSSI/CahillSerializability_CahillSerializableCorrect.tla\n<1>1. Init => CSStateCore\n  BY CSInitialCore, CSProof!SMTT(\"r5\") DEF CSStateCore\n<1>2. CSStateCore => CahillSerializable(history)\n  BY CSCoreImpliesSerializable, CSProof!SMTT(\"r5\") DEF CSStateCore\n<1>3. Spec => []CSOperationalFacts\n  BY CSInitialOperational, CSOperationalNext, CSProof!PTL DEF Spec\n<1>4. Spec => [][CSDeferredSteps]_allvars\n  \\* Remaining obligation: successful commit and deadlock-abort preservation.\n  \\* This requires invariants relating active transactions' operations,\n  \\* concurrent readers and writers, and the two conflict flags.\n  BY CSProof!PTL DEF Spec, CSDeferredSteps\n<1>5. QED\n  BY <1>1, <1>2, <1>3, <1>4, CSCoreNextUnderConditions, CSProof!PTL DEF Spec\n\\* END AGENT PROOF CahillSSI/CahillSerializability_CahillSerializableCorrect.tla\n====\n",
+  "units": {
+    "CahillSSI/CahillSerializability_CahillSerializableCorrect.tla": {
+      "id": "CahillSSI/CahillSerializability_CahillSerializableCorrect.tla",
+      "name": "CahillSerializableCorrect",
+      "kind": "target",
+      "lineStart": 867,
+      "lineEnd": 881,
+      "proofLines": [
+        869,
+        870,
+        871,
+        872,
+        873,
+        874,
+        875,
+        879,
+        880,
+        881
+      ],
+      "proofRange": [
+        869,
+        881
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:CSCoreImpliesSerializable",
+        "helper:CSCoreNextUnderConditions",
+        "helper:CSInitialCore",
+        "helper:CSInitialOperational",
+        "helper:CSOperationalNext"
+      ]
+    },
+    "helper:CSEmptyCommitted": {
+      "id": "helper:CSEmptyCommitted",
+      "name": "CSEmptyCommitted",
+      "kind": "helper",
+      "lineStart": 10,
+      "lineEnd": 11,
+      "proofLines": [
+        11
+      ],
+      "proofRange": [
+        11,
+        11
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:CSNeighborsInNodes": {
+      "id": "helper:CSNeighborsInNodes",
+      "name": "CSNeighborsInNodes",
+      "kind": "helper",
+      "lineStart": 43,
+      "lineEnd": 46,
+      "proofLines": [
+        46
+      ],
+      "proofRange": [
+        46,
+        46
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:CSRankRelationWellFounded": {
+      "id": "helper:CSRankRelationWellFounded",
+      "name": "CSRankRelationWellFounded",
+      "kind": "helper",
+      "lineStart": 48,
+      "lineEnd": 56,
+      "proofLines": [
+        51,
+        52,
+        53,
+        54,
+        55,
+        56
+      ],
+      "proofRange": [
+        51,
+        56
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:CSNeighborRank": {
+      "id": "helper:CSNeighborRank",
+      "name": "CSNeighborRank",
+      "kind": "helper",
+      "lineStart": 58,
+      "lineEnd": 65,
+      "proofLines": [
+        63,
+        64,
+        65
+      ],
+      "proofRange": [
+        63,
+        65
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:CSNeighborsInNodes"
+      ]
+    },
+    "helper:CSCycleRecursion": {
+      "id": "helper:CSCycleRecursion",
+      "name": "CSCycleRecursion",
+      "kind": "helper",
+      "lineStart": 67,
+      "lineEnd": 91,
+      "proofLines": [
+        71,
+        72,
+        73,
+        74,
+        75,
+        76,
+        77,
+        78,
+        79,
+        80,
+        81,
+        82,
+        83,
+        84,
+        85,
+        86,
+        87,
+        88,
+        89,
+        90,
+        91
+      ],
+      "proofRange": [
+        71,
+        91
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:CSNeighborRank",
+        "helper:CSRankRelationWellFounded"
+      ]
+    },
+    "helper:CSRankedGraphAcyclic": {
+      "id": "helper:CSRankedGraphAcyclic",
+      "name": "CSRankedGraphAcyclic",
+      "kind": "helper",
+      "lineStart": 93,
+      "lineEnd": 129,
+      "proofLines": [
+        96,
+        97,
+        98,
+        99,
+        100,
+        101,
+        102,
+        103,
+        104,
+        105,
+        106,
+        107,
+        108,
+        109,
+        110,
+        111,
+        112,
+        113,
+        114,
+        115,
+        116,
+        117,
+        118,
+        119,
+        120,
+        121,
+        122,
+        123,
+        124,
+        125,
+        126,
+        127,
+        128,
+        129
+      ],
+      "proofRange": [
+        96,
+        129
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:CSCycleRecursion",
+        "helper:CSNeighborRank",
+        "helper:CSNeighborsInNodes",
+        "helper:CSRankRelationWellFounded"
+      ]
+    },
+    "helper:CSMVSGNodes": {
+      "id": "helper:CSMVSGNodes",
+      "name": "CSMVSGNodes",
+      "kind": "helper",
+      "lineStart": 164,
+      "lineEnd": 170,
+      "proofLines": [
+        170
+      ],
+      "proofRange": [
+        170,
+        170
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:CSTimestampBounds": {
+      "id": "helper:CSTimestampBounds",
+      "name": "CSTimestampBounds",
+      "kind": "helper",
+      "lineStart": 172,
+      "lineEnd": 178,
+      "proofLines": [
+        178
+      ],
+      "proofRange": [
+        178,
+        178
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:CSEdgesIncreaseTimestamp": {
+      "id": "helper:CSEdgesIncreaseTimestamp",
+      "name": "CSEdgesIncreaseTimestamp",
+      "kind": "helper",
+      "lineStart": 180,
+      "lineEnd": 193,
+      "proofLines": [
+        184,
+        185,
+        186,
+        187,
+        188,
+        189,
+        190,
+        191,
+        192,
+        193
+      ],
+      "proofRange": [
+        184,
+        193
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:CSTimestampBounds"
+      ]
+    },
+    "helper:CSCoreGivesRank": {
+      "id": "helper:CSCoreGivesRank",
+      "name": "CSCoreGivesRank",
+      "kind": "helper",
+      "lineStart": 195,
+      "lineEnd": 207,
+      "proofLines": [
+        198,
+        199,
+        200,
+        201,
+        202,
+        203,
+        204,
+        205,
+        206,
+        207
+      ],
+      "proofRange": [
+        198,
+        207
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:CSEdgesIncreaseTimestamp",
+        "helper:CSMVSGNodes",
+        "helper:CSTimestampBounds"
+      ]
+    },
+    "helper:CSCoreImpliesSerializable": {
+      "id": "helper:CSCoreImpliesSerializable",
+      "name": "CSCoreImpliesSerializable",
+      "kind": "helper",
+      "lineStart": 209,
+      "lineEnd": 215,
+      "proofLines": [
+        212,
+        213,
+        214,
+        215
+      ],
+      "proofRange": [
+        212,
+        215
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:CSCoreGivesRank",
+        "helper:CSRankedGraphAcyclic"
+      ]
+    },
+    "helper:CSEmptySelect": {
+      "id": "helper:CSEmptySelect",
+      "name": "CSEmptySelect",
+      "kind": "helper",
+      "lineStart": 217,
+      "lineEnd": 228,
+      "proofLines": [
+        220,
+        221,
+        222,
+        223,
+        224,
+        225,
+        226,
+        227,
+        228
+      ],
+      "proofRange": [
+        220,
+        228
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:CSInitialCore": {
+      "id": "helper:CSInitialCore",
+      "name": "CSInitialCore",
+      "kind": "helper",
+      "lineStart": 230,
+      "lineEnd": 234,
+      "proofLines": [
+        231,
+        232,
+        233,
+        234
+      ],
+      "proofRange": [
+        231,
+        234
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:CSEmptyCommitted",
+        "helper:CSEmptySelect"
+      ]
+    },
+    "helper:CSCoreStuttering": {
+      "id": "helper:CSCoreStuttering",
+      "name": "CSCoreStuttering",
+      "kind": "helper",
+      "lineStart": 238,
+      "lineEnd": 240,
+      "proofLines": [
+        240
+      ],
+      "proofRange": [
+        240,
+        240
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:CSSelectAppend": {
+      "id": "helper:CSSelectAppend",
+      "name": "CSSelectAppend",
+      "kind": "helper",
+      "lineStart": 242,
+      "lineEnd": 246,
+      "proofLines": [
+        246
+      ],
+      "proofRange": [
+        246,
+        246
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:CSAppendRange": {
+      "id": "helper:CSAppendRange",
+      "name": "CSAppendRange",
+      "kind": "helper",
+      "lineStart": 253,
+      "lineEnd": 259,
+      "proofLines": [
+        256,
+        257,
+        258,
+        259
+      ],
+      "proofRange": [
+        256,
+        259
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:CSCommittedAppend": {
+      "id": "helper:CSCommittedAppend",
+      "name": "CSCommittedAppend",
+      "kind": "helper",
+      "lineStart": 275,
+      "lineEnd": 280,
+      "proofLines": [
+        280
+      ],
+      "proofRange": [
+        280,
+        280
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:CSAppendRange"
+      ]
+    },
+    "helper:CSKeysAppend": {
+      "id": "helper:CSKeysAppend",
+      "name": "CSKeysAppend",
+      "kind": "helper",
+      "lineStart": 282,
+      "lineEnd": 288,
+      "proofLines": [
+        288
+      ],
+      "proofRange": [
+        288,
+        288
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:CSAppendRange"
+      ]
+    },
+    "helper:CSUncommittedAppendView": {
+      "id": "helper:CSUncommittedAppendView",
+      "name": "CSUncommittedAppendView",
+      "kind": "helper",
+      "lineStart": 290,
+      "lineEnd": 301,
+      "proofLines": [
+        298,
+        299,
+        300,
+        301
+      ],
+      "proofRange": [
+        298,
+        301
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:CSCommittedAppend",
+        "helper:CSKeysAppend",
+        "helper:CSSelectAppend"
+      ]
+    },
+    "helper:CSCoreViewChange": {
+      "id": "helper:CSCoreViewChange",
+      "name": "CSCoreViewChange",
+      "kind": "helper",
+      "lineStart": 319,
+      "lineEnd": 334,
+      "proofLines": [
+        332,
+        333,
+        334
+      ],
+      "proofRange": [
+        332,
+        334
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:CSCoreUncommittedAppend": {
+      "id": "helper:CSCoreUncommittedAppend",
+      "name": "CSCoreUncommittedAppend",
+      "kind": "helper",
+      "lineStart": 336,
+      "lineEnd": 355,
+      "proofLines": [
+        346,
+        347,
+        348,
+        349,
+        350,
+        351,
+        352,
+        353,
+        354,
+        355
+      ],
+      "proofRange": [
+        346,
+        355
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:CSCoreViewChange",
+        "helper:CSUncommittedAppendView"
+      ]
+    },
+    "helper:CSActiveNotCommitted": {
+      "id": "helper:CSActiveNotCommitted",
+      "name": "CSActiveNotCommitted",
+      "kind": "helper",
+      "lineStart": 357,
+      "lineEnd": 361,
+      "proofLines": [
+        360,
+        361
+      ],
+      "proofRange": [
+        360,
+        361
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:CSCoreInternalAbort": {
+      "id": "helper:CSCoreInternalAbort",
+      "name": "CSCoreInternalAbort",
+      "kind": "helper",
+      "lineStart": 363,
+      "lineEnd": 375,
+      "proofLines": [
+        369,
+        370,
+        371,
+        372,
+        373,
+        374,
+        375
+      ],
+      "proofRange": [
+        369,
+        375
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:CSCoreUncommittedAppend"
+      ]
+    },
+    "helper:CSCoreBegin": {
+      "id": "helper:CSCoreBegin",
+      "name": "CSCoreBegin",
+      "kind": "helper",
+      "lineStart": 377,
+      "lineEnd": 388,
+      "proofLines": [
+        380,
+        381,
+        382,
+        383,
+        384,
+        385,
+        386,
+        387,
+        388
+      ],
+      "proofRange": [
+        380,
+        388
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:CSCoreUncommittedAppend"
+      ]
+    },
+    "helper:CSCoreVoluntaryAbort": {
+      "id": "helper:CSCoreVoluntaryAbort",
+      "name": "CSCoreVoluntaryAbort",
+      "kind": "helper",
+      "lineStart": 390,
+      "lineEnd": 395,
+      "proofLines": [
+        395
+      ],
+      "proofRange": [
+        395,
+        395
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:CSActiveNotCommitted",
+        "helper:CSCoreInternalAbort"
+      ]
+    },
+    "helper:CSCoreRead": {
+      "id": "helper:CSCoreRead",
+      "name": "CSCoreRead",
+      "kind": "helper",
+      "lineStart": 397,
+      "lineEnd": 421,
+      "proofLines": [
+        404,
+        405,
+        406,
+        407,
+        408,
+        409,
+        410,
+        411,
+        412,
+        413,
+        414,
+        415,
+        416,
+        417,
+        418,
+        419,
+        420,
+        421
+      ],
+      "proofRange": [
+        404,
+        421
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:CSActiveNotCommitted",
+        "helper:CSCoreInternalAbort",
+        "helper:CSCoreUncommittedAppend"
+      ]
+    },
+    "helper:CSCoreAcquiringWrite": {
+      "id": "helper:CSCoreAcquiringWrite",
+      "name": "CSCoreAcquiringWrite",
+      "kind": "helper",
+      "lineStart": 423,
+      "lineEnd": 443,
+      "proofLines": [
+        429,
+        430,
+        431,
+        432,
+        433,
+        434,
+        435,
+        436,
+        437,
+        438,
+        439,
+        440,
+        441,
+        442,
+        443
+      ],
+      "proofRange": [
+        429,
+        443
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:CSCoreInternalAbort",
+        "helper:CSCoreUncommittedAppend"
+      ]
+    },
+    "helper:CSCoreFinishingWrite": {
+      "id": "helper:CSCoreFinishingWrite",
+      "name": "CSCoreFinishingWrite",
+      "kind": "helper",
+      "lineStart": 445,
+      "lineEnd": 455,
+      "proofLines": [
+        452,
+        453,
+        454,
+        455
+      ],
+      "proofRange": [
+        452,
+        455
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:CSCoreAcquiringWrite"
+      ]
+    },
+    "helper:CSFiniteBridge": {
+      "id": "helper:CSFiniteBridge",
+      "name": "CSFiniteBridge",
+      "kind": "helper",
+      "lineStart": 459,
+      "lineEnd": 460,
+      "proofLines": [
+        460
+      ],
+      "proofRange": [
+        460,
+        460
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:CSRangeBridge": {
+      "id": "helper:CSRangeBridge",
+      "name": "CSRangeBridge",
+      "kind": "helper",
+      "lineStart": 462,
+      "lineEnd": 463,
+      "proofLines": [
+        463
+      ],
+      "proofRange": [
+        463,
+        463
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:CSNoLockOutside": {
+      "id": "helper:CSNoLockOutside",
+      "name": "CSNoLockOutside",
+      "kind": "helper",
+      "lineStart": 479,
+      "lineEnd": 480,
+      "proofLines": [
+        480
+      ],
+      "proofRange": [
+        480,
+        480
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:CSAppendSequence": {
+      "id": "helper:CSAppendSequence",
+      "name": "CSAppendSequence",
+      "kind": "helper",
+      "lineStart": 482,
+      "lineEnd": 490,
+      "proofLines": [
+        485,
+        486,
+        487,
+        488,
+        489,
+        490
+      ],
+      "proofRange": [
+        485,
+        490
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:CSConcatSequences": {
+      "id": "helper:CSConcatSequences",
+      "name": "CSConcatSequences",
+      "kind": "helper",
+      "lineStart": 492,
+      "lineEnd": 505,
+      "proofLines": [
+        497,
+        498,
+        499,
+        500,
+        501,
+        502,
+        503,
+        504,
+        505
+      ],
+      "proofRange": [
+        497,
+        505
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:CSRangeBridge"
+      ]
+    },
+    "helper:CSAbortRecursion": {
+      "id": "helper:CSAbortRecursion",
+      "name": "CSAbortRecursion",
+      "kind": "helper",
+      "lineStart": 507,
+      "lineEnd": 527,
+      "proofLines": [
+        510,
+        511,
+        512,
+        513,
+        514,
+        515,
+        516,
+        517,
+        518,
+        519,
+        520,
+        521,
+        522,
+        523,
+        524,
+        525,
+        526,
+        527
+      ],
+      "proofRange": [
+        510,
+        527
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:CSFiniteBridge"
+      ]
+    },
+    "helper:CSAbortListProperties": {
+      "id": "helper:CSAbortListProperties",
+      "name": "CSAbortListProperties",
+      "kind": "helper",
+      "lineStart": 529,
+      "lineEnd": 589,
+      "proofLines": [
+        534,
+        535,
+        536,
+        537,
+        538,
+        539,
+        540,
+        541,
+        542,
+        543,
+        544,
+        545,
+        546,
+        547,
+        548,
+        549,
+        550,
+        551,
+        552,
+        553,
+        554,
+        555,
+        556,
+        557,
+        558,
+        559,
+        560,
+        561,
+        562,
+        563,
+        564,
+        565,
+        566,
+        567,
+        568,
+        569,
+        570,
+        571,
+        572,
+        573,
+        574,
+        575,
+        576,
+        577,
+        578,
+        579,
+        580,
+        581,
+        582,
+        583,
+        584,
+        585,
+        586,
+        587,
+        588,
+        589
+      ],
+      "proofRange": [
+        534,
+        589
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:CSAbortRecursion",
+        "helper:CSConcatSequences",
+        "helper:CSFiniteBridge"
+      ]
+    },
+    "helper:CSWaiterFiniteUpdate": {
+      "id": "helper:CSWaiterFiniteUpdate",
+      "name": "CSWaiterFiniteUpdate",
+      "kind": "helper",
+      "lineStart": 591,
+      "lineEnd": 601,
+      "proofLines": [
+        596,
+        597,
+        598,
+        599,
+        600,
+        601
+      ],
+      "proofRange": [
+        596,
+        601
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:CSFiniteBridge"
+      ]
+    },
+    "helper:CSBasicHistoryStep": {
+      "id": "helper:CSBasicHistoryStep",
+      "name": "CSBasicHistoryStep",
+      "kind": "helper",
+      "lineStart": 621,
+      "lineEnd": 625,
+      "proofLines": [
+        625
+      ],
+      "proofRange": [
+        625,
+        625
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:CSAppendSequence",
+        "helper:CSCommittedAppend"
+      ]
+    },
+    "helper:CSInitialOperational": {
+      "id": "helper:CSInitialOperational",
+      "name": "CSInitialOperational",
+      "kind": "helper",
+      "lineStart": 627,
+      "lineEnd": 632,
+      "proofLines": [
+        628,
+        629,
+        630,
+        631,
+        632
+      ],
+      "proofRange": [
+        628,
+        632
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:CSEmptyCommitted",
+        "helper:CSFiniteBridge",
+        "helper:CSNoLockOutside"
+      ]
+    },
+    "helper:CSLosersFinite": {
+      "id": "helper:CSLosersFinite",
+      "name": "CSLosersFinite",
+      "kind": "helper",
+      "lineStart": 634,
+      "lineEnd": 640,
+      "proofLines": [
+        637,
+        638,
+        639,
+        640
+      ],
+      "proofRange": [
+        637,
+        640
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:CSFiniteBridge"
+      ]
+    },
+    "helper:CSBasicInternalAbort": {
+      "id": "helper:CSBasicInternalAbort",
+      "name": "CSBasicInternalAbort",
+      "kind": "helper",
+      "lineStart": 642,
+      "lineEnd": 652,
+      "proofLines": [
+        645,
+        646,
+        647,
+        648,
+        649,
+        650,
+        651,
+        652
+      ],
+      "proofRange": [
+        645,
+        652
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:CSBasicHistoryStep",
+        "helper:CSWaiterFiniteUpdate"
+      ]
+    },
+    "helper:CSBasicBegin": {
+      "id": "helper:CSBasicBegin",
+      "name": "CSBasicBegin",
+      "kind": "helper",
+      "lineStart": 654,
+      "lineEnd": 666,
+      "proofLines": [
+        657,
+        658,
+        659,
+        660,
+        661,
+        662,
+        663,
+        664,
+        665,
+        666
+      ],
+      "proofRange": [
+        657,
+        666
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:CSBasicHistoryStep"
+      ]
+    },
+    "helper:CSBasicRead": {
+      "id": "helper:CSBasicRead",
+      "name": "CSBasicRead",
+      "kind": "helper",
+      "lineStart": 668,
+      "lineEnd": 685,
+      "proofLines": [
+        671,
+        672,
+        673,
+        674,
+        675,
+        676,
+        677,
+        678,
+        679,
+        680,
+        681,
+        682,
+        683,
+        684,
+        685
+      ],
+      "proofRange": [
+        671,
+        685
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:CSBasicHistoryStep",
+        "helper:CSBasicInternalAbort"
+      ]
+    },
+    "helper:CSBasicAcquiringWrite": {
+      "id": "helper:CSBasicAcquiringWrite",
+      "name": "CSBasicAcquiringWrite",
+      "kind": "helper",
+      "lineStart": 687,
+      "lineEnd": 706,
+      "proofLines": [
+        691,
+        692,
+        693,
+        694,
+        695,
+        696,
+        697,
+        698,
+        699,
+        700,
+        701,
+        702,
+        703,
+        704,
+        705,
+        706
+      ],
+      "proofRange": [
+        691,
+        706
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:CSBasicHistoryStep",
+        "helper:CSBasicInternalAbort",
+        "helper:CSWaiterFiniteUpdate"
+      ]
+    },
+    "helper:CSBasicLockConflict": {
+      "id": "helper:CSBasicLockConflict",
+      "name": "CSBasicLockConflict",
+      "kind": "helper",
+      "lineStart": 708,
+      "lineEnd": 722,
+      "proofLines": [
+        712,
+        713,
+        714,
+        715,
+        716,
+        717,
+        718,
+        719,
+        720,
+        721,
+        722
+      ],
+      "proofRange": [
+        712,
+        722
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:CSBasicHistoryStep",
+        "helper:CSWaiterFiniteUpdate"
+      ]
+    },
+    "helper:CSBasicStartingWrite": {
+      "id": "helper:CSBasicStartingWrite",
+      "name": "CSBasicStartingWrite",
+      "kind": "helper",
+      "lineStart": 724,
+      "lineEnd": 739,
+      "proofLines": [
+        727,
+        728,
+        729,
+        730,
+        731,
+        732,
+        733,
+        734,
+        735,
+        736,
+        737,
+        738,
+        739
+      ],
+      "proofRange": [
+        727,
+        739
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:CSActiveNotCommitted",
+        "helper:CSBasicAcquiringWrite",
+        "helper:CSBasicInternalAbort",
+        "helper:CSBasicLockConflict"
+      ]
+    },
+    "helper:CSBasicFinishingWrite": {
+      "id": "helper:CSBasicFinishingWrite",
+      "name": "CSBasicFinishingWrite",
+      "kind": "helper",
+      "lineStart": 741,
+      "lineEnd": 747,
+      "proofLines": [
+        744,
+        745,
+        746,
+        747
+      ],
+      "proofRange": [
+        744,
+        747
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:CSBasicAcquiringWrite"
+      ]
+    },
+    "helper:CSNormalCommitHistory": {
+      "id": "helper:CSNormalCommitHistory",
+      "name": "CSNormalCommitHistory",
+      "kind": "helper",
+      "lineStart": 749,
+      "lineEnd": 754,
+      "proofLines": [
+        752,
+        753,
+        754
+      ],
+      "proofRange": [
+        752,
+        754
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:CSBasicCommit": {
+      "id": "helper:CSBasicCommit",
+      "name": "CSBasicCommit",
+      "kind": "helper",
+      "lineStart": 756,
+      "lineEnd": 782,
+      "proofLines": [
+        759,
+        760,
+        761,
+        762,
+        763,
+        764,
+        765,
+        766,
+        767,
+        768,
+        769,
+        770,
+        771,
+        772,
+        773,
+        774,
+        775,
+        776,
+        777,
+        778,
+        779,
+        780,
+        781,
+        782
+      ],
+      "proofRange": [
+        759,
+        782
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:CSAbortListProperties",
+        "helper:CSAppendSequence",
+        "helper:CSBasicInternalAbort",
+        "helper:CSCommittedAppend",
+        "helper:CSConcatSequences",
+        "helper:CSLosersFinite",
+        "helper:CSNormalCommitHistory",
+        "helper:CSWaiterFiniteUpdate"
+      ]
+    },
+    "helper:CSOperationalStutter": {
+      "id": "helper:CSOperationalStutter",
+      "name": "CSOperationalStutter",
+      "kind": "helper",
+      "lineStart": 784,
+      "lineEnd": 786,
+      "proofLines": [
+        786
+      ],
+      "proofRange": [
+        786,
+        786
+      ],
+      "proofOmitted": false,
+      "dependencies": []
+    },
+    "helper:CSOperationalNext": {
+      "id": "helper:CSOperationalNext",
+      "name": "CSOperationalNext",
+      "kind": "helper",
+      "lineStart": 788,
+      "lineEnd": 799,
+      "proofLines": [
+        789,
+        790,
+        791,
+        792,
+        793,
+        794,
+        795,
+        796,
+        797,
+        798,
+        799
+      ],
+      "proofRange": [
+        789,
+        799
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:CSBasicBegin",
+        "helper:CSBasicCommit",
+        "helper:CSBasicFinishingWrite",
+        "helper:CSBasicInternalAbort",
+        "helper:CSBasicRead",
+        "helper:CSBasicStartingWrite",
+        "helper:CSOperationalStutter"
+      ]
+    },
+    "helper:CSCoreStartingWrite": {
+      "id": "helper:CSCoreStartingWrite",
+      "name": "CSCoreStartingWrite",
+      "kind": "helper",
+      "lineStart": 807,
+      "lineEnd": 834,
+      "proofLines": [
+        811,
+        812,
+        813,
+        814,
+        815,
+        816,
+        817,
+        818,
+        819,
+        820,
+        821,
+        822,
+        823,
+        824,
+        825,
+        826,
+        827,
+        828,
+        829,
+        830,
+        831,
+        832,
+        833,
+        834
+      ],
+      "proofRange": [
+        811,
+        834
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:CSActiveNotCommitted",
+        "helper:CSCoreAcquiringWrite",
+        "helper:CSCoreUncommittedAppend"
+      ]
+    },
+    "helper:CSCoreNextUnderConditions": {
+      "id": "helper:CSCoreNextUnderConditions",
+      "name": "CSCoreNextUnderConditions",
+      "kind": "helper",
+      "lineStart": 836,
+      "lineEnd": 863,
+      "proofLines": [
+        839,
+        840,
+        841,
+        842,
+        843,
+        844,
+        845,
+        846,
+        847,
+        848,
+        849,
+        850,
+        851,
+        852,
+        853,
+        854,
+        855,
+        856,
+        857,
+        858,
+        859,
+        860,
+        861,
+        862,
+        863
+      ],
+      "proofRange": [
+        839,
+        863
+      ],
+      "proofOmitted": false,
+      "dependencies": [
+        "helper:CSCoreBegin",
+        "helper:CSCoreFinishingWrite",
+        "helper:CSCoreRead",
+        "helper:CSCoreStartingWrite",
+        "helper:CSCoreStuttering",
+        "helper:CSCoreVoluntaryAbort"
+      ]
+    }
+  }
+}
