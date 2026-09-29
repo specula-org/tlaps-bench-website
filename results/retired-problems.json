@@ -173,6 +173,41 @@
       "outcome": "proved"
     },
     {
+      "name": "Walgit WAL",
+      "type": "Protocol",
+      "specCount": 1,
+      "invariantCount": 7,
+      "provedBy": [
+        "Codex + GPT-6 Astra"
+      ],
+      "outcome": "proved",
+      "nameParts": [
+        {
+          "text": "Walgit WAL",
+          "url": "https://github.com/specula-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/Walgit/WalgitProof.tla"
+        },
+        {
+          "text": " ("
+        },
+        {
+          "text": "s3-wal-collection",
+          "url": "https://github.com/Vanlightly/s3-wal-collection"
+        },
+        {
+          "text": ")"
+        }
+      ],
+      "proofEvidence": {
+        "benchmarkRevision": "bb9cecc9ebb0f204551d0b829d314a3d1fc19272",
+        "run": "s3-wal-astra-max-20260927-wM5SJ5",
+        "resultSha256": "e848b7a68bb2ee4dc6e4ed5e75e28af91ccc2a22e52bde5d37cd24f7f3119ce3",
+        "proofSha256": "97ce29c2595358b54f1d19f29740b772ffb99bdf4e156b3986f58370f65d915c",
+        "trustedTargetCount": 7,
+        "targetCount": 7,
+        "inputMatchesRevision": "e03314edb30c100fcb3e201a94554106c0091b33"
+      }
+    },
+    {
       "name": "Byzantine Paxos (Consensus, VoteProof, PConProof, BPConProof)",
       "type": "Protocol",
       "specCount": 4,
@@ -461,6 +496,33 @@
       ]
     },
     {
+      "name": "TencentPaxos",
+      "type": "Protocol",
+      "specCount": 1,
+      "invariantCount": 2,
+      "provedBy": [
+        "Codex + GPT-6 Astra"
+      ],
+      "outcome": "proved",
+      "nameParts": [
+        {
+          "text": "TencentPaxos",
+          "url": "https://github.com/specula-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/tlaplus_examples_TencentPaxos/TPaxosWithProof.tla"
+        }
+      ],
+      "proofEvidence": {
+        "benchmarkRevision": "84344c86410c31dd06f3b145228210bb46c8d0cf",
+        "archiveSha256": "490dc40e0b5c65635de0e7bd05cf44a2d65ff5e87e37906ef000f72ed4a8b568",
+        "archiveMember": "gpt6_astra_solutions_reasoning_effort_max.jsonl",
+        "attempt": 1,
+        "recordSha256": "a82b2c49a368e4080488cdd5de4fb709a3d2dc3351b106b98c9af061061b6a3e",
+        "proofSha256": "df13996332211e6c6fc909fe0df10685ce6032990bebbe3730b25ac8c3abd0de",
+        "trustedTargetCount": 2,
+        "targetCount": 2,
+        "inputMatchesRevision": "e03314edb30c100fcb3e201a94554106c0091b33"
+      }
+    },
+    {
       "name": "Two-phase commit",
       "type": "Protocol",
       "specCount": 3,
@@ -510,6 +572,33 @@
       ]
     },
     {
+      "name": "Barriers",
+      "type": "Protocol",
+      "specCount": 1,
+      "invariantCount": 5,
+      "provedBy": [
+        "Codex + GPT-6 Astra"
+      ],
+      "outcome": "proved",
+      "nameParts": [
+        {
+          "text": "Barriers",
+          "url": "https://github.com/specula-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/tlaplus_examples_barriers/Barriers.tla"
+        }
+      ],
+      "proofEvidence": {
+        "benchmarkRevision": "84344c86410c31dd06f3b145228210bb46c8d0cf",
+        "archiveSha256": "490dc40e0b5c65635de0e7bd05cf44a2d65ff5e87e37906ef000f72ed4a8b568",
+        "archiveMember": "gpt6_astra_solutions_reasoning_effort_max.jsonl",
+        "attempt": 1,
+        "recordSha256": "bce067c27572f9a04fa2a15533660b28e53c639ac9c18bfdf9737ead0302e90a",
+        "proofSha256": "ea6f2631a06b27e00bb8962a4c5e1b30ac6ebd0f377c0740c1a6b72f2e1ae11f",
+        "trustedTargetCount": 5,
+        "targetCount": 5,
+        "inputMatchesRevision": "e03314edb30c100fcb3e201a94554106c0091b33"
+      }
+    },
+    {
       "name": "B-tree",
       "type": "System",
       "specCount": 1,
@@ -530,6 +619,31 @@
         "proofSha256": "d0761252fe3f0a146d7e6a39ed73153ec34a909ae8d191b98df138d8e73f6874",
         "trustedTargetCount": 5,
         "targetCount": 5
+      }
+    },
+    {
+      "name": "DiskStateQueue",
+      "type": "System",
+      "specCount": 1,
+      "invariantCount": 1,
+      "provedBy": [
+        "Codex + GPT-6 Astra"
+      ],
+      "outcome": "proved",
+      "nameParts": [
+        {
+          "text": "DiskStateQueue",
+          "url": "https://github.com/specula-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/DiskStateQueue/DiskStateQueueProof.tla"
+        }
+      ],
+      "proofEvidence": {
+        "benchmarkRevision": "59dbbe4d1f49f52fc6368d6f56e892e83497b2dc",
+        "run": "astra-max-repaired-table5-20260928-1ie4qkk3",
+        "resultSha256": "7f671ba715aa249adad5a064ffc09ed439e7c28f2d6e8e26bfcfebff564d0c7e",
+        "proofSha256": "b07c6018f7c451bb113975c88999ac879fe425801c3ecdcef7ccb235dee0f1a9",
+        "trustedTargetCount": 1,
+        "targetCount": 1,
+        "inputMatchesRevision": "e03314edb30c100fcb3e201a94554106c0091b33"
       }
     }
   ],
