@@ -4,7 +4,7 @@ function PageHome() {
   return (
     <section className="home-hero" id="introduction" aria-labelledby="intro-title">
       <div className="home-hero-inner">
-        <h1 id="intro-title"><span className="home-title-name">TLAPS-Bench:</span>{" "}<span className="home-title-description"><em>Formally Proving Complex Protocols and Systems</em> using TLA+ Proof System (TLAPS)</span></h1>
+        <h1 id="intro-title"><span className="home-title-name">TLAPS-Bench:</span>{" "}<span className="home-title-description"><em>Formally Proving Complex Protocols and Systems using TLA+ Proof System (TLAPS)</em></span></h1>
         <div className="home-kicker"><span aria-hidden="true" />Proof from scratch</div>
         <div className="home-actions">
           <a className="btn accent" href="#leaderboard">View leaderboard <span aria-hidden="true">↓</span></a>
