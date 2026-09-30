@@ -22,20 +22,14 @@ function Collapse({ open, children }) {
   </div>;
 }
 
-const MODEL_RESOURCE_COLUMNS = [
+const RESOURCE_COLUMNS = [
   { key: "tokensInOutPerInvM", label: "Tokens in / out per inv (M)" },
   { key: "costPerInvUsd", label: "Cost / inv (USD)" },
   { key: "costUsd", label: "Cost (USD)" },
 ];
-const RESOURCE_COLUMNS = [
-  { key: "totalHours", label: "Total hours" },
-  { key: "minutesPerInv", label: "Minutes / inv" },
-  { key: "turnsPerInv", label: "Turns / inv" },
-  ...MODEL_RESOURCE_COLUMNS,
-];
 
-function MetricCells({ metrics, columns = RESOURCE_COLUMNS }) {
-  return columns.map((column) => <td key={column.key}
+function MetricCells({ metrics }) {
+  return RESOURCE_COLUMNS.map((column) => <td key={column.key}
     className={`numeric metric-cell metric-${column.key}`} data-label={column.label} data-metric={column.key}>
     <span className="metric-value">{metrics[column.key]}</span>
   </td>);
@@ -86,9 +80,6 @@ function TaskFamilyName({ name }) {
 }
 
 const HEADER_LINES = {
-  totalHours: ["Total", "hours"],
-  minutesPerInv: ["Minutes", "/ inv"],
-  turnsPerInv: ["Turns", "/ inv"],
   tokensInOutPerInvM: ["Tokens in / out", "per inv (M)"],
   costPerInvUsd: ["Cost / inv", "(USD)"],
   costUsd: ["Cost", "(USD)"],
@@ -112,7 +103,7 @@ function SortHeader({ column, sort, setSort, numeric = false }) {
 function TableColumns({ kind }) {
   const widths = kind === "models"
     ? [36, 240, 82, 100, 152, 112, 104]
-    : [260, 92, 82, 100, 92, 94, 92, 152, 112, 104];
+    : [260, 92, 82, 100, 152, 112, 104];
   return <colgroup>{widths.map((width, index) => <col key={index} style={{ width }} />)}</colgroup>;
 }
 
@@ -207,7 +198,7 @@ function ModelDetails({ model }) {
             <td className="numeric spec-score" data-label={model.name}><PassScore passed={group.passed} total={group.total} /></td>
             <MetricCells metrics={group.metrics} />
           </tr>
-          <tr id={panelId} className="inv-expand-row" aria-hidden={!open}><td colSpan={10}><Collapse open={open}><Invariants model={model} group={group} /></Collapse></td></tr>
+          <tr id={panelId} className="inv-expand-row" aria-hidden={!open}><td colSpan={7}><Collapse open={open}><Invariants model={model} group={group} /></Collapse></td></tr>
         </React.Fragment>;
       })}</tbody>
       <tfoot><tr className="group-total">
@@ -223,7 +214,7 @@ function ModelDetails({ model }) {
 
 const MODEL_COLUMNS = [
   { key: "name", label: "Model" }, { key: "specsInv", label: "Specs / inv" },
-  { key: "rate", label: "Score" }, ...MODEL_RESOURCE_COLUMNS,
+  { key: "rate", label: "Score" }, ...RESOURCE_COLUMNS,
 ];
 
 export function ResultsTable({ models }) {
@@ -251,7 +242,7 @@ export function ResultsTable({ models }) {
               </NameToggle></th>
               <td className="numeric scope-cell" data-label="Specs / inv">{model.metrics.specsInv}</td>
               <td className="rate-cell" data-label="Score"><PassScore passed={model.passed} total={model.total} overall /></td>
-              <MetricCells metrics={model.metrics} columns={MODEL_RESOURCE_COLUMNS} />
+              <MetricCells metrics={model.metrics} />
             </tr>
             <tr id={`details-${model.id}`} className="detail-row" aria-hidden={!open}><td colSpan={7}><Collapse open={open}><ModelDetails model={model} /></Collapse></td></tr>
           </React.Fragment>;
