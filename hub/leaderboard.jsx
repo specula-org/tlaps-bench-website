@@ -12,7 +12,6 @@ const rowClick = (event, action) => {
   if (!event.target.closest("button, a, input, select")) action();
 };
 const fmt = (value, formatter, missing = "—") => value == null ? missing : formatter(value);
-const checkTime = (value, missing = "—") => value == null ? missing : String(Math.max(1, Math.round(value)));
 
 function Collapse({ open, children }) {
   const [visited, setVisited] = useState(open);
@@ -85,7 +84,6 @@ const HEADER_LINES = {
   costUsd: ["Cost", "(USD)"],
   proofSize: ["Proof size", "lines"],
   obligationsProved: ["Obligations", "proved / total"],
-  checkTimeSecs: ["Check time", "seconds"],
 };
 
 function SortHeader({ column, sort, setSort, numeric = false }) {
@@ -123,7 +121,6 @@ const UNIT_COLUMNS = [
   { key: "proofSize", label: "Proof size", description: "Code lines in the target proof and its local proof dependencies, counted once; blank lines and comments excluded." },
   { key: "obligationsProved", label: "Obligations proved / total", description: "Obligations proved in this target proof. The final Result also requires its dependencies to be proved." },
   { key: "helperCount", label: "Helpers used", description: "Direct helper theorem dependencies." },
-  { key: "checkTimeSecs", label: "Check time", description: "Approximate wall time of this target's TLAPM invocation, recovered from archived start and completion timestamps. Shared helper checks are separate." },
 ];
 
 function Invariants({ model, group }) {
@@ -152,9 +149,8 @@ function Invariants({ model, group }) {
         <th scope="row" className="inv-name" data-label="Invariant / property" title={task.id}>{task.name}{group.specCount > 1 && <small className="inv-spec-name">{task.specName}</small>}</th>
         <td data-label="Result"><span className={`verdict verdict-${task.verdict.toLowerCase()}`}>{task.verdict}</span></td>
         <td className="numeric" data-label="Proof size (lines)" title={UNIT_COLUMNS[2].description}>{formatTokens(task.proofSize)}</td>
-        <td className="numeric" data-label="Obligations proved / total" title={UNIT_COLUMNS[3].description}>{task.obligationsProved == null ? (model.missingMetricDisplay ?? "—") : `${formatTokens(task.obligationsProved)} / ${formatTokens(task.obligations)}`}</td>
+        <td className="numeric" data-label="Obligations proved / total" title={UNIT_COLUMNS[3].description}>{`${formatTokens(task.obligationsProved)} / ${formatTokens(task.obligations)}`}</td>
         <td className="numeric" data-label="Helpers used">{fmt(task.helperCount, formatTokens, model.missingMetricDisplay)}</td>
-        <td className="numeric" data-label="Check time (s)" title={UNIT_COLUMNS[5].description}>{checkTime(task.checkTimeSecs, model.missingMetricDisplay)}</td>
         <td className="proof-cell"><button type="button" className="view-proof" aria-label={`View ${task.name} proof`} onClick={() => setProofTask(task)}>View proof</button></td>
       </tr>)}</tbody>
     </table>

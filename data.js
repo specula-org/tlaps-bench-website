@@ -230,8 +230,8 @@ window.TLAPS_DATA = {
                 "id": "tlaplus_examples_FlashProtocol/FlashWithMutex_TypeCorrect.tla",
                 "name": "TypeCorrect",
                 "verdict": "PASS",
-                "obligations": null,
-                "obligationsProved": null,
+                "obligations": 5,
+                "obligationsProved": 5,
                 "helperCount": 1,
                 "proofSize": 191,
                 "proofUnitIds": [
@@ -249,8 +249,8 @@ window.TLAPS_DATA = {
                 "id": "tlaplus_examples_FlashProtocol/FlashWithMutex_ReqProgressCorrect.tla",
                 "name": "ReqProgressCorrect",
                 "verdict": "PASS",
-                "obligations": null,
-                "obligationsProved": null,
+                "obligations": 17,
+                "obligationsProved": 17,
                 "helperCount": 2,
                 "proofSize": 1072,
                 "proofUnitIds": [
@@ -280,8 +280,8 @@ window.TLAPS_DATA = {
                 "id": "tlaplus_examples_FlashProtocol/FlashWithMutex_DirProgressCorrect.tla",
                 "name": "DirProgressCorrect",
                 "verdict": "PASS",
-                "obligations": null,
-                "obligationsProved": null,
+                "obligations": 18,
+                "obligationsProved": 18,
                 "helperCount": 2,
                 "proofSize": 1771,
                 "proofUnitIds": [
@@ -329,8 +329,8 @@ window.TLAPS_DATA = {
                 "id": "tlaplus_examples_FlashProtocol/FlashWithMutex_UniProgressCorrect.tla",
                 "name": "UniProgressCorrect",
                 "verdict": "PASS",
-                "obligations": null,
-                "obligationsProved": null,
+                "obligations": 10,
+                "obligationsProved": 10,
                 "helperCount": 1,
                 "proofSize": 1067,
                 "proofUnitIds": [
@@ -360,8 +360,8 @@ window.TLAPS_DATA = {
                 "id": "tlaplus_examples_FlashProtocol/FlashWithMutex_InvProgressCorrect.tla",
                 "name": "InvProgressCorrect",
                 "verdict": "PASS",
-                "obligations": null,
-                "obligationsProved": null,
+                "obligations": 10,
+                "obligationsProved": 10,
                 "helperCount": 1,
                 "proofSize": 717,
                 "proofUnitIds": [
@@ -390,8 +390,8 @@ window.TLAPS_DATA = {
                 "id": "tlaplus_examples_FlashProtocol/FlashWithMutex_RpProgressCorrect.tla",
                 "name": "RpProgressCorrect",
                 "verdict": "PASS",
-                "obligations": null,
-                "obligationsProved": null,
+                "obligations": 2,
+                "obligationsProved": 2,
                 "helperCount": 1,
                 "proofSize": 207,
                 "proofUnitIds": [
@@ -411,8 +411,8 @@ window.TLAPS_DATA = {
                 "id": "tlaplus_examples_FlashProtocol/FlashWithMutex_WbProgressCorrect.tla",
                 "name": "WbProgressCorrect",
                 "verdict": "PASS",
-                "obligations": null,
-                "obligationsProved": null,
+                "obligations": 2,
+                "obligationsProved": 2,
                 "helperCount": 1,
                 "proofSize": 200,
                 "proofUnitIds": [
@@ -432,8 +432,8 @@ window.TLAPS_DATA = {
                 "id": "tlaplus_examples_FlashProtocol/FlashWithMutex_ShWbProgressCorrect.tla",
                 "name": "ShWbProgressCorrect",
                 "verdict": "PASS",
-                "obligations": null,
-                "obligationsProved": null,
+                "obligations": 2,
+                "obligationsProved": 2,
                 "helperCount": 1,
                 "proofSize": 210,
                 "proofUnitIds": [
@@ -453,8 +453,8 @@ window.TLAPS_DATA = {
                 "id": "tlaplus_examples_FlashProtocol/FlashWithMutex_NakcProgressCorrect.tla",
                 "name": "NakcProgressCorrect",
                 "verdict": "PASS",
-                "obligations": null,
-                "obligationsProved": null,
+                "obligations": 2,
+                "obligationsProved": 2,
                 "helperCount": 1,
                 "proofSize": 200,
                 "proofUnitIds": [
@@ -474,8 +474,8 @@ window.TLAPS_DATA = {
                 "id": "tlaplus_examples_FlashProtocol/FlashWithMutex_CacheDataCorrect.tla",
                 "name": "CacheDataCorrect",
                 "verdict": "PASS",
-                "obligations": null,
-                "obligationsProved": null,
+                "obligations": 6,
+                "obligationsProved": 6,
                 "helperCount": 1,
                 "proofSize": 833,
                 "proofUnitIds": [
@@ -501,8 +501,8 @@ window.TLAPS_DATA = {
                 "id": "tlaplus_examples_FlashProtocol/FlashWithMutex_MemDataCorrect.tla",
                 "name": "MemDataCorrect",
                 "verdict": "PASS",
-                "obligations": null,
-                "obligationsProved": null,
+                "obligations": 6,
+                "obligationsProved": 6,
                 "helperCount": 1,
                 "proofSize": 833,
                 "proofUnitIds": [
@@ -528,8 +528,8 @@ window.TLAPS_DATA = {
                 "id": "tlaplus_examples_FlashProtocol/FlashWithMutex_Lemma_1_Correct.tla",
                 "name": "Lemma_1_Correct",
                 "verdict": "PASS",
-                "obligations": null,
-                "obligationsProved": null,
+                "obligations": 6,
+                "obligationsProved": 6,
                 "helperCount": 1,
                 "proofSize": 833,
                 "proofUnitIds": [
@@ -555,8 +555,8 @@ window.TLAPS_DATA = {
                 "id": "tlaplus_examples_FlashProtocol/FlashWithMutex_Lemma_2_Correct.tla",
                 "name": "Lemma_2_Correct",
                 "verdict": "PASS",
-                "obligations": null,
-                "obligationsProved": null,
+                "obligations": 6,
+                "obligationsProved": 6,
                 "helperCount": 1,
                 "proofSize": 370,
                 "proofUnitIds": [
@@ -578,8 +578,8 @@ window.TLAPS_DATA = {
                 "id": "tlaplus_examples_FlashProtocol/FlashWithMutex_Lemma_3_Correct.tla",
                 "name": "Lemma_3_Correct",
                 "verdict": "PASS",
-                "obligations": null,
-                "obligationsProved": null,
+                "obligations": 6,
+                "obligationsProved": 6,
                 "helperCount": 1,
                 "proofSize": 370,
                 "proofUnitIds": [
@@ -601,8 +601,8 @@ window.TLAPS_DATA = {
                 "id": "tlaplus_examples_FlashProtocol/FlashWithMutex_Lemma_4_Correct.tla",
                 "name": "Lemma_4_Correct",
                 "verdict": "PASS",
-                "obligations": null,
-                "obligationsProved": null,
+                "obligations": 7,
+                "obligationsProved": 7,
                 "helperCount": 2,
                 "proofSize": 834,
                 "proofUnitIds": [
@@ -655,8 +655,8 @@ window.TLAPS_DATA = {
                 "id": "ZooKeeper/Zab_Leadership1.tla",
                 "name": "Leadership1",
                 "verdict": "PASS",
-                "obligations": null,
-                "obligationsProved": null,
+                "obligations": 8,
+                "obligationsProved": 8,
                 "helperCount": 3,
                 "proofSize": 2063,
                 "proofUnitIds": [
@@ -736,8 +736,8 @@ window.TLAPS_DATA = {
                 "id": "ZooKeeper/Zab_Leadership2.tla",
                 "name": "Leadership2",
                 "verdict": "FAIL",
-                "obligations": null,
-                "obligationsProved": null,
+                "obligations": 2,
+                "obligationsProved": 1,
                 "helperCount": 0,
                 "proofSize": 1,
                 "proofUnitIds": [
@@ -751,8 +751,8 @@ window.TLAPS_DATA = {
                 "id": "ZooKeeper/Zab_PrefixConsistency.tla",
                 "name": "PrefixConsistency",
                 "verdict": "FAIL",
-                "obligations": null,
-                "obligationsProved": null,
+                "obligations": 2,
+                "obligationsProved": 1,
                 "helperCount": 0,
                 "proofSize": 1,
                 "proofUnitIds": [
@@ -766,8 +766,8 @@ window.TLAPS_DATA = {
                 "id": "ZooKeeper/Zab_Integrity.tla",
                 "name": "Integrity",
                 "verdict": "FAIL",
-                "obligations": null,
-                "obligationsProved": null,
+                "obligations": 2,
+                "obligationsProved": 1,
                 "helperCount": 0,
                 "proofSize": 1,
                 "proofUnitIds": [
@@ -781,8 +781,8 @@ window.TLAPS_DATA = {
                 "id": "ZooKeeper/Zab_Agreement.tla",
                 "name": "Agreement",
                 "verdict": "FAIL",
-                "obligations": null,
-                "obligationsProved": null,
+                "obligations": 2,
+                "obligationsProved": 1,
                 "helperCount": 0,
                 "proofSize": 1,
                 "proofUnitIds": [
@@ -796,8 +796,8 @@ window.TLAPS_DATA = {
                 "id": "ZooKeeper/Zab_TotalOrder.tla",
                 "name": "TotalOrder",
                 "verdict": "FAIL",
-                "obligations": null,
-                "obligationsProved": null,
+                "obligations": 2,
+                "obligationsProved": 1,
                 "helperCount": 0,
                 "proofSize": 1,
                 "proofUnitIds": [
@@ -811,8 +811,8 @@ window.TLAPS_DATA = {
                 "id": "ZooKeeper/Zab_LocalPrimaryOrder.tla",
                 "name": "LocalPrimaryOrder",
                 "verdict": "FAIL",
-                "obligations": null,
-                "obligationsProved": null,
+                "obligations": 2,
+                "obligationsProved": 1,
                 "helperCount": 0,
                 "proofSize": 1,
                 "proofUnitIds": [
@@ -826,8 +826,8 @@ window.TLAPS_DATA = {
                 "id": "ZooKeeper/Zab_GlobalPrimaryOrder.tla",
                 "name": "GlobalPrimaryOrder",
                 "verdict": "FAIL",
-                "obligations": null,
-                "obligationsProved": null,
+                "obligations": 2,
+                "obligationsProved": 1,
                 "helperCount": 0,
                 "proofSize": 1,
                 "proofUnitIds": [
@@ -841,8 +841,8 @@ window.TLAPS_DATA = {
                 "id": "ZooKeeper/Zab_PrimaryIntegrity.tla",
                 "name": "PrimaryIntegrity",
                 "verdict": "FAIL",
-                "obligations": null,
-                "obligationsProved": null,
+                "obligations": 2,
+                "obligationsProved": 1,
                 "helperCount": 0,
                 "proofSize": 1,
                 "proofUnitIds": [
@@ -883,8 +883,8 @@ window.TLAPS_DATA = {
                 "id": "CahillSSI/CahillSerializability_CahillSerializableCorrect.tla",
                 "name": "CahillSerializableCorrect",
                 "verdict": "FAIL",
-                "obligations": null,
-                "obligationsProved": null,
+                "obligations": 19,
+                "obligationsProved": 18,
                 "helperCount": 5,
                 "proofSize": 469,
                 "proofUnitIds": [
@@ -975,8 +975,8 @@ window.TLAPS_DATA = {
                 "id": "ivy_examples_tlb/ivy_examples_tlb_Safety.tla",
                 "name": "Safety",
                 "verdict": "PASS",
-                "obligations": null,
-                "obligationsProved": null,
+                "obligations": 5,
+                "obligationsProved": 5,
                 "helperCount": 1,
                 "proofSize": 637,
                 "proofUnitIds": [
@@ -995,8 +995,8 @@ window.TLAPS_DATA = {
                 "id": "ivy_examples_tlb/ivy_examples_tlb_Liveness.tla",
                 "name": "Liveness",
                 "verdict": "FAIL",
-                "obligations": null,
-                "obligationsProved": null,
+                "obligations": 19,
+                "obligationsProved": 18,
                 "helperCount": 3,
                 "proofSize": 664,
                 "proofUnitIds": [
@@ -1047,8 +1047,8 @@ window.TLAPS_DATA = {
                 "id": "OpenAddressing/OpenAddressing_CompleteAsSafety.tla",
                 "name": "CompleteAsSafety",
                 "verdict": "PASS",
-                "obligations": null,
-                "obligationsProved": null,
+                "obligations": 7,
+                "obligationsProved": 7,
                 "helperCount": 2,
                 "proofSize": 169,
                 "proofUnitIds": [
@@ -1065,8 +1065,8 @@ window.TLAPS_DATA = {
                 "id": "OpenAddressing/OpenAddressing_Consistent.tla",
                 "name": "Consistent",
                 "verdict": "FAIL",
-                "obligations": null,
-                "obligationsProved": null,
+                "obligations": 5,
+                "obligationsProved": 4,
                 "helperCount": 0,
                 "proofSize": 4,
                 "proofUnitIds": [
@@ -1080,8 +1080,8 @@ window.TLAPS_DATA = {
                 "id": "OpenAddressing/OpenAddressing_Contains.tla",
                 "name": "Contains",
                 "verdict": "FAIL",
-                "obligations": null,
-                "obligationsProved": null,
+                "obligations": 5,
+                "obligationsProved": 4,
                 "helperCount": 0,
                 "proofSize": 4,
                 "proofUnitIds": [
@@ -1095,8 +1095,8 @@ window.TLAPS_DATA = {
                 "id": "OpenAddressing/OpenAddressing_Duplicates.tla",
                 "name": "Duplicates",
                 "verdict": "FAIL",
-                "obligations": null,
-                "obligationsProved": null,
+                "obligations": 5,
+                "obligationsProved": 4,
                 "helperCount": 0,
                 "proofSize": 4,
                 "proofUnitIds": [
@@ -1110,8 +1110,8 @@ window.TLAPS_DATA = {
                 "id": "OpenAddressing/OpenAddressing_Sorted.tla",
                 "name": "Sorted",
                 "verdict": "PASS",
-                "obligations": null,
-                "obligationsProved": null,
+                "obligations": 21,
+                "obligationsProved": 21,
                 "helperCount": 7,
                 "proofSize": 408,
                 "proofUnitIds": [
@@ -1169,8 +1169,8 @@ window.TLAPS_DATA = {
                 "id": "etcd_raft/etcd_raft_LogInv.tla",
                 "name": "LogInv",
                 "verdict": "FAIL",
-                "obligations": null,
-                "obligationsProved": null,
+                "obligations": 2,
+                "obligationsProved": 1,
                 "helperCount": 0,
                 "proofSize": 1,
                 "proofUnitIds": [
@@ -1184,8 +1184,8 @@ window.TLAPS_DATA = {
                 "id": "etcd_raft/etcd_raft_CommittedIsDurable.tla",
                 "name": "CommittedIsDurable",
                 "verdict": "FAIL",
-                "obligations": null,
-                "obligationsProved": null,
+                "obligations": 2,
+                "obligationsProved": 1,
                 "helperCount": 0,
                 "proofSize": 1,
                 "proofUnitIds": [
@@ -1199,8 +1199,8 @@ window.TLAPS_DATA = {
                 "id": "etcd_raft/etcd_raft_ElectionSafety.tla",
                 "name": "ElectionSafety",
                 "verdict": "FAIL",
-                "obligations": null,
-                "obligationsProved": null,
+                "obligations": 2,
+                "obligationsProved": 1,
                 "helperCount": 0,
                 "proofSize": 1,
                 "proofUnitIds": [
@@ -1214,8 +1214,8 @@ window.TLAPS_DATA = {
                 "id": "etcd_raft/etcd_raft_LeaderCompleteness.tla",
                 "name": "LeaderCompleteness",
                 "verdict": "FAIL",
-                "obligations": null,
-                "obligationsProved": null,
+                "obligations": 2,
+                "obligationsProved": 1,
                 "helperCount": 0,
                 "proofSize": 1,
                 "proofUnitIds": [
@@ -1229,8 +1229,8 @@ window.TLAPS_DATA = {
                 "id": "etcd_raft/etcd_raft_LogMatching.tla",
                 "name": "LogMatching",
                 "verdict": "FAIL",
-                "obligations": null,
-                "obligationsProved": null,
+                "obligations": 2,
+                "obligationsProved": 1,
                 "helperCount": 0,
                 "proofSize": 1,
                 "proofUnitIds": [
@@ -1244,8 +1244,8 @@ window.TLAPS_DATA = {
                 "id": "etcd_raft/etcd_raft_MoreThanOneLeader.tla",
                 "name": "MoreThanOneLeader",
                 "verdict": "PASS",
-                "obligations": null,
-                "obligationsProved": null,
+                "obligations": 4,
+                "obligationsProved": 4,
                 "helperCount": 2,
                 "proofSize": 362,
                 "proofUnitIds": [
@@ -1295,8 +1295,8 @@ window.TLAPS_DATA = {
                 "id": "etcd_raft/etcd_raft_MoreUpToDate.tla",
                 "name": "MoreUpToDate",
                 "verdict": "FAIL",
-                "obligations": null,
-                "obligationsProved": null,
+                "obligations": 2,
+                "obligationsProved": 1,
                 "helperCount": 0,
                 "proofSize": 1,
                 "proofUnitIds": [
@@ -1310,8 +1310,8 @@ window.TLAPS_DATA = {
                 "id": "etcd_raft/etcd_raft_QuorumLog.tla",
                 "name": "QuorumLog",
                 "verdict": "FAIL",
-                "obligations": null,
-                "obligationsProved": null,
+                "obligations": 2,
+                "obligationsProved": 1,
                 "helperCount": 0,
                 "proofSize": 1,
                 "proofUnitIds": [
@@ -1352,8 +1352,8 @@ window.TLAPS_DATA = {
                 "id": "HashicorpRaft/HashicorpRaft_LeaderCompletenessCorrect.tla",
                 "name": "LeaderCompletenessCorrect",
                 "verdict": "FAIL",
-                "obligations": null,
-                "obligationsProved": null,
+                "obligations": 12,
+                "obligationsProved": 11,
                 "helperCount": 1,
                 "proofSize": 308,
                 "proofUnitIds": [
@@ -1401,8 +1401,8 @@ window.TLAPS_DATA = {
                 "id": "HashicorpRaft/HashicorpRaft_StateMachineSafetyCorrect.tla",
                 "name": "StateMachineSafetyCorrect",
                 "verdict": "FAIL",
-                "obligations": null,
-                "obligationsProved": null,
+                "obligations": 12,
+                "obligationsProved": 11,
                 "helperCount": 1,
                 "proofSize": 308,
                 "proofUnitIds": [
@@ -1450,8 +1450,8 @@ window.TLAPS_DATA = {
                 "id": "HashicorpRaft/HashicorpRaft_CommittedEntriesPreservedCorrect.tla",
                 "name": "CommittedEntriesPreservedCorrect",
                 "verdict": "FAIL",
-                "obligations": null,
-                "obligationsProved": null,
+                "obligations": 12,
+                "obligationsProved": 11,
                 "helperCount": 1,
                 "proofSize": 308,
                 "proofUnitIds": [
@@ -1499,8 +1499,8 @@ window.TLAPS_DATA = {
                 "id": "HashicorpRaft/HashicorpRaft_LogMatchingCorrect.tla",
                 "name": "LogMatchingCorrect",
                 "verdict": "FAIL",
-                "obligations": null,
-                "obligationsProved": null,
+                "obligations": 13,
+                "obligationsProved": 12,
                 "helperCount": 1,
                 "proofSize": 308,
                 "proofUnitIds": [
@@ -1548,8 +1548,8 @@ window.TLAPS_DATA = {
                 "id": "HashicorpRaft/HashicorpRaft_ElectionSafetyCorrect.tla",
                 "name": "ElectionSafetyCorrect",
                 "verdict": "FAIL",
-                "obligations": null,
-                "obligationsProved": null,
+                "obligations": 12,
+                "obligationsProved": 11,
                 "helperCount": 1,
                 "proofSize": 308,
                 "proofUnitIds": [
@@ -1597,8 +1597,8 @@ window.TLAPS_DATA = {
                 "id": "HashicorpRaft/HashicorpRaft_ConfigurationSafetyCorrect.tla",
                 "name": "ConfigurationSafetyCorrect",
                 "verdict": "PASS",
-                "obligations": null,
-                "obligationsProved": null,
+                "obligations": 4,
+                "obligationsProved": 4,
                 "helperCount": 2,
                 "proofSize": 323,
                 "proofUnitIds": [
@@ -1672,8 +1672,8 @@ window.TLAPS_DATA = {
                 "id": "ZooKeeper_LowLevel/ZkV3_7_0_Leadership1.tla",
                 "name": "Leadership1",
                 "verdict": "PASS",
-                "obligations": null,
-                "obligationsProved": null,
+                "obligations": 21,
+                "obligationsProved": 21,
                 "helperCount": 3,
                 "proofSize": 1484,
                 "proofUnitIds": [
@@ -1762,8 +1762,8 @@ window.TLAPS_DATA = {
                 "id": "ZooKeeper_LowLevel/ZkV3_7_0_Leadership2.tla",
                 "name": "Leadership2",
                 "verdict": "PASS",
-                "obligations": null,
-                "obligationsProved": null,
+                "obligations": 21,
+                "obligationsProved": 21,
                 "helperCount": 4,
                 "proofSize": 1475,
                 "proofUnitIds": [
@@ -1853,8 +1853,8 @@ window.TLAPS_DATA = {
                 "id": "ZooKeeper_LowLevel/ZkV3_7_0_PrefixConsistency.tla",
                 "name": "PrefixConsistency",
                 "verdict": "FAIL",
-                "obligations": null,
-                "obligationsProved": null,
+                "obligations": 8,
+                "obligationsProved": 7,
                 "helperCount": 0,
                 "proofSize": 6,
                 "proofUnitIds": [
@@ -1868,8 +1868,8 @@ window.TLAPS_DATA = {
                 "id": "ZooKeeper_LowLevel/ZkV3_7_0_Integrity.tla",
                 "name": "Integrity",
                 "verdict": "FAIL",
-                "obligations": null,
-                "obligationsProved": null,
+                "obligations": 8,
+                "obligationsProved": 7,
                 "helperCount": 0,
                 "proofSize": 6,
                 "proofUnitIds": [
@@ -1883,8 +1883,8 @@ window.TLAPS_DATA = {
                 "id": "ZooKeeper_LowLevel/ZkV3_7_0_Agreement.tla",
                 "name": "Agreement",
                 "verdict": "FAIL",
-                "obligations": null,
-                "obligationsProved": null,
+                "obligations": 8,
+                "obligationsProved": 7,
                 "helperCount": 0,
                 "proofSize": 6,
                 "proofUnitIds": [
@@ -1898,8 +1898,8 @@ window.TLAPS_DATA = {
                 "id": "ZooKeeper_LowLevel/ZkV3_7_0_TotalOrder.tla",
                 "name": "TotalOrder",
                 "verdict": "FAIL",
-                "obligations": null,
-                "obligationsProved": null,
+                "obligations": 8,
+                "obligationsProved": 7,
                 "helperCount": 0,
                 "proofSize": 6,
                 "proofUnitIds": [
@@ -1913,8 +1913,8 @@ window.TLAPS_DATA = {
                 "id": "ZooKeeper_LowLevel/ZkV3_7_0_LocalPrimaryOrder.tla",
                 "name": "LocalPrimaryOrder",
                 "verdict": "FAIL",
-                "obligations": null,
-                "obligationsProved": null,
+                "obligations": 8,
+                "obligationsProved": 7,
                 "helperCount": 0,
                 "proofSize": 6,
                 "proofUnitIds": [
@@ -1928,8 +1928,8 @@ window.TLAPS_DATA = {
                 "id": "ZooKeeper_LowLevel/ZkV3_7_0_GlobalPrimaryOrder.tla",
                 "name": "GlobalPrimaryOrder",
                 "verdict": "FAIL",
-                "obligations": null,
-                "obligationsProved": null,
+                "obligations": 8,
+                "obligationsProved": 7,
                 "helperCount": 0,
                 "proofSize": 6,
                 "proofUnitIds": [
@@ -1943,8 +1943,8 @@ window.TLAPS_DATA = {
                 "id": "ZooKeeper_LowLevel/ZkV3_7_0_PrimaryIntegrity.tla",
                 "name": "PrimaryIntegrity",
                 "verdict": "FAIL",
-                "obligations": null,
-                "obligationsProved": null,
+                "obligations": 8,
+                "obligationsProved": 7,
                 "helperCount": 0,
                 "proofSize": 6,
                 "proofUnitIds": [
@@ -1985,8 +1985,8 @@ window.TLAPS_DATA = {
                 "id": "MongoDB/MultiShardTxnSnapshot_SnapshotIsolationCorrect.tla",
                 "name": "SnapshotIsolationCorrect",
                 "verdict": "FAIL",
-                "obligations": null,
-                "obligationsProved": null,
+                "obligations": 24,
+                "obligationsProved": 23,
                 "helperCount": 5,
                 "proofSize": 443,
                 "proofUnitIds": [
@@ -7619,7 +7619,7 @@ window.TLAPS_DATA = {
                 "proofUnitIds": [
                   "etcd_raft/etcd_raft_LogInv.tla"
                 ],
-                "obligationsProved": null,
+                "obligationsProved": 0,
                 "checkTimeSecs": null,
                 "checkTimeApproximate": false,
                 "checkTimeEvidence": null
@@ -7634,7 +7634,7 @@ window.TLAPS_DATA = {
                 "proofUnitIds": [
                   "etcd_raft/etcd_raft_CommittedIsDurable.tla"
                 ],
-                "obligationsProved": null,
+                "obligationsProved": 0,
                 "checkTimeSecs": null,
                 "checkTimeApproximate": false,
                 "checkTimeEvidence": null
@@ -7649,7 +7649,7 @@ window.TLAPS_DATA = {
                 "proofUnitIds": [
                   "etcd_raft/etcd_raft_ElectionSafety.tla"
                 ],
-                "obligationsProved": null,
+                "obligationsProved": 0,
                 "checkTimeSecs": null,
                 "checkTimeApproximate": false,
                 "checkTimeEvidence": null
@@ -7664,7 +7664,7 @@ window.TLAPS_DATA = {
                 "proofUnitIds": [
                   "etcd_raft/etcd_raft_LeaderCompleteness.tla"
                 ],
-                "obligationsProved": null,
+                "obligationsProved": 0,
                 "checkTimeSecs": null,
                 "checkTimeApproximate": false,
                 "checkTimeEvidence": null
@@ -7679,7 +7679,7 @@ window.TLAPS_DATA = {
                 "proofUnitIds": [
                   "etcd_raft/etcd_raft_LogMatching.tla"
                 ],
-                "obligationsProved": null,
+                "obligationsProved": 0,
                 "checkTimeSecs": null,
                 "checkTimeApproximate": false,
                 "checkTimeEvidence": null
@@ -7694,7 +7694,7 @@ window.TLAPS_DATA = {
                 "proofUnitIds": [
                   "etcd_raft/etcd_raft_MoreThanOneLeader.tla"
                 ],
-                "obligationsProved": null,
+                "obligationsProved": 0,
                 "checkTimeSecs": null,
                 "checkTimeApproximate": false,
                 "checkTimeEvidence": null
@@ -7709,7 +7709,7 @@ window.TLAPS_DATA = {
                 "proofUnitIds": [
                   "etcd_raft/etcd_raft_MoreUpToDate.tla"
                 ],
-                "obligationsProved": null,
+                "obligationsProved": 0,
                 "checkTimeSecs": null,
                 "checkTimeApproximate": false,
                 "checkTimeEvidence": null
@@ -7724,7 +7724,7 @@ window.TLAPS_DATA = {
                 "proofUnitIds": [
                   "etcd_raft/etcd_raft_QuorumLog.tla"
                 ],
-                "obligationsProved": null,
+                "obligationsProved": 0,
                 "checkTimeSecs": null,
                 "checkTimeApproximate": false,
                 "checkTimeEvidence": null
@@ -7757,7 +7757,7 @@ window.TLAPS_DATA = {
                 "proofUnitIds": [
                   "HashicorpRaft/HashicorpRaft_LeaderCompletenessCorrect.tla"
                 ],
-                "obligationsProved": null,
+                "obligationsProved": 0,
                 "checkTimeSecs": null,
                 "checkTimeApproximate": false,
                 "checkTimeEvidence": null
@@ -7772,7 +7772,7 @@ window.TLAPS_DATA = {
                 "proofUnitIds": [
                   "HashicorpRaft/HashicorpRaft_StateMachineSafetyCorrect.tla"
                 ],
-                "obligationsProved": null,
+                "obligationsProved": 0,
                 "checkTimeSecs": null,
                 "checkTimeApproximate": false,
                 "checkTimeEvidence": null
@@ -7787,7 +7787,7 @@ window.TLAPS_DATA = {
                 "proofUnitIds": [
                   "HashicorpRaft/HashicorpRaft_CommittedEntriesPreservedCorrect.tla"
                 ],
-                "obligationsProved": null,
+                "obligationsProved": 0,
                 "checkTimeSecs": null,
                 "checkTimeApproximate": false,
                 "checkTimeEvidence": null
@@ -7802,7 +7802,7 @@ window.TLAPS_DATA = {
                 "proofUnitIds": [
                   "HashicorpRaft/HashicorpRaft_LogMatchingCorrect.tla"
                 ],
-                "obligationsProved": null,
+                "obligationsProved": 0,
                 "checkTimeSecs": null,
                 "checkTimeApproximate": false,
                 "checkTimeEvidence": null
@@ -7817,7 +7817,7 @@ window.TLAPS_DATA = {
                 "proofUnitIds": [
                   "HashicorpRaft/HashicorpRaft_ElectionSafetyCorrect.tla"
                 ],
-                "obligationsProved": null,
+                "obligationsProved": 0,
                 "checkTimeSecs": null,
                 "checkTimeApproximate": false,
                 "checkTimeEvidence": null
@@ -7832,7 +7832,7 @@ window.TLAPS_DATA = {
                 "proofUnitIds": [
                   "HashicorpRaft/HashicorpRaft_ConfigurationSafetyCorrect.tla"
                 ],
-                "obligationsProved": null,
+                "obligationsProved": 0,
                 "checkTimeSecs": null,
                 "checkTimeApproximate": false,
                 "checkTimeEvidence": null
@@ -7908,7 +7908,7 @@ window.TLAPS_DATA = {
                 "proofUnitIds": [
                   "ZooKeeper_LowLevel/ZkV3_7_0_PrefixConsistency.tla"
                 ],
-                "obligationsProved": null,
+                "obligationsProved": 0,
                 "checkTimeSecs": null,
                 "checkTimeApproximate": false,
                 "checkTimeEvidence": null
@@ -7923,7 +7923,7 @@ window.TLAPS_DATA = {
                 "proofUnitIds": [
                   "ZooKeeper_LowLevel/ZkV3_7_0_Integrity.tla"
                 ],
-                "obligationsProved": null,
+                "obligationsProved": 0,
                 "checkTimeSecs": null,
                 "checkTimeApproximate": false,
                 "checkTimeEvidence": null
@@ -7938,7 +7938,7 @@ window.TLAPS_DATA = {
                 "proofUnitIds": [
                   "ZooKeeper_LowLevel/ZkV3_7_0_Agreement.tla"
                 ],
-                "obligationsProved": null,
+                "obligationsProved": 0,
                 "checkTimeSecs": null,
                 "checkTimeApproximate": false,
                 "checkTimeEvidence": null
@@ -7953,7 +7953,7 @@ window.TLAPS_DATA = {
                 "proofUnitIds": [
                   "ZooKeeper_LowLevel/ZkV3_7_0_TotalOrder.tla"
                 ],
-                "obligationsProved": null,
+                "obligationsProved": 0,
                 "checkTimeSecs": null,
                 "checkTimeApproximate": false,
                 "checkTimeEvidence": null
@@ -7968,7 +7968,7 @@ window.TLAPS_DATA = {
                 "proofUnitIds": [
                   "ZooKeeper_LowLevel/ZkV3_7_0_LocalPrimaryOrder.tla"
                 ],
-                "obligationsProved": null,
+                "obligationsProved": 0,
                 "checkTimeSecs": null,
                 "checkTimeApproximate": false,
                 "checkTimeEvidence": null
@@ -7983,7 +7983,7 @@ window.TLAPS_DATA = {
                 "proofUnitIds": [
                   "ZooKeeper_LowLevel/ZkV3_7_0_GlobalPrimaryOrder.tla"
                 ],
-                "obligationsProved": null,
+                "obligationsProved": 0,
                 "checkTimeSecs": null,
                 "checkTimeApproximate": false,
                 "checkTimeEvidence": null
@@ -7998,7 +7998,7 @@ window.TLAPS_DATA = {
                 "proofUnitIds": [
                   "ZooKeeper_LowLevel/ZkV3_7_0_PrimaryIntegrity.tla"
                 ],
-                "obligationsProved": null,
+                "obligationsProved": 0,
                 "checkTimeSecs": null,
                 "checkTimeApproximate": false,
                 "checkTimeEvidence": null

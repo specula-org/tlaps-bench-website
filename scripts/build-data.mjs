@@ -124,16 +124,15 @@ for (const model of cohort.models) {
       if (!["PASS", "FAIL", "UNRESOLVED", "TIMEOUT", "CHEATING", "ERROR"].includes(task.verdict)) {
         fail(`unknown task verdict: ${task.id}/${task.verdict}`);
       }
-      for (const field of ["obligations", "helperCount"]) {
-        if (task[field] != null) count(task[field], `${task.id}/${field}`);
+      for (const field of ["obligations", "obligationsProved"]) {
+        count(task[field], `${task.id}/${field}`);
       }
+      if (task.helperCount != null) count(task.helperCount, `${task.id}/helperCount`);
       const closure = dependencyClosure(bundle.units, task.id);
       if (JSON.stringify(closure) !== JSON.stringify(task.proofUnitIds) ||
           new Set(closure.flatMap((id) => bundle.units[id].proofLines)).size !== task.proofSize) fail(`proof size mismatch: ${task.id}`);
-      if (task.obligationsProved != null) {
-        count(task.obligationsProved, `${task.id}/proved obligations`);
-        if (!(task.obligations > 0) || task.obligationsProved > task.obligations) fail(`invalid obligation progress: ${task.id}`);
-      }
+      if (task.obligationsProved > task.obligations ||
+          (task.obligations === 0 && (!bundle.units[task.id].proofOmitted || task.verdict === "PASS"))) fail(`invalid obligation progress: ${task.id}`);
       if (task.checkTimeSecs != null) {
         const evidence = task.checkTimeEvidence;
         if (!Number.isFinite(task.checkTimeSecs) || task.checkTimeSecs < 0 || !task.checkTimeApproximate ||
