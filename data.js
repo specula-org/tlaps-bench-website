@@ -15,7 +15,6 @@ window.TLAPS_DATA = {
   ],
   "taskFamilyOrderSource": "https://github.com/specula-org/TLAPS-Bench/blob/047b388697e130e76619c213ae3c5590dd61d5b0/README.md#current-problem-set",
   "source": {
-    "url": "https://docs.google.com/document/d/1TpcKAx2Cm5Ft23n6nTTfskS1mbhPcB8DbcTdPtyZjWM/edit",
     "retrievedAt": "2026-09-28",
     "textSha256": "56626207bb2ac75578da5f5218da035e7156cccf0f740075a8d0169447e4fdb7",
     "sections": [
@@ -2095,7 +2094,6 @@ window.TLAPS_DATA = {
           }
         ],
         "source": {
-          "url": "https://docs.google.com/document/d/1TpcKAx2Cm5Ft23n6nTTfskS1mbhPcB8DbcTdPtyZjWM/edit?tab=t.nyu0a6nr1l2p",
           "retrievedAt": "2026-09-29",
           "textSha256": "f59fb057978f73bac088a320b2c21b605a3943f941333838f81e02766ea4a7dc",
           "archiveSha256": "490dc40e0b5c65635de0e7bd05cf44a2d65ff5e87e37906ef000f72ed4a8b568",

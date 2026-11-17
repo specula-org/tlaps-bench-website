@@ -12,8 +12,7 @@ const fail = (message) => { throw new Error(`${inputPath}: ${message}`); };
 const count = (value, label, min = 0) => {
   if (!Number.isInteger(value) || value < min) fail(`invalid ${label}`);
 };
-if (!source.url?.startsWith("https://docs.google.com/document/d/") ||
-    !/^\d{4}-\d{2}-\d{2}$/.test(source.retrievedAt) ||
+if (!/^\d{4}-\d{2}-\d{2}$/.test(source.retrievedAt) ||
     !/^[a-f0-9]{64}$/.test(source.textSha256)) fail("missing source provenance");
 if (!Array.isArray(suite.families) || !suite.families.length) fail("missing families");
 const families = new Map();
@@ -178,8 +177,7 @@ for (const model of cohort.models) {
 }
 const metricColumns = ["Total hours", "Minutes / inv", "Turns / inv", "Tokens in / out per inv (M)", "Cost / inv (USD)", "Cost (USD)"];
 const metricKeys = ["totalHours", "minutesPerInv", "turnsPerInv", "tokensInOutPerInvM", "costPerInvUsd", "costUsd"];
-if (documentMetrics.sourceUrl !== source.url + "?tab=t.0" ||
-    documentMetrics.retrievedAt !== source.retrievedAt ||
+if (documentMetrics.retrievedAt !== source.retrievedAt ||
     !/^[a-f0-9]{64}$/.test(documentMetrics.textSha256) ||
     documentMetrics.tables?.length !== cohort.models.length) fail("invalid document metric snapshot");
 const modelDocuments = new Map();
