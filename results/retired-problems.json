@@ -28,7 +28,7 @@
       "nameParts": [
         {
           "text": "TCP state machine",
-          "url": "https://github.com/specula-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/tlaplus_examples_tcp/tcp_proof.tla"
+          "url": "https://github.com/specular-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/tlaplus_examples_tcp/tcp_proof.tla"
         }
       ]
     },
@@ -47,35 +47,35 @@
         },
         {
           "text": "alternating bit",
-          "url": "https://github.com/specula-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/ivy_examples_alternating_bit_protocol/ivy_examples_alternating_bit_protocol.tla"
+          "url": "https://github.com/specular-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/ivy_examples_alternating_bit_protocol/ivy_examples_alternating_bit_protocol.tla"
         },
         {
           "text": ", "
         },
         {
           "text": "reliable broadcast",
-          "url": "https://github.com/specula-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/ivy_examples_hybrid_reliable_broadcast_cisa/ivy_examples_hybrid_reliable_broadcast_cisa.tla"
+          "url": "https://github.com/specular-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/ivy_examples_hybrid_reliable_broadcast_cisa/ivy_examples_hybrid_reliable_broadcast_cisa.tla"
         },
         {
           "text": ", "
         },
         {
           "text": "split queue",
-          "url": "https://github.com/specula-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/ivy_examples_split_queue_2_new/ivy_examples_split_queue_2_new.tla"
+          "url": "https://github.com/specular-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/ivy_examples_split_queue_2_new/ivy_examples_split_queue_2_new.tla"
         },
         {
           "text": ", "
         },
         {
           "text": "ticket",
-          "url": "https://github.com/specula-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/ivy_examples_ticket/ivy_examples_ticket.tla"
+          "url": "https://github.com/specular-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/ivy_examples_ticket/ivy_examples_ticket.tla"
         },
         {
           "text": ", "
         },
         {
           "text": "nested ticket",
-          "url": "https://github.com/specula-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/ivy_examples_ticket_nested/ivy_examples_ticket_nested.tla"
+          "url": "https://github.com/specular-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/ivy_examples_ticket_nested/ivy_examples_ticket_nested.tla"
         },
         {
           "text": ")"
@@ -97,7 +97,7 @@
       "nameParts": [
         {
           "text": "The German cache coherence protocols",
-          "url": "https://github.com/specula-org/TLAPS-Bench/tree/main/benchmark/proof-from-scratch-module/tlaplus_examples_GermanProtocol"
+          "url": "https://github.com/specular-org/TLAPS-Bench/tree/main/benchmark/proof-from-scratch-module/tlaplus_examples_GermanProtocol"
         }
       ]
     },
@@ -113,7 +113,7 @@
       "nameParts": [
         {
           "text": "Replicated counter convergence (CRDT)",
-          "url": "https://github.com/specula-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/tlaplus_examples_FiniteMonotonic/CRDT_proof.tla"
+          "url": "https://github.com/specular-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/tlaplus_examples_FiniteMonotonic/CRDT_proof.tla"
         }
       ]
     },
@@ -126,7 +126,7 @@
       "nameParts": [
         {
           "text": "SlateDB WAL",
-          "url": "https://github.com/specula-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/SlateDBWAL/SlateDBWALProof.tla"
+          "url": "https://github.com/specular-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/SlateDBWAL/SlateDBWALProof.tla"
         },
         {
           "text": " ("
@@ -157,7 +157,7 @@
       "nameParts": [
         {
           "text": "OSWALD WAL",
-          "url": "https://github.com/specula-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/OSWALD/OswaldProof.tla"
+          "url": "https://github.com/specular-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/OSWALD/OswaldProof.tla"
         },
         {
           "text": " ("
@@ -184,7 +184,7 @@
       "nameParts": [
         {
           "text": "Walgit WAL",
-          "url": "https://github.com/specula-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/Walgit/WalgitProof.tla"
+          "url": "https://github.com/specular-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/Walgit/WalgitProof.tla"
         },
         {
           "text": " ("
@@ -223,28 +223,28 @@
         },
         {
           "text": "Consensus",
-          "url": "https://github.com/specula-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/tlaplus_examples_byzpaxos/Consensus.tla"
+          "url": "https://github.com/specular-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/tlaplus_examples_byzpaxos/Consensus.tla"
         },
         {
           "text": ", "
         },
         {
           "text": "VoteProof",
-          "url": "https://github.com/specula-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/tlaplus_examples_byzpaxos/VoteProof.tla"
+          "url": "https://github.com/specular-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/tlaplus_examples_byzpaxos/VoteProof.tla"
         },
         {
           "text": ", "
         },
         {
           "text": "PConProof",
-          "url": "https://github.com/specula-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/tlaplus_examples_byzpaxos/PConProof.tla"
+          "url": "https://github.com/specular-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/tlaplus_examples_byzpaxos/PConProof.tla"
         },
         {
           "text": ", "
         },
         {
           "text": "BPConProof",
-          "url": "https://github.com/specula-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/tlaplus_examples_byzpaxos/BPConProof.tla"
+          "url": "https://github.com/specular-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/tlaplus_examples_byzpaxos/BPConProof.tla"
         },
         {
           "text": ")"
@@ -264,7 +264,7 @@
       "nameParts": [
         {
           "text": "Byzantine broadcast",
-          "url": "https://github.com/specula-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/tlaplus_examples_bcastByz/bcastByz.tla"
+          "url": "https://github.com/specular-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/tlaplus_examples_bcastByz/bcastByz.tla"
         }
       ]
     },
@@ -281,7 +281,7 @@
       "nameParts": [
         {
           "text": "Bosco asynchronous Byzantine consensus",
-          "url": "https://github.com/specula-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/tlaplus_examples_bosco/bosco.tla"
+          "url": "https://github.com/specular-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/tlaplus_examples_bosco/bosco.tla"
         }
       ]
     },
@@ -298,7 +298,7 @@
       "nameParts": [
         {
           "text": "Sailfish BFT consensus",
-          "url": "https://github.com/specula-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/tlaplus_examples_dag-consensus/Sailfish.tla"
+          "url": "https://github.com/specular-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/tlaplus_examples_dag-consensus/Sailfish.tla"
         }
       ]
     },
@@ -315,7 +315,7 @@
       "nameParts": [
         {
           "text": "Nano cryptocurrency transaction",
-          "url": "https://github.com/specula-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/tlaplus_examples_NanoBlockchain/Nano.tla"
+          "url": "https://github.com/specular-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/tlaplus_examples_NanoBlockchain/Nano.tla"
         }
       ]
     },
@@ -331,7 +331,7 @@
       "nameParts": [
         {
           "text": "Misra graph reachability algorithm",
-          "url": "https://github.com/specula-org/TLAPS-Bench/tree/main/benchmark/proof-from-scratch-module/tlaplus_examples_MisraReachability"
+          "url": "https://github.com/specular-org/TLAPS-Bench/tree/main/benchmark/proof-from-scratch-module/tlaplus_examples_MisraReachability"
         }
       ]
     },
@@ -347,7 +347,7 @@
       "nameParts": [
         {
           "text": "Spanning tree (abstract model)",
-          "url": "https://github.com/specula-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/tlaplus_examples_SpanningTree/SpanTree_proof.tla"
+          "url": "https://github.com/specular-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/tlaplus_examples_SpanningTree/SpanTree_proof.tla"
         }
       ]
     },
@@ -363,7 +363,7 @@
       "nameParts": [
         {
           "text": "Spanning tree (message passing)",
-          "url": "https://github.com/specula-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/tlaplus_examples_spanning/spanning_proof.tla"
+          "url": "https://github.com/specular-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/tlaplus_examples_spanning/spanning_proof.tla"
         }
       ]
     },
@@ -379,7 +379,7 @@
       "nameParts": [
         {
           "text": "Dijkstra-Scholten termination detection",
-          "url": "https://github.com/specula-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/tlaplus_examples_ewd687a/EWD687a_proof.tla"
+          "url": "https://github.com/specular-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/tlaplus_examples_ewd687a/EWD687a_proof.tla"
         }
       ]
     },
@@ -395,21 +395,21 @@
       "nameParts": [
         {
           "text": "Dijkstra ring termination detection",
-          "url": "https://github.com/specula-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/EWD840/EWD840.tla"
+          "url": "https://github.com/specular-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/EWD840/EWD840.tla"
         },
         {
           "text": " ("
         },
         {
           "text": "EWD840_proof",
-          "url": "https://github.com/specula-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/tlaplus_examples_ewd840/EWD840_proof.tla"
+          "url": "https://github.com/specular-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/tlaplus_examples_ewd840/EWD840_proof.tla"
         },
         {
           "text": ", "
         },
         {
           "text": "SyncTerminationDetection_proof",
-          "url": "https://github.com/specula-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/tlaplus_examples_ewd840/SyncTerminationDetection_proof.tla"
+          "url": "https://github.com/specular-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/tlaplus_examples_ewd840/SyncTerminationDetection_proof.tla"
         },
         {
           "text": ")"
@@ -428,7 +428,7 @@
       "nameParts": [
         {
           "text": "Termination detection",
-          "url": "https://github.com/specula-org/TLAPS-Bench/tree/main/benchmark/proof-from-scratch-module/tlaplus_examples_ewd998"
+          "url": "https://github.com/specular-org/TLAPS-Bench/tree/main/benchmark/proof-from-scratch-module/tlaplus_examples_ewd998"
         }
       ]
     },
@@ -444,7 +444,7 @@
       "nameParts": [
         {
           "text": "Kumar termination detection",
-          "url": "https://github.com/specula-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/tlaplus_examples_Termination/Termination_proof.tla"
+          "url": "https://github.com/specular-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/tlaplus_examples_Termination/Termination_proof.tla"
         }
       ]
     },
@@ -460,35 +460,35 @@
       "nameParts": [
         {
           "text": "Paxos",
-          "url": "https://github.com/specula-org/TLAPS-Bench/tree/main/benchmark/proof-from-scratch-module/Paxos"
+          "url": "https://github.com/specular-org/TLAPS-Bench/tree/main/benchmark/proof-from-scratch-module/Paxos"
         },
         {
           "text": " ("
         },
         {
           "text": "voting",
-          "url": "https://github.com/specula-org/TLAPS-Bench/tree/main/benchmark/proof-from-scratch-module/tlaplus_examples_Paxos"
+          "url": "https://github.com/specular-org/TLAPS-Bench/tree/main/benchmark/proof-from-scratch-module/tlaplus_examples_Paxos"
         },
         {
           "text": ", "
         },
         {
           "text": "consensus",
-          "url": "https://github.com/specula-org/TLAPS-Bench/tree/main/benchmark/proof-from-scratch-module/Consensus"
+          "url": "https://github.com/specular-org/TLAPS-Bench/tree/main/benchmark/proof-from-scratch-module/Consensus"
         },
         {
           "text": ", "
         },
         {
           "text": "commit",
-          "url": "https://github.com/specula-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/tlaplus_examples_transaction_commit/PaxosCommit_proof.tla"
+          "url": "https://github.com/specular-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/tlaplus_examples_transaction_commit/PaxosCommit_proof.tla"
         },
         {
           "text": ", "
         },
         {
           "text": "etc",
-          "url": "https://github.com/specula-org/TLAPS-Bench/tree/main/benchmark/proof-from-scratch-module/tlaplus_examples_PaxosHowToWinATuringAward"
+          "url": "https://github.com/specular-org/TLAPS-Bench/tree/main/benchmark/proof-from-scratch-module/tlaplus_examples_PaxosHowToWinATuringAward"
         },
         {
           "text": ")"
@@ -507,7 +507,7 @@
       "nameParts": [
         {
           "text": "TencentPaxos",
-          "url": "https://github.com/specula-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/tlaplus_examples_TencentPaxos/TPaxosWithProof.tla"
+          "url": "https://github.com/specular-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/tlaplus_examples_TencentPaxos/TPaxosWithProof.tla"
         }
       ],
       "proofEvidence": {
@@ -534,21 +534,21 @@
       "nameParts": [
         {
           "text": "Two-phase commit",
-          "url": "https://github.com/specula-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/tlaplus_examples_TwoPhase/TwoPhase.tla"
+          "url": "https://github.com/specular-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/tlaplus_examples_TwoPhase/TwoPhase.tla"
         },
         {
           "text": " ("
         },
         {
           "text": "TwoPhase_proof",
-          "url": "https://github.com/specula-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/tlaplus_examples_TwoPhase/TwoPhase_proof.tla"
+          "url": "https://github.com/specular-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/tlaplus_examples_TwoPhase/TwoPhase_proof.tla"
         },
         {
           "text": ", "
         },
         {
           "text": "transaction commit",
-          "url": "https://github.com/specula-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/tlaplus_examples_transaction_commit/TwoPhase_proof.tla"
+          "url": "https://github.com/specular-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/tlaplus_examples_transaction_commit/TwoPhase_proof.tla"
         },
         {
           "text": ")"
@@ -567,7 +567,7 @@
       "nameParts": [
         {
           "text": "Gray-Lamport transaction commit",
-          "url": "https://github.com/specula-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/tlaplus_examples_transaction_commit/TCommit_proof.tla"
+          "url": "https://github.com/specular-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/tlaplus_examples_transaction_commit/TCommit_proof.tla"
         }
       ]
     },
@@ -583,7 +583,7 @@
       "nameParts": [
         {
           "text": "Reusable synchronization barriers",
-          "url": "https://github.com/specula-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/tlaplus_examples_barriers/Barriers.tla"
+          "url": "https://github.com/specular-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/tlaplus_examples_barriers/Barriers.tla"
         }
       ],
       "proofEvidence": {
@@ -610,7 +610,7 @@
       "nameParts": [
         {
           "text": "B-tree",
-          "url": "https://github.com/specula-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/tlaplus_examples_btree/btree.tla"
+          "url": "https://github.com/specular-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/tlaplus_examples_btree/btree.tla"
         }
       ],
       "proofEvidence": {
@@ -633,7 +633,7 @@
       "nameParts": [
         {
           "text": "TLC disk-backed state queue",
-          "url": "https://github.com/specula-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/DiskStateQueue/DiskStateQueueProof.tla"
+          "url": "https://github.com/specular-org/TLAPS-Bench/blob/main/benchmark/proof-from-scratch-module/DiskStateQueue/DiskStateQueueProof.tla"
         }
       ],
       "proofEvidence": {

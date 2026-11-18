@@ -45,7 +45,7 @@ export const specSourceUrl = ({ group, scoringKey }) => {
 
   if (group === "etcd_raft") {
     return githubFile(
-      "specula-org/Specula",
+      "specular-org/Specular",
       "main",
       "skills/spec_generation/examples/etcdraft.tla",
     );

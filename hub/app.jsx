@@ -9,11 +9,11 @@ function Nav({ tweaks, update }) {
     <header className="nav">
       <div className="nav-inner">
         <a className="nav-brand" href="#introduction" aria-label="TLAPS-Bench introduction">
-          <img className="nav-brand-logo" src="https://github.com/specula-org.png?size=80" alt="" aria-hidden="true" />
+          <img className="nav-brand-logo" src="https://github.com/specular-org.png?size=80" alt="" aria-hidden="true" />
           <span className="nav-brand-name">TLAPS-Bench</span>
         </a>
         <div className="nav-right">
-          <a className="nav-cta" href="https://github.com/specula-org/tlaps-bench" target="_blank" rel="noopener noreferrer">GitHub</a>
+          <a className="nav-cta" href="https://github.com/specular-org/tlaps-bench" target="_blank" rel="noopener noreferrer">GitHub</a>
           <button className="theme-toggle" title={themeLabel} aria-label={themeLabel} onClick={() => update({ dark: !tweaks.dark })}>
             {tweaks.dark ? "☀" : "☾"}
           </button>
@@ -73,10 +73,10 @@ function App() {
         <div className="wrap">
           <div style={{display:"flex",alignItems:"center",gap:10}}>
             <span className="footer-dot" aria-hidden="true" />
-            <span>TLAPS-Bench · <a href="https://github.com/specula-org" target="_blank" rel="noopener noreferrer">specula-org</a></span>
+            <span>TLAPS-Bench · <a href="https://github.com/specular-org" target="_blank" rel="noopener noreferrer">specular-org</a></span>
           </div>
           <div style={{display:"flex",alignItems:"center",gap:18}}>
-            <a href="https://github.com/specula-org/tlaps-bench" target="_blank" rel="noopener noreferrer">GitHub</a>
+            <a href="https://github.com/specular-org/tlaps-bench" target="_blank" rel="noopener noreferrer">GitHub</a>
             <span className="foot-sep" aria-hidden="true" />
             <span>Released under the MIT License.</span>
           </div>
