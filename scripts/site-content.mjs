@@ -1,6 +1,6 @@
 export const SITE = {
   title: "TLAPS-Bench",
-  repo: "https://github.com/specula-org/tlaps-bench",
+  repo: "https://github.com/specular-org/tlaps-bench",
   taskFamilyOrder: [
     "cache-coherence", "zookeeper-protocol", "cahill-ssi",
     "ivy-tlb", "open-addressing", "etcd-raft", "hashicorp-raft", "zookeeper-implementation", "mongodb-transactions",
